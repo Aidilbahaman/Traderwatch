@@ -83,10 +83,12 @@
   </div>
 </footer>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
 <script src="config.js"></script>
 <script src="common.js"></script>
 <script>
-const member = requireMember();
+(async function(){
+const member = await requireMember();
 if(member){
   previewBanner(member);
   const isPro = member.plan === "pro";
@@ -120,47 +122,43 @@ if(member){
   });
   mountChart(CONFIG.pairs[0].symbol);
 
-  /* Signals: Free sees 1, Pro sees all. This is display only until a server enforces it. */
+  /* Signals come from Supabase. The server decides what each plan can see. */
   const grid = document.getElementById("signalGrid"), note = document.getElementById("signalNote");
   function render(list){
     grid.innerHTML = "";
-    list.forEach((s,i)=>{
-      const locked = !isPro && i >= 1;
+    list.forEach(s=>{
+      const locked = !!s.locked;
+      const cls = (s.side || "BUY") === "BUY" ? "buy" : "sell";
       const a = document.createElement("article");
       a.className = "sig" + (locked ? " locked" : "");
-      const cls = s.side === "BUY" ? "buy" : "sell";
       a.innerHTML = `
-        <div class="sig-top"><span class="pair">${esc(s.pair)}</span><span class="side ${cls}">${esc(s.side)}</span></div>
+        <div class="sig-top"><span class="pair">${esc(s.pair)}</span><span class="side ${cls}">${esc(locked ? "BUY" : s.side)}</span></div>
         <dl class="rows num">
-          <dt>Entry</dt><dd>${esc(s.entry)}</dd>
-          <dt>Stop loss</dt><dd class="sl">${esc(s.sl)}</dd>
-          <dt>Take profit</dt><dd class="tp">${esc(s.tp)}</dd>
+          <dt>Entry</dt><dd>${esc(locked ? "0.0000" : s.entry)}</dd>
+          <dt>Stop loss</dt><dd class="sl">${esc(locked ? "0.0000" : s.sl)}</dd>
+          <dt>Take profit</dt><dd class="tp">${esc(locked ? "0.0000" : s.tp)}</dd>
         </dl>
         <p class="time">${esc(s.time)}</p>
         ${locked ? '<div class="lock"><span>Pro signal</span><a class="btn sm" href="subscribe.html">Unlock with Pro</a></div>' : ''}`;
       grid.appendChild(a);
     });
   }
-  function mapLive(s){
-    const pair = (s.pair && s.pair.length === 6) ? s.pair.slice(0,3)+"/"+s.pair.slice(3) : s.pair;
-    const tp1 = (s.tps && s.tps[0]) ? s.tps[0].price : s.entry;
-    return {pair:pair, side:s.direction === "buy" ? "BUY" : "SELL", entry:String(s.entry), sl:String(s.sl), tp:String(tp1), time:(s.source === "stale" ? "Cached price" : "Live")+" · "+s.confidence+"% confidence"};
-  }
   async function load(){
-    if(CONFIG.signalsEndpoint){
-      try{
-        const r = await fetch(CONFIG.signalsEndpoint,{headers:{accept:"application/json"}});
-        if(!r.ok) throw new Error();
-        const data = await r.json(); const raw = Array.isArray(data) ? data : data.signals;
-        if(!Array.isArray(raw) || !raw.length) throw new Error();
-        render(raw.map(mapLive)); note.textContent = ""; return;
-      }catch(_){}
-    }
-    render(CONFIG.signals);
-    note.textContent = "These are sample signals to show the layout. Replace them with your real signals.";
+    try{
+      const r = await sb.rpc("get_signals");
+      if(r.error) throw r.error;
+      if(r.data && r.data.length){
+        render(r.data.map(s=>({pair:s.pair, side:s.side, entry:s.entry, sl:s.sl, tp:s.tp, locked:s.locked, time:"Posted " + new Date(s.posted_at).toLocaleString()})));
+        note.textContent = "";
+        return;
+      }
+    }catch(_){}
+    render(CONFIG.signals.map((s,i)=>Object.assign({}, s, {locked: !isPro && i >= 1})));
+    note.textContent = "No signals posted yet. These are sample signals to show the layout.";
   }
   load();
 }
+})();
 </script>
 </body>
 </html>

@@ -23,6 +23,13 @@
 .block h2{font-size:1.7rem;margin-bottom:16px}
 .linkbtn{background:none;border:0;color:var(--muted);font:600 1rem var(--body);cursor:pointer;text-decoration:underline}
 .center{text-align:center;margin:0 auto}
+dialog{background:var(--panel);color:var(--text);border:1px solid var(--line);border-radius:14px;max-width:440px;width:calc(100% - 32px);padding:24px}
+dialog::backdrop{background:rgba(0,0,0,.65)}
+.qr{background:#fff;border-radius:12px;padding:12px;margin:14px auto;width:min(260px,100%);color:#111;text-align:center}
+.qr img{display:block;width:100%;height:auto}
+.dlg-row{display:flex;justify-content:space-between;align-items:center;gap:12px}
+.amount{font:800 1.8rem var(--display)}
+dialog ol{margin:14px 0 18px 20px;color:var(--muted);display:grid;gap:6px}
 .steps{display:grid;gap:12px;margin-top:20px;color:var(--muted)}
 </style>
 </head>
@@ -83,17 +90,44 @@
   </div>
 </main>
 
+
+<dialog id="tngDlg" aria-labelledby="tngTitle">
+  <div class="dlg-row">
+    <h3 id="tngTitle">Pay by QR</h3>
+    <button class="linkbtn" type="button" id="tngClose">Close</button>
+  </div>
+  <p class="amount" id="tngAmount" style="margin-top:8px"></p>
+  <div class="qr"><img id="tngImg" alt="Malaysia National QR code for TraderWatch" width="260" height="260"><span id="tngMissing" hidden>Add your QR image to the site folder as tng-qr.jpg</span></div>
+  <ol>
+    <li>Open Touch 'n Go or your banking app and scan this QR.</li>
+    <li>Pay the exact amount above.</li>
+    <li>Enter the reference number from your payment receipt, then press I have paid.</li>
+  </ol>
+  <form id="tngForm" novalidate>
+    <label>Reference number
+      <input id="tngRef" name="ref" type="text" autocomplete="off" required>
+    </label>
+    <button class="btn" type="submit">I have paid</button>
+    <div class="msg" id="tngMsg" role="status" aria-live="polite"></div>
+  </form>
+</dialog>
+
 <footer>
   <div class="wrap">
     <p>Risk warning: Trading forex and leveraged products carries a high level of risk and may not suit everyone. Signals and charts on this site are for information only and are not financial advice. Past results do not guarantee future results.</p>
   </div>
 </footer>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
 <script src="config.js"></script>
 <script src="common.js"></script>
 <script>
-const member = requireMember();
+(async function(){
+const member = await requireMember();
 if(member){
+  const pendingKey = "tw_pending_" + member.email;
+  let isPending = false;
+  try{ isPending = !!localStorage.getItem(pendingKey); }catch(_){}
   previewBanner(member);
   const isPro = member.plan === "pro";
   const badge = document.getElementById("planBadge");
@@ -109,13 +143,41 @@ if(member){
       const u = CONFIG.proCheckoutUrl + (CONFIG.proCheckoutUrl.includes("?") ? "&" : "?") + "prefilled_email=" + encodeURIComponent(member.email);
       location.href = u;
     };
+  } else if(CONFIG.tngQrImage){
+    const dlg = document.getElementById("tngDlg"), img = document.getElementById("tngImg");
+    const tmsg = document.getElementById("tngMsg"), tform = document.getElementById("tngForm");
+    img.src = CONFIG.tngQrImage;
+    img.onerror = ()=>{ img.hidden = true; document.getElementById("tngMissing").hidden = false; };
+    document.getElementById("tngAmount").textContent = "RM " + CONFIG.proPriceMYR + " / month";
+    document.getElementById("tngClose").onclick = ()=> dlg.close();
+    function tShow(t, ok){ tmsg.textContent = t; tmsg.className = "msg " + (ok ? "ok" : "err"); }
+    if(isPending){
+      btn.textContent = "Payment under review"; btn.disabled = true;
+      msg.className = "msg ok"; msg.textContent = "We received your payment reference. Pro is unlocked after we confirm the payment.";
+    } else {
+      btn.textContent = "Pay by QR";
+      btn.onclick = ()=>{ tmsg.className = "msg"; dlg.showModal(); };
+    }
+    tform.addEventListener("submit", async e=>{
+      e.preventDefault();
+      const ref = document.getElementById("tngRef").value.trim();
+      if(ref.length < 4) return tShow("Enter the reference number from your payment receipt.", false);
+      if(!CONFIG.signupEndpoint) return tShow("Payment confirmation is not connected yet. Add your form endpoint in config.js.", false);
+      try{
+        const r = await fetch(CONFIG.signupEndpoint,{method:"POST",headers:{"Content-Type":"application/json",Accept:"application/json"},body:JSON.stringify({type:"payment",method:"qr",name:member.name,email:member.email,amountMYR:CONFIG.proPriceMYR,reference:ref})});
+        if(!r.ok) throw new Error();
+      }catch(_){ return tShow("Could not send your payment details. Try again in a moment.", false); }
+      try{ localStorage.setItem(pendingKey, "1"); }catch(_){}
+      dlg.close();
+      btn.textContent = "Payment under review"; btn.disabled = true;
+      msg.className = "msg ok"; msg.textContent = "Thanks. We will check your payment and unlock Pro on your account.";
+    });
   } else {
-    /* No checkout link yet: let you preview the Pro view. Disappears once proCheckoutUrl is set. */
-    btn.textContent = "Preview Pro (checkout not connected)";
-    btn.onclick = ()=>{ saveMember(Object.assign({}, member, {plan:"pro"})); location.href = "members.html"; };
-    msg.className = "msg err"; msg.textContent = "Checkout is not connected yet. This button only previews the Pro view on this device. Add your payment link in config.js.";
+    btn.textContent = "Subscribe to Pro"; btn.disabled = true;
+    msg.className = "msg err"; msg.textContent = "Payment is not connected yet. Add your payment details in config.js.";
   }
 }
+})();
 </script>
 </body>
 </html>

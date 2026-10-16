@@ -127,7 +127,7 @@ footer p+p{margin-top:12px;max-width:80ch}
       <a href="#pricing">Pricing</a>
       <a href="#faq">FAQ</a>
     </nav>
-    <a class="btn ghost sm" href="#join" data-plan="free">Log in</a>
+    <a class="btn ghost sm" href="login.html">Log in</a>
     <a class="btn sm" href="#join" data-plan="free">Join free</a>
   </div>
 </header>
@@ -223,6 +223,9 @@ footer p+p{margin-top:12px;max-width:80ch}
         <label>Email
           <input name="email" type="email" autocomplete="email" required>
         </label>
+        <label>Password
+          <input name="password" type="password" autocomplete="new-password" minlength="8" required>
+        </label>
         <label>Plan
           <select name="plan" id="planSelect">
             <option value="free">Free – $0</option>
@@ -257,7 +260,9 @@ footer p+p{margin-top:12px;max-width:80ch}
   </div>
 </footer>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
 <script src="config.js"></script>
+<script src="common.js"></script>
 <script>
 /* Settings live in config.js */
 
@@ -383,23 +388,39 @@ form.addEventListener("submit", async e=>{
   if(!d.name.trim()) return show("Enter your name.", false);
   if(!/^\S+@\S+\.\S+$/.test(d.email)) return show("Enter a valid email address.", false);
   if(!d.agree) return show("Tick the box to confirm you understand the risk.", false);
-  const demo = !CONFIG.signupEndpoint;
-  if(!demo){
-    try{
-      const r = await fetch(CONFIG.signupEndpoint,{method:"POST",headers:{"Content-Type":"application/json",Accept:"application/json"},body:JSON.stringify({name:d.name,email:d.email,plan:d.plan})});
-      if(!r.ok) throw new Error();
-    }catch(_){ return show("Could not create your account. Try again in a moment.", false); }
+  if(!d.password || d.password.length < 8) return show("Use a password with at least 8 characters.", false);
+  const submitBtn = form.querySelector('button[type="submit"]');
+  submitBtn.disabled = true;
+  try{
+    const redirect = location.href.replace(/[^/]*(#.*)?$/, "") + "members.html";
+    const res = await sb.auth.signUp({ email:d.email.trim(), password:d.password, options:{ data:{ name:d.name.trim() }, emailRedirectTo: redirect } });
+    if(res.error){
+      show(res.error.message.indexOf("already") > -1 ? "This email already has an account. Log in instead." : "Could not create your account: " + res.error.message, false);
+      return;
+    }
+    /* Tell yourself a new member joined (lead notification) */
+    if(CONFIG.signupEndpoint){
+      fetch(CONFIG.signupEndpoint,{method:"POST",headers:{"Content-Type":"application/json",Accept:"application/json"},body:JSON.stringify({type:"signup",name:d.name,email:d.email,plan:d.plan})}).catch(()=>{});
+    }
+    if(res.data && res.data.session){
+      location.href = d.plan === "pro" ? "subscribe.html" : "members.html";
+    } else {
+      show("Account created. Check your email and click the confirmation link, then log in.", true);
+      form.reset();
+    }
+  }catch(_){
+    show("Could not create your account. Try again in a moment.", false);
+  }finally{
+    submitBtn.disabled = false;
   }
-  try{ localStorage.setItem("tw_member", JSON.stringify({name:d.name.trim(), email:d.email.trim(), plan:"free", demo:demo})); }catch(_){}
-  location.href = d.plan === "pro" ? "subscribe.html" : "members.html";
 });
 
-/* Returning visitors on this device go straight to the member area */
-try{
-  if(localStorage.getItem("tw_member")){
+/* Logged-in visitors see a link to their account */
+sb.auth.getSession().then(r=>{
+  if(r.data && r.data.session){
     document.querySelectorAll('header .btn.ghost').forEach(a=>{ a.textContent="My account"; a.href="members.html"; });
   }
-}catch(_){}
+});
 
 document.getElementById("yr").textContent = new Date().getFullYear();
 </script>

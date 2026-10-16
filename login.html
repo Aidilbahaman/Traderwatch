@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Log in – TraderWatch</title>
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Source+Sans+3:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="app.css">
+<style>
+[hidden]{display:none!important}
+.box{max-width:440px;margin:56px auto;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:28px}
+.box h1{font-size:2rem;margin-bottom:18px}
+.alt{margin-top:18px;color:var(--muted);display:grid;gap:8px}
+.linkbtn{background:none;border:0;color:var(--muted);font:600 1rem var(--body);cursor:pointer;text-decoration:underline;padding:0;text-align:left}
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap nav">
+    <a class="logo" href="index.html" aria-label="TraderWatch home">
+      <svg width="32" height="32" viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="7" fill="#050b14" stroke="#264261"/><path d="M8 9h16v4h-6.2v11h-3.6V13H8z" fill="#fff"/><rect x="20" y="20" width="5" height="5" fill="#2ecf6f"/></svg>
+      <span>TraderWatch</span></a>
+  </div>
+</header>
+<main class="wrap">
+  <div class="box">
+    <h1>Log in</h1>
+    <form id="loginForm" novalidate>
+      <label>Email
+        <input name="email" type="email" autocomplete="email" required>
+      </label>
+      <label>Password
+        <input name="password" type="password" autocomplete="current-password" required>
+      </label>
+      <button class="btn" type="submit">Log in</button>
+      <div class="msg" id="msg" role="status" aria-live="polite"></div>
+    </form>
+    <div class="alt">
+      <button class="linkbtn" type="button" id="forgot">Forgot your password?</button>
+      <span>New here? <a href="index.html#join">Create a free account</a></span>
+    </div>
+  </div>
+</main>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script src="config.js"></script>
+<script src="common.js"></script>
+<script>
+const form = document.getElementById("loginForm"), msg = document.getElementById("msg");
+function show(t, ok){ msg.textContent = t; msg.className = "msg " + (ok ? "ok" : "err"); }
+sb.auth.getSession().then(r=>{ if(r.data && r.data.session) location.href = "members.html"; });
+
+form.addEventListener("submit", async e=>{
+  e.preventDefault();
+  const email = form.email.value.trim(), password = form.password.value;
+  if(!/^\S+@\S+\.\S+$/.test(email)) return show("Enter a valid email address.", false);
+  if(!password) return show("Enter your password.", false);
+  const btn = form.querySelector("button[type=submit]"); btn.disabled = true;
+  const r = await sb.auth.signInWithPassword({ email, password });
+  btn.disabled = false;
+  if(r.error){
+    return show(/confirm/i.test(r.error.message) ? "Confirm your email first. Check your inbox for the link." : "Wrong email or password.", false);
+  }
+  location.href = "members.html";
+});
+
+document.getElementById("forgot").addEventListener("click", async ()=>{
+  const email = form.email.value.trim();
+  if(!/^\S+@\S+\.\S+$/.test(email)) return show("Enter your email above first, then press Forgot your password.", false);
+  const redirectTo = location.href.replace(/[^/]*(#.*)?$/, "") + "login.html";
+  const r = await sb.auth.resetPasswordForEmail(email, { redirectTo });
+  show(r.error ? "Could not send the reset email: " + r.error.message : "If that email has an account, a reset link is on its way.", !r.error);
+});
+</script>
+</body>
+</html>
