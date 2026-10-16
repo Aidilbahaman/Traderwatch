@@ -1,0 +1,105 @@
+:root{
+  --bg:#0c1b2e; --panel:#13263d; --panel2:#182f4a; --line:#264261;
+  --text:#eef1f5; --muted:#9fb1c7; --buy:#3fd0b4; --sell:#ff7a66; --gold:#2ecf6f;
+  --display:'Bricolage Grotesque','Segoe UI',Arial,sans-serif;
+  --body:'Source Sans 3','Segoe UI',Arial,sans-serif;
+}
+*{box-sizing:border-box;margin:0}
+html{color-scheme:dark;scroll-behavior:smooth;scroll-padding-top:72px}
+body{background:var(--bg);color:var(--text);font:400 17px/1.6 var(--body);-webkit-font-smoothing:antialiased}
+a{color:inherit}
+:focus-visible{outline:3px solid var(--gold);outline-offset:3px;border-radius:4px}
+.wrap{max-width:1160px;margin:0 auto;padding:0 20px}
+h1,h2,h3{font-family:var(--display);line-height:1.08;letter-spacing:-.02em}
+h1{font-size:clamp(2.4rem,6vw,4.4rem);font-weight:800}
+h2{font-size:clamp(1.8rem,3.6vw,2.7rem);font-weight:700}
+h3{font-size:1.25rem;font-weight:700}
+.num{font-variant-numeric:tabular-nums}
+
+/* nav */
+header{position:sticky;top:0;z-index:20;background:rgba(12,27,46,.92);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+.nav{display:flex;align-items:center;gap:24px;height:64px}
+.logo{display:flex;align-items:center;gap:10px;font:800 1.35rem var(--display);letter-spacing:-.02em;text-decoration:none}
+.logo svg{flex:none}
+.nav nav{display:flex;gap:22px;margin-left:auto}
+.nav nav a{text-decoration:none;color:var(--muted);font-weight:600}
+.nav nav a:hover{color:var(--text)}
+.btn{display:inline-block;border:0;cursor:pointer;font:700 1rem var(--display);padding:12px 22px;border-radius:8px;text-decoration:none;background:var(--gold);color:#04170b}
+.btn:hover{filter:brightness(1.08)}
+.btn.ghost{background:transparent;color:var(--text);border:1.5px solid var(--line)}
+.btn.ghost:hover{border-color:var(--muted)}
+.btn.sm{padding:8px 16px;font-size:.95rem}
+@media(max-width:760px){.nav nav{display:none}.nav .btn.ghost{display:none}.nav .btn{margin-left:auto}}
+
+/* hero */
+.hero{padding:56px 0 40px}
+.hero-grid{display:grid;grid-template-columns:1fr 1.15fr;gap:40px;align-items:center}
+.hero p.lead{color:var(--muted);font-size:1.2rem;margin:20px 0 28px;max-width:34ch}
+.hero .cta{display:flex;gap:12px;flex-wrap:wrap}
+.hero small{display:block;margin-top:16px;color:var(--muted)}
+@media(max-width:900px){.hero-grid{grid-template-columns:1fr}}
+.chartbox{background:var(--panel);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.tabs{display:flex;gap:6px;padding:10px;border-bottom:1px solid var(--line);overflow-x:auto}
+.tabs button{background:transparent;border:1px solid transparent;color:var(--muted);font:600 .95rem var(--body);padding:7px 14px;border-radius:8px;cursor:pointer;white-space:nowrap}
+.tabs button[aria-selected="true"]{background:var(--panel2);color:var(--text);border-color:var(--line)}
+.tv{height:420px}
+.tv.big{height:560px}
+.tv .tradingview-widget-container,.tv .tradingview-widget-container__widget{height:100%;width:100%}
+.tvnote{padding:10px 14px;color:var(--muted);font-size:.9rem;border-top:1px solid var(--line)}
+
+section{padding:72px 0}
+.sec-head{max-width:620px;margin-bottom:36px}
+.sec-head p{color:var(--muted);margin-top:12px}
+
+/* signals */
+.signals{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+@media(max-width:900px){.signals{grid-template-columns:1fr}}
+.sig{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:20px;position:relative;overflow:hidden}
+.sig-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
+.pair{font:800 1.3rem var(--display)}
+.side{font:700 .85rem var(--body);padding:3px 10px;border-radius:99px}
+.side.buy{background:rgba(63,208,180,.15);color:var(--buy)}
+.side.sell{background:rgba(255,122,102,.15);color:var(--sell)}
+.rows{display:grid;grid-template-columns:auto 1fr;gap:6px 18px}
+.rows dt{color:var(--muted)}
+.rows dd{text-align:right;font-weight:600}
+.rows .sl{color:var(--sell)} .rows .tp{color:var(--buy)}
+.sig .time{margin-top:14px;color:var(--muted);font-size:.9rem}
+.sig.locked .rows,.sig.locked .time{filter:blur(7px);user-select:none;pointer-events:none}
+.lock{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;background:rgba(12,27,46,.55);font:700 1rem var(--display)}
+.sample{margin-top:18px;color:var(--muted);font-size:.92rem}
+
+/* pricing */
+.plans{display:grid;grid-template-columns:repeat(2,1fr);gap:20px;max-width:860px}
+@media(max-width:760px){.plans{grid-template-columns:1fr}}
+.plan{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:28px;display:flex;flex-direction:column}
+.plan.pro{border-color:var(--gold);background:var(--panel2)}
+.price{font:800 2.6rem var(--display);margin:10px 0 4px}
+.price span{font:400 1rem var(--body);color:var(--muted)}
+.plan ul{list-style:none;padding:0;margin:18px 0 26px;display:grid;gap:10px;flex:1}
+.plan li{padding-left:26px;position:relative}
+.plan li::before{content:"";position:absolute;left:0;top:.5em;width:12px;height:7px;border-left:2.5px solid var(--buy);border-bottom:2.5px solid var(--buy);transform:rotate(-45deg)}
+.plan li.no{color:var(--muted)}
+.plan li.no::before{border-color:var(--line);border-top:0;border-right:0;height:0;top:.75em;transform:none;border-left:0;border-bottom:2.5px solid var(--line);width:12px}
+
+/* join */
+.join{background:var(--panel);border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.join-grid{display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:start}
+@media(max-width:900px){.join-grid{grid-template-columns:1fr}}
+form{display:grid;gap:16px}
+label{display:grid;gap:6px;font-weight:600}
+input,select{background:var(--bg);border:1.5px solid var(--line);color:var(--text);font:400 1rem var(--body);padding:12px 14px;border-radius:8px;width:100%}
+input:focus,select:focus{border-color:var(--gold)}
+.check{display:flex;gap:10px;align-items:flex-start;font-weight:400;color:var(--muted)}
+.check input{width:auto;margin-top:5px}
+.msg{padding:12px 14px;border-radius:8px;display:none}
+.msg.ok{display:block;background:rgba(63,208,180,.14);color:var(--buy)}
+.msg.err{display:block;background:rgba(255,122,102,.14);color:var(--sell)}
+
+/* faq + footer */
+details{border-bottom:1px solid var(--line);padding:16px 0}
+summary{cursor:pointer;font:700 1.1rem var(--display)}
+details p{color:var(--muted);margin-top:10px;max-width:70ch}
+footer{padding:40px 0 56px;color:var(--muted);font-size:.92rem}
+footer p+p{margin-top:12px;max-width:80ch}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}

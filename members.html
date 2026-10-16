@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Your dashboard – TraderWatch</title>
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Source+Sans+3:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="app.css">
+<style>
+[hidden]{display:none!important}
+.badge{font:700 .85rem var(--body);padding:4px 12px;border-radius:99px;background:var(--panel2);border:1px solid var(--line);color:var(--muted)}
+.badge.pro{background:rgba(46,207,111,.15);border-color:var(--gold);color:var(--gold)}
+.preview{background:rgba(242,184,75,.14);color:#f2b84b;padding:10px 0;font-size:.95rem}
+.page{padding:40px 0 72px}
+.welcome{display:flex;justify-content:space-between;align-items:center;gap:20px;flex-wrap:wrap;margin-bottom:28px}
+.welcome p{color:var(--muted);margin-top:6px}
+.upgrade{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;background:var(--panel2);border:1px solid var(--gold);border-radius:14px;padding:20px 24px;margin-bottom:36px}
+.upgrade p{color:var(--muted);margin-top:4px}
+.block{margin-top:44px}
+.block h2{font-size:1.7rem;margin-bottom:16px}
+.linkbtn{background:none;border:0;color:var(--muted);font:600 1rem var(--body);cursor:pointer;text-decoration:underline}
+.center{text-align:center;margin:0 auto}
+.steps{display:grid;gap:12px;margin-top:20px;color:var(--muted)}
+</style>
+</head>
+<body>
+<div class="preview" id="previewBanner" hidden><div class="wrap">Preview mode: sign-ups are not being saved yet. Connect your form in config.js.</div></div>
+<header>
+  <div class="wrap nav">
+    <a class="logo" href="members.html" aria-label="TraderWatch member area">
+      <svg width="32" height="32" viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="7" fill="#050b14" stroke="#264261"/><path d="M8 9h16v4h-6.2v11h-3.6V13H8z" fill="#fff"/><rect x="20" y="20" width="5" height="5" fill="#2ecf6f"/></svg>
+      <span>TraderWatch</span></a>
+    <nav aria-label="Member">
+      <a href="members.html#charts">Charts</a>
+      <a href="members.html#signals">Signals</a>
+      <a href="subscribe.html">Subscription</a>
+    </nav>
+    <span class="badge" id="planBadge">Free</span>
+    <button class="linkbtn" type="button" onclick="logOut()">Log out</button>
+  </div>
+</header>
+
+<main class="page">
+  <div class="wrap">
+    <div class="welcome">
+      <div>
+        <h1 style="font-size:clamp(1.9rem,4vw,2.8rem)" id="hello">Welcome</h1>
+        <p id="planLine"></p>
+      </div>
+    </div>
+
+    <div class="upgrade" id="upgradeBox">
+      <div>
+        <h3>Get every signal with Pro</h3>
+        <p>Free members get 1 signal a day. Pro unlocks all signals, instant alerts and the full history for $19 a month.</p>
+      </div>
+      <a class="btn" href="subscribe.html">See Pro</a>
+    </div>
+
+    <section class="block" id="charts" style="padding:0">
+      <h2>Live charts</h2>
+      <div class="chartbox">
+        <div class="tabs" role="tablist" aria-label="Chart pair" id="tabs"></div>
+        <div class="tv big" id="chart"></div>
+        <div class="tvnote">Charts by TradingView. Prices may be delayed.</div>
+      </div>
+    </section>
+
+    <section class="block" id="signals" style="padding:0">
+      <h2>Signals</h2>
+      <div class="signals" id="signalGrid"></div>
+      <p class="sample" id="signalNote"></p>
+    </section>
+  </div>
+</main>
+
+<footer>
+  <div class="wrap">
+    <p>Risk warning: Trading forex and leveraged products carries a high level of risk and may not suit everyone. Signals and charts on this site are for information only and are not financial advice. Past results do not guarantee future results.</p>
+  </div>
+</footer>
+
+<script src="config.js"></script>
+<script src="common.js"></script>
+<script>
+const member = requireMember();
+if(member){
+  previewBanner(member);
+  const isPro = member.plan === "pro";
+  document.getElementById("hello").textContent = "Welcome, " + (member.name.split(" ")[0] || "trader");
+  const badge = document.getElementById("planBadge");
+  badge.textContent = isPro ? "Pro" : "Free";
+  badge.classList.toggle("pro", isPro);
+  document.getElementById("planLine").textContent = isPro ? "You are on the Pro plan. All signals are unlocked." : "You are on the Free plan. You can see 1 signal a day.";
+  document.getElementById("upgradeBox").hidden = isPro;
+
+  /* Charts */
+  const chartEl = document.getElementById("chart"), tabsEl = document.getElementById("tabs");
+  function mountChart(symbol){
+    chartEl.innerHTML = "";
+    const box = document.createElement("div"); box.className = "tradingview-widget-container";
+    const inner = document.createElement("div"); inner.className = "tradingview-widget-container__widget";
+    box.appendChild(inner);
+    const s = document.createElement("script");
+    s.src = "https://s3.tradingview.com/external-embedding/embed-widget-advanced-chart.js"; s.async = true;
+    s.textContent = JSON.stringify({autosize:true,symbol:symbol,interval:"60",timezone:"Etc/UTC",theme:"dark",style:"1",locale:"en",allow_symbol_change:true,backgroundColor:"#13263d",support_host:"https://www.tradingview.com"});
+    box.appendChild(s); chartEl.appendChild(box);
+  }
+  CONFIG.pairs.forEach((p,i)=>{
+    const b = document.createElement("button");
+    b.type="button"; b.role="tab"; b.textContent=p.label; b.setAttribute("aria-selected", i===0);
+    b.addEventListener("click",()=>{
+      tabsEl.querySelectorAll("button").forEach(x=>x.setAttribute("aria-selected","false"));
+      b.setAttribute("aria-selected","true"); mountChart(p.symbol);
+    });
+    tabsEl.appendChild(b);
+  });
+  mountChart(CONFIG.pairs[0].symbol);
+
+  /* Signals: Free sees 1, Pro sees all. This is display only until a server enforces it. */
+  const grid = document.getElementById("signalGrid"), note = document.getElementById("signalNote");
+  function render(list){
+    grid.innerHTML = "";
+    list.forEach((s,i)=>{
+      const locked = !isPro && i >= 1;
+      const a = document.createElement("article");
+      a.className = "sig" + (locked ? " locked" : "");
+      const cls = s.side === "BUY" ? "buy" : "sell";
+      a.innerHTML = `
+        <div class="sig-top"><span class="pair">${esc(s.pair)}</span><span class="side ${cls}">${esc(s.side)}</span></div>
+        <dl class="rows num">
+          <dt>Entry</dt><dd>${esc(s.entry)}</dd>
+          <dt>Stop loss</dt><dd class="sl">${esc(s.sl)}</dd>
+          <dt>Take profit</dt><dd class="tp">${esc(s.tp)}</dd>
+        </dl>
+        <p class="time">${esc(s.time)}</p>
+        ${locked ? '<div class="lock"><span>Pro signal</span><a class="btn sm" href="subscribe.html">Unlock with Pro</a></div>' : ''}`;
+      grid.appendChild(a);
+    });
+  }
+  function mapLive(s){
+    const pair = (s.pair && s.pair.length === 6) ? s.pair.slice(0,3)+"/"+s.pair.slice(3) : s.pair;
+    const tp1 = (s.tps && s.tps[0]) ? s.tps[0].price : s.entry;
+    return {pair:pair, side:s.direction === "buy" ? "BUY" : "SELL", entry:String(s.entry), sl:String(s.sl), tp:String(tp1), time:(s.source === "stale" ? "Cached price" : "Live")+" · "+s.confidence+"% confidence"};
+  }
+  async function load(){
+    if(CONFIG.signalsEndpoint){
+      try{
+        const r = await fetch(CONFIG.signalsEndpoint,{headers:{accept:"application/json"}});
+        if(!r.ok) throw new Error();
+        const data = await r.json(); const raw = Array.isArray(data) ? data : data.signals;
+        if(!Array.isArray(raw) || !raw.length) throw new Error();
+        render(raw.map(mapLive)); note.textContent = ""; return;
+      }catch(_){}
+    }
+    render(CONFIG.signals);
+    note.textContent = "These are sample signals to show the layout. Replace them with your real signals.";
+  }
+  load();
+}
+</script>
+</body>
+</html>
