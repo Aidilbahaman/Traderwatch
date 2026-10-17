@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Confirming your email – TraderWatch</title>
+<meta name="robots" content="noindex">
+<link rel="stylesheet" href="app.css">
+<style>
+[hidden]{display:none!important}
+.box{max-width:440px;margin:56px auto;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:28px}
+.msg.ok{color:var(--good,#1a7f4b)} .msg.err{color:#c0392b}
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap nav">
+    <a class="logo" href="index.html" aria-label="TraderWatch home">
+      <svg width="32" height="32" viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="7" fill="#050b14" stroke="#264261"/><path d="M8 9h16v4h-6.2v11h-3.6V13H8z" fill="#fff"/><rect x="20" y="20" width="5" height="5" fill="#2ecf6f"/></svg>
+      <span>TraderWatch</span></a>
+  </div>
+</header>
+<main class="wrap">
+  <div class="box">
+    <h1>Confirming your email…</h1>
+    <p class="muted">Please wait a moment while we finish setting up your account.</p>
+    <div class="msg" id="msg" role="status" aria-live="polite"></div>
+  </div>
+</main>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script src="config.js"></script>
+<script src="common.js"></script>
+<script>
+(function(){
+  const msg = document.getElementById("msg");
+  function show(t, cls){ msg.textContent = t; msg.className = "msg " + cls; }
+  const params = new URLSearchParams(location.search);
+  const hash = new URLSearchParams((location.hash || "").replace(/^#/, ""));
+  const code = params.get("code");
+  const accessToken = hash.get("access_token");
+  const refreshToken = hash.get("refresh_token");
+  const err = params.get("error") || params.get("error_code") || hash.get("error") || hash.get("error_code");
+  const errDesc = params.get("error_description") || hash.get("error_description");
+  if(err){
+    show("This confirmation link did not work: " + decodeURIComponent(errDesc || err).replace(/\+/g, " ") + ". Please request a new one from the login page.", "err");
+    return;
+  }
+  const next = params.get("next");
+  const safe = next && /^\/(?!\/)/.test(next) ? next : "members.html";
+  const finish = (result)=>{
+    if(result && result.error){ show("Confirmation failed: " + result.error.message + ". Please request a new link from the login page.", "err"); return; }
+    show("Email confirmed. Opening your member dashboard…", "ok");
+    setTimeout(()=>{ location.href = safe.replace(/^\//, ""); }, 800);
+  };
+  if(accessToken && refreshToken){
+    sb.auth.setSession({access_token:accessToken, refresh_token:refreshToken}).then(finish).catch(()=>show("Could not complete confirmation. Please request a new link from the login page.", "err"));
+    return;
+  }
+  if(!code){
+    show("No verification token was found in this link. Open the latest confirmation email and use its button.", "err");
+    return;
+  }
+  sb.auth.exchangeCodeForSession(code).then(finish).catch(()=>{ show("Could not reach the server. Check your connection and try the link again.", "err"); });
+})();
+</script>
+</body>
+</html>

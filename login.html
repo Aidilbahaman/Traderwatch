@@ -84,12 +84,15 @@ form.addEventListener("submit", async e=>{
   if(signup && password !== form.elements.confirm.value) return show("The passwords do not match.", false);
   submitButton.disabled = true;
   try {
-    const result = signup
-      ? await sb.auth.signUp({ email, password, options: { data: { name: form.elements.name.value.trim() } } })
+  const next = new URLSearchParams(location.search).get("next");
+  const redirectUrl = new URL("verify.html", location.href);
+  if(next && /^\/(?!\/)/.test(next)) redirectUrl.searchParams.set("next", next);
+  const redirectTo = redirectUrl.href;
+  const result = signup
+      ? await sb.auth.signUp({ email, password, options: { data: { name: form.elements.name.value.trim() }, emailRedirectTo: redirectTo } })
       : await sb.auth.signInWithPassword({ email, password });
     if(result.error) return show(signup ? result.error.message : (/confirm/i.test(result.error.message) ? "Confirm your email first. Check your inbox for the link." : "Wrong email or password."), false);
-    if(signup && !result.data.session) return show("Account created. Check your email to confirm your address before logging in.", true);
-    const next = new URLSearchParams(location.search).get("next");
+    if(signup && !result.data.session) return show("Account created. Check your email and press the confirm button, then come back to log in.", true);
     location.href = next && /^\/(?!\/)/.test(next) ? next : "members.html";
   } catch (_) { show("Unable to connect. Please try again.", false); }
   finally { submitButton.disabled = false; }
