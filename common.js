@@ -14,10 +14,16 @@ async function loadMember(){
   }catch(_){}
   return { id:u.id, email:u.email, name: name || (u.email || "").split("@")[0], plan:plan };
 }
-async function requireMember(){
-  const m = await loadMember();
-  if(!m){ location.href = "login.html"; return null; }
-  return m;
+function requireMember(returnTo){
+  const m = loadMember();
+  return m.then(member=>{
+    if(!member){
+      const target = returnTo || location.pathname + location.search;
+      location.href = "login.html?next=" + encodeURIComponent(target);
+      return null;
+    }
+    return member;
+  });
 }
 async function logOut(){
   await sb.auth.signOut();

@@ -98,6 +98,11 @@ if(member){
   badge.classList.toggle("pro", plan !== "free");
   document.getElementById("planLine").textContent = plan === "max" ? "Max Member · unlimited valid setups across 6 hot pairs." : plan === "pro" ? "Pro Member · up to 10 valid setups daily across 6 hot pairs." : "Free Member · up to 3 valid setups daily across 3 hot pairs.";
   document.getElementById("upgradeBox").hidden = plan === "max";
+  if(plan === "pro"){
+    document.querySelector("#upgradeBox h3").textContent = "Upgrade to Max";
+    document.querySelector("#upgradeBox p").textContent = "Max unlocks unlimited verified setups across all 6 hot pairs.";
+    const up = document.querySelector("#upgradeBox a"); up.textContent = "See Max"; up.href = "subscribe.html?plan=max";
+  }
 
   /* Charts */
   const chartEl = document.getElementById("chart"), tabsEl = document.getElementById("tabs");

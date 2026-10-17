@@ -61,26 +61,39 @@ dialog ol{margin:14px 0 18px 20px;color:var(--muted);display:grid;gap:6px}
         <h3>Free</h3>
         <div class="price">$0 <span>forever</span></div>
         <ul>
-          <li>1 signal per day</li>
+          <li>Up to 3 verified signals daily</li>
+          <li>3 hot pairs</li>
           <li>Live TradingView charts</li>
-          <li>Weekly market recap by email</li>
-          <li class="no">Instant signal alerts</li>
-          <li class="no">Full signal history</li>
+          <li class="no">6 hot pairs</li>
+          <li class="no">Unlimited signals</li>
         </ul>
         <a class="btn ghost" href="members.html" id="freeBtn">Continue with Free</a>
       </div>
       <div class="plan pro">
         <h3>Pro</h3>
-        <div class="price">$19 <span>per month</span></div>
+        <div class="price">$20 <span>per billing period to be confirmed</span></div>
         <ul>
-          <li>Every signal, as soon as it is posted</li>
-          <li>Instant email alerts</li>
-          <li>Entry, stop loss and 2 take-profit levels</li>
-          <li>Full signal history</li>
-          <li>Cancel any time</li>
+          <li>Up to 10 verified signals daily</li>
+          <li>6 hot pairs</li>
+          <li>Entry, stop loss and take profit</li>
+          <li>Member dashboard and charts</li>
+          <li class="no">Unlimited signals</li>
         </ul>
         <button class="btn" type="button" id="proBtn">Subscribe to Pro</button>
         <div class="msg" id="msg" role="status" aria-live="polite" style="margin-top:14px"></div>
+      </div>
+      <div class="plan max">
+        <h3>Max</h3>
+        <div class="price">$50 <span>per billing period to be confirmed</span></div>
+        <ul>
+          <li>Unlimited verified signals</li>
+          <li>6 hot pairs</li>
+          <li>H1 and M1 setups when available</li>
+          <li>Member dashboard and charts</li>
+          <li>Priority access to new setups</li>
+        </ul>
+        <button class="btn" type="button" id="maxBtn">Subscribe to Max</button>
+        <div class="msg" id="maxMsg" role="status" aria-live="polite" style="margin-top:14px"></div>
       </div>
     </div>
     <div class="steps">
@@ -125,22 +138,33 @@ dialog ol{margin:14px 0 18px 20px;color:var(--muted);display:grid;gap:6px}
 (async function(){
 const member = await requireMember();
 if(member){
-  const pendingKey = "tw_pending_" + member.email;
+  const requestedPlan = new URLSearchParams(location.search).get("plan");
+  const selectedPlan = requestedPlan === "max" ? "max" : "pro";
+  const planLabel = selectedPlan === "max" ? "Max" : "Pro";
+  const pendingKey = "tw_pending_" + selectedPlan + "_" + member.email;
   let isPending = false;
   try{ isPending = !!localStorage.getItem(pendingKey); }catch(_){}
   previewBanner(member);
-  const isPro = member.plan === "pro";
+  const currentPlan = ["free", "pro", "max"].includes(member.plan) ? member.plan : "free";
   const badge = document.getElementById("planBadge");
-  badge.textContent = isPro ? "Pro" : "Free"; badge.classList.toggle("pro", isPro);
-  const btn = document.getElementById("proBtn"), msg = document.getElementById("msg");
-  if(isPro){
-    document.getElementById("subTitle").textContent = "You are on Pro";
-    document.getElementById("subLine").textContent = "All signals are unlocked on your account.";
+  badge.textContent = currentPlan.charAt(0).toUpperCase() + currentPlan.slice(1); badge.classList.toggle("pro", currentPlan !== "free");
+  const btn = document.getElementById(selectedPlan === "max" ? "maxBtn" : "proBtn");
+  const msg = document.getElementById(selectedPlan === "max" ? "maxMsg" : "msg");
+  const price = CONFIG.planPrices[selectedPlan];
+  const checkoutUrl = CONFIG.checkoutUrls[selectedPlan];
+  document.getElementById("subTitle").textContent = "Choose your " + planLabel + " access";
+  document.getElementById("subLine").textContent = currentPlan === selectedPlan ? "You already have this plan." : `Selected: ${planLabel} · $${price.usd} per billing period to be confirmed.`;
+  document.getElementById("tngTitle").textContent = "Pay for " + planLabel;
+  document.getElementById("tngAmount").textContent = "RM " + price.myr + " / billing period";
+  if(currentPlan === selectedPlan || (currentPlan === "max" && selectedPlan === "pro")){
     btn.textContent = "Go to dashboard"; btn.onclick = ()=>{ location.href = "members.html"; };
-    document.getElementById("freeBtn").hidden = true;
-  } else if(CONFIG.proCheckoutUrl){
+    msg.className = "msg ok"; msg.textContent = "This plan is already active on your account.";
+  } else if(isPending){
+    btn.textContent = "Payment under review"; btn.disabled = true;
+    msg.className = "msg ok"; msg.textContent = "Payment reference received. Access is unlocked after manual confirmation.";
+  } else if(checkoutUrl){
     btn.onclick = ()=>{
-      const u = CONFIG.proCheckoutUrl + (CONFIG.proCheckoutUrl.includes("?") ? "&" : "?") + "prefilled_email=" + encodeURIComponent(member.email);
+      const u = checkoutUrl + (checkoutUrl.includes("?") ? "&" : "?") + "prefilled_email=" + encodeURIComponent(member.email);
       location.href = u;
     };
   } else if(CONFIG.tngQrImage){
@@ -148,33 +172,26 @@ if(member){
     const tmsg = document.getElementById("tngMsg"), tform = document.getElementById("tngForm");
     img.src = CONFIG.tngQrImage;
     img.onerror = ()=>{ img.hidden = true; document.getElementById("tngMissing").hidden = false; };
-    document.getElementById("tngAmount").textContent = "RM " + CONFIG.proPriceMYR + " / month";
     document.getElementById("tngClose").onclick = ()=> dlg.close();
     function tShow(t, ok){ tmsg.textContent = t; tmsg.className = "msg " + (ok ? "ok" : "err"); }
-    if(isPending){
-      btn.textContent = "Payment under review"; btn.disabled = true;
-      msg.className = "msg ok"; msg.textContent = "We received your payment reference. Pro is unlocked after we confirm the payment.";
-    } else {
-      btn.textContent = "Pay by QR";
-      btn.onclick = ()=>{ tmsg.className = "msg"; dlg.showModal(); };
-    }
+    btn.textContent = "Pay by QR";
+    btn.onclick = ()=>{ tmsg.className = "msg"; dlg.showModal(); };
     tform.addEventListener("submit", async e=>{
       e.preventDefault();
       const ref = document.getElementById("tngRef").value.trim();
       if(ref.length < 4) return tShow("Enter the reference number from your payment receipt.", false);
-      if(!CONFIG.signupEndpoint) return tShow("Payment confirmation is not connected yet. Add your form endpoint in config.js.", false);
+      if(!CONFIG.signupEndpoint) return tShow("Payment confirmation is not connected yet.", false);
       try{
-        const r = await fetch(CONFIG.signupEndpoint,{method:"POST",headers:{"Content-Type":"application/json",Accept:"application/json"},body:JSON.stringify({type:"payment",method:"qr",name:member.name,email:member.email,amountMYR:CONFIG.proPriceMYR,reference:ref})});
+        const r = await fetch(CONFIG.signupEndpoint,{method:"POST",headers:{"Content-Type":"application/json",Accept:"application/json"},body:JSON.stringify({type:"payment",plan:selectedPlan,method:"qr",name:member.name,email:member.email,amountUSD:price.usd,amountMYR:price.myr,reference:ref})});
         if(!r.ok) throw new Error();
       }catch(_){ return tShow("Could not send your payment details. Try again in a moment.", false); }
       try{ localStorage.setItem(pendingKey, "1"); }catch(_){}
-      dlg.close();
-      btn.textContent = "Payment under review"; btn.disabled = true;
-      msg.className = "msg ok"; msg.textContent = "Thanks. We will check your payment and unlock Pro on your account.";
+      dlg.close(); btn.textContent = "Payment under review"; btn.disabled = true;
+      msg.className = "msg ok"; msg.textContent = `Thanks. We will check your ${planLabel} payment and update your account.`;
     });
   } else {
-    btn.textContent = "Subscribe to Pro"; btn.disabled = true;
-    msg.className = "msg err"; msg.textContent = "Payment is not connected yet. Add your payment details in config.js.";
+    btn.textContent = "Payment not connected"; btn.disabled = true;
+    msg.className = "msg err"; msg.textContent = "Payment is not connected yet.";
   }
 }
 })();

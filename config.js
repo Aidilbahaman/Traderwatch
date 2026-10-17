@@ -2,13 +2,18 @@
 const CONFIG = {
   // Form service that receives sign-ups, e.g. "https://formspree.io/f/xxxxxxx". Leave empty until you have one.
   signupEndpoint: "https://formspree.io/f/xqpewvzl",
-  // Payment link for Pro (Stripe Payment Link, Lemon Squeezy, Paddle, etc.)
-  proCheckoutUrl: "",
-  // Touch 'n Go eWallet QR. Used when proCheckoutUrl is empty.
+  // Payment link per plan (Stripe Payment Link, Lemon Squeezy, Paddle, etc).
+  // Leave a plan empty to fall back to the Touch 'n Go QR flow below.
+  checkoutUrls: { pro: "", max: "" },
+  // Touch 'n Go eWallet QR. Used when the plan has no checkout URL.
   // 1) Your QR image is saved in this folder as tng-qr.jpg
-  // 2) Set the amount you charge per month in MYR
+  // 2) Amounts below are MYR estimates of the USD plan price; edit to match
+  //    what you actually charge before accepting any payment.
   tngQrImage: "tng-qr.jpg",
-  proPriceMYR: "79.00",
+  planPrices: {
+    pro: { usd: "20", myr: "82.00" },
+    max: { usd: "50", myr: "204.00" }
+  },
   // Supabase (real logins, next step). The publishable key is safe in public code. Never put a secret or service_role key here.
   supabaseUrl: "https://vicfiftvhxemuhxxmkxk.supabase.co",
   supabaseKey: "sb_publishable_4LzgHiCMUXmXUOkPtvIHVw_F7ks9otV",

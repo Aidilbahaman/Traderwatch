@@ -85,8 +85,9 @@ footer p{font-size:11px;line-height:1.65;max-width:850px}
 .sample{margin-top:18px;color:var(--muted);font-size:.92rem}
 
 /* pricing */
-.plans{display:grid;grid-template-columns:repeat(2,1fr);gap:20px;max-width:860px}
-@media(max-width:760px){.plans{grid-template-columns:1fr}}
+.plans{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px;max-width:1120px}
+@media(max-width:900px){.plans{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:600px){.plans{grid-template-columns:1fr}}
 .plan{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:28px;display:flex;flex-direction:column}
 .plan.pro{border-color:var(--gold);background:var(--panel2)}
 .price{font:800 2.6rem var(--display);margin:10px 0 4px}
