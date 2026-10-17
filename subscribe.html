@@ -180,11 +180,18 @@ if(member){
       e.preventDefault();
       const ref = document.getElementById("tngRef").value.trim();
       if(ref.length < 4) return tShow("Enter the reference number from your payment receipt.", false);
-      if(!CONFIG.signupEndpoint) return tShow("Payment confirmation is not connected yet.", false);
+      let saved = false;
       try{
-        const r = await fetch(CONFIG.signupEndpoint,{method:"POST",headers:{"Content-Type":"application/json",Accept:"application/json"},body:JSON.stringify({type:"payment",plan:selectedPlan,method:"qr",name:member.name,email:member.email,amountUSD:price.usd,amountMYR:price.myr,reference:ref})});
-        if(!r.ok) throw new Error();
-      }catch(_){ return tShow("Could not send your payment details. Try again in a moment.", false); }
+        const rq = await sb.rpc("submit_payment_request", {p_plan: selectedPlan, p_reference: ref, p_method: "qr", p_amount_usd: price.usd, p_amount_myr: price.myr});
+        if(!rq.error) saved = true;
+      }catch(_){}
+      if(!saved && CONFIG.signupEndpoint){
+        try{
+          const r = await fetch(CONFIG.signupEndpoint,{method:"POST",headers:{"Content-Type":"application/json",Accept:"application/json"},body:JSON.stringify({type:"payment",plan:selectedPlan,method:"qr",name:member.name,email:member.email,amountUSD:price.usd,amountMYR:price.myr,reference:ref})});
+          if(r.ok) saved = true;
+        }catch(_){}
+      }
+      if(!saved) return tShow("Could not send your payment details. Try again in a moment.", false);
       try{ localStorage.setItem(pendingKey, "1"); }catch(_){}
       dlg.close(); btn.textContent = "Payment under review"; btn.disabled = true;
       msg.className = "msg ok"; msg.textContent = `Thanks. We will check your ${planLabel} payment and update your account.`;
