@@ -7,7 +7,7 @@
 <meta name="robots" content="noindex">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Source+Sans+3:wght@400;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="app.css">
 <style>
 [hidden]{display:none!important}
@@ -108,7 +108,7 @@ if(member){
     box.appendChild(inner);
     const s = document.createElement("script");
     s.src = "https://s3.tradingview.com/external-embedding/embed-widget-advanced-chart.js"; s.async = true;
-    s.textContent = JSON.stringify({autosize:true,symbol:symbol,interval:"60",timezone:"Etc/UTC",theme:"dark",style:"1",locale:"en",allow_symbol_change:true,backgroundColor:"#13263d",support_host:"https://www.tradingview.com"});
+    s.textContent = JSON.stringify({autosize:true,symbol:symbol,interval:"60",timezone:"Etc/UTC",theme:"light",style:"1",locale:"en",allow_symbol_change:true,backgroundColor:"#ffffff",support_host:"https://www.tradingview.com"});
     box.appendChild(s); chartEl.appendChild(box);
   }
   CONFIG.pairs.forEach((p,i)=>{
