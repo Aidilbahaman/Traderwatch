@@ -17,7 +17,8 @@ const CONFIG = {
     {label:"GBP/USD", symbol:"FX:GBPUSD"},
     {label:"USD/JPY", symbol:"FX:USDJPY"},
     {label:"XAU/USD", symbol:"OANDA:XAUUSD"},
-    {label:"AUD/USD", symbol:"FX:AUDUSD"}
+    {label:"AUD/USD", symbol:"FX:AUDUSD"},
+    {label:"USD/CAD", symbol:"FX:USDCAD"}
   ],
   signals: [
     {pair:"EUR/USD", side:"BUY",  entry:"1.0850", sl:"1.0815", tp:"1.0920", time:"Posted today, 08:15", locked:false},

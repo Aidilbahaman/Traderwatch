@@ -68,21 +68,20 @@ function esc(t){return String(t==null?'':t).replace(/[&<>"']/g,c=>({'&':'&amp;',
 function fmtPair(p){return /^[A-Z]{6}$/.test(p)?p.slice(0,3)+'/'+p.slice(3):p}
 async function loadLandingSignals(){
   try{
-    const r=await fetch(SB_URL+'/rest/v1/signals?select=pair,side,entry,sl,tp,posted_at&order=posted_at.desc&limit=3',{headers:{apikey:SB_KEY,Authorization:'Bearer '+SB_KEY}});
+    const r=await fetch(SB_URL+'/rest/v1/rpc/get_public_signals',{method:'POST',headers:{apikey:SB_KEY,Authorization:'Bearer '+SB_KEY,'Content-Type':'application/json'},body:'{}'});
     if(!r.ok)throw Error('HTTP '+r.status);
     const rows=await r.json();
-    if(!Array.isArray(rows)||!rows.length)throw Error('empty');
     sigGrid.innerHTML='';
     rows.forEach(s=>{
       const a=document.createElement('article');a.className='signal';
       const sell=(s.side||'').toUpperCase()==='SELL';
-      a.innerHTML=`<div class="signal-top"><span class="pair">${esc(fmtPair(s.pair))}</span><span class="badge${sell?' sell':''}">${esc(s.side||'SETUP')}</span></div><div class="levels"><div><div class="label">Entry</div><div class="value">${esc(s.entry)}</div></div><div><div class="label">Stop loss</div><div class="value sl">${esc(s.sl)}</div></div><div><div class="label">Take profit</div><div class="value tp">${esc(s.tp)}</div></div></div><div class="signal-time">Posted ${esc(new Date(s.posted_at).toLocaleString())}</div>`;
+      a.innerHTML=`<div class="signal-top"><span class="pair">${esc(fmtPair(s.pair))}</span><span class="badge${sell?' sell':''}">${esc(s.side||'SETUP')}</span></div><h3>${esc(s.timeframe||'H1')} ${esc(s.side||'')} setup${s.timeframe==='M1'?' · scalping':''}</h3><div class="levels"><div><div class="label">Entry</div><div class="value">${esc(s.entry)}</div></div><div><div class="label">SL</div><div class="value sl">${esc(s.sl)}</div></div><div><div class="label">TP</div><div class="value tp">${esc(s.tp)}</div></div></div><div class="signal-time">Posted ${esc(new Date(s.posted_at).toLocaleString())}</div>`;
       sigGrid.appendChild(a);
     });
-    sigNote.textContent='Live setups from the desk — free for everyone. Educational only, not financial advice.';
+    sigNote.textContent=rows.length?'Latest verified public setups. Educational only, not financial advice.':'No verified setups are available today.';
   }catch(_){
     sigGrid.innerHTML='';
-    sigNote.textContent='No signals available right now. Check back soon — new setups appear here automatically.';
+    sigNote.textContent='Verified setups are temporarily unavailable. No sample values are shown.';
   }
 }
 loadLandingSignals();

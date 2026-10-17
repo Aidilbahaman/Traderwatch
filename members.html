@@ -54,8 +54,8 @@
 
     <div class="upgrade" id="upgradeBox">
       <div>
-        <h3>Get every signal with Pro</h3>
-        <p>Free members get 1 signal a day. Pro unlocks all signals, instant alerts and the full history for $19 a month.</p>
+        <h3>Get more setups with Pro</h3>
+        <p>Free: 3 signals daily and 3 hot pairs. Pro: 10 signals daily across 6 hot pairs. Max: unlimited signals across all 6 hot pairs.</p>
       </div>
       <a class="btn" href="subscribe.html">See Pro</a>
     </div>
@@ -91,13 +91,13 @@
 const member = await requireMember();
 if(member){
   previewBanner(member);
-  const isPro = member.plan === "pro";
+  const plan = ["free", "pro", "max"].includes(member.plan) ? member.plan : "free";
   document.getElementById("hello").textContent = "Welcome, " + (member.name.split(" ")[0] || "trader");
   const badge = document.getElementById("planBadge");
-  badge.textContent = isPro ? "Pro" : "Free";
-  badge.classList.toggle("pro", isPro);
-  document.getElementById("planLine").textContent = isPro ? "You are on the Pro plan. All signals are unlocked." : "You are on the Free plan. You can see 1 signal a day.";
-  document.getElementById("upgradeBox").hidden = isPro;
+  badge.textContent = plan.charAt(0).toUpperCase() + plan.slice(1);
+  badge.classList.toggle("pro", plan !== "free");
+  document.getElementById("planLine").textContent = plan === "max" ? "Max Member · unlimited valid setups across 6 hot pairs." : plan === "pro" ? "Pro Member · up to 10 valid setups daily across 6 hot pairs." : "Free Member · up to 3 valid setups daily across 3 hot pairs.";
+  document.getElementById("upgradeBox").hidden = plan === "max";
 
   /* Charts */
   const chartEl = document.getElementById("chart"), tabsEl = document.getElementById("tabs");
@@ -132,29 +132,39 @@ if(member){
       const a = document.createElement("article");
       a.className = "sig" + (locked ? " locked" : "");
       a.innerHTML = `
-        <div class="sig-top"><span class="pair">${esc(s.pair)}</span><span class="side ${cls}">${esc(locked ? "BUY" : s.side)}</span></div>
+        <div class="sig-top"><span class="pair">${esc(s.pair)}</span><span class="side ${cls}">${esc(locked ? "LOCKED" : s.side)}</span></div>
+        <h3 class="setup-title">${esc(s.timeframe || "H1")} ${esc(s.side || "")} setup${s.timeframe === "M1" ? " · scalping" : ""}</h3>
         <dl class="rows num">
-          <dt>Entry</dt><dd>${esc(locked ? "0.0000" : s.entry)}</dd>
-          <dt>Stop loss</dt><dd class="sl">${esc(locked ? "0.0000" : s.sl)}</dd>
-          <dt>Take profit</dt><dd class="tp">${esc(locked ? "0.0000" : s.tp)}</dd>
+          <dt>Entry</dt><dd>${esc(locked ? "—" : s.entry)}</dd>
+          <dt>SL</dt><dd class="sl">${esc(locked ? "—" : s.sl)}</dd>
+          <dt>TP</dt><dd class="tp">${esc(locked ? "—" : s.tp)}</dd>
         </dl>
         <p class="time">${esc(s.time)}</p>
         ${locked ? '<div class="lock"><span>Pro signal</span><a class="btn sm" href="subscribe.html">Unlock with Pro</a></div>' : ''}`;
       grid.appendChild(a);
     });
   }
+  const HOT_PAIRS = ["XAUUSD", "GBPUSD", "EURUSD", "USDJPY", "AUDUSD", "USDCAD"];
+  function normalizePair(pair){ return String(pair || "").replace(/[^A-Z]/gi, "").toUpperCase(); }
   async function load(){
     try{
       const r = await sb.rpc("get_signals");
       if(r.error) throw r.error;
-      if(r.data && r.data.length){
-        render(r.data.map(s=>({pair:s.pair, side:s.side, entry:s.entry, sl:s.sl, tp:s.tp, locked:s.locked, time:"Posted " + new Date(s.posted_at).toLocaleString()})));
-        note.textContent = "";
-        return;
-      }
-    }catch(_){}
-    render(CONFIG.signals.map((s,i)=>Object.assign({}, s, {locked: !isPro && i >= 1})));
-    note.textContent = "No signals posted yet. These are sample signals to show the layout.";
+      const rows = Array.isArray(r.data) ? r.data : [];
+      const deduped = [...new Map(rows.map(s => [String(s.id || [s.pair,s.timeframe,s.side,s.entry,s.sl,s.tp,s.posted_at].join("|")), s])).values()];
+      const daily = deduped.filter(s => {
+        const d = new Date(s.posted_at);
+        return Number.isFinite(d.getTime()) && d.toDateString() === new Date().toDateString();
+      });
+      const allowed = plan === "free" ? HOT_PAIRS.slice(0,3) : HOT_PAIRS;
+      const shown = daily.filter(s => allowed.includes(normalizePair(s.pair)));
+      const selected = plan === "max" ? shown : shown.slice(0, plan === "pro" ? 10 : 3);
+      render(selected.map(s=>({pair:s.pair, timeframe:s.timeframe || "H1", side:s.side, entry:s.entry, sl:s.sl, tp:s.tp, locked:false, time:"Posted " + new Date(s.posted_at).toLocaleString()})));
+      note.textContent = selected.length ? `${selected.length} of ${plan === "max" ? "unlimited" : plan === "pro" ? "10" : "3"} daily setups · ${allowed.length} hot pairs.` : "No verified setups available today for your plan. New valid H1/M1 setups appear here when posted.";
+    }catch(_){
+      render([]);
+      note.textContent = "Could not load verified signals. Please try again later.";
+    }
   }
   load();
 }
