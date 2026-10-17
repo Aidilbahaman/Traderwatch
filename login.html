@@ -27,8 +27,15 @@
 </header>
 <main class="wrap">
   <div class="box">
-    <h1>Log in</h1>
+    <h1 id="formTitle">Log in</h1>
+    <p id="formHint" class="muted" style="margin:-10px 0 18px">Welcome back. Log in to continue.</p>
     <form id="loginForm" novalidate>
+      <label id="nameWrap" hidden>Full name
+        <input name="name" type="text" autocomplete="name">
+      </label>
+      <label id="confirmWrap" hidden>Confirm password
+        <input name="confirm" type="password" autocomplete="new-password">
+      </label>
       <label>Email
         <input name="email" type="email" autocomplete="email" required>
       </label>
@@ -40,7 +47,7 @@
     </form>
     <div class="alt">
       <button class="linkbtn" type="button" id="forgot">Forgot your password?</button>
-      <span>New here? <a href="index.html#join">Create a free account</a></span>
+      <span id="modeToggle">New here? <a href="login.html?mode=signup">Create a free account</a></span>
     </div>
   </div>
 </main>
@@ -49,29 +56,52 @@
 <script src="common.js"></script>
 <script>
 const form = document.getElementById("loginForm"), msg = document.getElementById("msg");
+const signup = new URLSearchParams(location.search).get("mode") === "signup";
+const title = document.getElementById("formTitle"), hint = document.getElementById("formHint");
+const nameWrap = document.getElementById("nameWrap"), confirmWrap = document.getElementById("confirmWrap");
+const passwordInput = form.elements.password, submitButton = form.querySelector('button[type="submit"]');
 function show(t, ok){ msg.textContent = t; msg.className = "msg " + (ok ? "ok" : "err"); }
+function setMode(isSignup){
+  title.textContent = isSignup ? "Create your account" : "Log in";
+  hint.textContent = isSignup ? "Sign up for free to access your TraderWatch account." : "Welcome back. Log in to continue.";
+  nameWrap.hidden = !isSignup; nameWrap.querySelector('input').required = isSignup;
+  confirmWrap.hidden = !isSignup; confirmWrap.querySelector('input').required = isSignup;
+  passwordInput.autocomplete = isSignup ? "new-password" : "current-password";
+  submitButton.textContent = isSignup ? "Create account" : "Log in";
+  document.getElementById("forgot").hidden = isSignup;
+  document.getElementById("modeToggle").innerHTML = isSignup
+    ? 'Already have an account? <a href="login.html">Log in</a>'
+    : 'New here? <a href="login.html?mode=signup">Create a free account</a>';
+}
+setMode(signup);
 sb.auth.getSession().then(r=>{ if(r.data && r.data.session) location.href = "members.html"; });
 
 form.addEventListener("submit", async e=>{
   e.preventDefault();
-  const email = form.email.value.trim(), password = form.password.value;
+  const email = form.email.value.trim(), password = passwordInput.value;
   if(!/^\S+@\S+\.\S+$/.test(email)) return show("Enter a valid email address.", false);
-  if(!password) return show("Enter your password.", false);
-  const btn = form.querySelector("button[type=submit]"); btn.disabled = true;
-  const r = await sb.auth.signInWithPassword({ email, password });
-  btn.disabled = false;
-  if(r.error){
-    return show(/confirm/i.test(r.error.message) ? "Confirm your email first. Check your inbox for the link." : "Wrong email or password.", false);
-  }
-  location.href = "members.html";
+  if(!password || password.length < 8) return show("Use a password with at least 8 characters.", false);
+  if(signup && password !== form.elements.confirm.value) return show("The passwords do not match.", false);
+  submitButton.disabled = true;
+  try {
+    const result = signup
+      ? await sb.auth.signUp({ email, password, options: { data: { full_name: form.elements.name.value.trim() } } })
+      : await sb.auth.signInWithPassword({ email, password });
+    if(result.error) return show(signup ? result.error.message : (/confirm/i.test(result.error.message) ? "Confirm your email first. Check your inbox for the link." : "Wrong email or password."), false);
+    if(signup && !result.data.session) return show("Account created. Check your email to confirm your address before logging in.", true);
+    location.href = "members.html";
+  } catch (_) { show("Unable to connect. Please try again.", false); }
+  finally { submitButton.disabled = false; }
 });
 
 document.getElementById("forgot").addEventListener("click", async ()=>{
   const email = form.email.value.trim();
   if(!/^\S+@\S+\.\S+$/.test(email)) return show("Enter your email above first, then press Forgot your password.", false);
   const redirectTo = location.href.replace(/[^/]*(#.*)?$/, "") + "login.html";
-  const r = await sb.auth.resetPasswordForEmail(email, { redirectTo });
-  show(r.error ? "Could not send the reset email: " + r.error.message : "If that email has an account, a reset link is on its way.", !r.error);
+  try {
+    const r = await sb.auth.resetPasswordForEmail(email, { redirectTo });
+    show(r.error ? "Could not send the reset email: " + r.error.message : "If that email has an account, a reset link is on its way.", !r.error);
+  } catch (_) { show("Unable to connect. Please try again.", false); }
 });
 </script>
 </body>
