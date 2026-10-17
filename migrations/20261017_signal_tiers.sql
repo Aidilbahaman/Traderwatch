@@ -24,6 +24,11 @@ END $$;
 ALTER TABLE public.signals
   ADD CONSTRAINT signals_timeframe_check CHECK (timeframe IN ('H1','M1'));
 
+-- Never expose the signals table directly. Reads use the plan-aware RPC;
+-- the server-side engine uses the service key for inserts.
+DROP POLICY IF EXISTS allow_read ON public.signals;
+DROP POLICY IF EXISTS allow_insert ON public.signals;
+
 -- Step 3: member RPC, plan-aware, verified only
 DROP FUNCTION IF EXISTS public.get_signals();
 
