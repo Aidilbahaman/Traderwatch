@@ -97,8 +97,8 @@ dialog ol{margin:14px 0 18px 20px;color:var(--muted);display:grid;gap:6px}
       </div>
     </div>
     <div class="steps">
-      <p>You pay on a secure checkout page run by the payment provider. We never see your card details.</p>
-      <p>You can cancel any time and keep Pro until the end of the period you paid for.</p>
+      <p>QR payments are reviewed before plan access is activated. The page will open your member dashboard automatically after confirmation.</p>
+      <p>Never close the page until you see the payment-reference confirmation. Contact support if access is not updated after review.</p>
     </div>
   </div>
 </main>
@@ -188,11 +188,34 @@ if(member){
       try{ localStorage.setItem(pendingKey, "1"); }catch(_){}
       dlg.close(); btn.textContent = "Payment under review"; btn.disabled = true;
       msg.className = "msg ok"; msg.textContent = `Thanks. We will check your ${planLabel} payment and update your account.`;
+      startPlanWatch();
     });
   } else {
     btn.textContent = "Payment not connected"; btn.disabled = true;
     msg.className = "msg err"; msg.textContent = "Payment is not connected yet.";
   }
+
+  /* Auto-entry: once the plan is activated in Supabase, continue to the dashboard. */
+  let watchTimer = null;
+  function startPlanWatch(){
+    if(watchTimer) return;
+    let tries = 0;
+    watchTimer = setInterval(async ()=>{
+      tries++;
+      try{
+        const r = await sb.from("profiles").select("plan").eq("id", member.id).single();
+        const live = r && r.data && r.data.plan;
+        const ok = live === selectedPlan || (selectedPlan === "pro" && live === "max");
+        if(ok){
+          clearInterval(watchTimer); watchTimer = null;
+          location.href = "members.html?upgraded=" + selectedPlan;
+        }
+      }catch(_){}
+      if(tries >= 120){ clearInterval(watchTimer); watchTimer = null; }
+    }, 5000);
+  }
+  if(isPending) startPlanWatch();
+  window.__twStartPlanWatch = startPlanWatch;
 }
 })();
 </script>

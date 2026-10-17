@@ -49,6 +49,7 @@
       <div>
         <h1 style="font-size:clamp(1.9rem,4vw,2.8rem)" id="hello">Welcome</h1>
         <p id="planLine"></p>
+        <p class="msg ok" id="upgradeNote" hidden style="max-width:560px"></p>
       </div>
     </div>
 
@@ -97,6 +98,10 @@ if(member){
   badge.textContent = plan.charAt(0).toUpperCase() + plan.slice(1);
   badge.classList.toggle("pro", plan !== "free");
   document.getElementById("planLine").textContent = plan === "max" ? "Max Member · unlimited valid setups across 6 hot pairs." : plan === "pro" ? "Pro Member · up to 10 valid setups daily across 6 hot pairs." : "Free Member · up to 3 valid setups daily across 3 hot pairs.";
+  const upgraded = new URLSearchParams(location.search).get("upgraded");
+  if(upgraded === "max" || upgraded === "pro"){
+    const n = document.getElementById("upgradeNote"); n.hidden = false; n.textContent = "Payment confirmed. Your " + (upgraded === "max" ? "Max" : "Pro") + " access is now active.";
+  }
   document.getElementById("upgradeBox").hidden = plan === "max";
   if(plan === "pro"){
     document.querySelector("#upgradeBox h3").textContent = "Upgrade to Max";
