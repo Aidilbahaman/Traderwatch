@@ -174,7 +174,7 @@ if(member){
     img.onerror = ()=>{ img.hidden = true; document.getElementById("tngMissing").hidden = false; };
     document.getElementById("tngClose").onclick = ()=> dlg.close();
     function tShow(t, ok){ tmsg.textContent = t; tmsg.className = "msg " + (ok ? "ok" : "err"); }
-    btn.textContent = "Pay by QR";
+    btn.textContent = "Subscribe to " + planLabel;
     btn.onclick = ()=>{ tmsg.className = "msg"; dlg.showModal(); };
     tform.addEventListener("submit", async e=>{
       e.preventDefault();
