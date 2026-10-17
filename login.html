@@ -96,6 +96,12 @@ form.addEventListener("submit", async e=>{
       ? await sb.auth.signUp({ email, password, options: { data: { name: form.elements.name.value.trim() }, emailRedirectTo: redirectTo } })
       : await sb.auth.signInWithPassword({ email, password });
     if(result.error) return show(signup ? result.error.message : (/confirm/i.test(result.error.message) ? "Confirm your email first. Check your inbox for the link." : "Wrong email or password."), false);
+    if(signup && !result.data.session && result.data.user && result.data.user.email_confirmed_at){
+      const signed = await sb.auth.signInWithPassword({email, password});
+      if(signed.error) return show("Account created. Log in with your new account.", true);
+      location.href = next && /^\/(?!\/)/.test(next) ? next : "members.html";
+      return;
+    }
     if(signup && !result.data.session){
       resendEmail = email;
       startResendCooldown(60);
