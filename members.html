@@ -24,7 +24,7 @@
 .linkbtn{background:none;border:0;color:var(--muted);font:600 1rem var(--body);cursor:pointer;text-decoration:underline}
 .center{text-align:center;margin:0 auto}
 .steps{display:grid;gap:12px;margin-top:20px;color:var(--muted)}
-.tw-member-news{margin-top:44px;padding:24px;border:1px solid #173b5e;border-radius:18px;background:#061a31;box-shadow:0 18px 42px #00000018;overflow:hidden}.tw-member-news-head{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;margin-bottom:18px}.tw-member-news-head h2{color:#fff;margin:5px 0 4px}.tw-member-news-head p{color:#9db6ca;margin:0;font-size:.9rem}.tw-member-kicker{color:#b7f34b;font-size:.7rem;text-transform:uppercase;letter-spacing:.1em;font-weight:800}.tw-member-filter{display:inline-flex;align-items:center;gap:6px;color:#b7f34b;font-size:10px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;white-space:nowrap}.tw-member-filter:before{content:"";width:7px;height:7px;border-radius:50%;background:#b7f34b;box-shadow:0 0 10px #b7f34b}.tw-member-news .tw-fundamental-widget{height:480px;min-height:360px;border:1px solid #173b5e;border-radius:12px;overflow:hidden}.tw-member-note{padding:10px 4px 0;color:#9db6ca;font-size:10px;margin:0}.tw-member-note a{color:#b7f34b;text-decoration:none}@media(max-width:600px){.tw-member-news{padding:16px;margin-top:32px}.tw-member-news-head{display:block}.tw-member-filter{margin-top:12px}.tw-member-news .tw-fundamental-widget{height:520px}}
+.tw-chart-news{margin-top:44px}.tw-chartnews-head{margin-bottom:18px}.tw-chartnews-head h2{color:var(--navy);margin:5px 0 4px}.tw-chartnews-head p{color:var(--muted);margin:0;font-size:.9rem}.tw-chartnews-grid{display:grid;grid-template-columns:minmax(0,1.18fr) minmax(340px,.82fr);gap:18px;align-items:stretch}.tw-chartnews-cell{min-width:0}.tw-chartnews-cell .chartbox{height:100%;display:flex;flex-direction:column}.tw-chartnews-cell .tv.big{height:clamp(420px,36vw,560px);flex:1}.tw-member-news{margin-top:0!important;padding:18px;border:1px solid #173b5e;border-radius:14px;background:#061a31;box-shadow:0 18px 42px #00000018;overflow:hidden;display:flex;flex-direction:column}.tw-member-news-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:12px}.tw-member-news-head h3{color:#fff;font-size:1.05rem;margin:5px 0 0}.tw-member-kicker{color:#b7f34b;font-size:.7rem;text-transform:uppercase;letter-spacing:.1em;font-weight:800}.tw-member-filter{display:inline-flex;align-items:center;gap:6px;color:#b7f34b;font-size:10px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;white-space:nowrap}.tw-member-filter:before{content:"";width:7px;height:7px;border-radius:50%;background:#b7f34b;box-shadow:0 0 10px #b7f34b}.tw-member-news .tw-fundamental-widget{height:clamp(420px,36vw,560px);min-height:360px;border:1px solid #173b5e;border-radius:10px;overflow:hidden;flex:1}.tw-member-note{padding:9px 2px 0;color:#9db6ca;font-size:10px;margin:0}.tw-member-note a{color:#b7f34b;text-decoration:none}@media(max-width:900px){.tw-chartnews-grid{grid-template-columns:1fr}.tw-chartnews-cell .tv.big,.tw-member-news .tw-fundamental-widget{height:480px}.tw-member-news{min-height:0}}@media(max-width:600px){.tw-chart-news{margin-top:32px}.tw-chartnews-grid{gap:14px}.tw-member-news{padding:16px}.tw-chartnews-cell .tv.big,.tw-member-news .tw-fundamental-widget{height:440px}.tw-member-news-head{display:flex}}
 </style>
 <link rel="stylesheet" href="assets/css/tw-motion-bg.css?v=202610182344">
 <script src="assets/js/tw-fundamental-news.js?v=2026101901" defer></script>
@@ -79,22 +79,29 @@
       <p class="tg-note" id="tgNote" hidden></p>
     </section>
 
-    <section class="block" id="charts" style="padding:0">
-      <h2>Live charts</h2>
-      <div class="chartbox">
-        <div class="tabs" role="tablist" aria-label="Chart pair" id="tabs"></div>
-        <div class="tv big" id="chart"></div>
-        <div class="tvnote">Charts by TradingView. Prices may be delayed.</div>
+    <section class="block tw-chart-news" id="charts">
+      <div class="tw-chartnews-head">
+        <span class="tw-member-kicker">Dashboard tools</span>
+        <h2>Charts & fundamental news</h2>
+        <p>Live price action beside high-impact USD events — both in one view.</p>
       </div>
-    </section>
-
-    <section class="block tw-member-news" id="fundamental-news">
-      <div class="tw-member-news-head">
-        <div><span class="tw-member-kicker">Fundamental news</span><h2>High-impact USD events</h2><p>Live economic calendar filtered to USD releases with high importance.</p></div>
-        <span class="tw-member-filter">USD · High impact</span>
+      <div class="tw-chartnews-grid">
+        <div class="tw-chartnews-cell">
+          <div class="chartbox">
+            <div class="tabs" role="tablist" aria-label="Chart pair" id="tabs"></div>
+            <div class="tv big" id="chart"></div>
+            <div class="tvnote">Charts by TradingView. Prices may be delayed.</div>
+          </div>
+        </div>
+        <div class="tw-chartnews-cell tw-member-news" id="fundamental-news">
+          <div class="tw-member-news-head">
+            <div><span class="tw-member-kicker">Fundamental news</span><h3>High-impact USD events</h3></div>
+            <span class="tw-member-filter">USD · High</span>
+          </div>
+          <div class="tw-fundamental-widget" aria-label="High-impact USD economic calendar"></div>
+          <p class="tw-member-note">Calendar data by <a href="https://www.tradingview.com/economic-calendar/" target="_blank" rel="noopener noreferrer">TradingView</a>. Educational context only — not financial advice.</p>
+        </div>
       </div>
-      <div class="tw-fundamental-widget" aria-label="High-impact USD economic calendar"></div>
-      <p class="tw-member-note">Calendar data by <a href="https://www.tradingview.com/economic-calendar/" target="_blank" rel="noopener noreferrer">TradingView</a>. Educational context only — not financial advice.</p>
     </section>
 
     <section class="block tw-motion" id="signals">
