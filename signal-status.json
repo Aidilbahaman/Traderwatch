@@ -1,5 +1,5 @@
 {
- "updated": "2026-10-19T00:05:02+08:00",
+ "updated": "2026-10-19T01:05:02+08:00",
  "signals": {
   "USDCAD_20261018_110101": {
    "status": "sl",
@@ -29,16 +29,16 @@
    "status": "active"
   },
   "USDCAD_20261018_190156": {
-   "status": "active"
+   "status": "expired"
   },
   "AUDUSD_20261018_190043": {
-   "status": "active"
+   "status": "expired"
   },
   "USDJPY_20261018_190033": {
-   "status": "active"
+   "status": "expired"
   },
   "EURUSD_20261018_190013": {
-   "status": "active"
+   "status": "expired"
   },
   "GBPUSD_20261018_193014": {
    "status": "active"
