@@ -76,3 +76,21 @@ body[data-tier="free"] .tw2-band{--tw-accent:#7DD3FC}
 body[data-tier="pro"]  .tw2-band{--tw-accent:#A78BFA}
 body[data-tier="max"]  .tw2-band{--tw-accent:#4ADE9F}
 @media (prefers-reduced-motion:reduce){body .tw2-band{animation:none}}
+
+/* members.html Signals block: drifting grid behind the white signal cards.
+   Hairlines stay navy at low alpha so card text keeps full contrast. */
+#signals.tw-motion{
+  position:relative;overflow:hidden;border-radius:22px;padding:22px 22px 18px;
+  background:
+    linear-gradient(rgba(9,40,76,.055) 1px,transparent 1px) 0 0/40px 40px,
+    linear-gradient(90deg,rgba(9,40,76,.055) 1px,transparent 1px) 0 0/40px 40px,
+    radial-gradient(560px 280px at 82% 112%,color-mix(in srgb,var(--tw-accent,#4ADE9F) 24%,transparent),transparent 70%),
+    #fff;
+  animation:tw-grid 12s linear infinite}
+#signals.tw-motion>h2{position:relative;margin-top:0}
+#signals.tw-motion>.signals,#signals.tw-motion>.sample{position:relative}
+body[data-tier="free"] #signals.tw-motion{--tw-accent:#7DD3FC}
+body[data-tier="pro"]  #signals.tw-motion{--tw-accent:#A78BFA}
+body[data-tier="max"]  #signals.tw-motion{--tw-accent:#4ADE9F}
+@media(max-width:720px){#signals.tw-motion{padding:16px 14px 14px;border-radius:18px}}
+@media(prefers-reduced-motion:reduce){#signals.tw-motion{animation:none}}
