@@ -25,6 +25,7 @@
 .center{text-align:center;margin:0 auto}
 .steps{display:grid;gap:12px;margin-top:20px;color:var(--muted)}
 </style>
+<link rel="stylesheet" href="assets/css/tw-motion-bg.css">
 </head>
 <body>
 <div class="preview" id="previewBanner" hidden><div class="wrap">Preview mode: sign-ups are not being saved yet. Connect your form in config.js.</div></div>
@@ -111,6 +112,7 @@ const member = await requireMember();
 if(member){
   previewBanner(member);
   const plan = ["free", "pro", "max"].includes(member.plan) ? member.plan : "free";
+  document.body.dataset.tier = plan;
   document.getElementById("hello").textContent = "Welcome, " + (member.name.split(" ")[0] || "trader");
   const badge = document.getElementById("planBadge");
   badge.textContent = plan.charAt(0).toUpperCase() + plan.slice(1);
