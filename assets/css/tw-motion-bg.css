@@ -1,0 +1,78 @@
+/* TraderWatch – animated grid + price-line background
+   Satu fail CSS untuk semua halaman. Tukar tier guna atribut data-tier pada .tw-card
+   (free | pro | max). Warna boleh diubah di bahagian :root / [data-tier]. */
+
+.tw-card{
+  --tw-accent:#4ADE9F;          /* default = max */
+  --tw-accent-soft:#6EE7B7;
+  --tw-bg:#0A1628;
+  position:relative;overflow:hidden;width:100%;box-sizing:border-box;
+  min-height:430px;border-radius:24px;color:#fff;
+  font-family:"Plus Jakarta Sans",system-ui,sans-serif;
+  background:
+    linear-gradient(rgba(255,255,255,.05) 1px,transparent 1px) 0 0/40px 40px,
+    linear-gradient(90deg,rgba(255,255,255,.05) 1px,transparent 1px) 0 0/40px 40px,
+    radial-gradient(520px 260px at 70% 110%,color-mix(in srgb,var(--tw-accent) 28%,transparent),transparent),
+    var(--tw-bg);
+  animation:tw-grid 12s linear infinite;
+}
+.tw-card[data-tier="free"]{--tw-accent:#7DD3FC;--tw-accent-soft:#BAE6FD}
+.tw-card[data-tier="pro"]{--tw-accent:#A78BFA;--tw-accent-soft:#C4B5FD}
+.tw-card[data-tier="max"]{--tw-accent:#4ADE9F;--tw-accent-soft:#6EE7B7}
+.tw-card--hero{border-radius:0;min-height:520px}      /* untuk halaman utama */
+
+.tw-svg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+.tw-content{position:relative;box-sizing:border-box;padding:34px;display:flex;flex-direction:column;gap:22px;min-height:inherit}
+
+.tw-line{stroke-dasharray:1;stroke-dashoffset:1;animation:tw-draw 8s ease-in-out infinite}
+.tw-area{opacity:0;animation:tw-area 8s ease-in-out infinite}
+.tw-live{display:inline-block;width:9px;height:9px;border-radius:50%;background:var(--tw-accent-soft);margin-right:8px;animation:tw-pulse 1.6s ease-out infinite}
+
+/* komponen kaca (kotak statistik, tab) */
+.tw-stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.tw-tile{position:relative;min-height:84px;box-sizing:border-box;padding:12px 14px;border-radius:16px;
+  background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.22);
+  -webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
+.tw-tile small{display:block;font-size:12px;color:#DCE6F5}
+.tw-tile strong{display:block;font-size:28px;font-weight:800;line-height:1.1}
+.tw-tabs{display:flex;flex-wrap:wrap;padding:2px 8px;border-radius:16px;background:rgba(255,255,255,.9)}
+.tw-tabs button{flex:1;min-height:44px;border:0;background:none;font:700 13px inherit;font-family:inherit;color:#334155;cursor:pointer}
+.tw-tabs button[aria-selected="true"],.tw-tabs button.active{color:#0A1628;box-shadow:inset 0 -3px 0 var(--tw-accent)}
+
+@keyframes tw-grid{to{background-position:40px 40px,40px 40px,0 0,0 0}}
+@keyframes tw-draw{0%{stroke-dashoffset:1;opacity:1}85%,93%{stroke-dashoffset:0;opacity:1}100%{stroke-dashoffset:0;opacity:0}}
+@keyframes tw-area{0%{opacity:0}85%,93%{opacity:1}100%{opacity:0}}
+@keyframes tw-pulse{0%{box-shadow:0 0 0 0 color-mix(in srgb,var(--tw-accent-soft) 70%,transparent)}100%{box-shadow:0 0 0 10px transparent}}
+
+@media (max-width:720px){
+  .tw-content{padding:22px}
+  .tw-stats{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media (prefers-reduced-motion:reduce){
+  .tw-card,.tw-line,.tw-area,.tw-live{animation:none!important}
+  .tw-line{stroke-dashoffset:0}.tw-area{opacity:1}
+  .tw-svg animate,.tw-svg animateMotion{display:none}
+}
+
+/* ===== Integration overrides (TraderWatch pages) ===== */
+/* index.html hero: .hero had its own gradient + two decorative shapes.
+   The tw-card background replaces them, so neutralise the old layers. */
+.hero.tw-card:before,.hero.tw-card:after{display:none}
+.hero.tw-card{isolation:auto}
+.hero.tw-card .tw-content{padding:0}
+.hero.tw-card .hero-inner{min-height:520px;padding:54px 0}
+@media(max-width:600px){.hero.tw-card .hero-inner{min-height:auto;padding:34px 0}}
+
+/* members.html toolkit band (built by members-tools-2.js) keeps its markup;
+   the animated grid + accent glow are applied through CSS only. */
+body .tw2-band{position:relative;overflow:hidden;
+  background:
+    linear-gradient(rgba(255,255,255,.05) 1px,transparent 1px) 0 0/40px 40px,
+    linear-gradient(90deg,rgba(255,255,255,.05) 1px,transparent 1px) 0 0/40px 40px,
+    radial-gradient(520px 260px at 70% 110%,color-mix(in srgb,var(--tw-accent,#4ADE9F) 28%,transparent),transparent),
+    #0A1628;
+  animation:tw-grid 12s linear infinite}
+body[data-tier="free"] .tw2-band{--tw-accent:#7DD3FC}
+body[data-tier="pro"]  .tw2-band{--tw-accent:#A78BFA}
+body[data-tier="max"]  .tw2-band{--tw-accent:#4ADE9F}
+@media (prefers-reduced-motion:reduce){body .tw2-band{animation:none}}
