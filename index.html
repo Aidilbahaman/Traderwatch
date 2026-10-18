@@ -15,9 +15,59 @@
 @media(max-width:1120px){.nav{gap:18px}.navlinks{gap:14px}.navlinks a{font-size:12px}.btn{padding-left:13px;padding-right:13px}.navactions{gap:7px}}@media(max-width:950px){.nav{grid-template-columns:1fr auto}.navlinks{display:none;position:absolute;top:64px;left:0;right:0;background:white;border-bottom:1px solid var(--line);box-shadow:0 12px 22px #09284c12;padding:10px 20px 17px;flex-direction:column;align-items:stretch;gap:0}.navlinks.open{display:flex;grid-template-columns:1fr}.navlinks a{padding:13px 3px;border-bottom:1px solid #edf2f6}.navlinks .nav-mobile-cta{display:flex;margin-top:10px;border:0}.navactions{margin-left:auto}.menu{display:block;order:3;margin-left:0}.hero-inner{grid-template-columns:1fr;gap:27px;padding:40px 0}.hero h1{font-size:52px}.preview{max-width:580px}.approach{grid-template-columns:1fr;gap:22px}.bonus-panel{grid-template-columns:1fr}.bonus-action{width:min(100%,300px)}}@media(max-width:850px){.utility{display:none}.container.nav{width:calc(100% - 32px);height:68px;display:flex;justify-content:space-between;gap:0;padding:0 4px}.brand{font-size:18px;gap:8px}.brandmark{width:32px;height:32px}.menu{display:grid;place-items:center;order:0;margin:0;width:42px;height:42px;flex:none;border:1px solid #d9e5ef;border-radius:12px;background:#f5f9fc;color:var(--navy);font-size:0;box-shadow:0 2px 8px #09284c0b}.menu:before{content:"";width:17px;height:12px;background:linear-gradient(var(--navy),var(--navy)) 0 0/17px 2px no-repeat,linear-gradient(var(--navy),var(--navy)) 0 5px/17px 2px no-repeat,linear-gradient(var(--navy),var(--navy)) 0 10px/17px 2px no-repeat}.menu[aria-expanded=true]:before{width:17px;height:17px;background:linear-gradient(45deg,transparent 46%,var(--navy) 47% 54%,transparent 55%),linear-gradient(-45deg,transparent 46%,var(--navy) 47% 54%,transparent 55%)}.navactions{display:none}.navlinks{display:none;justify-self:stretch;left:0;right:0;top:68px;z-index:21;position:absolute;max-height:calc(100vh - 76px);overflow-y:auto;border:1px solid #e5edf4;border-radius:0 0 16px 16px;background:white;box-shadow:0 18px 36px #09284c20;padding:12px 16px 16px;flex-direction:column;align-items:stretch;gap:2px}.navlinks.open{display:flex;grid-template-columns:1fr}.navlinks a:not(.nav-mobile-cta){padding:12px 8px;border-bottom:1px solid #edf2f6}.navlinks .nav-mobile-cta{display:flex;justify-content:center;margin-top:8px;min-height:44px;border:1px solid #d9e5ef}.navlinks .nav-mobile-cta.green{border-color:var(--green)}.hero-inner{grid-template-columns:1fr;gap:27px;padding:40px 0}.hero h1{font-size:52px}.preview{max-width:580px}.approach{grid-template-columns:1fr;gap:22px}.bonus-panel{grid-template-columns:1fr}.bonus-action{width:min(100%,300px)}}
 @media(max-width:600px){.container{width:calc(100% - 30px)}.hero-inner{padding:34px 0}.hero h1{font-size:43px}.hero p{font-size:15px}.hero-buttons{display:grid;grid-template-columns:1fr}.hero-buttons .btn{width:100%;min-height:49px}.chart{height:140px}.markets{grid-template-columns:1fr 1fr}.market{padding:12px 8px;border-bottom:1px solid var(--line)}.market:first-child{padding-left:8px}.market:nth-child(2){border-right:0}.market:nth-child(3),.market:nth-child(4){border-bottom:0}.market span{font-size:11px}.section{padding:54px 0}.section h2{font-size:31px}.signals{grid-template-columns:1fr}.signal{padding:0 16px 16px}.signal:before{margin:0 -16px 16px}.levels>div{padding:10px 7px}.value{font-size:12px}.signal-actions{display:grid;grid-template-columns:1fr;width:100%}.signal-actions .btn{width:100%;min-width:0}.converter-layout{grid-template-columns:1fr;gap:21px}.converter-card{padding:18px}.convert-row{grid-template-columns:1fr 100px}.bonus{padding-bottom:55px}.bonus-panel{padding:24px 20px;border-radius:15px}.bonus-action{width:100%}.bonus-panel:after{right:3%;top:18%;font-size:100px}.footer-top{align-items:flex-start;flex-direction:column}.mobilebar{position:fixed;z-index:30;left:0;right:0;bottom:0;display:flex;gap:9px;padding:9px 14px calc(9px + env(safe-area-inset-bottom));background:white;border-top:1px solid var(--line);box-shadow:0 -8px 22px #09284c15}.mobilebar .btn{flex:1;min-height:45px}.footer{padding-bottom:100px}}
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*:before,*:after{transition:none!important}}
+/* Intro video: plays first, then reveals the landing page. */
+.intro-gate{position:fixed;inset:0;z-index:100;background:#061426;display:grid;place-items:center;opacity:1;visibility:visible;transition:opacity .45s ease,visibility .45s ease}.intro-gate.is-hidden{opacity:0;visibility:hidden;pointer-events:none}.intro-video{width:100%;height:100%;object-fit:contain;background:#061426}.intro-btn{position:absolute;min-height:44px;padding:10px 16px;border:1px solid #ffffff59;border-radius:10px;background:#0b1f33cc;color:#fff;font:800 14px var(--body);cursor:pointer;backdrop-filter:blur(10px);transition:background .18s,transform .18s}.intro-btn:hover{background:#0b1f33f2;transform:translateY(-1px)}.intro-skip{right:20px;bottom:26px}.intro-sound{left:20px;bottom:26px;min-width:48px;padding:10px 14px}.intro-progress{position:absolute;left:0;right:0;bottom:0;height:3px;background:#ffffff26;overflow:hidden}.intro-progress:after{content:"";display:block;width:0;height:100%;background:var(--green);animation:intro-progress 29.91s linear forwards}@keyframes intro-progress{to{width:100%}}html.intro-playing,html.intro-playing body{overflow:hidden}@media(max-width:600px){.intro-btn{min-height:46px;font-size:13px}.intro-skip{right:14px;bottom:calc(20px + env(safe-area-inset-bottom))}.intro-sound{left:14px;bottom:calc(20px + env(safe-area-inset-bottom))}}@media(prefers-reduced-motion:reduce){.intro-gate{transition:none}.intro-progress{display:none}.intro-btn{transition:none}}
 </style>
 </head>
 <body>
+<div class="intro-gate" id="introGate">
+<video class="intro-video" id="introVideo" playsinline muted autoplay preload="auto" poster="assets/video/intro-poster.jpg" aria-label="TraderWatch introduction"><source src="assets/video/intro.mp4" type="video/mp4"></video>
+<button class="intro-btn intro-sound" id="introSound" type="button" aria-label="Unmute intro video">🔊</button>
+<button class="intro-btn intro-skip" id="introSkip" type="button">Skip intro →</button>
+<div class="intro-progress" aria-hidden="true"></div>
+</div>
+<script>
+(()=>{
+ const gate=document.getElementById('introGate'),vid=document.getElementById('introVideo'),
+       skip=document.getElementById('introSkip'),sound=document.getElementById('introSound'),
+       root=document.documentElement;
+ if(!gate||!vid) return;
+ const KEY='tw_intro_seen';
+ let done=false;
+ const finish=()=>{
+   if(done) return; done=true;
+   gate.classList.add('is-hidden');
+   root.classList.remove('intro-playing');
+   try{ sessionStorage.setItem(KEY,'1'); }catch(e){}
+   setTimeout(()=>{ gate.remove(); },600);
+ };
+ // Already seen this session, or the visitor prefers reduced motion: go straight in.
+ let seen=false;
+ try{ seen=sessionStorage.getItem(KEY)==='1'; }catch(e){}
+ const reduced=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+ if(seen||reduced){ gate.remove(); return; }
+ root.classList.add('intro-playing');
+ vid.addEventListener('ended',finish,{once:true});
+ vid.addEventListener('error',finish,{once:true});
+ skip.addEventListener('click',finish);
+ sound.addEventListener('click',()=>{
+   vid.muted=!vid.muted;
+   sound.textContent=vid.muted?'🔊':'🔇';
+   sound.setAttribute('aria-label',vid.muted?'Unmute intro video':'Mute intro video');
+   if(!vid.muted) vid.play().catch(()=>{});
+ });
+ const p=vid.play();
+ if(p&&p.catch) p.catch(()=>{
+   // Autoplay blocked (common on mobile data saver): show the poster and let a tap start it.
+   sound.textContent='▶';
+   sound.setAttribute('aria-label','Play intro video');
+   const kick=()=>{ vid.muted=true; vid.play().then(()=>{sound.textContent='🔊';}).catch(finish); };
+   gate.addEventListener('click',kick,{once:true});
+   // Do not trap the visitor: fall through to the page after 8s.
+   setTimeout(()=>{ if(!done && vid.paused) finish(); },8000);
+ });
+})();
+</script>
 <div class="utility"><div class="container"><span>Market education · setups · practical tools</span><a href="login.html">Member login →</a></div></div>
 <header class="header"><div class="container nav"><a class="brand" href="#top"><span class="brandmark">T</span>TraderWatch</a><button class="menu" id="menu" aria-label="Open menu" aria-expanded="false">☰</button><nav class="navlinks" id="navlinks"><a href="#approach">How it works</a><a href="#signals">Signals</a><a href="#converter">Converter</a><a href="#ask">Ask</a><a href="#faq">FAQ</a><a class="nav-mobile-cta btn outline" href="login.html">Member login</a><a class="nav-mobile-cta btn green" href="login.html?mode=signup">Register Now</a></nav><div class="navactions"><a class="btn outline" href="login.html">Member login</a><a class="btn green" href="login.html?mode=signup">Register Now</a></div></div></header>
 <main id="top">
