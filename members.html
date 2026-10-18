@@ -161,23 +161,33 @@ if(member){
     if(!tgBtn.hasAttribute("data-link")) return;   // already linked: let the link through
     e.preventDefault();
     const old = tgBtn.textContent;
+    tgNote.hidden = true;
     tgBtn.textContent = "Preparing link…";
     tgBtn.style.pointerEvents = "none";
-    const { data, error } = await window.supabase.rpc("create_link_token", { p_user_id: member.id });
-    tgBtn.textContent = old;
-    tgBtn.style.pointerEvents = "";
-    if(error || !data){
+    const timeout = new Promise((_, rej) => setTimeout(() => rej(new Error("timeout")), 12000));
+    try{
+      const { data, error } = await Promise.race([
+        sb.rpc("create_link_token", { p_user_id: member.id }),
+        timeout
+      ]);
+      tgBtn.textContent = old;
+      tgBtn.style.pointerEvents = "";
+      if(error || !data){
+        throw new Error((error && error.message) || "empty token");
+      }
+      window.open("https://t.me/Twreg_bot?start=" + encodeURIComponent(data), "_blank", "noopener");
       tgNote.hidden = false;
-      tgNote.textContent = "Could not create a link. Try again in a moment.";
-      return;
+      tgNote.textContent = "Link opened in Telegram — press Start there. Valid for 15 minutes, one use only.";
+    }catch(err){
+      tgBtn.textContent = old;
+      tgBtn.style.pointerEvents = "";
+      tgNote.hidden = false;
+      tgNote.textContent = "Could not create a link (" + (err && err.message ? err.message : "error") + "). Check your connection and try again.";
     }
-    window.open("https://t.me/Twreg_bot?start=" + encodeURIComponent(data), "_blank", "noopener");
-    tgNote.hidden = false;
-    tgNote.textContent = "Link opened in Telegram — press Start there. Valid for 15 minutes, one use only.";
   });
 
   tgRefresh.addEventListener("click", async () => {
-    const { data } = await window.supabase.from("profiles").select("telegram_chat_id").eq("id", member.id).single();
+    const { data } = await sb.from("profiles").select("telegram_chat_id").eq("id", member.id).single();
     tgRender(data && data.telegram_chat_id != null);
     tgNote.hidden = false;
     tgNote.textContent = (data && data.telegram_chat_id != null) ? "Linked ✓" : "Not linked yet — press Link Telegram, then Start in the bot.";
