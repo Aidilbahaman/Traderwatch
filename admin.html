@@ -18,7 +18,7 @@
   <section class="admin-card"><h2>Payment requests</h2><div class="toolbar"><select id="statusFilter" aria-label="Request status"><option value="pending">Pending</option><option value="all">All</option><option value="approved">Approved</option><option value="rejected">Rejected</option></select><input id="search" type="search" placeholder="Search email or name" aria-label="Search requests"></div><div id="requests"><p class="empty">Loading requests…</p></div><div class="msg" id="requestMsg" role="status" aria-live="polite"></div></section>
   <section class="admin-card"><h2>Manual plan override</h2><form id="overrideForm"><div class="toolbar"><input id="overrideEmail" type="email" required placeholder="member@example.com" aria-label="Member email"><select id="overridePlan" aria-label="Plan"><option value="free">Free</option><option value="pro">Pro</option><option value="max">Max</option></select><button class="btn" type="submit">Update plan</button></div></form><div class="msg" id="overrideMsg" role="status" aria-live="polite"></div></section>
 </div></main>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script><script src="config.js"></script><script src="common.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script><script src="config.js?v=202610181652"></script><script src="common.js?v=202610181652"></script>
 <script>
 (async function(){
  const member=await requireMember('/admin.html'); if(!member)return;

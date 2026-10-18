@@ -54,8 +54,8 @@
   </div>
 </main>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
-<script src="config.js"></script>
-<script src="common.js"></script>
+<script src="config.js?v=202610181652"></script>
+<script src="common.js?v=202610181652"></script>
 <script>
 const form = document.getElementById("loginForm"), msg = document.getElementById("msg");
 const resend = document.getElementById("resend"), resendTimer = document.getElementById("resendTimer");
@@ -78,10 +78,9 @@ function setMode(isSignup){
     : 'New here? <a href="login.html?mode=signup">Create a free account</a>';
 }
 setMode(signup);
-const loggedOut = new URLSearchParams(location.search).get("loggedout") === "1";
-if(!loggedOut){
-  sb.auth.getSession().then(r=>{ if(r.data && r.data.session) location.replace("members.html"); });
-}
+// The login page must always show the credential form. Never auto-enter an
+// existing session from here: on a shared browser that would silently open
+// whoever was signed in before. A successful login replaces the old session.
 
 form.addEventListener("submit", async e=>{
   e.preventDefault();
