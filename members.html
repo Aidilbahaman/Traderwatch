@@ -157,7 +157,7 @@ if(member){
 
   function tgSetHref(){
     if(!tgToken) return;
-    tgBtn.href = "https://t.me/Twreg_bot?start=" + encodeURIComponent(tgToken);
+    tgBtn.href = "https://t.me/Traderwatchmembershipbot?start=" + encodeURIComponent(tgToken);
   }
 
   function tgRender(linked){
@@ -168,7 +168,7 @@ if(member){
         ? "This chat is linked. You will start receiving signals here once your plan is Pro or Max."
         : "Every new signal is delivered to your Telegram the moment it is posted. Not receiving them? Press Refresh status.";
       tgBtn.textContent = "Open bot";
-      tgBtn.href = "https://t.me/Twreg_bot";
+      tgBtn.href = "https://t.me/Traderwatchmembershipbot";
       tgBtn.removeAttribute("data-link");
       tgBtn.removeAttribute("target");
       tgRefresh.hidden = false;
