@@ -25,7 +25,7 @@
 .center{text-align:center;margin:0 auto}
 .steps{display:grid;gap:12px;margin-top:20px;color:var(--muted)}
 </style>
-<link rel="stylesheet" href="assets/css/tw-motion-bg.css?v=202610182232">
+<link rel="stylesheet" href="assets/css/tw-motion-bg.css?v=202610182240">
 </head>
 <body>
 <div class="preview" id="previewBanner" hidden><div class="wrap">Preview mode: sign-ups are not being saved yet. Connect your form in config.js.</div></div>
@@ -86,7 +86,21 @@
       </div>
     </section>
 
-    <section class="block tw-motion" id="signals">
+    <section class="block tw-band-motion" id="signals">
+      <svg class="tw-band-svg" viewBox="0 0 970 430" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+  <defs>
+    <linearGradient id="twg-signals" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" style="stop-color:var(--tw-accent)" stop-opacity=".35"/>
+      <stop offset="1" style="stop-color:var(--tw-accent)" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+  <path class="tw-area" d="M0,332 L24,341 L48,344 L73,346 L97,352 L121,363 L146,349 L170,334 L194,340 L218,344 L242,358 L267,371 L291,356 L315,336 L340,338 L364,331 L388,314 L412,293 L436,301 L461,315 L485,291 L509,303 L534,302 L558,304 L582,319 L606,332 L630,347 L655,331 L679,344 L703,318 L728,325 L752,303 L776,280 L800,256 L824,242 L849,231 L873,243 L897,218 L922,221 L946,215 L970,217 L970,430 L0,430 Z" fill="url(#twg-signals)"/>
+  <path class="tw-line" pathLength="1" d="M0,332 L24,341 L48,344 L73,346 L97,352 L121,363 L146,349 L170,334 L194,340 L218,344 L242,358 L267,371 L291,356 L315,336 L340,338 L364,331 L388,314 L412,293 L436,301 L461,315 L485,291 L509,303 L534,302 L558,304 L582,319 L606,332 L630,347 L655,331 L679,344 L703,318 L728,325 L752,303 L776,280 L800,256 L824,242 L849,231 L873,243 L897,218 L922,221 L946,215 L970,217" fill="none" style="stroke:var(--tw-accent)" stroke-width="2.5" stroke-opacity=".85" stroke-linejoin="round"/>
+  <circle r="5" style="fill:var(--tw-accent-soft)">
+    <animateMotion dur="8s" repeatCount="indefinite" keyPoints="0;1;1" keyTimes="0;.85;1" calcMode="linear" path="M0,332 L24,341 L48,344 L73,346 L97,352 L121,363 L146,349 L170,334 L194,340 L218,344 L242,358 L267,371 L291,356 L315,336 L340,338 L364,331 L388,314 L412,293 L436,301 L461,315 L485,291 L509,303 L534,302 L558,304 L582,319 L606,332 L630,347 L655,331 L679,344 L703,318 L728,325 L752,303 L776,280 L800,256 L824,242 L849,231 L873,243 L897,218 L922,221 L946,215 L970,217"/>
+    <animate attributeName="opacity" dur="8s" repeatCount="indefinite" values="1;1;0;0" keyTimes="0;.85;.9;1"/>
+  </circle>
+</svg>
       <h2>Signals</h2>
       <div class="signals" id="signalGrid"></div>
       <p class="sample" id="signalNote"></p>
@@ -105,7 +119,7 @@
 <script src="common.js?v=202610182133"></script>
 <script>window.TW_CONFIG = { tzOffset: 8, supportUrl: "", brand: "TraderWatch" };</script>
 <script src="members-tools.js?v=202610182133" defer></script>
-<script src="members-tools-2.js?v=202610182133" defer></script>
+<script src="members-tools-2.js?v=202610182240" defer></script>
 <script>
 (async function(){
 const member = await requireMember();

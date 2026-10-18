@@ -77,20 +77,31 @@ body[data-tier="pro"]  .tw2-band{--tw-accent:#A78BFA}
 body[data-tier="max"]  .tw2-band{--tw-accent:#4ADE9F}
 @media (prefers-reduced-motion:reduce){body .tw2-band{animation:none}}
 
-/* members.html Signals block: drifting grid behind the white signal cards.
-   Hairlines stay navy at low alpha so card text keeps full contrast. */
-#signals.tw-motion{
-  position:relative;overflow:hidden;border-radius:22px;padding:22px 22px 18px;
+/* ===== Dark motion band (Max toolkit + Signals) =====
+   Shared design: drifting grid, accent glow, drawn price line, travelling dot.
+   Applied to .tw2-band (JS-built toolkit) and #signals (static). */
+.tw-band-motion{
+  position:relative;overflow:hidden;color:#fff;
   background:
-    linear-gradient(rgba(9,40,76,.055) 1px,transparent 1px) 0 0/40px 40px,
-    linear-gradient(90deg,rgba(9,40,76,.055) 1px,transparent 1px) 0 0/40px 40px,
-    radial-gradient(560px 280px at 82% 112%,color-mix(in srgb,var(--tw-accent,#4ADE9F) 24%,transparent),transparent 70%),
-    #fff;
+    linear-gradient(rgba(255,255,255,.05) 1px,transparent 1px) 0 0/40px 40px,
+    linear-gradient(90deg,rgba(255,255,255,.05) 1px,transparent 1px) 0 0/40px 40px,
+    radial-gradient(520px 260px at 70% 110%,color-mix(in srgb,var(--tw-accent,#4ADE9F) 28%,transparent),transparent),
+    #0A1628;
   animation:tw-grid 12s linear infinite}
-#signals.tw-motion>h2{position:relative;margin-top:0}
-#signals.tw-motion>.signals,#signals.tw-motion>.sample{position:relative}
-body[data-tier="free"] #signals.tw-motion{--tw-accent:#7DD3FC}
-body[data-tier="pro"]  #signals.tw-motion{--tw-accent:#A78BFA}
-body[data-tier="max"]  #signals.tw-motion{--tw-accent:#4ADE9F}
-@media(max-width:720px){#signals.tw-motion{padding:16px 14px 14px;border-radius:18px}}
-@media(prefers-reduced-motion:reduce){#signals.tw-motion{animation:none}}
+.tw-band-motion>*{position:relative;z-index:1}
+.tw-band-svg{position:absolute;inset:0;width:100%;height:100%;z-index:0;pointer-events:none}
+.tw-band-motion>h2{color:#fff!important;margin-top:0}
+.tw-band-motion .sample{color:#DCE6F5}
+
+body[data-tier="free"] .tw-band-motion{--tw-accent:#7DD3FC;--tw-accent-soft:#BAE6FD}
+body[data-tier="pro"]  .tw-band-motion{--tw-accent:#A78BFA;--tw-accent-soft:#C4B5FD}
+body[data-tier="max"]  .tw-band-motion{--tw-accent:#4ADE9F;--tw-accent-soft:#6EE7B7}
+
+#signals.tw-band-motion{border-radius:22px;padding:22px 22px 18px}
+@media(max-width:720px){#signals.tw-band-motion{padding:16px 14px 14px;border-radius:18px}}
+
+@media(prefers-reduced-motion:reduce){
+  .tw-band-motion{animation:none}
+  .tw-band-motion .tw-line{animation:none;stroke-dashoffset:0}
+  .tw-band-motion .tw-area{animation:none;opacity:1}
+}
