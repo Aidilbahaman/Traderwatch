@@ -50,7 +50,7 @@
   <div class="wrap">
     <div class="welcome">
       <div>
-        <h1 style="font-size:clamp(1.9rem,4vw,2.8rem)" id="hello">Welcome</h1>
+        <h1 style="font-size:clamp(1.9rem,4vw,2.8rem)" id="hello">Welcome back</h1>
         <p id="planLine"></p>
         <p class="msg ok" id="upgradeNote" hidden style="max-width:560px"></p>
       </div>
@@ -63,21 +63,6 @@
       </div>
       <a class="btn" href="subscribe.html">See Pro</a>
     </div>
-
-    <section class="block tg-link" id="tgLink" hidden style="padding:0">
-      <h2>Telegram signals</h2>
-      <div class="tg-card">
-        <div class="tg-copy">
-          <h3 id="tgTitle">Get signals in Telegram</h3>
-          <p id="tgBody">Link your Telegram account and every new signal is sent to you the moment it is posted.</p>
-        </div>
-        <div class="tg-action">
-          <a class="btn" id="tgBtn" href="#" target="_blank" rel="noopener">Link Telegram</a>
-          <button class="linkbtn" type="button" id="tgRefresh" hidden>Refresh status</button>
-        </div>
-      </div>
-      <p class="tg-note" id="tgNote" hidden></p>
-    </section>
 
     <section class="block tw-chart-news" id="charts">
       <div class="tw-chartnews-head">
@@ -102,6 +87,21 @@
           <p class="tw-member-note">Calendar data by <a href="https://www.tradingview.com/economic-calendar/" target="_blank" rel="noopener noreferrer">TradingView</a>. Educational context only — not financial advice.</p>
         </div>
       </div>
+    </section>
+
+    <section class="block tg-link" id="tgLink" hidden style="padding:0">
+      <h2>Telegram signals</h2>
+      <div class="tg-card">
+        <div class="tg-copy">
+          <h3 id="tgTitle">Get signals in Telegram</h3>
+          <p id="tgBody">Link your Telegram account and every new signal is sent to you the moment it is posted.</p>
+        </div>
+        <div class="tg-action">
+          <a class="btn" id="tgBtn" href="#" target="_blank" rel="noopener">Link Telegram</a>
+          <button class="linkbtn" type="button" id="tgRefresh" hidden>Refresh status</button>
+        </div>
+      </div>
+      <p class="tg-note" id="tgNote" hidden></p>
     </section>
 
     <section class="block tw-motion" id="signals">
@@ -131,7 +131,7 @@ if(member){
   previewBanner(member);
   const plan = ["free", "pro", "max"].includes(member.plan) ? member.plan : "free";
   document.body.dataset.tier = plan;
-  document.getElementById("hello").textContent = "Welcome, " + (member.name.split(" ")[0] || "trader");
+  document.getElementById("hello").textContent = "Welcome back, " + (member.name.split(" ")[0] || "trader");
   const badge = document.getElementById("planBadge");
   badge.textContent = plan.charAt(0).toUpperCase() + plan.slice(1);
   badge.classList.toggle("pro", plan !== "free");
