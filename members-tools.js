@@ -15,7 +15,8 @@
   // ---------- Tetapan ----------
   var CONFIG = {
     statusUrl: 'signal-status.json',
-    maxOnly: true,          // true = ciri ini hanya untuk Max member
+    maxOnly: false,         // false = aktif untuk Pro dan Max; Free tidak mendapat toolkit
+    minPlan: 'pro',         // plan minimum yang layak
     statsDays: 30
   };
 
@@ -71,9 +72,9 @@
   document.head.appendChild(styleEl);
 
   // ---------- Pembantu ----------
-  function isMax() {
-    if (!CONFIG.maxOnly) return true;
-    return /max member/i.test(document.body.innerText || '');
+  function isEligible() {
+    var text = document.body.innerText || '';
+    return /\b(Pro|Max) Member\b/i.test(text);
   }
 
   function el(tag, cls, text) {
@@ -465,7 +466,7 @@
   // ---------- Kitaran utama ----------
   function run() {
     scheduled = false;
-    if (!isMax()) return;
+    if (!isEligible()) return;
     buildBar();
     findCards().forEach(enhanceCard);
     applyStatus();

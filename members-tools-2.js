@@ -305,7 +305,8 @@ html.tw-dark iframe,html.tw-dark img,html.tw-dark video{filter:invert(1) hue-rot
     var band = el('div', 'tw2-band');
     var top = el('div', 'tw2-top');
     var left = el('div');
-    left.appendChild(el('div', 'tw2-brand', 'Max toolkit'));
+    var planName = /max member/i.test(document.body.innerText || '') ? 'Max' : 'Pro';
+    left.appendChild(el('div', 'tw2-brand', planName + ' toolkit'));
     var open = el('div', 'tw2-open');
     ui.live = el('span', 'tw2-live off');
     ui.openTxt = el('span', null, '');
