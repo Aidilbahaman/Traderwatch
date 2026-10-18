@@ -1,5 +1,5 @@
 {
- "updated": "2026-10-18T19:45:01+08:00",
+ "updated": "2026-10-19T00:05:02+08:00",
  "signals": {
   "USDCAD_20261018_110101": {
    "status": "sl",
@@ -44,6 +44,24 @@
    "status": "active"
   },
   "XAUUSD_20261018_193003": {
+   "status": "active"
+  },
+  "USDCAD_20261019_000242": {
+   "status": "active"
+  },
+  "USDJPY_20261019_000204": {
+   "status": "active"
+  },
+  "GBPUSD_20261019_000154": {
+   "status": "active"
+  },
+  "EURUSD_20261019_000032": {
+   "status": "active"
+  },
+  "XAUUSD_20261019_000013": {
+   "status": "active"
+  },
+  "XAUUSD_20261019_000003": {
    "status": "active"
   }
  }
