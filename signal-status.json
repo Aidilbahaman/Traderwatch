@@ -1,5 +1,5 @@
 {
- "updated": "2026-10-19T01:40:01+08:00",
+ "updated": "2026-10-19T06:05:02+08:00",
  "signals": {
   "USDCAD_20261018_110101": {
    "status": "sl",
@@ -53,13 +53,13 @@
    "status": "active"
   },
   "GBPUSD_20261019_000154": {
-   "status": "active"
+   "status": "expired"
   },
   "EURUSD_20261019_000032": {
-   "status": "active"
+   "status": "expired"
   },
   "XAUUSD_20261019_000013": {
-   "status": "active"
+   "status": "expired"
   },
   "XAUUSD_20261019_000003": {
    "status": "active"
