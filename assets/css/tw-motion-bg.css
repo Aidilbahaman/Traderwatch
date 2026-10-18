@@ -59,6 +59,16 @@
    The tw-card background replaces them, so neutralise the old layers. */
 .hero.tw-card:before,.hero.tw-card:after{display:none}
 .hero.tw-card{isolation:auto}
+/* index.html's inline <style> sets its own .hero gradient after this file,
+   which hid the animated grid. Three classes win on specificity instead of
+   relying on !important. */
+.hero.tw-card.tw-card--hero{
+  background:
+    linear-gradient(rgba(255,255,255,.05) 1px,transparent 1px) 0 0/40px 40px,
+    linear-gradient(90deg,rgba(255,255,255,.05) 1px,transparent 1px) 0 0/40px 40px,
+    radial-gradient(520px 260px at 70% 110%,color-mix(in srgb,var(--tw-accent,#4ADE9F) 28%,transparent),transparent),
+    #0A1628;
+  animation:tw-grid 12s linear infinite}
 .hero.tw-card .tw-content{padding:0}
 .hero.tw-card .hero-inner{min-height:520px;padding:54px 0}
 @media(max-width:600px){.hero.tw-card .hero-inner{min-height:auto;padding:34px 0}}
