@@ -78,7 +78,10 @@ function setMode(isSignup){
     : 'New here? <a href="login.html?mode=signup">Create a free account</a>';
 }
 setMode(signup);
-sb.auth.getSession().then(r=>{ if(r.data && r.data.session) location.href = "members.html"; });
+const loggedOut = new URLSearchParams(location.search).get("loggedout") === "1";
+if(!loggedOut){
+  sb.auth.getSession().then(r=>{ if(r.data && r.data.session) location.replace("members.html"); });
+}
 
 form.addEventListener("submit", async e=>{
   e.preventDefault();

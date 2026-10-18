@@ -26,8 +26,19 @@ function requireMember(returnTo){
   });
 }
 async function logOut(){
-  await sb.auth.signOut();
-  location.href = "index.html";
+  // Clear local auth state first so a failed network call cannot leave a
+  // usable session behind, then ask Supabase to revoke it server-side.
+  try{
+    Object.keys(localStorage).forEach(k=>{
+      if(/^sb-.*-auth-token/.test(k)) localStorage.removeItem(k);
+    });
+    Object.keys(sessionStorage).forEach(k=>{
+      if(/^sb-.*-auth-token/.test(k)) sessionStorage.removeItem(k);
+    });
+  }catch(_){}
+  try{ await sb.auth.signOut({ scope: "global" }); }
+  catch(_){ try{ await sb.auth.signOut({ scope: "local" }); }catch(__){} }
+  location.replace("login.html?loggedout=1");
 }
 function previewBanner(){}
 function esc(v){
