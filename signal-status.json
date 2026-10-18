@@ -1,5 +1,5 @@
 {
- "updated": "2026-10-18T15:48:39+08:00",
+ "updated": "2026-10-18T15:51:03+08:00",
  "signals": {
   "USDCAD_20261018_120100": {
    "status": "sl",
@@ -32,24 +32,6 @@
    "status": "sl",
    "pips": -1.1,
    "r": -1
-  },
-  "GBPUSD_20261016_090000": {
-   "status": "tp",
-   "pips": 12.0,
-   "r": 1.5
-  },
-  "XAUUSD_20261015_140000": {
-   "status": "sl",
-   "pips": -8.0,
-   "r": -1
-  },
-  "EURUSD_20261014_100000": {
-   "status": "tp",
-   "pips": 9.0,
-   "r": 1.8
-  },
-  "USDCAD_20261013_220000": {
-   "status": "cancelled"
   }
  },
  "strength": {
