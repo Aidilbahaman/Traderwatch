@@ -135,6 +135,31 @@ if(member){
   const tgNote = document.getElementById("tgNote");
   const tgRefresh = document.getElementById("tgRefresh");
   tgSection.hidden = false;
+
+  /* Mobile-safe linking: mint the token up front and put it straight into
+     the anchor href, so tapping is a plain navigation (no popup blocker,
+     no lost user-gesture after an await). The token is refreshed when it
+     gets close to expiry or after a failed attempt. */
+  let tgToken = null, tgTokenAt = 0;
+  const TOKEN_TTL = 15 * 60 * 1000, TOKEN_REUSE = 10 * 60 * 1000;
+
+  async function tgMint(force){
+    if(!force && tgToken && (Date.now() - tgTokenAt) < TOKEN_REUSE) return tgToken;
+    const timeout = new Promise((_, rej) => setTimeout(() => rej(new Error("timeout")), 12000));
+    const { data, error } = await Promise.race([
+      sb.rpc("create_link_token", { p_user_id: member.id }),
+      timeout
+    ]);
+    if(error || !data) throw new Error((error && error.message) || "empty token");
+    tgToken = data; tgTokenAt = Date.now();
+    return data;
+  }
+
+  function tgSetHref(){
+    if(!tgToken) return;
+    tgBtn.href = "https://t.me/Twreg_bot?start=" + encodeURIComponent(tgToken);
+  }
+
   function tgRender(linked){
     tgNote.hidden = true; tgRefresh.hidden = true;
     if(linked){
@@ -145,52 +170,59 @@ if(member){
       tgBtn.textContent = "Open bot";
       tgBtn.href = "https://t.me/Twreg_bot";
       tgBtn.removeAttribute("data-link");
+      tgBtn.removeAttribute("target");
       tgRefresh.hidden = false;
     } else {
       tgTitle.textContent = "Get signals in Telegram";
       tgBody.textContent = "Link your Telegram account and every new signal is sent to you the moment it is posted. The link is single-use and expires in 15 minutes.";
-      tgBtn.textContent = "Link Telegram";
-      tgBtn.href = "#";
+      tgBtn.textContent = tgToken ? "Link Telegram" : "Preparing link…";
       tgBtn.setAttribute("data-link", "1");
+      tgBtn.setAttribute("target", "_blank");
+      tgBtn.setAttribute("rel", "noopener");
+      tgSetHref();
     }
   }
+
   tgRender(member.telegram_chat_id != null);
 
-  /* Single-use token: generate on click, never put the user id in a URL. */
+  /* Mint on load so the first tap is already a real link. */
+  if(member.telegram_chat_id == null){
+    tgMint().then(() => { tgRender(false); }).catch(err => {
+      tgBtn.textContent = "Retry link";
+      tgBtn.href = "#";
+      tgNote.hidden = false;
+      tgNote.textContent = "Could not prepare the link (" + (err && err.message ? err.message : "error") + "). Tap Retry link.";
+    });
+  }
+
   tgBtn.addEventListener("click", async (e) => {
-    if(!tgBtn.hasAttribute("data-link")) return;   // already linked: let the link through
-    e.preventDefault();
-    const old = tgBtn.textContent;
-    tgNote.hidden = true;
-    tgBtn.textContent = "Preparing link…";
-    tgBtn.style.pointerEvents = "none";
-    const timeout = new Promise((_, rej) => setTimeout(() => rej(new Error("timeout")), 12000));
-    try{
-      const { data, error } = await Promise.race([
-        sb.rpc("create_link_token", { p_user_id: member.id }),
-        timeout
-      ]);
-      tgBtn.textContent = old;
-      tgBtn.style.pointerEvents = "";
-      if(error || !data){
-        throw new Error((error && error.message) || "empty token");
+    if(!tgBtn.hasAttribute("data-link")) return;   // linked: plain navigation
+    // Stale or missing token -> refresh it, then send the user on.
+    if(!tgToken || (Date.now() - tgTokenAt) > TOKEN_REUSE){
+      e.preventDefault();
+      const old = tgBtn.textContent;
+      tgBtn.textContent = "Preparing link…";
+      try{
+        await tgMint(true);
+        tgSetHref();
+        tgBtn.textContent = old;
+        // Same tap continues: navigate directly instead of window.open.
+        location.href = tgBtn.href;
+      }catch(err){
+        tgBtn.textContent = "Retry link";
+        tgNote.hidden = false;
+        tgNote.textContent = "Could not prepare the link (" + (err && err.message ? err.message : "error") + "). Tap Retry link.";
       }
-      window.open("https://t.me/Twreg_bot?start=" + encodeURIComponent(data), "_blank", "noopener");
-      tgNote.hidden = false;
-      tgNote.textContent = "Link opened in Telegram — press Start there. Valid for 15 minutes, one use only.";
-    }catch(err){
-      tgBtn.textContent = old;
-      tgBtn.style.pointerEvents = "";
-      tgNote.hidden = false;
-      tgNote.textContent = "Could not create a link (" + (err && err.message ? err.message : "error") + "). Check your connection and try again.";
     }
   });
 
   tgRefresh.addEventListener("click", async () => {
     const { data } = await sb.from("profiles").select("telegram_chat_id").eq("id", member.id).single();
-    tgRender(data && data.telegram_chat_id != null);
+    const linked = !!(data && data.telegram_chat_id != null);
+    if(!linked) tgMint(true).catch(()=>{});
+    tgRender(linked);
     tgNote.hidden = false;
-    tgNote.textContent = (data && data.telegram_chat_id != null) ? "Linked ✓" : "Not linked yet — press Link Telegram, then Start in the bot.";
+    tgNote.textContent = linked ? "Linked ✓" : "Not linked yet — tap Link Telegram, then press Start in the bot.";
   });
 
   /* Charts */
