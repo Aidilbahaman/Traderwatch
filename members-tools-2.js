@@ -402,7 +402,7 @@ html.tw-dark iframe,html.tw-dark img,html.tw-dark video{filter:invert(1) hue-rot
 
     buildPerf(ui.panels.perf);
     var calc = document.getElementById('tw-calc');
-    if (calc) { calc.open = true; ui.panels.calc.appendChild(calc); }
+    if (calc) { calc.open = false; ui.panels.calc.appendChild(calc); }
     buildJournal(ui.panels.jr);
     buildSim(ui.panels.sim);
     buildMarket(ui.panels.mkt);
