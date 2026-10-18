@@ -1,5 +1,5 @@
 {
- "updated": "2026-10-18T15:51:03+08:00",
+ "updated": "2026-10-18T15:55:01+08:00",
  "signals": {
   "USDCAD_20261018_120100": {
    "status": "sl",
@@ -33,20 +33,5 @@
    "pips": -1.1,
    "r": -1
   }
- },
- "strength": {
-  "USD": 1.4,
-  "EUR": -0.3,
-  "GBP": 0.2,
-  "JPY": -1.2,
-  "AUD": 0.6,
-  "CAD": -0.7
- },
- "events": [
-  {
-   "date": "25/10/2026 21:00",
-   "title": "Webinar Max: review minggu",
-   "url": "https://example.com"
-  }
- ]
+ }
 }
