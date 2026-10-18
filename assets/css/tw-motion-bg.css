@@ -77,31 +77,46 @@ body[data-tier="pro"]  .tw2-band{--tw-accent:#A78BFA}
 body[data-tier="max"]  .tw2-band{--tw-accent:#4ADE9F}
 @media (prefers-reduced-motion:reduce){body .tw2-band{animation:none}}
 
-/* ===== Dark motion band (Max toolkit + Signals) =====
-   Shared design: drifting grid, accent glow, drawn price line, travelling dot.
-   Applied to .tw2-band (JS-built toolkit) and #signals (static). */
-.tw-band-motion{
-  position:relative;overflow:hidden;color:#fff;
+/* ===== Full visual for JS-built Max/Pro toolkit ===== */
+.tw2-band.tw-band-motion{
+  position:relative;overflow:hidden;min-height:430px;box-sizing:border-box;
+  padding:34px!important;display:flex;flex-direction:column;justify-content:space-between;
+  color:#fff;
   background:
     linear-gradient(rgba(255,255,255,.05) 1px,transparent 1px) 0 0/40px 40px,
     linear-gradient(90deg,rgba(255,255,255,.05) 1px,transparent 1px) 0 0/40px 40px,
     radial-gradient(520px 260px at 70% 110%,color-mix(in srgb,var(--tw-accent,#4ADE9F) 28%,transparent),transparent),
     #0A1628;
   animation:tw-grid 12s linear infinite}
-.tw-band-motion>*{position:relative;z-index:1}
-.tw-band-svg{position:absolute;inset:0;width:100%;height:100%;z-index:0;pointer-events:none}
-.tw-band-motion>h2{color:#fff!important;margin-top:0}
-.tw-band-motion .sample{color:#DCE6F5}
+.tw2-band.tw-band-motion>*{position:relative;z-index:1}
+.tw2-band.tw-band-motion>.tw-band-svg{position:absolute;inset:0;width:100%;height:100%;z-index:0;pointer-events:none}
+body[data-tier="free"] .tw2-band.tw-band-motion{--tw-accent:#7DD3FC;--tw-accent-soft:#BAE6FD}
+body[data-tier="pro"]  .tw2-band.tw-band-motion{--tw-accent:#A78BFA;--tw-accent-soft:#C4B5FD}
+body[data-tier="max"]  .tw2-band.tw-band-motion{--tw-accent:#4ADE9F;--tw-accent-soft:#6EE7B7}
+.tw2-band.tw-band-motion .tw2-top{margin-bottom:0}
+.tw2-band.tw-band-motion .tw2-k{min-height:84px;padding:12px 14px;background:rgba(255,255,255,.12);border-color:rgba(255,255,255,.22);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
+.tw2-band.tw-band-motion .tw2-tabs{margin:0;padding:2px 8px;background:rgba(255,255,255,.9);border-radius:16px}
+.tw2-band.tw-band-motion .tw2-hint{color:#DCE6F5;padding:0;margin:0;text-align:center}
 
-body[data-tier="free"] .tw-band-motion{--tw-accent:#7DD3FC;--tw-accent-soft:#BAE6FD}
-body[data-tier="pro"]  .tw-band-motion{--tw-accent:#A78BFA;--tw-accent-soft:#C4B5FD}
-body[data-tier="max"]  .tw-band-motion{--tw-accent:#4ADE9F;--tw-accent-soft:#6EE7B7}
+/* Signals: restored to the earlier light drifting-grid design. */
+#signals.tw-motion{
+  position:relative;overflow:hidden;border-radius:22px;padding:22px 22px 18px;
+  background:
+    linear-gradient(rgba(9,40,76,.055) 1px,transparent 1px) 0 0/40px 40px,
+    linear-gradient(90deg,rgba(9,40,76,.055) 1px,transparent 1px) 0 0/40px 40px,
+    radial-gradient(560px 280px at 82% 112%,color-mix(in srgb,var(--tw-accent,#4ADE9F) 24%,transparent),transparent 70%),
+    #fff;
+  animation:tw-grid 12s linear infinite}
+#signals.tw-motion>h2{position:relative;margin-top:0}
+#signals.tw-motion>.signals,#signals.tw-motion>.sample{position:relative}
+body[data-tier="free"] #signals.tw-motion{--tw-accent:#7DD3FC}
+body[data-tier="pro"]  #signals.tw-motion{--tw-accent:#A78BFA}
+body[data-tier="max"]  #signals.tw-motion{--tw-accent:#4ADE9F}
+@media(max-width:720px){#signals.tw-motion{padding:16px 14px 14px;border-radius:18px}}
+@media(prefers-reduced-motion:reduce){#signals.tw-motion{animation:none}}
 
-#signals.tw-band-motion{border-radius:22px;padding:22px 22px 18px}
-@media(max-width:720px){#signals.tw-band-motion{padding:16px 14px 14px;border-radius:18px}}
-
-@media(prefers-reduced-motion:reduce){
-  .tw-band-motion{animation:none}
-  .tw-band-motion .tw-line{animation:none;stroke-dashoffset:0}
-  .tw-band-motion .tw-area{animation:none;opacity:1}
+@media(max-width:720px){
+  .tw2-band.tw-band-motion{min-height:430px;padding:22px!important;gap:20px;justify-content:flex-start}
+  .tw2-band.tw-band-motion .tw2-top{margin-bottom:0}
 }
+@media(prefers-reduced-motion:reduce){.tw2-band.tw-band-motion{animation:none}}

@@ -329,7 +329,7 @@ html.tw-dark iframe,html.tw-dark img,html.tw-dark video{filter:invert(1) hue-rot
   }
 
   // Motion band artwork (grid + drawn price line) shared with #signals
-  var TW_BAND_SVG = '<svg class="tw-band-svg" viewBox="0 0 970 430" preserveAspectRatio="xMidYMid slice" aria-hidden="true">  <defs>    <linearGradient id="twg-band" x1="0" y1="0" x2="0" y2="1">      <stop offset="0" style="stop-color:var(--tw-accent)" stop-opacity=".35"/>      <stop offset="1" style="stop-color:var(--tw-accent)" stop-opacity="0"/>    </linearGradient>  </defs>  <path class="tw-area" d="M0,332 L24,341 L48,344 L73,346 L97,352 L121,363 L146,349 L170,334 L194,340 L218,344 L242,358 L267,371 L291,356 L315,336 L340,338 L364,331 L388,314 L412,293 L436,301 L461,315 L485,291 L509,303 L534,302 L558,304 L582,319 L606,332 L630,347 L655,331 L679,344 L703,318 L728,325 L752,303 L776,280 L800,256 L824,242 L849,231 L873,243 L897,218 L922,221 L946,215 L970,217 L970,430 L0,430 Z" fill="url(#twg-band)"/>  <path class="tw-line" pathLength="1" d="M0,332 L24,341 L48,344 L73,346 L97,352 L121,363 L146,349 L170,334 L194,340 L218,344 L242,358 L267,371 L291,356 L315,336 L340,338 L364,331 L388,314 L412,293 L436,301 L461,315 L485,291 L509,303 L534,302 L558,304 L582,319 L606,332 L630,347 L655,331 L679,344 L703,318 L728,325 L752,303 L776,280 L800,256 L824,242 L849,231 L873,243 L897,218 L922,221 L946,215 L970,217" fill="none" style="stroke:var(--tw-accent)" stroke-width="2.5" stroke-opacity=".85" stroke-linejoin="round"/>  <circle r="5" style="fill:var(--tw-accent-soft)">    <animateMotion dur="8s" repeatCount="indefinite" keyPoints="0;1;1" keyTimes="0;.85;1" calcMode="linear" path="M0,332 L24,341 L48,344 L73,346 L97,352 L121,363 L146,349 L170,334 L194,340 L218,344 L242,358 L267,371 L291,356 L315,336 L340,338 L364,331 L388,314 L412,293 L436,301 L461,315 L485,291 L509,303 L534,302 L558,304 L582,319 L606,332 L630,347 L655,331 L679,344 L703,318 L728,325 L752,303 L776,280 L800,256 L824,242 L849,231 L873,243 L897,218 L922,221 L946,215 L970,217"/>    <animate attributeName="opacity" dur="8s" repeatCount="indefinite" values="1;1;0;0" keyTimes="0;.85;.9;1"/>  </circle></svg>';
+  var TW_BAND_SVG = '<svg class="tw-band-svg" viewBox="0 0 970 430" preserveAspectRatio="none" aria-hidden="true">  <defs>    <linearGradient id="twg-band" x1="0" y1="0" x2="0" y2="1">      <stop offset="0" style="stop-color:var(--tw-accent)" stop-opacity=".35"/>      <stop offset="1" style="stop-color:var(--tw-accent)" stop-opacity="0"/>    </linearGradient>  </defs>  <path class="tw-area" d="M0,332 L24,341 L48,344 L73,346 L97,352 L121,363 L146,349 L170,334 L194,340 L218,344 L242,358 L267,371 L291,356 L315,336 L340,338 L364,331 L388,314 L412,293 L436,301 L461,315 L485,291 L509,303 L534,302 L558,304 L582,319 L606,332 L630,347 L655,331 L679,344 L703,318 L728,325 L752,303 L776,280 L800,256 L824,242 L849,231 L873,243 L897,218 L922,221 L946,215 L970,217 L970,430 L0,430 Z" fill="url(#twg-band)"/>  <path class="tw-line" pathLength="1" d="M0,332 L24,341 L48,344 L73,346 L97,352 L121,363 L146,349 L170,334 L194,340 L218,344 L242,358 L267,371 L291,356 L315,336 L340,338 L364,331 L388,314 L412,293 L436,301 L461,315 L485,291 L509,303 L534,302 L558,304 L582,319 L606,332 L630,347 L655,331 L679,344 L703,318 L728,325 L752,303 L776,280 L800,256 L824,242 L849,231 L873,243 L897,218 L922,221 L946,215 L970,217" fill="none" style="stroke:var(--tw-accent)" stroke-width="2.5" stroke-opacity=".85" stroke-linejoin="round"/>  <circle r="5" style="fill:var(--tw-accent-soft)">    <animateMotion dur="8s" repeatCount="indefinite" keyPoints="0;1;1" keyTimes="0;.85;1" calcMode="linear" path="M0,332 L24,341 L48,344 L73,346 L97,352 L121,363 L146,349 L170,334 L194,340 L218,344 L242,358 L267,371 L291,356 L315,336 L340,338 L364,331 L388,314 L412,293 L436,301 L461,315 L485,291 L509,303 L534,302 L558,304 L582,319 L606,332 L630,347 L655,331 L679,344 L703,318 L728,325 L752,303 L776,280 L800,256 L824,242 L849,231 L873,243 L897,218 L922,221 L946,215 L970,217"/>    <animate attributeName="opacity" dur="8s" repeatCount="indefinite" values="1;1;0;0" keyTimes="0;.85;.9;1"/>  </circle></svg>';
 
   function buildUI() {
     var bar = document.getElementById('tw-bar');
@@ -369,9 +369,9 @@ html.tw-dark iframe,html.tw-dark img,html.tw-dark video{filter:invert(1) hue-rot
     ui.kRisk = kpi('Baki risiko hari ini');
     [ui.kWin, ui.kPips, ui.kStreak, ui.kRisk].forEach(function (k) { grid.appendChild(k.wrap); });
     band.appendChild(grid);
-    root.appendChild(band);
 
-    // Tab
+    // Tabs + hint belong inside the full toolkit visual. Tab panels remain
+    // below so long-form tools keep their original light background.
     var tabs = el('div', 'tw2-tabs');
     tabs.setAttribute('role', 'tablist');
     TABS.forEach(function (t) {
@@ -385,10 +385,12 @@ html.tw-dark iframe,html.tw-dark img,html.tw-dark video{filter:invert(1) hue-rot
       ui.tabs[t[0]] = b;
       tabs.appendChild(b);
     });
-    root.appendChild(tabs);
+    band.appendChild(tabs);
     ui.hint = el('p', 'tw2-hint', 'Pilih tab untuk buka alat.');
-    root.appendChild(ui.hint);
+    band.appendChild(ui.hint);
+    root.appendChild(band);
 
+    // Tab panels
     TABS.forEach(function (t) {
       var p = el('div', 'tw2-panel');
       p.hidden = true;
