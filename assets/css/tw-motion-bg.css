@@ -112,3 +112,13 @@ body[data-tier="max"]  .tw2-band.tw-band-motion{--tw-accent:#4ADE9F;--tw-accent-
   .tw2-band.tw-band-motion .tw2-top{margin-bottom:0}
 }
 @media(prefers-reduced-motion:reduce){.tw2-band.tw-band-motion{animation:none}}
+
+/* Full-bleed toolkit: remove the outer white shell/strips and keep filters
+   + calculator on the same navy motion surface. */
+.tw2.tw2-motion{padding:0;background:#0A1628;border:0;box-shadow:0 12px 34px rgba(10,22,40,.18)}
+.tw2-band.tw-band-motion{border-radius:22px}
+.tw2-tools{display:grid;grid-template-columns:1fr;gap:12px}
+.tw2-band.tw-band-motion .tw-filters{margin:0}
+.tw2-band.tw-band-motion .tw-filters select{background:rgba(255,255,255,.92);border-color:rgba(255,255,255,.28)}
+.tw2-band.tw-band-motion .tw-calc{background:rgba(255,255,255,.92);border-color:rgba(255,255,255,.28)}
+@media(max-width:600px){.tw2-band.tw-band-motion{border-radius:16px}}

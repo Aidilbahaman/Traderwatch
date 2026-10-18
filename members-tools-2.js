@@ -25,6 +25,7 @@
 
   // ---------- CSS ----------
   var css = `
+#tw-bar.tw2-on{gap:0}
 #tw-bar.tw2-on .tw-stats{display:none}
 .tw2{background:#fff;border:1px solid #dfe6f0;border-radius:22px;overflow:hidden;box-shadow:0 8px 28px rgba(27,42,74,.08);margin:0 0 4px}
 .tw2 *{box-sizing:border-box}
@@ -335,7 +336,7 @@ html.tw-dark iframe,html.tw-dark img,html.tw-dark video{filter:invert(1) hue-rot
     var bar = document.getElementById('tw-bar');
     if (!bar || document.getElementById('tw2')) return;
     bar.classList.add('tw2-on');
-    var root = el('section', 'tw2');
+    var root = el('section', 'tw2 tw2-motion');
     root.id = 'tw2';
 
     // Jalur utama
@@ -408,6 +409,17 @@ html.tw-dark iframe,html.tw-dark img,html.tw-dark video{filter:invert(1) hue-rot
     buildSettings(ui.panels.set);
 
     bar.insertBefore(root, bar.firstChild);
+
+    // Filters + lot calculator live outside the card by default, which leaves
+    // white strips above/below the motion panel. Move them inside so the
+    // toolkit reads as one full-bleed dark surface.
+    var tools = el('div', 'tw2-tools');
+    var filters = bar.querySelector('.tw-filters');
+    var calcEl = document.getElementById('tw-calc');
+    if (filters) tools.appendChild(filters);
+    if (calcEl) tools.appendChild(calcEl);
+    if (tools.children.length) band.appendChild(tools);
+
   }
 
   function showTab(id) {
