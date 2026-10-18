@@ -144,20 +144,43 @@ if(member){
         : "Every new signal is delivered to your Telegram the moment it is posted. Not receiving them? Press Refresh status.";
       tgBtn.textContent = "Open bot";
       tgBtn.href = "https://t.me/Twreg_bot";
+      tgBtn.removeAttribute("data-link");
       tgRefresh.hidden = false;
     } else {
       tgTitle.textContent = "Get signals in Telegram";
-      tgBody.textContent = "Link your Telegram account and every new signal is sent to you the moment it is posted.";
+      tgBody.textContent = "Link your Telegram account and every new signal is sent to you the moment it is posted. The link is single-use and expires in 15 minutes.";
       tgBtn.textContent = "Link Telegram";
-      tgBtn.href = "https://t.me/Twreg_bot?start=" + member.id;
+      tgBtn.href = "#";
+      tgBtn.setAttribute("data-link", "1");
     }
   }
   tgRender(member.telegram_chat_id != null);
+
+  /* Single-use token: generate on click, never put the user id in a URL. */
+  tgBtn.addEventListener("click", async (e) => {
+    if(!tgBtn.hasAttribute("data-link")) return;   // already linked: let the link through
+    e.preventDefault();
+    const old = tgBtn.textContent;
+    tgBtn.textContent = "Preparing link…";
+    tgBtn.style.pointerEvents = "none";
+    const { data, error } = await window.supabase.rpc("create_link_token", { p_user_id: member.id });
+    tgBtn.textContent = old;
+    tgBtn.style.pointerEvents = "";
+    if(error || !data){
+      tgNote.hidden = false;
+      tgNote.textContent = "Could not create a link. Try again in a moment.";
+      return;
+    }
+    window.open("https://t.me/Twreg_bot?start=" + encodeURIComponent(data), "_blank", "noopener");
+    tgNote.hidden = false;
+    tgNote.textContent = "Link opened in Telegram — press Start there. Valid for 15 minutes, one use only.";
+  });
+
   tgRefresh.addEventListener("click", async () => {
     const { data } = await window.supabase.from("profiles").select("telegram_chat_id").eq("id", member.id).single();
     tgRender(data && data.telegram_chat_id != null);
     tgNote.hidden = false;
-    tgNote.textContent = (data && data.telegram_chat_id != null) ? "Linked ✓" : "Not linked yet — press Link Telegram, then /start in the bot.";
+    tgNote.textContent = (data && data.telegram_chat_id != null) ? "Linked ✓" : "Not linked yet — press Link Telegram, then Start in the bot.";
   });
 
   /* Charts */
