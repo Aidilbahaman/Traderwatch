@@ -8,11 +8,12 @@ async function loadMember(){
   const u = session.user;
   let plan = "free";
   let name = (u.user_metadata && u.user_metadata.name) || "";
+  let telegram_chat_id = null;
   try{
-    const r = await sb.from("profiles").select("name,plan").eq("id", u.id).single();
-    if(r.data){ plan = r.data.plan; name = r.data.name || name; }
+    const r = await sb.from("profiles").select("name,plan,telegram_chat_id").eq("id", u.id).single();
+    if(r.data){ plan = r.data.plan; name = r.data.name || name; telegram_chat_id = r.data.telegram_chat_id; }
   }catch(_){}
-  return { id:u.id, email:u.email, name: name || (u.email || "").split("@")[0], plan:plan };
+  return { id:u.id, email:u.email, name: name || (u.email || "").split("@")[0], plan:plan, telegram_chat_id:telegram_chat_id };
 }
 function requireMember(returnTo){
   const m = loadMember();

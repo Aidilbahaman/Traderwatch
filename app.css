@@ -138,6 +138,12 @@ footer p+p{margin-top:12px;max-width:80ch}
 .sample{color:var(--muted)}
 .upgrade{box-shadow:0 8px 24px rgba(9,40,76,.04)}
 .upgrade .btn{white-space:nowrap}
+.tg-card{display:grid;grid-template-columns:1fr auto;gap:16px;align-items:center;background:#f0f8ff;border:1px solid #c9e3f5;border-left:4px solid #229ED9;border-radius:14px;padding:20px 22px;box-shadow:0 8px 24px rgba(9,40,76,.04)}
+.tg-copy h3{font:800 18px var(--display);color:var(--navy);margin:0 0 5px}
+.tg-copy p{color:var(--muted);margin:0;font-size:13px}
+.tg-action{display:grid;gap:8px;justify-items:end}
+.tg-action .btn{white-space:nowrap}
+.tg-note{font-size:12px;color:var(--muted);margin:8px 0 0}
 .badge.pro{box-shadow:0 2px 8px rgba(9,40,76,.08)}
 @media(max-width:760px){
   .nav{gap:10px}

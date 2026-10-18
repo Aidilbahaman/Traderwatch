@@ -61,6 +61,21 @@
       <a class="btn" href="subscribe.html">See Pro</a>
     </div>
 
+    <section class="block tg-link" id="tgLink" hidden style="padding:0">
+      <h2>Telegram signals</h2>
+      <div class="tg-card">
+        <div class="tg-copy">
+          <h3 id="tgTitle">Get signals in Telegram</h3>
+          <p id="tgBody">Link your Telegram account and every new signal is sent to you the moment it is posted.</p>
+        </div>
+        <div class="tg-action">
+          <a class="btn" id="tgBtn" href="#" target="_blank" rel="noopener">Link Telegram</a>
+          <button class="linkbtn" type="button" id="tgRefresh" hidden>Refresh status</button>
+        </div>
+      </div>
+      <p class="tg-note" id="tgNote" hidden></p>
+    </section>
+
     <section class="block" id="charts" style="padding:0">
       <h2>Live charts</h2>
       <div class="chartbox">
@@ -111,6 +126,39 @@ if(member){
     document.querySelector("#upgradeBox p").textContent = "Max unlocks unlimited verified setups across all 6 hot pairs.";
     const up = document.querySelector("#upgradeBox a"); up.textContent = "See Max"; up.href = "subscribe.html?plan=max";
   }
+
+  /* Telegram signal linking (Pro/Max push) */
+  const tgSection = document.getElementById("tgLink");
+  const tgBtn = document.getElementById("tgBtn");
+  const tgTitle = document.getElementById("tgTitle");
+  const tgBody = document.getElementById("tgBody");
+  const tgNote = document.getElementById("tgNote");
+  const tgRefresh = document.getElementById("tgRefresh");
+  tgSection.hidden = false;
+  function tgRender(linked){
+    tgNote.hidden = true; tgRefresh.hidden = true;
+    if(linked){
+      tgTitle.textContent = "Telegram linked ✓";
+      tgBody.textContent = plan === "free"
+        ? "This chat is linked. You will start receiving signals here once your plan is Pro or Max."
+        : "Every new signal is delivered to your Telegram the moment it is posted. Not receiving them? Press Refresh status.";
+      tgBtn.textContent = "Open bot";
+      tgBtn.href = "https://t.me/Twreg_bot";
+      tgRefresh.hidden = false;
+    } else {
+      tgTitle.textContent = "Get signals in Telegram";
+      tgBody.textContent = "Link your Telegram account and every new signal is sent to you the moment it is posted.";
+      tgBtn.textContent = "Link Telegram";
+      tgBtn.href = "https://t.me/Twreg_bot?start=" + member.id;
+    }
+  }
+  tgRender(member.telegram_chat_id != null);
+  tgRefresh.addEventListener("click", async () => {
+    const { data } = await window.supabase.from("profiles").select("telegram_chat_id").eq("id", member.id).single();
+    tgRender(data && data.telegram_chat_id != null);
+    tgNote.hidden = false;
+    tgNote.textContent = (data && data.telegram_chat_id != null) ? "Linked ✓" : "Not linked yet — press Link Telegram, then /start in the bot.";
+  });
 
   /* Charts */
   const chartEl = document.getElementById("chart"), tabsEl = document.getElementById("tabs");
