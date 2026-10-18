@@ -134,7 +134,7 @@
   function parseCard(card) {
     if (card.dataset && card.dataset.key) {
       return {
-        pair: String(card.dataset.pair || '').replace(/([A-Z]{3})\/([A-Z]{3})/, '$1/$2'),
+        pair: String(card.dataset.pair || '').replace(/^([A-Z]{3})([A-Z]{3})$/, '$1/$2'),
         code: String(card.dataset.pair || '').replace(/[^A-Z]/g, ''),
         side: card.dataset.side || '',
         type: card.dataset.type === 'M1' ? 'scalping' : (card.dataset.type || ''),
@@ -458,6 +458,7 @@
     calc.entry.value = entry;
     calc.sl.value = sl;
     runCalc();
+    document.dispatchEvent(new Event('tw-calc-open'));
     det.scrollIntoView({ behavior: 'smooth', block: 'center' });
   }
 
