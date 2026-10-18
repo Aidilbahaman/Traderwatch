@@ -79,8 +79,8 @@ body[data-tier="max"]  .tw2-band{--tw-accent:#4ADE9F}
 
 /* ===== Full visual for JS-built Max/Pro toolkit ===== */
 .tw2-band.tw-band-motion{
-  position:relative;overflow:hidden;min-height:430px;box-sizing:border-box;
-  padding:34px!important;display:flex;flex-direction:column;justify-content:space-between;
+  position:relative;overflow:hidden;box-sizing:border-box;
+  padding:24px!important;display:flex;flex-direction:column;gap:16px;
   color:#fff;
   background:
     linear-gradient(rgba(255,255,255,.05) 1px,transparent 1px) 0 0/40px 40px,
@@ -98,25 +98,17 @@ body[data-tier="max"]  .tw2-band.tw-band-motion{--tw-accent:#4ADE9F;--tw-accent-
 .tw2-band.tw-band-motion .tw2-tabs{margin:0;padding:2px 8px;background:rgba(255,255,255,.9);border-radius:16px}
 .tw2-band.tw-band-motion .tw2-hint{color:#DCE6F5;padding:0;margin:0;text-align:center}
 
-/* Signals: restored to the earlier light drifting-grid design. */
+/* Signals: plain white background (original clean section). */
 #signals.tw-motion{
-  position:relative;overflow:hidden;border-radius:22px;padding:22px 22px 18px;
-  background:
-    linear-gradient(rgba(9,40,76,.055) 1px,transparent 1px) 0 0/40px 40px,
-    linear-gradient(90deg,rgba(9,40,76,.055) 1px,transparent 1px) 0 0/40px 40px,
-    radial-gradient(560px 280px at 82% 112%,color-mix(in srgb,var(--tw-accent,#4ADE9F) 24%,transparent),transparent 70%),
-    #fff;
-  animation:tw-grid 12s linear infinite}
+  position:relative;overflow:visible;border-radius:0;padding:0;
+  background:#fff;
+  animation:none}
 #signals.tw-motion>h2{position:relative;margin-top:0}
 #signals.tw-motion>.signals,#signals.tw-motion>.sample{position:relative}
-body[data-tier="free"] #signals.tw-motion{--tw-accent:#7DD3FC}
-body[data-tier="pro"]  #signals.tw-motion{--tw-accent:#A78BFA}
-body[data-tier="max"]  #signals.tw-motion{--tw-accent:#4ADE9F}
-@media(max-width:720px){#signals.tw-motion{padding:16px 14px 14px;border-radius:18px}}
-@media(prefers-reduced-motion:reduce){#signals.tw-motion{animation:none}}
+@media(max-width:720px){#signals.tw-motion{padding:0;border-radius:0}}
 
 @media(max-width:720px){
-  .tw2-band.tw-band-motion{min-height:430px;padding:22px!important;gap:20px;justify-content:flex-start}
+  .tw2-band.tw-band-motion{padding:16px!important;gap:14px}
   .tw2-band.tw-band-motion .tw2-top{margin-bottom:0}
 }
 @media(prefers-reduced-motion:reduce){.tw2-band.tw-band-motion{animation:none}}
