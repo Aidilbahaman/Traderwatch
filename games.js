@@ -551,8 +551,38 @@
     render();
   }
 
+
+  /* ---------- member session (badge + logout) ---------- */
+  function normalizeTier(v) {
+    var t = String(v == null ? "" : v).toLowerCase();
+    return (t === "pro" || t === "max") ? t : "free";
+  }
+  function bootAuth() {
+    var badge = document.getElementById("planBadge");
+    var p = typeof window.requireMember === "function"
+      ? window.requireMember(location.pathname)
+      : Promise.resolve(null);
+    Promise.resolve(p).then(function (member) {
+      if (!member) return;
+      var t = normalizeTier(member.plan);
+      document.body.dataset.tier = t;
+      if (badge) {
+        badge.textContent = t === "max" ? "Max" : t === "pro" ? "Pro" : "Free";
+        badge.classList.toggle("pro", t !== "free");
+      }
+    }).catch(function () {});
+
+    var logout = document.getElementById("eduLogout");
+    if (logout) {
+      logout.addEventListener("click", function () {
+        if (typeof window.logOut === "function") window.logOut();
+      });
+    }
+  }
+
   /* ---------- boot ---------- */
   function init() {
+    bootAuth();
     var c = document.querySelector('[data-game="candle"]');
     var p = document.querySelector('[data-game="pips"]');
     var s = document.querySelector('[data-game="size"]');
