@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Practice games – TraderWatch</title>
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="app.css?v=2026102102">
+<link rel="stylesheet" href="games.css?v=2026102102">
+<style>[hidden]{display:none!important}</style>
+</head>
+<body>
+<header>
+  <div class="wrap nav">
+    <a class="logo" href="members.html" aria-label="TraderWatch member area">
+      <svg width="32" height="32" viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="7" fill="#050b14" stroke="#264261"/><path d="M8 9h16v4h-6.2v11h-3.6V13H8z" fill="#fff"/><rect x="20" y="20" width="5" height="5" fill="#2ecf6f"/></svg></a>
+    <nav aria-label="Member">
+      <a href="education.html" aria-current="page">Education hub<span class="edu-new">NEW</span></a>
+      <a href="members.html#charts">Charts</a>
+      <a href="members.html#signals">Signals</a>
+      <a href="members.html#toolkits">Toolkits</a>
+    </nav>
+    <span class="badge" id="planBadge">Free</span>
+    <button class="linkbtn" type="button" id="eduLogout">Log out</button>
+  </div>
+</header>
+
+<main class="page game-page">
+  <div class="wrap">
+    <div class="game-head-page">
+      <p class="edu-eyebrow">Practice</p>
+      <h1 class="game-title-page">Belajar dengan main</h1>
+      <p class="game-lede">Empat latihan pendek — 2 minit satu. Tak ada markah untuk dilihat orang lain, cuma untuk kau tahu part mana yang masih kabur.</p>
+    </div>
+
+    <div class="game-grid">
+      <section class="game-card" aria-labelledby="g1t">
+        <div class="game-card-head">
+          <span class="game-kicker">Game 1 · 5 rounds</span>
+          <h2 id="g1t">Baca candle</h2>
+          <p class="game-sub">Tengok satu candle, jawab arah dan wick mana yang panjang.</p>
+        </div>
+        <div class="game-body" data-game="candle"></div>
+      </section>
+
+      <section class="game-card" aria-labelledby="g2t">
+        <div class="game-card-head">
+          <span class="game-kicker">Game 2 · 4 rounds</span>
+          <h2 id="g2t">Kira pips</h2>
+          <p class="game-sub">Beza harga dua level — berapa pip? Ingat pair yen lain.</p>
+        </div>
+        <div class="game-body" data-game="pips"></div>
+      </section>
+
+      <section class="game-card" aria-labelledby="g3t">
+        <div class="game-card-head">
+          <span class="game-kicker">Game 3 · 3 rounds</span>
+          <h2 id="g3t">Saiz posisi</h2>
+          <p class="game-sub">Baki, peratus risiko dan jarak stop — cari saiz lot.</p>
+        </div>
+        <div class="game-body" data-game="size"></div>
+      </section>
+
+      <section class="game-card" aria-labelledby="g4t">
+        <div class="game-card-head">
+          <span class="game-kicker">Game 4 · 6 pasang</span>
+          <h2 id="g4t">Padan istilah</h2>
+          <p class="game-sub">Klik term, kemudian klik maksud yang betul.</p>
+        </div>
+        <div class="game-body" data-game="match"></div>
+      </section>
+    </div>
+
+    <p class="game-note">Educational content only. Not financial advice. Skor disimpan dalam browser kau sahaja.</p>
+    <p class="edu-disclaimer"><a href="education.html" style="color:#0d4f91;font-weight:700">← Balik ke Education hub</a></p>
+  </div>
+</main>
+
+<footer>
+  <div class="wrap">
+    <p>Risk warning: Trading forex and leveraged products carries a high level of risk and may not suit everyone. Signals and charts on this site are for information only and are not financial advice. Past results do not guarantee future results.</p>
+  </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script src="config.js?v=202610182133"></script>
+<script src="common.js?v=202610182133"></script>
+<script src="games.js?v=2026102102" defer></script>
+</body>
+</html>

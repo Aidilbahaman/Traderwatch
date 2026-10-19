@@ -1,0 +1,227 @@
+/* ==========================================================================
+   TraderWatch — Education practice games
+   Namespaced game-*. Shares the education palette: dark navy cards
+   (#061a31 / #173b5e), lime accent (--gold), site tokens for type.
+   ========================================================================== */
+
+.game-page { padding: 26px 0 56px; }
+
+.game-head-page { margin-bottom: 22px; }
+.game-title-page {
+  margin: 0 0 6px;
+  font-size: clamp(1.9rem, 4vw, 2.6rem);
+  color: var(--navy);
+}
+.game-lede {
+  margin: 0;
+  max-width: 62ch;
+  color: #4a5f77;
+  font-size: .95rem;
+}
+.game-note {
+  margin-top: 18px;
+  color: #526980;
+  font-size: 12.5px;
+}
+
+/* --- grid of games ------------------------------------------------------ */
+.game-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+.game-card {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 20px;
+  border: 1px solid #173b5e;
+  border-radius: 16px;
+  background: #061a31;
+  box-shadow: 0 16px 34px rgba(6, 26, 49, .18);
+  color: #cfe1f2;
+}
+.game-card-head { display: flex; flex-direction: column; gap: 6px; }
+.game-kicker {
+  color: var(--gold);
+  font: 800 9.5px/1.5 var(--body);
+  letter-spacing: .12em;
+  text-transform: uppercase;
+}
+.game-card h2 {
+  margin: 0;
+  color: #fff;
+  font-size: 1.16rem;
+  line-height: 1.25;
+}
+.game-sub { margin: 0; color: #9db6ca; font-size: 13px; }
+
+/* --- shared bits -------------------------------------------------------- */
+.game-dots { display: flex; gap: 6px; align-items: center; }
+.game-dots i {
+  display: block;
+  width: 8px;
+  height: 8px;
+  border-radius: 99px;
+  background: #24486b;
+}
+.game-dots i.on { background: var(--gold); }
+.game-dots i.ok { background: #4cd07d; }
+.game-dots i.no { background: #ff7a66; }
+.game-score { margin-left: auto; color: #9db6ca; font: 700 11px var(--body); }
+
+.game-body { display: flex; flex-direction: column; gap: 14px; }
+.game-q { margin: 0; color: #eaf3fb; font: 700 15px/1.4 var(--body); }
+
+.game-candle {
+  display: flex;
+  justify-content: center;
+  padding: 8px 0;
+  border-radius: 12px;
+  background: #04121f;
+  border: 1px solid #122f4a;
+}
+.game-candle svg { display: block; }
+
+.game-options { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.game-opt {
+  min-height: 46px;
+  padding: 10px 14px;
+  border: 1px solid #2a5b86;
+  border-radius: 10px;
+  background: transparent;
+  color: #dbe9f6;
+  font: 700 13.5px var(--body);
+  cursor: pointer;
+  transition: background .15s, border-color .15s, color .15s;
+}
+.game-opt:hover { border-color: var(--gold); color: #fff; }
+.game-opt[aria-pressed="true"] { background: #122f4a; border-color: var(--gold); color: #fff; }
+.game-opt.is-right { background: rgba(76, 208, 125, .18); border-color: #4cd07d; color: #d8ffe6; }
+.game-opt.is-wrong { background: rgba(255, 122, 102, .16); border-color: #ff7a66; color: #ffe2dd; }
+.game-opt[disabled] { cursor: default; }
+
+.game-row { display: flex; gap: 10px; flex-wrap: wrap; align-items: flex-end; }
+.game-field { display: flex; flex-direction: column; gap: 6px; flex: 1 1 140px; }
+.game-field label { color: #9db6ca; font: 700 11px var(--body); letter-spacing: .04em; text-transform: uppercase; }
+.game-field input {
+  min-height: 46px;
+  padding: 0 12px;
+  border: 1px solid #2a5b86;
+  border-radius: 10px;
+  background: #04121f;
+  color: #fff;
+  font: 700 15px var(--body);
+}
+.game-field input::placeholder { color: #5f7d99; font-weight: 400; }
+.game-field input:focus-visible { outline: 3px solid var(--gold); outline-offset: 2px; }
+
+.game-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 46px;
+  padding: 0 18px;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  background: var(--gold);
+  color: #193414;
+  font: 800 13px var(--body);
+  cursor: pointer;
+  transition: filter .15s;
+}
+.game-btn:hover { filter: brightness(1.05); }
+.game-btn.ghost { background: transparent; border-color: #2a5b86; color: #dbe9f6; }
+.game-btn.ghost:hover { border-color: var(--gold); color: #fff; filter: none; }
+.game-btn[hidden] { display: none; }
+
+.game-feedback {
+  min-height: 20px;
+  margin: 0;
+  color: #9db6ca;
+  font-size: 13px;
+  line-height: 1.45;
+}
+.game-feedback.ok { color: #a9f0c1; }
+.game-feedback.no { color: #ffb3a6; }
+.game-why {
+  margin: 0;
+  padding: 10px 12px;
+  border-left: 3px solid var(--gold);
+  border-radius: 8px;
+  background: rgba(183, 243, 75, .07);
+  color: #cfe1f2;
+  font-size: 12.5px;
+  line-height: 1.5;
+}
+.game-why[hidden] { display: none; }
+
+/* --- match game --------------------------------------------------------- */
+.game-match { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.game-col { display: flex; flex-direction: column; gap: 8px; }
+.game-col-title {
+  color: #9db6ca;
+  font: 800 9.5px var(--body);
+  letter-spacing: .1em;
+  text-transform: uppercase;
+}
+.game-chip {
+  min-height: 44px;
+  padding: 8px 12px;
+  border: 1px solid #2a5b86;
+  border-radius: 10px;
+  background: transparent;
+  color: #dbe9f6;
+  font: 600 12.5px/1.35 var(--body);
+  text-align: left;
+  cursor: pointer;
+  transition: border-color .15s, background .15s, color .15s;
+}
+.game-chip:hover { border-color: var(--gold); }
+.game-chip[aria-pressed="true"] { border-color: var(--gold); background: #122f4a; color: #fff; }
+.game-chip.is-matched {
+  border-color: #4cd07d;
+  background: rgba(76, 208, 125, .14);
+  color: #d8ffe6;
+  cursor: default;
+}
+
+/* --- result panel ------------------------------------------------------- */
+.game-done {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 14px;
+  border: 1px solid #2a5b86;
+  border-radius: 12px;
+  background: #0a2742;
+}
+.game-done strong { color: #fff; font: 800 1rem var(--display); }
+.game-done p { margin: 0; color: #9db6ca; font-size: 13px; }
+
+/* --- focus on dark surfaces -------------------------------------------- */
+.game-card :focus-visible { outline: 3px solid var(--gold); outline-offset: 2px; }
+
+/* --- responsive --------------------------------------------------------- */
+@media (max-width: 900px) {
+  .game-grid { grid-template-columns: 1fr; }
+}
+@media (max-width: 560px) {
+  .game-card { padding: 16px; }
+  .game-options { grid-template-columns: 1fr; }
+  .game-match { grid-template-columns: 1fr; }
+  .game-btn { width: 100%; min-height: 48px; }
+  .game-opt { min-height: 48px; }
+  .game-field input { min-height: 48px; }
+  .game-row { flex-direction: column; align-items: stretch; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .game-opt, .game-btn, .game-chip { transition: none; }
+}
+
+.game-chip.is-wrong {
+  border-color: #ff7a66;
+  background: rgba(255, 122, 102, .16);
+  color: #ffe2dd;
+}
