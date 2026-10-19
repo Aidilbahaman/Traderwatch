@@ -190,9 +190,13 @@ def pair_has_active(pair, state):
 
 
 def in_session(now=None):
-    """London/NY window, 15:00-01:00 MYT, plus the Asian open 08:00-11:00."""
+    """08:00-01:00 MYT — covers Asian open through New York close.
+
+    Sized so 7 pairs at a 10-minute scan plus a 15-minute status sweep land
+    around 700 of the 800 free daily credits.
+    """
     h = (now or datetime.now(TZ_KL)).astimezone(TZ_KL).hour
-    return h >= 15 or h < 1 or 8 <= h < 11
+    return h >= 8 or h < 1
 
 
 def decide(model, bars):
