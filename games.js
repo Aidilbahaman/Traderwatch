@@ -377,16 +377,196 @@
     reset.addEventListener("click", function () { matchGame(root); });
   }
 
+
+  /* ---------- game 5: sessions and Malaysian time ---------- */
+  var SESSION_ROUNDS = [
+    { q: "London opens around 07:00 UTC. What time is that in Malaysia (UTC+8)?",
+      opts: ["15:00", "19:00"], ans: 0,
+      why: "07:00 UTC + 8 hours = 15:00 in Malaysia. London is the afternoon session for us." },
+    { q: "New York opens around 12:00 UTC. Malaysia time?",
+      opts: ["16:00", "20:00"], ans: 1,
+      why: "12:00 UTC + 8 = 20:00. The London–New York overlap therefore lands around 20:00–24:00 Malaysian time." },
+    { q: "Tokyo opens around 00:00 UTC. Malaysia time?",
+      opts: ["08:00", "12:00"], ans: 0,
+      why: "00:00 UTC + 8 = 08:00. Tokyo runs through the Malaysian morning." },
+    { q: "Which overlap is usually the busiest window of the day?",
+      opts: ["London + New York", "Sydney + Tokyo"], ans: 0,
+      why: "The London–New York overlap carries the most volume, so spreads are usually tightest and moves fastest then." },
+    { q: "At 22:00 UTC, which session has just opened?",
+      opts: ["Sydney", "London"], ans: 0,
+      why: "Sydney opens around 21:00 UTC. London closed at 16:00 and New York closes around 21:00." }
+  ];
+
+  /* ---------- game 6: risk to reward ---------- */
+  var RR_ROUNDS = [
+    { q: "Entry 1.0850 · stop 1.0830 · target 1.0910. What is the reward-to-risk ratio?",
+      kind: "number", label: "R:R (e.g. 3 for 1:3)", ans: 3, tol: 0.06, step: "0.1", display: "1:3",
+      why: "Risk 20 pips (1.0850 − 1.0830), reward 60 pips (1.0910 − 1.0850). 60 ÷ 20 = 3." },
+    { q: "Entry 149.20 · stop 148.80 · target 150.20. What is the reward-to-risk ratio?",
+      kind: "number", label: "R:R", ans: 2.5, tol: 0.06, step: "0.1", display: "1:2.5",
+      why: "Risk 40 pips, reward 100 pips. 100 ÷ 40 = 2.5." },
+    { q: "Entry 1.2650 · stop 1.2680 · target 1.2590. What is the reward-to-risk ratio?",
+      kind: "number", label: "R:R", ans: 2, tol: 0.06, step: "0.1", display: "1:2",
+      why: "Risk 30 pips above entry, reward 60 pips below it. 60 ÷ 30 = 2." },
+    { q: "Entry 0.6520 · stop 0.6495 · target 0.6555. What is the reward-to-risk ratio?",
+      kind: "number", label: "R:R", ans: 1.4, tol: 0.06, step: "0.1", display: "1:1.4",
+      why: "Risk 25 pips, reward 35 pips. 35 ÷ 25 = 1.4." }
+  ];
+
+  /* ---------- game 7: spot the zone ---------- */
+  var CHART_ROUNDS = [
+    { q: "Which zone did price keep bouncing from?",
+      data: [1.0900,1.0912,1.0920,1.0918,1.0906,1.0894,1.0880,1.0866,1.0850,1.0834,1.0818,1.0802,1.0800,1.0814,1.0830,1.0846,1.0862,1.0878,1.0894,1.0908,1.0918,1.0910,1.0896,1.0882,1.0866,1.0850,1.0834,1.0818,1.0800,1.0800,1.0816,1.0832,1.0848,1.0864,1.0880,1.0896,1.0910,1.0918,1.0906,1.0892,1.0876,1.0860,1.0844,1.0828,1.0812,1.0800,1.0800,1.0818],
+      bands: [{ label: "A", price: 1.0800 }, { label: "B", price: 1.0930 }, { label: "C", price: 1.0700 }],
+      why: "A zone matters because price reacted there repeatedly, not because it looks tidy." },
+    { q: "Which zone acted as resistance?",
+      data: [1.0800,1.0820,1.0840,1.0860,1.0880,1.0900,1.0920,1.0938,1.0940,1.0925,1.0905,1.0885,1.0865,1.0845,1.0865,1.0885,1.0905,1.0925,1.0940,1.0935,1.0915,1.0895,1.0875,1.0895,1.0915,1.0935,1.0940,1.0920,1.0900,1.0880,1.0860,1.0840,1.0820,1.0840,1.0860,1.0880,1.0900,1.0920,1.0940,1.0925],
+      bands: [{ label: "A", price: 1.0840 }, { label: "B", price: 1.0940 }, { label: "C", price: 1.1000 }],
+      why: "Resistance is the same idea from above: a level price failed to close beyond." }
+  ];
+
+  function touches(data, price) {
+    var tol = 0.0004, n = 0;
+    for (var i = 0; i < data.length; i++) if (Math.abs(data[i] - price) <= tol) n++;
+    return n;
+  }
+
+  function chartGame(root) {
+    clear(root);
+    var idx = 0, score = 0, locked = false;
+
+    var bar = dots(CHART_ROUNDS.length);
+    var scoreEl = el("span", "game-score", scoreLabel("zones", CHART_ROUNDS.length));
+    var top = el("div", "game-dots");
+    top.style.justifyContent = "space-between";
+    top.appendChild(bar);
+    top.appendChild(scoreEl);
+
+    var stage = el("div", "game-body");
+    var live = el("p", "game-feedback");
+    live.setAttribute("role", "status");
+    live.setAttribute("aria-live", "polite");
+
+    root.appendChild(top);
+    root.appendChild(stage);
+    root.appendChild(live);
+
+    function chartSvg(r) {
+      var W = 320, H = 168, pad = 16;
+      var hi = Math.max.apply(null, r.data), lo = Math.min.apply(null, r.data);
+      var span = hi - lo || 0.001;
+      function y(v) { return pad + (H - pad * 2) * ((hi - v) / span); }
+      var stepX = (W - pad * 2) / (r.data.length - 1);
+      var pts = r.data.map(function (v, i) { return (pad + i * stepX).toFixed(1) + "," + y(v).toFixed(1); }).join(" ");
+      var out = '<svg viewBox="0 0 ' + W + ' ' + H + '" width="100%" height="168" role="img" aria-label="Price line with three horizontal zones labelled A, B and C">';
+      r.bands.forEach(function (b) {
+        var by = y(b.price).toFixed(1);
+        out += '<line x1="' + pad + '" x2="' + (W - pad) + '" y1="' + by + '" y2="' + by + '" stroke="#2a5b86" stroke-width="1" stroke-dasharray="5 4"/>';
+        out += '<text x="' + (pad + 4) + '" y="' + (Number(by) - 5).toFixed(1) + '" fill="#9db6ca" font-size="10" font-weight="700">' + b.label + ' · ' + b.price.toFixed(4) + "</text>";
+      });
+      out += '<polyline points="' + pts + '" fill="none" stroke="#6aa8ff" stroke-width="1.8" stroke-linejoin="round"/>';
+      out += "</svg>";
+      return out;
+    }
+
+    function finish() {
+      clear(stage);
+      record("zones", score, CHART_ROUNDS.length);
+      scoreEl.textContent = scoreLabel("zones", CHART_ROUNDS.length);
+      var done = el("div", "game-done");
+      done.appendChild(el("strong", null, score + " / " + CHART_ROUNDS.length + " betul"));
+      done.appendChild(el("p", null, "Zon dikira dari berapa kali harga menyentuhnya."));
+      var again = el("button", "game-btn", "Main lagi");
+      again.type = "button";
+      again.addEventListener("click", function () {
+        idx = 0; score = 0; locked = false;
+        live.textContent = ""; live.className = "game-feedback";
+        paintDots(bar, 0, []);
+        render();
+        again.focus();
+      });
+      done.appendChild(again);
+      stage.appendChild(done);
+      live.textContent = "Selesai. Skor " + score + " daripada " + CHART_ROUNDS.length + ".";
+      again.focus();
+    }
+
+    function next() {
+      if (idx >= CHART_ROUNDS.length - 1) { finish(); return; }
+      idx++; locked = false;
+      live.textContent = ""; live.className = "game-feedback";
+      paintDots(bar, idx, []);
+      render();
+    }
+
+    function render() {
+      clear(stage);
+      var r = CHART_ROUNDS[idx];
+      var counts = r.bands.map(function (b) { return touches(r.data, b.price); });
+      var best = counts.indexOf(Math.max.apply(null, counts));
+
+      var box = el("div", "game-candle");
+      box.innerHTML = chartSvg(r);
+      stage.appendChild(box);
+      stage.appendChild(el("p", "game-q", r.q));
+
+      var opts = el("div", "game-options");
+      var why = el("p", "game-why", r.why);
+      why.hidden = true;
+
+      r.bands.forEach(function (b, i) {
+        var btn = el("button", "game-opt", "Zone " + b.label + " · " + b.price.toFixed(4));
+        btn.type = "button";
+        btn.setAttribute("aria-pressed", "false");
+        btn.addEventListener("click", function () {
+          if (locked) return;
+          locked = true;
+          var ok = i === best;
+          if (ok) score++;
+          paintDots(bar, idx, []);
+          btn.className = "game-opt " + (ok ? "is-right" : "is-wrong");
+          btn.setAttribute("aria-pressed", "true");
+          if (!ok && opts.children[best]) opts.children[best].className = "game-opt is-right";
+          Array.prototype.forEach.call(opts.children, function (c) { c.disabled = true; });
+          live.textContent = ok ? "Betul." : "Bukan — zon itu disentuh " + counts[i] + " kali, zon betul " + counts[best] + " kali.";
+          live.className = "game-feedback " + (ok ? "ok" : "no");
+          why.textContent = r.why + " Zon " + r.bands.map(function (b, j) {
+            return b.label + " disentuh " + counts[j] + " kali";
+          }).join(", ") + ".";
+          why.hidden = false;
+          var nb = el("button", "game-btn", idx === CHART_ROUNDS.length - 1 ? "Tengok skor" : "Seterusnya");
+          nb.type = "button";
+          nb.addEventListener("click", next);
+          stage.appendChild(nb);
+          nb.focus();
+        });
+        opts.appendChild(btn);
+      });
+
+      stage.appendChild(opts);
+      stage.appendChild(why);
+    }
+
+    paintDots(bar, 0, []);
+    render();
+  }
+
   /* ---------- boot ---------- */
   function init() {
     var c = document.querySelector('[data-game="candle"]');
     var p = document.querySelector('[data-game="pips"]');
     var s = document.querySelector('[data-game="size"]');
     var m = document.querySelector('[data-game="match"]');
+    var se = document.querySelector('[data-game="sessions"]');
+    var rr = document.querySelector('[data-game="rr"]');
+    var zn = document.querySelector('[data-game="zones"]');
     if (c) roundGame({ root: c, id: "candle", rounds: CANDLE_ROUNDS, closing: "Cuba lagi — kelajuan bukan matlamat, faham dulu." });
     if (p) roundGame({ root: p, id: "pips", rounds: PIP_ROUNDS, closing: "Pip value berubah ikut pair dan saiz lot." });
     if (s) roundGame({ root: s, id: "size", rounds: SIZE_ROUNDS, closing: "Formula: (baki × % risiko) ÷ (stop pips × pip value)." });
     if (m) matchGame(m);
+    if (se) roundGame({ root: se, id: "sessions", rounds: SESSION_ROUNDS, closing: "Waktu Malaysia = UTC + 8." });
+    if (rr) roundGame({ root: rr, id: "rr", rounds: RR_ROUNDS, closing: "R:R = jarak target ÷ jarak stop." });
+    if (zn) chartGame(zn);
   }
 
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init);
