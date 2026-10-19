@@ -1,5 +1,5 @@
 {
- "updated": "2026-10-19T08:05:02+08:00",
+ "updated": "2026-10-19T08:35:01+08:00",
  "signals": {
   "USDCAD_20261018_110101": {
    "status": "sl",
@@ -89,6 +89,9 @@
    "status": "active"
   },
   "EURUSD_20261019_080005": {
+   "status": "active"
+  },
+  "AUDUSD_20261019_083005": {
    "status": "active"
   }
  }
