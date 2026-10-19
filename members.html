@@ -330,7 +330,7 @@ if(member){
       const shown = daily.filter(s => allowed.includes(normalizePair(s.pair)));
       const selected = plan === "max" ? shown : shown.slice(0, plan === "pro" ? 10 : 3);
       render(selected.map(s=>({pair:s.pair, timeframe:s.timeframe || "H1", side:s.side, entry:s.entry, sl:s.sl, tp:s.tp, posted_at:s.posted_at, locked:false})));
-      note.textContent = selected.length ? `${selected.length} of ${plan === "max" ? "unlimited" : plan === "pro" ? "10" : "3"} daily setups · ${allowed.length} hot pairs.` : "No verified setups available today for your plan. New valid H1/M15 setups appear here when posted.";
+      note.textContent = selected.length ? `${selected.length} of ${plan === "max" ? "unlimited" : plan === "pro" ? "10" : "3"} daily setups · ${allowed.length} hot pairs.` : "No verified setups available today for your plan. New valid M15 setups appear here when posted.";
     }catch(_){
       render([]);
       note.textContent = "Could not load verified signals. Please try again later.";

@@ -47,11 +47,20 @@ class SignalPolicyTests(unittest.TestCase):
         self.assertIsNotNone(status.EXPIRY_H1)
         self.assertEqual(status.EXPIRY_H1.total_seconds(), 48 * 3600)
 
-    def test_engine_uses_m15_not_m1(self):
+    def test_rule_engine_is_h1_only(self):
         engine = load_engine()
-        self.assertIn('M15', engine.TIMEFRAMES)
+        self.assertEqual(list(engine.TIMEFRAMES), ['H1'])
+        self.assertNotIn('M15', engine.TIMEFRAMES)
         self.assertNotIn('M1', engine.TIMEFRAMES)
-        self.assertEqual(engine.TIMEFRAMES['M15'], '15min')
+
+    def test_ai_engine_owns_m15(self):
+        spec = importlib.util.spec_from_file_location(
+            'ai_engine', ENGINE / 'signal-engine-ai.py')
+        mod = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(mod)
+        self.assertEqual(mod.TIMEFRAME, 'M15')
+        self.assertEqual(mod.TD_INTERVAL, '15min')
+        self.assertGreaterEqual(mod.THRESHOLD, 0.5)
 
     def test_m15_stop_floor_beats_thin_atr(self):
         engine = load_engine()

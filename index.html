@@ -119,7 +119,7 @@ async function loadHistory(){const request=++chartRequest;historyChart.className
 const qaForm=document.getElementById('qaForm'),qaInput=document.getElementById('qaInput'),qaMessages=document.getElementById('qaMessages');
 function qaAnswer(q){
   const s=q.toLowerCase();
-  if(/\b(max|unlimited|50|fifty)\b/.test(s)) return 'Max Member is $50 per billing period to be confirmed. It includes unlimited verified signals across 7 hot pairs, with H1 and M15 setups when available.';
+  if(/\b(max|unlimited|50|fifty)\b/.test(s)) return 'Max Member is $50 per billing period to be confirmed. It includes unlimited verified signals across 7 hot pairs, with M15 setups when available.';
   if(/\b(pro|20|twenty|ten|10)\b/.test(s)) return 'Pro Member is $20 per billing period to be confirmed. It includes up to 10 verified signals daily across 7 hot pairs.';
   if(/\b(free|0|three|3)\b/.test(s)) return 'Free Member is free. It includes up to 3 verified signals daily across 3 hot pairs, plus dashboard and charts.';
   if(/\b(signal|setup|entry|stop|sl|take profit|tp|scalp|h1|m1)\b/.test(s)) return 'Signals are educational setups only. Verify the current price, timeframe, spread and risk on your own broker. No result is guaranteed.';

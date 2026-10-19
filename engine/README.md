@@ -20,7 +20,10 @@ All files must be `chmod 600`. `.gitignore` blocks `*.env` and `state/`.
 
 | Script | Schedule | Purpose |
 |---|---|---|
-| `signal-engine.py` | `*/15 * * * *` | Generates verified H1/M15 setups from Twelve Data candles |
+| `signal-engine-ai.py` | `*/15 * * * *` | Sole producer — AI M15 logistic model decides side + trade |
+| `signal-engine.py` | disabled | Legacy EMA/RSI/ATR rule engine; retained for audit only |
+| `train-ai-model.py` | manual | Trains `state/ai-m15-model.json` from cached candles |
+| `ai_model.py` | — | Shared M15 features + logistic fit/predict |
 | `signal-status.py` | `*/5 * * * *` | Evaluates open setups against M1 candles → TP/SL/expired |
 | `signal-telegram-sender.py` | `5,35 * * * *` | Pushes new signals to linked Pro/Max members |
 | `signal-close-alert.py` | `*/5 * * * *` | Admin-only TP/SL closure alerts (@Twreg_bot) |

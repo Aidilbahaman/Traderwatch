@@ -34,7 +34,7 @@ PAIRS = {
     "USD/CAD": {"td": "USD/CAD", "dp": 5, "mode": "forex"},
     "NZD/USD": {"td": "NZD/USD", "dp": 5, "mode": "forex"},
 }
-TIMEFRAMES = {"H1": "1h", "M15": "15min"}
+TIMEFRAMES = {"H1": "1h"}   # M15 is produced by signal-engine-ai.py
 CANDLES = 130
 STATUS_FILE = Path("/home/ubuntu/web/Traderwatch-repo/signal-status.json")
 LOCK = Path("/tmp/signal-engine.lock")
