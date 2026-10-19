@@ -9,6 +9,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="app.css">
+<link rel="stylesheet" href="education.css">
 <style>
 [hidden]{display:none!important}
 .badge{font:700 .85rem var(--body);padding:4px 12px;border-radius:99px;background:var(--panel2);border:1px solid var(--line);color:var(--muted)}
@@ -35,6 +36,7 @@
     <nav aria-label="Member">
       <a href="members.html#charts">Charts</a>
       <a href="members.html#signals">Signals</a>
+      <a href="members.html#education" data-edu-link>Education<span class="edu-new">NEW</span></a>
       <a href="subscribe.html">Subscription</a>
     </nav>
     <span class="badge" id="planBadge">Free</span>
@@ -105,6 +107,24 @@
       <div class="signals" id="signalGrid"></div>
       <p class="sample" id="signalNote"></p>
     </section>
+
+    <section class="block edu" id="education" aria-labelledby="eduTitle">
+      <div class="edu-head">
+        <p class="edu-eyebrow">Learning hub</p>
+        <h2 id="eduTitle">Education</h2>
+        <p class="edu-sub">Short, plain-English lessons on how the market, charts and risk work — written for members, sized for a coffee break.</p>
+        <p class="edu-meta" id="eduMeta"></p>
+      </div>
+
+      <div class="edu-continue" id="eduContinue" hidden></div>
+
+      <div class="edu-tabs" id="eduTabs" role="tablist" aria-label="Lesson category"></div>
+
+      <div class="edu-grid" id="eduGrid" role="tabpanel" aria-labelledby="eduTab0"></div>
+      <p class="edu-empty" id="eduEmpty" hidden>No lessons in this category yet.</p>
+
+      <p class="edu-disclaimer">Educational content only. Not financial advice.</p>
+    </section>
   </div>
 </main>
 
@@ -120,6 +140,8 @@
 <script>window.TW_CONFIG = { tzOffset: 8, supportUrl: "", brand: "TraderWatch" };</script>
 <script src="members-tools.js?v=202610182133" defer></script>
 <script src="members-tools-2.js?v=2026101903" defer></script>
+<script src="education-data.js" defer></script>
+<script src="education.js" defer></script>
 <script>
 (async function(){
 const member = await requireMember();

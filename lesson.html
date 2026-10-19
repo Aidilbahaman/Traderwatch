@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lesson – Education – TraderWatch</title>
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="app.css">
+<link rel="stylesheet" href="education.css">
+<style>[hidden]{display:none!important}</style>
+</head>
+<body>
+<header>
+  <div class="wrap nav">
+    <a class="logo" href="members.html" aria-label="TraderWatch member area">
+      <svg width="32" height="32" viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="7" fill="#050b14" stroke="#264261"/><path d="M8 9h16v4h-6.2v11h-3.6V13H8z" fill="#fff"/><rect x="20" y="20" width="5" height="5" fill="#2ecf6f"/></svg>
+      <span>TraderWatch</span></a>
+    <nav aria-label="Member">
+      <a href="members.html#charts">Charts</a>
+      <a href="members.html#signals">Signals</a>
+      <a href="members.html#education" aria-current="page">Education<span class="edu-new">NEW</span></a>
+      <a href="subscribe.html">Subscription</a>
+    </nav>
+    <span class="badge" id="planBadge">Free</span>
+    <button class="linkbtn" type="button" id="eduLogout">Log out</button>
+  </div>
+</header>
+
+<main class="edu-lesson-page">
+  <div class="wrap edu-lesson-wrap">
+    <a class="edu-back" href="members.html#education">
+      <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M10 3 5 8l5 5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      Back to Education
+    </a>
+    <article class="edu-lesson" id="lessonRoot"></article>
+    <p class="edu-disclaimer">Educational content only. Not financial advice.</p>
+    <p class="edu-sr" id="eduLive" role="status" aria-live="polite"></p>
+  </div>
+</main>
+
+<footer>
+  <div class="wrap">
+    <p>Risk warning: Trading forex and leveraged products carries a high level of risk and may not suit everyone. Signals and charts on this site are for information only and are not financial advice. Past results do not guarantee future results.</p>
+  </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script src="config.js?v=202610182133"></script>
+<script src="common.js?v=202610182133"></script>
+<script src="education-data.js" defer></script>
+<script src="education.js" defer></script>
+</body>
+</html>
