@@ -348,9 +348,9 @@ if(member){
       const carried = deduped.filter(s => !isToday(s) && forPlan(s) && stillOpen(s));
       const selected = (plan === "max" ? todays : todays.slice(0, plan === "pro" ? 10 : 3)).concat(carried);
       render(selected.map(s=>({pair:s.pair, timeframe:s.timeframe || "H1", side:s.side, entry:s.entry, sl:s.sl, tp:s.tp, posted_at:s.posted_at, locked:false})));
-      const carriedNote = carried.length ? ` · ${carried.length} still open from earlier.` : "";
+      const carriedNote = carried.length ? ` · ${carried.length} still open from earlier` : "";
       note.textContent = selected.length
-        ? `${selected.length} of ${plan === "max" ? "unlimited" : plan === "pro" ? "10" : "3"} daily setups · ${allowed.length} hot pairs.${carriedNote}`
+        ? `${selected.length} of ${plan === "max" ? "unlimited" : plan === "pro" ? "10" : "3"} daily setups · ${allowed.length} hot pairs${carriedNote}.`
         : "No verified setups available today for your plan. New valid M15 setups appear here when posted.";
     }catch(_){
       render([]);
