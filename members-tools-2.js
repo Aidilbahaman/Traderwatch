@@ -12,6 +12,10 @@
   var CFG = Object.assign({
     tzOffset: 8,        // zon masa "Posted" pada laman (8 = Malaysia)
     statsDays: 30,
+    // Only count signals closed on/after this moment in Prestasi. Set to the
+    // day the verified signal engine started so legacy/backfilled records do
+    // not inflate win rate or pips. Empty string = count everything.
+    statsSince: '2026-10-19T08:00:00+08:00',
     supportUrl: '',     // kosong = sembunyi butang "Tanya"
     brand: 'TraderWatch'
   }, window.TW_CONFIG || {});
@@ -245,9 +249,29 @@ html.tw-dark iframe,html.tw-dark img,html.tw-dark video{filter:invert(1) hue-rot
   }
   function closedSignals(days) {
     var cut = days ? Date.now() - days * 86400000 : 0;
+    if (CFG.statsSince) {
+      var since = Date.parse(CFG.statsSince);
+      if (isFinite(since) && since > cut) cut = since;
+    }
     return allSignals().filter(function (x) {
       return (x.status === 'tp' || x.status === 'sl') && x.t >= cut;
     });
+  }
+  // Honest period label: never claim "30 hari" when the tracking window is
+  // shorter than that because statsSince started later.
+  function periodLabel() {
+    var days = CFG.statsDays;
+    if (CFG.statsSince) {
+      var since = Date.parse(CFG.statsSince);
+      if (isFinite(since)) {
+        var elapsed = (Date.now() - since) / 86400000;
+        if (elapsed < days) {
+          if (elapsed < 1) return 'hari ini';
+          return Math.ceil(elapsed) + ' hari';
+        }
+      }
+    }
+    return days + ' hari';
   }
   function sessionOf(hour) {
     var u = (hour - CFG.tzOffset + 24) % 24;
@@ -364,8 +388,8 @@ html.tw-dark iframe,html.tw-dark img,html.tw-dark video{filter:invert(1) hue-rot
     band.appendChild(top);
 
     var grid = el('div', 'tw2-kpis');
-    ui.kWin = kpi('Win rate ' + CFG.statsDays + ' hari');
-    ui.kPips = kpi('Pips ' + CFG.statsDays + ' hari');
+    ui.kWin = kpi('Win rate ' + periodLabel());
+    ui.kPips = kpi('Pips ' + periodLabel());
     ui.kStreak = kpi('TP berturut-turut');
     ui.kRisk = kpi('Baki risiko hari ini');
     [ui.kWin, ui.kPips, ui.kStreak, ui.kRisk].forEach(function (k) { grid.appendChild(k.wrap); });
@@ -499,7 +523,7 @@ html.tw-dark iframe,html.tw-dark img,html.tw-dark video{filter:invert(1) hue-rot
     var list = closedSignals(CFG.statsDays);
     if (!list.length) {
       var e = box(null, true);
-      e.appendChild(el('p', 'tw2-sub', 'Belum ada signal ditutup dalam ' + CFG.statsDays + ' hari.'));
+      e.appendChild(el('p', 'tw2-sub', 'Belum ada signal ditutup dalam ' + periodLabel() + '.'));
       b.appendChild(e);
       return;
     }
