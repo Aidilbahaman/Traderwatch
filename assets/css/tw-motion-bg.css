@@ -1,14 +1,15 @@
 /* TraderWatch – animated grid + price-line background
    Satu fail CSS untuk semua halaman. Tukar tier guna atribut data-tier pada .tw-card
-   (free | pro | max). Warna boleh diubah di bahagian :root / [data-tier]. */
+   (free | pro | max). Tokens below mirror TraderWatch Design DNA; tier uses the same
+   brand palette at different emphasis levels instead of introducing a second palette. */
 
 .tw-card{
-  --tw-accent:#4ADE9F;          /* default = max */
-  --tw-accent-soft:#6EE7B7;
-  --tw-bg:#0A1628;
+  --tw-accent:#B7F34B;          /* max / primary action */
+  --tw-accent-soft:#D8F3B7;
+  --tw-bg:#0A1728;              /* rendered hero background */
   position:relative;overflow:hidden;width:100%;box-sizing:border-box;
-  min-height:430px;border-radius:24px;color:#fff;
-  font-family:"Plus Jakarta Sans",system-ui,sans-serif;
+  min-height:430px;border-radius:18px;color:#fff;
+  font-family:"DM Sans",Arial,sans-serif;
   background:
     linear-gradient(rgba(255,255,255,.05) 1px,transparent 1px) 0 0/40px 40px,
     linear-gradient(90deg,rgba(255,255,255,.05) 1px,transparent 1px) 0 0/40px 40px,
@@ -16,9 +17,9 @@
     var(--tw-bg);
   animation:tw-grid 12s linear infinite;
 }
-.tw-card[data-tier="free"]{--tw-accent:#7DD3FC;--tw-accent-soft:#BAE6FD}
-.tw-card[data-tier="pro"]{--tw-accent:#A78BFA;--tw-accent-soft:#C4B5FD}
-.tw-card[data-tier="max"]{--tw-accent:#4ADE9F;--tw-accent-soft:#6EE7B7}
+.tw-card[data-tier="free"]{--tw-accent:#1685CF;--tw-accent-soft:#EAF4FC}
+.tw-card[data-tier="pro"]{--tw-accent:#0D4F91;--tw-accent-soft:#EAF4FC}
+.tw-card[data-tier="max"]{--tw-accent:#B7F34B;--tw-accent-soft:#D8F3B7}
 .tw-card--hero{border-radius:0;min-height:520px}      /* untuk halaman utama */
 
 .tw-svg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
@@ -30,14 +31,14 @@
 
 /* komponen kaca (kotak statistik, tab) */
 .tw-stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
-.tw-tile{position:relative;min-height:84px;box-sizing:border-box;padding:12px 14px;border-radius:16px;
+.tw-tile{position:relative;min-height:84px;box-sizing:border-box;padding:12px 14px;border-radius:18px;
   background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.22);
   -webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
-.tw-tile small{display:block;font-size:12px;color:#DCE6F5}
+.tw-tile small{display:block;font-size:12px;color:#D9E5EF}
 .tw-tile strong{display:block;font-size:28px;font-weight:800;line-height:1.1}
-.tw-tabs{display:flex;flex-wrap:wrap;padding:2px 8px;border-radius:16px;background:rgba(255,255,255,.9)}
-.tw-tabs button{flex:1;min-height:44px;border:0;background:none;font:700 13px inherit;font-family:inherit;color:#334155;cursor:pointer}
-.tw-tabs button[aria-selected="true"],.tw-tabs button.active{color:#0A1628;box-shadow:inset 0 -3px 0 var(--tw-accent)}
+.tw-tabs{display:flex;flex-wrap:wrap;padding:2px 8px;border-radius:18px;background:rgba(255,255,255,.9)}
+.tw-tabs button{flex:1;min-height:44px;border:0;background:none;font:700 13px inherit;font-family:inherit;color:#425A73;cursor:pointer}
+.tw-tabs button[aria-selected="true"],.tw-tabs button.active{color:#0A1728;box-shadow:inset 0 -3px 0 var(--tw-accent)}
 
 @keyframes tw-grid{to{background-position:40px 40px,40px 40px,0 0,0 0}}
 @keyframes tw-draw{0%{stroke-dashoffset:1;opacity:1}85%,93%{stroke-dashoffset:0;opacity:1}100%{stroke-dashoffset:0;opacity:0}}
@@ -66,8 +67,8 @@
   background:
     linear-gradient(rgba(255,255,255,.05) 1px,transparent 1px) 0 0/40px 40px,
     linear-gradient(90deg,rgba(255,255,255,.05) 1px,transparent 1px) 0 0/40px 40px,
-    radial-gradient(520px 260px at 70% 110%,color-mix(in srgb,var(--tw-accent,#4ADE9F) 28%,transparent),transparent),
-    #0A1628;
+    radial-gradient(520px 260px at 70% 110%,color-mix(in srgb,var(--tw-accent,#B7F34B) 28%,transparent),transparent),
+    #0A1728;
   animation:tw-grid 12s linear infinite}
 .hero.tw-card .tw-content{padding:0}
 .hero.tw-card .hero-inner{min-height:520px;padding:54px 0}
@@ -79,12 +80,12 @@ body .tw2-band{position:relative;overflow:hidden;
   background:
     linear-gradient(rgba(255,255,255,.05) 1px,transparent 1px) 0 0/40px 40px,
     linear-gradient(90deg,rgba(255,255,255,.05) 1px,transparent 1px) 0 0/40px 40px,
-    radial-gradient(520px 260px at 70% 110%,color-mix(in srgb,var(--tw-accent,#4ADE9F) 28%,transparent),transparent),
-    #0A1628;
+    radial-gradient(520px 260px at 70% 110%,color-mix(in srgb,var(--tw-accent,#B7F34B) 28%,transparent),transparent),
+    #0A1728;
   animation:tw-grid 12s linear infinite}
-body[data-tier="free"] .tw2-band{--tw-accent:#7DD3FC}
-body[data-tier="pro"]  .tw2-band{--tw-accent:#A78BFA}
-body[data-tier="max"]  .tw2-band{--tw-accent:#4ADE9F}
+body[data-tier="free"] .tw2-band{--tw-accent:#1685CF}
+body[data-tier="pro"]  .tw2-band{--tw-accent:#0D4F91}
+body[data-tier="max"]  .tw2-band{--tw-accent:#B7F34B}
 @media (prefers-reduced-motion:reduce){body .tw2-band{animation:none}}
 
 /* ===== Full visual for JS-built Max/Pro toolkit ===== */
@@ -95,18 +96,18 @@ body[data-tier="max"]  .tw2-band{--tw-accent:#4ADE9F}
   background:
     linear-gradient(rgba(255,255,255,.05) 1px,transparent 1px) 0 0/40px 40px,
     linear-gradient(90deg,rgba(255,255,255,.05) 1px,transparent 1px) 0 0/40px 40px,
-    radial-gradient(520px 260px at 70% 110%,color-mix(in srgb,var(--tw-accent,#4ADE9F) 28%,transparent),transparent),
-    #0A1628;
+    radial-gradient(520px 260px at 70% 110%,color-mix(in srgb,var(--tw-accent,#B7F34B) 28%,transparent),transparent),
+    #0A1728;
   animation:tw-grid 12s linear infinite}
 .tw2-band.tw-band-motion>*{position:relative;z-index:1}
 .tw2-band.tw-band-motion>.tw-band-svg{position:absolute;inset:0;width:100%;height:100%;z-index:0;pointer-events:none}
-body[data-tier="free"] .tw2-band.tw-band-motion{--tw-accent:#7DD3FC;--tw-accent-soft:#BAE6FD}
-body[data-tier="pro"]  .tw2-band.tw-band-motion{--tw-accent:#A78BFA;--tw-accent-soft:#C4B5FD}
-body[data-tier="max"]  .tw2-band.tw-band-motion{--tw-accent:#4ADE9F;--tw-accent-soft:#6EE7B7}
+body[data-tier="free"] .tw2-band.tw-band-motion{--tw-accent:#1685CF;--tw-accent-soft:#EAF4FC}
+body[data-tier="pro"]  .tw2-band.tw-band-motion{--tw-accent:#0D4F91;--tw-accent-soft:#EAF4FC}
+body[data-tier="max"]  .tw2-band.tw-band-motion{--tw-accent:#B7F34B;--tw-accent-soft:#D8F3B7}
 .tw2-band.tw-band-motion .tw2-top{margin-bottom:0}
 .tw2-band.tw-band-motion .tw2-k{min-height:84px;padding:12px 14px;background:rgba(255,255,255,.12);border-color:rgba(255,255,255,.22);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
-.tw2-band.tw-band-motion .tw2-tabs{margin:0;padding:2px 8px;background:rgba(255,255,255,.9);border-radius:16px}
-.tw2-band.tw-band-motion .tw2-hint{color:#DCE6F5;padding:0;margin:0;text-align:center}
+.tw2-band.tw-band-motion .tw2-tabs{margin:0;padding:2px 8px;background:rgba(255,255,255,.9);border-radius:18px}
+.tw2-band.tw-band-motion .tw2-hint{color:#D9E5EF;padding:0;margin:0;text-align:center}
 
 /* Signals: plain white background (original clean section). */
 #signals.tw-motion{
@@ -125,10 +126,10 @@ body[data-tier="max"]  .tw2-band.tw-band-motion{--tw-accent:#4ADE9F;--tw-accent-
 
 /* Full-bleed toolkit: remove the outer white shell/strips and keep filters
    + calculator on the same navy motion surface. */
-.tw2.tw2-motion{padding:0;background:#0A1628;border:0;box-shadow:0 12px 34px rgba(10,22,40,.18)}
-.tw2-band.tw-band-motion{border-radius:22px}
+.tw2.tw2-motion{padding:0;background:#0A1728;border:0;box-shadow:0 12px 34px rgba(10,23,40,.18)}
+.tw2-band.tw-band-motion{border-radius:18px}
 .tw2-tools{display:grid;grid-template-columns:1fr;gap:12px}
 .tw2-band.tw-band-motion .tw-filters{margin:0}
 .tw2-band.tw-band-motion .tw-filters select{background:rgba(255,255,255,.92);border-color:rgba(255,255,255,.28)}
 .tw2-band.tw-band-motion .tw-calc{background:rgba(255,255,255,.92);border-color:rgba(255,255,255,.28)}
-@media(max-width:600px){.tw2-band.tw-band-motion{border-radius:16px}}
+@media(max-width:600px){.tw2-band.tw-band-motion{border-radius:18px}}
