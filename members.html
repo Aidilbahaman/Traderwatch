@@ -55,7 +55,7 @@
     <div class="upgrade" id="upgradeBox">
       <div>
         <h3>Get more setups with Pro</h3>
-        <p>Free: 3 signals daily and 3 hot pairs. Pro: 10 signals daily across 6 hot pairs. Max: unlimited signals across all 6 hot pairs.</p>
+        <p>Free: 3 signals daily and 3 hot pairs. Pro: 10 signals daily across 7 hot pairs. Max: unlimited signals across all 7 hot pairs.</p>
       </div>
       <a class="btn" href="subscribe.html">See Pro</a>
     </div>
@@ -131,7 +131,7 @@ if(member){
   const badge = document.getElementById("planBadge");
   badge.textContent = plan.charAt(0).toUpperCase() + plan.slice(1);
   badge.classList.toggle("pro", plan !== "free");
-  document.getElementById("planLine").textContent = plan === "max" ? "Max Member · unlimited valid setups across 6 hot pairs." : plan === "pro" ? "Pro Member · up to 10 valid setups daily across 6 hot pairs." : "Free Member · up to 3 valid setups daily across 3 hot pairs.";
+  document.getElementById("planLine").textContent = plan === "max" ? "Max Member · unlimited valid setups across 7 hot pairs." : plan === "pro" ? "Pro Member · up to 10 valid setups daily across 7 hot pairs." : "Free Member · up to 3 valid setups daily across 3 hot pairs.";
   const upgraded = new URLSearchParams(location.search).get("upgraded");
   if(upgraded === "max" || upgraded === "pro"){
     const n = document.getElementById("upgradeNote"); n.hidden = false; n.textContent = "Payment confirmed. Your " + (upgraded === "max" ? "Max" : "Pro") + " access is now active.";
@@ -139,7 +139,7 @@ if(member){
   document.getElementById("upgradeBox").hidden = plan === "max";
   if(plan === "pro"){
     document.querySelector("#upgradeBox h3").textContent = "Upgrade to Max";
-    document.querySelector("#upgradeBox p").textContent = "Max unlocks unlimited verified setups across all 6 hot pairs.";
+    document.querySelector("#upgradeBox p").textContent = "Max unlocks unlimited verified setups across all 7 hot pairs.";
     const up = document.querySelector("#upgradeBox a"); up.textContent = "See Max"; up.href = "subscribe.html?plan=max";
   }
 
@@ -314,7 +314,7 @@ if(member){
       grid.appendChild(a);
     });
   }
-  const HOT_PAIRS = ["XAUUSD", "GBPUSD", "EURUSD", "USDJPY", "AUDUSD", "USDCAD"];
+  const HOT_PAIRS = ["XAUUSD", "GBPUSD", "EURUSD", "USDJPY", "AUDUSD", "USDCAD", "NZDUSD"];
   function normalizePair(pair){ return String(pair || "").replace(/[^A-Z]/gi, "").toUpperCase(); }
   async function load(){
     try{

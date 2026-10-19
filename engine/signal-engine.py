@@ -25,12 +25,13 @@ TIMEOUT = 25
 CALL_GAP = 9
 RETRY_WAIT = 62
 PAIRS = {
-    "XAU/USD": {"td": "XAU/USD", "dp": 2},
-    "EUR/USD": {"td": "EUR/USD", "dp": 5},
-    "GBP/USD": {"td": "GBP/USD", "dp": 5},
-    "USD/JPY": {"td": "USD/JPY", "dp": 3},
-    "AUD/USD": {"td": "AUD/USD", "dp": 5},
-    "USD/CAD": {"td": "USD/CAD", "dp": 5},
+    "XAU/USD": {"td": "XAU/USD", "dp": 2, "mode": "forex"},
+    "EUR/USD": {"td": "EUR/USD", "dp": 5, "mode": "forex"},
+    "GBP/USD": {"td": "GBP/USD", "dp": 5, "mode": "forex"},
+    "USD/JPY": {"td": "USD/JPY", "dp": 3, "mode": "forex"},
+    "AUD/USD": {"td": "AUD/USD", "dp": 5, "mode": "forex"},
+    "USD/CAD": {"td": "USD/CAD", "dp": 5, "mode": "forex"},
+    "NZD/USD": {"td": "NZD/USD", "dp": 5, "mode": "forex"},
 }
 TIMEFRAMES = {"H1": "1h", "M1": "1min"}
 CANDLES = 130

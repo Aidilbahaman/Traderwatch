@@ -22,7 +22,7 @@ REPO = Path(__file__).resolve().parents[1]
 STATUS_FILE = REPO / "signal-status.json"
 SECRETS = Path.home() / ".secrets"
 
-PAIRS = {"XAU/USD", "EUR/USD", "GBP/USD", "USD/JPY", "AUD/USD", "USD/CAD"}
+PAIRS = {"XAU/USD", "EUR/USD", "GBP/USD", "USD/JPY", "AUD/USD", "USD/CAD", "NZD/USD"}
 PIP = {"XAU/USD": 0.1, "USD/JPY": 0.01}
 DEFAULT_PIP = 0.0001
 DP = {"XAU/USD": 2, "USD/JPY": 3}

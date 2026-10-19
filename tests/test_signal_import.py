@@ -91,6 +91,21 @@ class ValidatorTests(unittest.TestCase):
         self.assertEqual(errors, [])
         self.assertGreaterEqual(m['rr'], 1.5)
 
+    def test_nzdusd_is_whitelisted(self):
+        errors, m = SI.validate(
+            {'pair': 'NZD/USD', 'side': 'BUY', 'timeframe': 'H1',
+             'entry': 0.56634, 'sl': 0.56334, 'tp': 0.57234}, set())
+        self.assertEqual(errors, [])
+        self.assertAlmostEqual(m['sl_pips'], 30.0)
+
+    def test_nzdusd_m1_uses_forex_pip(self):
+        errors, m = SI.validate(
+            {'pair': 'NZD/USD', 'side': 'SELL', 'timeframe': 'M1',
+             'entry': 0.56634, 'sl': 0.56884, 'tp': 0.56134}, set())
+        self.assertEqual(errors, [])
+        self.assertEqual(m['sl_pips'], 25.0)
+        self.assertEqual(m['rr'], 2.0)
+
 
 if __name__ == '__main__':
     unittest.main()

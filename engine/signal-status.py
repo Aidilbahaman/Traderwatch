@@ -27,6 +27,9 @@ MAX_AGE = timedelta(days=90)
 CALL_GAP = 9
 PIP = {"XAUUSD": 0.1, "USDJPY": 0.01}
 DEFAULT_PIP = 0.0001
+# Cap how many open setups are evaluated per run to stay inside the free
+# Twelve Data credit budget (8/min, 800/day).
+MAX_CHECKS = 8
 
 
 def log(msg):
@@ -188,6 +191,9 @@ def main():
             continue
 
         checked += 1
+        if checked > MAX_CHECKS:
+            log(f"CAP reached {MAX_CHECKS} checks; remaining signals evaluated next run")
+            break
         # An open-ended scalping setup still needs a bounded API window per
         # request; evaluate from posting time through now.
         end = now if limit is None else min(now, posted + limit)
