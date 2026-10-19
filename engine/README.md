@@ -28,6 +28,20 @@ All files must be `chmod 600`. `.gitignore` blocks `*.env` and `state/`.
 | `payment-notifier.py` | `* * * * *` | Pending/approved payment alerts |
 | `registration-notifier.py` | `* * * * *` | New registration alerts |
 | `plan-notify-worker.py` | `*/5 * * * *` | Member-facing plan upgrade messages |
+| `signal-import.py` | manual | Validate + import AI-assisted signals (dry-run by default) |
+
+## Producing signals with AI
+
+Read `signal-spec.md` before generating anything. Validate every candidate
+before it reaches the database:
+
+```bash
+python3 engine/signal-import.py --status                      # active pairs
+python3 engine/signal-import.py --file candidates.json         # dry run
+python3 engine/signal-import.py --file candidates.json --commit
+```
+
+`candidates.example.json` shows the expected shape.
 
 ## Signal lifecycle rules
 

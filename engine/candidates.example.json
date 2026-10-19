@@ -1,0 +1,20 @@
+[
+  {
+    "pair": "GBP/USD",
+    "timeframe": "H1",
+    "side": "SELL",
+    "entry": 1.33349,
+    "sl": 1.33600,
+    "tp": 1.32847,
+    "reason": "Lower high at 1.33600 with momentum rolling over below EMA50."
+  },
+  {
+    "pair": "AUD/USD",
+    "timeframe": "M1",
+    "side": "SELL",
+    "entry": 0.69659,
+    "sl": 0.69859,
+    "tp": 0.69259,
+    "reason": "Failed retest of 0.69850, momentum turning lower."
+  }
+]
