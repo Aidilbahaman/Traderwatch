@@ -15,7 +15,7 @@ members. Never insert with `verified = false` and expect it to appear.
 |---|---|---|---|
 | `pair` | string | yes | One of the six whitelisted pairs below, formatted `XXX/YYY` |
 | `side` | string | yes | `BUY` or `SELL` (uppercase) |
-| `timeframe` | string | yes | `H1` or `M1` |
+| `timeframe` | string | yes | `H1` or `M15` |
 | `entry` | number | yes | Current market price at time of posting |
 | `sl` | number | yes | Stop loss |
 | `tp` | number | yes | Take profit |
@@ -41,10 +41,10 @@ XAU/USD   EUR/USD   GBP/USD   USD/JPY   AUD/USD   USD/CAD
 1. **Direction sanity**
    - `BUY`: `sl < entry < tp`
    - `SELL`: `tp < entry < sl`
-2. **M1 (scalping) risk band**
-   - Stop loss must be **20–40 pips** away from entry.
+2. **M15 (scalping) risk floor**
+   - Stop loss must be **at least 12 pips** away from entry.
    - Take profit must be **~2× the stop** (ratio 1.8–2.2).
-   - Reason: M1 ATR is 0.5–2 pips, so tighter stops die on spread and noise.
+   - Reason: M15 ATR can be only 4–9 pips on FX; the floor keeps stops outside spread and noise.
 3. **H1 minimum reward**
    - Reward-to-risk must be **at least 1.5**.
 4. **One active setup per pair**
@@ -57,7 +57,7 @@ XAU/USD   EUR/USD   GBP/USD   USD/JPY   AUD/USD   USD/CAD
 
 | Timeframe | Closes when |
 |---|---|
-| `M1` | TP hits, SL hits, or an operator cancels it. **No time expiry.** |
+| `M15` | TP hits, SL hits, or an operator cancels it. **No time expiry.** |
 | `H1` | TP hits, SL hits, or 48 hours pass without either. |
 
 ## Workflow for an AI-assisted producer

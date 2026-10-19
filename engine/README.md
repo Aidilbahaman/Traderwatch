@@ -20,7 +20,7 @@ All files must be `chmod 600`. `.gitignore` blocks `*.env` and `state/`.
 
 | Script | Schedule | Purpose |
 |---|---|---|
-| `signal-engine.py` | `*/30 * * * *` | Generates verified H1/M1 setups from Twelve Data candles |
+| `signal-engine.py` | `*/15 * * * *` | Generates verified H1/M15 setups from Twelve Data candles |
 | `signal-status.py` | `*/5 * * * *` | Evaluates open setups against M1 candles → TP/SL/expired |
 | `signal-telegram-sender.py` | `5,35 * * * *` | Pushes new signals to linked Pro/Max members |
 | `signal-close-alert.py` | `*/5 * * * *` | Admin-only TP/SL closure alerts (@Twreg_bot) |
@@ -46,8 +46,8 @@ python3 engine/signal-import.py --file candidates.json --commit
 ## Signal lifecycle rules
 
 - **One active setup per pair.** While any timeframe for a pair is `active`,
-  the engine emits nothing new for that pair (H1 and M1 included).
-- **M1 / scalping never auto-expires.** It stays `active` until TP hits, SL
+  the engine emits nothing new for that pair (H1 and M15 included).
+- **M15 / scalping never auto-expires.** It stays `active` until TP hits, SL
   hits, or an operator cancels it.
 - **H1 expires after 48 hours** without a TP/SL hit.
 - If the status file or Supabase check fails, the engine **fails closed** and

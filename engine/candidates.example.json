@@ -10,7 +10,7 @@
   },
   {
     "pair": "AUD/USD",
-    "timeframe": "M1",
+    "timeframe": "M15",
     "side": "SELL",
     "entry": 0.69659,
     "sl": 0.69859,

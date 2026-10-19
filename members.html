@@ -264,7 +264,7 @@ if(member){
     });
     tabsEl.appendChild(b);
   });
-  // Keep the dashboard focused on XAU/USD M1 by default; tabs remain available.
+  // Keep the dashboard focused on XAU/USD M15 by default; tabs remain available.
   if(tabsEl.firstElementChild){
     tabsEl.querySelectorAll("button").forEach(x=>x.setAttribute("aria-selected","false"));
     const goldTab = [...tabsEl.querySelectorAll("button")].find(x=>/XAU|GOLD/i.test(x.textContent));
@@ -303,7 +303,7 @@ if(member){
       a.dataset.tp = s.tp ?? "";
       a.innerHTML = `
         <div class="sig-top"><span class="pair">${esc(s.pair)}</span><span class="side ${cls}">${esc(locked ? "LOCKED" : s.side)}</span></div>
-        <h3 class="setup-title">${esc(s.timeframe || "H1")} ${esc(s.side || "")} setup${s.timeframe === "M1" ? " · scalping" : ""}</h3>
+        <h3 class="setup-title">${esc(s.timeframe || "H1")} ${esc(s.side || "")} setup${s.timeframe === "M15" ? " · scalping" : ""}</h3>
         <dl class="rows num">
           <dt>Entry</dt><dd>${esc(locked ? "—" : s.entry)}</dd>
           <dt>SL</dt><dd class="sl">${esc(locked ? "—" : s.sl)}</dd>
@@ -330,7 +330,7 @@ if(member){
       const shown = daily.filter(s => allowed.includes(normalizePair(s.pair)));
       const selected = plan === "max" ? shown : shown.slice(0, plan === "pro" ? 10 : 3);
       render(selected.map(s=>({pair:s.pair, timeframe:s.timeframe || "H1", side:s.side, entry:s.entry, sl:s.sl, tp:s.tp, posted_at:s.posted_at, locked:false})));
-      note.textContent = selected.length ? `${selected.length} of ${plan === "max" ? "unlimited" : plan === "pro" ? "10" : "3"} daily setups · ${allowed.length} hot pairs.` : "No verified setups available today for your plan. New valid H1/M1 setups appear here when posted.";
+      note.textContent = selected.length ? `${selected.length} of ${plan === "max" ? "unlimited" : plan === "pro" ? "10" : "3"} daily setups · ${allowed.length} hot pairs.` : "No verified setups available today for your plan. New valid H1/M15 setups appear here when posted.";
     }catch(_){
       render([]);
       note.textContent = "Could not load verified signals. Please try again later.";

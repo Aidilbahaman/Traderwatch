@@ -24,9 +24,9 @@ def h1(**kw):
     return base
 
 
-def m1(**kw):
+def m15(**kw):
     # XAU/USD pip = 0.1 -> 25 pip SL = 2.5, 50 pip TP = 5.0
-    base = {'pair': 'XAU/USD', 'side': 'BUY', 'timeframe': 'M1',
+    base = {'pair': 'XAU/USD', 'side': 'BUY', 'timeframe': 'M15',
             'entry': 4164.75, 'sl': 4162.25, 'tp': 4169.75}
     base.update(kw)
     return base
@@ -38,8 +38,8 @@ class ValidatorTests(unittest.TestCase):
         self.assertEqual(errors, [])
         self.assertGreaterEqual(m['rr'], 1.5)
 
-    def test_valid_m1_passes_with_1to2(self):
-        errors, m = SI.validate(m1(), set())
+    def test_valid_m15_passes_with_1to2(self):
+        errors, m = SI.validate(m15(), set())
         self.assertEqual(errors, [])
         self.assertEqual(m['sl_pips'], 25.0)
         self.assertEqual(m['rr'], 2.0)
@@ -48,19 +48,20 @@ class ValidatorTests(unittest.TestCase):
         errors, _ = SI.validate(h1(sl=4180.0, tp=4140.0), set())
         self.assertTrue(any('sl < entry < tp' in e for e in errors))
 
-    def test_m1_stop_too_tight_rejected(self):
-        # 5 pips stop: 0.5 on XAU/USD
-        errors, _ = SI.validate(m1(sl=4164.25, tp=4165.75), set())
-        self.assertTrue(any('must be 20-40' in e for e in errors))
+    def test_m15_stop_too_tight_rejected(self):
+        # 5 pips stop: 0.5 on XAU/USD, under the 12 pip floor
+        errors, _ = SI.validate(m15(sl=4164.25, tp=4165.75), set())
+        self.assertTrue(any('must be at least' in e for e in errors))
 
-    def test_m1_stop_too_wide_rejected(self):
-        # 60 pips stop: 6.0 on XAU/USD
-        errors, _ = SI.validate(m1(sl=4158.75, tp=4176.75), set())
-        self.assertTrue(any('must be 20-40' in e for e in errors))
+    def test_m15_wide_stop_allowed(self):
+        # 60 pips stop: 6.0 on XAU/USD — above the floor, so it must pass
+        errors, m = SI.validate(m15(sl=4158.75, tp=4176.75), set())
+        self.assertEqual(errors, [])
+        self.assertAlmostEqual(m['rr'], 2.0)
 
-    def test_m1_rr_out_of_band_rejected(self):
+    def test_m15_rr_out_of_band_rejected(self):
         # 25 pip stop, 12.5 pip TP -> R:R 0.5
-        errors, _ = SI.validate(m1(tp=4166.00), set())
+        errors, _ = SI.validate(m15(tp=4166.00), set())
         self.assertTrue(any('reward:risk' in e for e in errors))
 
     def test_h1_rr_below_minimum_rejected(self):
@@ -98,9 +99,9 @@ class ValidatorTests(unittest.TestCase):
         self.assertEqual(errors, [])
         self.assertAlmostEqual(m['sl_pips'], 30.0)
 
-    def test_nzdusd_m1_uses_forex_pip(self):
+    def test_nzdusd_m15_uses_forex_pip(self):
         errors, m = SI.validate(
-            {'pair': 'NZD/USD', 'side': 'SELL', 'timeframe': 'M1',
+            {'pair': 'NZD/USD', 'side': 'SELL', 'timeframe': 'M15',
              'entry': 0.56634, 'sl': 0.56884, 'tp': 0.56134}, set())
         self.assertEqual(errors, [])
         self.assertEqual(m['sl_pips'], 25.0)

@@ -138,7 +138,7 @@
         pair: String(card.dataset.pair || '').replace(/^([A-Z]{3})([A-Z]{3})$/, '$1/$2'),
         code: String(card.dataset.pair || '').replace(/[^A-Z]/g, ''),
         side: card.dataset.side || '',
-        type: card.dataset.type === 'M1' ? 'scalping' : (card.dataset.type || ''),
+        type: card.dataset.type === 'M15' ? 'scalping' : (card.dataset.type || ''),
         entry: parseFloat(card.dataset.entry),
         sl: parseFloat(card.dataset.sl),
         tp: parseFloat(card.dataset.tp),

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """TraderWatch signal status updater.
 
-Reads open signals from Supabase, fetches M1 candles from Twelve Data,
+Reads open signals from Supabase, fetches 1-minute candles from Twelve Data,
 determines TP/SL/expired/cancelled, writes signal-status.json, and commits
 only when something changed. Never invents prices: on missing data the
 existing status is preserved and the error is logged.
@@ -21,7 +21,7 @@ STATUS_FILE = REPO / "signal-status.json"
 SECRETS = Path.home() / ".secrets"
 TZ_KL = timezone(timedelta(hours=8))
 LOOKBACK_DAYS = 7
-EXPIRY_SCALP = None  # stays active until TP/SL or explicit cancellation
+EXPIRY_SCALP = None  # M15 stays active until TP/SL or explicit cancellation
 EXPIRY_H1 = timedelta(hours=48)
 MAX_AGE = timedelta(days=90)
 CALL_GAP = 9
@@ -60,7 +60,11 @@ def sb_get(path):
 
 
 def candles(pair, start, end):
-    """Fetch M1 candles between start and end (UTC)."""
+    """Fetch 1-minute candles between start and end (UTC).
+
+    One-minute granularity is used for every timeframe so a TP/SL touch is
+    detected at minute precision rather than at the signal's own bar close.
+    """
     params = urllib.parse.urlencode({
         "symbol": pair, "interval": "1min", "timezone": "UTC",
         "start_date": start.strftime("%Y-%m-%d %H:%M:%S"),
@@ -184,7 +188,8 @@ def main():
 
         posted = parse_ts(sig["posted_at"])
         age = now - posted
-        limit = EXPIRY_SCALP if sig["timeframe"] == "M1" else EXPIRY_H1
+        # M15 (and any legacy M1 rows) use the short scalping window.
+        limit = EXPIRY_SCALP if sig["timeframe"] in ("M1", "M15") else EXPIRY_H1
         if limit is not None and age > limit:
             state["signals"][key] = {"status": "expired"}
             changed += 1

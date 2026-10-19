@@ -100,7 +100,7 @@ async function loadLandingSignals(){
       const a=document.createElement('article');a.className='signal';
       const sell=(s.side||'').toUpperCase()==='SELL';
       a.dataset.pair=fmtPair(s.pair);
-      a.innerHTML=`<div class="signal-top"><span class="pair">${esc(fmtPair(s.pair))}</span><span class="badge${sell?' sell':''}">${esc(s.side||'SETUP')}</span></div><h3>${esc(s.timeframe||'H1')} ${esc(s.side||'')} setup${s.timeframe==='M1'?' · scalping':''}</h3><div class="levels"><div><div class="label">Entry</div><div class="value">${esc(s.entry)}</div></div><div><div class="label">SL</div><div class="value sl">${esc(s.sl)}</div></div><div><div class="label">TP</div><div class="value tp">${esc(s.tp)}</div></div></div><div class="signal-time">Posted ${esc(new Date(s.posted_at).toLocaleString('en-GB',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'}))}</div>`;
+      a.innerHTML=`<div class="signal-top"><span class="pair">${esc(fmtPair(s.pair))}</span><span class="badge${sell?' sell':''}">${esc(s.side||'SETUP')}</span></div><h3>${esc(s.timeframe||'H1')} ${esc(s.side||'')} setup${s.timeframe==='M15'?' · scalping':''}</h3><div class="levels"><div><div class="label">Entry</div><div class="value">${esc(s.entry)}</div></div><div><div class="label">SL</div><div class="value sl">${esc(s.sl)}</div></div><div><div class="label">TP</div><div class="value tp">${esc(s.tp)}</div></div></div><div class="signal-time">Posted ${esc(new Date(s.posted_at).toLocaleString('en-GB',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'}))}</div>`;
       sigGrid.appendChild(a);
     });
     sigNote.textContent=rows.length?'Latest verified public setups. Educational only, not financial advice.':'No verified setups are available today.';
@@ -119,7 +119,7 @@ async function loadHistory(){const request=++chartRequest;historyChart.className
 const qaForm=document.getElementById('qaForm'),qaInput=document.getElementById('qaInput'),qaMessages=document.getElementById('qaMessages');
 function qaAnswer(q){
   const s=q.toLowerCase();
-  if(/\b(max|unlimited|50|fifty)\b/.test(s)) return 'Max Member is $50 per billing period to be confirmed. It includes unlimited verified signals across 7 hot pairs, with H1 and M1 setups when available.';
+  if(/\b(max|unlimited|50|fifty)\b/.test(s)) return 'Max Member is $50 per billing period to be confirmed. It includes unlimited verified signals across 7 hot pairs, with H1 and M15 setups when available.';
   if(/\b(pro|20|twenty|ten|10)\b/.test(s)) return 'Pro Member is $20 per billing period to be confirmed. It includes up to 10 verified signals daily across 7 hot pairs.';
   if(/\b(free|0|three|3)\b/.test(s)) return 'Free Member is free. It includes up to 3 verified signals daily across 3 hot pairs, plus dashboard and charts.';
   if(/\b(signal|setup|entry|stop|sl|take profit|tp|scalp|h1|m1)\b/.test(s)) return 'Signals are educational setups only. Verify the current price, timeframe, spread and risk on your own broker. No result is guaranteed.';

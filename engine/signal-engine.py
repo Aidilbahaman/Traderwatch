@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """TraderWatch auto signal engine.
 
-Fetches real H1/M1 candles from Twelve Data, computes a deterministic
+Fetches real H1/M15 candles from Twelve Data, computes a deterministic
 trend+momentum setup (EMA20/EMA50, RSI14, ATR14), and inserts verified
 setups into Supabase. One active setup per pair per timeframe per day.
 
@@ -21,6 +21,7 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 TIMEOUT = 25
+TZ_KL = timezone(timedelta(hours=8))
 # Free tier allows 8 credits/minute -> keep ~7 calls/min with 9s spacing.
 CALL_GAP = 9
 RETRY_WAIT = 62
@@ -33,7 +34,7 @@ PAIRS = {
     "USD/CAD": {"td": "USD/CAD", "dp": 5, "mode": "forex"},
     "NZD/USD": {"td": "NZD/USD", "dp": 5, "mode": "forex"},
 }
-TIMEFRAMES = {"H1": "1h", "M1": "1min"}
+TIMEFRAMES = {"H1": "1h", "M15": "15min"}
 CANDLES = 130
 STATUS_FILE = Path("/home/ubuntu/web/Traderwatch-repo/signal-status.json")
 LOCK = Path("/tmp/signal-engine.lock")
@@ -106,11 +107,10 @@ def pair_has_active_setup(pair, status_state):
         log(f"WARN pair active check failed {pair}: {e}")
         return True
 
-# Scalping (M1) pip guards: SL must land 20-40 pips away, TP 40-80 pips
-# (1:2 R:R). M1 ATR is often 0.5-2 pips, so raw 1.5/3.0*ATR gives
-# 1-3 pip SLs that hit instantly on spread+noise.
-SCALP_MIN_SL_PIPS = 20.0
-SCALP_MAX_SL_PIPS = 40.0
+# Scalping (M15) risk model. M15 ATR measures 4-9 pips on FX and ~65 pips on
+# XAU, so a raw 1.5*ATR stop is 6 pips on AUD/NZD — inside the spread. The
+# stop is ATR-derived but floored to survive spread and noise, then TP = 1:2.
+SCALP_MIN_SL_PIPS = 12.0
 SCALP_RR = 2.0
 PIP_SIZE = {"XAU/USD": 0.1, "USD/JPY": 0.01}
 DEFAULT_PIP = 0.0001
@@ -215,15 +215,16 @@ def atr14(rows):
 
 
 def stop_and_target(side, price, atr, pair, tf):
-    """Return (entry, sl, tp). H1 keeps raw 1.5/3.0*ATR. M1 (scalping)
-    clamps the stop into a 20-40 pip band and projects TP at 1:2."""
+    """Return (entry, sl, tp).
+
+    H1 : raw 1.5/3.0 x ATR
+    M15: ATR-derived stop floored at 12 pips, TP at 1:2
+    """
     pip = pip_size(pair)
-    if tf == "M1":
-        # Scalping: clamp ATR-derived stop into the 20-40 pip band, then
-        # project TP at 1:2. Widening to the floor keeps the stop outside
-        # M1 noise; capping at the ceiling stops runaway risk on spikes.
-        sl_dist = min(max(1.5 * atr, SCALP_MIN_SL_PIPS * pip),
-                      SCALP_MAX_SL_PIPS * pip)
+    if tf == "M15":
+        # Floor the stop so it clears spread and M15 noise; XAU's ATR already
+        # sits well above the floor, so gold keeps its natural ATR width.
+        sl_dist = max(1.5 * atr, SCALP_MIN_SL_PIPS * pip)
         tp_dist = sl_dist * SCALP_RR
     else:
         sl_dist, tp_dist = 1.5 * atr, 3.0 * atr
@@ -301,6 +302,17 @@ def today_start():
     return datetime.fromtimestamp(start_utc, tz=timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
 
 
+def in_session(now=None):
+    """True during the London/New York overlap window (15:00-01:00 MYT).
+
+    Scanning outside active hours burns API credits on thin, choppy candles
+    that rarely produce a valid M15 setup.
+    """
+    now = now or datetime.now(TZ_KL)
+    hour = now.astimezone(TZ_KL).hour
+    return hour >= 15 or hour < 1
+
+
 def main():
     if LOCK.exists():
         log("SKIP previous run still active")
@@ -308,6 +320,9 @@ def main():
     LOCK.touch()
     try:
         inserted, skipped, errors = 0, 0, 0
+        if not in_session():
+            log("SKIP outside session window (15:00-01:00 MYT)")
+            return 0
         status_state = load_status_state()
         if status_state is None:
             log("ERROR cannot read signal-status.json; fail closed to avoid duplicate pair signals")

@@ -28,8 +28,7 @@ DEFAULT_PIP = 0.0001
 DP = {"XAU/USD": 2, "USD/JPY": 3}
 DEFAULT_DP = 5
 
-SCALP_MIN_SL = 20.0
-SCALP_MAX_SL = 40.0
+SCALP_MIN_SL = 12.0
 SCALP_RR_MIN = 1.8
 SCALP_RR_MAX = 2.2
 H1_MIN_RR = 1.5
@@ -83,8 +82,8 @@ def validate(sig, active):
         errors.append(f"pair '{pair}' not whitelisted (use one of {sorted(PAIRS)})")
     if side not in ("BUY", "SELL"):
         errors.append(f"side '{side}' must be BUY or SELL")
-    if tf not in ("H1", "M1"):
-        errors.append(f"timeframe '{tf}' must be H1 or M1")
+    if tf not in ("H1", "M15"):
+        errors.append(f"timeframe '{tf}' must be H1 or M15")
 
     try:
         entry = float(sig["entry"])
@@ -116,14 +115,14 @@ def validate(sig, active):
         m.update({"sl_pips": round(sl_pips, 1), "tp_pips": round(tp_pips, 1),
                   "rr": round(rr, 2)})
 
-        if tf == "M1":
-            if not (SCALP_MIN_SL <= sl_pips <= SCALP_MAX_SL):
+        if tf == "M15":
+            if sl_pips < SCALP_MIN_SL:
                 errors.append(
-                    f"M1 stop is {sl_pips:.1f} pips; must be "
-                    f"{SCALP_MIN_SL:.0f}-{SCALP_MAX_SL:.0f}")
+                    f"M15 stop is {sl_pips:.1f} pips; must be at least "
+                    f"{SCALP_MIN_SL:.0f}")
             if not (SCALP_RR_MIN <= rr <= SCALP_RR_MAX):
                 errors.append(
-                    f"M1 reward:risk is {rr:.2f}; must be "
+                    f"M15 reward:risk is {rr:.2f}; must be "
                     f"{SCALP_RR_MIN}-{SCALP_RR_MAX} (1:2)")
         elif tf == "H1" and rr < H1_MIN_RR:
             errors.append(f"H1 reward:risk is {rr:.2f}; must be at least {H1_MIN_RR}")
