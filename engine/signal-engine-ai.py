@@ -224,6 +224,30 @@ def build_levels(pair, side, price, atr):
     return price + sl_dist, price - tp_dist
 
 
+def credit_budget_ok(reserve=100):
+    """False when the daily quota is nearly gone.
+
+    New signals are optional; closing TP/SL is not. Once the day's usage gets
+    within `reserve` credits of the plan limit, the engine stands down so
+    signal-status.py can still resolve open setups.
+    """
+    try:
+        with urllib.request.urlopen(
+                "https://api.twelvedata.com/api_usage?apikey=" + TD_KEY,
+                timeout=20) as r:
+            d = json.loads(r.read().decode())
+        used = int(d.get("daily_usage", 0))
+        limit = int(d.get("plan_daily_limit", 800))
+        if used >= limit - reserve:
+            log(f"SKIP credit guard: {used}/{limit} used, "
+                f"reserving {reserve} for TP/SL checks")
+            return False
+        return True
+    except Exception as e:
+        log(f"WARN credit check failed ({type(e).__name__}); continuing")
+        return True
+
+
 def main():
     global TD_KEY
     dry = "--dry-run" in sys.argv
@@ -254,6 +278,9 @@ def main():
         if not TD_KEY:
             log("ERROR no TWELVEDATA_API_KEY")
             return 1
+
+        if not credit_budget_ok():
+            return 0
 
         inserted = skipped = errors = 0
         for pair in PAIRS:
