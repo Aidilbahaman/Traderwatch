@@ -325,15 +325,33 @@ if(member){
       if(r.error) throw r.error;
       const rows = Array.isArray(r.data) ? r.data : [];
       const deduped = [...new Map(rows.map(s => [String(s.id || [s.pair,s.timeframe,s.side,s.entry,s.sl,s.tp,s.posted_at].join("|")), s])).values()];
-      const daily = deduped.filter(s => {
+
+      /* Signals posted before today used to vanish at midnight even while the
+         position was still open. Keep them while signal-status.json says
+         "active"; everything else stays on today's list only. */
+      let statuses = {};
+      try{
+        const sr = await fetch("signal-status.json?t=" + Date.now(), { cache: "no-store" });
+        if(sr.ok){ const sj = await sr.json(); statuses = (sj && sj.signals) || {}; }
+      }catch(_){}
+      const isToday = s => {
         const d = new Date(s.posted_at);
         return Number.isFinite(d.getTime()) && d.toDateString() === new Date().toDateString();
-      });
+      };
+      const stillOpen = s => {
+        const st = statuses[signalKey(s.pair, s.posted_at)];
+        return !!st && st.status === "active";
+      };
       const allowed = plan === "free" ? HOT_PAIRS.slice(0,3) : HOT_PAIRS;
-      const shown = daily.filter(s => allowed.includes(normalizePair(s.pair)));
-      const selected = plan === "max" ? shown : shown.slice(0, plan === "pro" ? 10 : 3);
+      const forPlan = s => allowed.includes(normalizePair(s.pair));
+      const todays = deduped.filter(s => isToday(s) && forPlan(s));
+      const carried = deduped.filter(s => !isToday(s) && forPlan(s) && stillOpen(s));
+      const selected = (plan === "max" ? todays : todays.slice(0, plan === "pro" ? 10 : 3)).concat(carried);
       render(selected.map(s=>({pair:s.pair, timeframe:s.timeframe || "H1", side:s.side, entry:s.entry, sl:s.sl, tp:s.tp, posted_at:s.posted_at, locked:false})));
-      note.textContent = selected.length ? `${selected.length} of ${plan === "max" ? "unlimited" : plan === "pro" ? "10" : "3"} daily setups · ${allowed.length} hot pairs.` : "No verified setups available today for your plan. New valid M15 setups appear here when posted.";
+      const carriedNote = carried.length ? ` · ${carried.length} still open from earlier.` : "";
+      note.textContent = selected.length
+        ? `${selected.length} of ${plan === "max" ? "unlimited" : plan === "pro" ? "10" : "3"} daily setups · ${allowed.length} hot pairs.${carriedNote}`
+        : "No verified setups available today for your plan. New valid M15 setups appear here when posted.";
     }catch(_){
       render([]);
       note.textContent = "Could not load verified signals. Please try again later.";
