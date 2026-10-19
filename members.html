@@ -342,13 +342,27 @@ if(member){
         const st = statuses[signalKey(s.pair, s.posted_at)];
         return !!st && st.status === "active";
       };
+      /* A result should stay visible for a day after it closes, otherwise the
+         trade vanishes the moment the engine marks TP/SL. */
+      const closedRecently = s => {
+        const st = statuses[signalKey(s.pair, s.posted_at)];
+        if(!st || !st.closed) return false;
+        const t = new Date(st.closed).getTime();
+        return Number.isFinite(t) && (Date.now() - t) <= 24 * 60 * 60 * 1000;
+      };
       const allowed = plan === "free" ? HOT_PAIRS.slice(0,3) : HOT_PAIRS;
       const forPlan = s => allowed.includes(normalizePair(s.pair));
       const todays = deduped.filter(s => isToday(s) && forPlan(s));
-      const carried = deduped.filter(s => !isToday(s) && forPlan(s) && stillOpen(s));
+      const older = deduped.filter(s => !isToday(s) && forPlan(s));
+      const carriedOpen = older.filter(stillOpen);
+      const carriedClosed = older.filter(closedRecently).slice(0, 3);
+      const carried = carriedOpen.concat(carriedClosed);
       const selected = (plan === "max" ? todays : todays.slice(0, plan === "pro" ? 10 : 3)).concat(carried);
       render(selected.map(s=>({pair:s.pair, timeframe:s.timeframe || "H1", side:s.side, entry:s.entry, sl:s.sl, tp:s.tp, posted_at:s.posted_at, locked:false})));
-      const carriedNote = carried.length ? ` · ${carried.length} still open from earlier` : "";
+      const bits = [];
+      if(carriedOpen.length) bits.push(`${carriedOpen.length} still open from earlier`);
+      if(carriedClosed.length) bits.push(`${carriedClosed.length} closed in the last 24h`);
+      const carriedNote = bits.length ? ` · ${bits.join(" · ")}` : "";
       note.textContent = selected.length
         ? `${selected.length} of ${plan === "max" ? "unlimited" : plan === "pro" ? "10" : "3"} daily setups · ${allowed.length} hot pairs${carriedNote}.`
         : "No verified setups available today for your plan. New valid M15 setups appear here when posted.";
