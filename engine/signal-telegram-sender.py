@@ -177,7 +177,7 @@ def fmt(s):
             f"🎁 <b>New trader offer</b>\n"
             f"Register through our partner link to claim a <b>$30 welcome bonus</b>. "
             f"Eligibility and conditions apply — please review the broker's terms before registering.\n"
-            f"👉 https://rinfinity.com/en/welcome-bonus?a=wnzx")
+            f'👉 <a href="https://rinfinity.com/en/welcome-bonus?a=wnzx">Claim your $30 welcome bonus</a>')
 
 
 def main():
