@@ -9,7 +9,6 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="app.css">
-<link rel="stylesheet" href="education.css?v=2026102001">
 <style>
 [hidden]{display:none!important}
 .badge{font:700 .85rem var(--body);padding:4px 12px;border-radius:99px;background:var(--panel2);border:1px solid var(--line);color:var(--muted)}
@@ -31,13 +30,12 @@
 <header>
   <div class="wrap nav">
     <a class="logo" href="members.html" aria-label="TraderWatch member area">
-      <svg width="32" height="32" viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="7" fill="#050b14" stroke="#264261"/><path d="M8 9h16v4h-6.2v11h-3.6V13H8z" fill="#fff"/><rect x="20" y="20" width="5" height="5" fill="#2ecf6f"/></svg>
-      <span>TraderWatch</span></a>
+      <svg width="32" height="32" viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="7" fill="#050b14" stroke="#264261"/><path d="M8 9h16v4h-6.2v11h-3.6V13H8z" fill="#fff"/><rect x="20" y="20" width="5" height="5" fill="#2ecf6f"/></svg></a>
     <nav aria-label="Member">
+      <a href="education.html">Education hub<span class="edu-new">NEW</span></a>
       <a href="members.html#charts">Charts</a>
       <a href="members.html#signals">Signals</a>
-      <a href="members.html#education" data-edu-link>Education<span class="edu-new">NEW</span></a>
-      <a href="subscribe.html">Subscription</a>
+      <a href="members.html#toolkits">Toolkits</a>
     </nav>
     <span class="badge" id="planBadge">Free</span>
     <button class="linkbtn" type="button" onclick="logOut()">Log out</button>
@@ -102,29 +100,14 @@
       <p class="tg-note" id="tgNote" hidden></p>
     </section>
 
+    <div id="toolkits"></div>
+
     <section class="block tw-motion" id="signals">
       <h2>Signals</h2>
       <div class="signals" id="signalGrid"></div>
       <p class="sample" id="signalNote"></p>
     </section>
 
-    <section class="block edu" id="education" aria-labelledby="eduTitle">
-      <div class="edu-head">
-        <p class="edu-eyebrow">Learning hub</p>
-        <h2 id="eduTitle">Education</h2>
-        <p class="edu-sub">Short, plain-English lessons on how the market, charts and risk work — written for members, sized for a coffee break.</p>
-        <p class="edu-meta" id="eduMeta"></p>
-      </div>
-
-      <div class="edu-continue" id="eduContinue" hidden></div>
-
-      <div class="edu-tabs" id="eduTabs" role="tablist" aria-label="Lesson category"></div>
-
-      <div class="edu-grid" id="eduGrid" role="tabpanel" aria-labelledby="eduTab0"></div>
-      <p class="edu-empty" id="eduEmpty" hidden>No lessons in this category yet.</p>
-
-      <p class="edu-disclaimer">Educational content only. Not financial advice.</p>
-    </section>
   </div>
 </main>
 
@@ -140,8 +123,6 @@
 <script>window.TW_CONFIG = { tzOffset: 8, supportUrl: "", brand: "TraderWatch" };</script>
 <script src="members-tools.js?v=202610182133" defer></script>
 <script src="members-tools-2.js?v=2026101903" defer></script>
-<script src="education-data.js?v=2026102001" defer></script>
-<script src="education.js?v=2026102001" defer></script>
 <script>
 (async function(){
 const member = await requireMember();

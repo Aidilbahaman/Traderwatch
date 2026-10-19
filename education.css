@@ -21,25 +21,9 @@
   --edu-radius: 14px;
 }
 
-/* --- nav: NEW badge + current page state -------------------------------- */
-.nav nav a .edu-new {
-  display: inline-block;
-  margin-left: 6px;
-  padding: 2px 6px;
-  border-radius: 99px;
-  background: var(--gold);
-  color: #193414;
-  font: 800 9px/1.4 var(--body);
-  letter-spacing: .06em;
-  vertical-align: 1px;
-}
-.nav nav a[aria-current="true"],
-.nav nav a[aria-current="page"] {
-  color: var(--blue);
-  text-decoration: underline;
-  text-decoration-thickness: 2px;
-  text-underline-offset: 6px;
-}
+/* --- page shell (standalone education.html) ----------------------------- */
+.edu-page { padding: 26px 0 56px; }
+.edu-title { margin: 0 0 4px; font-size: clamp(1.9rem, 4vw, 2.6rem); color: var(--navy); }
 
 /* --- section shell ------------------------------------------------------ */
 .edu { scroll-margin-top: 90px; }

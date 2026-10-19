@@ -166,3 +166,7 @@ footer p+p{margin-top:12px;max-width:80ch}
   .tabs button{padding:7px 11px;font-size:12px}
 }
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.sig{transition:none}.sig:hover{transform:none}}
+
+/* member nav: Education NEW badge + current-page state (shared by all member pages) */
+.nav nav a .edu-new{display:inline-block;margin-left:6px;padding:2px 6px;border-radius:99px;background:var(--gold);color:#193414;font:800 9px/1.4 var(--body);letter-spacing:.06em;vertical-align:1px}
+.nav nav a[aria-current="page"],.nav nav a[aria-current="true"]{color:var(--blue);text-decoration:underline;text-decoration-thickness:2px;text-underline-offset:6px}

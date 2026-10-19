@@ -289,35 +289,10 @@
     }, 50);
   }
 
-  function watchNav() {
-    var section = document.getElementById("education");
-    var link = document.querySelector('.nav nav a[data-edu-link]');
-    if (!section || !link) return;
-    var ticking = false;
-    function update() {
-      ticking = false;
-      var rect = section.getBoundingClientRect();
-      // highlight while the section covers the middle of the viewport
-      var on = rect.top < window.innerHeight * 0.55 && rect.bottom > window.innerHeight * 0.45;
-      if (on) link.setAttribute("aria-current", "true");
-      else link.removeAttribute("aria-current");
-    }
-    window.addEventListener("scroll", function () {
-      if (ticking) return;
-      ticking = true;
-      update();
-    }, { passive: true });
-    window.addEventListener("resize", update);
-    update();
-    // a #education deep link scrolls after load; re-check once it settles
-    setTimeout(update, 400);
-  }
-
   function initHub() {
     buildTabs();
     whenTierKnown(function () {
       render();
-      watchNav();
       if ("MutationObserver" in window) {
         new MutationObserver(function (muts) {
           if (muts.some(function (m) { return m.attributeName === "data-tier"; })) render();
@@ -390,7 +365,7 @@
     up.href = "subscribe.html?plan=" + tier;
     actions.appendChild(up);
     var back = el("a", "edu-cta ghost", "Back to Education");
-    back.href = "members.html#education";
+    back.href = "education.html";
     actions.appendChild(back);
     box.appendChild(actions);
     root.appendChild(box);
@@ -437,7 +412,7 @@
     actions.appendChild(btn);
 
     var back = el("a", "edu-cta ghost", "Back to Education");
-    back.href = "members.html#education";
+    back.href = "education.html";
     actions.appendChild(back);
     root.appendChild(actions);
   }
@@ -516,7 +491,7 @@
     p.style.margin = "10px 0 20px";
     root.appendChild(p);
     var a = el("a", "edu-cta", "Back to Education");
-    a.href = "members.html#education";
+    a.href = "education.html";
     root.appendChild(a);
   }
 
@@ -559,8 +534,19 @@
     setProgress: setProgress
   };
 
+  function bootHub() {
+    var p = typeof window.requireMember === "function"
+      ? window.requireMember(location.pathname)
+      : Promise.resolve(null);
+    Promise.resolve(p).then(function (member) {
+      if (member) publishTier(member);
+    }).catch(function () {}).then(function () {
+      initHub();
+    });
+  }
+
   function init() {
-    if (document.getElementById("education")) initHub();
+    if (document.getElementById("education")) bootHub();
     if (document.getElementById("lessonRoot")) bootLesson();
     var logout = document.getElementById("eduLogout");
     if (logout) {
