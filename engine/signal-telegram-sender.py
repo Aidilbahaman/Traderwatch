@@ -157,8 +157,7 @@ def fmt(s):
             f"Entry {s['entry']}\n"
             f"🛑 SL {s['sl']}\n"
             f"🎯 TP {s['tp']}\n\n"
-            f"Educational setup — verify on your broker. Not financial advice.\n"
-            f"Dashboard: https://aidilbahaman.github.io/Traderwatch/members.html")
+            f"This is live price update. We giving the signal, you decide to enter or not. Not financial advice, trade at your own risk.")
 
 
 def main():
