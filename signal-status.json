@@ -1,5 +1,5 @@
 {
- "updated": "2026-10-19T06:10:01+08:00",
+ "updated": "2026-10-19T08:00:02+08:00",
  "signals": {
   "USDCAD_20261018_110101": {
    "status": "sl",
@@ -23,10 +23,16 @@
    "closed": "2026-10-18T19:45:01+08:00"
   },
   "EURUSD_20261018_170331": {
-   "status": "active"
+   "status": "tp",
+   "pips": 10.8,
+   "r": 2.0,
+   "closed": "2026-10-19T08:00:02+08:00"
   },
   "XAUUSD_20261018_170219": {
-   "status": "active"
+   "status": "tp",
+   "pips": 33.6,
+   "r": 1.99,
+   "closed": "2026-10-19T08:00:02+08:00"
   },
   "USDCAD_20261018_190156": {
    "status": "expired"
@@ -47,10 +53,16 @@
    "status": "expired"
   },
   "USDCAD_20261019_000242": {
-   "status": "active"
+   "status": "sl",
+   "pips": -10.5,
+   "r": -1,
+   "closed": "2026-10-19T08:00:02+08:00"
   },
   "USDJPY_20261019_000204": {
-   "status": "active"
+   "status": "sl",
+   "pips": -7.8,
+   "r": -1,
+   "closed": "2026-10-19T08:00:02+08:00"
   },
   "GBPUSD_20261019_000154": {
    "status": "expired"
@@ -62,7 +74,10 @@
    "status": "expired"
   },
   "XAUUSD_20261019_000003": {
-   "status": "active"
+   "status": "tp",
+   "pips": 24.5,
+   "r": 2.01,
+   "closed": "2026-10-19T08:00:02+08:00"
   }
  }
 }
