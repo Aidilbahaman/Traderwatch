@@ -151,13 +151,33 @@ def fetch_new_signals(sent):
     return sorted(fresh, key=lambda s: s["posted_at"])
 
 
+PIP = {"XAU/USD": 0.1, "USD/JPY": 0.01}
+DEFAULT_PIP = 0.0001
+
+
 def fmt(s):
     arrow = "🟢 BUY" if s["side"] == "BUY" else "🔴 SELL"
-    return (f"{arrow} {s['pair']} · {s['timeframe']}\n"
-            f"Entry {s['entry']}\n"
-            f"🛑 SL {s['sl']}\n"
-            f"🎯 TP {s['tp']}\n\n"
-            f"This is live price update. We giving the signal, you decide to enter or not. Not financial advice, trade at your own risk.")
+    pip = PIP.get(s["pair"], DEFAULT_PIP)
+    entry, sl, tp = float(s["entry"]), float(s["sl"]), float(s["tp"])
+    sl_p = abs(entry - sl) / pip
+    tp_p = abs(tp - entry) / pip
+    rr = tp_p / sl_p if sl_p else 0.0
+    levels = ("<pre>"
+              f"Entry   {s['entry']}\n"
+              f"SL      {s['sl']}   -{sl_p:.1f}p\n"
+              f"TP      {s['tp']}   +{tp_p:.1f}p\n"
+              f"R:R     1 : {rr:.1f}"
+              "</pre>")
+    return (f"📡 <b>TRADERWATCH · LIVE SIGNAL</b>\n"
+            f"━━━━━━━━━━━━━━━━━━━━\n"
+            f"{arrow} <b>{s['pair']}</b> · {s['timeframe']}\n\n"
+            f"{levels}\n"
+            f"This is live price update. We giving the signal, you decide to "
+            f"enter or not. Not financial advice, trade at your own risk.\n\n"
+            f"🎁 <b>New trader offer</b>\n"
+            f"Register through our partner link to claim a <b>$30 welcome bonus</b>. "
+            f"Eligibility and conditions apply — please review the broker's terms before registering.\n"
+            f"👉 https://rinfinity.com/en/welcome-bonus?a=wnzx")
 
 
 def main():
