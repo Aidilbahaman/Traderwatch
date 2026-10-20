@@ -573,13 +573,20 @@ html.tw-dark iframe,html.tw-dark img,html.tw-dark video{filter:invert(1) hue-rot
 
     var c3 = box('Ikut sesi', true);
     var tiles = el('div', 'tw2-tiles');
-    ['Asia', 'London', 'New York'].forEach(function (k) {
-      var m = bySes[k];
+    // Tetingkap sesi dalam waktu Malaysia, supaya ahli faham julat setiap satu.
+    var SESS = [
+      { k: 'Asia', w: '05:00–15:00 MY' },
+      { k: 'London', w: '15:00–20:00 MY' },
+      { k: 'New York', w: '20:00–04:00 MY' }
+    ];
+    SESS.forEach(function (s) {
+      var m = bySes[s.k];
       var t = el('div', 'tw2-tile');
-      t.appendChild(el('span', null, k));
+      t.appendChild(el('span', null, s.k));
       t.appendChild(el('b', null, m ? Math.round(m.w / m.n * 100) + '%' : '–'));
-      var sp = el('span', m ? cls(m.pips) : '', m ? fmt(m.pips) + ' pips · ' + m.n : 'Tiada data');
-      t.appendChild(sp);
+      t.appendChild(el('span', m ? cls(m.pips) : 'tw2-sub',
+                       m ? fmt(m.pips) + ' pips · ' + m.n : 'Belum ada signal ditutup'));
+      t.appendChild(el('span', 'tw2-sub', s.w));
       tiles.appendChild(t);
     });
     c3.appendChild(tiles);
