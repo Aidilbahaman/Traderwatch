@@ -1,5 +1,5 @@
 {
- "updated": "2026-10-22T04:30:02+08:00",
+ "updated": "2026-10-22T05:00:03+08:00",
  "signals": {
   "USDCAD_20261018_110101": {
    "status": "sl",
@@ -312,7 +312,11 @@
    "closed": "2026-10-22T03:00:02+08:00"
   },
   "USDCAD_20261022_000031": {
-   "status": "active"
+   "status": "tp",
+   "pips": 24.0,
+   "r": 2.0,
+   "unit": "pips",
+   "closed": "2026-10-22T05:00:03+08:00"
   },
   "XAUUSD_20261022_030720": {
    "status": "sl",
@@ -328,7 +332,11 @@
    "status": "active"
   },
   "XAUUSD_20261022_040410": {
-   "status": "active"
+   "status": "sl",
+   "pips": -30.4,
+   "r": -1,
+   "unit": "pips",
+   "closed": "2026-10-22T05:00:03+08:00"
   },
   "BTCUSD_20261022_042049": {
    "status": "active"
