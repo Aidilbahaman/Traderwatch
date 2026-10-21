@@ -1,5 +1,5 @@
 {
- "updated": "2026-10-21T21:45:01+08:00",
+ "updated": "2026-10-21T22:15:02+08:00",
  "signals": {
   "USDCAD_20261018_110101": {
    "status": "sl",
@@ -251,7 +251,10 @@
    "status": "active"
   },
   "XAUUSD_20261021_210615": {
-   "status": "active"
+   "status": "tp",
+   "pips": 138.6,
+   "r": 3.62,
+   "closed": "2026-10-21T22:15:02+08:00"
   },
   "EURUSD_20261021_214143": {
    "status": "active"
