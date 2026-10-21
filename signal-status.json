@@ -1,5 +1,5 @@
 {
- "updated": "2026-10-21T09:45:01+08:00",
+ "updated": "2026-10-21T10:30:02+08:00",
  "signals": {
   "USDCAD_20261018_110101": {
    "status": "sl",
@@ -185,6 +185,9 @@
    "status": "active"
   },
   "XAUUSD_20261021_094228": {
+   "status": "active"
+  },
+  "USDJPY_20261021_102406": {
    "status": "active"
   }
  }
