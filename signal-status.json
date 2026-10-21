@@ -1,5 +1,5 @@
 {
- "updated": "2026-10-22T04:15:01+08:00",
+ "updated": "2026-10-22T04:30:02+08:00",
  "signals": {
   "USDCAD_20261018_110101": {
    "status": "sl",
@@ -328,6 +328,9 @@
    "status": "active"
   },
   "XAUUSD_20261022_040410": {
+   "status": "active"
+  },
+  "BTCUSD_20261022_042049": {
    "status": "active"
   }
  }
