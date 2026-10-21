@@ -1,2 +1,2 @@
-# TW6N
+# TRADERWATCH PROJECT
 Trader Watch Web Page
