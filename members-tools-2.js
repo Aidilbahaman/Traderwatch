@@ -241,6 +241,7 @@ html.tw-dark iframe,html.tw-dark img,html.tw-dark video{filter:invert(1) hue-rot
       var o = s.signals[k];
       out.push({
         key: k, pair: m[1], hour: +m[5], status: o.status, pips: o.pips,
+        unit: o.unit === 'usd' ? 'usd' : 'pips',
         r: o.r, closed: o.closed,
         t: Date.UTC(+m[2], +m[3] - 1, +m[4], +m[5], +m[6], +m[7]) - CFG.tzOffset * 3600000
       });
@@ -462,7 +463,10 @@ html.tw-dark iframe,html.tw-dark img,html.tw-dark video{filter:invert(1) hue-rot
   function renderKpi() {
     var list = closedSignals(CFG.statsDays);
     var wins = list.filter(function (x) { return x.status === 'tp'; }).length;
-    var pips = list.reduce(function (a, x) { return a + (x.pips || 0); }, 0);
+    var pipList = list.filter(function (x) { return x.unit !== 'usd'; });
+    var usdList = list.filter(function (x) { return x.unit === 'usd'; });
+    var pips = pipList.reduce(function (a, x) { return a + (x.pips || 0); }, 0);
+    var usd = usdList.reduce(function (a, x) { return a + (x.pips || 0); }, 0);
     var cur = 0;
     for (var i = list.length - 1; i >= 0 && list[i].status === 'tp'; i--) cur++;
 
@@ -480,9 +484,10 @@ html.tw-dark iframe,html.tw-dark img,html.tw-dark video{filter:invert(1) hue-rot
     ui.kPips.x.textContent = '';
     if (list.length) {
       ui.kPips.val.textContent = fmt(pips);
-      ui.kPips.sub.textContent = list.length + ' signal';
+      ui.kPips.sub.textContent = pipList.length + ' signal'
+        + (usdList.length ? ' · BTC $' + fmt(usd) : '');
       var c = 0, pts = [0];
-      list.forEach(function (x) { c += x.pips || 0; pts.push(c); });
+      pipList.forEach(function (x) { c += x.pips || 0; pts.push(c); });
       ui.kPips.x.appendChild(sparkline(pts));
     } else {
       ui.kPips.val.textContent = '–';
@@ -528,8 +533,11 @@ html.tw-dark iframe,html.tw-dark img,html.tw-dark video{filter:invert(1) hue-rot
       return;
     }
 
+    var pipList = list.filter(function (x) { return x.unit !== 'usd'; });
+    var usdList = list.filter(function (x) { return x.unit === 'usd'; });
     var cum = 0, pts = [0];
-    list.forEach(function (x) { cum += x.pips || 0; pts.push(cum); });
+    pipList.forEach(function (x) { cum += x.pips || 0; pts.push(cum); });
+    var usdTotal = usdList.reduce(function (a, x) { return a + (x.pips || 0); }, 0);
     var cur = 0, best = 0, run = 0;
     list.forEach(function (x) {
       if (x.status === 'tp') { run++; if (run > best) best = run; } else { run = 0; }
@@ -539,7 +547,8 @@ html.tw-dark iframe,html.tw-dark img,html.tw-dark video{filter:invert(1) hue-rot
     var c1 = box('Pips kumulatif');
     var big = el('div', 'tw2-big ' + cls(cum), fmt(cum) + ' pips');
     c1.appendChild(big);
-    c1.appendChild(el('p', 'tw2-sub', list.length + ' signal · TP berturut-turut terbaik: ' + best));
+    c1.appendChild(el('p', 'tw2-sub', pipList.length + ' signal · TP berturut-turut terbaik: ' + best
+      + (usdList.length ? ' · BTC $' + fmt(usdTotal) : '')));
     var chartWrap = el('div');
     chartWrap.style.marginTop = '10px';
     chartWrap.appendChild(areaChart(pts, 150, cum >= 0 ? '#2f9e5b' : '#c0392b'));
@@ -548,12 +557,21 @@ html.tw-dark iframe,html.tw-dark img,html.tw-dark video{filter:invert(1) hue-rot
 
     var byPair = {}, bySes = {};
     list.forEach(function (x) {
-      var p = byPair[x.pair] = byPair[x.pair] || { w: 0, n: 0, pips: 0 };
-      p.n++; if (x.status === 'tp') p.w++; p.pips += x.pips || 0;
+      var p = byPair[x.pair] = byPair[x.pair] || { w: 0, n: 0, pips: 0, usd: 0 };
+      p.n++; if (x.status === 'tp') p.w++;
+      if (x.unit === 'usd') p.usd += x.pips || 0; else p.pips += x.pips || 0;
       var sn = sessionOf(x.hour);
-      var q = bySes[sn] = bySes[sn] || { w: 0, n: 0, pips: 0 };
-      q.n++; if (x.status === 'tp') q.w++; q.pips += x.pips || 0;
+      var q = bySes[sn] = bySes[sn] || { w: 0, n: 0, pips: 0, usd: 0 };
+      q.n++; if (x.status === 'tp') q.w++;
+      if (x.unit === 'usd') q.usd += x.pips || 0; else q.pips += x.pips || 0;
     });
+
+    function sumLabel(m) {
+      var out = m.usd ? (m.usd >= 0 ? '+' : '') + '$' + fmt(m.usd) : '';
+      if (m.pips) out = (out ? out + ' · ' : '') + fmt(m.pips) + ' pips';
+      return out || '0 pips';
+    }
+    function sumCls(m) { return cls(m.pips || m.usd); }
 
     var c2 = box('Ikut pair');
     Object.keys(byPair).sort(function (a, c) { return byPair[c].pips - byPair[a].pips; }).forEach(function (k) {
@@ -566,7 +584,7 @@ html.tw-dark iframe,html.tw-dark img,html.tw-dark video{filter:invert(1) hue-rot
       tr.appendChild(f);
       r.appendChild(tr);
       r.appendChild(el('span', null, pct + '%'));
-      r.appendChild(el('span', cls(m.pips), fmt(m.pips)));
+      r.appendChild(el('span', sumCls(m), sumLabel(m)));
       c2.appendChild(r);
     });
     b.appendChild(c2);
@@ -584,8 +602,8 @@ html.tw-dark iframe,html.tw-dark img,html.tw-dark video{filter:invert(1) hue-rot
       var t = el('div', 'tw2-tile');
       t.appendChild(el('span', null, s.k));
       t.appendChild(el('b', null, m ? Math.round(m.w / m.n * 100) + '%' : '–'));
-      t.appendChild(el('span', m ? cls(m.pips) : 'tw2-sub',
-                       m ? fmt(m.pips) + ' pips · ' + m.n : 'Belum ada signal ditutup'));
+      t.appendChild(el('span', m ? sumCls(m) : 'tw2-sub',
+                       m ? sumLabel(m) + ' · ' + m.n : 'Belum ada signal ditutup'));
       t.appendChild(el('span', 'tw2-sub', s.w));
       tiles.appendChild(t);
     });
@@ -599,9 +617,10 @@ html.tw-dark iframe,html.tw-dark img,html.tw-dark video{filter:invert(1) hue-rot
   }
 
   function downloadCsv(list) {
-    var rows = ['key,pair,status,pips,r,closed'];
+    var rows = ['key,pair,status,pips,unit,r,closed'];
     list.forEach(function (x) {
       rows.push([x.key, prettyPair(x.pair), x.status, x.pips == null ? '' : x.pips,
+        x.unit || 'pips',
         x.r == null ? '' : x.r, x.closed || ''].join(','));
     });
     var blob = new Blob([rows.join('\n')], { type: 'text/csv' });

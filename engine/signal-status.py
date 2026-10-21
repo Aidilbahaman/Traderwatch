@@ -25,8 +25,10 @@ EXPIRY_SCALP = None  # M15 stays active until TP/SL or explicit cancellation
 EXPIRY_H1 = timedelta(hours=48)
 MAX_AGE = timedelta(days=90)
 CALL_GAP = 9
-PIP = {"XAUUSD": 0.1, "USDJPY": 0.01}
+PIP = {"XAUUSD": 0.1, "USDJPY": 0.01, "BTCUSD": 1.0}
 DEFAULT_PIP = 0.0001
+# BTC movement is measured in USD, not forex pips.
+USD_UNIT = {"BTCUSD"}
 # Cap how many open setups are evaluated per run to stay inside the free
 # Twelve Data credit budget (8/min, 800/day).
 MAX_CHECKS = 8
@@ -216,13 +218,16 @@ def main():
 
         status, pips, r, ambiguous = evaluate(sig, data)
         if status:
+            code = "".join(ch for ch in sig["pair"].upper() if ch.isalpha())
             entry = {"status": status, "pips": pips, "r": r,
+                     "unit": "usd" if code in USD_UNIT else "pips",
                      "closed": now.astimezone(TZ_KL).isoformat(timespec="seconds")}
             if ambiguous:
                 entry["ambiguous"] = True
             state["signals"][key] = entry
             changed += 1
-            log(f"{'TP' if status=='tp' else 'SL'} {sig['pair']} {pips:+.1f} pips")
+            log(f"{'TP' if status=='tp' else 'SL'} {sig['pair']} "
+                f"{pips:+.1f} {'USD' if entry['unit']=='usd' else 'pips'}")
         elif prev.get("status") != "active":
             state["signals"][key] = {"status": "active"}
             changed += 1
