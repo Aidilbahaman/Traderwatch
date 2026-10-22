@@ -1,12 +1,18 @@
 #!/usr/bin/env python3
 """TraderWatch signal status updater.
 
-Reads open signals from Supabase, fetches 1-minute candles from Twelve Data,
-determines TP/SL/expired/cancelled, writes signal-status.json, and commits
-only when something changed. Never invents prices: on missing data the
-existing status is preserved and the error is logged.
+Reads open signals from Supabase, fetches 1-minute candles, determines
+TP/SL/expired/cancelled, writes signal-status.json, and commits only when
+something changed. Never invents prices: on missing data the existing status
+is preserved and the error is logged.
+
+Data source: Swissquote M1 from state/sq-bars.db is PRIMARY (local SQLite,
+populated live by sq-collector — no network, no rate limit, no credit cost).
+TwelveData 1-min is only a fallback for windows Swissquote does not cover
+(older trades from before the collector started polling).
 """
 import json
+import sqlite3
 import subprocess
 import sys
 import time
@@ -61,12 +67,42 @@ def sb_get(path):
         return json.loads(r.read().decode())
 
 
+SQ_DB = REPO / "state" / "sq-bars.db"
+
+
+def _sq_pair(pair):
+    """'USD/CAD' -> 'USDCAD' (kunci lajur dalam sq-bars.db)."""
+    return "".join(c for c in str(pair).upper() if c.isalpha())
+
+
 def candles(pair, start, end):
     """Fetch 1-minute candles between start and end (UTC).
 
-    One-minute granularity is used for every timeframe so a TP/SL touch is
-    detected at minute precision rather than at the signal's own bar close.
+    Swissquote M1 SQLite ialah sumber UTAMA: sq-collector poll live setiap
+    beberapa saat dan simpan bar M1 terus ke state/sq-bars.db. Jadi semakan
+    TP/SL tidak bergantung network, tidak ada had rate, dan percuma.
+
+    TwelveData hanya sandaran bila Swissquote tiada bar dalam window itu
+    (contoh trade lama sebelum collector mula poll).
     """
+    try:
+        if SQ_DB.exists():
+            code = _sq_pair(pair)
+            con = sqlite3.connect(f"file:{SQ_DB}?mode=ro", uri=True)
+            try:
+                rows = con.execute(
+                    "SELECT ts, h, l FROM bars WHERE pair=? AND gran='M1' "
+                    "AND ts>=? AND ts<=? ORDER BY ts",
+                    (code, start.strftime("%Y-%m-%dT%H:%M:%S"),
+                     end.strftime("%Y-%m-%dT%H:%M:%S"))).fetchall()
+            finally:
+                con.close()
+            if rows:
+                return [(r[0], float(r[1]), float(r[2])) for r in rows], "swissquote"
+    except Exception as e:
+        log(f"SQ-ERR {pair}: {type(e).__name__}: {str(e)[:70]}")
+
+    # Sandaran: TwelveData 1-min.
     params = urllib.parse.urlencode({
         "symbol": pair, "interval": "1min", "timezone": "UTC",
         "start_date": start.strftime("%Y-%m-%d %H:%M:%S"),
@@ -90,7 +126,7 @@ def candles(pair, start, end):
             out = []
             for v in reversed(vals):
                 out.append((v["datetime"], float(v["high"]), float(v["low"])))
-            return out, ""
+            return out, "twelvedata"
         except urllib.error.HTTPError as e:
             if e.code == 429 and attempt == 1:
                 time.sleep(62)
@@ -231,9 +267,9 @@ def main():
         # An open-ended scalping setup still needs a bounded API window per
         # request; evaluate from posting time through now.
         end = now if limit is None else min(now, posted + limit)
-        data, err = candles(sig["pair"], posted, end)
+        data, src = candles(sig["pair"], posted, end)
         if data is None:
-            log(f"DATA {sig['pair']}: {err}")
+            log(f"DATA {sig['pair']}: {src}")
             errors += 1
             time.sleep(CALL_GAP)
             continue
