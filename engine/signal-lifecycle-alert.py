@@ -546,21 +546,30 @@ def fmt_duration(start, end):
 
 
 def _timing_line(st, start, end, label="TP hit"):
-    """Baris masa dengan sumber timestamp dinyatakan.
+    """Baris masa untuk notifikasi member.
 
-    entry_at  = harga benar-benar sentuh entry
-    first_touch = harga sentuh zon POI (lebih awal)
-    bila hanya ada posted_at, kita cuma tahu bila setup di-SiLive, bukan bila
-    entry kena — jadi label daran "Setup posted", bukan "Entry".
-
-    `_timing_line` hanya dipanggil selepas entry disahkan, jadi `start`
-    sentiasa entry_at atau first_touch.posted_at, bukan sekadar posted_at
-    mentah; kalau bukan, label "Entry" akan menipu.
+    Panjang tempoh hanya bermakna bila ia diukur dari entry yang benar-benar
+    disentuh. Bila timestamp itu tiada (mis. trade lama yang di-backfill),
+    jangan tunjuk nombor — beritahu member tempohnya tidak dapat disahkan
+    supaya mereka tidak menganggap angka sebagai fakta.
     """
-    if not end:
-        return (f"Entry {clock_my(start)} ➔ {label} "
-                f"(⏱️ {src_of(st)} ➔ close)")
-    return f"Entry {clock_my(start)} ➔ {label} {clock_my(end)} ({fmt_duration(start, end)} · {src_of(st)})"
+    if not start or not end:
+        return f"⏱️ {_src_phrase(st, label)}"
+    src = src_of(st)
+    if src == "entry":
+        return (f"⏱️ {label} {clock_my(end)} · tempoh "
+                f"{fmt_duration(start, end)}")
+    # Tanpa entry_at yang sah, panjang tempoh bukan ukuran entry→close.
+    return f"⏱️ {label} {clock_my(end)} · tempoh tidak disahkan"
+
+
+def _src_phrase(st, label):
+    src = src_of(st)
+    if src == "entry":
+        return f"{label} (entry disahkan)"
+    if src == "POI touched":
+        return f"{label} selepas harga sentuh zon POI"
+    return f"{label} selepas setup diterbitkan"
 
 
 def src_of(st):
