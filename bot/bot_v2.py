@@ -633,21 +633,36 @@ def _run_agent(prompt, use_staruh=False):
             m_url, m_key_env = MODEL_ROUTES.get(model, (LLM_URL, LLM_KEY_ENV))
             m_key = _profile_secret(m_key_env) or key
             for temp in (0.2, 0.45, 0.1, 0.3, 0.6):
-                body = json.dumps({"model": model,
-                                   "messages": [{"role": "user", "content": content}],
-                                   "temperature": temp, "max_tokens": 2000}).encode()
+                payload = {"model": model,
+                           "messages": [{"role": "user", "content": content}],
+                           "temperature": temp, "max_tokens": 2000}
+                # Model reasoning (MiniMax m3.1 flash) guna token untuk
+                # "reasoning" dahulu. Tanpa effort=low,ia habiskan
+                # max_tokens sebelum tulis jawapan -> content=None ->
+                # "model gagal beri jawapan". effort=low potong reasoning
+                # (~21s -> ~12s) dan pastikan JSON keluar.
+                if model.startswith("minimax/"):
+                    payload["reasoning"] = {"effort": "low"}
+                body = json.dumps(payload).encode()
                 req = urllib.request.Request(m_url, data=body,
                     headers={"Authorization": "Bearer " + m_key,
                              "Content-Type": "application/json"})
                 try:
                     with urllib.request.urlopen(req, timeout=90) as r:
                         data = json.load(r)
-                    txt = (data["choices"][0]["message"]["content"] or "").strip()
+                    msg = data["choices"][0]["message"]
+                    txt = (msg.get("content") or "").strip()
+                    if not txt:
+                        # Reasoning model: content Sometimes null bila
+                        # max_tokens habis dalam reasoning. Teks penuh
+                        # masih ada dalam field "reasoning".
+                        txt = (msg.get("reasoning") or "").strip()
                     # Hanya terima jawapan yang ada payload boleh parse.
                     # Blok think-only / kosong mesti retry, bukan dipulangkan
                     # kepada validate sebagai "tiada setup".
                     clean = re.sub(r"<think(?:ing)?>.*?</think(?:ing)?>", "", txt, flags=re.S).strip()
-                    has_payload = ("BIAS=" in clean or "{\"" in clean or "{\n" in clean)
+                    has_payload = ("BIAS=" in clean or "{\"" in clean or "{\n" in clean
+                                   or ("\"bias\"" in clean) or ("\"entry\"" in clean))
                     if txt and len(txt) >= 12 and has_payload:
                         if model != LLM_MODEL:
                             print(f"[LLM] fallback model used: {model}", flush=True)
