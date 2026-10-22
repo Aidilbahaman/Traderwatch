@@ -1,5 +1,5 @@
 {
- "updated": "2026-10-23T05:22:09+08:00",
+ "updated": "2026-10-23T05:22:43+08:00",
  "signals": {
   "USDCAD_20261018_110101": {
    "status": "sl",
@@ -430,7 +430,12 @@
    "status": "active"
   },
   "USDCAD_20261023_025418": {
-   "status": "active"
+   "status": "void_unfilled",
+   "pips": 0.0,
+   "r": 0.0,
+   "unit": "pips",
+   "closed": "2026-10-23T03:00:02+08:00",
+   "note": "Entry 1.40356 never filled. Swissquote M1 replay: price already at 1.4005 by 02:54 MY (below tp 1.4015) and never reached entry. No position opened. Earlier 'tp +20.6 pips' notice was a phantom verdict; members were notified directly on 2026-10-23."
   }
  }
 }
