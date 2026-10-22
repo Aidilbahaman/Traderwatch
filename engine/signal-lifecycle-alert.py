@@ -603,12 +603,11 @@ def build_message(event, sig, price, st=None):
                 f"Price reached your entry ({fmt_price(sig['pair'], price)}).\n"
                 f"Setup is now active — manage your risk.")
     if event == "sl":
-        start = st.get("entry_at") or sig.get("posted_at")
-        end = st.get("closed_at") or datetime.now(timezone.utc).isoformat()
+        start = st.get("entry_at") or st.get("first_touch") or sig.get("posted_at")
+        end = st.get("closed_at")
         return (f"🛑 <b>Trade #{sig.get('id', '—')} • {sig['pair']} {side} ({direction})</b>\n"
                 f"Stop Loss reached — the setup was closed according to the risk plan.\n"
-                f"⏱️ Time: {_timing_line(st, start, end, 'SL hit')} "
-                f"({fmt_duration(start, end)})\n\n"
+                f"⏱️ Time: {_timing_line(st, start, end, 'SL hit')}\n\n"
                 f"📍 Entry Zone: <code>{fmt_price(sig['pair'], sig['entry'])}</code>\n"
                 f"🛡️ Stop Loss: <code>{fmt_price(sig['pair'], sig['sl'])}</code> "
                 f"(-{fmt_move(sig, sig['sl'])})\n"
