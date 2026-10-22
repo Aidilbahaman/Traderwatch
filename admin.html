@@ -8,13 +8,42 @@
 <link rel="stylesheet" href="app.css">
 <style>
 [hidden]{display:none!important}
-.admin-page{padding:30px 0 70px}.admin-head{display:flex;justify-content:space-between;align-items:end;gap:18px;flex-wrap:wrap;margin-bottom:24px}.admin-head p{color:var(--muted);margin-top:6px}.admin-actions{display:flex;gap:10px;flex-wrap:wrap}.admin-card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px;margin-bottom:18px;box-shadow:0 8px 24px rgba(9,40,76,.05)}.admin-card h2{font-size:1.2rem;margin-bottom:14px}.toolbar{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px}.toolbar input,.toolbar select{max-width:260px}.request{border:1px solid var(--line);border-radius:12px;padding:16px;margin-top:12px;display:grid;gap:10px}.request-head{display:flex;justify-content:space-between;gap:12px;align-items:start;flex-wrap:wrap}.request-meta{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;color:var(--muted);font-size:.9rem}.request-meta b{display:block;color:var(--text);font-size:1rem}.request-actions{display:flex;gap:8px;flex-wrap:wrap}.btn.danger{background:#fde9e5;color:#a33d34}.btn.secondary{background:#eef4f8;color:var(--navy)}.status{font-size:.8rem;font-weight:800;text-transform:uppercase;letter-spacing:.06em;padding:5px 9px;border-radius:99px;background:#fff3d6;color:#946b00}.status.approved{background:#e6f7eb;color:#25804b}.status.rejected{background:#fde9e5;color:#a33d34}.empty{color:var(--muted);padding:20px 0}.msg{margin-top:12px}.role-note{font-size:.85rem;color:var(--muted)}@media(max-width:650px){.request-meta{grid-template-columns:1fr 1fr}.admin-page{padding-top:22px}}
+.admin-page{padding:30px 0 70px}.admin-head{display:flex;justify-content:space-between;align-items:end;gap:18px;flex-wrap:wrap;margin-bottom:24px}.admin-head p{color:var(--muted);margin-top:6px}.admin-actions{display:flex;gap:10px;flex-wrap:wrap}.admin-card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px;margin-bottom:18px;box-shadow:0 8px 24px rgba(9,40,76,.05)}.admin-card h2{font-size:1.2rem;margin-bottom:14px}.toolbar{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px}.toolbar input,.toolbar select{max-width:260px}.request{border:1px solid var(--line);border-radius:12px;padding:16px;margin-top:12px;display:grid;gap:10px}.request-head{display:flex;justify-content:space-between;gap:12px;align-items:start;flex-wrap:wrap}.request-meta{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;color:var(--muted);font-size:.9rem}.request-meta b{display:block;color:var(--text);font-size:1rem}.request-actions{display:flex;gap:8px;flex-wrap:wrap}.btn.danger{background:#fde9e5;color:#a33d34}.btn.secondary{background:#eef4f8;color:var(--navy)}.subs-tbl{width:100%;border-collapse:collapse;font-size:.9rem}
+.subs-tbl th,.subs-tbl td{padding:10px 8px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top}
+.subs-tbl th{font-size:.74rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:800}
+.subs-tbl tbody tr:hover{background:var(--panel2)}
+.subs-tbl .num{font-variant-numeric:tabular-nums;white-space:nowrap}
+.pill{display:inline-block;font-size:.7rem;font-weight:800;text-transform:uppercase;letter-spacing:.05em;padding:3px 8px;border-radius:99px}
+.pill.max{background:#e6f7eb;color:#25804b}
+.pill.pro{background:#e8f1fd;color:#1c5fa8}
+.pill.free{background:#f1f4f7;color:#60758d}
+.pill.ok{background:#e6f7eb;color:#25804b}
+.pill.warn{background:#fff3d6;color:#946b00}
+.pill.late{background:#fde9e5;color:#a33d34}
+@media(max-width:720px){.subs-tbl{display:block;overflow-x:auto;white-space:nowrap}}
+.status{font-size:.8rem;font-weight:800;text-transform:uppercase;letter-spacing:.06em;padding:5px 9px;border-radius:99px;background:#fff3d6;color:#946b00}.status.approved{background:#e6f7eb;color:#25804b}.status.rejected{background:#fde9e5;color:#a33d34}.empty{color:var(--muted);padding:20px 0}.msg{margin-top:12px}.role-note{font-size:.85rem;color:var(--muted)}@media(max-width:650px){.request-meta{grid-template-columns:1fr 1fr}.admin-page{padding-top:22px}}
 </style>
 </head>
 <body>
 <header><div class="wrap nav"><a class="logo" href="index.html" aria-label="TraderWatch home"><svg width="32" height="32" viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="7" fill="#050b14" stroke="#264261"/><path d="M8 9h16v4h-6.2v11h-3.6V13H8z" fill="#fff"/><rect x="20" y="20" width="5" height="5" fill="#2ecf6f"/></svg><span>TraderWatch Admin</span></a><button class="linkbtn" type="button" onclick="logOut()">Log out</button></div></header>
 <main class="admin-page"><div class="wrap">
   <div class="admin-head"><div><h1 style="font-size:clamp(1.9rem,4vw,2.8rem)">Payment approvals</h1><p>Review payment references and activate Pro or Max access.</p><p class="role-note" id="adminIdentity"></p></div><div class="admin-actions"><button class="btn secondary" id="refreshBtn" type="button">Refresh</button><a class="btn secondary" href="members.html">Member dashboard</a></div></div>
+  <section class="admin-card" id="subsCard"><h2>Subscription check (30 hari / sebulan)</h2>
+    <p class="role-note">Semak nama member, tarikh subscribe, tarikh expire, dan tier. Kiraan 30 hari dari tarikh subscribe atau tarikh terakhir plan di-upgrade.</p>
+    <div class="toolbar">
+      <select id="subsTier" aria-label="Filter tier">
+        <option value="all">Semua tier</option>
+        <option value="max">Max</option>
+        <option value="pro">Pro</option>
+        <option value="free">Free</option>
+      </select>
+      <input id="subsSearch" type="search" placeholder="Cari nama atau email" aria-label="Cari member">
+      <button class="btn" id="subsBtn" type="button">Semak subscription</button>
+    </div>
+    <div id="subsOut"><p class="empty">Tekan "Semak subscription" untuk senarai.</p></div>
+    <div class="msg" id="subsMsg" role="status" aria-live="polite"></div>
+  </section>
+
   <section class="admin-card"><h2>Payment requests</h2><div class="toolbar"><select id="statusFilter" aria-label="Request status"><option value="pending">Pending</option><option value="all">All</option><option value="approved">Approved</option><option value="rejected">Rejected</option></select><input id="search" type="search" placeholder="Search email or name" aria-label="Search requests"></div><div id="requests"><p class="empty">Loading requests…</p></div><div class="msg" id="requestMsg" role="status" aria-live="polite"></div></section>
   <section class="admin-card"><h2>Manual plan override</h2><form id="overrideForm"><div class="toolbar"><input id="overrideEmail" type="email" required placeholder="member@example.com" aria-label="Member email"><select id="overridePlan" aria-label="Plan"><option value="free">Free</option><option value="pro">Pro</option><option value="max">Max</option></select><button class="btn" type="submit">Update plan</button></div></form><div class="msg" id="overrideMsg" role="status" aria-live="polite"></div></section>
 </div></main>
@@ -23,6 +52,89 @@
 (async function(){
  const member=await requireMember('/admin.html'); if(!member)return;
  const identity=document.getElementById('adminIdentity'), requests=document.getElementById('requests'), reqMsg=document.getElementById('requestMsg'), filter=document.getElementById('statusFilter'), search=document.getElementById('search');
+ const subsOut=document.getElementById('subsOut'),subsMsg=document.getElementById('subsMsg'),
+       subsTier=document.getElementById('subsTier'),subsSearch=document.getElementById('subsSearch'),
+       subsBtn=document.getElementById('subsBtn');
+ const PLAN_DAYS={pro:30,max:30,free:0};
+ function monthEnd(startISO,days){
+   if(!startISO)return null;
+   const s=new Date(startISO);
+   if(isNaN(s))return null;
+   const e=new Date(s.getTime());
+   e.setDate(e.getDate()+(days||30));
+   return e;
+ }
+ function fmtD(d){if(!d)return'—';return d.toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'});}
+ async function loadSubs(){
+   subsBtn.disabled=true;subsMsg.className='msg';subsMsg.textContent='';
+   subsOut.innerHTML='<p class="empty">Memuatkan member…</p>';
+   try{
+     const {data,error}=await sb.from('profiles')
+        .select('id,name,email,plan,created_at,telegram_chat_id')
+        .order('name',{ascending:true});
+     if(error)throw error;
+     // Subscription start = bila plan terakhir di-naik (payload reviews)
+     let reviewMap={};
+     try{
+       const {data:pr}=await sb.rpc('admin_list_payment_requests',{p_status:'approved'});
+       (pr||[]).forEach(r=>{
+         if(!r.email||!r.reviewed_at)return;
+         const k=r.email.toLowerCase();
+         const at=r.reviewed_at;
+         if(!reviewMap[k]||at>reviewMap[k])reviewMap[k]=at;
+       });
+     }catch(_){/* RPC optional */}
+     const now=new Date();
+     const q=subsSearch.value.trim().toLowerCase();
+     const tier=subsTier.value;
+     let rows=(data||[]).map(p=>{
+       const tier_=String(p.plan||'free').toLowerCase();
+       const days=PLAN_DAYS[tier_]||0;
+       const reviewed=p.email?reviewMap[p.email.toLowerCase()]:null;
+       const startISO=(reviewed||p.created_at);
+       const start=startISO?new Date(startISO):null;
+       const end=days?monthEnd(startISO,days):null;
+       const daysLeft=end?Math.ceil((end-now)/86400000):null;
+       let state='ok';
+       if(tier_==='free')state='free';
+       else if(!end)state='warn';
+       else if(daysLeft<0)state='late';
+       else if(daysLeft<=7)state='warn';
+       return{...p,tier:tier_,start,end,daysLeft,state};
+     }).filter(p=>tier==='all'||p.tier===tier)
+       .filter(p=>!q||String((p.name||'')+' '+(p.email||'')).toLowerCase().includes(q));
+     rows.sort((a,b)=>(a.daysLeft??99999)-(b.daysLeft??99999));
+     if(!rows.length){subsOut.innerHTML='<p class="empty">Tiada member sepadan.</p>';return}
+     const paid=rows.filter(r=>r.tier!=='free');
+     const late=rows.filter(r=>r.state==='late');
+     const soon=rows.filter(r=>r.state==='warn');
+     subsOut.innerHTML=
+       '<div class="subs-tbl"><thead><tr><th>Member</th><th>Tier</th><th>Subscribe</th>'+
+       '<th>Expire</th><th>Baki</th><th>Status</th><th>TG</th></tr></thead><tbody>'+
+       rows.map(p=>{
+         const bal=p.daysLeft==null?'—':
+           (p.daysLeft<0?Math.abs(p.daysLeft)+' hari':'lewat '+p.daysLeft+' hari');
+         const lbl={ok:'aktif',warn:'akan tamat',late:'tamat',free:'free'}[p.state];
+         return '<tr><td><strong>'+escA(p.name||'—')+'</strong><div class="role-note">'+escA(p.email||'')+'</div></td>'+
+           '<td><span class="pill '+p.tier+'">'+p.tier+'</span></td>'+
+           '<td class="num">'+fmtD(p.start)+'</td>'+
+           '<td class="num">'+fmtD(p.end)+'</td>'+
+           '<td class="num">'+bal+'</td>'+
+           '<td><span class="pill '+p.state+'">'+lbl+'</span></td>'+
+           '<td class="num">'+(p.telegram_chat_id||'—')+'</td></tr>';
+       }).join('')+'</tbody></table>'+
+       '<p class="role-note" style="margin-top:12px">Bayaran: '+paid.length+
+         ' · Akan tamat ≤7 hari: '+soon.length+' · Tamat: '+late.length+'</p>';
+     subsMsg.className='msg ok';
+     subsMsg.textContent='Memuatkan '+rows.length+' member.';
+   }catch(e){
+     subsOut.innerHTML='<p class="empty">Gagal memuatkan member.</p>';
+     subsMsg.className='msg err';subsMsg.textContent=String(e.message||e).slice(0,160);
+   }finally{subsBtn.disabled=false}
+ }
+ subsBtn.addEventListener('click',loadSubs);
+ subsTier.addEventListener('change',loadSubs);
+
  async function ensureAdmin(){const {data,error}=await sb.from('profiles').select('role,email').eq('id',member.id).single();if(error||!data||data.role!=='admin'){location.href='members.html';return false}identity.textContent='Signed in as '+data.email+' · Administrator';return true}
  function escA(v){return esc(v)}
  function render(rows){const q=search.value.trim().toLowerCase();const filtered=rows.filter(r=>!q||String(r.email+' '+(r.name||'')).toLowerCase().includes(q));if(!filtered.length){requests.innerHTML='<p class="empty">No payment requests found.</p>';return}requests.innerHTML=filtered.map(r=>`<article class="request"><div class="request-head"><div><strong>${escA(r.name||'Member')}</strong><div class="role-note">${escA(r.email)}</div></div><span class="status ${escA(r.status)}">${escA(r.status)}</span></div><div class="request-meta"><div>Plan<b>${escA(r.plan.toUpperCase())}</b></div><div>Amount<b>RM ${escA(r.amount_myr||'—')} / $${escA(r.amount_usd||'—')}</b></div><div>Reference<b>${escA(r.reference)}</b></div></div><div class="role-note">Submitted ${escA(new Date(r.created_at).toLocaleString())}</div>${r.status==='pending'?`<div class="request-actions"><button class="btn" data-action="approve" data-id="${r.id}" type="button">Approve ${escA(r.plan)}</button><button class="btn danger" data-action="reject" data-id="${r.id}" type="button">Reject</button></div>`:''}</article>`).join('')}
