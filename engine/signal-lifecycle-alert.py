@@ -47,6 +47,16 @@ PHOTO_CAPTION_LIMIT = 1024
 # Setup LIMIT yang tak kena entry dalam tempoh ini dianggap gagal.
 # Hanya untuk buy limit / sell limit — setup yang dah entry tidak terjejas.
 EXPIRY_MIN = int(__import__("os").environ.get("LIFECYCLE_EXPIRY_MIN", "30"))
+# Grace window: signal yang baru posting (dalam GRACE_MIN minit) ketika bot
+# mula/reset TIDAK boleh dilabel "legacy". Sebelum ini, signal yang posting
+# 32 saat sebelum bot start di-bootstrap sebagai legacy dan notification
+# TP/SL-nya hilang selamanya.
+GRACE_MIN = int(__import__("os").environ.get("LIFECYCLE_GRACE_MIN", "15"))
+# Backfill: notifikasi catch-up hanya dihantar jika peristiwa (TP/SL) benar
+# berlaku dalam tempoh ini. Peristiwa lama (>BACKFILL_MAX_AGE_HOURS jam)
+# hanya direkod dalam state, tiada mesej — elak spam member.
+BACKFILL_MAX_AGE_HOURS = int(
+    __import__("os").environ.get("LIFECYCLE_BACKFILL_HOURS", "24"))
 
 PIP = {"XAU/USD": 0.1, "USD/JPY": 0.01, "BTC/USD": 1.0}
 DEFAULT_PIP = 0.0001
@@ -606,6 +616,85 @@ def build_message(event, sig, price, st=None):
             f"Educational information only — not financial advice.")
 
 
+def _status_key(sig):
+    """Kunci yang sama dengan signal-status.py: CODE_YYYYMMDD_HHMMSS (KL).
+
+    WAJIB guna konvensi timezone yang sama: timestamp Supabase tanpa
+    zon bermaksud UTC,tukar ke KL selepas. Kalau salah, kunci tak
+    sepadan dengan signal-status.json dan backfill senyap je.
+    """
+    raw = str(sig["posted_at"]).replace("Z", "+00:00")
+    d = datetime.fromisoformat(raw)
+    if d.tzinfo is None:
+        d = d.replace(tzinfo=timezone.utc)
+    d = d.astimezone(timezone(timedelta(hours=8)))
+    code = "".join(ch for ch in str(sig["pair"]).upper() if ch.isalpha())
+    return f"{code}_{d:%Y%m%d}_{d:%H%M%S}"
+
+
+def _load_status_map():
+    """Isi signal-status.json -> {key: {...}} (dikongsi antara proses)."""
+    path = Path("/home/ubuntu/web/Traderwatch-repo/signal-status.json")
+    try:
+        data = json.loads(path.read_text())
+    except Exception:
+        return {}
+    return data.get("signals") or {}
+
+
+def _backfill_from_status(sig, st, sid, targets, dry_run=False):
+    """Hantar notifikasi TP/SL yang tertinggal untuk signal 'legacy'.
+
+    Syarat:
+      - status.json ada rekod untuk signal ini
+      - status adalah tp atau sl
+      - peristiwa itu berlaku dalam BACKFILL_MAX_AGE_HOURS (elak spam
+        member dengan keputusan lama yang masih belum ditutup)
+    Return True bila notifikasi dihantar (atau di dry-run).
+    """
+    key = _status_key(sig)
+    info = _load_status_map().get(key)
+    if not info:
+        # Tiada rekod status: jangan main semula bar lama (spam). Tutup
+        # legacy sebagai "unknown" supaya tak di-recheck setiap minit.
+        st["closed"] = "unknown"
+        st["backfilled"] = False
+        log(f"BACKFILL-NORECORD #{sid} {sig['pair']} key={key} — "
+            f"tiada rekod status, ditutup senyap")
+        return True
+    status = str(info.get("status") or "").lower()
+    if status not in ("tp", "sl"):
+        return False
+    closed_raw = info.get("closed")
+    if not closed_raw:
+        return False
+    try:
+        closed_dt = parse_ts(closed_raw)
+    except Exception:
+        return False
+    age_h = (datetime.now(timezone.utc) - closed_dt).total_seconds() / 3600.0
+    if age_h > BACKFILL_MAX_AGE_HOURS:
+        # Peristiwa lama: tutup state TANPA hantar mesej. Kalau tak ditutup,
+        # evaluate_bars akan main semula bar lama dan hantar notifikasi
+        # basi — spam member dengan keputusan 2-3 hari lalu.
+        st["closed"] = status
+        st["closed_at"] = closed_dt.isoformat()
+        st["backfilled"] = False
+        log(f"BACKFILL-SKIP #{sid} {sig['pair']} {status} — lama "
+            f"({age_h:.1f}h > {BACKFILL_MAX_AGE_HOURS}h), ditutup senyap")
+        return True
+
+    st["closed"] = status
+    st["closed_at"] = closed_dt.isoformat()
+    st["backfilled"] = True
+    text = build_message(status, sig, None, st)
+    png = render_result_chart(sig, st)
+    s, f = dispatch(text, targets, dry_run=dry_run, png=png)
+    log(f"BACKFILL {status} #{sid} {sig['pair']} pips={info.get('pips')} "
+        f"age={age_h:.1f}h chart={'yes' if png else 'no'} sent={s} fail={f}")
+    return True
+
+
 def dispatch(text, targets, dry_run=False, png=None):
     """Hantar ke semua target + admin. Jika ada PNG, guna photo+caption."""
     sent = failed = 0
@@ -660,6 +749,28 @@ def _run(dry_run=False):
             st = {"entry": False, "closed": None, "first_touch": None}
         else:
             st.setdefault("first_touch", None)
+        # Legacy (warisan kod lama) — HARUS dikendalikan SEBELUM evaluate.
+        # Kalau biarkan evaluate_bars main semula bar lama, notifikasi
+        # TP/SL yang sudah 2-3 hari akan dihantar sekarang = spam member.
+        if st.get("closed") == "legacy":
+            if _backfill_from_status(sig, st, sid, targets, dry_run):
+                state[sid] = st
+                events += 1
+            continue
+        # Signal FRESH: baru posting (dalam grace window) ketika bot mula.
+        # Such signal mesti dipantau seperti biasa, bukan "legacy".
+        fresh = False
+        if bootstrap:
+            try:
+                age_min = (datetime.now(timezone.utc) -
+                           parse_ts(sig["posted_at"])).total_seconds() / 60.0
+                fresh = age_min <= GRACE_MIN
+            except Exception:
+                fresh = False
+            if fresh:
+                bootstrap = False
+                log(f"FRESH {sid} {sig['pair']} age={age_min:.1f}min "
+                    f"— dipantau (bukan legacy)")
 
         price = None
         try:
