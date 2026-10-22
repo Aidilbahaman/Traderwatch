@@ -208,7 +208,11 @@ def main():
 
         key = key_for(sig["pair"], sig["posted_at"])
         prev = state["signals"].get(key, {})
-        if prev.get("status") in ("tp", "sl", "expired", "cancelled", "collected"):
+        # Status terminal: jangan evaluate semula. void_unfilled mesti
+        # ada di sini — tanpanya cron akan reset ke "active" pada run
+        # seterusnya dan hantar notifikasi palsu lagi (bug trade #110).
+        if prev.get("status") in ("tp", "sl", "expired", "cancelled", "collected",
+                                  "void_unfilled"):
             continue
 
         posted = parse_ts(sig["posted_at"])
