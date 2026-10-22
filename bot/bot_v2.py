@@ -1455,6 +1455,27 @@ def detail_text(t, j):
             f"› Invalidasi:\n{g('invalidation')}\n\n---\n\n⏱️ Validitas: ~{VALID_MIN} menit")
 
 
+async def _heartbeat(st, pair, t0):
+    """Kemaskini mesej progres setiap 10s supaya pengguna tak rasa hang
+    semasa menunggu LLM (yang boleh ambil 20-45s)."""
+    steps = ["menyusun struktur", "mencari POI", "mengira risiko & SL",
+             "semak confluence H1", "tapis setup"]
+    try:
+        while True:
+            await asyncio.sleep(10)
+            el = int(time.monotonic() - t0)
+            step = steps[min(el // 10, len(steps) - 1)]
+            try:
+                await st.edit_text(
+                    f"🧠 <b>Menganalisa <code>{e(pair)}</code></b>\n"
+                    f"⏳ {step}… <code>{el}s</code>",
+                    parse_mode=ParseMode.HTML)
+            except BadRequest:
+                return          # mesej sudah ditimpa oleh langkah seterusnya
+    except asyncio.CancelledError:
+        return
+
+
 async def do_analysis(chat, tg, ctx, pair):
     u = get_user(tg)
     if not can_vision(u):
@@ -1471,11 +1492,18 @@ async def do_analysis(chat, tg, ctx, pair):
     st = await chat.send_message("⏳ <b>[1/4]</b> Mengambil data pasaran...", parse_mode=ParseMode.HTML)
     try:
         h1, m15 = await acandles(pair, "H1", 60), await acandles(pair, "M15", 120)
-        await st.edit_text("🧠 <b>[2/4]</b> AI membaca struktur H1 + M15...", parse_mode=ParseMode.HTML)
+        t_llm = time.monotonic()
+        await st.edit_text(f"🧠 <b>[2/4]</b> AI menganalisa <code>{e(pair)}</code> dengan "
+                           f"<code>{e(LLM_MODEL.split('/')[-1])}</code>\n"
+                           f"⏱️ usually 20-30s…", parse_mode=ParseMode.HTML)
         price = m15[-1]["c"]
-        raw = await ask_agent(PROMPT.format(pair=pair, price=fmt(pair, price),
-                                            h1=compact(h1, 45, pair), m15=compact(m15, 60, pair)),
+        _hb = asyncio.create_task(_heartbeat(st, pair, t_llm))
+        try:
+            raw = await ask_agent(PROMPT.format(pair=pair, price=fmt(pair, price),
+                                                h1=compact(h1, 45, pair), m15=compact(m15, 60, pair)),
                                    use_staruh=True)
+        finally:
+            _hb.cancel()
         await st.edit_text("🧠 <b>[3/4]</b> Mengesahkan level & RR...", parse_mode=ParseMode.HTML)
         j = extract_json(raw)
         try:
