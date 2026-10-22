@@ -1,0 +1,105 @@
+//@version=6
+indicator("TraderWatch SMC/ICT Confluence", "TW SMC", overlay = true)
+
+// -- Inputs ----------------
+htf      = input.timeframe("60", "Higher timeframe")
+fastLen  = input.int(20, "H1 fast EMA", minval = 2)
+slowLen  = input.int(50, "H1 slow EMA", minval = 3)
+swingLen = input.int(20, "Structure lookback", minval = 5)
+sweepLen = input.int(10, "Liquidity lookback", minval = 3)
+rrTarget = input.float(3.0, "Projected R:R", minval = 1.5, step = 0.5)
+minScore = input.int(75, "Minimum score for Grade A", minval = 50, maxval = 100)
+showFvg  = input.bool(true, "Show latest FVG / POI")
+showLvl  = input.bool(true, "Show active Entry / SL / TP")
+
+// -- Confirmed H1 bias ----------------
+h1Close = request.security(syminfo.tickerid, htf, close[1], barmerge.gaps_off, barmerge.lookahead_on)
+h1Fast  = request.security(syminfo.tickerid, htf, ta.ema(close, fastLen)[1], barmerge.gaps_off, barmerge.lookahead_on)
+h1Slow  = request.security(syminfo.tickerid, htf, ta.ema(close, slowLen)[1], barmerge.gaps_off, barmerge.lookahead_on)
+
+h1Bull = nz(h1Close, 0.0) > nz(h1Fast, 0.0) and nz(h1Fast, 0.0) > nz(h1Slow, 0.0)
+h1Bear = nz(h1Close, 0.0) < nz(h1Fast, 0.0) and nz(h1Fast, 0.0) < nz(h1Slow, 0.0)
+
+// -- Structure and liquidity ----------------
+prevHigh = ta.highest(high, swingLen)[1]
+prevLow  = ta.lowest(low, swingLen)[1]
+
+bullBos = close > prevHigh and close[1] <= prevHigh
+bearBos = close < prevLow and close[1] >= prevLow
+
+liqHigh   = ta.highest(high, sweepLen)[1]
+liqLow    = ta.lowest(low, sweepLen)[1]
+bearSweep = high > liqHigh and close < liqHigh
+bullSweep = low < liqLow and close > liqLow
+
+// -- Three-candle FVG / POI ----------------
+bullFvgTop = ta.valuewhen(low > high[2], low, 0)
+bullFvgBot = ta.valuewhen(low > high[2], high[2], 0)
+bearFvgTop = ta.valuewhen(high < low[2], low[2], 0)
+bearFvgBot = ta.valuewhen(high < low[2], high, 0)
+
+bullFvgOk = not na(bullFvgBot) and close >= bullFvgBot
+bearFvgOk = not na(bearFvgTop) and close <= bearFvgTop
+
+bullPoi = bullFvgOk and low <= bullFvgTop and high >= bullFvgBot
+bearPoi = bearFvgOk and high >= bearFvgBot and low <= bearFvgTop
+
+// -- Rejection trigger ----------------
+rng    = math.max(high - low, syminfo.mintick)
+bTop   = math.max(open, close)
+bBot   = math.min(open, close)
+bullRej = close > open and (bBot - low) / rng >= 0.35
+bearRej = close < open and (high - bTop) / rng >= 0.35
+
+// -- Confluence score ----------------
+bullScore = (h1Bull ? 25 : 0) + (bullBos ? 20 : 0) + (bullSweep ? 20 : 0) + (bullPoi ? 20 : 0) + (bullRej ? 15 : 0)
+bearScore = (h1Bear ? 25 : 0) + (bearBos ? 20 : 0) + (bearSweep ? 20 : 0) + (bearPoi ? 20 : 0) + (bearRej ? 15 : 0)
+
+bullAplus = bullScore >= 90 and h1Bull and bullPoi and bullRej and rrTarget >= 3.0
+bearAplus = bearScore >= 90 and h1Bear and bearPoi and bearRej and rrTarget >= 3.0
+bullA     = not bullAplus and bullScore >= minScore and h1Bull
+bearA     = not bearAplus and bearScore >= minScore and h1Bear
+
+buySig  = barstate.isconfirmed and (bullAplus or bullA) and not (bullAplus[1] or bullA[1])
+sellSig = barstate.isconfirmed and (bearAplus or bearA) and not (bearAplus[1] or bearA[1])
+
+// -- Entry / SL / TP ----------------
+buyEntry = ta.valuewhen(buySig, close, 0)
+buySl    = ta.valuewhen(buySig, prevLow, 0)
+buyTp    = buyEntry + math.abs(buyEntry - buySl) * rrTarget
+
+sellEntry = ta.valuewhen(sellSig, close, 0)
+sellSl    = ta.valuewhen(sellSig, prevHigh, 0)
+sellTp    = sellEntry - math.abs(sellSl - sellEntry) * rrTarget
+
+lastBuy = nz(ta.barssince(buySig), 100000) < nz(ta.barssince(sellSig), 100000)
+eLine   = lastBuy ? buyEntry : sellEntry
+sLine   = lastBuy ? buySl : sellSl
+tLine   = lastBuy ? buyTp : sellTp
+
+// -- Plots ----------------
+bgcolor(h1Bull ? color.new(color.green, 93) : h1Bear ? color.new(color.red, 93) : color.new(color.gray, 93))
+
+plot(showFvg and bullFvgOk ? bullFvgTop : na, "Bull FVG top", color = color.green, linewidth = 1, style = plot.style_linebr)
+plot(showFvg and bullFvgOk ? bullFvgBot : na, "Bull FVG bottom", color = color.green, linewidth = 1, style = plot.style_linebr)
+plot(showFvg and bearFvgOk ? bearFvgTop : na, "Bear FVG top", color = color.red, linewidth = 1, style = plot.style_linebr)
+plot(showFvg and bearFvgOk ? bearFvgBot : na, "Bear FVG bottom", color = color.red, linewidth = 1, style = plot.style_linebr)
+
+plot(showLvl ? eLine : na, "Active Entry", color = color.white, linewidth = 2, style = plot.style_linebr)
+plot(showLvl ? sLine : na, "Active Stop", color = color.red, linewidth = 2, style = plot.style_linebr)
+plot(showLvl ? tLine : na, "Active Target", color = color.lime, linewidth = 2, style = plot.style_linebr)
+
+plotshape(bullBos, "Bullish BOS", style = shape.triangleup, location = location.belowbar, color = color.lime, text = "BOS", size = size.tiny)
+plotshape(bearBos, "Bearish BOS", style = shape.triangledown, location = location.abovebar, color = color.red, text = "BOS", size = size.tiny)
+plotshape(bullSweep, "Sell-side sweep", style = shape.circle, location = location.belowbar, color = color.aqua, text = "SSL", size = size.tiny)
+plotshape(bearSweep, "Buy-side sweep", style = shape.circle, location = location.abovebar, color = color.orange, text = "BSL", size = size.tiny)
+
+plotshape(buySig and bullAplus, "Grade A+ BUY", style = shape.labelup, location = location.belowbar, color = color.lime, text = "A+ BUY", textcolor = color.black, size = size.small)
+plotshape(buySig and bullA, "Grade A BUY", style = shape.labelup, location = location.belowbar, color = color.green, text = "A BUY", textcolor = color.white, size = size.small)
+plotshape(sellSig and bearAplus, "Grade A+ SELL", style = shape.labeldown, location = location.abovebar, color = color.red, text = "A+ SELL", textcolor = color.white, size = size.small)
+plotshape(sellSig and bearA, "Grade A SELL", style = shape.labeldown, location = location.abovebar, color = color.maroon, text = "A SELL", textcolor = color.white, size = size.small)
+
+// -- Alerts ----------------
+alertcondition(buySig, "TraderWatch Grade A/A+ BUY", "TraderWatch Grade A/A+ BUY setup. Confirm H1/M15 structure, POI and live risk before entry.")
+alertcondition(sellSig, "TraderWatch Grade A/A+ SELL", "TraderWatch Grade A/A+ SELL setup. Confirm H1/M15 structure, POI and live risk before entry.")
+alertcondition(barstate.isconfirmed and (bullSweep or bearSweep), "TraderWatch Liquidity Sweep", "TraderWatch liquidity sweep detected. Wait for structure confirmation.")

@@ -185,7 +185,7 @@ def main():
 
         key = key_for(sig["pair"], sig["posted_at"])
         prev = state["signals"].get(key, {})
-        if prev.get("status") in ("tp", "sl", "expired", "cancelled"):
+        if prev.get("status") in ("tp", "sl", "expired", "cancelled", "collected"):
             continue
 
         posted = parse_ts(sig["posted_at"])

@@ -1,0 +1,123 @@
+//@version=3
+study(title="TraderWatch SMC/ICT Confluence v3", shorttitle="TW SMC v3", overlay=true)
+
+// ─────────────────────────────────────────────────────────────────────────────
+// TraderWatch rule-based approximation of the AI analysis workflow.
+// AI cannot run inside Pine v3, so this indicator visualises measurable proxies:
+// H1 trend alignment, M15 structure break, liquidity sweep, 3-candle FVG,
+// POI retest, candle rejection and R:R projection.
+// Recommended chart: M15. Educational use only.
+// ─────────────────────────────────────────────────────────────────────────────
+
+// Inputs
+htf             = input(title="Higher timeframe", type=resolution, defval="60")
+fastLen         = input(title="H1 fast EMA", type=integer, defval=20, minval=2)
+slowLen         = input(title="H1 slow EMA", type=integer, defval=50, minval=3)
+swingLen        = input(title="Structure lookback", type=integer, defval=20, minval=5)
+sweepLen        = input(title="Liquidity lookback", type=integer, defval=10, minval=3)
+atrLen          = input(title="ATR length", type=integer, defval=14, minval=2)
+slAtr           = input(title="SL ATR buffer", type=float, defval=0.25, minval=0.0, step=0.05)
+rrTarget        = input(title="Projected R:R", type=float, defval=3.0, minval=1.5, step=0.5)
+minScoreA       = input(title="Minimum score for Grade A", type=integer, defval=75, minval=50, maxval=100)
+showFvg         = input(title="Show latest FVG / POI", type=bool, defval=true)
+showLevels      = input(title="Show active Entry / SL / TP", type=bool, defval=true)
+showStructure   = input(title="Show BOS markers", type=bool, defval=true)
+showSweeps      = input(title="Show liquidity sweeps", type=bool, defval=true)
+
+// H1 directional bias — no lookahead, so only confirmed HTF information is used.
+h1Close = security(tickerid, htf, close, barmerge.gaps_off, barmerge.lookahead_off)
+h1Fast  = security(tickerid, htf, ema(close, fastLen), barmerge.gaps_off, barmerge.lookahead_off)
+h1Slow  = security(tickerid, htf, ema(close, slowLen), barmerge.gaps_off, barmerge.lookahead_off)
+h1Bull  = h1Close > h1Fast and h1Fast > h1Slow
+h1Bear  = h1Close < h1Fast and h1Fast < h1Slow
+
+// M15 market structure proxy: close through the previous range.
+prevHigh = highest(high, swingLen)[1]
+prevLow  = lowest(low, swingLen)[1]
+bullBos  = close > prevHigh and close[1] <= prevHigh
+bearBos  = close < prevLow and close[1] >= prevLow
+
+// Liquidity sweep proxy: wick beyond an old extreme, then close back inside.
+liqHigh   = highest(high, sweepLen)[1]
+liqLow    = lowest(low, sweepLen)[1]
+bearSweep = high > liqHigh and close < liqHigh
+bullSweep = low < liqLow and close > liqLow
+
+// Three-candle ICT Fair Value Gap (FVG).
+// Bullish: current low is above high two bars ago.
+// Bearish: current high is below low two bars ago.
+bullFvgNew = low > high[2]
+bearFvgNew = high < low[2]
+
+bullFvgTop = valuewhen(bullFvgNew, low, 0)
+bullFvgBot = valuewhen(bullFvgNew, high[2], 0)
+bearFvgTop = valuewhen(bearFvgNew, low[2], 0)
+bearFvgBot = valuewhen(bearFvgNew, high, 0)
+
+// The latest gap remains valid until price closes through its far boundary.
+bullFvgValid = not na(bullFvgBot) and close >= bullFvgBot
+bearFvgValid = not na(bearFvgTop) and close <= bearFvgTop
+bullPoiTouch = bullFvgValid and low <= bullFvgTop and high >= bullFvgBot
+bearPoiTouch = bearFvgValid and high >= bearFvgBot and low <= bearFvgTop
+
+// M1-style rejection proxy on the current chart candle.
+rng       = max(high - low, syminfo.mintick)
+bodyTop   = max(open, close)
+bodyBot   = min(open, close)
+upperWick = high - bodyTop
+lowerWick = bodyBot - low
+bullReject = close > open and lowerWick / rng >= 0.35
+bearReject = close < open and upperWick / rng >= 0.35
+
+// Confluence score. Grade is rule-based, not the backend AI's subjective grade.
+bullScore = (h1Bull ? 25 : 0) + (bullBos ? 20 : 0) + (bullSweep ? 20 : 0) + (bullPoiTouch ? 20 : 0) + (bullReject ? 15 : 0)
+bearScore = (h1Bear ? 25 : 0) + (bearBos ? 20 : 0) + (bearSweep ? 20 : 0) + (bearPoiTouch ? 20 : 0) + (bearReject ? 15 : 0)
+
+// A+ requires strong score, HTF alignment, POI interaction, trigger and R:R >= 3.
+bullAPlus = bullScore >= 90 and h1Bull and bullPoiTouch and bullReject and rrTarget >= 3
+bearAPlus = bearScore >= 90 and h1Bear and bearPoiTouch and bearReject and rrTarget >= 3
+bullA     = not bullAPlus and bullScore >= minScoreA and h1Bull
+bearA     = not bearAPlus and bearScore >= minScoreA and h1Bear
+
+buySignal  = (bullAPlus or bullA) and not (bullAPlus[1] or bullA[1])
+sellSignal = (bearAPlus or bearA) and not (bearAPlus[1] or bearA[1])
+
+// Project entry, invalidation and targets from the signal candle.
+atrValue = atr(atrLen)
+buyEntry = valuewhen(buySignal, close, 0)
+buySl    = valuewhen(buySignal, min(low, bullFvgBot) - atrValue * slAtr, 0)
+buyTp    = buyEntry + abs(buyEntry - buySl) * rrTarget
+sellEntry = valuewhen(sellSignal, close, 0)
+sellSl    = valuewhen(sellSignal, max(high, bearFvgTop) + atrValue * slAtr, 0)
+sellTp    = sellEntry - abs(sellSl - sellEntry) * rrTarget
+
+lastWasBuy = nz(barssince(buySignal), 100000) < nz(barssince(sellSignal), 100000)
+activeEntry = lastWasBuy ? buyEntry : sellEntry
+activeSl    = lastWasBuy ? buySl : sellSl
+activeTp    = lastWasBuy ? buyTp : sellTp
+
+// Visuals
+bgcolor(h1Bull ? green : h1Bear ? red : gray, transp=93)
+plot(showFvg and bullFvgValid ? bullFvgTop : na, title="Bull FVG top", color=green, linewidth=1, style=linebr)
+plot(showFvg and bullFvgValid ? bullFvgBot : na, title="Bull FVG bottom", color=green, linewidth=1, style=linebr)
+plot(showFvg and bearFvgValid ? bearFvgTop : na, title="Bear FVG top", color=red, linewidth=1, style=linebr)
+plot(showFvg and bearFvgValid ? bearFvgBot : na, title="Bear FVG bottom", color=red, linewidth=1, style=linebr)
+
+plot(showLevels ? activeEntry : na, title="Active Entry", color=white, linewidth=2, style=linebr)
+plot(showLevels ? activeSl : na, title="Active Stop", color=red, linewidth=2, style=linebr)
+plot(showLevels ? activeTp : na, title="Active Target", color=lime, linewidth=2, style=linebr)
+
+plotshape(showStructure and bullBos, title="Bullish BOS", style=shape.triangleup, location=location.belowbar, color=lime, text="BOS", size=size.tiny)
+plotshape(showStructure and bearBos, title="Bearish BOS", style=shape.triangledown, location=location.abovebar, color=red, text="BOS", size=size.tiny)
+plotshape(showSweeps and bullSweep, title="Sell-side sweep", style=shape.circle, location=location.belowbar, color=aqua, text="SSL", size=size.tiny)
+plotshape(showSweeps and bearSweep, title="Buy-side sweep", style=shape.circle, location=location.abovebar, color=orange, text="BSL", size=size.tiny)
+
+plotshape(bullAPlus, title="Grade A+ BUY", style=shape.labelup, location=location.belowbar, color=lime, text="A+ BUY", textcolor=black, size=size.small, transp=0)
+plotshape(bullA, title="Grade A BUY", style=shape.labelup, location=location.belowbar, color=green, text="A BUY", textcolor=white, size=size.small, transp=0)
+plotshape(bearAPlus, title="Grade A+ SELL", style=shape.labeldown, location=location.abovebar, color=red, text="A+ SELL", textcolor=white, size=size.small, transp=0)
+plotshape(bearA, title="Grade A SELL", style=shape.labeldown, location=location.abovebar, color=maroon, text="A SELL", textcolor=white, size=size.small, transp=0)
+
+// TradingView alerts
+alertcondition(buySignal, title="TraderWatch Grade A/A+ BUY", message="TraderWatch Grade A/A+ BUY setup. Confirm H1/M15 structure, POI and live risk before entry.")
+alertcondition(sellSignal, title="TraderWatch Grade A/A+ SELL", message="TraderWatch Grade A/A+ SELL setup. Confirm H1/M15 structure, POI and live risk before entry.")
+alertcondition(bullSweep or bearSweep, title="TraderWatch Liquidity Sweep", message="TraderWatch liquidity sweep detected. Wait for structure confirmation.")

@@ -30,6 +30,7 @@ from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
+sys.path.insert(0, str(HERE.parent))
 import ai_model as M  # noqa: E402
 
 TIMEOUT = 25
@@ -86,6 +87,31 @@ def sb(path, method="GET", body=None):
             return r.status, r.read().decode()
     except urllib.error.HTTPError as e:
         return e.code, e.read().decode()[:300]
+
+
+def sq_bars(symbol, interval, outputsize=CANDLES):
+    """Swissquote bars (dari collector daemon) — tiada had kuota."""
+    import importlib.util as _il
+    spec = _il.spec_from_file_location("sqc", HERE / "sq_collector.py")
+    m = _il.module_from_spec(spec)
+    spec.loader.exec_module(m)
+    pair = symbol.replace("/", "")
+    # Collector simpan gran sebagai M1/M5/M15/... ; enjin hantar format TD.
+    gran = {"1min": "M1", "5min": "M5", "15min": "M15", "30min": "M30",
+            "1h": "H1", "60min": "H1"}.get(str(interval).lower(), interval)
+    rows = m.candles_from_bars(pair, gran, outputsize)
+    # Selaraskan dengan parse_candles(): (ts_ms, high, low, close)
+    out = []
+    for c in rows:
+        try:
+            d = datetime.fromisoformat(str(c["t"]).replace("Z", "+00:00"))
+            if d.tzinfo is None:
+                d = d.replace(tzinfo=timezone.utc)
+            out.append((int(d.timestamp() * 1000), float(c["h"]),
+                        float(c["l"]), float(c["c"])))
+        except (KeyError, TypeError, ValueError):
+            continue
+    return out
 
 
 def td_get(symbol, interval, outputsize=CANDLES):
@@ -179,6 +205,48 @@ def load_status_state():
         return None
 
 
+def lifecycle_state():
+    """State lifecycle (entry/closed) dikongsi dengan signal-lifecycle-alert.py."""
+    p = REPO.parent / ".signal-lifecycle.json"
+    try:
+        return json.loads(p.read_text())
+    except Exception:
+        return {}
+
+
+def pair_blocked(pair, state, life):
+    """True jika pair patut dilangkau kerana setup masih hidup.
+
+    Setup yang sudah expired/legacy/tp/sl TIDAK menyekat pair baru — ini
+    yang membolehkan enjin cari setup pengganti selepas 30 minit tamat.
+    """
+    code, txt = sb(f"signals?select=id,posted_at&pair=eq.{urllib.parse.quote(pair)}"
+                   f"&verified=is.true&order=posted_at.desc&limit=1")
+    if code != 200:
+        return True                     # fail closed
+    try:
+        rows = json.loads(txt or "[]")
+    except Exception:
+        return True
+    if not rows:
+        return False
+
+    row = rows[0]
+    info = life.get(str(row["id"])) or {}
+    closed = str(info.get("closed") or "").lower()
+    if closed in ("expired", "legacy", "tp", "sl"):
+        return False                    # sudah selesai -> jangan sekat
+    if info.get("entry"):
+        return True                     # posisi masih terbuka
+
+    # Tiada rekod lifecycle: guna signal-status.json seperti asal.
+    key = key_for(pair, row["posted_at"])
+    st = (state.get("signals") or {}).get(key)
+    if not st:
+        return True
+    return str(st.get("status")).lower() == "active"
+
+
 def pair_has_active(pair, state):
     code = "".join(ch for ch in pair.upper() if ch.isalpha())
     for key, info in (state.get("signals") or {}).items():
@@ -234,6 +302,10 @@ def credit_budget_ok(reserve=100):
     New signals are optional; closing TP/SL is not. Once the day's usage gets
     within `reserve` credits of the plan limit, the engine stands down so
     signal-status.py can still resolve open setups.
+
+    Fail CLOSED: a 429 on the check itself means the quota is gone, so the
+    engine must stand down instead of burning the remaining requests and
+    starving the TP/SL checker.
     """
     try:
         with urllib.request.urlopen(
@@ -247,6 +319,12 @@ def credit_budget_ok(reserve=100):
                 f"reserving {reserve} for TP/SL checks")
             return False
         return True
+    except urllib.error.HTTPError as e:
+        if e.code == 429:
+            log("SKIP credit guard: 429 on usage check -> quota exhausted; standing down")
+            return False
+        log(f"WARN credit check failed (HTTP {e.code}); continuing")
+        return True
     except Exception as e:
         log(f"WARN credit check failed ({type(e).__name__}); continuing")
         return True
@@ -256,8 +334,19 @@ def main():
     global TD_KEY
     dry = "--dry-run" in sys.argv
     if LOCK.exists():
-        log("SKIP previous run still active")
-        return 0
+        # Stale-lock guard: if a previous run was killed (reboot, OOM), the
+        # lock file survives and would block the engine forever. A run takes
+        # ~90s, so anything older than 10 minutes is stale.
+        try:
+            age = time.time() - LOCK.stat().st_mtime
+        except OSError:
+            age = 0
+        if age > 600:
+            log(f"WARN stale lock ({age:.0f}s) removed")
+            LOCK.unlink(missing_ok=True)
+        else:
+            log("SKIP previous run still active")
+            return 0
     LOCK.touch()
     try:
         if not MODEL_FILE.exists():
@@ -283,15 +372,15 @@ def main():
             log("ERROR no TWELVEDATA_API_KEY")
             return 1
 
-        if not credit_budget_ok():
-            return 0
-
+        # Kuota Twelve Data hanya relevan bila fallback TD digunakan, bukan
+        # lagi penghalang utama: sumber utama kini Swissquote (tiada kuota).
+        life = lifecycle_state()
         inserted = skipped = errors = 0
         for pair in PAIRS:
             if pair not in models:
                 skipped += 1
                 continue
-            if pair_has_active(pair, state) or pair_recent_unresolved(pair, state):
+            if pair_blocked(pair, state, life):
                 log(f"SKIP {pair}: existing active setup")
                 skipped += 1
                 continue
@@ -299,8 +388,22 @@ def main():
             # post again as soon as its previous setup resolves. The pair
             # lifecycle guard above is what prevents duplicates.
 
-            payload_c = td_get(pair, TD_INTERVAL)
-            bars, err = parse_candles(payload_c)
+            bars, err = None, ""
+            try:
+                bars = sq_bars(pair, TD_INTERVAL)
+                if bars and len(bars) >= 60:
+                    err = ""
+                else:
+                    bars, err = None, f"sq bars kurang: {len(bars or [])}"
+            except Exception as sqx:
+                bars, err = None, f"sq gagal: {sqx}"
+            if not bars:
+                # Sandaran Twelve Data (terhad kuota harian)
+                if not credit_budget_ok():
+                    errors += 1
+                    continue
+                payload_c = td_get(pair, TD_INTERVAL)
+                bars, err = parse_candles(payload_c)
             if not bars:
                 log(f"DATA {pair} {TIMEFRAME}: {err}")
                 errors += 1
