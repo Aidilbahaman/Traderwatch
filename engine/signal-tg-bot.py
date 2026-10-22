@@ -62,6 +62,9 @@ SB = load_secrets("supabase.env")
 # @Twreg_bot is now used only for outbound welcome/nudge messages.
 TOKEN = TG.get("TELEGRAM_SIGNALS_BOT_TOKEN") or TG["TELEGRAM_BOT_TOKEN"]
 SB_URL = SB["SUPABASE_URL"]
+
+# Plan yang boleh ditetapkan admin (whitelist — nilai lain ditolak).
+PLAN_CHOICES = ("free", "pro", "max")
 SB_KEY = SB["SUPABASE_SERVICE_KEY"]
 
 # Admin contact. tg://user?id= membuka DM admin terus tanpa mendedahkan
@@ -162,6 +165,11 @@ def sb_get(path):
     """GET -> (status, json_or_None)."""
     _, rows = sb(path)
     return rows
+
+
+def sb_patch(path, body):
+    """PATCH -> (status, json_or_None)."""
+    return sb(path, "PATCH", body, prefer="return=representation")
 
 
 def resolve_token(token):
@@ -589,6 +597,51 @@ def handle_callback(cq):
                        "Sekarang taip satu atau dua ayat: apa yang membantu, "
                        "atau apa yang boleh diperbaiki?\n\n"
                        "Taip /skip kalau tak nak tinggalkan nota.")
+        return
+    if data.startswith("pw:up:"):
+        # Butang "Upgrade ke PRO/MAX" dalam notifikasi Stripe webhook.
+        # uid datang daripada event yang sudah disahkan HMAC Stripe, bukan
+        # daripada user input — tapi tetap gate admin sebagai lapisan kedua.
+        parts = data.split(":", 3)
+        uid, want = parts[2], parts[3]
+        if uid not in PLAN_CHOICES or want not in PLAN_CHOICES:
+            tg("answerCallbackQuery", callback_query_id=cq_id,
+               text="Permintaan tidak sah", show_alert=True)
+            return
+        row = sb_get(f"profiles?id=eq.{uid}&select=id,email,name,plan")
+        if not row:
+            tg("answerCallbackQuery", callback_query_id=cq_id,
+               text="Member tidak dijumpai", show_alert=True)
+            reply(chat_id, "⚠️ Member tidak dijumpai.")
+            return
+        prof = row[0]
+        now_plan = prof.get("plan") or "free"
+        who = prof.get("name") or prof.get("email") or uid
+        rank = {"free": 0, "pro": 1, "max": 2}
+        if rank.get(now_plan, 0) >= rank.get(want, 9):
+            tg("answerCallbackQuery", callback_query_id=cq_id,
+               text=f"{who} sudah {now_plan.upper()} — tiada perubahan", show_alert=True)
+            reply(chat_id, f"ℹ️ <b>{who}</b> sudah pun <b>{now_plan.upper()}</b> "
+                           f"(atau lebih tinggi). Tiada perubahan dibuat.")
+            return
+        try:
+            sb_patch(f"profiles?id=eq.{uid}", {"plan": want})
+        except Exception as ex:
+            log(f"PW-UP-ERR {type(ex).__name__} {ex}")
+            tg("answerCallbackQuery", callback_query_id=cq_id,
+               text="Gagal update", show_alert=True)
+            reply(chat_id, f"⚠️ Gagal upgrade: {type(ex).__name__}. "
+                           f"Upgrade manual dalam admin.html.")
+            return
+        log(f"PW-UP {who}: {now_plan} -> {want}")
+        tg("answerCallbackQuery", callback_query_id=cq_id,
+           text=f"✅ {who} → {want.upper()}", show_alert=True)
+        reply(chat_id,
+              f"✅ <b>Di-upgrade</b>\n"
+              f"Member: <b>{who}</b>\n"
+              f"Plan: {now_plan.upper()} ➜ <b>{want.upper()}</b>\n"
+              f"User id: <code>{uid}</code>\n\n"
+              f"🛡️ Sahkan duit sudah sampai ke bank sebelum upgrade.")
         return
     tg("answerCallbackQuery", callback_query_id=cq_id)
     if not data.startswith("mb:"):
