@@ -538,6 +538,23 @@ def fmt_duration(start, end):
     return f"{h}j {m}m" if h else f"{m}m"
 
 
+def _timing_line(st, start, end, label="TP hit"):
+    """Baris masa dengan sumber timestamp dinyatakan.
+
+    entry_at  = harga benar-benar sentuh entry
+    first_touch = harga sentuh zon POI (lebih awal)
+    bila hanya ada posted_at, kita cuma tahu bila setup di-SiLive, bukan bila
+    entry kena — jadi label daran "Setup posted", bukan "Entry".
+    """
+    src = ("entry" if st.get("entry_at")
+           else "POI touched" if st.get("first_touch")
+           else "Setup posted")
+    if not end:
+        return (f"Entry {clock_my(start)} ➔ {label} "
+                f"(⏱️ {src} ➔ close)")
+    return f"Entry {clock_my(start)} ➔ {label} {clock_my(end)} ({fmt_duration(start, end)})"
+
+
 def clock_my(value):
     try:
         return parse_ts(value).astimezone(timezone(timedelta(hours=8))).strftime("%H:%M MY")
@@ -574,7 +591,7 @@ def build_message(event, sig, price, st=None):
         end = st.get("closed_at") or datetime.now(timezone.utc).isoformat()
         return (f"🛑 <b>Trade #{sig.get('id', '—')} • {sig['pair']} {side} ({direction})</b>\n"
                 f"Stop Loss reached — the setup was closed according to the risk plan.\n"
-                f"⏱️ Time: Entry {clock_my(start)} ➔ SL hit {clock_my(end)} "
+                f"⏱️ Time: {_timing_line(st, start, end, 'SL hit')} "
                 f"({fmt_duration(start, end)})\n\n"
                 f"📍 Entry Zone: <code>{fmt_price(sig['pair'], sig['entry'])}</code>\n"
                 f"🛡️ Stop Loss: <code>{fmt_price(sig['pair'], sig['sl'])}</code> "
@@ -597,8 +614,12 @@ def build_message(event, sig, price, st=None):
                 f"❌ <b>Cancel the {order} for this setup now.</b>\n\n"
                 f"No position was opened. This setup is no longer valid.\n"
                 f"We are scanning for a new setup.")
-    start = st.get("entry_at") or sig.get("posted_at")
-    end = st.get("closed_at") or datetime.now(timezone.utc).isoformat()
+    # Timestamp sebenar. JANGAN jatuh balik kepada now(): bukan itu masa
+    # TP kena, dan ialundur setiap kali mesej dibina semula — jadi duration
+    # jadi berubah-ubah (laporan "TP hit 1m" padahal 6 minit).
+    # Tanpa closed_at yang sah, lebih baik tunjuk "—" daripada angka salah.
+    start = st.get("entry_at") or st.get("first_touch") or sig.get("posted_at")
+    end = st.get("closed_at")
     risk = fmt_pips(sig, sig["sl"])
     reward = fmt_pips(sig, sig["tp"])
     rr = reward / risk if risk else 0.0
@@ -608,8 +629,7 @@ def build_message(event, sig, price, st=None):
               "original Stop Loss; future outcomes are not guaranteed.")
     return (f"🎯 <b>Trade #{sig.get('id', '—')} • {sig['pair']} {side} ({direction})</b>\n"
             f"Take Profit reached successfully!\n"
-            f"⏱️ Time: Entry {clock_my(start)} ➔ TP hit {clock_my(end)} "
-            f"({fmt_duration(start, end)})\n\n"
+            f"⏱️ Time: {_timing_line(st, start, end)}\n\n"
             f"📍 Entry Zone: <code>{fmt_price(sig['pair'], sig['entry'])}</code>\n"
             f"🛡️ Stop Loss: <code>{fmt_price(sig['pair'], sig['sl'])}</code> "
             f"(-{fmt_move(sig, sig['sl'])})\n"

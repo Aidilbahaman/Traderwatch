@@ -132,7 +132,8 @@ Deno.serve(async (req) => {
           `Jumlah: ${amount != null ? `${(amount / 100).toFixed(2)} ${currency}` : "?"}\n` +
           `Session: ${s.id}\n` +
           `Bayar: ${s.payment_status ?? "?"}\n\n` +
-          `👉 Transfer duit kepada member, kemudian sahkan dalam Stripe Dashboard.`
+          `👉 Transfer kepada KAU dulu (akaun Stripe ini milik rakan kongsi).\n` +
+          `Selepas duit sampai, urus bayaran member sendiri.`
         );
         break;
       }
