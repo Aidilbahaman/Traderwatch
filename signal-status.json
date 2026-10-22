@@ -1,5 +1,5 @@
 {
- "updated": "2026-10-22T08:45:01+08:00",
+ "updated": "2026-10-22T10:15:01+08:00",
  "signals": {
   "USDCAD_20261018_110101": {
    "status": "sl",
@@ -353,7 +353,11 @@
    "status": "active"
   },
   "NZDUSD_20261022_083054": {
-   "status": "active"
+   "status": "sl",
+   "pips": -12.0,
+   "r": -1,
+   "unit": "pips",
+   "closed": "2026-10-22T10:15:01+08:00"
   }
  }
 }
