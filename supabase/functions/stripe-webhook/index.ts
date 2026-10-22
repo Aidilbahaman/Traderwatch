@@ -181,6 +181,8 @@ Deno.serve(async (req) => {
           .select("plan,name").eq("id", userId).maybeSingle();
         const nowPlan = prof?.plan ?? "free";
 
+        const APP_URL = Deno.env.get("PUBLIC_APP_URL")
+          ?? "https://aidilbahaman.github.io/Traderwatch/";
         const kb = userId
           ? {
               inline_keyboard: [
@@ -188,7 +190,7 @@ Deno.serve(async (req) => {
                   { text: `✅ Upgrade ke ${plan.toUpperCase()}`, callback_data: `pw:up:${userId}:${plan}` },
                 ],
                 [
-                  { text: "🔍 Lihat member", url: `${SUPABASE_URL.replace(".supabase.co", "")}` },
+                  { text: "🔍 Lihat member", url: `${APP_URL}members.html` },
                 ],
               ],
             }
