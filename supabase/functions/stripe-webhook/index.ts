@@ -71,6 +71,39 @@ function planFromSession(session: any): string | null {
   return null;
 }
 
+/* ---- Stripe price lookup: map price id -> plan via price metadata ---- */
+const priceCache = new Map<string, string | null>();
+
+async function planFromPriceId(
+  sb: ReturnType<typeof createClient>, priceId: string
+): Promise<string | null> {
+  if (priceCache.has(priceId)) return priceCache.get(priceId)!;
+  try {
+    // Stripe key lives in Supabase secret; set together with the webhook secret.
+    const key = Deno.env.get("STRIPE_RESTRICTED_KEY") ?? "";
+    if (!key) { priceCache.set(priceId, null); return null; }
+    const res = await fetch(`https://api.stripe.com/v1/prices/${priceId}`, {
+      headers: { Authorization: `Bearer ${key}` },
+    });
+    if (!res.ok) { priceCache.set(priceId, null); return null; }
+    const p = await res.json();
+    const fromMeta = p?.metadata?.plan;
+    const nickname = String(p?.nickname ?? "").toLowerCase();
+    const productName = String(p?.product_data?.name ?? "").toLowerCase();
+    const hay = `${nickname} ${productName}`;
+    let plan: string | null = null;
+    if (fromMeta && ["free", "pro", "max"].includes(fromMeta)) plan = fromMeta;
+    else if (/max/.test(hay)) plan = "max";
+    else if (/pro/.test(hay)) plan = "pro";
+    else if (/free/.test(hay)) plan = "free";
+    priceCache.set(priceId, plan);
+    return plan;
+  } catch (_) {
+    priceCache.set(priceId, null);
+    return null;
+  }
+}
+
 Deno.serve(async (req) => {
   if (req.method !== "POST") {
     return new Response("Method not allowed", { status: 405 });
@@ -102,7 +135,23 @@ Deno.serve(async (req) => {
         const s = event.data.object;
         const email = s.customer_details?.email ?? s.customer_email;
         const refId = s.client_reference_id ?? s.metadata?.user_id ?? null;
-        const plan = planFromSession(s);
+        let plan = planFromSession(s);
+        // Snapshot API tidak sertakan line_items penuh — ambil price id
+        // daripada `price_details`, kemudian tanya Stripe apa products itu.
+        if (!plan) {
+          const ids = new Set<string>();
+          const walk = (o: any, depth = 0): void => {
+            if (!o || depth > 6) return;
+            if (typeof o === "string") { if (o.startsWith("price_")) ids.add(o); return; }
+            if (Array.isArray(o)) { o.forEach(x => walk(x, depth + 1)); return; }
+            for (const v of Object.values(o)) walk(v, depth + 1);
+          };
+          walk(s);
+          for (const id of ids) {
+            const p = await planFromPriceId(sb, id);
+            if (p) { plan = p; break; }
+          }
+        }
         if (!plan) break;
 
         // profiles.keyed by auth user id (no email column). The subscribe page
