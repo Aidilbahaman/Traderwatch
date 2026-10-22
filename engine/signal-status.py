@@ -162,6 +162,32 @@ def pip_size(code):
     return PIP.get(code, DEFAULT_PIP)
 
 
+def _iso_mine(ts):
+    """Format a candle stamp as MY ISO +08:00.
+
+    Accepts both shapes the two data sources emit:
+      Swissquote SQLite -> "2026-10-22T18:50:00"
+      TwelveData JSON   -> "2026-10-22 18:50:00"
+    Both are UTC.
+    """
+    if not ts:
+        return None
+    raw = str(ts).strip().replace("Z", "+00:00")
+    for fmt in ("%Y-%m-%d %H:%M:%S", "%Y-%m-%dT%H:%M:%S"):
+        try:
+            d = datetime.strptime(raw, fmt).replace(tzinfo=timezone.utc)
+            return d.astimezone(TZ_KL).isoformat(timespec="seconds")
+        except ValueError:
+            continue
+    try:
+        d = datetime.fromisoformat(raw)
+        if d.tzinfo is None:
+            d = d.replace(tzinfo=timezone.utc)
+        return d.astimezone(TZ_KL).isoformat(timespec="seconds")
+    except Exception:
+        return None
+
+
 def evaluate(sig, rows):
     """Return (status, pips, r, ambiguous). rows ordered oldest->newest.
 
@@ -179,6 +205,7 @@ def evaluate(sig, rows):
     side = sig["side"].upper()
     code = "".join(ch for ch in sig["pair"].upper() if ch.isalpha())
     filled = False
+    entry_at = None
     for _ts, high, low in rows:
         if not filled:
             hit_entry = low <= entry <= high
@@ -187,19 +214,25 @@ def evaluate(sig, rows):
                 # level without the trade existing.
                 continue
             filled = True
+            entry_at = _ts
         hit_tp = high >= tp if side == "BUY" else low <= tp
         hit_sl = low <= sl if side == "BUY" else high >= sl
         if hit_tp and hit_sl:
             pips = -abs(entry - sl) / pip_size(code)
-            return "sl", round(pips, 1), -1, True
+            return "sl", round(pips, 1), -1, True, entry_at
         if hit_sl:
             pips = -abs(entry - sl) / pip_size(code)
-            return "sl", round(pips, 1), -1, False
+            return "sl", round(pips, 1), -1, False, entry_at
         if hit_tp:
             pips = abs(tp - entry) / pip_size(code)
             rr = round(abs(tp - entry) / abs(entry - sl), 2) if entry != sl else 0
-            return "tp", round(pips, 1), rr, False
-    return None, None, None, False
+            return "tp", round(pips, 1), rr, False, entry_at
+    # Fill happened but no TP/SL yet: report the fill so the lifecycle can
+    # send the ENTRY alert and hold the position. This is what makes a manual
+    # signal 24/7 — member gets told when the setup is actually live.
+    if entry_at:
+        return "active", None, None, False, entry_at
+    return None, None, None, False, None
 
 
 def git(*args):
@@ -286,18 +319,28 @@ def main():
             time.sleep(CALL_GAP)
             continue
 
-        status, pips, r, ambiguous = evaluate(sig, data)
-        if status:
+        status, pips, r, ambiguous, entry_at = evaluate(sig, data)
+        if status in ("tp", "sl"):
             code = "".join(ch for ch in sig["pair"].upper() if ch.isalpha())
             entry = {"status": status, "pips": pips, "r": r,
                      "unit": "usd" if code in USD_UNIT else "pips",
                      "closed": now.astimezone(TZ_KL).isoformat(timespec="seconds")}
             if ambiguous:
                 entry["ambiguous"] = True
+            if entry_at:
+                entry["entry_at"] = _iso_mine(entry_at)
             state["signals"][key] = entry
             changed += 1
             log(f"{'TP' if status=='tp' else 'SL'} {sig['pair']} "
                 f"{pips:+.1f} {'USD' if entry['unit']=='usd' else 'pips'}")
+        elif status == "active":
+            # Entry touched, no TP/SL yet — record the fill so the lifecycle
+            # sends ENTRY TRIGGERED and holds the position.
+            if not prev.get("entry_at"):     # jangan timpa fill yang direkod
+                state["signals"][key] = dict(prev, status="active",
+                                             entry_at=_iso_mine(entry_at))
+                changed += 1
+                log(f"ENTRY {sig['pair']} @ {sig['entry']} ({_iso_mine(entry_at)})")
         elif prev.get("status") != "active":
             state["signals"][key] = {"status": "active"}
             changed += 1
