@@ -460,7 +460,11 @@ def _is_payment_error(ex):
 # Bajet masa satu panggilan LLM (saat). Chain retry_model x temperatura
 # boleh capai 15 minit; pengguna tunggu terlalu lama. 90s cukup untuk
 # GLM (~12s) dengan 1-2 retry pendek.
-LLM_BUDGET_S = float(os.environ.get("LLM_BUDGET_S", "90"))
+LLM_BUDGET_S = float(os.environ.get("LLM_BUDGET_S", "150"))
+
+# Model yang ambik >30s untuk satu panggilan. Cubaan berulang dengan
+# suhu lain hanya menambah等待 tanpa tambah全文.
+SLOW_MODELS = {"asai/freemodel-4-ds-v4.1flash", "asai/freemodel-5-kimi"}
 
 # ---- Preset model: berbayar / percuma / auto ----
 LLM_PRESETS = {
@@ -470,16 +474,22 @@ LLM_PRESETS = {
                 "fallback": "asai/freemodel-1-GLM,asai/freemodel-4-ds-v4.1flash",
                 "url": "https://serveras.click/v1/chat/completions",
                 "key_env": "HERMES_CUSTOM_SERVERAS_CLICK_API_KEY"},
-    "deepseek": {"label": "\U0001f4b3 Model berbayar \u2014 DeepSeek",
-                 "desc": "DeepSeek free (serveras) \u2014 analisis paling tepat, percuma",
+    "deepseek": {"label": "\U0001f4b3 Model percuma \u2014 DeepSeek",
+                 "desc": "DeepSeek v4.1 flash (serveras) \u2014 setup paling tepat (17s)",
                  "model": "asai/freemodel-4-ds-v4.1flash",
-                 "fallback": "asai/freemodel-2-MiniMax,asai/freemodel-1-GLM",
+                 "fallback": "asai/freemodel-1-GLM,asai/freemodel-2-MiniMax",
                  "url": "https://serveras.click/v1/chat/completions",
                  "key_env": "HERMES_CUSTOM_SERVERAS_CLICK_API_KEY"},
     "free": {"label": "\U0001f193 Model percuma \u2014 GLM",
-             "desc": "GLM free (serveras) \u2014 percuma, sandaran bila MiniMax sibuk",
+             "desc": "GLM free (serveras) \u2014 percuma, paling laju (12s), paling stabil",
              "model": "asai/freemodel-1-GLM",
-             "fallback": "asai/freemodel-2-MiniMax,asai/freemodel-4-ds-v4.1flash",
+             "fallback": "asai/freemodel-4-ds-v4.1flash,asai/freemodel-2-MiniMax",
+             "url": "https://serveras.click/v1/chat/completions",
+             "key_env": "HERMES_CUSTOM_SERVERAS_CLICK_API_KEY"},
+    "kimi": {"label": "\U0001f9d1\ufe0f Model percuma \u2014 Kimi",
+             "desc": "Kimi free (serveras) \u2014 analisis mendalam, tetapi lambat (45s)",
+             "model": "asai/freemodel-5-kimi",
+             "fallback": "asai/freemodel-4-ds-v4.1flash,asai/freemodel-1-GLM",
              "url": "https://serveras.click/v1/chat/completions",
              "key_env": "HERMES_CUSTOM_SERVERAS_CLICK_API_KEY"},
 }
@@ -496,11 +506,12 @@ LLM_PRESETS = {
 ENV_FILE = pathlib.Path("/home/ubuntu/tw-bot/.env")
 
 # ---- PIN MODEL ----
-# Default = GLM (asai/freemodel-1-GLM). GLM replying JSON secara terus
-# (12s), manakala asai/freemodel-2-MiniMax ialah THINKING model yang
-# habiskan 4000 token untuk reasoning -> content kosong. Admin masih
-# boleh tukar preset lewat /model.
-DEFAULT_PRESET = "free"
+# Default = DeepSeek v4.1 flash (asai/freemodel-4-ds-v4.1flash). Test live
+# 23 Okt 2026: 16.6s, JSON tulen tanpa pagar markdown, entry paling dekat
+# dengan harga (~4122 vs 4120), rr1=1.75, conf=0.68 — setup paling realistik
+# berbanding GLM (12.5s tapi entry kurang tepat) dan Kimi (44.7s, lambat).
+# Admin masih boleh tukar preset lewat /model.
+DEFAULT_PRESET = "deepseek"
 
 
 def _apply_pin():
@@ -662,21 +673,28 @@ def _run_agent(prompt, use_staruh=False):
                 break
             m_url, m_key_env = MODEL_ROUTES.get(model, (LLM_URL, LLM_KEY_ENV))
             m_key = _profile_secret(m_key_env) or key
-            for temp in (0.2, 0.5):
+            # Model percuma boleh 45s/attempt. Cuba suhu berbeza hanya
+            # untuk model pantas; model lambat terus ke model seterusnya.
+            for temp in ((0.2,) if SLOW_MODELS else (0.2, 0.5)):
                 payload = {"model": model,
                            "messages": [{"role": "user", "content": content}],
                            "temperature": temp, "max_tokens": 2000}
-                if (model.startswith("minimax/") or model.startswith("openrouter/")
-                        or model.startswith("asai/")):
-                    # Model reasoning guna token untuk reasoning; JSON penuh
-                    # (20+ medan) boleh terpotong pada 2000 token.
+                # Paksa JSON tulen — model percuma kadang bungkus dengan
+                # pagar markdown atau tulis prosa sebelum objek.
+                payload["response_format"] = {"type": "json_object"}
+                if model.startswith("asai/"):
+                    # Prompt sudah dipangkas (buang medan _en), jadi 2500
+                    # token cukup untuk JSON penuh ~20 medan. Token lebih
+                    # hanya perlambat balasan.
+                    payload["max_tokens"] = 2500
+                elif model.startswith("minimax/") or model.startswith("openrouter/"):
                     payload["max_tokens"] = 4000
                 if model == "asai/freemodel-2-MiniMax":
-                    # asai/freemodel-2-MiniMax = THINKING model: 1st call guna
-                    # 4000 token penuh untuk reasoning -> content kosong.
-                    # Naikkan siling supaya JSON ada ruang selepas reasoning.
+                    # asai/freemodel-2-MiniMax = THINKING model: siling 4000
+                    # token habis untuk reasoning -> content kosong. Naikkan
+                    # ke 8000. JANGAN hantar reasoning.effort — serveras
+                    # pulangkan 422 Unprocessable Entity untuk parameter itu.
                     payload["max_tokens"] = 8000
-                    payload["reasoning"] = {"effort": "low"}
                 # Model reasoning (MiniMax m3.1 flash) guna token untuk
                 # "reasoning" dahulu. Tanpa effort=low,ia habiskan
                 # max_tokens sebelum tulis jawapan -> content=None ->
@@ -1346,18 +1364,14 @@ H1 (open,high,low,close; 60 bar terakhir):
 {h1}
 M15 (80 bar terakhir):
 {m15}
-Balas HANYA satu objek JSON, tanpa teks lain, kunci tepat:
+Balas HANYA satu objek JSON, tanpa teks lain, kunci tepat. JANGAN tulis
+medan "_en" atau teks panjang — ringkas setiap medan naratif dalam 1 baris.
+
 bias (BUY atau SELL), poi_low, poi_high (zon FVG/breaker M15 belum termitigasi),
 sl, tp1, tp2 (nombor), grade (A+/A/B/C sahaja), confidence (0-10), bias_m5, plan (rencana eksekusi),
 h1_trend, h1_levels (support/demand/resistance ringkas), h1_confluence (HIGH/MEDIUM/LOW),
 m15_context, dol_type, dol_levels, poi_type, trigger_m1, rating_reason,
 alignment (EXCELLENT/GOOD/MIXED), note, invalidation. Bahasa Indonesia.
-
-Selain itu, beri versi Bahasa Inggeris untuk SEMUA medan naratif di atas
-dengan akhiran _en: plan_en, h1_trend_en, h1_levels_en, m15_context_en,
-dol_type_en, dol_levels_en, poi_type_en, trigger_m1_en, rating_reason_en,
-note_en, invalidation_en. Nilai _en mesti terjemahan setia nilai asal —
-jangan tambah atau buang maklumat, kekalkan semua nombor dan level.
 
 Rubrik grade (pilih satu sahaja): A+ = confluence sangat tinggi, trend H1 dan
 M15 searah, POI fresh, trigger jelas, R:R >= 3; A = confluence tinggi, satu
