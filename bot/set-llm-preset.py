@@ -19,31 +19,24 @@ ENV = Path("/home/ubuntu/tw-bot/.env")
 SERVICE = "traderwatch-signals-bot"
 
 PRESETS = {
-    "flash": {
-        "desc": "MiniMax m3.1 flash free via OpenRouter (model Hermes)",
+    "minimax": {
+        "desc": "MiniMax m3.1 flash free (OpenRouter) - paling cepat",
         "model": "minimax/minimax-m3.1-flash:free",
-        "fallback": "openrouter/free",
+        "fallback": "asai/freemodel-2-MiniMax",
         "url": "https://openrouter.ai/api/v1/chat/completions",
         "key_env": "OPENROUTER_API_KEY",
     },
-    "paid": {
-        "desc": "Model berbayar sahaja (v4-flash) — perlu kredit",
-        "model": "asai/deepseek-v4-flash",
-        "fallback": "",
-        "url": "https://serveras.click/v1/chat/completions",
-        "key_env": "HERMES_CUSTOM_SERVERAS_CLICK_API_KEY",
+    "deepseek": {
+        "desc": "DeepSeek v4 Flash (OpenRouter) - analisis paling tepat",
+        "model": "deepseek/deepseek-v4-flash",
+        "fallback": "asai/deepseek-v4-flash",
+        "url": "https://openrouter.ai/api/v1/chat/completions",
+        "key_env": "OPENROUTER_API_KEY",
     },
     "free": {
-        "desc": "Model percuma sahaja (freemodel-3-deepseekpro)",
-        "model": "asai/freemodel-3-deepseekpro",
-        "fallback": "",
-        "url": "https://serveras.click/v1/chat/completions",
-        "key_env": "HERMES_CUSTOM_SERVERAS_CLICK_API_KEY",
-    },
-    "auto": {
-        "desc": "v4-flash dahulu, jatuh ke free bila kredit habis (402)",
-        "model": "asai/deepseek-v4-flash",
-        "fallback": "openrouter/free",
+        "desc": "GLM free (serveras) - percuma, sandaran bila MiniMax sibuk",
+        "model": "asai/freemodel-1-GLM",
+        "fallback": "minimax/minimax-m3.1-flash:free",
         "url": "https://serveras.click/v1/chat/completions",
         "key_env": "HERMES_CUSTOM_SERVERAS_CLICK_API_KEY",
     },
@@ -103,7 +96,7 @@ def restart():
 
 def main():
     if len(sys.argv) < 2 or sys.argv[1] not in PRESETS and sys.argv[1] != "status":
-        print("Guna: set-llm-preset.py [flash|paid|free|auto|status]")
+        print("Guna: set-llm-preset.py [minimax|deepseek|free|status]")
         return 2
 
     cmd = sys.argv[1]

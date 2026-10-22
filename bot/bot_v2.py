@@ -381,11 +381,21 @@ LLM_KEY_ENV = os.environ.get("LLM_KEY_ENV", "OPENROUTER_API_KEY")
 MODEL_ROUTES = {
     "minimax/minimax-m3.1-flash:free":
         ("https://openrouter.ai/api/v1/chat/completions", "OPENROUTER_API_KEY"),
+    "deepseek/deepseek-v4-flash":
+        ("https://openrouter.ai/api/v1/chat/completions", "OPENROUTER_API_KEY"),
+    "deepseek/deepseek-v4.1-flash-1017":
+        ("https://openrouter.ai/api/v1/chat/completions", "OPENROUTER_API_KEY"),
     "openrouter/free":
         ("https://openrouter.ai/api/v1/chat/completions", "OPENROUTER_API_KEY"),
-    "asai/deepseek-v4-flash":
+    "nvidia/nemotron-3.5-lightning:free":
+        ("https://openrouter.ai/api/v1/chat/completions", "OPENROUTER_API_KEY"),
+    "google/gemma-4-31b-it:free":
+        ("https://openrouter.ai/api/v1/chat/completions", "OPENROUTER_API_KEY"),
+    "asai/freemodel-1-GLM":
         ("https://serveras.click/v1/chat/completions", "HERMES_CUSTOM_SERVERAS_CLICK_API_KEY"),
-    "asai/freemodel-3-deepseekpro":
+    "asai/freemodel-2-MiniMax":
+        ("https://serveras.click/v1/chat/completions", "HERMES_CUSTOM_SERVERAS_CLICK_API_KEY"),
+    "asai/deepseek-v4-flash":
         ("https://serveras.click/v1/chat/completions", "HERMES_CUSTOM_SERVERAS_CLICK_API_KEY"),
 }
 
@@ -444,47 +454,49 @@ def _is_payment_error(ex):
 
 # ---- Preset model: berbayar / percuma / auto ----
 LLM_PRESETS = {
-    "flash": {"label": "⚡ MiniMax m3.1 flash (OpenRouter)",
-              "desc": "Model yang sama dengan Hermes — free, cepat, tiada kredit",
-              "model": "minimax/minimax-m3.1-flash:free",
-              "fallback": "openrouter/free",
-              "url": "https://openrouter.ai/api/v1/chat/completions",
-              "key_env": "OPENROUTER_API_KEY"},
-    "paid": {"label": "💳 Model berbayar",
-             "desc": "v4-flash sahaja — analisis paling tepat, perlu kredit",
-             "model": "asai/deepseek-v4-flash",
-             "fallback": "openrouter/free",
-             "url": "https://serveras.click/v1/chat/completions",
-             "key_env": "HERMES_CUSTOM_SERVERAS_CLICK_API_KEY"},
-    "free": {"label": "🆓 Model percuma (serveras)",
-             "desc": "freemodel sahaja — tiada kos, kadang jawapan kosong",
-             "model": "asai/freemodel-3-deepseekpro",
-             "fallback": "openrouter/free",
-             "url": "https://serveras.click/v1/chat/completions",
-             "key_env": "HERMES_CUSTOM_SERVERAS_CLICK_API_KEY"},
-    "auto": {"label": "⚙️ Auto",
-             "desc": "v4-flash dahulu, auto-turun ke free bila kredit habis",
-             "model": "asai/deepseek-v4-flash",
-             "fallback": "openrouter/free",
+    "minimax": {"label": "\U0001f193 Model percuma \u2014 MiniMax",
+                "desc": "MiniMax m3.1 flash (OpenRouter) \u2014 free, paling cepat",
+                "model": "minimax/minimax-m3.1-flash:free",
+                "fallback": "asai/freemodel-2-MiniMax",
+                "url": "https://openrouter.ai/api/v1/chat/completions",
+                "key_env": "OPENROUTER_API_KEY"},
+    "deepseek": {"label": "\U0001f4b3 Model berbayar \u2014 DeepSeek",
+                 "desc": "DeepSeek v4 Flash \u2014 analisis paling tepat (OpenRouter, sangat murah)",
+                 "model": "deepseek/deepseek-v4-flash",
+                 "fallback": "asai/deepseek-v4-flash",
+                 "url": "https://openrouter.ai/api/v1/chat/completions",
+                 "key_env": "OPENROUTER_API_KEY"},
+    "free": {"label": "\U0001f193 Model percuma \u2014 GLM",
+             "desc": "GLM free (serveras) \u2014 percuma, sandaran bila MiniMax sibuk",
+             "model": "asai/freemodel-1-GLM",
+             "fallback": "minimax/minimax-m3.1-flash:free",
              "url": "https://serveras.click/v1/chat/completions",
              "key_env": "HERMES_CUSTOM_SERVERAS_CLICK_API_KEY"},
 }
+# Semua preset disahkan hidup 22 Okt 2026:
+#   minimax/minimax-m3.1-flash:free OK 0.8s | deepseek/deepseek-v4-flash OK 1.1s
+#   asai/freemodel-1-GLM OK 4.0s | asai/freemodel-2-MiniMax OK 1.6s
+# Tiada DeepSeek free: asai/freemodel-3-deepseekpro -> 404 model_not_found,
+# semua asai/deepseek-* -> 402 insufficient_credits.
+
+
 ENV_FILE = pathlib.Path("/home/ubuntu/tw-bot/.env")
 
 # ---- PIN MODEL ----
 # Model dikunci ke MiniMax m3.1 flash (OpenRouter) — model yang sama
 # digunakan Hermes. Preset lain hanya sandaran automatik bila model
 # utama tidak dapat dicapai; admin tak boleh tukar model dari /model.
-PINNED_PRESET = "flash"
+DEFAULT_PRESET = "minimax"
 
 
 def _apply_pin():
-    """Paksa model ke preset yang dipin, dan simpan ke .env.
+    """Tetapkan preset DEFAULT semasa startup dan simpan ke .env.
 
-    Dipanggil semasa startup supaya .env atau sesi bot yang lama tidak
-    dapat tinggalkan model lain (mis. preset 'paid' yang tiada kredit).
+    Ini BUKAN hard lock — admin masih boleh tukar preset melalui /model.
+    Fungsinya cuma memastikan selepas restart bot kembali kepada model
+    lalai (MiniMax free) dan tidak tinggal pada preset yang rosak.
     """
-    cfg = LLM_PRESETS.get(PINNED_PRESET)
+    cfg = LLM_PRESETS.get(DEFAULT_PRESET)
     if not cfg:
         return None
     url, key_env = _preset_route(cfg)
@@ -497,17 +509,15 @@ def _apply_pin():
     os.environ["LLM_URL"] = url
     os.environ["LLM_KEY_ENV"] = key_env
     try:
-        _persist_llm_preset(PINNED_PRESET)
+        _persist_llm_preset(DEFAULT_PRESET)
     except Exception as ex:
-        print(f"[LLM] pin: gagal simpan .env: {ex}", flush=True)
-    print(f"[LLM] PINNED -> {PINNED_PRESET} ({cfg['model']})", flush=True)
+        print(f"[LLM] default: gagal simpan .env: {ex}", flush=True)
+    print(f"[LLM] DEFAULT -> {DEFAULT_PRESET} ({cfg['model']})", flush=True)
     return cfg
 
 
 def llm_preset_active():
     """Nama preset yang sepadan dengan keadaan runtime sekarang."""
-    if PINNED_PRESET in LLM_PRESETS:
-        return PINNED_PRESET
     fb = (os.environ.get("LLM_FALLBACK_MODELS") or "").strip()
     for name, cfg in LLM_PRESETS.items():
         if cfg["model"] == LLM_MODEL and cfg["fallback"] == fb:
@@ -592,8 +602,6 @@ def llm_preset_keyboard():
     active = llm_preset_active()
     rows = []
     for name, cfg in LLM_PRESETS.items():
-        if PINNED_PRESET in LLM_PRESETS and name != PINNED_PRESET:
-            continue          # model dikunci — jangan tunjuk pilihan lain
         mark = "✅ " if name == active else ""
         rows.append([IB(f"{mark}{cfg['label']}", callback_data=f"llm:{name}")])
     return IM(rows)
@@ -1796,11 +1804,6 @@ async def on_callback(update: Update, ctx):
         name = d.split(":", 1)[1]
         if name not in LLM_PRESETS:
             return await say(chat, "⚠️ Preset tidak dikenali.")
-        if PINNED_PRESET in LLM_PRESETS and name != PINNED_PRESET:
-            cfg = LLM_PRESETS[PINNED_PRESET]
-            return await say(chat,
-                f"🔒 Model dikunci ke <code>{e(cfg['model'])}</code>\n"
-                f"ℹ️ Preset lain dilumpuhkan (AI/owner keputusan).")
         cfg = _apply_llm_preset(name)
         log_line = f"[LLM] preset -> {name} ({cfg['model']})"
         print(log_line, flush=True)
