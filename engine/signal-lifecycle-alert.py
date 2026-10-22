@@ -426,7 +426,21 @@ def render_result_chart(sig, st, count=96, right_pad=0.43):
         import matplotlib.pyplot as plt
         from engine.sq_collector import candles_from_bars
         code = sig["pair"].replace("/", "")
-        bars = candles_from_bars(code, "M15", count)
+        # Berhenti pada bar terakhir SEBELUM trade ditutup supaya carta
+        # achievement tidak tunjuk harga berhari-hari kemudian. Tanpa
+        # penapis ini, trade #76 (ditutup 21 Okt) dipaparkan dengan
+        # candle 22-23 Okt dan harga 4022 — mengelirukan member.
+        cutoff = None
+        for key in ("closed_at", "entry_at"):
+            v = st.get(key)
+            if v:
+                cutoff = parse_ts(v).strftime("%Y-%m-%dT%H:%M:%S")
+                break
+        bars = candles_from_bars(code, "M15", count, until=cutoff)
+        if len(bars) < 10:
+            # Window itu terlalu pendek (mis. trade lama sebelum collector
+            # mula poll) — lebih baik tunjuk carta penuh daripada tiada.
+            bars = candles_from_bars(code, "M15", count)
         if len(bars) < 10:
             return None
         idx = (pd.to_datetime([b["t"] for b in bars], utc=True)

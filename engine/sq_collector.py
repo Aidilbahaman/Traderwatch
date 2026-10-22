@@ -206,15 +206,28 @@ def get_bars(pair, gran, count):
     return [list(r) for r in reversed(rows)]
 
 
-def candles_from_bars(pair, gran, count):
-    """Return list of {t,o,h,l,c} for bot_v2 / signal-engine."""
+def candles_from_bars(pair, gran, count, until=None):
+    """Return list of {t,o,h,l,c} for bot_v2 / signal-engine.
+
+    `until` (str "YYYY-MM-DDTHH:MM:SS", UTC) menapis bar supaya carta
+   achievement berhenti pada masa trade ditutup. Tanpa ia, carta bagi
+    trade yang sudah tutup akan tunjuk harga terkini berbanding harga
+    ketika SL/TP kena — mengelirukan member yang查看 carta lama.
+    """
     g = _GRAN_MAP.get(str(gran).upper(), str(gran).upper())
     db = _db()
-    rows = db.execute("""
-        SELECT ts, o, h, l, c FROM bars
-        WHERE pair=? AND gran=?
-        ORDER BY ts DESC LIMIT ?""",
-        (pair, g, count)).fetchall()
+    if until:
+        rows = db.execute("""
+            SELECT ts, o, h, l, c FROM bars
+            WHERE pair=? AND gran=? AND ts<=?
+            ORDER BY ts DESC LIMIT ?""",
+            (pair, g, until, count)).fetchall()
+    else:
+        rows = db.execute("""
+            SELECT ts, o, h, l, c FROM bars
+            WHERE pair=? AND gran=?
+            ORDER BY ts DESC LIMIT ?""",
+            (pair, g, count)).fetchall()
     db.close()
     out = []
     for i, (ts, o, h, l, c) in enumerate(reversed(rows)):
