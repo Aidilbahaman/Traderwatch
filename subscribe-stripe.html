@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Subscribe with Stripe – TraderWatch</title>
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Source+Sans+3:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="app.css">
+<style>
+[hidden]{display:none!important}
+.badge{font:700 .85rem var(--body);padding:4px 12px;border-radius:99px;background:var(--panel2);border:1px solid var(--line);color:var(--muted)}
+.badge.pro{background:rgba(46,207,111,.15);border-color:var(--gold);color:var(--gold)}
+.page{padding:40px 0 72px}
+.head{display:flex;justify-content:space-between;align-items:flex-end;gap:20px;flex-wrap:wrap;margin-bottom:28px}
+.head p{color:var(--muted);margin-top:6px;max-width:60ch}
+.linkbtn{background:none;border:0;color:var(--muted);font:600 1rem var(--body);cursor:pointer;text-decoration:underline}
+
+/* Pay-method logos strip */
+.paylogos{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:0 0 28px;padding:14px 18px;
+          background:var(--panel2);border:1px solid var(--line);border-radius:14px}
+.paylogos strong{font:600 .95rem var(--body);color:var(--muted);margin-right:4px}
+.paylogos span{font:600 .82rem var(--body);color:var(--muted);background:var(--panel);
+               border:1px solid var(--line);border-radius:8px;padding:6px 11px;white-space:nowrap}
+
+/* Selected-plan summary card */
+.summary{background:var(--panel2);border:1px solid var(--gold);border-radius:14px;padding:20px 24px;
+         margin-bottom:26px;display:flex;justify-content:space-between;align-items:center;gap:18px;flex-wrap:wrap}
+.summary h2{margin:0 0 4px;font-size:1.35rem}
+.summary p{margin:0;color:var(--muted)}
+.summary .price{font:800 2rem var(--display);color:var(--gold);white-space:nowrap}
+
+.stripebox{background:var(--panel2);border:1px solid var(--line);border-radius:14px;padding:22px 24px;margin-bottom:24px}
+.stripebox h3{margin:0 0 10px;font-size:1.15rem}
+.stripebox p{color:var(--muted);margin:0 0 16px}
+.actions{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
+.alt{font-size:.92rem;color:var(--muted);margin-top:14px}
+.alt a{color:var(--gold)}
+.msg{font:600 .95rem var(--body);margin-top:14px}
+.msg.ok{color:#2ecf6f}
+.msg.err{color:#ff7a7a}
+.note{background:rgba(242,184,75,.12);border:1px solid rgba(242,184,75,.35);border-radius:12px;
+      padding:14px 18px;color:var(--muted);font-size:.93rem;margin-bottom:24px}
+.steps{color:var(--muted);display:grid;gap:10px;margin-top:6px}
+</style>
+</head>
+<body>
+<div class="wrap nav" style="padding-top:22px">
+  <a class="logo" href="members.html" aria-label="TraderWatch member area">
+    <svg width="32" height="32" viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="7" fill="#050b14" stroke="#264261"/><path d="M8 9h16v4h-6.2v11h-3.6V13H8z" fill="#fff"/><rect x="20" y="20" width="5" height="5" fill="#2ecf6f"/></svg></a>
+  <nav aria-label="Member">
+    <a href="education.html">Education hub</a>
+    <a href="members.html#charts">Charts</a>
+    <a href="members.html#signals">Signals</a>
+  </nav>
+  <span class="badge" id="planBadge">Free</span>
+  <button class="linkbtn" type="button" onclick="logOut()">Log out</button>
+</div>
+
+<main class="page">
+  <div class="wrap">
+    <div class="head">
+      <div>
+        <h1 style="font-size:clamp(1.9rem,4vw,2.8rem);margin:0">Checkout with Stripe</h1>
+        <p>Secure card payment processed by Stripe. Your plan activates automatically after payment clears.</p>
+      </div>
+    </div>
+
+    <div class="paylogos">
+      <strong>Accepted payment methods</strong>
+      <span>Visa</span><span>Mastercard</span><span>Amex</span>
+      <span>Google Pay</span><span>Apple Pay</span>
+      <span>FPX (Malaysian banks)</span><span>Touch 'n Go</span>
+    </div>
+
+    <div class="summary" id="summary" hidden>
+      <div>
+        <h2 id="sumTitle">Pro</h2>
+        <p id="sumLine">Full signal access, entry, stop loss and take profit.</p>
+      </div>
+      <div class="price" id="sumPrice">$20</div>
+    </div>
+
+    <div class="note" id="chooseNote">
+      Pick a plan below. You can also open checkout directly:
+      <a id="lnkFree" href="#" rel="nofollow">Free</a> ·
+      <a id="lnkPro" href="#" rel="nofollow">Pro</a> ·
+      <a id="lnkMax" href="#" rel="nofollow">Max</a>
+    </div>
+
+    <div class="stripebox" id="boxFree" hidden>
+      <h3>Free</h3>
+      <p>Up to 3 verified signals daily · 3 hot pairs · live TradingView charts.</p>
+      <div class="actions">
+        <button class="btn" type="button" data-plan="free" id="btnFree">Get started with Free</button>
+      </div>
+      <div class="msg" id="msgFree" role="status" aria-live="polite"></div>
+    </div>
+
+    <div class="stripebox" id="boxPro" hidden>
+      <h3>Pro</h3>
+      <p>Up to 10 verified signals daily · 7 hot pairs · entry, stop loss and take profit · member dashboard.</p>
+      <div class="actions">
+        <button class="btn" type="button" data-plan="pro" id="btnPro">Subscribe with Stripe</button>
+      </div>
+      <div class="msg" id="msgPro" role="status" aria-live="polite"></div>
+    </div>
+
+    <div class="stripebox" id="boxMax" hidden>
+      <h3>Max</h3>
+      <p>Unlimited verified signals · 7 hot pairs · M15 setups · priority access to new setups.</p>
+      <div class="actions">
+        <button class="btn" type="button" data-plan="max" id="btnMax">Subscribe with Stripe</button>
+      </div>
+      <div class="msg" id="msgMax" role="status" aria-live="polite"></div>
+    </div>
+
+    <div class="msg" id="msgTop" role="status" aria-live="polite"></div>
+
+    <div class="alt">
+      Prefer to pay by Touch 'n Go or bank QR?
+      <a href="subscribe.html">Use the QR payment page</a>.
+    </div>
+
+    <div class="steps" style="margin-top:26px">
+      <p>1. Open the Stripe checkout link above — your email is pre-filled automatically.</p>
+      <p>2. Pay with card, FPX, or your wallet of choice.</p>
+      <p>3. Come back here; this page opens your dashboard automatically once the plan is active.</p>
+    </div>
+  </div>
+</main>
+
+<footer>
+  <div class="wrap">
+    <p>Risk warning: Trading forex and leveraged products carries a high level of risk and may not suit everyone. Signals and charts on this site are for information only and are not financial advice. Past results do not guarantee future results.</p>
+  </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script src="config.js?v=202610230310"></script>
+<script src="common.js?v=202610230310"></script>
+<script>
+(async function(){
+const member = await requireMember();
+if(!member) return;
+
+const PLANS = {
+  free: { title:"Free", price:"$0", line:"Up to 3 verified signals daily, 3 hot pairs and live charts." },
+  pro:  { title:"Pro",  price:"$20", line:"Up to 10 verified signals daily with entry, stop loss and take profit." },
+  max:  { title:"Max",  price:"$50", line:"Unlimited verified signals, M15 setups and priority access." }
+};
+
+const currentPlan = ["free","pro","max"].includes(member.plan) ? member.plan : "free";
+const badge = document.getElementById("planBadge");
+badge.textContent = currentPlan.charAt(0).toUpperCase() + currentPlan.slice(1);
+badge.classList.toggle("pro", currentPlan !== "free");
+
+// Direct links
+["free","pro","max"].forEach(function(p){
+  const url = (CONFIG.checkoutUrls || {})[p];
+  const a = document.getElementById("lnk" + p.charAt(0).toUpperCase() + p.slice(1));
+  if(a){ a.href = url || "#"; if(!url) a.setAttribute("aria-disabled","true"); }
+});
+
+// Which plan box to show: ?plan=max else the next upgrade above current
+const q = new URLSearchParams(location.search);
+let plan = q.get("plan");
+if(!PLANS[plan]){
+  if(currentPlan === "free") plan = "pro";
+  else if(currentPlan === "pro") plan = "max";
+  else plan = "max";
+}
+const cfg = PLANS[plan];
+const url = (CONFIG.checkoutUrls || {})[plan];
+
+document.getElementById("sumTitle").textContent = cfg.title + " plan";
+document.getElementById("sumLine").textContent  = cfg.line;
+document.getElementById("sumPrice").textContent = cfg.price;
+document.getElementById("summary").hidden = false;
+document.getElementById("chooseNote").hidden = true;
+document.getElementById("box" + plan.charAt(0).toUpperCase() + plan.slice(1)).hidden = false;
+
+const btn  = document.getElementById("btn" + plan.charAt(0).toUpperCase() + plan.slice(1));
+const msg  = document.getElementById("msg" + plan.charAt(0).toUpperCase() + plan.slice(1));
+const mtop = document.getElementById("msgTop");
+
+if(currentPlan === plan || (currentPlan === "max" && plan === "pro")){
+  btn.textContent = "Go to dashboard";
+  btn.onclick = function(){ location.href = "members.html"; };
+  msg.className = "msg ok";
+  msg.textContent = "This plan is already active on your account.";
+} else if(!url){
+  btn.textContent = "Payment not connected";
+  btn.disabled = true;
+  msg.className = "msg err";
+  msg.textContent = "Stripe checkout is not connected for this plan yet.";
+} else {
+  btn.textContent = "Continue to Stripe — " + cfg.title;
+  btn.onclick = function(){
+    const u = url + (url.includes("?") ? "&" : "?") +
+              "prefilled_email=" + encodeURIComponent(member.email) +
+              "&client_reference_id=" + encodeURIComponent(member.id);
+    mtop.className = "msg ok";
+    mtop.textContent = "Opening secure Stripe checkout…";
+    location.href = u;
+  };
+}
+
+/* Watch Supabase until the plan is activated, then continue to the dashboard. */
+let tries = 0;
+const timer = setInterval(async function(){
+  tries++;
+  try{
+    const r = await sb.from("profiles").select("plan").eq("id", member.id).single();
+    const live = r && r.data && r.data.plan;
+    if(live === plan || (plan === "pro" && live === "max")){
+      clearInterval(timer);
+      location.href = "members.html?upgraded=" + plan;
+      return;
+    }
+  }catch(_){}
+  if(tries >= 120) clearInterval(timer);   // 10 minutes
+}, 5000);
+})();
+</script>
+</body>
+</html>

@@ -2,10 +2,16 @@
 const CONFIG = {
   // Form service that receives sign-ups, e.g. "https://formspree.io/f/xxxxxxx". Leave empty until you have one.
   signupEndpoint: "https://formspree.io/f/xqpewvzl",
-  // Payment link per plan (Stripe Payment Link, Lemon Squeezy, Paddle, etc).
+  // Stripe Payment Link per plan (dibuat via Stripe Dashboard).
   // Leave a plan empty to fall back to the Touch 'n Go QR flow below.
-  checkoutUrls: { pro: "", max: "" },
-  // Touch 'n Go eWallet QR. Used when the plan has no checkout URL.
+  // Payment Link already carries the price + currency configured in Stripe;
+  // this site only sends the member's email for auto-fill.
+  checkoutUrls: {
+    free: "https://buy.stripe.com/aFa9AS8bP8972s9g3tdby04",
+    pro:  "https://buy.stripe.com/aFaaEWgIl4WVgiZ18zdby05",
+    max:  "https://buy.stripe.com/dRmbJ04ZDblj0k1bNddby06"
+  },
+  // Touch 'n Go eWallet QR. Fallback bila plan tiada checkout URL (Stripe).
   // 1) Your QR image is saved in this folder as tng-qr.jpg
   // 2) Amounts below are MYR estimates of the USD plan price; edit to match
   //    what you actually charge before accepting any payment.
