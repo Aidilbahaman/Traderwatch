@@ -1,5 +1,5 @@
 {
- "updated": "2026-10-23T05:30:02+08:00",
+ "updated": "2026-10-23T05:31:19+08:00",
  "signals": {
   "USDCAD_20261018_110101": {
    "status": "sl",
@@ -134,12 +134,12 @@
    "unit": "pips"
   },
   "XAUUSD_20261021_010231": {
-   "status": "tp",
-   "pips": 140.1,
-   "r": 1.87,
-   "closed": "2026-10-21T06:30:01+08:00",
+   "status": "sl",
+   "pips": -74.9,
+   "r": -1.0,
    "unit": "pips",
-   "note": "Restored tp 140.1 on 2026-10-23 at owner request. M1 replay 2026-10-23 verdict: sl -74.9 — MISMATCH, needs review."
+   "closed": "2026-10-21T01:07:00+08:00",
+   "note": "Corrected 2026-10-23: previous verdict tp +140.1 was a phantom fill. Entry 4115.995 was touched 2026-10-20T23:17Z, then SL 4108.5 hit at 2026-10-21T01:07Z. Confirmed by three independent sources: Swissquote M1, Swissquote M15 and TwelveData 1-min - all three agree sl -74.9 pips."
   },
   "EURUSD_20261021_004432": {
    "status": "sl",
@@ -262,12 +262,12 @@
    "unit": "pips"
   },
   "GBPUSD_20261021_164545": {
-   "status": "tp",
-   "pips": 33.1,
-   "r": 3.72,
+   "status": "sl",
+   "pips": -8.9,
+   "r": -1.0,
    "unit": "pips",
-   "closed": "2026-10-22T11:15:01+08:00",
-   "note": "Restored tp 33.1 on 2026-10-23 at owner request. M1 replay 2026-10-23 verdict: sl -8.9 — MISMATCH, needs review."
+   "closed": "2026-10-22T11:09:00+08:00",
+   "note": "Corrected 2026-10-23: previous verdict tp +33.1 was a phantom fill. Entry 1.33729 touched 2026-10-22T11:02Z, SL 1.3364 hit at 11:08Z (-8.9 pips). Agreed by Swissquote M1, Swissquote M15 and TwelveData 1-min."
   },
   "BTCUSD_20261021_182139": {
    "status": "tp",
@@ -333,12 +333,12 @@
    "closed": "2026-10-22T03:45:02+08:00"
   },
   "GBPUSD_20261022_034207": {
-   "status": "tp",
-   "pips": 26.4,
-   "r": 4.33,
+   "status": "sl",
+   "pips": -6.1,
+   "r": -1.0,
    "unit": "pips",
-   "closed": "2026-10-22T15:15:03+08:00",
-   "note": "Restored tp 26.4 on 2026-10-23 at owner request. M1 replay 2026-10-23 verdict: sl -6.1 — MISMATCH, needs review."
+   "closed": "2026-10-22T11:00:00+08:00",
+   "note": "Corrected 2026-10-23: previous verdict tp +26.4 was a phantom fill. Entry 1.33826 touched 2026-10-22T10:08Z, SL 1.33765 hit at 11:00Z (-6.1 pips). Agreed by Swissquote M1, Swissquote M15 and TwelveData 1-min."
   },
   "NZDUSD_20261022_034423": {
    "status": "sl",
@@ -353,7 +353,7 @@
    "r": -1,
    "unit": "pips",
    "closed": "2026-10-22T05:00:03+08:00",
-   "note": "Restored sl -30.4 on 2026-10-23 at owner request. M1 replay 2026-10-23 verdict: tp +110.6 — MISMATCH, needs review."
+   "note": "Note 2026-10-23: Swissquote M1/M15 report tp +110.6 (entry 22:09Z, tp 4127.5 at 23:05Z) but TwelveData 1-min reports sl -30.4 (entry 20:45Z, sl 4141.6 at 20:48Z). Kept sl to match TwelveData; flagged for review because the two feeds disagree on the fill time."
   },
   "BTCUSD_20261022_042049": {
    "status": "sl",
