@@ -138,7 +138,14 @@ def candles(pair, start, end):
 
 
 def parse_ts(value):
-    """Parse a Supabase timestamp into an aware UTC datetime."""
+    """Parse a Supabase timestamp into an aware UTC datetime.
+
+    Supabase columns typed timestamptz come back NAIVE when the session
+    timezone is UTC (the default for PostgREST). Treating that naive value
+    as UTC is what key_for() does, so a signal posted 22 Oct 18:08 UTC is
+    filed under 23 Oct 02:08 MY — the 23 Oct 02:08 key. That is correct:
+    MY = UTC+8. Do not "fix" this by assuming the naive value is MY.
+    """
     d = datetime.fromisoformat(str(value).replace("Z", "+00:00"))
     if d.tzinfo is None:
         d = d.replace(tzinfo=timezone.utc)
