@@ -16,13 +16,17 @@ const SERVICE_KEY   = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
 const TG_TOKEN  = Deno.env.get("TELEGRAM_ADMIN_BOT_TOKEN") ?? "";
 const TG_CHAT   = Deno.env.get("TELEGRAM_ADMIN_CHAT_ID") ?? "";
 
-async function alertAdmin(text: string) {
+async function alertAdmin(text: string, reply_markup?: unknown) {
   if (!TG_TOKEN || !TG_CHAT) return;
   try {
     await fetch(`https://api.telegram.org/bot${TG_TOKEN}/sendMessage`, {
       method: "POST",
       headers: { "content-type": "application/json" },
-      body: JSON.stringify({ chat_id: TG_CHAT, text, disable_web_page_preview: true }),
+      body: JSON.stringify({
+        chat_id: TG_CHAT, text, disable_web_page_preview: true,
+        parse_mode: "HTML",
+        ...(reply_markup ? { reply_markup } : {}),
+      }),
     });
   } catch (_) {
     // Notifikasi gagal tidak boleh menggagalkan pemprosesan webhook.
@@ -177,6 +181,19 @@ Deno.serve(async (req) => {
           .select("plan,name").eq("id", userId).maybeSingle();
         const nowPlan = prof?.plan ?? "free";
 
+        const kb = userId
+          ? {
+              inline_keyboard: [
+                [
+                  { text: `✅ Upgrade ke ${plan.toUpperCase()}`, callback_data: `pw:up:${userId}:${plan}` },
+                ],
+                [
+                  { text: "🔍 Lihat member", url: `${SUPABASE_URL.replace(".supabase.co", "")}` },
+                ],
+              ],
+            }
+          : undefined;
+
         await alertAdmin(
           `💰 <b>Stripe payment masuk</b>\n` +
           `Tier dibeli: <b>${plan.toUpperCase()}</b>\n` +
@@ -185,7 +202,10 @@ Deno.serve(async (req) => {
           `Jumlah: ${amount != null ? `${(amount / 100).toFixed(2)} ${currency}` : "?"}\n` +
           `Session: ${s.id}\n` +
           `Status: ${s.payment_status ?? "?"}\n\n` +
-          `👉 Semak Stripe Dashboard, transfer kepada KAU, kemudian upgrade tier client secara manual.`
+          (userId
+            ? `Tekan butang bawah untuk upgrade terus — atau upgrade manual bila duit sudah sampai.`
+            : `👉 Semak Stripe Dashboard, transfer kepada KAU, kemudian upgrade tier client secara manual.`),
+          kb
         );
         break;
       }

@@ -1984,6 +1984,40 @@ async def on_callback(update: Update, ctx):
         return
     tg, chat, d = q.from_user, q.message.chat, q.data
     u = get_user(tg)
+    if d.startswith("pw:up:"):
+        # Butang "Upgrade ke PRO/MAX" dalam notifikasi Stripe webhook.
+        # Semua orang dalam ADMIN_IDS boleh guna — id member datang dari
+        # signature-verified webhook, bukan daripada user input.
+        if tg.id not in ADMIN_IDS:
+            return await say(chat, "🔒 Admin sahaja.")
+        _, _, uid, want = d.split(":", 3)
+        try:
+            rows = sb_request(f"profiles?id=eq.{uid}&select=plan,email,name")
+        except Exception as ex:
+            return await say(chat, f"⚠️ Gagal baca member: {e(str(ex))[:120]}.")
+        if not rows:
+            return await say(chat, "⚠️ Member tak dijumpai.")
+        prof = rows[0] or {}
+        now_plan = prof.get("plan")
+        who = prof.get("name") or prof.get("email") or uid
+        order = {"free": 0, "pro": 1, "max": 2}
+        if order.get(str(now_plan), 0) >= order.get(want, 9):
+            return await say(chat, f"ℹ️ <b>{e(who)}</b> sudah pun <b>{e(str(now_plan).upper())}</b> "
+                                   f"(atau lebih tinggi). Tiada perubahan.")
+        try:
+            got = sb_request(f"profiles?id=eq.{uid}", "PATCH", {"plan": want})
+            if not got:
+                return await say(chat, "⚠️ Tiada bar dikemas kini — semak config admin.")
+            return await say(
+                chat,
+                f"✅ <b>Di-upgrade</b>\n"
+                f"Member: <b>{e(who)}</b>\n"
+                f"Plan: {e(str(now_plan).upper())} ➜ <b>{e(want.upper())}</b>\n\n"
+                f"🛡️ Ingat: sahkan duit sudah sampai ke bank dulu sebelum upgrade.",
+                IM([[IB("🔄 Refresh", callback_data="menu:home")]]))
+        except Exception as ex:
+            return await say(chat, f"⚠️ Gagal upgrade: {e(str(ex))[:150]}. "
+                                   f"Tukar plan secara manual dalam admin.html.")
     if d.startswith("llm:"):
         if tg.id not in ADMIN_IDS:
             return await say(chat, "🔒 Admin sahaja.")
