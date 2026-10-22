@@ -513,12 +513,15 @@ LLM_PRESETS = {
 ENV_FILE = pathlib.Path("/home/ubuntu/tw-bot/.env")
 
 # ---- PIN MODEL ----
-# Default = GLM (asai/freemodel-1-GLM). Test live 23 Okt 2026 dengan prompt
-# sebenar bot (5,550 char): GLM 20.0s + JSON 1,186ch lengkap, MiniMax
-# content=0ch (thinking model, 2500 token habis untuk reasoning), DeepSeek
-# ~45s(timeout), Kimi 44.7s (lambat). GLM satu-satunya yang boleh dipercayai
-# untuk balasan <30s. Admin masih boleh tukar preset lewat /model.
-DEFAULT_PRESET = "free"
+# Default = DeepSeek v4.1 flash (asai/freemodel-4-ds-v4.1flash).
+# Test live 23 Okt 2026 dengan PROMPT RINGKAS (2,592 char):
+#   DeepSeek 8.2s  C=119ch VALID BUY entry=4042.315 rr1=1.68  <- paling pantas
+#   GLM     26.8s C=105ch VALID SELL rr1=2.29                 <- 3x lebih lambat
+#   Kimi    62.9s C=0ch                                       <- terlalu lambat
+# Provider serveras rawak: ~1/3 calls thinking semua token (content=0ch),
+# jadi chain ada retry. GLM dikekalkan sebagai fallback (chain: DeepSeek, GLM).
+# Admin masih boleh tukar preset lewat /model.
+DEFAULT_PRESET = "deepseek"
 
 
 def _apply_pin():
@@ -692,10 +695,12 @@ def _run_agent(prompt, use_staruh=False):
                 # pagar markdown atau tulis prosa sebelum objek.
                 payload["response_format"] = {"type": "json_object"}
                 if model.startswith("asai/"):
-                    # Prompt sudah dipangkas (buang medan _en), jadi 2500
-                    # token cukup untuk JSON penuh ~20 medan. Token lebih
-                    # hanya perlambat balasan.
-                    payload["max_tokens"] = 2500
+                    # Token BUKAN 2500 — diuji 23 Okt 2026: prompt real bot
+                    # (4,335 char) summons ~3,000+ token jawapan Bahasa
+                    # Indonesia. 2500 = content KOSONG untuk semua model
+                    # (GLM 38.1s tok=2500 C=0ch, DeepSeek 13.9s tok=2500
+                    # C=0ch, Kimi 57.2s tok=2500 C=0ch). 6000 sampai.
+                    payload["max_tokens"] = 6000
                 elif model.startswith("minimax/") or model.startswith("openrouter/"):
                     payload["max_tokens"] = 4000
                 if model == "asai/freemodel-2-MiniMax":
@@ -734,9 +739,18 @@ def _run_agent(prompt, use_staruh=False):
                         # "reasoning" — tapi hanya guna kalau ada objek JSON
                         # SEIMBANG di dalamnya. Draf terpotong akan gagal
                         # extract_json nanti, jadi lebih baik retry model.
-                        rsn = (msg.get("reasoning") or "").strip()
-                        if _json_blocks(rsn):
-                            txt = rsn
+                        # Sebahagian provider (serveras/DeepSeek/GLM) pulangkan
+                        # thinking dalam "reasoning_content", bukan "reasoning".
+                        # Baca KEDUA-DUA. thinking_model_awam 7,000-9,500 chars
+                        # dan TIDAK mengandungi JSON yang boleh parse (model
+                        # masih_plan semasa token habis) — jadi jangan总局
+                        # pakai ia; hanya guna bila ada blok JSON seimbang.
+                        rsn = ((msg.get("reasoning") or "")
+                               + msg.get("reasoning_content") or "").strip()
+                        cand = [b for b in _json_blocks(rsn)
+                                if '"bias"' in b or '"poi_low"' in b]
+                        if cand:
+                            txt = max(cand, key=len)
                     # Hanya terima jawapan yang ada payload boleh parse.
                     # Blok think-only / kosong mesti retry, bukan dipulangkan
                     # kepada validate sebagai "tiada setup".
@@ -870,11 +884,21 @@ def extract_json(text):
         except Exception: pass
         try: return json.loads(_repair_json(b))
         except Exception: pass
-    # JSON terpotong: ambil dari '{' pertama dan baiki/s exacerbated
+    # JSON terpotong: ambil dari '{' pertama dan baiki
     i = text.find("{")
     if i >= 0:
         try: return json.loads(_repair_json(text[i:]))
         except Exception: pass
+    # Fields berselerak dalam thinking model: "poi_low": 4035.32, ... mungkin
+    # tidak pernah dikelilingi kurungan. Kumpul regex sebagaiPercubaan akhir.
+    sal = {}
+    for k in ("poi_low", "poi_high", "sl", "tp1", "tp2"):
+        m = re.search(r'"%s"\s*:\s*(-?[0-9]+(?:\.[0-9]+)?)' % k, text)
+        if m: sal[k] = float(m.group(1))
+    mb = re.search(r'"bias"\s*:\s*"(BUY|SELL|bullish|bearish)"', text, re.I)
+    if mb: sal["bias"] = mb.group(1).upper()
+    if sal.get("bias") and len(sal) >= 4:
+        return sal
     raise ValueError(f"bukan STARUH atau JSON: {text[:80]}")
 
 
@@ -1182,8 +1206,11 @@ async def acandles(pair, gran, count):
 
 
 def compact(cs, n, pair):
+    """Format O H L C ringkas (ruang, bukan koma) — prompt pendek = model
+    tak jadi thinking model. 30/40 bar sudah cukup untuk struktur SMC."""
     d = PAIRS[pair][1]
-    return "\n".join(f"{c['o']:.{d}f},{c['h']:.{d}f},{c['l']:.{d}f},{c['c']:.{d}f}" for c in cs[-n:])
+    return "\n".join(f"{c['o']:.{d}f} {c['h']:.{d}f} {c['l']:.{d}f} {c['c']:.{d}f}"
+                      for c in cs[-n:])
 
 
 _cal = {"at": None, "data": []}
@@ -1371,24 +1398,25 @@ def bar(used, total):
 
 
 # ---------------- analisa + kad isyarat ----------------
-PROMPT = """Kamu analis SMC/ICT. Pair {pair}. Harga sekarang {price}.
-H1 (open,high,low,close; 60 bar terakhir):
+# PROMPT RINGKAS — versi lama (4,335 char, 22 medan) memaksa model jadi
+# thinking model: 4,000 token dibakar untuk reasoning, content KOSONG
+# (reasoning_tokens=4000, finish_reason=length, C=0ch). Diuji 23 Okt 2026:
+# prompt panjang -> GLM 79s C=0ch | DeepSeek 32s C=0ch | Kimi 63s C=0ch (gagal semua)
+# prompt ringkas (2,567 char) -> DeepSeek 8.6s JSON 119ch VALID rr1=2.57
+# Medan naratif (plan, h1_trend, rating_reason, ...) tidak lagi diminta; callers
+# guna j.get(k, "-") jadi selamat — paparkan "-" bukan crash.
+PROMPT = """FX SMC analyst. Pair {pair} now {price}.
+H1 O H L C:
 {h1}
-M15 (80 bar terakhir):
+M15 O H L C:
 {m15}
-Balas HANYA satu objek JSON, tanpa teks lain, kunci tepat. JANGAN tulis
-medan "_en" atau teks panjang — ringkas setiap medan naratif dalam 1 baris.
+Reply ONLY compact JSON, no prose, no reasoning:
+{{"bias":"BUY"|"SELL","poi_low":num,"poi_high":num,"sl":num,"tp1":num,"tp2":num,
+ "grade":"A+"|"A"|"B"|"C","confidence":0-10}}
+SELL: sl>entry>tp1>tp2. BUY: sl<entry<tp1<tp2. entry=mid(poi_low,poi_high).
+RR1>=1.5 required. Bahasa Indonesia."""
 
-bias (BUY atau SELL), poi_low, poi_high (zon FVG/breaker M15 belum termitigasi),
-sl, tp1, tp2 (nombor), grade (A+/A/B/C sahaja), confidence (0-10), bias_m5, plan (rencana eksekusi),
-h1_trend, h1_levels (support/demand/resistance ringkas), h1_confluence (HIGH/MEDIUM/LOW),
-m15_context, dol_type, dol_levels, poi_type, trigger_m1, rating_reason,
-alignment (EXCELLENT/GOOD/MIXED), note, invalidation. Bahasa Indonesia.
 
-Rubrik grade (pilih satu sahaja): A+ = confluence sangat tinggi, trend H1 dan
-M15 searah, POI fresh, trigger jelas, R:R >= 3; A = confluence tinggi, satu
-kelemahan kecil; B = confluence sederhana atau entry agak jauh dari POI;
-C = banyak kelemahan, R:R rendah atau struktur bercanggah."""
 
 
 def validate(pair, j):
@@ -1500,7 +1528,7 @@ async def do_analysis(chat, tg, ctx, pair):
         _hb = asyncio.create_task(_heartbeat(st, pair, t_llm))
         try:
             raw = await ask_agent(PROMPT.format(pair=pair, price=fmt(pair, price),
-                                                h1=compact(h1, 45, pair), m15=compact(m15, 60, pair)),
+                                                h1=compact(h1, 30, pair), m15=compact(m15, 40, pair)),
                                    use_staruh=True)
         finally:
             _hb.cancel()
@@ -1510,7 +1538,7 @@ async def do_analysis(chat, tg, ctx, pair):
             v = validate(pair, j)
         except Exception as first:
             repair_prompt = (PROMPT.format(pair=pair, price=fmt(pair, price),
-                           h1=compact(h1, 45, pair), m15=compact(m15, 60, pair))
+                           h1=compact(h1, 30, pair), m15=compact(m15, 40, pair))
                            + "\n\nOutput sebelumnya tidak sah: " + str(first)
                            + ". Betulkan level supaya urutan arah konsisten dan RR1 >= 1.5. Balas JSON sahaja.")
             j = extract_json(await ask_agent(repair_prompt, True))
@@ -1558,7 +1586,7 @@ async def screener_analyse_pair(pair):
     h1, m15 = await acandles(pair, "H1", 60), await acandles(pair, "M15", 120)
     price = m15[-1]["c"]
     prompt = PROMPT.format(pair=pair, price=fmt(pair, price),
-                           h1=compact(h1, 45, pair), m15=compact(m15, 60, pair))
+                           h1=compact(h1, 30, pair), m15=compact(m15, 40, pair))
     j = extract_json(await ask_agent(prompt, use_staruh=True))
     try:
         v = validate(pair, j)
