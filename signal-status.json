@@ -1,5 +1,5 @@
 {
- "updated": "2026-10-23T04:00:02+08:00",
+ "updated": "2026-10-23T04:20:00+08:00",
  "signals": {
   "USDCAD_20261018_110101": {
    "status": "sl",
@@ -420,7 +420,12 @@
    "status": "active"
   },
   "USDCAD_20261023_025418": {
-   "status": "active"
+   "status": "void_unfilled",
+   "pips": 0.0,
+   "r": 0.0,
+   "unit": "pips",
+   "closed": "2026-10-23T03:00:02+08:00",
+   "note": "Corrected 2026-10-23 04:1x MY: entry 1.40356 never touched. TwelveData 1-min replay shows USD/CAD already at 1.4005 by 02:54 MY (below tp 1.4015), so no position was ever opened. Earlier 'tp +20.6 pips' notice was a phantom verdict from signal-status.py evaluating TP without confirming entry fill. Members who acted on it should treat it as void."
   }
  }
 }
