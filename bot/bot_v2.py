@@ -75,7 +75,7 @@ ENERGY = {"FREE": 3000, "PRO": 50000}
 
 def energy_cap(tier): return ENERGY.get(str(tier).upper(), ENERGY["FREE"])
 LINE = "━" * 20
-WIB = timezone(timedelta(hours=7))
+WIB = timezone(timedelta(hours=8))   # Asia/Kuala_Lumpur (MY), bukan +7
 MONTHS = ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Agu", "Sep", "Okt", "Nov", "Des"]
 # pair: (instrumen OANDA, desimal, ukuran pip)
 # Diselaraskan dengan HOT_PAIRS di members.html — 7 pair yang sama.
@@ -2203,6 +2203,98 @@ async def on_callback(update: Update, ctx):
                         f"<i>Nota: iklan/rujukan broker ialah hubungan komersial. Nyatakan dengan jelas kepada pengguna.</i>")
 
 
+def _sub_rows():
+    """Semua member + subscription window 30 hari, terus dari Supabase.
+
+    Panel HTML tak boleh baca profiles penuh sebab RLS hanya benarkan admin
+    pandang bar sendiri. Bot ada service key, jadi ia bypass RLS — itu sebab
+    panel ini ialah dalam Telegram dan bukan di laman.
+    """
+    if not (SB_URL and SB_KEY):
+        return []
+    q = ("profiles?select=id,name,email,plan,created_at,telegram_chat_id"
+         "&order=created_at.desc&limit=500")
+    rows = sb_request(q)
+    # Start = reviewed_at bayaran terakhir (jika ada), fallback created_at.
+    latest = {}
+    try:
+        for r in sb_request("payment_requests?select=email,plan,reviewed_at"
+                            "&status=eq.approved&order=reviewed_at.desc&limit=500"):
+            em = (r.get("email") or "").strip().lower()
+            if em and (em not in latest or (r.get("reviewed_at") or "") > latest[em]):
+                latest[em] = r.get("reviewed_at") or ""
+    except Exception:
+        pass
+    from datetime import datetime as _dt, timedelta as _td
+    now = _dt.now(timezone.utc).astimezone(WIB)
+    out = []
+    for p in rows:
+        plan = str(p.get("plan") or "free").lower()
+        if plan not in ("free", "pro", "max"):
+            plan = "free"
+        start_iso = latest.get((p.get("email") or "").strip().lower()) or p.get("created_at")
+        start = None
+        if start_iso:
+            try:
+                start = _dt.fromisoformat(str(start_iso).replace("Z", "+00:00"))
+                if start.tzinfo is None:
+                    start = start.replace(tzinfo=timezone.utc)
+                start = start.astimezone(WIB)
+            except Exception:
+                start = None
+        end = start + _td(days=30) if (start and plan != "free") else None
+        left = None
+        if end:
+            left = (end.date() - now.date()).days
+        out.append({
+            "id": p.get("id"), "name": p.get("name") or "—",
+            "email": p.get("email") or "—", "plan": plan,
+            "tg": p.get("telegram_chat_id"),
+            "start": start, "end": end, "left": left,
+        })
+    out.sort(key=lambda r: (r["left"] is None, r["left"] if r["left"] is not None else 9999))
+    return out
+
+
+def _fmt_date(d):
+    return d.strftime("%d %b %Y") if d else "—"
+
+
+async def subs_cmd(update: Update, ctx):
+    """ /subs — senarai subscription semua member (admin sahaja). """
+    if not allowed(update.effective_chat.id):
+        return
+    if update.effective_user.id not in ADMIN_IDS:
+        return await say(update.effective_chat, "\U0001f512 Admin sahaja.")
+    rows = _sub_rows()
+    if not rows:
+        return await say(update.effective_chat, "⚠️ Tiada member dibaca. Semak Supabase key.")
+    lines = ["\U0001f4cb <b>Subscription — semua member (30 hari)</b>", ""]
+    icon = {"free": "⚪", "pro": "\U0001f535", "max": "\U0001f7e2"}
+    for r in rows:
+        if r["plan"] == "free":
+            badge = "⚪ FREE"
+        elif r["left"] is None:
+            badge = f"{icon[r['plan']]} {r['plan'].upper()} — ?"
+        elif r["left"] < 0:
+            badge = f"\U0001f534 {r['plan'].upper()} — Tamat {-r['left']} hari lalu"
+        elif r["left"] <= 7:
+            badge = f"\U0001f7e1 {r['plan'].upper()} — {r['left']} hari lagi"
+        else:
+            badge = f"\U0001f7e2 {r['plan'].upper()} — {r['left']} hari lagi"
+        lines.append(f"{badge}")
+        lines.append(f"   <b>{e(r['name'])}</b>")
+        lines.append(f"   {e(r['email'])}")
+        lines.append(f"   Subscribe: {_fmt_date(r['start'])} · Expire: {_fmt_date(r['end'])}"
+                     + (f" · TG {r['tg']}" if r["tg"] else ""))
+        lines.append("")
+    paid = sum(1 for r in rows if r["plan"] != "free")
+    late = sum(1 for r in rows if r["left"] is not None and r["left"] < 0)
+    soon = sum(1 for r in rows if r["left"] is not None and 0 <= r["left"] <= 7)
+    lines.append(f"\u2003Bayaran: <b>{paid}</b> · Akan tamat: <b>{soon}</b> · Tamat: <b>{late}</b>")
+    await say(update.effective_chat, "\n".join(lines))
+
+
 async def admin_cmd(update: Update, ctx):
     if not allowed(update.effective_chat.id):
         return
@@ -2333,6 +2425,7 @@ def main():
     app.add_handler(CommandHandler("start", start))
     app.add_handler(CommandHandler("model", model_cmd))
     app.add_handler(CommandHandler(["setpro", "setexness"], admin_cmd))
+    app.add_handler(CommandHandler(["subs", "langgana"], subs_cmd))
     app.add_handler(CallbackQueryHandler(on_callback))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, on_text))
     app.job_queue.run_repeating(watch, interval=20, first=10)
