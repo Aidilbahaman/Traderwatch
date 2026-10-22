@@ -146,7 +146,11 @@ def git(*args):
 
 
 def main():
-    subprocess.run(["git", "-C", str(REPO), "pull", "--rebase", "--quiet"],
+    # --autostash: working tree ada signal-status.json yang diubah cron
+    # sebelumnya; tanpa autostash, "pull --rebase" gagal ("cannot pull with
+    # rebase: You have unstaged changes") dan auto-commit mati.
+    subprocess.run(["git", "-C", str(REPO), "pull", "--rebase", "--autostash",
+                    "--quiet"],
                    capture_output=True, text=True)
 
     if STATUS_FILE.exists():
@@ -251,17 +255,30 @@ def main():
     # strength/events payloads so the dashboard never shows invented data.
     state.pop("strength", None)
     state.pop("events", None)
-    STATUS_FILE.write_text(json.dumps(state, indent=1, ensure_ascii=False) + "\n")
+    new_text = json.dumps(state, indent=1, ensure_ascii=False) + "\n"
+    old_text = ""
+    try:
+        old_text = STATUS_FILE.read_text()
+    except OSError:
+        pass
+    STATUS_FILE.write_text(new_text)
 
     log(f"DONE checked={checked} changed={changed} errors={errors} total={len(state['signals'])}")
 
-    if changed:
+    # Commit bila FILE berubah, bukan hanya bila ada perubahan status
+    # signal. Field "updated" berubah setiap run, jadi commit setiap kali
+    # memastikan Pages sentiasa dapat status live dan `git status` sentiasa
+    # bersih (fail tak ternoda dalam working tree).
+    if new_text != old_text:
         git("add", "signal-status.json")
-        git("commit", "-m", f"status: {changed} signal update(s)")
-        push = git("push", "origin", "main")
-        if push.returncode != 0:
-            log("PUSH-FAIL " + (push.stderr or "")[:160])
-            return 1
+        commit = git("commit", "-m", f"status: {changed} signal update(s)")
+        if commit.returncode != 0:
+            log("COMMIT-FAIL " + (commit.stderr or "")[:160])
+        else:
+            push = git("push", "origin", "main")
+            if push.returncode != 0:
+                log("PUSH-FAIL " + (push.stderr or "")[:160])
+                return 1
     return 0 if errors == 0 else 1
 
 
