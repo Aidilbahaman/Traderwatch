@@ -371,11 +371,11 @@ def spend(tg_id, vision=0, energy=0):
 
 
 # ---------------- agent Hermes ----------------
-# Default route: MiniMax m3.1 flash (free) via OpenRouter — model yang sama
-# digunakan Hermes. Serveras masih boleh dipilih lewat preset /model.
-LLM_URL = os.environ.get("LLM_URL", "https://openrouter.ai/api/v1/chat/completions")
-LLM_MODEL = os.environ.get("LLM_MODEL", "minimax/minimax-m3.1-flash:free")
-LLM_KEY_ENV = os.environ.get("LLM_KEY_ENV", "OPENROUTER_API_KEY")
+# Default route: serveras.click. MiniMax m3.1 flash :free OpenRouter DIHAPUS
+# 22 Okt 2026 (free launch period tamat) — jangan rujuk semula.
+LLM_URL = os.environ.get("LLM_URL", "https://serveras.click/v1/chat/completions")
+LLM_MODEL = os.environ.get("LLM_MODEL", "asai/freemodel-2-MiniMax")
+LLM_KEY_ENV = os.environ.get("LLM_KEY_ENV", "HERMES_CUSTOM_SERVERAS_CLICK_API_KEY")
 
 # Route per model supaya chain fellback boleh campur provider safely.
 MODEL_ROUTES = {
@@ -396,6 +396,10 @@ MODEL_ROUTES = {
     "asai/freemodel-2-MiniMax":
         ("https://serveras.click/v1/chat/completions", "HERMES_CUSTOM_SERVERAS_CLICK_API_KEY"),
     "asai/deepseek-v4-flash":
+        ("https://serveras.click/v1/chat/completions", "HERMES_CUSTOM_SERVERAS_CLICK_API_KEY"),
+    "asai/freemodel-4-ds-v4.1flash":
+        ("https://serveras.click/v1/chat/completions", "HERMES_CUSTOM_SERVERAS_CLICK_API_KEY"),
+    "asai/freemodel-5-kimi":
         ("https://serveras.click/v1/chat/completions", "HERMES_CUSTOM_SERVERAS_CLICK_API_KEY"),
 }
 
@@ -455,26 +459,29 @@ def _is_payment_error(ex):
 # ---- Preset model: berbayar / percuma / auto ----
 LLM_PRESETS = {
     "minimax": {"label": "\U0001f193 Model percuma \u2014 MiniMax",
-                "desc": "MiniMax m3.1 flash (OpenRouter) \u2014 free, paling cepat",
-                "model": "minimax/minimax-m3.1-flash:free",
-                "fallback": "asai/freemodel-2-MiniMax",
-                "url": "https://openrouter.ai/api/v1/chat/completions",
-                "key_env": "OPENROUTER_API_KEY"},
+                "desc": "MiniMax free (serveras) \u2014 percuma, paling cepat",
+                "model": "asai/freemodel-2-MiniMax",
+                "fallback": "asai/freemodel-1-GLM,asai/freemodel-4-ds-v4.1flash",
+                "url": "https://serveras.click/v1/chat/completions",
+                "key_env": "HERMES_CUSTOM_SERVERAS_CLICK_API_KEY"},
     "deepseek": {"label": "\U0001f4b3 Model berbayar \u2014 DeepSeek",
-                 "desc": "DeepSeek v4 Flash \u2014 analisis paling tepat (OpenRouter, sangat murah)",
-                 "model": "deepseek/deepseek-v4-flash",
-                 "fallback": "asai/deepseek-v4-flash",
-                 "url": "https://openrouter.ai/api/v1/chat/completions",
-                 "key_env": "OPENROUTER_API_KEY"},
+                 "desc": "DeepSeek free (serveras) \u2014 analisis paling tepat, percuma",
+                 "model": "asai/freemodel-4-ds-v4.1flash",
+                 "fallback": "asai/freemodel-2-MiniMax,asai/freemodel-1-GLM",
+                 "url": "https://serveras.click/v1/chat/completions",
+                 "key_env": "HERMES_CUSTOM_SERVERAS_CLICK_API_KEY"},
     "free": {"label": "\U0001f193 Model percuma \u2014 GLM",
              "desc": "GLM free (serveras) \u2014 percuma, sandaran bila MiniMax sibuk",
              "model": "asai/freemodel-1-GLM",
-             "fallback": "minimax/minimax-m3.1-flash:free",
+             "fallback": "asai/freemodel-2-MiniMax,asai/freemodel-4-ds-v4.1flash",
              "url": "https://serveras.click/v1/chat/completions",
              "key_env": "HERMES_CUSTOM_SERVERAS_CLICK_API_KEY"},
 }
-# Semua preset disahkan hidup 22 Okt 2026:
-#   minimax/minimax-m3.1-flash:free OK 0.8s | deepseek/deepseek-v4-flash OK 1.1s
+# Semua preset disahkan hidup 23 Okt 2026 (serveras.click):
+#   asai/freemodel-2-MiniMax OK | asai/freemodel-1-GLM OK
+#   asai/freemodel-4-ds-v4.1flash (fallback, belum diuji live)
+# NOTA: minimax/minimax-m3.1-flash:free OpenRouter DIHAPUS 22 Okt 2026
+#       (free launch period tamat) \u2014 jangan guna semula.
 #   asai/freemodel-1-GLM OK 4.0s | asai/freemodel-2-MiniMax OK 1.6s
 # Tiada DeepSeek free: asai/freemodel-3-deepseekpro -> 404 model_not_found,
 # semua asai/deepseek-* -> 402 insufficient_credits.
@@ -645,7 +652,8 @@ def _run_agent(prompt, use_staruh=False):
                 payload = {"model": model,
                            "messages": [{"role": "user", "content": content}],
                            "temperature": temp, "max_tokens": 2000}
-                if model.startswith("minimax/") or model.startswith("openrouter/"):
+                if (model.startswith("minimax/") or model.startswith("openrouter/")
+                        or model.startswith("asai/")):
                     # Model reasoning guna token untuk reasoning; JSON penuh
                     # (20+ medan) boleh terpotong pada 2000 token.
                     payload["max_tokens"] = 4000
