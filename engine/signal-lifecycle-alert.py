@@ -161,10 +161,15 @@ def parse_ts(value):
 
 
 def is_expired(sig, st, now_dt, expiry_min=None, price=None, bars=None):
-    """True bila pending limit melebihi tempoh SELEPAS first-touch zon.
+    """True bila pending limit melebihi tempoh.
 
-    Tanpa first_touch, setup terus menunggu. Entry yang sudah filled tidak
-    pernah expired.
+    Timer expiry:
+      - bila ada first_touch  -> diukur dari first_touch (harga masuk zon
+        POI kemudian keluar lagi)
+      - bila tiada first_touch -> diukur dari posted_at, supaya setup yang
+        tak pernah sentuh POI jugak akan luput
+
+    Entry yang sudah filled tidak pernah expired.
 
     Tiga lapisan perlindungan sebelum setup boleh ditutup:
 
@@ -183,7 +188,26 @@ def is_expired(sig, st, now_dt, expiry_min=None, price=None, bars=None):
         return False
     first_touch = st.get("first_touch")
     if not first_touch:
-        return False
+        # Harga belum pernah sentuh zon POI. Timer expiry bermula dari
+        # POSTED_AT, bukan first_touch — tanpa ini, setup yang tak pernah
+        # Kohl sentuh POI akan menggantung selamanya (bug: #109 274 minit,
+        # #111 228 minit, #114 63 minit masih "pending").
+        posted = sig.get("posted_at")
+        if not posted:
+            return False
+        try:
+            since = parse_ts(posted)
+        except Exception:
+            return False
+        if (now_dt - since).total_seconds() <= expiry_min * 60:
+            return False
+        st["expiry_strikes"] = int(st.get("expiry_strikes") or 0) + 1
+        if st["expiry_strikes"] < 2:
+            log(f"EXPIRY-PENDING {sig.get('id')} {sig.get('pair')} "
+                f"no-first-touch strike={st['expiry_strikes']}/2 "
+                f"— tunggu tick seterusnya")
+            return False
+        return True
     entry = float(sig["entry"])
     side = str(sig["side"]).upper()
 
