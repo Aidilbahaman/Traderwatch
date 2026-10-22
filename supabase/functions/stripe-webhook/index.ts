@@ -116,24 +116,27 @@ Deno.serve(async (req) => {
         }
         if (!userId) break;
 
-        const { error } = await sb.from("profiles").update({ plan }).eq("id", userId);
-        if (error) throw error;
-        handled.push(`checkout.session.completed -> ${email ?? userId} = ${plan}`);
-
-        // Notifikasi admin: duit masuk akaun Stripe (nanti transfer manual
-        // balik kepada member). Sertakan amount + currency supaya admin tak
-        // perlu buka dashboard.
+        // NOTIFY SAHAJA. Plan TIDAK auto-upgrade — owner upgrade client
+        // secara manual selepas semak bayaran (akaun Stripe milik rakan
+        // kongsi, jadi duit perlu disahkan dulu).
+        // Cache plan supaya alert boleh tunjuk tier yang十六条.
         const amount = s.amount_total ?? null;
         const currency = (s.currency ?? "").toUpperCase();
+        handled.push(`checkout.session.completed ${email ?? userId} -> notify ${plan}`);
+
+        const { data: prof } = await sb.from("profiles")
+          .select("plan,name").eq("id", userId).maybeSingle();
+        const nowPlan = prof?.plan ?? "free";
+
         await alertAdmin(
           `💰 <b>Stripe payment masuk</b>\n` +
-          `Plan: <b>${plan.toUpperCase()}</b>\n` +
-          `Member: ${email ?? userId}\n` +
+          `Tier dibeli: <b>${plan.toUpperCase()}</b>\n` +
+          `Member: ${prof?.name || "—"} (${email ?? userId})\n` +
+          `Plan sekarang: <b>${String(nowPlan).toUpperCase()}</b>\n` +
           `Jumlah: ${amount != null ? `${(amount / 100).toFixed(2)} ${currency}` : "?"}\n` +
           `Session: ${s.id}\n` +
-          `Bayar: ${s.payment_status ?? "?"}\n\n` +
-          `👉 Transfer kepada KAU dulu (akaun Stripe ini milik rakan kongsi).\n` +
-          `Selepas duit sampai, urus bayaran member sendiri.`
+          `Status: ${s.payment_status ?? "?"}\n\n` +
+          `👉 Semak Stripe Dashboard, transfer kepada KAU, kemudian upgrade tier client secara manual.`
         );
         break;
       }
@@ -143,9 +146,14 @@ Deno.serve(async (req) => {
         const plan = planFromSession(s as any) ?? (s.status === "active" ? "pro" : null);
         const refId = s.metadata?.user_id ?? s.client_reference_id ?? null;
         if (!plan || !refId) break;
-        const { error } = await sb.from("profiles").update({ plan }).eq("id", refId);
-        if (error) throw error;
-        handled.push(`subscription.updated -> ${refId} = ${plan}`);
+        handled.push(`subscription.updated ${refId} -> notify ${plan}`);
+        await alertAdmin(
+          `🔄 <b>Langganan dikemas kini (Stripe)</b>\n` +
+          `User: ${refId}\n` +
+          `Tier dalam bayaran: <b>${plan.toUpperCase()}</b>\n` +
+          `Status: ${s.status ?? "?"}\n\n` +
+          `👉 Semak Stripe Dashboard. Upgrade/downgrade tier client secara manual jika perlu.`
+        );
         break;
       }
 
@@ -159,14 +167,14 @@ Deno.serve(async (req) => {
           userId = (list?.users ?? []).find(u => u.email?.toLowerCase() === email.toLowerCase())?.id ?? null;
         }
         if (!userId) break;
-        const { error } = await sb.from("profiles").update({ plan: "free" }).eq("id", userId);
-        if (error) throw error;
-        handled.push(`subscription.deleted -> ${email ?? userId} = free`);
+        // NOTIFY SAHAJA — downgrade juga manual supaya owner boleh semak
+        // dulu (ada kalanya refund belum selesai proses).
+        handled.push(`subscription.deleted ${email ?? userId} -> notify`);
         await alertAdmin(
-          `⚠️ <b>Langganan dibatalkan</b>\n` +
+          `⚠️ <b>Langganan dibatalkan (Stripe)</b>\n` +
           `Member: ${email ?? userId}\n` +
-          `Plan diturunkan ke FREE.\n` +
-          `Subscription: ${s.id}`
+          `Subscription: ${s.id}\n\n` +
+          `👉 Semak Stripe Dashboard. Downgrade tier client secara manual jika perlu.`
         );
         break;
       }
