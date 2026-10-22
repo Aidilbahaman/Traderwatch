@@ -35,8 +35,9 @@ PIP = {"XAUUSD": 0.1, "USDJPY": 0.01, "BTCUSD": 1.0}
 DEFAULT_PIP = 0.0001
 # BTC movement is measured in USD, not forex pips.
 USD_UNIT = {"BTCUSD"}
-# Cap how many open setups are evaluated per run to stay inside the free
-# Twelve Data credit budget (8/min, 800/day).
+# Cap how many open setups are evaluated per run so a single pass over a
+# backlog stays quick. Data comes from local SQLite, so this is purely a
+# runtime guard, not a credit limit.
 MAX_CHECKS = 8
 
 
@@ -55,7 +56,6 @@ def load(name):
 
 
 SB = load("supabase.env")
-TD_KEY = load("twelve.env")["TWELVEDATA_API_KEY"]
 
 
 def sb_get(path):
@@ -102,39 +102,11 @@ def candles(pair, start, end):
     except Exception as e:
         log(f"SQ-ERR {pair}: {type(e).__name__}: {str(e)[:70]}")
 
-    # Sandaran: TwelveData 1-min.
-    params = urllib.parse.urlencode({
-        "symbol": pair, "interval": "1min", "timezone": "UTC",
-        "start_date": start.strftime("%Y-%m-%d %H:%M:%S"),
-        "end_date": end.strftime("%Y-%m-%d %H:%M:%S"),
-        "outputsize": 5000, "apikey": TD_KEY,
-    })
-    url = "https://api.twelvedata.com/time_series?" + params
-    for attempt in (1, 2):
-        try:
-            req = urllib.request.Request(url, headers={"User-Agent": "TraderWatch-status/1.0"})
-            with urllib.request.urlopen(req, timeout=30) as r:
-                data = json.loads(r.read().decode())
-            if data.get("status") == "error" or data.get("code"):
-                msg = str(data.get("message", ""))[:140]
-                if data.get("code") == 429 and attempt == 1:
-                    log(f"RATE-LIMIT {pair}: wait 62s")
-                    time.sleep(62)
-                    continue
-                return None, msg
-            vals = data.get("values") or []
-            out = []
-            for v in reversed(vals):
-                out.append((v["datetime"], float(v["high"]), float(v["low"])))
-            return out, "twelvedata"
-        except urllib.error.HTTPError as e:
-            if e.code == 429 and attempt == 1:
-                time.sleep(62)
-                continue
-            return None, f"HTTP {e.code}"
-        except Exception as e:
-            return None, f"{type(e).__name__}: {str(e)[:90]}"
-    return None, "rate limit persisted"
+    # Tiada sandaran luar: Swissquote M1 ialah satu-satunya sumber. Kalau
+    # collector belum cover window itu (trade lama sebelum poll bermula),
+    # lebih baik tiada verdict daripada guna sumber lain — supaya setiap
+    # TP/SL yang dihantar berasal daripada feed yang sama.
+    return None, "swissquote M1 tiada bar dalam window ini"
 
 
 def parse_ts(value):
@@ -162,6 +134,32 @@ def pip_size(code):
     return PIP.get(code, DEFAULT_PIP)
 
 
+def _iso_mine(ts):
+    """Format a candle stamp as MY ISO +08:00.
+
+    Accepts both shapes the two data sources emit:
+      Swissquote SQLite -> "2026-10-22T18:50:00"
+      TwelveData JSON   -> "2026-10-22 18:50:00"
+    Both are UTC. Anything with an explicit offset is parsed as-is.
+    """
+    if not ts:
+        return None
+    raw = str(ts).strip().replace("Z", "+00:00")
+    for fmt in ("%Y-%m-%d %H:%M:%S", "%Y-%m-%dT%H:%M:%S"):
+        try:
+            d = datetime.strptime(raw, fmt).replace(tzinfo=timezone.utc)
+            return d.astimezone(TZ_KL).isoformat(timespec="seconds")
+        except ValueError:
+            continue
+    try:
+        d = datetime.fromisoformat(raw)
+        if d.tzinfo is None:
+            d = d.replace(tzinfo=timezone.utc)
+        return d.astimezone(TZ_KL).isoformat(timespec="seconds")
+    except Exception:
+        return None
+
+
 def evaluate(sig, rows):
     """Return (status, pips, r, ambiguous). rows ordered oldest->newest.
 
@@ -179,6 +177,7 @@ def evaluate(sig, rows):
     side = sig["side"].upper()
     code = "".join(ch for ch in sig["pair"].upper() if ch.isalpha())
     filled = False
+    entry_at = None
     for _ts, high, low in rows:
         if not filled:
             hit_entry = low <= entry <= high
@@ -187,19 +186,24 @@ def evaluate(sig, rows):
                 # level without the trade existing.
                 continue
             filled = True
+            entry_at = _ts
         hit_tp = high >= tp if side == "BUY" else low <= tp
         hit_sl = low <= sl if side == "BUY" else high >= sl
         if hit_tp and hit_sl:
             pips = -abs(entry - sl) / pip_size(code)
-            return "sl", round(pips, 1), -1, True
+            return "sl", round(pips, 1), -1, True, entry_at
         if hit_sl:
             pips = -abs(entry - sl) / pip_size(code)
-            return "sl", round(pips, 1), -1, False
+            return "sl", round(pips, 1), -1, False, entry_at
         if hit_tp:
             pips = abs(tp - entry) / pip_size(code)
             rr = round(abs(tp - entry) / abs(entry - sl), 2) if entry != sl else 0
-            return "tp", round(pips, 1), rr, False
-    return None, None, None, False
+            return "tp", round(pips, 1), rr, False, entry_at
+    # Establishment may have happened without a TP/SL close yet: report the
+    # fill so the lifecycle can send the ENTRY alert and hold the position.
+    if entry_at:
+        return "active", None, None, False, entry_at
+    return None, None, None, False, None
 
 
 def git(*args):
@@ -286,18 +290,29 @@ def main():
             time.sleep(CALL_GAP)
             continue
 
-        status, pips, r, ambiguous = evaluate(sig, data)
-        if status:
+        status, pips, r, ambiguous, entry_at = evaluate(sig, data)
+        if status in ("tp", "sl"):
             code = "".join(ch for ch in sig["pair"].upper() if ch.isalpha())
             entry = {"status": status, "pips": pips, "r": r,
                      "unit": "usd" if code in USD_UNIT else "pips",
                      "closed": now.astimezone(TZ_KL).isoformat(timespec="seconds")}
             if ambiguous:
                 entry["ambiguous"] = True
+            if entry_at:
+                entry["entry_at"] = _iso_mine(entry_at)
             state["signals"][key] = entry
             changed += 1
             log(f"{'TP' if status=='tp' else 'SL'} {sig['pair']} "
                 f"{pips:+.1f} {'USD' if entry['unit']=='usd' else 'pips'}")
+        elif status == "active":
+            # Entry touched but no TP/SL yet: record the fill so the
+            # lifecycle can send the ENTRY alert and hold the position.
+            # prev kecehana: jangan tulis semula (avoid churn every 15 min).
+            if not prev.get("entry_at"):   # jangan timpa fill yang direkod
+                state["signals"][key] = dict(prev, status="active",
+                                             entry_at=_iso_mine(entry_at))
+                changed += 1
+                log(f"ENTRY {sig['pair']} @ {sig['entry']} ({_iso_mine(entry_at)})")
         elif prev.get("status") != "active":
             state["signals"][key] = {"status": "active"}
             changed += 1
