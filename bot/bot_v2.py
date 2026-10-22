@@ -446,6 +446,12 @@ def _llm_model_chain():
         m = m.strip()
         if m and m not in chain:
             chain.append(m)
+    # Pantas-dulu: model <=20s dij置于 depan. DeepSeek/Kimi Ambik 45s dan
+    # timeout — letakkan di hujung supaya pengguna dapat jawapan cepat,
+    # model lambat hanya dipakai bila model pantas gagal parse.
+    if (os.environ.get("LLM_FAST_FIRST") or "").strip() in ("1", "true", "yes"):
+        FAST = ("asai/freemodel-1-GLM", "asai/freemodel-2-MiniMax")
+        chain.sort(key=lambda m: (0 if m in FAST else 1))
     return chain
 
 
@@ -507,12 +513,12 @@ LLM_PRESETS = {
 ENV_FILE = pathlib.Path("/home/ubuntu/tw-bot/.env")
 
 # ---- PIN MODEL ----
-# Default = DeepSeek v4.1 flash (asai/freemodel-4-ds-v4.1flash). Test live
-# 23 Okt 2026: 16.6s, JSON tulen tanpa pagar markdown, entry paling dekat
-# dengan harga (~4122 vs 4120), rr1=1.75, conf=0.68 — setup paling realistik
-# berbanding GLM (12.5s tapi entry kurang tepat) dan Kimi (44.7s, lambat).
-# Admin masih boleh tukar preset lewat /model.
-DEFAULT_PRESET = "deepseek"
+# Default = GLM (asai/freemodel-1-GLM). Test live 23 Okt 2026 dengan prompt
+# sebenar bot (5,550 char): GLM 20.0s + JSON 1,186ch lengkap, MiniMax
+# content=0ch (thinking model, 2500 token habis untuk reasoning), DeepSeek
+# ~45s(timeout), Kimi 44.7s (lambat). GLM satu-satunya yang boleh dipercayai
+# untuk balasan <30s. Admin masih boleh tukar preset lewat /model.
+DEFAULT_PRESET = "free"
 
 
 def _apply_pin():
@@ -676,7 +682,9 @@ def _run_agent(prompt, use_staruh=False):
             m_key = _profile_secret(m_key_env) or key
             # Model percuma boleh 45s/attempt. Cuba suhu berbeza hanya
             # untuk model pantas; model lambat terus ke model seterusnya.
-            for temp in ((0.2,) if SLOW_MODELS else (0.2, 0.5)):
+            # Timeout per-model: model lambat dapat 60s, model pantas 30s.
+            m_slow = model in SLOW_MODELS
+            for temp in ((0.2,) if m_slow else (0.2, 0.5)):
                 payload = {"model": model,
                            "messages": [{"role": "user", "content": content}],
                            "temperature": temp, "max_tokens": 2000}
@@ -707,13 +715,16 @@ def _run_agent(prompt, use_staruh=False):
                 req = urllib.request.Request(m_url, data=body,
                     headers={"Authorization": "Bearer " + m_key,
                              "Content-Type": "application/json"})
-                # Sisa bajet masa jadi timeout; jangan exceed deadline.
+                # Sisa bajet masa jadi timeout, tapi cap per-model: model
+                # lambat (45s+) jangan makan keseluruhan bajet — potong
+                # 55s supaya model pantas ada masa jawab.
                 left = deadline - time.monotonic()
                 if left <= 5:
                     last_err = (last_err or "") + " | bajet masa habis"
                     break
+                cap = 55 if m_slow else 30
                 try:
-                    with urllib.request.urlopen(req, timeout=max(10, int(left))) as r:
+                    with urllib.request.urlopen(req, timeout=max(10, int(min(left, cap)))) as r:
                         data = json.load(r)
                     msg = data["choices"][0]["message"]
                     txt = (msg.get("content") or "").strip()
