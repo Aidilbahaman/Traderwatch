@@ -1,5 +1,5 @@
 {
- "updated": "2026-10-22T17:30:02+08:00",
+ "updated": "2026-10-22T17:45:03+08:00",
  "signals": {
   "USDCAD_20261018_110101": {
    "status": "sl",
@@ -403,7 +403,11 @@
    "status": "active"
   },
   "USDJPY_20261022_170024": {
-   "status": "active"
+   "status": "sl",
+   "pips": -20.0,
+   "r": -1,
+   "unit": "pips",
+   "closed": "2026-10-22T17:45:03+08:00"
   }
  }
 }
