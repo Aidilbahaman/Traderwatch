@@ -645,6 +645,10 @@ def _run_agent(prompt, use_staruh=False):
                 payload = {"model": model,
                            "messages": [{"role": "user", "content": content}],
                            "temperature": temp, "max_tokens": 2000}
+                if model.startswith("minimax/") or model.startswith("openrouter/"):
+                    # Model reasoning guna token untuk reasoning; JSON penuh
+                    # (20+ medan) boleh terpotong pada 2000 token.
+                    payload["max_tokens"] = 4000
                 # Model reasoning (MiniMax m3.1 flash) guna token untuk
                 # "reasoning" dahulu. Tanpa effort=low,ia habiskan
                 # max_tokens sebelum tulis jawapan -> content=None ->
@@ -662,10 +666,14 @@ def _run_agent(prompt, use_staruh=False):
                     msg = data["choices"][0]["message"]
                     txt = (msg.get("content") or "").strip()
                     if not txt:
-                        # Reasoning model: content Sometimes null bila
-                        # max_tokens habis dalam reasoning. Teks penuh
-                        # masih ada dalam field "reasoning".
-                        txt = (msg.get("reasoning") or "").strip()
+                        # Reasoning model: content null bila max_tokens habis
+                        # dalam reasoning. Teks penuh masih ada dalam medan
+                        # "reasoning" — tapi hanya guna kalau ada objek JSON
+                        # SEIMBANG di dalamnya. Draf terpotong akan gagal
+                        # extract_json nanti, jadi lebih baik retry model.
+                        rsn = (msg.get("reasoning") or "").strip()
+                        if _json_blocks(rsn):
+                            txt = rsn
                     # Hanya terima jawapan yang ada payload boleh parse.
                     # Blok think-only / kosong mesti retry, bukan dipulangkan
                     # kepada validate sebagai "tiada setup".
@@ -728,6 +736,54 @@ def parse_staruh(raw):
             "confidence": int(vals.get('confidence', 5)),
             "bias_m5": str(vals.get('bias_m5', vals.get('BIAS'))).upper()}
 
+def _json_blocks(text):
+    """Semua objek JSON seimbang dalam text (outermost, bukan bersarang).
+
+    Model reasoning kadang tulis draf JSON dalam medan "reasoning" yang
+    TERPOTONG. Imbasan kurungan|Last lets us ambil blok yang lengkap.
+    """
+    out, depth, start, instr, esc = [], 0, None, False, False
+    for i, ch in enumerate(text):
+        if instr:
+            if esc: esc = False
+            elif ch == "\\": esc = True
+            elif ch == '"': instr = False
+            continue
+        if ch == '"':
+            instr = True
+            continue
+        if ch == "{":
+            if depth == 0: start = i
+            depth += 1
+        elif ch == "}" and depth > 0:
+            depth -= 1
+            if depth == 0 and start is not None:
+                out.append(text[start:i + 1])
+                start = None
+    return out
+
+
+def _repair_json(block):
+    """Baiki JSON yang rosak ringan: trailing comma, kurungan tak tutup."""
+    fixed = re.sub(r",\s*([}\]])", r"\1", block)
+    # tutup objek/array yang tak ditutup (JSON terpotong)
+    depth_obj = depth_arr = 0
+    instr = esc = False
+    for ch in fixed:
+        if instr:
+            if esc: esc = False
+            elif ch == "\\": esc = True
+            elif ch == '"': instr = False
+            continue
+        if ch == '"': instr = True
+        elif ch == "{": depth_obj += 1
+        elif ch == "}": depth_obj -= 1
+        elif ch == "[": depth_arr += 1
+        elif ch == "]": depth_arr -= 1
+    fixed = fixed + ("}" * max(0, depth_obj)) + ("]" * max(0, depth_arr))
+    return fixed
+
+
 def extract_json(text):
     # Model free kadang balut jawapan dalam blok pemikiran. Buang dahulu,
     # jika tidak parser nampak teks pemikiran dan bukan JSON sebenar.
@@ -740,7 +796,21 @@ def extract_json(text):
     except Exception: pass
     # json in markdown
     m = re.search(r"```(?:json)?\n?(.*?)\n?```", text, re.S)
-    if m: return json.loads(m.group(1).strip())
+    if m:
+        try: return json.loads(m.group(1).strip())
+        except Exception: pass
+    # Blok JSON seimbang (outermost) — longest first
+    blocks = sorted(_json_blocks(text), key=len, reverse=True)
+    for b in blocks:
+        try: return json.loads(b)
+        except Exception: pass
+        try: return json.loads(_repair_json(b))
+        except Exception: pass
+    # JSON terpotong: ambil dari '{' pertama dan baiki/s exacerbated
+    i = text.find("{")
+    if i >= 0:
+        try: return json.loads(_repair_json(text[i:]))
+        except Exception: pass
     raise ValueError(f"bukan STARUH atau JSON: {text[:80]}")
 
 
