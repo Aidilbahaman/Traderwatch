@@ -11,6 +11,17 @@
 <link rel="stylesheet" href="app.css">
 <style>
 [hidden]{display:none!important}
+.maint{background:linear-gradient(135deg,rgba(242,184,75,.16),rgba(242,184,75,.06));
+  border-bottom:1px solid rgba(242,184,75,.42);padding:16px 0}
+.maint .wrap{max-width:1120px;margin:0 auto;padding:0 20px}
+.maint h2{margin:0 0 6px;font-size:1.12rem;color:#f2b84b;display:flex;align-items:center;gap:9px}
+.maint p{margin:0 0 8px;color:var(--muted);font-size:.94rem;line-height:1.55}
+.maint ul{margin:0 0 8px;padding-left:20px;color:var(--muted);font-size:.9rem;line-height:1.65}
+.maint .dot{width:8px;height:8px;border-radius:50%;background:#f2b84b;flex:0 0 auto;
+  box-shadow:0 0 0 0 rgba(242,184,75,.55);animation:maintPulse 1.9s ease-out infinite}
+@keyframes maintPulse{0%{box-shadow:0 0 0 0 rgba(242,184,75,.5)}70%{box-shadow:0 0 0 9px rgba(242,184,75,0)}
+  100%{box-shadow:0 0 0 0 rgba(242,184,75,0)}}
+@media (prefers-reduced-motion:reduce){.maint .dot{animation:none}}
 .badge{font:700 .85rem var(--body);padding:4px 12px;border-radius:99px;background:var(--panel2);border:1px solid var(--line);color:var(--muted)}
 .badge.pro{background:rgba(46,207,111,.15);border-color:var(--gold);color:var(--gold)}
 .preview{background:rgba(242,184,75,.14);color:#f2b84b;padding:10px 0;font-size:.95rem}
@@ -39,6 +50,14 @@
 <script src="assets/js/tw-fundamental-news.js?v=2026101901" defer></script>
 </head>
 <body>
+<div class="maint" id="maintBanner" hidden>
+  <div class="wrap">
+    <h2><span class="dot" aria-hidden="true"></span><span id="maintTitle">Server Under Maintenance</span></h2>
+    <p id="maintBody"></p>
+    <ul id="maintPoints"></ul>
+    <p id="maintNote"></p>
+  </div>
+</div>
 <div class="preview" id="previewBanner" hidden><div class="wrap">Preview mode: sign-ups are not being saved yet. Connect your form in config.js.</div></div>
 <header>
   <div class="wrap nav">
@@ -145,9 +164,37 @@
 </footer>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
-<script src="config.js?v=202610182133"></script>
+<script src="config.js?v=202610230700"></script>
 <script src="common.js?v=202610182133"></script>
-<script>window.TW_CONFIG = { tzOffset: 8, supportUrl: "", brand: "TraderWatch" };</script>
+<script>
+(function(){
+  var cfg = (typeof CONFIG !== "undefined" && CONFIG) ? CONFIG : (window.CONFIG || {});
+  window.TW_CONFIG = Object.assign({ tzOffset: 8, supportUrl: "", brand: "TraderWatch" },
+                                   cfg.maintenance ? { maintenance: cfg.maintenance } : {});
+})();
+/* Banner maintenance: sumber CONFIG.maintenance supaya boleh dimatikan dari
+   satu tempat (config.js) tanpa menyentuh HTML. */
+(function(){
+  var m = window.TW_CONFIG.maintenance;
+  if(!m || !m.active) return;
+  var box = document.getElementById("maintBanner");
+  if(!box) return;
+  if(m.title) document.getElementById("maintTitle").textContent = m.title;
+  if(m.body) document.getElementById("maintBody").textContent = m.body;
+  var ul = document.getElementById("maintPoints");
+  if(ul && m.points && m.points.length){
+    ul.hidden = false;
+    m.points.forEach(function(t){
+      var li = document.createElement("li");
+      li.textContent = t;
+      ul.appendChild(li);
+    });
+  } else if(ul){ ul.hidden = true; }
+  var nt = document.getElementById("maintNote");
+  if(nt && m.note) nt.textContent = m.note;
+  box.hidden = false;
+})();
+</script>
 <script src="members-tools.js?v=202610182133" defer></script>
 <script src="members-tools-2.js?v=2026101903" defer></script>
 <script>

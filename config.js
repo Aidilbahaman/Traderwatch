@@ -1,5 +1,17 @@
 /* ===== Settings: edit these ===== */
 const CONFIG = {
+  // Banner maintenance untuk member area. Set notice: "" untuk buang banner.
+  maintenance: {
+    active: true,
+    title: "Server Under Maintenance",
+    body: "Sistem AI isyarat sedang diuji (fasa testing) untuk memastikan setiap isyarat tepat dan boleh dipercayai.",
+    points: [
+      "Isyarat AI baharu tidak dikeluarkan sementara ini",
+      "Isyarat sedia ada yang sedang berjalan tetap dipantau",
+      "Tiada tindakan diperlukan daripada anda"
+    ],
+    note: "Kami akan maklumkan melalui channel Telegram sebaik sahaja sistem kembali normal."
+  },
   // Form service that receives sign-ups, e.g. "https://formspree.io/f/xxxxxxx". Leave empty until you have one.
   signupEndpoint: "https://formspree.io/f/xqpewvzl",
   // Stripe Payment Link per plan (dibuat via Stripe Dashboard).
