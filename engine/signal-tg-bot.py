@@ -69,7 +69,9 @@ SB_KEY = SB["SUPABASE_SERVICE_KEY"]
 
 # Admin contact. tg://user?id= membuka DM admin terus tanpa mendedahkan
 # nombor ID kepada member — teks pautan yang dipaparkan ialah "Message Admin".
-ADMIN_USER_ID = (TG.get("TELEGRAM_ADMIN_CHAT_ID") or "").strip()
+ADMIN_TOKEN = (TG.get("TELEGRAM_BOT_TOKEN") or "").strip()      # @Twreg_bot
+ADMIN_CHAT_ID = (TG.get("TELEGRAM_ADMIN_CHAT_ID") or "").strip()
+ADMIN_USER_ID = ADMIN_CHAT_ID
 ADMIN_LINK = (f'<a href="tg://user?id={ADMIN_USER_ID}">Message Admin</a>'
               if ADMIN_USER_ID.isdigit() else "the admin")
 
@@ -200,6 +202,34 @@ def resolve_token(token):
     # Fetch the profile to confirm the account still exists.
     prof = profile_for(uid)
     return prof, None
+
+
+def tg_admin(method, **params):
+    """Hantar melalui @Twreg_bot (token TELEGRAM_BOT_TOKEN).
+
+    Notifikasi dalaman kepada admin Sometimes perlu datang daripada bot
+    lain supaya owner boleh bezakan (mis. pengesahan plan upgrade) daripada
+    mesej isyarat member yang biasa.
+    """
+    if not ADMIN_TOKEN or not ADMIN_CHAT_ID:
+        return {"ok": False, "description": "admin token/chat tidak ditetapkan"}
+    url = API.format(token=ADMIN_TOKEN, method=method)
+    if params:
+        url += "?" + urllib.parse.urlencode(params)
+    req = urllib.request.Request(url)
+    try:
+        with urllib.request.urlopen(req, timeout=TIMEOUT) as r:
+            return json.loads(r.read().decode())
+    except Exception as ex:
+        return {"ok": False, "description": f"{type(ex).__name__}: {ex}"}
+
+
+def notify_admin(text):
+    res = tg_admin("sendMessage", chat_id=ADMIN_CHAT_ID, text=text,
+                   parse_mode="HTML", disable_web_page_preview="true")
+    if not res.get("ok"):
+        log(f"NOTIFY-ADMIN-FAIL {res.get('description')}")
+    return res.get("ok")
 
 
 def reply(chat_id, text):
@@ -604,7 +634,11 @@ def handle_callback(cq):
         # daripada user input — tapi tetap gate admin sebagai lapisan kedua.
         parts = data.split(":", 3)
         uid, want = parts[2], parts[3]
-        if uid not in PLAN_CHOICES or want not in PLAN_CHOICES:
+        # Guard: uid mesti kelihatan seperti UUID Supabase auth user id.
+        # PLAN_CHOICES hanya untuk plan — bukan untuk uid.
+        import re as _re
+        if not _re.fullmatch(r"[0-9a-fA-F-]{36}", uid) or want not in PLAN_CHOICES:
+            log(f"PW-UP REJECT uid={uid!r} want={want!r}")
             tg("answerCallbackQuery", callback_query_id=cq_id,
                text="Permintaan tidak sah", show_alert=True)
             return
@@ -636,12 +670,12 @@ def handle_callback(cq):
         log(f"PW-UP {who}: {now_plan} -> {want}")
         tg("answerCallbackQuery", callback_query_id=cq_id,
            text=f"✅ {who} → {want.upper()}", show_alert=True)
-        reply(chat_id,
-              f"✅ <b>Di-upgrade</b>\n"
-              f"Member: <b>{who}</b>\n"
-              f"Plan: {now_plan.upper()} ➜ <b>{want.upper()}</b>\n"
-              f"User id: <code>{uid}</code>\n\n"
-              f"🛡️ Sahkan duit sudah sampai ke bank sebelum upgrade.")
+        notify_admin(
+            "✅ <b>Plan di-upgrade</b>\n"
+            f"Member: <b>{who}</b>\n"
+            f"Plan: {now_plan.upper()} ➜ <b>{want.upper()}</b>\n"
+            f"User id: <code>{uid}</code>\n\n"
+            "🛡️ Sahkan duit sudah sampai ke bank sebelum upgrade.")
         return
     tg("answerCallbackQuery", callback_query_id=cq_id)
     if not data.startswith("mb:"):
