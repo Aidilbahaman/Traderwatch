@@ -11,6 +11,7 @@ import asyncio, html, io, json, os, pathlib, re, shlex, sqlite3, subprocess, url
 import xml.etree.ElementTree as ET
 import sys
 import sys as _sys
+import time
 _sys.path.insert(0, "/home/ubuntu/web/Traderwatch-repo")
 from engine.sq_collector import candles_from_bars as candles_swissquote  # noqa: E402
 from datetime import datetime, timedelta, timezone
@@ -374,7 +375,7 @@ def spend(tg_id, vision=0, energy=0):
 # Default route: serveras.click. MiniMax m3.1 flash :free OpenRouter DIHAPUS
 # 22 Okt 2026 (free launch period tamat) — jangan rujuk semula.
 LLM_URL = os.environ.get("LLM_URL", "https://serveras.click/v1/chat/completions")
-LLM_MODEL = os.environ.get("LLM_MODEL", "asai/freemodel-2-MiniMax")
+LLM_MODEL = os.environ.get("LLM_MODEL", "asai/freemodel-1-GLM")
 LLM_KEY_ENV = os.environ.get("LLM_KEY_ENV", "HERMES_CUSTOM_SERVERAS_CLICK_API_KEY")
 
 # Route per model supaya chain fellback boleh campur provider safely.
@@ -456,10 +457,15 @@ def _is_payment_error(ex):
     return "402" in text or "insufficient_credits" in text or "payment required" in text
 
 
+# Bajet masa satu panggilan LLM (saat). Chain retry_model x temperatura
+# boleh capai 15 minit; pengguna tunggu terlalu lama. 90s cukup untuk
+# GLM (~12s) dengan 1-2 retry pendek.
+LLM_BUDGET_S = float(os.environ.get("LLM_BUDGET_S", "90"))
+
 # ---- Preset model: berbayar / percuma / auto ----
 LLM_PRESETS = {
     "minimax": {"label": "\U0001f193 Model percuma \u2014 MiniMax",
-                "desc": "MiniMax free (serveras) \u2014 percuma, paling cepat",
+                "desc": "MiniMax free (serveras) \u2014 percuma (thinking model, lambat)",
                 "model": "asai/freemodel-2-MiniMax",
                 "fallback": "asai/freemodel-1-GLM,asai/freemodel-4-ds-v4.1flash",
                 "url": "https://serveras.click/v1/chat/completions",
@@ -490,10 +496,11 @@ LLM_PRESETS = {
 ENV_FILE = pathlib.Path("/home/ubuntu/tw-bot/.env")
 
 # ---- PIN MODEL ----
-# Model dikunci ke MiniMax m3.1 flash (OpenRouter) — model yang sama
-# digunakan Hermes. Preset lain hanya sandaran automatik bila model
-# utama tidak dapat dicapai; admin tak boleh tukar model dari /model.
-DEFAULT_PRESET = "minimax"
+# Default = GLM (asai/freemodel-1-GLM). GLM replying JSON secara terus
+# (12s), manakala asai/freemodel-2-MiniMax ialah THINKING model yang
+# habiskan 4000 token untuk reasoning -> content kosong. Admin masih
+# boleh tukar preset lewat /model.
+DEFAULT_PRESET = "free"
 
 
 def _apply_pin():
@@ -645,10 +652,17 @@ def _run_agent(prompt, use_staruh=False):
         models = _llm_model_chain()
         last_err = None
         payment_seen = False
+        # Bajet masa: chain penuh (3 model x 5 suhu) boleh capai 15 minit
+        # percubaan. Pengguna tunggu terlalu lama, jadi impose deadline
+        # supaya balasan datang dalam ~90s atau gagal cepat.
+        deadline = time.monotonic() + LLM_BUDGET_S
         for model in models:
+            if time.monotonic() > deadline:
+                last_err = (last_err or "") + " | bajet masa habis"
+                break
             m_url, m_key_env = MODEL_ROUTES.get(model, (LLM_URL, LLM_KEY_ENV))
             m_key = _profile_secret(m_key_env) or key
-            for temp in (0.2, 0.45, 0.1, 0.3, 0.6):
+            for temp in (0.2, 0.5):
                 payload = {"model": model,
                            "messages": [{"role": "user", "content": content}],
                            "temperature": temp, "max_tokens": 2000}
@@ -657,6 +671,12 @@ def _run_agent(prompt, use_staruh=False):
                     # Model reasoning guna token untuk reasoning; JSON penuh
                     # (20+ medan) boleh terpotong pada 2000 token.
                     payload["max_tokens"] = 4000
+                if model == "asai/freemodel-2-MiniMax":
+                    # asai/freemodel-2-MiniMax = THINKING model: 1st call guna
+                    # 4000 token penuh untuk reasoning -> content kosong.
+                    # Naikkan siling supaya JSON ada ruang selepas reasoning.
+                    payload["max_tokens"] = 8000
+                    payload["reasoning"] = {"effort": "low"}
                 # Model reasoning (MiniMax m3.1 flash) guna token untuk
                 # "reasoning" dahulu. Tanpa effort=low,ia habiskan
                 # max_tokens sebelum tulis jawapan -> content=None ->
@@ -668,8 +688,13 @@ def _run_agent(prompt, use_staruh=False):
                 req = urllib.request.Request(m_url, data=body,
                     headers={"Authorization": "Bearer " + m_key,
                              "Content-Type": "application/json"})
+                # Sisa bajet masa jadi timeout; jangan exceed deadline.
+                left = deadline - time.monotonic()
+                if left <= 5:
+                    last_err = (last_err or "") + " | bajet masa habis"
+                    break
                 try:
-                    with urllib.request.urlopen(req, timeout=90) as r:
+                    with urllib.request.urlopen(req, timeout=max(10, int(left))) as r:
                         data = json.load(r)
                     msg = data["choices"][0]["message"]
                     txt = (msg.get("content") or "").strip()
@@ -693,6 +718,7 @@ def _run_agent(prompt, use_staruh=False):
                             print(f"[LLM] fallback model used: {model}", flush=True)
                         return txt
                     last_err = "jawapan kosong atau tiada payload"
+                    time.sleep(0.4)
                 except Exception as ex:
                     last_err = f"{type(ex).__name__}: {str(ex)[:80]}"
                     if _is_payment_error(ex):
