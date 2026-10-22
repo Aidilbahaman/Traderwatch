@@ -42,7 +42,10 @@ LOCK = Path("/tmp/tw-lifecycle.lock")
 # Ujian pada diri sendiri: kalau fail ini wujud, mesej hanya ke chat itu.
 TEST_CHAT_FILE = Path("/home/ubuntu/web/.lifecycle-test-chat")
 LOOKBACK_DAYS = 7
-MAX_SIGNALS = 40
+# 1000 bukan had teknikal — PostgREST boleh_nullable banyak-banyak. Yang
+# penting lifecycleeduct semua signal yang masih boleh ditutup (entry filled,
+# belum SL/TP) supaya notifikasi entry/TP/SL tidak terlepas bila backlog.
+MAX_SIGNALS = 1000
 PHOTO_CAPTION_LIMIT = 1024
 # Setup LIMIT yang tak kena entry dalam tempoh ini dianggap gagal.
 # Hanya untuk buy limit / sell limit — setup yang dah entry tidak terjejas.
@@ -559,6 +562,25 @@ def fmt_duration(start, end):
     return f"{h}j {m}m" if h else f"{m}m"
 
 
+# Notifikasi "ENTRY TRIGGERED" hanya dihantar jika fill baru berlaku dalam
+# window ini. Tanpa had, cron yang hidup semula selepas downtime akan hantar
+# notifikasi entry untuk SEMUA posisi lama serentak — flood ke member.
+ENTRY_ALERT_WINDOW_MIN = 30
+
+
+def _entry_recent(sig, st, now_dt):
+    """True bila fill entry berlaku dalam ENTRY_ALERT_WINDOW_MIN minit."""
+    raw = st.get("entry_at")
+    if not raw:
+        return False
+    try:
+        when = parse_ts(raw)
+    except Exception:
+        return False
+    age = (now_dt - when).total_seconds() / 60.0
+    return 0 <= age <= ENTRY_ALERT_WINDOW_MIN
+
+
 def _timing_line(st, start, end, label="TP hit"):
     """Baris masa untuk notifikasi member.
 
@@ -954,6 +976,29 @@ def _run(dry_run=False):
                 elif is_expired(sig, st, datetime.now(timezone.utc), EXPIRY_MIN) \
                         and st.get("first_touch") is None:
                     st["closed"] = "expired"
+                elif not st.get("notified") and _entry_recent(
+                        sig, st, datetime.now(timezone.utc)):
+                    # Posisi aktif, member belum dapat notifikasi entry, DAN
+                    # fill baru berlaku (dalam ENTRY_ALERT_WINDOW_MIN minit).
+                    # Window ini penting: tanpa had masa, cron yangHidup
+                    # semula selepas downtime akan hantar notifikasi entry
+                    # untuk	SEMUA posisi lama serentak — flood ke member.
+                    pending = _pending_chats(st, targets)
+                    if pending:
+                        text = build_message("entry", sig, price, st)
+                        png = render_result_chart(sig, st)
+                        s, f, ok_chats = dispatch(text, targets, dry_run=dry_run, png=png)
+                        st["notified"] = sorted(set(st.get("notified") or [])
+                                                | set(str(c) for c in ok_chats))
+                        log(f"BOOTSTRAP-ENTRY #{sid} {sig['pair']} price={price} "
+                            f"sent={s} fail={f}")
+                        events += 1
+                        state[sid] = st
+                        continue
+                    # Tiada chat tertinggal (semua sudah dapat) — tandakan
+                    # supaya run seterusnya tidak cuba hantar semula.
+                    st["notified"] = sorted(set(st.get("notified") or [])
+                                            | set(str(c) for c in targets))
                 else:
                     # posisi aktif: jangan tutup, pantau macam biasa
                     log(f"BOOTSTRAP {sid} {sig['pair']} price={price} "
