@@ -22,7 +22,7 @@ PRESETS = {
     "flash": {
         "desc": "MiniMax m3.1 flash free via OpenRouter (model Hermes)",
         "model": "minimax/minimax-m3.1-flash:free",
-        "fallback": "asai/freemodel-3-deepseekpro",
+        "fallback": "openrouter/free",
         "url": "https://openrouter.ai/api/v1/chat/completions",
         "key_env": "OPENROUTER_API_KEY",
     },
@@ -43,7 +43,7 @@ PRESETS = {
     "auto": {
         "desc": "v4-flash dahulu, jatuh ke free bila kredit habis (402)",
         "model": "asai/deepseek-v4-flash",
-        "fallback": "asai/freemodel-3-deepseekpro",
+        "fallback": "openrouter/free",
         "url": "https://serveras.click/v1/chat/completions",
         "key_env": "HERMES_CUSTOM_SERVERAS_CLICK_API_KEY",
     },
