@@ -57,6 +57,11 @@ GRACE_MIN = int(__import__("os").environ.get("LIFECYCLE_GRACE_MIN", "15"))
 # hanya direkod dalam state, tiada mesej — elak spam member.
 BACKFILL_MAX_AGE_HOURS = int(
     __import__("os").environ.get("LIFECYCLE_BACKFILL_HOURS", "24"))
+# Anti-flood: maksimum notifikasi repair dalam satu run. Country run boleh
+# mengambil masa lama (render chart + hantar ke 4 chat), dan pada masa
+#-tu cron mungkin mula run seterusnya.
+REPAIR_MAX_PER_RUN = int(
+    __import__("os").environ.get("LIFECYCLE_REPAIR_MAX", "3"))
 
 PIP = {"XAU/USD": 0.1, "USD/JPY": 0.01, "BTC/USD": 1.0}
 DEFAULT_PIP = 0.0001
@@ -689,15 +694,58 @@ def _backfill_from_status(sig, st, sid, targets, dry_run=False):
     st["backfilled"] = True
     text = build_message(status, sig, None, st)
     png = render_result_chart(sig, st)
-    s, f = dispatch(text, targets, dry_run=dry_run, png=png)
+    s, f, ok_chats = dispatch(text, targets, dry_run=dry_run, png=png)
+    st["notified"] = sorted(set(st.get("notified") or []) | set(str(c) for c in ok_chats))
     log(f"BACKFILL {status} #{sid} {sig['pair']} pips={info.get('pips')} "
         f"age={age_h:.1f}h chart={'yes' if png else 'no'} sent={s} fail={f}")
     return True
 
 
+def _pending_chats(st, targets):
+    """Chat yang belum dapat notifikasi untuk signal ini."""
+    done = set(str(c) for c in (st.get("notified") or []))
+    chats = [int(t["telegram_chat_id"]) for t in targets]
+    if ADMIN_CHAT and ADMIN_CHAT.isdigit() and int(ADMIN_CHAT) not in chats:
+        chats.append(int(ADMIN_CHAT))
+    return [c for c in chats if str(c) not in done]
+
+
+def _repair_notify(sig, st, sid, targets, pending, dry_run=False):
+    """Hantar notifikasi TP/SL yang hilang kepada chat yang belum dapat."""
+    closed_raw = st.get("closed_at")
+    try:
+        closed_dt = parse_ts(closed_raw) if closed_raw else datetime.now(timezone.utc)
+    except Exception:
+        closed_dt = datetime.now(timezone.utc)
+    age_h = (datetime.now(timezone.utc) - closed_dt).total_seconds() / 3600.0
+    if age_h > BACKFILL_MAX_AGE_HOURS:
+        log(f"REPAIR-SKIP #{sid} {sig['pair']} {st.get('closed')} — lama "
+            f"({age_h:.1f}h > {BACKFILL_MAX_AGE_HOURS}h)")
+        st["legacy_repaired"] = True
+        return False
+    sub = [t for t in targets if int(t["telegram_chat_id"]) in pending]
+    if not sub:
+        st["legacy_repaired"] = True
+        return False
+    text = build_message(st["closed"], sig, None, st)
+    png = render_result_chart(sig, st)
+    s, f, ok_chats = dispatch(text, sub, dry_run=dry_run, png=png)
+    st["notified"] = sorted(set(st.get("notified") or []) | set(str(c) for c in ok_chats))
+    st["legacy_repaired"] = True
+    log(f"REPAIR {st.get('closed')} #{sid} {sig['pair']} "
+        f"pending={pending} sent={s} fail={f} age={age_h:.1f}h")
+    return True
+
+
 def dispatch(text, targets, dry_run=False, png=None):
-    """Hantar ke semua target + admin. Jika ada PNG, guna photo+caption."""
+    """Hantar ke semua target + admin. Jika ada PNG, guna photo+caption.
+
+    Pulangkan (sent, failed, ok_chats) — ok_chats ialah senarai chat_id yang
+    berjaya terima, supaya state boleh catat siapa yang sudah tahu. Tanpa
+    ini, repair pass akan hantar semula mesej yang member sudah terima.
+    """
     sent = failed = 0
+    ok_chats = []
     chats = [int(t["telegram_chat_id"]) for t in targets]
     if ADMIN_CHAT and ADMIN_CHAT.isdigit() and int(ADMIN_CHAT) not in chats:
         chats.append(int(ADMIN_CHAT))
@@ -709,11 +757,12 @@ def dispatch(text, targets, dry_run=False, png=None):
         ok, desc = tg_photo(cid, png, text) if png else tg_send(cid, text)
         if ok:
             sent += 1
+            ok_chats.append(cid)
         else:
             failed += 1
             log(f"SEND-FAIL chat={cid} {desc[:100]}")
         time.sleep(0.4)
-    return sent, failed
+    return sent, failed, ok_chats
 
 
 # ---------------------------------------------------------------- utama
@@ -728,6 +777,7 @@ def _run(dry_run=False):
 
     seen = set()
     events = 0
+    repair_sent = 0
     for sig in signals:
         sid = str(sig["id"])
         seen.add(sid)
@@ -749,6 +799,27 @@ def _run(dry_run=False):
             st = {"entry": False, "closed": None, "first_touch": None}
         else:
             st.setdefault("first_touch", None)
+        # REPAIR: signal yang sudah tutup (tp/sl) tapi ada member yang belum
+        # dapat notifikasi. Contoh #102 XAU/USD TP +300 pips — state ditulis
+        # 'closed' tapi mesej tak pernah dihantar (dry-run tersalah simpan
+        # state). Hantar semula hanya kepada chat yang belum dapat.
+        if (not bootstrap and st.get("closed") in ("tp", "sl")
+                and not st.get("legacy_repaired")
+                and not st.get("notified")):
+            # Repair HANYA untuk signal yang belum pernah ada rekod
+            # notifikasi langsung. Signal yang ada `notified` sudah pun
+            # sampai ke member — jANGAN hantar semula.
+            pending = _pending_chats(st, targets)
+            if pending:
+                if repair_sent >= REPAIR_MAX_PER_RUN:
+                    log(f"REPAIR-CAP reached ({REPAIR_MAX_PER_RUN}) — "
+                        f"hantar lagi pada run seterusnya")
+                    continue
+                if _repair_notify(sig, st, sid, targets, pending, dry_run):
+                    repair_sent += 1
+                    events += 1
+                    state[sid] = st
+                    continue
         # Legacy (warisan kod lama) — HARUS dikendalikan SEBELUM evaluate.
         # Kalau biarkan evaluate_bars main semula bar lama, notifikasi
         # TP/SL yang sudah 2-3 hari akan dihantar sekarang = spam member.
@@ -828,7 +899,8 @@ def _run(dry_run=False):
             st["closed"] = "expired"
             text = build_message("expired", sig, None, st)
             png = render_result_chart(sig, st)
-            s, f = dispatch(text, targets, dry_run=dry_run, png=png)
+            s, f, ok_chats = dispatch(text, targets, dry_run=dry_run, png=png)
+            st["notified"] = sorted(set(st.get("notified") or []) | set(str(c) for c in ok_chats))
             log(f"EVENT expired #{sid} {sig['pair']} "
                 f"chart={'yes' if png else 'no'} sent={s} fail={f}")
             events += 1
@@ -837,14 +909,22 @@ def _run(dry_run=False):
         for ev in found:
             text = build_message(ev, sig, price, st)
             png = render_result_chart(sig, st) if ev in ("tp", "sl", "entry", "expired") else None
-            s, f = dispatch(text, targets, dry_run=dry_run, png=png)
+            s, f, ok_chats = dispatch(text, targets, dry_run=dry_run, png=png)
+            st["notified"] = sorted(set(st.get("notified") or []) | set(str(c) for c in ok_chats))
             log(f"EVENT {ev} #{sid} {sig['pair']} price={price} "
                 f"chart={'yes' if png else 'no'} sent={s} fail={f}")
             events += 1
 
     # buang state signal yang dah keluar tetingkap
     state = {k: v for k, v in state.items() if k in seen}
-    save_state(state)
+    # PENTING: dry-run TIDAK boleh tulis state. Sebelum ini, dry-run
+    # menyimpan state "closed" untuk signal yang hartanya belum
+    # dihantar — isyarat TP/SL hilang selamanya. Ini punca #102 XAU/USD
+    # TP (+300 pips) tak pernah sampai ke member.
+    if dry_run:
+        log("DRY-RUN: state TIDAK disimpan")
+    else:
+        save_state(state)
     log(f"done events={events} tracked={len(state)}")
     return 0
 
@@ -857,20 +937,29 @@ def main():
         return 0
     dry_run = "--dry-run" in args
 
-    if LOCK.exists():
-        try:
-            age = time.time() - LOCK.stat().st_mtime
-        except OSError:
-            age = 0
-        if age < 120:
-            log(f"SKIP already running ({age:.0f}s)")
-            return 0
-        LOCK.unlink(missing_ok=True)
-    LOCK.write_text(str(__import__("os").getpid()))
+    # Flock-based single instance. Age-based "stale lock" tidak selamat:
+    # satu run yang mengambil >120 saat (contohnya repair banyak signal)
+    # akan pecah lock, dan cron seterusnya mula run kedua yang selari ->
+    # notifikasi dihantar DUA kali. Flock tak boleh dipecah selagi proses
+    # masih hidup.
+    import fcntl
+    lock_fd = open(LOCK, "w")
+    try:
+        fcntl.flock(lock_fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
+    except OSError:
+        log("SKIP instance lain sedang jalan")
+        lock_fd.close()
+        return 0
+    lock_fd.write(str(__import__("os").getpid()))
+    lock_fd.flush()
     try:
         return _run(dry_run=dry_run)
     finally:
-        LOCK.unlink(missing_ok=True)
+        try:
+            fcntl.flock(lock_fd, fcntl.LOCK_UN)
+        except OSError:
+            pass
+        lock_fd.close()
 
 
 if __name__ == "__main__":
