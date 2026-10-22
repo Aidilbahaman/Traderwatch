@@ -457,10 +457,11 @@ def _is_payment_error(ex):
     return "402" in text or "insufficient_credits" in text or "payment required" in text
 
 
-# Bajet masa satu panggilan LLM (saat). Chain retry_model x temperatura
-# boleh capai 15 minit; pengguna tunggu terlalu lama. 90s cukup untuk
-# GLM (~12s) dengan 1-2 retry pendek.
-LLM_BUDGET_S = float(os.environ.get("LLM_BUDGET_S", "150"))
+# Bajet masa satu panggilan LLM (saat). Chain model x retry boleh capai
+# 5+ minit; pengguna tunggu terlalu lama. 120s cukup untuk 1-2 attempt
+# model pantas (GLM ~15-30s) atau 1 attempt model lambat (DeepSeek ~45s)
+# sebelum jatuh ke model sandaran.
+LLM_BUDGET_S = float(os.environ.get("LLM_BUDGET_S", "120"))
 
 # Model yang ambik >30s untuk satu panggilan. Cubaan berulang dengan
 # suhu lain hanya menambah等待 tanpa tambah全文.
