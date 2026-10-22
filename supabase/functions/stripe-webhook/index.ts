@@ -10,6 +10,25 @@ const STRIPE_SECRET = Deno.env.get("STRIPE_WEBHOOK_SECRET") ?? "";
 const SUPABASE_URL  = Deno.env.get("SUPABASE_URL") ?? "";
 const SERVICE_KEY   = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
 
+/* Telegram admin alerts. Payout manual (duit masuk akaun Stripe orang lain
+   dulu) bergantung pada notifikasi ini — admin perlu tahu reference +
+   jumlah tepat untuk transfer balik kepada member. */
+const TG_TOKEN  = Deno.env.get("TELEGRAM_ADMIN_BOT_TOKEN") ?? "";
+const TG_CHAT   = Deno.env.get("TELEGRAM_ADMIN_CHAT_ID") ?? "";
+
+async function alertAdmin(text: string) {
+  if (!TG_TOKEN || !TG_CHAT) return;
+  try {
+    await fetch(`https://api.telegram.org/bot${TG_TOKEN}/sendMessage`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ chat_id: TG_CHAT, text, disable_web_page_preview: true }),
+    });
+  } catch (_) {
+    // Notifikasi gagal tidak boleh menggagalkan pemprosesan webhook.
+  }
+}
+
 /* ---- Stripe signature verification (HMAC-SHA256, WebCrypto) ---- */
 const enc = new TextEncoder();
 
@@ -100,6 +119,21 @@ Deno.serve(async (req) => {
         const { error } = await sb.from("profiles").update({ plan }).eq("id", userId);
         if (error) throw error;
         handled.push(`checkout.session.completed -> ${email ?? userId} = ${plan}`);
+
+        // Notifikasi admin: duit masuk akaun Stripe (nanti transfer manual
+        // balik kepada member). Sertakan amount + currency supaya admin tak
+        // perlu buka dashboard.
+        const amount = s.amount_total ?? null;
+        const currency = (s.currency ?? "").toUpperCase();
+        await alertAdmin(
+          `💰 <b>Stripe payment masuk</b>\n` +
+          `Plan: <b>${plan.toUpperCase()}</b>\n` +
+          `Member: ${email ?? userId}\n` +
+          `Jumlah: ${amount != null ? `${(amount / 100).toFixed(2)} ${currency}` : "?"}\n` +
+          `Session: ${s.id}\n` +
+          `Bayar: ${s.payment_status ?? "?"}\n\n` +
+          `👉 Transfer duit kepada member, kemudian sahkan dalam Stripe Dashboard.`
+        );
         break;
       }
 
@@ -127,6 +161,12 @@ Deno.serve(async (req) => {
         const { error } = await sb.from("profiles").update({ plan: "free" }).eq("id", userId);
         if (error) throw error;
         handled.push(`subscription.deleted -> ${email ?? userId} = free`);
+        await alertAdmin(
+          `⚠️ <b>Langganan dibatalkan</b>\n` +
+          `Member: ${email ?? userId}\n` +
+          `Plan diturunkan ke FREE.\n` +
+          `Subscription: ${s.id}`
+        );
         break;
       }
 
