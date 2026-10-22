@@ -69,9 +69,10 @@
    subsBtn.disabled=true;subsMsg.className='msg';subsMsg.textContent='';
    subsOut.innerHTML='<p class="empty">Memuatkan member…</p>';
    try{
-     const {data,error}=await sb.from('profiles')
-        .select('id,name,email,plan,created_at,telegram_chat_id')
-        .order('name',{ascending:true});
+     // RLS hanya benarkan admin pandang bar sendiri bila baca terus
+     // profiles, jadi senarai penuh datang dari RPC admin_list_members
+     // (SECURITY DEFINER, admin-only) yang memang ada dalam projek.
+     const {data,error}=await sb.rpc('admin_list_members',{p_search:null});
      if(error)throw error;
      // Subscription start = bila plan terakhir di-naik (payload reviews)
      let reviewMap={};
