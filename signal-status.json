@@ -1,5 +1,5 @@
 {
- "updated": "2026-10-23T06:10:29+08:00",
+ "updated": "2026-10-23T06:11:45+08:00",
  "signals": {
   "USDCAD_20261018_110101": {
    "status": "sl",
@@ -442,7 +442,7 @@
   },
   "GBPUSD_20261023_053424": {
    "status": "active",
-   "entry_at": null
+   "entry_at": "2026-10-23T06:00:00+08:00"
   },
   "AUDUSD_20261023_053357": {
    "status": "active"
