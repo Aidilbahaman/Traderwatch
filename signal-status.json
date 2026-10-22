@@ -134,11 +134,12 @@
    "unit": "pips"
   },
   "XAUUSD_20261021_010231": {
-   "status": "tp",
-   "pips": 140.1,
-   "r": 1.87,
+   "status": "void_unfilled",
+   "pips": 0.0,
+   "r": 0.0,
+   "unit": "pips",
    "closed": "2026-10-21T06:30:01+08:00",
-   "unit": "pips"
+   "note": "Corrected 2026-10-23: entry 76 never filled; previous verdict tp +140.1 was phantom."
   },
   "EURUSD_20261021_004432": {
    "status": "sl",
@@ -239,11 +240,12 @@
    "unit": "pips"
   },
   "AUDUSD_20261021_103028": {
-   "status": "sl",
-   "pips": -12.0,
-   "r": -1,
+   "status": "void_unfilled",
+   "pips": 0.0,
+   "r": 0.0,
+   "unit": "pips",
    "closed": "2026-10-21T12:15:02+08:00",
-   "unit": "pips"
+   "note": "Corrected 2026-10-23: entry 84 never filled; previous verdict sl -12.0 was phantom."
   },
   "XAUUSD_20261021_161932": {
    "status": "tp",
@@ -260,11 +262,12 @@
    "unit": "pips"
   },
   "GBPUSD_20261021_164545": {
-   "status": "tp",
-   "pips": 33.1,
-   "r": 3.72,
+   "status": "void_unfilled",
+   "pips": 0.0,
+   "r": 0.0,
    "unit": "pips",
-   "closed": "2026-10-22T11:15:01+08:00"
+   "closed": "2026-10-22T11:15:01+08:00",
+   "note": "Corrected 2026-10-23: entry 87 never filled; previous verdict tp +33.1 was phantom."
   },
   "BTCUSD_20261021_182139": {
    "status": "tp",
@@ -330,11 +333,12 @@
    "closed": "2026-10-22T03:45:02+08:00"
   },
   "GBPUSD_20261022_034207": {
-   "status": "tp",
-   "pips": 26.4,
-   "r": 4.33,
+   "status": "void_unfilled",
+   "pips": 0.0,
+   "r": 0.0,
    "unit": "pips",
-   "closed": "2026-10-22T15:15:03+08:00"
+   "closed": "2026-10-22T15:15:03+08:00",
+   "note": "Corrected 2026-10-23: entry 97 never filled; previous verdict tp +26.4 was phantom."
   },
   "NZDUSD_20261022_034423": {
    "status": "sl",
@@ -344,11 +348,12 @@
    "closed": "2026-10-22T06:45:01+08:00"
   },
   "XAUUSD_20261022_040410": {
-   "status": "sl",
-   "pips": -30.4,
-   "r": -1,
+   "status": "void_unfilled",
+   "pips": 0.0,
+   "r": 0.0,
    "unit": "pips",
-   "closed": "2026-10-22T05:00:03+08:00"
+   "closed": "2026-10-22T05:00:03+08:00",
+   "note": "Corrected 2026-10-23: entry 99 never filled; previous verdict sl -30.4 was phantom."
   },
   "BTCUSD_20261022_042049": {
    "status": "sl",
@@ -414,21 +419,23 @@
    "closed": "2026-10-22T17:45:03+08:00"
   },
   "XAUUSD_20261023_020855": {
-   "status": "tp",
-   "pips": 200.0,
-   "r": 1.67,
+   "status": "void_unfilled",
+   "pips": 0.0,
+   "r": 0.0,
    "unit": "pips",
-   "closed": "2026-10-23T03:15:02+08:00"
+   "closed": "2026-10-23T03:15:02+08:00",
+   "note": "Corrected 2026-10-23: entry 109 never filled; previous verdict tp +200.0 was phantom."
   },
   "EURUSD_20261023_025434": {
    "status": "active"
   },
   "USDCAD_20261023_025418": {
-   "status": "tp",
-   "pips": 20.6,
-   "r": 2.19,
+   "status": "void_unfilled",
+   "pips": 0.0,
+   "r": 0.0,
    "unit": "pips",
-   "closed": "2026-10-23T03:00:02+08:00"
+   "closed": "2026-10-23T03:00:02+08:00",
+   "note": "Corrected 2026-10-23: entry 110 never filled; previous verdict tp +20.6 was phantom."
   }
  }
 }

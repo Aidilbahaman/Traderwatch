@@ -114,13 +114,18 @@ def evaluate(sig, price, st, bootstrap=False):
     if not st.get("entry"):
         touched = price <= entry if side == "BUY" else price >= entry
         if not touched:
-            # Kes tepi: harga sudah melepasi TP tanpa kita pernah nampak
-            # sentuhan entry (contoh bot baru dihidupkan). Tandakan entry
-            # supaya state jujur, tetapi JANGAN tembak TP pada panggilan
-            # yang sama — kita tidak tahu bila ia berlaku.
+            # Harga sudah melepasi TP tanpa pernah sentuh entry. Ini BUKAN
+            # win: posisi itu tidak pernah wujud, jadi setup ini di-void dan
+            # TIDAK boleh menghantar notifikasi TP. `price` hanyalah satu
+            # snapshot; kita tidak tahu bila (atau sama sekali) harga
+            # sampai ke entry.
             blown = price >= tp if side == "BUY" else price <= tp
             if not blown:
                 return []
+            st["void"] = "entry_never_touched"
+            log(f"VOID #{sig.get('id')} {sig['pair']} — harga melepasi "
+                f"{tp} tanpa sentuh entry {entry}, tiada posisi")
+            return []
         st["entry"] = True
         events.append("entry")
         # Jangan nilai TP/SL pada panggilan yang sama dengan entry: harga
@@ -274,6 +279,8 @@ def evaluate_bars(sig, bars, st, bootstrap=False):
         if not st.get("entry"):
             touched = lo <= entry if side == "BUY" else hi >= entry
             if not touched:
+                # Setup masih pending: jangan nilai TP/SL. Harga mungkin
+                # berada di sebalik TP/SL tanpa posisi pernah wujud.
                 continue
             st["entry"] = True
             st["entry_at"] = ts_raw
@@ -545,14 +552,23 @@ def _timing_line(st, start, end, label="TP hit"):
     first_touch = harga sentuh zon POI (lebih awal)
     bila hanya ada posted_at, kita cuma tahu bila setup di-SiLive, bukan bila
     entry kena — jadi label daran "Setup posted", bukan "Entry".
+
+    `_timing_line` hanya dipanggil selepas entry disahkan, jadi `start`
+    sentiasa entry_at atau first_touch.posted_at, bukan sekadar posted_at
+    mentah; kalau bukan, label "Entry" akan menipu.
     """
-    src = ("entry" if st.get("entry_at")
-           else "POI touched" if st.get("first_touch")
-           else "Setup posted")
     if not end:
         return (f"Entry {clock_my(start)} ➔ {label} "
-                f"(⏱️ {src} ➔ close)")
-    return f"Entry {clock_my(start)} ➔ {label} {clock_my(end)} ({fmt_duration(start, end)})"
+                f"(⏱️ {src_of(st)} ➔ close)")
+    return f"Entry {clock_my(start)} ➔ {label} {clock_my(end)} ({fmt_duration(start, end)} · {src_of(st)})"
+
+
+def src_of(st):
+    if st.get("entry_at"):
+        return "entry"
+    if st.get("first_touch"):
+        return "POI touched"
+    return "Setup posted"
 
 
 def clock_my(value):
@@ -690,6 +706,14 @@ def _backfill_from_status(sig, st, sid, targets, dry_run=False):
     status = str(info.get("status") or "").lower()
     if status not in ("tp", "sl"):
         return False
+    # Rekod yang sudah di-void (phantom fill) mesti TIDAK dihantar semula,
+    # walaupun status.json masih menyimpan verdict lama.
+    if info.get("status") == "void_unfilled" or st.get("void"):
+        st["closed"] = "void_unfilled"
+        st["backfilled"] = False
+        log(f"BACKFILL-VOID #{sid} {sig['pair']} — entry tidak pernah kena, "
+            f"tiada notifikasi dihantar")
+        return True
     closed_raw = info.get("closed")
     if not closed_raw:
         return False
@@ -731,7 +755,15 @@ def _pending_chats(st, targets):
 
 
 def _repair_notify(sig, st, sid, targets, pending, dry_run=False):
-    """Hantar notifikasi TP/SL yang hilang kepada chat yang belum dapat."""
+    """Hantar notifikasi TP/SL yang hilang kepada chat yang belum dapat.
+
+    Signal yang di-void (entry tidak pernah kena) TIDAK boleh dihantar —
+    verdict TP/SL di atasnya adalah bayangan, bukan hasil transaksi.
+    """
+    if st.get("void"):
+        log(f"REPAIR-VOID #{sid} {sig['pair']} — {st['void']}, tiada notifikasi dihantar")
+        st["legacy_repaired"] = True
+        return False
     closed_raw = st.get("closed_at")
     try:
         closed_dt = parse_ts(closed_raw) if closed_raw else datetime.now(timezone.utc)

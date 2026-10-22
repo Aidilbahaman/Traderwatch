@@ -120,11 +120,30 @@ def pip_size(code):
 
 
 def evaluate(sig, rows):
-    """Return (status, pips, r, ambiguous). rows ordered oldest->newest."""
+    """Return (status, pips, r, ambiguous). rows ordered oldest->newest.
+
+    ENTRY GATE: a TP/SL verdict is only valid once the market has actually
+    traded through the entry level. Before that the position does not exist,
+    so a pending setup can never "reach" TP or "hit" SL -- if price is merely
+    beyond one of those levels the setup is still unfilled.
+
+    Walk the bars in order and track fill state:
+      - first bar whose range covers entry -> filled, verdict allowed;
+      - a bar covering both SL and TP counts as SL (conservative);
+      - bars before the fill are ignored for TP/SL purposes.
+    """
     entry, sl, tp = sig["entry"], sig["sl"], sig["tp"]
     side = sig["side"].upper()
     code = "".join(ch for ch in sig["pair"].upper() if ch.isalpha())
+    filled = False
     for _ts, high, low in rows:
+        if not filled:
+            hit_entry = low <= entry <= high
+            if not hit_entry:
+                # Setup still pending: skip TP/SL, price may sit beyond a
+                # level without the trade existing.
+                continue
+            filled = True
         hit_tp = high >= tp if side == "BUY" else low <= tp
         hit_sl = low <= sl if side == "BUY" else high >= sl
         if hit_tp and hit_sl:
