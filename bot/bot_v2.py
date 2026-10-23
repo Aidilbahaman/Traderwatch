@@ -2439,6 +2439,47 @@ async def renew_cmd(update: Update, ctx):
                  before.upper(), want))
 
 
+async def notify_cmd(update: Update, ctx):
+    """/notify <teks> - hantar mesej sistem kepada semua member yang
+    ada telegram_chat_id, dibaca live dari Supabase.
+
+    Notifikasi signal (entry/TP/SL) memang sudah automatik - cron
+    signal-telegram-sender dan signal-lifecycle-alert baca Supabase
+    setiap kali jalan, jadi member yang baru connect akan dapat
+    signal tanpa perlu ditambah secara manual. Perintah ini hanya
+    untuk notifikasi sistem (maintenance, live,dan lain-lain) yang
+   /compose bila-bila masa owner mahu.
+    """
+    if not allowed(update.effective_chat.id):
+        return
+    if update.effective_user.id not in ADMIN_IDS:
+        return await say(update.effective_chat, "\U0001f512 Admin sahaja.")
+    if not ctx.args:
+        return await say(update.effective_chat,
+                         "Guna: /notify <teks>\n"
+                         "Contoh: /notify Server maintenance selesai")
+    msg = ctx.message.text.split(None, 1)[1].strip()
+    try:
+        rows = sb_request("profiles?select=telegram_chat_id,name"
+                          "&plan=in.(pro,max)&telegram_chat_id=not.is.null")
+    except Exception as ex:
+        return await say(update.effective_chat,
+                         "\u274c Gagal baca senarai member: %s" % e(str(ex)[:120]))
+    if not rows:
+        return await say(update.effective_chat, "Tiada member dengan telegram_chat_id.")
+    ok, fail = [], []
+    for p in rows:
+        cid = int(p["telegram_chat_id"])
+        sent = await _send_tg(cid, msg)
+        (ok if sent else fail).append(f"{p.get('name') or cid}")
+    lines = ["\u2705 Dihantar kepada %d member." % len(ok)]
+    if ok:
+        lines.append("OK: " + ", ".join(ok))
+    if fail:
+        lines.append("\u274c Gagal: " + ", ".join(fail))
+    await say(update.effective_chat, "\n".join(lines))
+
+
 async def admin_cmd(update: Update, ctx):
     if not allowed(update.effective_chat.id):
         return
@@ -2572,6 +2613,7 @@ def main():
     app.add_handler(CommandHandler(["subs", "langgana"], subs_cmd))
     app.add_handler(CommandHandler(["warn"], warn_cmd))
     app.add_handler(CommandHandler(["renew"], renew_cmd))
+    app.add_handler(CommandHandler(["notify", "notis"], notify_cmd))
     app.add_handler(CallbackQueryHandler(on_callback))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, on_text))
     app.job_queue.run_repeating(watch, interval=20, first=10)
