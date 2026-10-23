@@ -1,8 +1,8 @@
 /* ===== Settings: edit these ===== */
 const CONFIG = {
-  // Banner maintenance untuk member area. Set notice: "" untuk buang banner.
+  // Banner maintenance untuk member area. Set active: false untuk buang banner.
   maintenance: {
-    active: true,
+    active: false,
     title: "Server Under Maintenance",
     body: "Sistem AI isyarat sedang diuji (fasa testing) untuk memastikan setiap isyarat tepat dan boleh dipercayai.",
     points: [
