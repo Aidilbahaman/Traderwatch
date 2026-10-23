@@ -2373,14 +2373,14 @@ async def _send_tg(chat_id, text):
 
 
 async def warn_cmd(update: Update, ctx):
-    """ /warn <tg_id> — hantar mesej renew kepada member. """
+    """ /warn &lt;tg_id&gt; — hantar mesej renew kepada member. """
     if not allowed(update.effective_chat.id):
         return
     if update.effective_user.id not in ADMIN_IDS:
         return await say(update.effective_chat, "\U0001f512 Admin sahaja.")
     if not ctx.args:
         return await say(update.effective_chat,
-                         "Guna: /warn <tg_id>\nContoh: /warn 681335841")
+                         "Guna: /warn &lt;tg_id&gt;\nContoh: /warn 681335841")
     try:
         tg = int(ctx.args[0])
     except (TypeError, ValueError):
@@ -2407,14 +2407,14 @@ async def warn_cmd(update: Update, ctx):
 
 
 async def renew_cmd(update: Update, ctx):
-    """ /renew <tg_id> [PRO|MAX|FREE] — upgrade/downgrade tier terus. """
+    """ /renew &lt;tg_id&gt; [PRO|MAX|FREE] — upgrade/downgrade tier terus. """
     if not allowed(update.effective_chat.id):
         return
     if update.effective_user.id not in ADMIN_IDS:
         return await say(update.effective_chat, "\U0001f512 Admin sahaja.")
     if len(ctx.args) < 1:
         return await say(update.effective_chat,
-                         "Guna: /renew <tg_id> [PRO|MAX|FREE]\n"
+                         "Guna: /renew &lt;tg_id&gt; [PRO|MAX|FREE]\n"
                          "Contoh: /renew 681335841 MAX")
     try:
         tg = int(ctx.args[0])
@@ -2533,8 +2533,8 @@ def _set_trade_status(tid, new_status):
 async def history_cmd(update: Update, ctx):
     """ /history — senarai signal expired, dengan pilihan repost atau delete.
 
-    /history <id> repost  -> buka semula setup dengan window 30 minit baharu
-    /history <id> delete  -> buang setup sepenuhnya
+    /history &lt;id&gt; repost  -> buka semula setup dengan window 30 minit baharu
+    /history &lt;id&gt; delete  -> buang setup sepenuhnya
     """
     if not allowed(update.effective_chat.id):
         return
@@ -2561,9 +2561,9 @@ async def history_cmd(update: Update, ctx):
                 f"entry <code>{t['entry']}</code> \u00b7 "
                 f"POI <code>{t['poi_low']}-{t['poi_high']}</code>")
         lines.append("")
-        lines.append("`/history <id> repost` \u2014 buka semula (window 30 minit)")
-        lines.append("`/history <id> delete` \u2014 buang setup")
-        lines.append("`/history 6h` \u2014 panjangkan window")
+        lines.append("`/history &lt;id&gt; repost` — buka semula (window 30 minit)")
+        lines.append("`/history &lt;id&gt; delete` — buang setup")
+        lines.append("`/history 6h` — panjangkan window")
         await say(update.effective_chat, "\n".join(lines))
         return
 
@@ -2620,7 +2620,7 @@ async def admin_cmd(update: Update, ctx):
     try:
         uid = int(ctx.args[0])
     except (TypeError, ValueError):
-        return await update.message.reply_text("Guna: /setpro <tg_id> [PRO|FREE]")
+        return await update.message.reply_text("Guna: /setpro &lt;tg_id&gt; [PRO|FREE]")
     if cmd == "setpro":
         db.execute("UPDATE users SET tier=? WHERE tg_id=?", (ctx.args[1].upper() if len(ctx.args) > 1 else "PRO", uid))
     elif cmd == "setexness":
