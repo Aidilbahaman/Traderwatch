@@ -1,5 +1,5 @@
 {
- "updated": "2026-10-23T14:15:02+08:00",
+ "updated": "2026-10-23T14:20:02+08:00",
  "signals": {
   "USDCAD_20261018_110101": {
    "status": "sl",
@@ -184,11 +184,12 @@
    "unit": "pips"
   },
   "XAUUSD_20261020_170107": {
-   "status": "tp",
-   "pips": 71.6,
-   "r": 4.63,
-   "closed": "2026-10-21T01:15:01+08:00",
-   "unit": "pips"
+   "status": "sl",
+   "pips": -15.5,
+   "r": -1,
+   "unit": "pips",
+   "closed": "2026-10-23T14:20:02+08:00",
+   "entry_at": "2026-10-20T17:15:00+08:00"
   },
   "XAUUSD_20261021_022608": {
    "status": "tp",
@@ -215,8 +216,9 @@
    "status": "sl",
    "pips": -53.0,
    "r": -1,
-   "closed": "2026-10-21T07:30:02+08:00",
-   "unit": "pips"
+   "unit": "pips",
+   "closed": "2026-10-23T14:20:02+08:00",
+   "entry_at": "2026-10-21T06:43:00+08:00"
   },
   "XAUUSD_20261021_072831": {
    "status": "tp",
@@ -419,7 +421,7 @@
    "closed": "2026-10-22T17:45:03+08:00"
   },
   "XAUUSD_20261023_020855": {
-   "status": "void_unfilled",
+   "status": "expired",
    "pips": 0.0,
    "r": 0.0,
    "unit": "pips",
@@ -435,7 +437,7 @@
    "entry_at": "2026-10-23T08:38:00+08:00"
   },
   "USDCAD_20261023_025418": {
-   "status": "void_unfilled",
+   "status": "expired",
    "pips": 0.0,
    "r": 0.0,
    "unit": "pips",
@@ -463,7 +465,7 @@
    "pips": 6.7,
    "r": 2.68,
    "unit": "pips",
-   "closed": "2026-10-23T08:15:02+08:00",
+   "closed": "2026-10-23T14:20:02+08:00",
    "entry_at": "2026-10-23T07:57:00+08:00"
   },
   "XAUUSD_20261023_132317": {
@@ -479,10 +481,12 @@
    "note": "Entry 1.33921 never reached. Swissquote M1 replay from 2026-10-23T05:22Z: high 1.33913, 0.8 pips below entry. POI band 1.33909-1.33934 touched 05:41Z but the entry line was never met. No position, so TP/SL are void."
   },
   "EURUSD_20261023_132204": {
-   "status": "active"
+   "status": "expired",
+   "pips": 0.0
   },
   "USDJPY_20261023_132128": {
-   "status": "active"
+   "status": "expired",
+   "pips": 0.0
   }
  }
 }
