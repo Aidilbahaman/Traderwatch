@@ -112,10 +112,31 @@ header{
 }
 @keyframes pulse{ 50%{ opacity:.25; } }
 
-/* hero tile */
-.hero-row{ display:flex; justify-content:space-between; align-items:center; gap:18px; height:100%; }
-.hero-row > div:first-child{ min-width:0; }
+/* hero tile: kiri = welcome + info tier, kanan = ring di tengah */
+.hero-row{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto;
+  align-items:center;
+  gap:20px;
+  height:100%;
+}
+.hero-left{
+  min-width:0;
+  display:flex;
+  flex-direction:column;
+  align-items:flex-start;
+  justify-content:center;
+  text-align:left;
+}
+.hero-right{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  flex:none;
+}
 .hero-tile h1{ margin:0 0 8px; }
+.hero-left .sub{ margin:0; }
+.hero-left .msg.ok{ margin-top:10px; }
 /* Rujukan Bento: tajuk 2 baris (nama + noktah), bukan 3.
    Beri tajuk lebar penuh yang ada; jangan biar ring menolaknya. */
 .hero-row > div:first-child{ flex:1 1 auto; }
@@ -470,13 +491,18 @@ footer p{ color:var(--muted); max-width:70ch; margin:0 auto; text-align:center; 
   .tw-calc summary{ min-height:44px; display:flex; align-items:center; }
 }
 @media (max-width:600px){
+  .hero-row{
+    grid-template-columns:1fr;
+    gap:16px;
+  }
+  .hero-left{ align-items:flex-start; }
+  .hero-right{ width:100%; justify-content:center; }
   .page{ padding:16px 0 80px; }
   .wrap{ padding:0 14px; }
   .t,#signals.t,#charts.t,#fundamental-news.t,#upgradeBox.t{ padding:20px; border-radius:22px; }
   .bento{ gap:12px; }
   h1{ font-size:30px; }
   h2{ font-size:20px; }
-  .hero-row{ flex-direction:column; align-items:flex-start; gap:14px; }
   .ring{ width:84px; height:84px; }
   .ring span{ width:66px; height:66px; font-size:20px; }
   .tw-stats{ grid-template-columns:1fr; }

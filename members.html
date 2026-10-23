@@ -46,7 +46,7 @@
 @media(max-width:760px){.tw-offer-panel{grid-template-columns:1fr;gap:18px}.tw-offer-action{width:100%}.tw-offer-panel:after{right:4%;top:16%;font-size:96px;opacity:.7}}
 .page section.block{padding:0}.page section.block + section.block{margin-top:4px}.page .tw-chart-news + .tg-link{margin-top:4px}.page .tg-link + .tw-motion{margin-top:4px}@media(max-width:600px){.page section.block{padding:0}.page section.block + section.block{margin-top:2px}.page .tw-chart-news + .tg-link{margin-top:2px}.page .tg-link + .tw-motion{margin-top:2px}}
 </style>
-<link rel="stylesheet" href="members-bento.css?v=20261024q">
+<link rel="stylesheet" href="members-bento.css?v=20261024r">
 <link rel="stylesheet" href="assets/css/tw-motion-bg.css?v=202610182344">
 <script src="assets/js/tw-fundamental-news.js?v=2026101901" defer></script>
 </head>
@@ -82,12 +82,14 @@
       <section class="t w2 hero-tile">
         <p class="k">Utama</p>
         <div class="hero-row">
-          <div>
+          <div class="hero-left">
             <h1 id="hello">Welcome</h1>
             <p class="sub" id="planLine"></p>
             <p class="msg ok" id="upgradeNote" hidden></p>
           </div>
-          <div class="ring" id="planRing" aria-hidden="true"><span id="planRingText">—</span></div>
+          <div class="hero-right">
+            <div class="ring" id="planRing" aria-hidden="true"><span id="planRingText">—</span></div>
+          </div>
         </div>
       </section>
 
@@ -249,12 +251,24 @@ if(member){
   const badge = document.getElementById("planBadge");
   badge.textContent = plan.charAt(0).toUpperCase() + plan.slice(1);
   badge.classList.toggle("pro", plan !== "free");
-  /* Teks tier di bawah tajuk (dikembalikan seperti asal). */
-  document.getElementById("planLine").textContent = plan === "max"
-    ? "Max Member · unlimited valid setups across 7 hot pairs."
-    : plan === "pro"
-      ? "Pro Member · up to 10 valid setups daily across 7 hot pairs."
-      : "Free Member · up to 3 valid setups daily across 3 hot pairs.";
+  /* Info tier: "N of M free signal for today" — dikemas kini selepas
+     get_signals() tahu berapa setup sebenar untuk plan ini hari ini. */
+  const TIER_CAP = plan === "max" ? null : plan === "pro" ? 10 : 3;
+  const tierName = plan === "max" ? "Max" : plan === "pro" ? "Pro" : "Free";
+  function setTierInfo(used){
+    const el = document.getElementById("planLine");
+    if(!el) return;
+    const n = Math.max(0, Number(used) || 0);
+    if(TIER_CAP === null){
+      el.textContent = tierName + " Member · " + n + " signal hari ini · tanpa had";
+    }else{
+      el.textContent = tierName + " Member · " + n + " of " + TIER_CAP + " free signal for today";
+    }
+    el.dataset.used = n;
+    el.dataset.cap = TIER_CAP === null ? "" : TIER_CAP;
+  }
+  window.__setTierInfo = setTierInfo;
+  setTierInfo(0);
   const upgraded = new URLSearchParams(location.search).get("upgraded");
   if(upgraded === "max" || upgraded === "pro"){
     const n = document.getElementById("upgradeNote"); n.hidden = false; n.textContent = "Payment confirmed. Your " + (upgraded === "max" ? "Max" : "Pro") + " access is now active.";
@@ -521,6 +535,12 @@ if(member){
       }));
       try{ window.dispatchEvent(new CustomEvent("tw:signals")); }catch(_){}
       render(window.TW_SIGNALS.map(s=>({...s, locked:false})));
+      /* Kira setup hari ini untuk info tier. */
+      try{
+        if(typeof window.__setTierInfo === "function"){
+          window.__setTierInfo(selected.length);
+        }
+      }catch(_){}
       const bits = [];
       if(carriedOpen.length) bits.push(`${carriedOpen.length} still open from earlier`);
       if(carriedClosed.length) bits.push(`${carriedClosed.length} closed in the last 48h`);
