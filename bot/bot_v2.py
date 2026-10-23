@@ -2480,6 +2480,128 @@ async def notify_cmd(update: Update, ctx):
     await say(update.effective_chat, "\n".join(lines))
 
 
+HISTORY_WINDOW_H = 2   # /history tunjuk expired dalam 2 jam terakhir
+
+
+def _expired_trades(hours=None):
+    """Expired / void trades from bot.db, newest first.
+
+    Owner needs these because price can return to an expired zone after the
+    30-minute window closed. Reposting reopens the setup with a fresh window;
+    deleting drops it. Both are admin decisions, never automatic.
+    """
+    # Filter in Python: SQLite datetime() comparison returns nothing because
+    # created_at is stored as ISO text with a 'T' separator, which the
+    # built-in date functions do not parse consistently.
+    # created_at is UTC while datetime.now() is local (MY, +08:00), so the
+    # cutoff has to be computed in UTC too or every row looks older than it is.
+    hours = HISTORY_WINDOW_H if hours is None else max(1, min(int(hours), 48))
+    cutoff = datetime.now(timezone.utc).replace(tzinfo=None) - timedelta(hours=hours)
+    rows = db.execute(
+        "SELECT id, pair, bias, entry, sl, tp1, poi_low, poi_high, created_at, expires_at "
+        "FROM trades WHERE status IN ('EXPIRED', 'VOID_UNFILLED') "
+        "ORDER BY id DESC LIMIT 60").fetchall()
+    out = []
+    for r in rows:
+        r = dict(r)
+        try:
+            created = datetime.fromisoformat(str(r["created_at"]))
+        except (TypeError, ValueError):
+            continue
+        if created.tzinfo is not None:
+            created = created.astimezone(timezone.utc).replace(tzinfo=None)
+        if created >= cutoff:
+            out.append(r)
+    return out[:20]
+
+
+def _set_trade_status(tid, new_status):
+    before = db.execute("SELECT status FROM trades WHERE id=?", (tid,)).fetchone()
+    if not before:
+        return False, f"trade #{tid} takde"
+    db.execute("UPDATE trades SET status=?, expires_at=? WHERE id=?",
+              (new_status, datetime.now().isoformat(timespec="seconds"), tid))
+    db.commit()
+    return True, f"#{tid} {before['status']} -> {new_status}"
+
+
+async def history_cmd(update: Update, ctx):
+    """ /history — senarai signal expired, dengan pilihan repost atau delete.
+
+    /history <id> repost  -> buka semula setup dengan window 30 minit baharu
+    /history <id> delete  -> buang setup sepenuhnya
+    """
+    if not allowed(update.effective_chat.id):
+        return
+    if update.effective_user.id not in ADMIN_IDS:
+        return await say(update.effective_chat, "\U0001f512 Admin sahaja.")
+
+    # /history [jam] - default 2 jam, boleh sampai 48 jam
+    hours = HISTORY_WINDOW_H
+    if ctx.args and ctx.args[0].lower().endswith("h") and ctx.args[0][:-1].isdigit():
+        hours = max(1, min(int(ctx.args[0][:-1]), 48))
+        ctx.args = ctx.args[1:]
+    if not ctx.args:
+        rows = _expired_trades(hours)
+        if not rows:
+            return await say(update.effective_chat,
+                             "\u2705 Tiada signal expired dalam %d jam lepas." % hours)
+        lines = ["\U0001F5D1 <b>Signal Expired</b> — %d jam lepas\n" % hours]
+        for t in rows[:15]:
+            lines.append(
+                f"<code>#{t['id']}</code> {t['pair']} {t['bias']} · "
+                f"entry <code>{t['entry']}</code> · "
+                f"POI <code>{t['poi_low']}-{t['poi_high']}</code>")
+        lines.append("")
+        lines.append("`/history <id> repost` — buka semula (window 30 minit)")
+        lines.append("`/history <id> delete` — buang setup")
+        lines.append("`/history 6h` — panjangkan window")
+        await say(update.effective_chat, "\n".join(lines))
+        return
+
+    try:
+        tid = int(ctx.args[0])
+    except (TypeError, ValueError):
+        return await say(update.effective_chat, "ID mesti nombor. Contoh: /history 56 repost")
+    action = (ctx.args[1] if len(ctx.args) > 1 else "").lower()
+
+    if action == "repost":
+        row = db.execute("SELECT * FROM trades WHERE id=?", (tid,)).fetchone()
+        if not row:
+            return await say(update.effective_chat, f"Trade #{tid} takde.")
+        if row["status"] not in ("EXPIRED", "VOID_UNFILLED"):
+            return await say(update.effective_chat,
+                             f"#{tid} berstatus {row['status']}, bukan expired.")
+        db.execute("UPDATE trades SET status='PENDING', expires_at=? WHERE id=?",
+                  ((datetime.now() + timedelta(minutes=30)).isoformat(timespec="seconds"), tid))
+        db.commit()
+        if row["supabase_id"]:
+            try:
+                sb_patch("signals?id=eq.%s" % row["supabase_id"],
+                         {"verified": True})
+            except Exception:
+                pass
+        await say(update.effective_chat,
+                  "\u2705 <b>#%s repost</b>\n\n"
+                  "%s %s\nEntry <code>%s</code>\nPOI <code>%s-%s</code>\n"
+                  "Window baru: 30 minit dari sekarang.\n\n"
+                  "Cron sender akan hantar setup ini."
+                  % (tid, row["pair"], row["bias"], row["entry"],
+                     row["poi_low"], row["poi_high"]))
+        return
+
+    if action == "delete":
+        ok, msg = _set_trade_status(tid, "DELETED")
+        await say(update.effective_chat,
+                  "\U0001F5D1 Dihapus: <code>%s</code>" % msg
+                  if ok else "\u274C " + msg)
+        return
+
+    await say(update.effective_chat,
+               "Pilih action: `repost` atau `delete`.\n"
+               "Contoh: /history 56 repost")
+
+
 async def admin_cmd(update: Update, ctx):
     if not allowed(update.effective_chat.id):
         return
@@ -2614,6 +2736,7 @@ def main():
     app.add_handler(CommandHandler(["warn"], warn_cmd))
     app.add_handler(CommandHandler(["renew"], renew_cmd))
     app.add_handler(CommandHandler(["notify", "notis"], notify_cmd))
+    app.add_handler(CommandHandler(["history", "histori", "expired"], history_cmd))
     app.add_handler(CallbackQueryHandler(on_callback))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, on_text))
     app.job_queue.run_repeating(watch, interval=20, first=10)
