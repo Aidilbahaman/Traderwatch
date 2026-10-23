@@ -46,7 +46,7 @@
 @media(max-width:760px){.tw-offer-panel{grid-template-columns:1fr;gap:18px}.tw-offer-action{width:100%}.tw-offer-panel:after{right:4%;top:16%;font-size:96px;opacity:.7}}
 .page section.block{padding:0}.page section.block + section.block{margin-top:4px}.page .tw-chart-news + .tg-link{margin-top:4px}.page .tg-link + .tw-motion{margin-top:4px}@media(max-width:600px){.page section.block{padding:0}.page section.block + section.block{margin-top:2px}.page .tw-chart-news + .tg-link{margin-top:2px}.page .tg-link + .tw-motion{margin-top:2px}}
 </style>
-<link rel="stylesheet" href="members-bento.css?v=20261024p">
+<link rel="stylesheet" href="members-bento.css?v=20261024q">
 <link rel="stylesheet" href="assets/css/tw-motion-bg.css?v=202610182344">
 <script src="assets/js/tw-fundamental-news.js?v=2026101901" defer></script>
 </head>
@@ -108,10 +108,6 @@
           <p class="k">Pips kumulatif</p>
           <div class="perf-big" id="perfNet">+0.0 pips</div>
           <p class="perf-sub" id="perfSub">—</p>
-        </div>
-        <div class="perf-toggle" role="tablist" aria-label="Paparan graf">
-          <button type="button" role="tab" data-view="pair" aria-selected="true">Ikut pair</button>
-          <button type="button" role="tab" data-view="time" aria-selected="false">Ikut masa</button>
         </div>
         <div class="perf-wrap">
           <svg id="perfChart" viewBox="0 0 720 240" preserveAspectRatio="none" role="img"
@@ -693,21 +689,44 @@ if(member){
       fillActive().catch(function(){});
     }
 
-    /* ---------- Graph performance: pips kumulatif ---------- */
-    let perfView = "pair";
-    let perfSigs = null;
-
+    /* ---------- Graph performance: pips kumulatif (gaya toolkits) ---------- */
     function fmtPips(v){
-      return (v > 0 ? "+" : "") + v.toFixed(1) + " pips";
+      return (v > 0 ? "+" : "") + Number(v).toFixed(1) + " pips";
+    }
+
+    /* Area chart dengan gradient + titik hujung — sama seperti members-tools-2.js */
+    function areaChart(pts, H, color){
+      const W = 320, P = 10;
+      const min = Math.min.apply(null, pts.concat([0]));
+      const max = Math.max.apply(null, pts.concat([0]));
+      const span = (max === min) ? 1 : (max - min);
+      const X = i => P + i * (W - 2*P) / Math.max(1, pts.length - 1);
+      const Y = v => H - P - (v - min) / span * (H - 2*P);
+
+      const id = "perfGrad" + Math.random().toString(36).slice(2, 8);
+      const line = pts.map((v,i) => X(i).toFixed(1) + "," + Y(v).toFixed(1)).join(" ");
+
+      return '<defs><linearGradient id="' + id + '" x1="0" y1="0" x2="0" y2="1">'
+        + '<stop offset="0%" stop-color="' + color + '" stop-opacity="0.28"/>'
+        + '<stop offset="100%" stop-color="' + color + '" stop-opacity="0"/>'
+        + '</linearGradient></defs>'
+        + '<line x1="' + P + '" x2="' + (W-P) + '" y1="' + Y(0).toFixed(1) + '" y2="' + Y(0).toFixed(1)
+        + '" stroke="#c9d3e3" stroke-dasharray="3 4"/>'
+        + '<polygon points="' + X(0).toFixed(1) + "," + Y(0).toFixed(1) + " " + line + " "
+        + X(pts.length-1).toFixed(1) + "," + Y(0).toFixed(1) + '" fill="url(#' + id + ')"/>'
+        + '<polyline points="' + line + '" fill="none" stroke="' + color
+        + '" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>'
+        + '<circle cx="' + X(pts.length-1).toFixed(1) + '" cy="' + Y(pts[pts.length-1]).toFixed(1)
+        + '" r="4.5" fill="#fff" stroke="' + color + '" stroke-width="2.5"/>';
     }
 
     function renderPerf(sigs){
-      perfSigs = sigs;
       const svg = document.getElementById("perfChart");
       const netEl = document.getElementById("perfNet");
       const subEl = document.getElementById("perfSub");
       if(!svg) return;
 
+      /* Kumpul trade ditutup, susun ikut masa. */
       const rows = [];
       Object.keys(sigs || {}).forEach(function(k){
         const v = sigs[k] || {};
@@ -715,116 +734,43 @@ if(member){
         if(st !== "tp" && st !== "collected" && st !== "sl") return;
         const when = new Date(v.closed || v.closed_at || 0).getTime();
         if(!Number.isFinite(when)) return;
-        rows.push({
-          t: when,
-          pair: String(k.split("_")[0]),
-          status: st,
-          pips: typeof v.pips === "number" ? v.pips : 0
-        });
+        rows.push({ t: when, status: st, pips: (typeof v.pips === "number" ? v.pips : 0),
+                    unit: v.unit || "pips" });
       });
 
       if(!rows.length){
         svg.innerHTML = "";
         if(netEl) netEl.textContent = "+0.0 pips";
-        if(subEl) subEl.textContent = "Belum ada trade ditutup";
+        if(subEl) subEl.textContent = "Belum ada signal ditutup";
         return;
       }
-
       rows.sort(function(a,b){ return a.t - b.t; });
 
-      /* Angka utama: jumlah pips TP sahaja (bukan net). */
-      const tpRows = rows.filter(function(r){ return r.status !== "sl"; });
-      const tpTotal = tpRows.reduce(function(a,r){ return a + r.pips; }, 0);
+      /* Pips sahaja (BTC dalam USD dikecualikan, sama seperti toolkit). */
+      const pipRows = rows.filter(function(r){ return r.unit !== "usd"; });
+      let cum = 0;
+      const pts = [0];
+      pipRows.forEach(function(r){ cum += r.pips; pts.push(cum); });
 
-      /* Streak TP berturut-turut. */
-      let cur = 0, best = 0, bestPair = "";
+      /* Streak TP. */
+      let run = 0, best = 0;
       rows.forEach(function(r){
-        if(r.status === "sl"){ cur = 0; return; }
-        cur++;
-        if(cur > best){ best = cur; bestPair = r.pair; }
+        if(r.status === "sl"){ run = 0; return; }
+        run++; if(run > best) best = run;
       });
 
       if(netEl){
-        netEl.textContent = fmtPips(tpTotal);
-        netEl.className = "perf-big " + (tpTotal >= 0 ? "pos" : "neg");
+        netEl.textContent = fmtPips(cum);
+        netEl.className = "perf-big " + (cum >= 0 ? "pos" : "neg");
       }
       if(subEl){
-        subEl.textContent = tpRows.length + " signal · TP berturut-turut terbaik: "
-          + best + (bestPair ? " (" + bestPair + ")" : "");
+        subEl.textContent = pipRows.length + " signal · TP berturut-turut terbaik: " + best;
       }
 
-      const W = 720, H = 240;
-      const PADL = 8, PADR = 8, PADT = 14, PADB = 34;
-
-      if(perfView === "pair"){
-        /* Bar chart: jumlah pips TP ikut pair, menaik. */
-        const agg = {};
-        tpRows.forEach(function(r){
-          agg[r.pair] = (agg[r.pair] || 0) + r.pips;
-        });
-        const items = Object.keys(agg).map(function(k){ return { label:k, v:agg[k] }; })
-          .sort(function(a,b){ return a.v - b.v; });
-
-        const maxV = Math.max.apply(null, items.map(function(i){ return Math.abs(i.v); }).concat([1]));
-        const innerW = W - PADL - PADR;
-        const innerH = H - PADT - PADB;
-        const zeroY = PADT + innerH;              /* semua positif: baseline bawah */
-        const slot = innerW / items.length;
-        const barW = Math.min(64, slot * 0.56);
-
-        let out = "";
-        items.forEach(function(it, i){
-          const cx = PADL + slot * i + slot/2;
-          const hgt = Math.max(3, (Math.abs(it.v)/maxV) * innerH);
-          const y = zeroY - hgt;
-          const neg = it.v < 0;
-          out += '<rect class="bar ' + (neg ? "bar-neg" : "bar-pos") + '" x="' + (cx-barW/2).toFixed(1)
-            + '" y="' + y.toFixed(1) + '" width="' + barW.toFixed(1) + '" height="' + hgt.toFixed(1)
-            + '" rx="7"/>';
-          out += '<text class="bar-val" x="' + cx.toFixed(1) + '" y="' + (y-7).toFixed(1)
-            + '" text-anchor="middle">' + Math.round(it.v) + '</text>';
-          out += '<text class="axis-label" x="' + cx.toFixed(1) + '" y="' + (H-12)
-            + '" text-anchor="middle">' + it.label.replace("USD","") + '</text>';
-        });
-        out += '<line class="base-line" x1="' + PADL + '" y1="' + zeroY
-          + '" x2="' + (W-PADR) + '" y2="' + zeroY + '"/>';
-        svg.setAttribute("viewBox", "0 0 " + W + " " + H);
-        svg.innerHTML = out;
-        return;
-      }
-
-      /* Ikut masa: kumulatif TP. */
-      let run = 0;
-      const pts = tpRows.map(function(r){ run += r.pips; return { t:r.t, v:run }; });
-      if(pts.length < 2) pts.push({ t: pts.length?pts[0].t+1:1, v: run });
-      const vals = pts.map(function(p){ return p.v; }).concat([0]);
-      let min = Math.min.apply(null, vals), max = Math.max.apply(null, vals);
-      if(min === max) max = min + 1;
-      const span = max - min;
-      const innerW = W - PADL - PADR, innerH = H - PADT - PADB;
-      function x(i){ return PADL + (i/(pts.length-1))*innerW; }
-      function y(v){ return PADT + innerH - ((v-min)/span)*innerH; }
-
-      let d = pts.map(function(p,i){ return (i?"L":"M") + x(i).toFixed(1) + " " + y(p.v).toFixed(1); }).join(" ");
-      let area = "M" + x(0).toFixed(1) + " " + y(Math.max(min,0)).toFixed(1) + " ";
-      pts.forEach(function(p,i){ area += "L" + x(i).toFixed(1) + " " + y(p.v).toFixed(1) + " "; });
-      area += "L" + x(pts.length-1).toFixed(1) + " " + y(Math.max(min,0)).toFixed(1) + " Z";
-
-      svg.setAttribute("viewBox", "0 0 " + W + " " + H);
-      svg.innerHTML = '<path class="area-tp" d="' + area + '"/>'
-        + '<path class="line-tp" d="' + d + '"/>';
+      const H = 150;
+      svg.setAttribute("viewBox", "0 0 320 " + H);
+      svg.innerHTML = areaChart(pts, H, cum >= 0 ? "#2f9e5b" : "#c0392b");
     }
-
-    /* Toggle Ikut pair / Ikut masa. */
-    document.querySelectorAll('.perf-toggle button').forEach(function(btn){
-      btn.addEventListener("click", function(){
-        document.querySelectorAll('.perf-toggle button').forEach(function(b){
-          b.setAttribute("aria-selected", b === btn ? "true" : "false");
-        });
-        perfView = btn.dataset.view || "pair";
-        if(perfSigs) renderPerf(perfSigs);
-      });
-    });
 
     runStats();
 
