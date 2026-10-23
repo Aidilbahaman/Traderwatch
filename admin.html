@@ -122,7 +122,12 @@
            '<td class="num">'+fmtD(p.end)+'</td>'+
            '<td class="num">'+bal+'</td>'+
            '<td><span class="pill '+p.state+'">'+lbl+'</span></td>'+
-           '<td class="num">'+(p.telegram_chat_id||'—')+'</td></tr>';
+           '<td class="num">'+
+           (p.telegram_chat_id
+             ? '<button class="btn secondary" data-ping="'+p.telegram_chat_id+'" type="button" '+
+               'data-nm="'+escA(p.name||'member')+'" data-pl="'+p.tier+'">Warning</button>'
+             : '—')+
+           '</td></tr>';
        }).join('')+'</tbody></table>'+
        '<p class="role-note" style="margin-top:12px">Bayaran: '+paid.length+
          ' · Akan tamat ≤7 hari: '+soon.length+' · Tamat: '+late.length+'</p>';
@@ -135,6 +140,25 @@
  }
  subsBtn.addEventListener('click',loadSubs);
  subsTier.addEventListener('change',loadSubs);
+ /* Warning: hantar mesej renew terus kepada member Telegram. Butang ini
+    hanya sesi(browser) jadi ia hanya paparkan ayat - penghantaran
+    sebenar dibuat oleh bot /warn (Twbackendbot) yang ada service key. */
+ subsOut.addEventListener('click',async e=>{
+   const b=e.target.closest('button[data-ping]');
+   if(!b)return;
+   const tg=b.dataset.ping,nm=b.dataset.nm,pl=b.dataset.pl;
+   const txt='Assalamualaikum '+nm+'!\n\nSubscription TraderWatch anda ('+
+     pl.toUpperCase()+') dah nears expiry. Sila renew untuk terus dapat signal.\n\n'+
+     'Reply YA untuk renew - admin akan hantar link pembayaran.';
+   b.disabled=true;
+   const nl=String.fromCharCode(10);
+   const note=prompt('Hantar mesej ini kepada '+nm+' (Telegram '+tg+')?'+nl+nl+txt+nl+nl+'[OK=hantar, Cancel=batal]');
+   if(note===null){b.disabled=false;return}
+   subsMsg.className='msg ok';
+   subsMsg.textContent='Cara hantar: buka @Twbackendbot dan taip /warn '+tg+
+     ' — bot akan hantar mesej ini terus kepada member.';
+   b.disabled=false;
+ });
 
  async function ensureAdmin(){const {data,error}=await sb.from('profiles').select('role,email').eq('id',member.id).single();if(error||!data||data.role!=='admin'){location.href='members.html';return false}identity.textContent='Signed in as '+data.email+' · Administrator';return true}
  function escA(v){return esc(v)}
