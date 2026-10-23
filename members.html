@@ -237,27 +237,22 @@ if(member){
   const badge = document.getElementById("planBadge");
   badge.textContent = plan.charAt(0).toUpperCase() + plan.slice(1);
   badge.classList.toggle("pro", plan !== "free");
-  /* planLine = kiraan setup digunakan hari ini (bukan teks plan).
-     Teks plan kekal dalam badge header. */
-  (function setPlanLine(){
+  /* Kuota per-plan. Used dikemas kini selepas get_signals() memulangkan
+     setup yang benar-benar layak untuk ahli ini hari ini. */
+  const DAILY_CAP = plan === "max" ? null : plan === "pro" ? 10 : 3;
+  function updateQuotaLine(used){
     const el = document.getElementById("planLine");
     if(!el) return;
-    const cap = plan === "max" ? null : plan === "pro" ? 10 : 3;
-    fetch("signal-status.json?t=" + Date.now(), { cache: "no-store" })
-      .then(r => r.ok ? r.json() : null)
-      .then(sj => {
-        const sigs = (sj && sj.signals) || {};
-        const today = new Date().toLocaleDateString("en-CA", { timeZone: "Asia/Kuala_Lumpur" }).replace(/-/g, "");
-        const used = Object.keys(sigs).filter(k => k.includes("_" + today + "_")).length;
-        el.textContent = cap === null
-          ? used + " signal digunakan hari ini."
-          : used + " daripada " + cap + " signal digunakan hari ini.";
-        el.dataset.used = used;
-        el.dataset.cap = cap === null ? "" : cap;
-        window.dispatchEvent(new CustomEvent("tw:quota", { detail: { used, cap } }));
-      })
-      .catch(() => { el.textContent = ""; });
-  })();
+    const n = Math.max(0, Number(used) || 0);
+    el.textContent = DAILY_CAP === null
+      ? n + " signal digunakan hari ini."
+      : n + " daripada " + DAILY_CAP + " signal digunakan hari ini.";
+    el.dataset.used = n;
+    el.dataset.cap = DAILY_CAP === null ? "" : DAILY_CAP;
+    window.dispatchEvent(new CustomEvent("tw:quota", { detail: { used:n, cap:DAILY_CAP } }));
+  }
+  const planLine = document.getElementById("planLine");
+  if(planLine) planLine.textContent = "Memuatkan kuota hari ini…";
   const upgraded = new URLSearchParams(location.search).get("upgraded");
   if(upgraded === "max" || upgraded === "pro"){
     const n = document.getElementById("upgradeNote"); n.hidden = false; n.textContent = "Payment confirmed. Your " + (upgraded === "max" ? "Max" : "Pro") + " access is now active.";
@@ -464,8 +459,14 @@ if(member){
         if(sr.ok){ const sj = await sr.json(); statuses = (sj && sj.signals) || {}; }
       }catch(_){}
       const isToday = s => {
-        const d = new Date(s.posted_at);
-        return Number.isFinite(d.getTime()) && d.toDateString() === new Date().toDateString();
+        /* Supabase posted_at ialah UTC-naive; mytParts memaksa UTC sebelum
+           tukar ke Kuala Lumpur, sama seperti signalKey/status matching. */
+        const p = mytParts(s.posted_at);
+        if(!p) return false;
+        const today = new Intl.DateTimeFormat("en-CA", {
+          timeZone:"Asia/Kuala_Lumpur", year:"numeric", month:"2-digit", day:"2-digit"
+        }).format(new Date()).replace(/-/g, "");
+        return p.yyyy + p.mm + p.dd === today;
       };
       const stillOpen = s => {
         const st = statuses[signalKey(s.pair, s.posted_at)];
@@ -488,7 +489,10 @@ if(member){
       const carriedOpen = older.filter(stillOpen);
       const carriedClosed = older.filter(closedRecently).slice(0, 5);
       const carried = carriedOpen.concat(carriedClosed);
-      const selected = (plan === "max" ? todays : todays.slice(0, plan === "pro" ? 10 : 3)).concat(carried);
+      const dailyLimit = plan === "max" ? Infinity : plan === "pro" ? 10 : 3;
+      const selectedToday = plan === "max" ? todays : todays.slice(0, dailyLimit);
+      updateQuotaLine(selectedToday.length);
+      const selected = selectedToday.concat(carried);
       /* simpan untuk fillBento() — signal-status.json tidak menyimpan entry/sl/tp */
       window.TW_SIGNALS = selected.map(s => ({
         pair: s.pair, timeframe: s.timeframe || "H1", side: s.side,
@@ -498,7 +502,7 @@ if(member){
       render(window.TW_SIGNALS.map(s=>({...s, locked:false})));
       const bits = [];
       if(carriedOpen.length) bits.push(`${carriedOpen.length} still open from earlier`);
-      if(carriedClosed.length) bits.push(`${carriedClosed.length} closed in the last 24h`);
+      if(carriedClosed.length) bits.push(`${carriedClosed.length} closed in the last 48h`);
       const carriedNote = bits.length ? ` · ${bits.join(" · ")}` : "";
       note.textContent = selected.length
         ? `${selected.length} of ${plan === "max" ? "unlimited" : plan === "pro" ? "10" : "3"} daily setups · ${allowed.length} hot pairs${carriedNote}.`
