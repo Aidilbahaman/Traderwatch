@@ -510,11 +510,11 @@ if(member){
         Object.keys(sigs).forEach(k => {
           const s = sigs[k] || {};
           const st = s.status;
-          if(st !== "tp" && st !== "sl") return;
+          if(st !== "tp" && st !== "sl" && st !== "collected") return;
           const when = new Date(s.closed || s.closed_at || 0).getTime();
           if(Number.isFinite(when) && when < cutoff) return;
           closed++;
-          if(st === "tp") wins++; else losses++;
+          if(st === "tp" || st === "collected") wins++; else losses++;
           if(typeof s.pips === "number") pips += s.pips;
           if(typeof s.entry === "number" && typeof s.sl === "number" && typeof s.tp === "number"){
             const risk = Math.abs(s.entry - s.sl), reward = Math.abs(s.tp - s.entry);
@@ -544,7 +544,7 @@ if(member){
           let winSum = 0, winN = 0;
           Object.keys(sigs).forEach(function(k){
             const v = sigs[k] || {};
-            if(v.status !== "tp") return;
+            if(v.status !== "tp" && v.status !== "collected") return;
             if(typeof v.r === "number" && isFinite(v.r) && v.r > 0){
               winSum += v.r; winN++;
             }

@@ -30,7 +30,8 @@
   };
 
   var STATUS_LABEL = {
-    active: 'Active', tp: 'TP hit', sl: 'SL hit', expired: 'Tamat', cancelled: 'Dibatalkan'
+    active: 'Active', tp: 'TP hit', sl: 'SL hit', expired: 'Tamat', cancelled: 'Dibatalkan',
+    collected: 'TP dikutip'      // ditutup manual: sebahagian/banyak TP sudah dikutip
   };
 
   var statusData = null;      // dimuat daripada JSON
@@ -258,7 +259,7 @@
       var s = statusData.signals[d.key];
       if (!s || !STATUS_LABEL[s.status]) { b.hidden = true; continue; }
       var label = STATUS_LABEL[s.status];
-      if ((s.status === 'tp' || s.status === 'sl') && typeof s.pips === 'number') {
+      if ((s.status === 'tp' || s.status === 'sl' || s.status === 'collected') && typeof s.pips === 'number') {
         label += ' ' + (s.pips > 0 ? '+' : '') + s.pips.toFixed(1) + ' pips';
       }
       b.textContent = label;
@@ -348,7 +349,7 @@
       var s = statusData.signals[k];
       var m = k.match(/_(\d{4})(\d{2})(\d{2})_/);
       if (m && new Date(+m[1], +m[2] - 1, +m[3]).getTime() < cutoff) return;
-      if (s.status === 'tp') { wins++; pips += s.pips || 0; }
+      if (s.status === 'tp' || s.status === 'collected') { wins++; pips += s.pips || 0; }
       else if (s.status === 'sl') { losses++; pips += s.pips || 0; }
     });
     var total = wins + losses;

@@ -201,6 +201,7 @@ header{
 .tw-badge.tp{ background:#e3f4e8; color:#1a7a42; }
 .tw-badge.sl{ background:#fdecec; color:#b3261e; }
 .tw-badge.expired,.tw-badge.cancelled{ background:#eceff3; color:#6a768a; }
+.tw-badge.collected{ background:#e3f4e8; color:#1a7a42; }
 .tw-btn{
   font:inherit; font-size:13px; font-weight:600; color:var(--text);
   background:#f5f5f7; border:1px solid var(--line); border-radius:99px;
