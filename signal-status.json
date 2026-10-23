@@ -1,5 +1,5 @@
 {
- "updated": "2026-10-24T00:38:02+08:00",
+ "updated": "2026-10-24T00:39:02+08:00",
  "signals": {
   "XAUUSD_20261024_001738": {
    "status": "pending"
@@ -475,6 +475,49 @@
   },
   "GBPUSD_20261018_193014": {
    "status": "pending"
+  },
+  "XAUUSD_20261018_193003": {
+   "status": "pending"
+  },
+  "USDCAD_20261018_190156": {
+   "status": "pending"
+  },
+  "AUDUSD_20261018_190043": {
+   "status": "pending"
+  },
+  "USDJPY_20261018_190033": {
+   "status": "sl",
+   "pips": -20.0,
+   "r": -1,
+   "unit": "pips",
+   "closed": "2026-10-24T00:39:02+08:00",
+   "entry_at": "2026-10-21T19:10:00+08:00"
+  },
+  "EURUSD_20261018_190013": {
+   "status": "sl",
+   "pips": -20.0,
+   "r": -1,
+   "unit": "pips",
+   "closed": "2026-10-24T00:39:02+08:00",
+   "entry_at": "2026-10-21T02:46:00+08:00"
+  },
+  "GBPUSD_20261018_170341": {
+   "status": "expired"
+  },
+  "EURUSD_20261018_170331": {
+   "status": "expired"
+  },
+  "XAUUSD_20261018_170219": {
+   "status": "expired"
+  },
+  "USDCAD_20261018_110101": {
+   "status": "expired"
+  },
+  "USDJPY_20261018_080050": {
+   "status": "expired"
+  },
+  "AUDUSD_20261018_043118": {
+   "status": "expired"
   }
  }
 }
