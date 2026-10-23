@@ -498,9 +498,16 @@ if(member){
       const ring = document.getElementById("planRing");
       if(!el || !ring) return;
       const cap = plan === "max" ? null : plan === "pro" ? 10 : 3;
-      if(cap === null){ el.textContent = "∞"; ring.style.background = "conic-gradient(var(--blue) 0 100%, var(--line) 0)"; return; }
+      if(cap === null){
+        el.textContent = "∞";
+        ring.style.background = "conic-gradient(var(--blue) 0 100%, var(--line) 0)";
+        return;
+      }
+      /* Utamakan bilangan kad yang benar-benar dipaparkan; jika grid belum
+         dirender, guna window.TW_SIGNALS. Jika kedua-duanya kosong, papar 0. */
       const domCount = document.querySelectorAll("#signalGrid .sig").length;
-      const used = domCount || (window.TW_SIGNALS || []).length;
+      const arrCount = (window.TW_SIGNALS || []).length;
+      const used = domCount || arrCount || 0;
       el.textContent = used + "/" + cap;
       const pct = Math.max(0, Math.min(100, (used / cap) * 100));
       ring.style.background = "conic-gradient(var(--blue) 0 " + pct + "%, var(--line) 0)";
@@ -582,7 +589,7 @@ if(member){
         const badge = document.getElementById("activeBadge");
         const trk = document.getElementById("activeTrk");
         const meta = document.getElementById("activeMeta");
-        if(!best || !pairEl) return;
+        if(!best || !pairEl){ setRing(); return; }
 
         const code = String(bestKey).split("_")[0];
         const nice = code.length === 6 ? code.slice(0,3) + "/" + code.slice(3) : code;
@@ -623,6 +630,7 @@ if(member){
        ia selamat dijalankan serta-merta. fillActive() perlukan TW_SIGNALS. */
     function runStats(){
       fillStats().catch(function(){});
+      setRing();
     }
     function runActive(){
       fillActive().catch(function(){});
