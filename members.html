@@ -46,7 +46,7 @@
 @media(max-width:760px){.tw-offer-panel{grid-template-columns:1fr;gap:18px}.tw-offer-action{width:100%}.tw-offer-panel:after{right:4%;top:16%;font-size:96px;opacity:.7}}
 .page section.block{padding:0}.page section.block + section.block{margin-top:4px}.page .tw-chart-news + .tg-link{margin-top:4px}.page .tg-link + .tw-motion{margin-top:4px}@media(max-width:600px){.page section.block{padding:0}.page section.block + section.block{margin-top:2px}.page .tw-chart-news + .tg-link{margin-top:2px}.page .tg-link + .tw-motion{margin-top:2px}}
 </style>
-<link rel="stylesheet" href="members-bento.css?v=20261024i">
+<link rel="stylesheet" href="members-bento.css?v=20261024o">
 <link rel="stylesheet" href="assets/css/tw-motion-bg.css?v=202610182344">
 <script src="assets/js/tw-fundamental-news.js?v=2026101901" defer></script>
 </head>
@@ -101,6 +101,23 @@
         <p class="k">Purata R:R</p>
         <div class="num" id="statRR">—</div>
         <p class="sub" id="statCount" style="margin-top:12px;font-size:13px">—</p>
+      </section>
+
+      <section class="t w4" id="perfTile">
+        <div class="tile-head">
+          <div><p class="k">Performance · kumulatif pips</p><h2>Take profit vs Stop loss</h2></div>
+          <span class="live" id="perfBadge" hidden>30 hari</span>
+        </div>
+        <div class="perf-wrap">
+          <svg id="perfChart" viewBox="0 0 720 200" preserveAspectRatio="none" role="img"
+               aria-label="Graf kumulatif pips take profit berbanding stop loss"></svg>
+        </div>
+        <div class="perf-legend">
+          <span><i class="dot-tp"></i> TP kumulatif</span>
+          <span><i class="dot-sl"></i> SL kumulatif</span>
+          <span><i class="dot-net"></i> Bersih</span>
+          <span class="perf-net" id="perfNet">—</span>
+        </div>
       </section>
 
       <section class="t w2 r2" id="activeTile">
@@ -408,16 +425,37 @@ if(member){
       const locked = !!s.locked;
       const cls = (s.side || "BUY") === "BUY" ? "buy" : "sell";
       const a = document.createElement("article");
-      a.className = "sig" + (locked ? " locked" : "");
       const t = mytParts(s.posted_at);
       const stamp = t ? `${t.dd}/${t.mm}/${t.yyyy}, ${t.HH}:${t.MM}:${t.SS}` : "";
-      a.dataset.key = signalKey(s.pair, s.posted_at);
+      const key = signalKey(s.pair, s.posted_at);
+
+      /* Status muktamad -> kad ringkas satu baris (padat), bukan kad penuh. */
+      const st = (window.TW_STATUSES || {})[key] || {};
+      const settled = ["tp","sl","expired","collected","cancelled"].includes(st.status);
+      a.dataset.key = key;
       a.dataset.pair = String(s.pair||"").toUpperCase();
       a.dataset.side = String(s.side||"").toUpperCase();
       a.dataset.type = s.timeframe || "H1";
       a.dataset.entry = s.entry ?? "";
       a.dataset.sl = s.sl ?? "";
       a.dataset.tp = s.tp ?? "";
+
+      if(settled && !locked){
+        const label = {tp:"TP hit", sl:"SL hit", expired:"Tamat", collected:"TP dikutip", cancelled:"Batal"}[st.status] || st.status;
+        const pips = typeof st.pips === "number" ? (st.pips > 0 ? "+" : "") + st.pips.toFixed(1) + "p" : "";
+        a.className = "sig sig-done " + st.status;
+        a.innerHTML = `
+          <div class="done-row">
+            <span class="done-pair">${esc(s.pair)}</span>
+            <span class="side ${cls}">${esc(s.side)}</span>
+            <span class="done-res ${st.status}">${esc(label)}${pips ? " " + esc(pips) : ""}</span>
+            <span class="done-time"><span class="d-full">${esc(stamp)}</span><span class="d-short">${esc(t.dd + "/" + t.mm + " " + t.HH + ":" + t.MM)}</span></span>
+          </div>`;
+        grid.appendChild(a);
+        return;
+      }
+
+      a.className = "sig" + (locked ? " locked" : "");
       a.innerHTML = `
         <div class="sig-top"><span class="pair">${esc(s.pair)}</span><span class="side ${cls}">${esc(locked ? "LOCKED" : s.side)}</span></div>
         <h3 class="setup-title">${esc(s.timeframe || "H1")} ${esc(s.side || "")} setup${s.timeframe === "M15" ? " · scalping" : ""}</h3>
@@ -447,6 +485,7 @@ if(member){
       try{
         const sr = await fetch("signal-status.json?t=" + Date.now(), { cache: "no-store" });
         if(sr.ok){ const sj = await sr.json(); statuses = (sj && sj.signals) || {}; }
+        window.TW_STATUSES = statuses;
       }catch(_){}
       const isToday = s => {
         /* Supabase posted_at ialah UTC-naive; mytParts memaksa UTC sebelum
@@ -583,6 +622,7 @@ if(member){
         if(cntEl) cntEl.textContent = closed > 0
           ? closed + " signal ditutup · " + (pips > 0 ? "+" : "") + pips.toFixed(1) + " pips"
           : "Belum ada signal ditutup";
+        renderPerf(sigs);
       }catch(_){}
     }
 
@@ -652,6 +692,94 @@ if(member){
     }
     function runActive(){
       fillActive().catch(function(){});
+    }
+
+    /* ---------- Graph performance: TP vs SL kumulatif ---------- */
+    function renderPerf(sigs){
+      const svg = document.getElementById("perfChart");
+      const netEl = document.getElementById("perfNet");
+      const badge = document.getElementById("perfBadge");
+      if(!svg) return;
+
+      /* Kumpul trade mengikut masa tutup (ascending). */
+      const rows = [];
+      Object.keys(sigs || {}).forEach(function(k){
+        const v = sigs[k] || {};
+        const st = v.status;
+        if(st !== "tp" && st !== "sl" && st !== "collected") return;
+        const when = new Date(v.closed || v.closed_at || 0).getTime();
+        if(!Number.isFinite(when)) return;
+        const pips = typeof v.pips === "number" ? v.pips : 0;
+        rows.push({ t: when, status: st, pips: pips });
+      });
+      if(!rows.length){
+        svg.innerHTML = "";
+        if(netEl) netEl.textContent = "Tiada data";
+        return;
+      }
+      rows.sort(function(a,b){ return a.t - b.t; });
+
+      /* Siri kumulatif. */
+      let cTP = 0, cSL = 0;
+      const series = rows.map(function(r){
+        if(r.status === "sl") cSL += r.pips;   // negatif
+        else cTP += r.pips;                    // tp / collected
+        return { cTP: cTP, cSL: cSL, net: cTP + cSL };
+      });
+
+      const W = 720, H = 200, PADL = 42, PADR = 10, PADT = 12, PADB = 22;
+      const vals = [];
+      series.forEach(function(p){ vals.push(p.cTP, p.cSL, p.net, 0); });
+      let min = Math.min.apply(null, vals);
+      let max = Math.max.apply(null, vals);
+      if(min === max){ max = min + 1; }
+      const span = max - min;
+      const innerW = W - PADL - PADR;
+      const innerH = H - PADT - PADB;
+
+      function x(i){
+        return PADL + (series.length === 1 ? innerW/2 : (i/(series.length-1))*innerW);
+      }
+      function y(v){
+        return PADT + innerH - ((v - min)/span)*innerH;
+      }
+      function path(get){
+        return series.map(function(p,i){ return (i?"L":"M") + x(i).toFixed(1) + " " + y(get(p)).toFixed(1); }).join(" ");
+      }
+      function area(get){
+        const base = y(Math.max(min, 0));
+        let d = "M" + x(0).toFixed(1) + " " + base.toFixed(1) + " ";
+        series.forEach(function(p,i){ d += "L" + x(i).toFixed(1) + " " + y(get(p)).toFixed(1) + " "; });
+        d += "L" + x(series.length-1).toFixed(1) + " " + base.toFixed(1) + " Z";
+        return d;
+      }
+
+      /* Grid + label paksi. */
+      let g = "";
+      const steps = 4;
+      for(let i=0;i<=steps;i++){
+        const v = min + (span * i/steps);
+        const yy = y(v);
+        g += '<line class="grid-line" x1="'+PADL+'" y1="'+yy.toFixed(1)+'" x2="'+(W-PADR)+'" y2="'+yy.toFixed(1)+'"/>';
+        g += '<text class="axis-label" x="'+(PADL-6)+'" y="'+(yy+3).toFixed(1)+'" text-anchor="end">'+Math.round(v)+'</text>';
+      }
+      if(min < 0 && max > 0){
+        g += '<line class="zero-line" x1="'+PADL+'" y1="'+y(0).toFixed(1)+'" x2="'+(W-PADR)+'" y2="'+y(0).toFixed(1)+'"/>';
+      }
+
+      const net = series[series.length-1].net;
+      svg.innerHTML = g
+        + '<path class="area-tp" d="'+area(function(p){return p.cTP;})+'"/>'
+        + '<path class="area-sl" d="'+area(function(p){return p.cSL;})+'"/>'
+        + '<path class="line-tp" d="'+path(function(p){return p.cTP;})+'"/>'
+        + '<path class="line-sl" d="'+path(function(p){return p.cSL;})+'"/>'
+        + '<path class="line-net" d="'+path(function(p){return p.net;})+'"/>';
+
+      if(netEl){
+        netEl.textContent = (net > 0 ? "+" : "") + net.toFixed(1) + " pips";
+        netEl.className = "perf-net " + (net >= 0 ? "pos" : "neg");
+      }
+      if(badge) badge.hidden = false;
     }
 
     runStats();
