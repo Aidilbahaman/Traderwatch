@@ -88,6 +88,10 @@ PAIRS = {"XAUUSD": ("XAU_USD", 2, 0.1), "GBPUSD": ("GBP_USD", 5, 0.0001),
 
 BTN_ANALISA, BTN_TOOLS = "📊 Terminal Analisa", "🛠️ Tools & Fitur PRO"
 BTN_JURNAL, BTN_KUOTA = "📓 Jurnal & Equity", "💳 Subscription"
+# Label lama yang masih ada pada keyboard member yang tidak mahu refresh
+# reply keyboard. Kalau tak ada alias ini, tekan butang lama tiada respons.
+BTN_LEGACY = {"👤 Cek Kuota & Akun": BTN_KUOTA, "👤 Subscription": BTN_KUOTA,
+               "Cek Kuota & Akun": BTN_KUOTA}
 BTN_SET, BTN_ABOUT = "⚙️ Pengaturan Bot", "🏛️ Tentang Hermes"
 BTN_DRAFT = "🗂️ Draft Signal"
 BTN_SCREENER = "🤖 Auto Screener"
@@ -1944,6 +1948,9 @@ async def on_text(update: Update, ctx):
         return
     t, tg, chat = update.message.text.strip(), update.effective_user, update.effective_chat
     u = get_user(tg)
+    # Normalkan label lama ke label baru sebelum semaphore butang.
+    if t in BTN_LEGACY:
+        t = BTN_LEGACY[t]
     if t == BTN_ANALISA:
         return await say(chat, "🏛️ <b>HERMES Terminal Analyst</b>\n\nSilakan pilih pair atau aset yang ingin "
                                "dianalisa dengan strategi smart money concept:", pairs_kb())
