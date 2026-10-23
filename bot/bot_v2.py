@@ -178,6 +178,12 @@ def sb_request(path, method="GET", body=None):
         return json.loads(raw) if raw.strip() else []
 
 
+def sb_patch(path, body):
+    """PATCH helper — guna 'Prefer: return=representation' supaya dapat row
+    yang dikemas kini, jadi bot boleh sahkan apa yang sebenarnya disimpan."""
+    return sb_request(path, "PATCH", body)
+
+
 def fetch_member_targets():
     return sb_request("profiles?select=name,telegram_chat_id&plan=in.(pro,max)"
                       "&telegram_chat_id=not.is.null")
@@ -2295,6 +2301,106 @@ async def subs_cmd(update: Update, ctx):
     await say(update.effective_chat, "\n".join(lines))
 
 
+def _find_member_by_tg(tg_id):
+    """Cari profile ikut telegram_chat_id. Service key bypass RLS jadi semua
+    kelihatan, bukan hanya bar admin."""
+    try:
+        rows = sb_request("profiles?select=id,name,email,plan,telegram_chat_id"
+                          "&telegram_chat_id=eq.%s" % int(tg_id))
+        return rows[0] if rows else None
+    except (TypeError, ValueError):
+        return None
+
+
+async def _send_tg(chat_id, text):
+    """Hantar mesej sebagai bot isyarat (@Traderwatchmembershipbot) supaya
+    member yang hanya follow bot itu tetap terima."""
+    if not SIGNALS_TOKEN:
+        return False
+    url = "https://api.telegram.org/bot%s/sendMessage" % SIGNALS_TOKEN.strip()
+    req = urllib.request.Request(url, data=json.dumps({
+        "chat_id": int(chat_id), "text": text, "parse_mode": "HTML",
+        "disable_web_page_preview": True}).encode(),
+        headers={"Content-Type": "application/json"})
+    try:
+        with urllib.request.urlopen(req, timeout=25) as r:
+            return json.loads(r.read().decode()).get("ok", False)
+    except Exception:
+        return False
+
+
+async def warn_cmd(update: Update, ctx):
+    """ /warn <tg_id> — hantar mesej renew kepada member. """
+    if not allowed(update.effective_chat.id):
+        return
+    if update.effective_user.id not in ADMIN_IDS:
+        return await say(update.effective_chat, "\U0001f512 Admin sahaja.")
+    if not ctx.args:
+        return await say(update.effective_chat,
+                         "Guna: /warn <tg_id>\nContoh: /warn 681335841")
+    try:
+        tg = int(ctx.args[0])
+    except (TypeError, ValueError):
+        return await say(update.effective_chat, "tg_id mesti nombor.")
+    p = _find_member_by_tg(tg)
+    if not p:
+        return await say(update.effective_chat, "Member dengan tg_id %s takde." % tg)
+    plan = str(p.get("plan") or "free").upper()
+    txt = ("Assalamualaikum %s!\n\n"
+           "Subscription TraderWatch anda (%s) dah nears expiry.\n"
+           "Sila renew supaya anda terus dapat signal dan semua ciri member.\n\n"
+           "Reply YA pada mesej ini supaya admin boleh hantar link pembayaran "
+           "kepada anda.\n\n"
+           "Terima kasih atas sokongan anda."
+           % (e(p.get("name") or "Ahli"), plan))
+    ok = await _send_tg(tg, txt)
+    if ok:
+        await say(update.effective_chat,
+                  "\u2705 Mesej renew dihantar kepada %s (%s)."
+                  % (e(p.get("name") or "-"), plan))
+    else:
+        await say(update.effective_chat,
+                  "\u274c Gagal hantar. Pastikan member dah mula chat botMembership.")
+
+
+async def renew_cmd(update: Update, ctx):
+    """ /renew <tg_id> [PRO|MAX|FREE] — upgrade/downgrade tier terus. """
+    if not allowed(update.effective_chat.id):
+        return
+    if update.effective_user.id not in ADMIN_IDS:
+        return await say(update.effective_chat, "\U0001f512 Admin sahaja.")
+    if len(ctx.args) < 1:
+        return await say(update.effective_chat,
+                         "Guna: /renew <tg_id> [PRO|MAX|FREE]\n"
+                         "Contoh: /renew 681335841 MAX")
+    try:
+        tg = int(ctx.args[0])
+    except (TypeError, ValueError):
+        return await say(update.effective_chat, "tg_id mesti nombor.")
+    want = (ctx.args[1] if len(ctx.args) > 1 else "PRO").upper()
+    if want not in ("FREE", "PRO", "MAX"):
+        return await say(update.effective_chat, "Tier mesti FREE, PRO atau MAX.")
+    p = _find_member_by_tg(tg)
+    if not p:
+        return await say(update.effective_chat, "Member dengan tg_id %s takde." % tg)
+    before = str(p.get("plan") or "free")
+    try:
+        rows = sb_patch("profiles?id=eq.%s" % p["id"], {"plan": want.lower()})
+    except Exception as ex:
+        return await say(update.effective_chat,
+                         "\u274c Gagal kemas kini: %s" % e(str(ex)[:120]))
+    got = str((rows[0] if rows else {}).get("plan") or "?").lower()
+    if got != want.lower():
+        return await say(update.effective_chat,
+                         "\u274c Disimpan sebagai %s, bukan %s." % (got.upper(), want))
+    await say(update.effective_chat,
+              "\u2705 Tier dikemas kini\n\n"
+              "Member: %s\nEmail: %s\nTelegram: %s\n"
+              "%s \u2192 %s"
+              % (e(p.get("name") or "-"), e(p.get("email") or "-"), tg,
+                 before.upper(), want))
+
+
 async def admin_cmd(update: Update, ctx):
     if not allowed(update.effective_chat.id):
         return
@@ -2426,6 +2532,8 @@ def main():
     app.add_handler(CommandHandler("model", model_cmd))
     app.add_handler(CommandHandler(["setpro", "setexness"], admin_cmd))
     app.add_handler(CommandHandler(["subs", "langgana"], subs_cmd))
+    app.add_handler(CommandHandler(["warn"], warn_cmd))
+    app.add_handler(CommandHandler(["renew"], renew_cmd))
     app.add_handler(CallbackQueryHandler(on_callback))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, on_text))
     app.job_queue.run_repeating(watch, interval=20, first=10)
