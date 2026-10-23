@@ -196,61 +196,91 @@ header{
 }
 .sample{ color:var(--muted); font-size:12px; margin:12px 0 0; }
 
-/* ---------- Graph performance (TP vs SL kumulatif) ---------- */
-#perfTile{ display:flex; flex-direction:column; }
+/* ---------- Graph performance: pips kumulatif ---------- */
+#perfTile{ display:flex; flex-direction:column; gap:2px; }
+.perf-head{ margin-bottom:2px; }
+.perf-big{
+  font-size:clamp(30px,4.2vw,44px);
+  font-weight:700;
+  letter-spacing:-.04em;
+  line-height:1.05;
+  color:var(--text);
+  font-variant-numeric:tabular-nums;
+  margin:2px 0 4px;
+}
+.perf-big.pos{ color:#1a7a42; }
+.perf-big.neg{ color:#b3261e; }
+.perf-sub{
+  font-size:12px;
+  color:var(--muted);
+  margin:0 0 12px;
+  line-height:1.4;
+}
+
+.perf-toggle{
+  display:inline-flex;
+  gap:4px;
+  padding:3px;
+  border-radius:99px;
+  background:#f5f5f7;
+  align-self:flex-start;
+  margin-bottom:10px;
+}
+.perf-toggle button{
+  font:inherit;
+  font-size:12px;
+  font-weight:600;
+  color:var(--muted);
+  background:transparent;
+  border:0;
+  border-radius:99px;
+  padding:6px 14px;
+  cursor:pointer;
+  transition:background .16s ease, color .16s ease;
+}
+.perf-toggle button[aria-selected="true"]{
+  background:#fff;
+  color:var(--text);
+  box-shadow:0 1px 3px rgba(0,0,0,.08);
+}
+
 .perf-wrap{
   position:relative;
   flex:1;
-  min-height:180px;
-  margin:4px 0 12px;
+  min-height:200px;
 }
 #perfChart{
   display:block;
   width:100%;
-  height:180px;
+  height:220px;
   overflow:visible;
 }
-#perfChart .grid-line{ stroke:#e8e8ed; stroke-width:1; }
-#perfChart .zero-line{ stroke:#c7c7cc; stroke-width:1; stroke-dasharray:4 4; }
-#perfChart .area-tp{ fill:rgba(31,163,92,.12); }
-#perfChart .area-sl{ fill:rgba(229,55,43,.10); }
+#perfChart .base-line{ stroke:#e8e8ed; stroke-width:1; }
+#perfChart .area-tp{ fill:rgba(31,163,92,.14); }
 #perfChart .line-tp{ fill:none; stroke:#1fa35c; stroke-width:2.5; stroke-linejoin:round; stroke-linecap:round; }
-#perfChart .line-sl{ fill:none; stroke:#e5372b; stroke-width:2.5; stroke-linejoin:round; stroke-linecap:round; }
-#perfChart .line-net{ fill:none; stroke:#0a84ff; stroke-width:2; stroke-dasharray:5 4; }
-#perfChart .axis-label{ font-size:10px; fill:#86868b; font-family:var(--bento-font); }
-.perf-legend{
-  display:flex;
-  flex-wrap:wrap;
-  align-items:center;
-  gap:14px;
-  font-size:12px;
-  color:var(--muted);
+#perfChart .bar-pos{ fill:#1fa35c; opacity:.85; }
+#perfChart .bar-neg{ fill:#e5372b; opacity:.85; }
+#perfChart .axis-label{
+  font-size:11px;
+  fill:#86868b;
+  font-family:var(--bento-font);
+  font-weight:600;
 }
-.perf-legend i{
-  display:inline-block;
-  width:9px; height:9px;
-  border-radius:50%;
-  margin-right:5px;
-  vertical-align:middle;
-}
-.perf-legend .dot-tp{ background:#1fa35c; }
-.perf-legend .dot-sl{ background:#e5372b; }
-.perf-legend .dot-net{ background:#0a84ff; }
-.perf-net{
-  margin-left:auto;
+#perfChart .bar-val{
+  font-size:11px;
+  fill:#1d1d1f;
+  font-family:var(--bento-font);
   font-weight:700;
-  font-size:14px;
-  color:var(--text);
   font-variant-numeric:tabular-nums;
 }
-.perf-net.pos{ color:#1a7a42; }
-.perf-net.neg{ color:#b3261e; }
 @media (max-width:600px){
-  .perf-wrap{ min-height:150px; }
-  #perfChart{ height:150px; }
-  .perf-legend{ gap:10px; font-size:11px; }
+  .perf-wrap{ min-height:170px; }
+  #perfChart{ height:180px; }
+  .perf-big{ font-size:30px; }
+  .perf-toggle button{ font-size:11px; padding:5px 12px; }
+  #perfChart .axis-label{ font-size:9px; }
+  #perfChart .bar-val{ font-size:9px; }
 }
-
 
 /* ---------- Kad signal yang sudah settle: ringkas & padat ---------- */
 .sig.sig-done{

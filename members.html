@@ -46,7 +46,7 @@
 @media(max-width:760px){.tw-offer-panel{grid-template-columns:1fr;gap:18px}.tw-offer-action{width:100%}.tw-offer-panel:after{right:4%;top:16%;font-size:96px;opacity:.7}}
 .page section.block{padding:0}.page section.block + section.block{margin-top:4px}.page .tw-chart-news + .tg-link{margin-top:4px}.page .tg-link + .tw-motion{margin-top:4px}@media(max-width:600px){.page section.block{padding:0}.page section.block + section.block{margin-top:2px}.page .tw-chart-news + .tg-link{margin-top:2px}.page .tg-link + .tw-motion{margin-top:2px}}
 </style>
-<link rel="stylesheet" href="members-bento.css?v=20261024o">
+<link rel="stylesheet" href="members-bento.css?v=20261024p">
 <link rel="stylesheet" href="assets/css/tw-motion-bg.css?v=202610182344">
 <script src="assets/js/tw-fundamental-news.js?v=2026101901" defer></script>
 </head>
@@ -104,19 +104,18 @@
       </section>
 
       <section class="t w4" id="perfTile">
-        <div class="tile-head">
-          <div><p class="k">Performance · kumulatif pips</p><h2>Take profit vs Stop loss</h2></div>
-          <span class="live" id="perfBadge" hidden>30 hari</span>
+        <div class="perf-head">
+          <p class="k">Pips kumulatif</p>
+          <div class="perf-big" id="perfNet">+0.0 pips</div>
+          <p class="perf-sub" id="perfSub">—</p>
+        </div>
+        <div class="perf-toggle" role="tablist" aria-label="Paparan graf">
+          <button type="button" role="tab" data-view="pair" aria-selected="true">Ikut pair</button>
+          <button type="button" role="tab" data-view="time" aria-selected="false">Ikut masa</button>
         </div>
         <div class="perf-wrap">
-          <svg id="perfChart" viewBox="0 0 720 200" preserveAspectRatio="none" role="img"
-               aria-label="Graf kumulatif pips take profit berbanding stop loss"></svg>
-        </div>
-        <div class="perf-legend">
-          <span><i class="dot-tp"></i> TP kumulatif</span>
-          <span><i class="dot-sl"></i> SL kumulatif</span>
-          <span><i class="dot-net"></i> Bersih</span>
-          <span class="perf-net" id="perfNet">—</span>
+          <svg id="perfChart" viewBox="0 0 720 240" preserveAspectRatio="none" role="img"
+               aria-label="Pips kumulatif mengikut pair"></svg>
         </div>
       </section>
 
@@ -694,93 +693,138 @@ if(member){
       fillActive().catch(function(){});
     }
 
-    /* ---------- Graph performance: TP vs SL kumulatif ---------- */
+    /* ---------- Graph performance: pips kumulatif ---------- */
+    let perfView = "pair";
+    let perfSigs = null;
+
+    function fmtPips(v){
+      return (v > 0 ? "+" : "") + v.toFixed(1) + " pips";
+    }
+
     function renderPerf(sigs){
+      perfSigs = sigs;
       const svg = document.getElementById("perfChart");
       const netEl = document.getElementById("perfNet");
-      const badge = document.getElementById("perfBadge");
+      const subEl = document.getElementById("perfSub");
       if(!svg) return;
 
-      /* Kumpul trade mengikut masa tutup (ascending). */
       const rows = [];
       Object.keys(sigs || {}).forEach(function(k){
         const v = sigs[k] || {};
         const st = v.status;
-        if(st !== "tp" && st !== "sl" && st !== "collected") return;
+        if(st !== "tp" && st !== "collected" && st !== "sl") return;
         const when = new Date(v.closed || v.closed_at || 0).getTime();
         if(!Number.isFinite(when)) return;
-        const pips = typeof v.pips === "number" ? v.pips : 0;
-        rows.push({ t: when, status: st, pips: pips });
+        rows.push({
+          t: when,
+          pair: String(k.split("_")[0]),
+          status: st,
+          pips: typeof v.pips === "number" ? v.pips : 0
+        });
       });
+
       if(!rows.length){
         svg.innerHTML = "";
-        if(netEl) netEl.textContent = "Tiada data";
+        if(netEl) netEl.textContent = "+0.0 pips";
+        if(subEl) subEl.textContent = "Belum ada trade ditutup";
         return;
       }
+
       rows.sort(function(a,b){ return a.t - b.t; });
 
-      /* Siri kumulatif. */
-      let cTP = 0, cSL = 0;
-      const series = rows.map(function(r){
-        if(r.status === "sl") cSL += r.pips;   // negatif
-        else cTP += r.pips;                    // tp / collected
-        return { cTP: cTP, cSL: cSL, net: cTP + cSL };
+      /* Angka utama: jumlah pips TP sahaja (bukan net). */
+      const tpRows = rows.filter(function(r){ return r.status !== "sl"; });
+      const tpTotal = tpRows.reduce(function(a,r){ return a + r.pips; }, 0);
+
+      /* Streak TP berturut-turut. */
+      let cur = 0, best = 0, bestPair = "";
+      rows.forEach(function(r){
+        if(r.status === "sl"){ cur = 0; return; }
+        cur++;
+        if(cur > best){ best = cur; bestPair = r.pair; }
       });
 
-      const W = 720, H = 200, PADL = 42, PADR = 10, PADT = 12, PADB = 22;
-      const vals = [];
-      series.forEach(function(p){ vals.push(p.cTP, p.cSL, p.net, 0); });
-      let min = Math.min.apply(null, vals);
-      let max = Math.max.apply(null, vals);
-      if(min === max){ max = min + 1; }
-      const span = max - min;
-      const innerW = W - PADL - PADR;
-      const innerH = H - PADT - PADB;
-
-      function x(i){
-        return PADL + (series.length === 1 ? innerW/2 : (i/(series.length-1))*innerW);
-      }
-      function y(v){
-        return PADT + innerH - ((v - min)/span)*innerH;
-      }
-      function path(get){
-        return series.map(function(p,i){ return (i?"L":"M") + x(i).toFixed(1) + " " + y(get(p)).toFixed(1); }).join(" ");
-      }
-      function area(get){
-        const base = y(Math.max(min, 0));
-        let d = "M" + x(0).toFixed(1) + " " + base.toFixed(1) + " ";
-        series.forEach(function(p,i){ d += "L" + x(i).toFixed(1) + " " + y(get(p)).toFixed(1) + " "; });
-        d += "L" + x(series.length-1).toFixed(1) + " " + base.toFixed(1) + " Z";
-        return d;
-      }
-
-      /* Grid + label paksi. */
-      let g = "";
-      const steps = 4;
-      for(let i=0;i<=steps;i++){
-        const v = min + (span * i/steps);
-        const yy = y(v);
-        g += '<line class="grid-line" x1="'+PADL+'" y1="'+yy.toFixed(1)+'" x2="'+(W-PADR)+'" y2="'+yy.toFixed(1)+'"/>';
-        g += '<text class="axis-label" x="'+(PADL-6)+'" y="'+(yy+3).toFixed(1)+'" text-anchor="end">'+Math.round(v)+'</text>';
-      }
-      if(min < 0 && max > 0){
-        g += '<line class="zero-line" x1="'+PADL+'" y1="'+y(0).toFixed(1)+'" x2="'+(W-PADR)+'" y2="'+y(0).toFixed(1)+'"/>';
-      }
-
-      const net = series[series.length-1].net;
-      svg.innerHTML = g
-        + '<path class="area-tp" d="'+area(function(p){return p.cTP;})+'"/>'
-        + '<path class="area-sl" d="'+area(function(p){return p.cSL;})+'"/>'
-        + '<path class="line-tp" d="'+path(function(p){return p.cTP;})+'"/>'
-        + '<path class="line-sl" d="'+path(function(p){return p.cSL;})+'"/>'
-        + '<path class="line-net" d="'+path(function(p){return p.net;})+'"/>';
-
       if(netEl){
-        netEl.textContent = (net > 0 ? "+" : "") + net.toFixed(1) + " pips";
-        netEl.className = "perf-net " + (net >= 0 ? "pos" : "neg");
+        netEl.textContent = fmtPips(tpTotal);
+        netEl.className = "perf-big " + (tpTotal >= 0 ? "pos" : "neg");
       }
-      if(badge) badge.hidden = false;
+      if(subEl){
+        subEl.textContent = tpRows.length + " signal · TP berturut-turut terbaik: "
+          + best + (bestPair ? " (" + bestPair + ")" : "");
+      }
+
+      const W = 720, H = 240;
+      const PADL = 8, PADR = 8, PADT = 14, PADB = 34;
+
+      if(perfView === "pair"){
+        /* Bar chart: jumlah pips TP ikut pair, menaik. */
+        const agg = {};
+        tpRows.forEach(function(r){
+          agg[r.pair] = (agg[r.pair] || 0) + r.pips;
+        });
+        const items = Object.keys(agg).map(function(k){ return { label:k, v:agg[k] }; })
+          .sort(function(a,b){ return a.v - b.v; });
+
+        const maxV = Math.max.apply(null, items.map(function(i){ return Math.abs(i.v); }).concat([1]));
+        const innerW = W - PADL - PADR;
+        const innerH = H - PADT - PADB;
+        const zeroY = PADT + innerH;              /* semua positif: baseline bawah */
+        const slot = innerW / items.length;
+        const barW = Math.min(64, slot * 0.56);
+
+        let out = "";
+        items.forEach(function(it, i){
+          const cx = PADL + slot * i + slot/2;
+          const hgt = Math.max(3, (Math.abs(it.v)/maxV) * innerH);
+          const y = zeroY - hgt;
+          const neg = it.v < 0;
+          out += '<rect class="bar ' + (neg ? "bar-neg" : "bar-pos") + '" x="' + (cx-barW/2).toFixed(1)
+            + '" y="' + y.toFixed(1) + '" width="' + barW.toFixed(1) + '" height="' + hgt.toFixed(1)
+            + '" rx="7"/>';
+          out += '<text class="bar-val" x="' + cx.toFixed(1) + '" y="' + (y-7).toFixed(1)
+            + '" text-anchor="middle">' + Math.round(it.v) + '</text>';
+          out += '<text class="axis-label" x="' + cx.toFixed(1) + '" y="' + (H-12)
+            + '" text-anchor="middle">' + it.label.replace("USD","") + '</text>';
+        });
+        out += '<line class="base-line" x1="' + PADL + '" y1="' + zeroY
+          + '" x2="' + (W-PADR) + '" y2="' + zeroY + '"/>';
+        svg.setAttribute("viewBox", "0 0 " + W + " " + H);
+        svg.innerHTML = out;
+        return;
+      }
+
+      /* Ikut masa: kumulatif TP. */
+      let run = 0;
+      const pts = tpRows.map(function(r){ run += r.pips; return { t:r.t, v:run }; });
+      if(pts.length < 2) pts.push({ t: pts.length?pts[0].t+1:1, v: run });
+      const vals = pts.map(function(p){ return p.v; }).concat([0]);
+      let min = Math.min.apply(null, vals), max = Math.max.apply(null, vals);
+      if(min === max) max = min + 1;
+      const span = max - min;
+      const innerW = W - PADL - PADR, innerH = H - PADT - PADB;
+      function x(i){ return PADL + (i/(pts.length-1))*innerW; }
+      function y(v){ return PADT + innerH - ((v-min)/span)*innerH; }
+
+      let d = pts.map(function(p,i){ return (i?"L":"M") + x(i).toFixed(1) + " " + y(p.v).toFixed(1); }).join(" ");
+      let area = "M" + x(0).toFixed(1) + " " + y(Math.max(min,0)).toFixed(1) + " ";
+      pts.forEach(function(p,i){ area += "L" + x(i).toFixed(1) + " " + y(p.v).toFixed(1) + " "; });
+      area += "L" + x(pts.length-1).toFixed(1) + " " + y(Math.max(min,0)).toFixed(1) + " Z";
+
+      svg.setAttribute("viewBox", "0 0 " + W + " " + H);
+      svg.innerHTML = '<path class="area-tp" d="' + area + '"/>'
+        + '<path class="line-tp" d="' + d + '"/>';
     }
+
+    /* Toggle Ikut pair / Ikut masa. */
+    document.querySelectorAll('.perf-toggle button').forEach(function(btn){
+      btn.addEventListener("click", function(){
+        document.querySelectorAll('.perf-toggle button').forEach(function(b){
+          b.setAttribute("aria-selected", b === btn ? "true" : "false");
+        });
+        perfView = btn.dataset.view || "pair";
+        if(perfSigs) renderPerf(perfSigs);
+      });
+    });
 
     runStats();
 
