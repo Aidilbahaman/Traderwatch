@@ -112,12 +112,12 @@ header{
 }
 @keyframes pulse{ 50%{ opacity:.25; } }
 
-/* hero tile: kiri = welcome + info tier, kanan = ring di tengah */
+/* hero tile: kiri = welcome + info tier, kanan = ring di tengah separuh */
 .hero-row{
   display:grid;
-  grid-template-columns:minmax(0,1fr) auto;
+  grid-template-columns:minmax(0,1fr) minmax(0,1fr);
   align-items:center;
-  gap:20px;
+  gap:16px;
   height:100%;
 }
 .hero-left{
@@ -132,7 +132,9 @@ header{
   display:flex;
   align-items:center;
   justify-content:center;
-  flex:none;
+  width:100%;
+  min-width:0;
+  min-height:100%;
 }
 .hero-tile h1{ margin:0 0 8px; }
 .hero-left .sub{ margin:0; }
