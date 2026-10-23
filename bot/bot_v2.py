@@ -87,7 +87,7 @@ PAIRS = {"XAUUSD": ("XAU_USD", 2, 0.1), "GBPUSD": ("GBP_USD", 5, 0.0001),
          "BTCUSD": ("BTC_USD", 2, 1.0)}
 
 BTN_ANALISA, BTN_TOOLS = "📊 Terminal Analisa", "🛠️ Tools & Fitur PRO"
-BTN_JURNAL, BTN_KUOTA = "📓 Jurnal & Equity", "💳 Subscription"
+BTN_JURNAL, BTN_KUOTA, BTN_POS = "📓 Jurnal & Equity", "💳 Subscription", "📊 Active Position"
 # Label lama yang masih ada pada keyboard member yang tidak mahu refresh
 # reply keyboard. Kalau tak ada alias ini, tekan butang lama tiada respons.
 BTN_LEGACY = {"👤 Cek Kuota & Akun": BTN_KUOTA, "👤 Subscription": BTN_KUOTA,
@@ -98,12 +98,12 @@ BTN_SCREENER = "🤖 Auto Screener"
 BTN_PROFIT = "💰 Profit Guard"
 BTN_HISTORY = "🗑 History Expired"
 MENU = ReplyKeyboardMarkup(
-    [[BTN_ANALISA, BTN_TOOLS], [BTN_JURNAL, BTN_KUOTA], [BTN_SET, BTN_ABOUT]],
+    [[BTN_ANALISA, BTN_TOOLS], [BTN_JURNAL, BTN_KUOTA], [BTN_POS, BTN_SET], [BTN_ABOUT]],
     resize_keyboard=True)
 # Admin console: Auto Screener scan semua pair, Draft kekal untuk review.
 MENU_ADMIN = ReplyKeyboardMarkup(
     [[BTN_ANALISA, BTN_DRAFT], [BTN_SCREENER, BTN_PROFIT],
-     [BTN_TOOLS, BTN_HISTORY], [BTN_JURNAL, BTN_SET]],
+     [BTN_TOOLS, BTN_HISTORY], [BTN_JURNAL, BTN_KUOTA], [BTN_POS, BTN_SET]],
     resize_keyboard=True)
 
 
@@ -1981,7 +1981,10 @@ async def on_text(update: Update, ctx):
     if t == BTN_KUOTA:
         # Admin: senarai semua member terus dari menu. Member: status sendiri.
         if tg.id in ADMIN_IDS:
-            return await subs_cmd(update, ctx)
+            return
+    if t == BTN_POS:
+        await handle_active_position(update, context)
+        return await subs_cmd(update, ctx)
         return await say(chat, profile_text(tg, u),
                          None if is_pro(u) else IM([[IB("👑 Upgrade PRO", callback_data="pro_guide")]]))
     if t == BTN_SET:
@@ -2002,6 +2005,18 @@ async def on_text(update: Update, ctx):
             await say(chat, f"#{r['id']} <b>{r['pair']}</b> {r['bias']} · entry "
                             f"<code>{fmt(r['pair'], r['entry'])}</code> · "
                             f"RR 1:{r['rr1']:.1f} · {r['publish_status'] or 'DRAFT'}", kb)
+        return
+
+    if t == BTN_POS:
+        conn = sqlite3.connect("bot.db")
+        positions = conn.execute("SELECT pair, entry FROM trades WHERE status='ACTIVE'").fetchall()
+        if not positions:
+            await say(update.effective_chat, "Tiada posisi aktif.")
+        else:
+            msg = "📊 <b>Active Position</b>\n\n"
+            for pair, entry in positions:
+                msg += f"• <b>{pair}</b> Entry {entry}\n"
+            await say(update.effective_chat, msg)
         return
     low = t.lower()
     if "berita" in low or "news" in low:
@@ -2782,3 +2797,17 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+
+# Active Position handler (added manually)
+async def handle_active_position(update, context):
+    import sqlite3
+    conn = sqlite3.connect('/home/ubuntu/tw-bot/bot.db')
+    rows = conn.execute("SELECT pair, entry FROM trades WHERE status='ACTIVE'").fetchall()
+    if not rows:
+        await update.effective_message.reply_text('Tiada posisi aktif.')
+    else:
+        msg = '📊 <b>Active Position</b>\n\n'
+        for pair, entry in rows:
+            msg += f'• <b>{pair}</b> Entry {entry}\n'
+        await update.effective_message.reply_text(msg)
