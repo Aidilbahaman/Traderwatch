@@ -237,22 +237,12 @@ if(member){
   const badge = document.getElementById("planBadge");
   badge.textContent = plan.charAt(0).toUpperCase() + plan.slice(1);
   badge.classList.toggle("pro", plan !== "free");
-  /* Kuota per-plan. Used dikemas kini selepas get_signals() memulangkan
-     setup yang benar-benar layak untuk ahli ini hari ini. */
-  const DAILY_CAP = plan === "max" ? null : plan === "pro" ? 10 : 3;
-  function updateQuotaLine(used){
-    const el = document.getElementById("planLine");
-    if(!el) return;
-    const n = Math.max(0, Number(used) || 0);
-    el.textContent = DAILY_CAP === null
-      ? n + " signal digunakan hari ini."
-      : n + " daripada " + DAILY_CAP + " signal digunakan hari ini.";
-    el.dataset.used = n;
-    el.dataset.cap = DAILY_CAP === null ? "" : DAILY_CAP;
-    window.dispatchEvent(new CustomEvent("tw:quota", { detail: { used:n, cap:DAILY_CAP } }));
-  }
-  const planLine = document.getElementById("planLine");
-  if(planLine) planLine.textContent = "Memuatkan kuota hari ini…";
+  /* Teks tier di bawah tajuk (dikembalikan seperti asal). */
+  document.getElementById("planLine").textContent = plan === "max"
+    ? "Max Member · unlimited valid setups across 7 hot pairs."
+    : plan === "pro"
+      ? "Pro Member · up to 10 valid setups daily across 7 hot pairs."
+      : "Free Member · up to 3 valid setups daily across 3 hot pairs.";
   const upgraded = new URLSearchParams(location.search).get("upgraded");
   if(upgraded === "max" || upgraded === "pro"){
     const n = document.getElementById("upgradeNote"); n.hidden = false; n.textContent = "Payment confirmed. Your " + (upgraded === "max" ? "Max" : "Pro") + " access is now active.";
@@ -489,10 +479,7 @@ if(member){
       const carriedOpen = older.filter(stillOpen);
       const carriedClosed = older.filter(closedRecently).slice(0, 5);
       const carried = carriedOpen.concat(carriedClosed);
-      const dailyLimit = plan === "max" ? Infinity : plan === "pro" ? 10 : 3;
-      const selectedToday = plan === "max" ? todays : todays.slice(0, dailyLimit);
-      updateQuotaLine(selectedToday.length);
-      const selected = selectedToday.concat(carried);
+      const selected = (plan === "max" ? todays : todays.slice(0, plan === "pro" ? 10 : 3)).concat(carried);
       /* simpan untuk fillBento() — signal-status.json tidak menyimpan entry/sl/tp */
       window.TW_SIGNALS = selected.map(s => ({
         pair: s.pair, timeframe: s.timeframe || "H1", side: s.side,
@@ -524,23 +511,15 @@ if(member){
       const ring = document.getElementById("planRing");
       if(!el || !ring) return;
       const cap = plan === "max" ? null : plan === "pro" ? 10 : 3;
-
-      /* Guna kiraan yang SAMA dengan planLine supaya ring dan teks tak
-         bercanggah. planLine menulis data-used/data-cap pada elemennya. */
-      const pl = document.getElementById("planLine");
-      let used = pl && pl.dataset.used !== undefined && pl.dataset.used !== ""
-        ? Number(pl.dataset.used)
-        : null;
-      if(used === null || !isFinite(used)){
-        const domCount = document.querySelectorAll("#signalGrid .sig").length;
-        used = domCount || (window.TW_SIGNALS || []).length || 0;
-      }
-
       if(cap === null){
         el.textContent = "∞";
         ring.style.background = "conic-gradient(var(--blue) 0 100%, var(--line) 0)";
         return;
       }
+      /* Kiraan = bilangan kad yang benar-benar dipaparkan untuk ahli ini. */
+      const domCount = document.querySelectorAll("#signalGrid .sig").length;
+      const arrCount = (window.TW_SIGNALS || []).length;
+      const used = domCount || arrCount || 0;
       el.textContent = used + "/" + cap;
       const pct = Math.max(0, Math.min(100, (used / cap) * 100));
       ring.style.background = "conic-gradient(var(--blue) 0 " + pct + "%, var(--line) 0)";
@@ -606,6 +585,12 @@ if(member){
           : "Belum ada signal ditutup";
       }catch(_){}
     }
+
+    /* Dipanggil oleh tw:signals (selepas kad dirender) supaya kiraan tepat. */
+    window.addEventListener("tw:signals", function(){
+      /* tunggu satu tick: render() baru sahaja menulis kad */
+      setTimeout(function(){ setRing(); }, 0);
+    });
 
     async function fillActive(){
       try{
@@ -685,7 +670,6 @@ if(member){
       bootBento();
     }
     window.addEventListener("tw:signals", function(){ runActive(); runStats(); });
-    window.addEventListener("tw:quota", function(){ setRing(); });
   })();
 }
 })();
