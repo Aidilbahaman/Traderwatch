@@ -9,7 +9,6 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="app.css">
-<link rel="stylesheet" href="members-bento.css?v=20261024b">
 <style>
 [hidden]{display:none!important}
 .maint{background:linear-gradient(135deg,rgba(242,184,75,.16),rgba(242,184,75,.06));
@@ -47,6 +46,7 @@
 @media(max-width:760px){.tw-offer-panel{grid-template-columns:1fr;gap:18px}.tw-offer-action{width:100%}.tw-offer-panel:after{right:4%;top:16%;font-size:96px;opacity:.7}}
 .page section.block{padding:0}.page section.block + section.block{margin-top:4px}.page .tw-chart-news + .tg-link{margin-top:4px}.page .tg-link + .tw-motion{margin-top:4px}@media(max-width:600px){.page section.block{padding:0}.page section.block + section.block{margin-top:2px}.page .tw-chart-news + .tg-link{margin-top:2px}.page .tg-link + .tw-motion{margin-top:2px}}
 </style>
+<link rel="stylesheet" href="members-bento.css?v=20261024d">
 <link rel="stylesheet" href="assets/css/tw-motion-bg.css?v=202610182344">
 <script src="assets/js/tw-fundamental-news.js?v=2026101901" defer></script>
 </head>
@@ -77,84 +77,83 @@
 
 <main class="page">
   <div class="wrap">
-    <div class="welcome">
-      <div>
-        <h1 style="font-size:clamp(1.9rem,4vw,2.8rem)" id="hello">Welcome</h1>
-        <p id="planLine"></p>
-        <p class="msg ok" id="upgradeNote" hidden style="max-width:560px"></p>
-      </div>
-    </div>
+    <div class="bento">
 
-    <section class="tw-offer" id="offer" aria-label="Broker welcome offer">
-      <div class="tw-offer-panel">
-        <div class="tw-offer-copy">
-          <span class="tw-offer-label">Broker welcome offer · Rinfinity</span>
-          <h2>Get a $30 deposit bonus to kick-start your trading account.</h2>
-          <p>Open an account through our partner link and check the current offer terms before depositing. A bonus is not a reason to take extra risk.</p>
-        </div>
-        <div class="tw-offer-action">
-          <a class="tw-offer-btn" href="https://rinfinity.com/en/welcome-bonus?a=wnzx" target="_blank" rel="noopener noreferrer sponsored">Check eligibility &amp; claim →</a>
-          <small>Partner link: TraderWatch may receive compensation. Bonus eligibility, conditions and withdrawal rules are set by the broker. Trading involves risk of loss.</small>
-        </div>
-      </div>
-    </section>
-
-    <div class="upgrade" id="upgradeBox">
-      <div>
-        <h3>Get more setups with Pro</h3>
-        <p>Free: 3 signals daily and 3 hot pairs. Pro: 10 signals daily across 7 hot pairs. Max: unlimited signals across all 7 hot pairs.</p>
-      </div>
-      <a class="btn" href="subscribe.html">See Pro</a>
-    </div>
-
-    <section class="block tw-chart-news" id="charts">
-      <div class="tw-chartnews-head">
-        <span class="tw-member-kicker">Dashboard tools</span>
-        <h2>Charts & fundamental news</h2>
-        <p>Live price action beside high-impact USD events — both in one view.</p>
-      </div>
-      <div class="tw-chartnews-grid">
-        <div class="tw-chartnews-cell">
-          <div class="chartbox">
-            <div class="tabs" role="tablist" aria-label="Chart pair" id="tabs"></div>
-            <div class="tv big" id="chart"></div>
-            <div class="tvnote">Charts by TradingView. Prices may be delayed.</div>
+      <section class="t w2 hero-tile">
+        <p class="k">Utama</p>
+        <div class="hero-row">
+          <div>
+            <h1 id="hello">Welcome</h1>
+            <p class="sub" id="planLine"></p>
+            <p class="msg ok" id="upgradeNote" hidden></p>
           </div>
+          <div class="ring" id="planRing" aria-hidden="true"><span id="planRingText">—</span></div>
         </div>
-        <div class="tw-chartnews-cell tw-member-news" id="fundamental-news">
-          <div class="tw-member-news-head">
-            <div><span class="tw-member-kicker">Fundamental news</span><h3>High-impact USD events</h3></div>
-            <span class="tw-member-filter">USD · High</span>
-          </div>
-          <div class="tw-fundamental-widget" aria-label="High-impact USD economic calendar"></div>
-          <p class="tw-member-note">Calendar data by <a href="https://www.tradingview.com/economic-calendar/" target="_blank" rel="noopener noreferrer">TradingView</a>. Educational context only — not financial advice.</p>
-        </div>
-      </div>
-    </section>
+      </section>
 
-    <section class="block tg-link" id="tgLink" hidden style="padding:0">
-      <h2>Telegram signals</h2>
-      <div class="tg-card">
-        <div class="tg-copy">
-          <h3 id="tgTitle">Get signals in Telegram</h3>
-          <p id="tgBody">Link your Telegram account and every new signal is sent to you the moment it is posted.</p>
+      <section class="t w2" id="signals">
+        <div class="tile-head">
+          <div><p class="k">Setup harian</p><h2>Signals</h2></div>
+          <span class="live">Live</span>
         </div>
+        <div class="signals" id="signalGrid"></div>
+        <p class="sample" id="signalNote"></p>
+      </section>
+
+      <section class="t w2" id="charts">
+        <div class="tile-head">
+          <div><p class="k">Dashboard tools</p><h2>Charts</h2></div>
+        </div>
+        <div class="tabs" role="tablist" aria-label="Chart pair" id="tabs"></div>
+        <div class="tv big" id="chart"></div>
+        <div class="tvnote">Charts by TradingView. Prices may be delayed.</div>
+      </section>
+
+      <section class="t w2 dark tw-member-news" id="fundamental-news">
+        <div class="tw-member-news-head">
+          <div><span class="tw-member-kicker">Fundamental news</span><h3>High-impact USD events</h3></div>
+          <span class="tw-member-filter">USD · High</span>
+        </div>
+        <div class="tw-fundamental-widget" aria-label="High-impact USD economic calendar"></div>
+        <p class="tw-member-note">Calendar data by <a href="https://www.tradingview.com/economic-calendar/" target="_blank" rel="noopener noreferrer">TradingView</a>. Educational context only — not financial advice.</p>
+      </section>
+
+      <section class="t w2 blue tg-tile" id="tgLink" hidden>
+        <p class="k">Telegram</p>
+        <h2 id="tgTitle">Signal terus ke telefon.</h2>
+        <p class="sub" id="tgBody">Link your Telegram account and every new signal is sent to you the moment it is posted.</p>
         <div class="tg-action">
-          <a class="btn" id="tgBtn" href="#" target="_blank" rel="noopener">Link Telegram</a>
-          <button class="linkbtn" type="button" id="tgRefresh" hidden>Refresh status</button>
+          <a class="btn w" id="tgBtn" href="#" target="_blank" rel="noopener">Link Telegram</a>
+          <button class="linkbtn w-link" type="button" id="tgRefresh" hidden>Refresh status</button>
         </div>
-      </div>
-      <p class="tg-note" id="tgNote" hidden></p>
-    </section>
+        <p class="tg-note" id="tgNote" hidden></p>
+      </section>
 
-    <div id="toolkits"></div>
+      <div class="t w2" id="toolkits"></div>
 
-    <section class="block tw-motion" id="signals">
-      <h2>Signals</h2>
-      <div class="signals" id="signalGrid"></div>
-      <p class="sample" id="signalNote"></p>
-    </section>
+      <section class="t w4" id="offer" aria-label="Broker welcome offer">
+        <div class="tw-offer-panel">
+          <div class="tw-offer-copy">
+            <span class="tw-offer-label">Broker welcome offer · Rinfinity</span>
+            <h2>Get a $30 deposit bonus to kick-start your trading account.</h2>
+            <p>Open an account through our partner link and check the current offer terms before depositing. A bonus is not a reason to take extra risk.</p>
+          </div>
+          <div class="tw-offer-action">
+            <a class="tw-offer-btn" href="https://rinfinity.com/en/welcome-bonus?a=wnzx" target="_blank" rel="noopener noreferrer sponsored">Check eligibility &amp; claim →</a>
+            <small>Partner link: TraderWatch may receive compensation. Bonus eligibility, conditions and withdrawal rules are set by the broker. Trading involves risk of loss.</small>
+          </div>
+        </div>
+      </section>
 
+      <section class="t w4 upgrade" id="upgradeBox">
+        <div>
+          <h3>Get more setups with Pro</h3>
+          <p>Free: 3 signals daily and 3 hot pairs. Pro: 10 signals daily across 7 hot pairs. Max: unlimited signals across all 7 hot pairs.</p>
+        </div>
+        <a class="btn w" href="subscribe.html">See Pro</a>
+      </section>
+
+    </div>
   </div>
 </main>
 
