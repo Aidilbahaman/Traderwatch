@@ -464,6 +464,7 @@ if(member){
         pair: s.pair, timeframe: s.timeframe || "H1", side: s.side,
         entry: s.entry, sl: s.sl, tp: s.tp, posted_at: s.posted_at
       }));
+      try{ window.dispatchEvent(new CustomEvent("tw:signals")); }catch(_){}
       render(window.TW_SIGNALS.map(s=>({...s, locked:false})));
       const bits = [];
       if(carriedOpen.length) bits.push(`${carriedOpen.length} still open from earlier`);
@@ -537,22 +538,20 @@ if(member){
           }
         }
         if(rrEl){
-          /* R:R purata dari trade yang ada entry/sl/tp dalam Supabase.
-             signal-status.json hanya simpan pips, jadi nisbah tepat perlu
-             entry/sl/tp sebenar. */
-          let rrSum2 = 0, rrN2 = 0;
-          const list = window.TW_SIGNALS || [];
-          const statusMap = sigs;
-          list.forEach(function(x){
-            const e2 = Number(x.entry), s2 = Number(x.sl), t2 = Number(x.tp);
-            if(!isFinite(e2) || !isFinite(s2) || !isFinite(t2)) return;
-            const risk = Math.abs(e2 - s2);
-            if(!(risk > 0)) return;
-            rrSum2 += Math.abs(t2 - e2) / risk;
-            rrN2++;
+          /* Purata R:R = purata R bagi trade menang (TP), kerana SL sentiasa -1R.
+             signal-status.json sudah menyimpan field `r` (R multiple) untuk
+             setiap trade ditutup — tiada perlu query Supabase (RLS sekat anon). */
+          let winSum = 0, winN = 0;
+          Object.keys(sigs).forEach(function(k){
+            const v = sigs[k] || {};
+            if(v.status !== "tp") return;
+            if(typeof v.r === "number" && isFinite(v.r) && v.r > 0){
+              winSum += v.r; winN++;
+            }
           });
-          const rrVal = rrN2 > 0 ? (rrSum2 / rrN2) : (rrN > 0 ? rrSum / rrN : null);
-          rrEl.textContent = rrVal !== null ? "1:" + rrVal.toFixed(1) : "—";
+          rrEl.textContent = winN > 0
+            ? "1:" + (winSum / winN).toFixed(1)
+            : "—";
         }
         if(cntEl) cntEl.textContent = closed > 0
           ? closed + " signal ditutup · " + (pips > 0 ? "+" : "") + pips.toFixed(1) + " pips"
@@ -612,8 +611,31 @@ if(member){
       }catch(_){}
     }
 
-    fillStats();
-    fillActive();
+    /* fillStats() hanya perlukan signal-status.json (bukan Supabase), jadi
+       ia selamat dijalankan serta-merta. fillActive() perlukan TW_SIGNALS. */
+    function runStats(){
+      fillStats().catch(function(){});
+    }
+    function runActive(){
+      fillActive().catch(function(){});
+    }
+
+    runStats();
+
+    async function bootBento(){
+      for(let i = 0; i < 60; i++){
+        if((window.TW_SIGNALS || []).length) break;
+        await new Promise(function(r){ setTimeout(r, 100); });
+      }
+      runActive();
+      runStats();          /* kira semula: pastikan nilai tidak "—" */
+    }
+    if(document.readyState === "loading"){
+      document.addEventListener("DOMContentLoaded", bootBento);
+    }else{
+      bootBento();
+    }
+    window.addEventListener("tw:signals", function(){ runActive(); runStats(); });
   })();
 }
 })();
