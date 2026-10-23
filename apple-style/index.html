@@ -164,9 +164,10 @@ const DATA = {
     planLabel: "Plan Free"
   },
   quota: {
-    used: 3,                         /* TODO: real data — tiada tracking kuota harian per-user */
+    used: null,                      /* dikira dari postedToday (lihat computeQuota) */
     limit: 3                         // Free = 3/hari, Pro = 10, Max = tanpa had
   },
+  postedToday: 3,                    /* signal diterbitkan hari ini (dikira dari performance) */
   activeSignal: {
     id: 126,
     pair: "XAU/USD",
@@ -286,9 +287,9 @@ function renderUser() {
   const h1 = $(".hero h1");
   if (h1) h1.innerHTML = "Selamat kembali,<br>" + u.name + ".";
 
+  const q = computeQuota();
   const sub = $(".hero .sub");
   if (sub) {
-    const q = DATA.quota;
     sub.textContent = q.limit
       ? q.used + " daripada " + q.limit + " signal digunakan hari ini."
       : q.used + " signal digunakan hari ini.";
@@ -297,13 +298,11 @@ function renderUser() {
   const ring = $(".ring");
   const ringText = $(".ring span");
   if (ringText) {
-    ringText.textContent = DATA.quota.limit
-      ? DATA.quota.used + "/" + DATA.quota.limit
-      : "∞";
+    ringText.textContent = q.limit ? q.used + "/" + q.limit : "∞";
   }
   if (ring) {
-    const pct = DATA.quota.limit
-      ? Math.min(100, Math.round((DATA.quota.used / DATA.quota.limit) * 100))
+    const pct = q.limit
+      ? Math.min(100, Math.round((q.used / q.limit) * 100))
       : 100;
     ring.style.background =
       "conic-gradient(var(--blue) 0 " + pct + "%, var(--line) 0)";
@@ -311,6 +310,14 @@ function renderUser() {
 }
 
 /* ---------- render: statistik ---------- */
+function computeQuota() {
+  const limit = DATA.quota ? DATA.quota.limit : null;
+  const used = (typeof DATA.postedToday === "number")
+    ? DATA.postedToday
+    : (DATA.quota && typeof DATA.quota.used === "number" ? DATA.quota.used : 0);
+  return { used: used, limit: limit };
+}
+
 function computeStats() {
   const rows = DATA.performance || [];
   let tp = 0, sl = 0, pips = 0;

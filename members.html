@@ -459,7 +459,12 @@ if(member){
       const carriedClosed = older.filter(closedRecently).slice(0, 3);
       const carried = carriedOpen.concat(carriedClosed);
       const selected = (plan === "max" ? todays : todays.slice(0, plan === "pro" ? 10 : 3)).concat(carried);
-      render(selected.map(s=>({pair:s.pair, timeframe:s.timeframe || "H1", side:s.side, entry:s.entry, sl:s.sl, tp:s.tp, posted_at:s.posted_at, locked:false})));
+      /* simpan untuk fillBento() — signal-status.json tidak menyimpan entry/sl/tp */
+      window.TW_SIGNALS = selected.map(s => ({
+        pair: s.pair, timeframe: s.timeframe || "H1", side: s.side,
+        entry: s.entry, sl: s.sl, tp: s.tp, posted_at: s.posted_at
+      }));
+      render(window.TW_SIGNALS.map(s=>({...s, locked:false})));
       const bits = [];
       if(carriedOpen.length) bits.push(`${carriedOpen.length} still open from earlier`);
       if(carriedClosed.length) bits.push(`${carriedClosed.length} closed in the last 24h`);
@@ -485,7 +490,8 @@ if(member){
       if(!el || !ring) return;
       const cap = plan === "max" ? null : plan === "pro" ? 10 : 3;
       if(cap === null){ el.textContent = "∞"; ring.style.background = "conic-gradient(var(--blue) 0 100%, var(--line) 0)"; return; }
-      const used = (document.querySelectorAll("#signalGrid .sig") || []).length;
+      const domCount = document.querySelectorAll("#signalGrid .sig").length;
+      const used = domCount || (window.TW_SIGNALS || []).length;
       el.textContent = used + "/" + cap;
       const pct = Math.max(0, Math.min(100, (used / cap) * 100));
       ring.style.background = "conic-gradient(var(--blue) 0 " + pct + "%, var(--line) 0)";
@@ -530,7 +536,24 @@ if(member){
             winEl.textContent = "—";
           }
         }
-        if(rrEl) rrEl.textContent = rrN > 0 ? "1:" + (rrSum / rrN).toFixed(1) : "—";
+        if(rrEl){
+          /* R:R purata dari trade yang ada entry/sl/tp dalam Supabase.
+             signal-status.json hanya simpan pips, jadi nisbah tepat perlu
+             entry/sl/tp sebenar. */
+          let rrSum2 = 0, rrN2 = 0;
+          const list = window.TW_SIGNALS || [];
+          const statusMap = sigs;
+          list.forEach(function(x){
+            const e2 = Number(x.entry), s2 = Number(x.sl), t2 = Number(x.tp);
+            if(!isFinite(e2) || !isFinite(s2) || !isFinite(t2)) return;
+            const risk = Math.abs(e2 - s2);
+            if(!(risk > 0)) return;
+            rrSum2 += Math.abs(t2 - e2) / risk;
+            rrN2++;
+          });
+          const rrVal = rrN2 > 0 ? (rrSum2 / rrN2) : (rrN > 0 ? rrSum / rrN : null);
+          rrEl.textContent = rrVal !== null ? "1:" + rrVal.toFixed(1) : "—";
+        }
         if(cntEl) cntEl.textContent = closed > 0
           ? closed + " signal ditutup · " + (pips > 0 ? "+" : "") + pips.toFixed(1) + " pips"
           : "Belum ada signal ditutup";
@@ -561,7 +584,14 @@ if(member){
         if(badge) badge.hidden = false;
         if(trk) trk.hidden = false;
 
-        const e = Number(best.entry), sl = Number(best.sl), tp = Number(best.tp);
+        /* status file hanya simpan status; entry/sl/tp datang dari Supabase */
+        const fromList = (window.TW_SIGNALS || []).find(x => {
+          const k = String(x.pair || "").replace(/[^A-Z]/gi, "").toUpperCase();
+          return k === code;
+        }) || {};
+        const e  = Number(best.entry  !== undefined ? best.entry  : fromList.entry);
+        const sl = Number(best.sl     !== undefined ? best.sl     : fromList.sl);
+        const tp = Number(best.tp     !== undefined ? best.tp     : fromList.tp);
         const fmt = v => Number.isFinite(v) ? v.toLocaleString("en-US", {minimumFractionDigits:0, maximumFractionDigits:5}) : "—";
         const set = (id, v) => { const el = document.getElementById(id); if(el) el.textContent = v; };
         set("trkEntry", fmt(e)); set("trkSL", fmt(sl)); set("trkTP", fmt(tp));
