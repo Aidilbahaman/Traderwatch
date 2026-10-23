@@ -87,7 +87,7 @@ PAIRS = {"XAUUSD": ("XAU_USD", 2, 0.1), "GBPUSD": ("GBP_USD", 5, 0.0001),
          "BTCUSD": ("BTC_USD", 2, 1.0)}
 
 BTN_ANALISA, BTN_TOOLS = "📊 Terminal Analisa", "🛠️ Tools & Fitur PRO"
-BTN_JURNAL, BTN_KUOTA = "📓 Jurnal & Equity", "👤 Cek Kuota & Akun"
+BTN_JURNAL, BTN_KUOTA = "📓 Jurnal & Equity", "💳 Subscription"
 BTN_SET, BTN_ABOUT = "⚙️ Pengaturan Bot", "🏛️ Tentang Hermes"
 BTN_DRAFT = "🗂️ Draft Signal"
 BTN_SCREENER = "🤖 Auto Screener"
@@ -1754,14 +1754,42 @@ def quota_out_text():
 
 
 def profile_text(tg, u):
-    pro = is_pro(u)
-    slots = "Unlimited" if pro else f"{max(VISION_FREE - u['vision_used'], 0)} / {VISION_FREE}"
-    return (f"👤 <b>PROFIL & KUOTA PENGGUNA</b>\n{LINE}\n🆔 Telegram ID: <code>{tg.id}</code>\n"
-            f"👤 Nama: {e(tg.first_name)}\n🎖️ Status Tier: {'PRO MEMBER' if pro else 'FREE MEMBER'}\n"
-            f"🏦 Akun Exness: {e(u['exness_id']) if u['exness_id'] else 'Belum Terdaftar'}\n{LINE}\n"
-            f"📊 <b>KUOTA TERSEDIA HARI INI:</b>\n• 📸 Slot Analisa Vision: {slots}\n"
-            f"• 🔋 Energi Chatbot AI:\n  ↳ {bar(u['energy_used'], energy_cap(u['tier']))}\n{LINE}\n"
-            f"⏰ Reset kuota otomatis setiap hari pukul 00:00 WIB.")
+    """Butang Subscription — status langganan sendiri, bukan kuota.
+
+    Butang ini asalnya "Cek Kuota & Akun" yang tunjuk slot vision, energi
+    chatbot dan akaun Exness. Owner minta ia ditukar kepada Subscription
+    supaya member nampak tempoh langganan mereka, dan admin boleh semak
+    semua member terus dari menu yang sama.
+    """
+    rows = _sub_rows()
+    me = next((r for r in rows if r["tg"] and int(r["tg"]) == int(tg.id)), None)
+    if me is None:
+        # Tiada profil Supabase — Fall back kepada data bot supaya butang
+        # tidak pernah kosong untuk member yang belum sync.
+        pro = is_pro(u)
+        return (f"💳 <b>SUBSCRIPTION</b>\n{LINE}\n"
+                f"🆔 Telegram ID: <code>{tg.id}</code>\n"
+                f"👤 Nama: {e(tg.first_name)}\n"
+                f"🎖️ Tier: {'PRO MEMBER' if pro else 'FREE MEMBER'}\n{LINE}\n"
+                f"Hubungi admin untuk maklumat subscription.")
+    icon = {"free": "⚪", "pro": "\U0001f535", "max": "\U0001f7e2"}
+    if me["plan"] == "free":
+        badge = "⚪ FREE"
+    elif me["left"] is None:
+        badge = f"{icon[me['plan']]} {me['plan'].upper()}"
+    elif me["left"] < 0:
+        badge = f"\U0001f534 {me['plan'].upper()} — tamat {-me['left']} hari lalu"
+    elif me["left"] <= 7:
+        badge = f"\U0001f7e1 {me['plan'].upper()} — {me['left']} hari lagi"
+    else:
+        badge = f"\U0001f7e2 {me['plan'].upper()} — {me['left']} hari lagi"
+    return (f"💳 <b>SUBSCRIPTION</b>\n{LINE}\n"
+            f"🆔 Telegram ID: <code>{tg.id}</code>\n"
+            f"👤 Nama: {e(me['name'] or tg.first_name)}\n"
+            f"🎖️ Status: {badge}\n"
+            f"📅 Subscribe: {_fmt_date(me['start'])}\n"
+            f"⏳ Expire: {_fmt_date(me['end'])}\n{LINE}\n"
+            f"💡 Sila reply YA pada mesej renew daripada admin untuk Renew.")
 
 
 def journal_text(tg):
@@ -1939,6 +1967,9 @@ async def on_text(update: Update, ctx):
                                           [IB("📰 High-Impact News", callback_data="tool:news")]]))
     if t == BTN_JURNAL: return await say(chat, journal_text(tg))
     if t == BTN_KUOTA:
+        # Admin: senarai semua member terus dari menu. Member: status sendiri.
+        if tg.id in ADMIN_IDS:
+            return await subs_cmd(update, ctx)
         return await say(chat, profile_text(tg, u),
                          None if is_pro(u) else IM([[IB("👑 Upgrade PRO", callback_data="pro_guide")]]))
     if t == BTN_SET:
