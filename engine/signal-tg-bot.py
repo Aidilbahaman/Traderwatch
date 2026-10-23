@@ -789,6 +789,84 @@ def handle(msg):
                            "link that connects this chat to your account.")
     elif cmd == "/stop":
         unlink(chat_id)
+    elif cmd == "/position" or cmd == "/activetrades":
+        try:
+            import sqlite3
+            import pathlib
+            import datetime
+            conn = sqlite3.connect('/home/ubuntu/tw-bot/bot.db')
+            conn.row_factory = sqlite3.Row
+            rows = conn.execute("SELECT * FROM trades WHERE status='ACTIVE' ORDER BY created_at DESC").fetchall()
+            if not rows:
+                reply(chat_id, "Tiada trade aktif sekarang.")
+                return
+
+            current_prices = {}
+            try:
+                sq_db = pathlib.Path("/home/ubuntu/web/Traderwatch-repo/state/sq-bars.db")
+                if sq_db.exists():
+                    sq_conn = sqlite3.connect(str(sq_db))
+                    sq_conn.row_factory = sqlite3.Row
+                    for p_name in set(r["pair"] for r in rows):
+                        cur_row = sq_conn.execute("SELECT c FROM bars WHERE pair=? AND gran='M1' ORDER BY ts DESC LIMIT 1", (p_name,)).fetchone()
+                        if cur_row:
+                            current_prices[p_name] = float(cur_row["c"])
+                    sq_conn.close()
+            except Exception:
+                pass
+
+            msg = "📈 <b>Active Trade Position</b>\n\n"
+            total_pips = 0.0
+            idx = 0
+
+            for r in rows:
+                idx += 1
+                pair = r["pair"]
+                side = r["bias"]
+                try:
+                    entry = float(r["entry"])
+                except (TypeError, ValueError):
+                    continue
+
+                now_price = current_prices.get(pair, entry)
+                pips = (now_price - entry) if side == "BUY" else (entry - now_price)
+                pips *= (10.0 if "XAU" in pair else (100.0 if "JPY" in pair else 10000.0))
+                total_pips += pips
+
+                emoji_dir = "🟢" if side == "BUY" else "🔴"
+                pips_emoji = "🟢" if pips >= 0 else "🔴"
+                pips_str = f"+{pips:.1f}" if pips >= 0 else f"{pips:.1f}"
+
+                try:
+                    created = datetime.datetime.fromisoformat(r["created_at"].replace("Z", "+00:00"))
+                    now_dt = datetime.datetime.now(datetime.timezone.utc)
+                    if created.tzinfo is None:
+                        created = created.replace(tzinfo=datetime.timezone.utc)
+                    delta = now_dt - created
+                    hours = int(delta.total_seconds() // 3600)
+                    minutes = int((delta.total_seconds() % 3600) // 60)
+                    if hours >= 24:
+                        days = hours // 24
+                        rem_h = hours % 24
+                        dur_str = f"{days}h {rem_h}j {minutes}m"
+                    else:
+                        dur_str = f"{hours}j {minutes}m"
+                except Exception:
+                    dur_str = "Baru sahaja"
+
+                msg += f"{idx}) <b>{pair}</b> {emoji_dir} {side}\n"
+                msg += f"Entry: {entry} → Now: {now_price}\n"
+                msg += f"Running: {pips_emoji} {pips_str} pips\n"
+                msg += f"Berjalan: {dur_str}\n\n"
+
+            tot_emoji = "🟢" if total_pips >= 0 else "🔴"
+            tot_str = f"+{total_pips:.1f}" if total_pips >= 0 else f"{total_pips:.1f}"
+            msg += f"<b>Total running:</b> {tot_emoji} {tot_str} pips"
+
+            kb_inline = json.dumps({"inline_keyboard": [[{"text": "🔄 Refresh", "callback_data": "refresh_active_pos"}]]})
+            tg("sendMessage", chat_id=chat_id, text=msg, parse_mode="HTML", reply_markup=kb_inline)
+        except Exception as e:
+            reply(chat_id, f"Gagal memuatkan posisi: {e}")
     elif cmd == "/status":
         status(chat_id)
     elif cmd == "/help":

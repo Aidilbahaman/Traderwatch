@@ -35,9 +35,10 @@ PIP = {"XAUUSD": 0.1, "USDJPY": 0.01, "BTCUSD": 1.0}
 DEFAULT_PIP = 0.0001
 # BTC movement is measured in USD, not forex pips.
 USD_UNIT = {"BTCUSD"}
-# Cap how many open setups are evaluated per run to stay inside the free
-# Twelve Data credit budget (8/min, 800/day).
-MAX_CHECKS = 8
+# Cap how many open setups are evaluated per run. Swissquote M1 ialah SQLite
+# lokal (tiada kredit/rate limit), jadi had ini hanya perlu cukup besar untuk
+# semua setup terbuka — bukan lagi terikat bajet Twelve Data.
+MAX_CHECKS = 40
 
 
 def log(msg):
@@ -308,15 +309,20 @@ def main():
         # request; evaluate from posting time through now.
         end = now if limit is None else min(now, posted + limit)
         data, src = candles(sig["pair"], posted, end)
+        # Swissquote M1 ialah SQLite lokal — tiada rate limit, jadi tiada
+        # keperluan tunggu CALL_GAP. Hanya TwelveData (network) perlu gap.
+        gap = 0 if src == "swissquote" else CALL_GAP
         if data is None:
             log(f"DATA {sig['pair']}: {src}")
             errors += 1
-            time.sleep(CALL_GAP)
+            if gap:
+                time.sleep(gap)
             continue
         if not data:
             log(f"DATA {sig['pair']}: empty candle set")
             errors += 1
-            time.sleep(CALL_GAP)
+            if gap:
+                time.sleep(gap)
             continue
 
         status, pips, r, ambiguous, entry_at = evaluate(sig, data)
@@ -344,7 +350,8 @@ def main():
         elif prev.get("status") != "active":
             state["signals"][key] = {"status": "active"}
             changed += 1
-        time.sleep(CALL_GAP)
+        if gap:
+            time.sleep(gap)
 
     cutoff = now - MAX_AGE
     for key in list(state["signals"]):

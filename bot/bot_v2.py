@@ -87,7 +87,7 @@ PAIRS = {"XAUUSD": ("XAU_USD", 2, 0.1), "GBPUSD": ("GBP_USD", 5, 0.0001),
          "BTCUSD": ("BTC_USD", 2, 1.0)}
 
 BTN_ANALISA, BTN_TOOLS = "📊 Terminal Analisa", "🛠️ Tools & Fitur PRO"
-BTN_JURNAL, BTN_KUOTA, BTN_POS = "📓 Jurnal & Equity", "💳 Subscription", "📊 Active Position"
+BTN_JURNAL, BTN_KUOTA, BTN_POS = "📓 Jurnal & Equity", "💳 Subscription", "📈 Active Trade Position"
 # Label lama yang masih ada pada keyboard member yang tidak mahu refresh
 # reply keyboard. Kalau tak ada alias ini, tekan butang lama tiada respons.
 BTN_LEGACY = {"👤 Cek Kuota & Akun": BTN_KUOTA, "👤 Subscription": BTN_KUOTA,
@@ -103,7 +103,7 @@ MENU = ReplyKeyboardMarkup(
 # Admin console: Auto Screener scan semua pair, Draft kekal untuk review.
 MENU_ADMIN = ReplyKeyboardMarkup(
     [[BTN_ANALISA, BTN_DRAFT], [BTN_SCREENER, BTN_PROFIT],
-     [BTN_TOOLS, BTN_HISTORY], [BTN_JURNAL, BTN_KUOTA], [BTN_POS, BTN_SET]],
+     [BTN_TOOLS, BTN_HISTORY], [BTN_JURNAL, BTN_SET], [BTN_POS]],
     resize_keyboard=True)
 
 
@@ -187,6 +187,68 @@ def sb_patch(path, body):
     """PATCH helper — guna 'Prefer: return=representation' supaya dapat row
     yang dikemas kini, jadi bot boleh sahkan apa yang sebenarnya disimpan."""
     return sb_request(path, "PATCH", body)
+
+
+def _pip_size(pair):
+    """Saiz 1 pip ikut PAIRS (XAUUSD 0.1, USDJPY 0.01, BTCUSD 1.0)."""
+    return PAIRS.get(pair, ("", 5, 0.0001))[2]
+
+
+def _age_text(seconds):
+    """Tempoh setup: 45m / 2j 15m / 1h 3j."""
+    m = int(max(0, seconds) // 60)
+    h, m = divmod(m, 60)
+    d, h = divmod(h, 24)
+    if d:
+        return f"{d}h {h}j"
+    if h:
+        return f"{h}j {m}m"
+    return f"{m}m"
+
+
+def active_positions_text(rows):
+    """Senarai semua trade ACTIVE/TP1: entry, harga semasa, pips, tempoh."""
+    now_utc = datetime.now(timezone.utc)
+    lines = ["📈 <b>Active Trade Position</b>", ""]
+    total, n = 0.0, 0
+    for r in rows:
+        pair = r["pair"]
+        side = str(r["bias"]).upper()
+        entry = float(r["entry"])
+        price = entry
+        try:
+            cs = get_candles(pair, "M1", 3)
+            if cs:
+                price = float(cs[-1]["c"])
+        except Exception:
+            pass
+        pip = _pip_size(pair)
+        diff = (price - entry) if side == "BUY" else (entry - price)
+        pips = (diff / pip) if pip else 0.0
+        total += pips
+        n += 1
+        emoji = "🟢" if pips >= 0 else "🔴"
+        try:
+            age = (now_utc - parse_t(r["created_at"])).total_seconds()
+        except Exception:
+            age = 0
+        lines += [
+            f"{n}) <b>{pair}</b> {'🟢' if side == 'BUY' else '🔴'} {side}",
+            f"Entry: <code>{fmt(pair, entry)}</code> → Now: <code>{fmt(pair, price)}</code>",
+            f"Running: {emoji} {pips:+.1f} pips",
+            f"Berjalan: {_age_text(age)}",
+            "",
+        ]
+    lines.append(f"<b>Total running: {'🟢' if total >= 0 else '🔴'} {total:+.1f} pips</b>")
+    lines.append("")
+    lines.append("<i>Bukan nasihat pelaburan. Uruskan risiko sendiri.</i>")
+    return "\n".join(lines), total
+
+
+def fetch_all_member_targets():
+    """Semua member (free/pro/max) yang sudah link Telegram."""
+    return sb_request("profiles?select=name,telegram_chat_id"
+                      "&telegram_chat_id=not.is.null&limit=500")
 
 
 def fetch_member_targets():
@@ -386,7 +448,7 @@ def spend(tg_id, vision=0, energy=0):
 # Default route: serveras.click. MiniMax m3.1 flash :free OpenRouter DIHAPUS
 # 22 Okt 2026 (free launch period tamat) — jangan rujuk semula.
 LLM_URL = os.environ.get("LLM_URL", "https://serveras.click/v1/chat/completions")
-LLM_MODEL = os.environ.get("LLM_MODEL", "asai/freemodel-1-GLM")
+LLM_MODEL = os.environ.get("LLM_MODEL", "asai/deepseek-v4.1-flash-1017")
 LLM_KEY_ENV = os.environ.get("LLM_KEY_ENV", "HERMES_CUSTOM_SERVERAS_CLICK_API_KEY")
 
 # Route per model supaya chain fellback boleh campur provider safely.
@@ -492,9 +554,9 @@ LLM_PRESETS = {
                 "fallback": "asai/freemodel-1-GLM,asai/freemodel-4-ds-v4.1flash",
                 "url": "https://serveras.click/v1/chat/completions",
                 "key_env": "HERMES_CUSTOM_SERVERAS_CLICK_API_KEY"},
-    "deepseek": {"label": "\U0001f4b3 Model percuma \u2014 DeepSeek",
-                 "desc": "DeepSeek v4.1 flash (serveras) \u2014 setup paling tepat (17s)",
-                 "model": "asai/freemodel-4-ds-v4.1flash",
+    "deepseek": {"label": "💎 Model percuma — DeepSeek",
+                 "desc": "DeepSeek v4.1 flash (serveras) — setup paling tepat (17s)",
+                 "model": "asai/deepseek-v4.1-flash",
                  "fallback": "asai/freemodel-1-GLM,asai/freemodel-2-MiniMax",
                  "url": "https://serveras.click/v1/chat/completions",
                  "key_env": "HERMES_CUSTOM_SERVERAS_CLICK_API_KEY"},
@@ -504,6 +566,66 @@ LLM_PRESETS = {
              "fallback": "asai/freemodel-4-ds-v4.1flash,asai/freemodel-2-MiniMax",
              "url": "https://serveras.click/v1/chat/completions",
              "key_env": "HERMES_CUSTOM_SERVERAS_CLICK_API_KEY"},
+    "nemotron": {"label": "⚡ NVIDIA Nemotron 3 Super",
+                 "desc": "NVIDIA Nemotron 3 Super (120B) free — pantas & bijak",
+                 "model": "nvidia/nemotron-3-super-120b-a12b:free",
+                 "fallback": "openrouter/free,asai/freemodel-1-GLM",
+                 "url": "https://openrouter.ai/api/v1/chat/completions",
+                 "key_env": "OPENROUTER_API_KEY"},
+    "openrouter": {"label": "🔄 OpenRouter Free Router",
+                  "desc": "OpenRouter free router — automatik pilih model free (gemma, nemotron, dll)",
+                  "model": "openrouter/free",
+                  "fallback": "asai/freemodel-1-GLM,asai/freemodel-2-MiniMax",
+                  "url": "https://openrouter.ai/api/v1/chat/completions",
+                  "key_env": "OPENROUTER_API_KEY"},
+    "deepseek-v41-flash": {"label": "🔴 DeepSeek v4.1 flash",
+                 "desc": "DeepSeek v4.1 flash (serveras) — jangan guna (404)",
+                 "model": "asai/freemodel-4-ds-v4.1flash",
+                 "fallback": "asai/freemodel-2-MiniMax,asai/freemodel-1-GLM",
+                 "url": "https://serveras.click/v1/chat/completions",
+                 "key_env": "HERMES_CUSTOM_SERVERAS_CLICK_API_KEY"},
+    "deepseek-v4-flash": {"label": "🔴 DeepSeek v4 flash",
+                  "desc": "DeepSeek v4 flash (serveras)",
+                  "model": "asai/deepseek-v4-flash",
+                  "fallback": "asai/freemodel-2-MiniMax,asai/freemodel-1-GLM",
+                  "url": "https://serveras.click/v1/chat/completions",
+                  "key_env": "HERMES_CUSTOM_SERVERAS_CLICK_API_KEY"},
+    "glm-5-3-flash": {"label": "🟢 GLM 5.3 Flash",
+                 "desc": "GLM 5.3 Flash (serveras) — berbayar / boleh guna",
+                 "model": "asai/glm-5.3-flash",
+                 "fallback": "asai/freemodel-2-MiniMax,asai/freemodel-1-GLM",
+                 "url": "https://serveras.click/v1/chat/completions",
+                 "key_env": "HERMES_CUSTOM_SERVERAS_CLICK_API_KEY"},
+    "claude-haiku-5-5": {"label": "🟣 Claude Haiku 5.5",
+                 "desc": "Claude Haiku 5.5 (serveras) — berbayar",
+                 "model": "asai/claude-haiku-5.5",
+                 "fallback": "asai/freemodel-2-MiniMax,asai/freemodel-1-GLM",
+                 "url": "https://serveras.click/v1/chat/completions",
+                 "key_env": "HERMES_CUSTOM_SERVERAS_CLICK_API_KEY"},
+    "claude-sonnet-5": {"label": "🟣 Claude Sonnet 5",
+                 "desc": "Claude Sonnet 5 (serveras) — berbayar / kuat",
+                 "model": "asai/claude-sonnet-5",
+                 "fallback": "asai/freemodel-2-MiniMax,asai/freemodel-1-GLM",
+                 "url": "https://serveras.click/v1/chat/completions",
+                 "key_env": "HERMES_CUSTOM_SERVERAS_CLICK_API_KEY"},
+    "claude-opus-4-6": {"label": "🟣 Claude Opus 4.6",
+                 "desc": "Claude Opus 4.6 (serveras) — berbayar / paling bijak",
+                 "model": "asai/claude-opus-4.6",
+                 "fallback": "asai/freemodel-2-MiniMax,asai/freemodel-1-GLM",
+                 "url": "https://serveras.click/v1/chat/completions",
+                 "key_env": "HERMES_CUSTOM_SERVERAS_CLICK_API_KEY"},
+    "kimi-k2-7": {"label": "🤖 Kimi K2.7",
+                 "desc": "Kimi K2.7 (serveras) — berbayar",
+                 "model": "asai/kimi-k2.7",
+                 "fallback": "asai/freemodel-2-MiniMax,asai/freemodel-1-GLM",
+                 "url": "https://serveras.click/v1/chat/completions",
+                 "key_env": "HERMES_CUSTOM_SERVERAS_CLICK_API_KEY"},
+    "deepseek-v4-pro": {"label": "💎 DeepSeek v4 Pro",
+                 "desc": "DeepSeek v4 Pro (serveras) — berbayar / paling tepat",
+                 "model": "asai/deepseek-v4-pro",
+                 "fallback": "asai/freemodel-2-MiniMax,asai/freemodel-1-GLM",
+                 "url": "https://serveras.click/v1/chat/completions",
+                 "key_env": "HERMES_CUSTOM_SERVERAS_CLICK_API_KEY"},
     "kimi": {"label": "\U0001f9d1\ufe0f Model percuma \u2014 Kimi",
              "desc": "Kimi free (serveras) \u2014 analisis mendalam, tetapi lambat (45s)",
              "model": "asai/freemodel-5-kimi",
@@ -524,7 +646,7 @@ LLM_PRESETS = {
 ENV_FILE = pathlib.Path("/home/ubuntu/tw-bot/.env")
 
 # ---- PIN MODEL ----
-# Default = DeepSeek v4.1 flash (asai/freemodel-4-ds-v4.1flash).
+# Default = MiniMax (asai/freemodel-2-MiniMax).
 # Test live 23 Okt 2026 dengan PROMPT RINGKAS (2,592 char):
 #   DeepSeek 8.2s  C=119ch VALID BUY entry=4042.315 rr1=1.68  <- paling pantas
 #   GLM     26.8s C=105ch VALID SELL rr1=2.29                 <- 3x lebih lambat
@@ -532,7 +654,7 @@ ENV_FILE = pathlib.Path("/home/ubuntu/tw-bot/.env")
 # Provider serveras rawak: ~1/3 calls thinking semua token (content=0ch),
 # jadi chain ada retry. GLM dikekalkan sebagai fallback (chain: DeepSeek, GLM).
 # Admin masih boleh tukar preset lewat /model.
-DEFAULT_PRESET = "deepseek"
+DEFAULT_PRESET = "deepseek-v41-1017"
 
 
 def _apply_pin():
@@ -1978,13 +2100,26 @@ async def on_text(update: Update, ctx):
                                           [IB("🔭 Macro Outlook", callback_data="tool:outlook")],
                                           [IB("📰 High-Impact News", callback_data="tool:news")]]))
     if t == BTN_JURNAL: return await say(chat, journal_text(tg))
+    if t == BTN_POS:
+        try:
+            rows = db.execute(
+                "SELECT * FROM trades WHERE status IN ('ACTIVE','TP1') "
+                "ORDER BY created_at ASC").fetchall()
+            if not rows:
+                return await say(chat, "Tiada trade aktif sekarang.")
+            txt, _ = await asyncio.to_thread(active_positions_text, rows)
+            kb = None
+            if tg.id in ADMIN_IDS:
+                kb = IM([[IB("📤 Post to everyone", callback_data="pos:post"),
+                          IB("❌ Cancel", callback_data="pos:cancel")],
+                         [IB("🔄 Refresh", callback_data="pos:refresh")]])
+            return await say(chat, txt, kb)
+        except Exception as e:
+            return await say(chat, f"Masalah: {e(str(e))[:120]}")
     if t == BTN_KUOTA:
         # Admin: senarai semua member terus dari menu. Member: status sendiri.
         if tg.id in ADMIN_IDS:
-            return
-    if t == BTN_POS:
-        await handle_active_position(update, context)
-        return await subs_cmd(update, ctx)
+            return await subs_cmd(update, ctx)
         return await say(chat, profile_text(tg, u),
                          None if is_pro(u) else IM([[IB("👑 Upgrade PRO", callback_data="pro_guide")]]))
     if t == BTN_SET:
@@ -2005,18 +2140,6 @@ async def on_text(update: Update, ctx):
             await say(chat, f"#{r['id']} <b>{r['pair']}</b> {r['bias']} · entry "
                             f"<code>{fmt(r['pair'], r['entry'])}</code> · "
                             f"RR 1:{r['rr1']:.1f} · {r['publish_status'] or 'DRAFT'}", kb)
-        return
-
-    if t == BTN_POS:
-        conn = sqlite3.connect("bot.db")
-        positions = conn.execute("SELECT pair, entry FROM trades WHERE status='ACTIVE'").fetchall()
-        if not positions:
-            await say(update.effective_chat, "Tiada posisi aktif.")
-        else:
-            msg = "📊 <b>Active Position</b>\n\n"
-            for pair, entry in positions:
-                msg += f"• <b>{pair}</b> Entry {entry}\n"
-            await say(update.effective_chat, msg)
         return
     low = t.lower()
     if "berita" in low or "news" in low:
@@ -2196,6 +2319,58 @@ async def on_callback(update: Update, ctx):
     if d.startswith("demo:"):
         return await say(chat, "ℹ️ Ini <b>demo button</b> sahaja — tiada tindakan. "
                                "Button sebenar muncul pada kad analisa baru.")
+    if d.startswith("pos:"):
+        if tg.id not in ADMIN_IDS:
+            return await say(chat, "🔒 Admin sahaja.")
+        if d == "pos:refresh":
+            rows = db.execute("SELECT * FROM trades WHERE status IN ('ACTIVE','TP1') "
+                              "ORDER BY created_at ASC").fetchall()
+            if not rows:
+                return await q.edit_message_text("Tiada trade aktif sekarang.")
+            txt, _ = await asyncio.to_thread(active_positions_text, rows)
+            kb = IM([[IB("📤 Post to everyone", callback_data="pos:post"),
+                      IB("❌ Cancel", callback_data="pos:cancel")],
+                     [IB("🔄 Refresh", callback_data="pos:refresh")]])
+            return await q.edit_message_text(txt, parse_mode=ParseMode.HTML, reply_markup=kb)
+        if d == "pos:cancel":
+            return await q.edit_message_text("❌ Dibatalkan — tiada apa dihantar ke member.")
+        if d == "pos:confirm":
+            rows = db.execute("SELECT * FROM trades WHERE status IN ('ACTIVE','TP1') "
+                              "ORDER BY created_at ASC").fetchall()
+            if not rows:
+                return await q.edit_message_text("Tiada trade aktif sekarang.")
+            txt, _ = await asyncio.to_thread(active_positions_text, rows)
+            plain = re.sub(r"<[^>]+>", "", txt)
+            try:
+                targets = await asyncio.to_thread(fetch_all_member_targets)
+            except Exception as ex:
+                return await say(chat, f"⚠️ Gagal baca member: {e(str(ex))[:120]}")
+            chats = sorted({int(t["telegram_chat_id"]) for t in targets
+                            if t.get("telegram_chat_id")})
+            ok = fail = 0
+            for cid in chats:
+                good, _err = await asyncio.to_thread(telegram_send_member, cid, plain)
+                if good:
+                    ok += 1
+                else:
+                    fail += 1
+            return await q.edit_message_text(
+                f"📤 <b>Dihantar ke member</b>\n✅ Berjaya: {ok}\n"
+                f"{'⚠️ Gagal: ' + str(fail) if fail else 'Tiada kegagalan'}",
+                parse_mode=ParseMode.HTML)
+        if d == "pos:post":
+            try:
+                targets = await asyncio.to_thread(fetch_all_member_targets)
+            except Exception as ex:
+                return await say(chat, f"⚠️ Gagal baca member: {e(str(ex))[:120]}")
+            chats = sorted({int(t["telegram_chat_id"]) for t in targets
+                            if t.get("telegram_chat_id")})
+            if not chats:
+                return await say(chat, "⚠️ Tiada member yang link Telegram.")
+            return await say(chat, f"📤 Hantar ringkasan active position ke <b>{len(chats)}</b> member?\n"
+                                   f"Tekan ✅ Confirm untuk teruskan.",
+                             IM([[IB("✅ Confirm post", callback_data="pos:confirm")],
+                                 [IB("❌ Cancel", callback_data="pos:cancel")]]))
     if d.startswith("admin:"):
         if tg.id not in ADMIN_IDS:
             return await say(chat, "🔒 Admin sahaja.")
@@ -2797,17 +2972,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-
-# Active Position handler (added manually)
-async def handle_active_position(update, context):
-    import sqlite3
-    conn = sqlite3.connect('/home/ubuntu/tw-bot/bot.db')
-    rows = conn.execute("SELECT pair, entry FROM trades WHERE status='ACTIVE'").fetchall()
-    if not rows:
-        await update.effective_message.reply_text('Tiada posisi aktif.')
-    else:
-        msg = '📊 <b>Active Position</b>\n\n'
-        for pair, entry in rows:
-            msg += f'• <b>{pair}</b> Entry {entry}\n'
-        await update.effective_message.reply_text(msg)
