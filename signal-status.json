@@ -1,5 +1,5 @@
 {
- "updated": "2026-10-23T22:22:02+08:00",
+ "updated": "2026-10-23T22:23:02+08:00",
  "signals": {
   "USDCAD_20261018_110101": {
    "status": "sl",
@@ -496,7 +496,8 @@
    "status": "active"
   },
   "NZDUSD_20261023_142920": {
-   "status": "active"
+   "status": "active",
+   "entry_at": "2026-10-23T22:22:00+08:00"
   },
   "BTCUSD_20261023_195517": {
    "status": "tp",
