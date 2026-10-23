@@ -96,13 +96,14 @@ BTN_SET, BTN_ABOUT = "⚙️ Pengaturan Bot", "🏛️ Tentang Hermes"
 BTN_DRAFT = "🗂️ Draft Signal"
 BTN_SCREENER = "🤖 Auto Screener"
 BTN_PROFIT = "💰 Profit Guard"
+BTN_HISTORY = "🗑 History Expired"
 MENU = ReplyKeyboardMarkup(
     [[BTN_ANALISA, BTN_TOOLS], [BTN_JURNAL, BTN_KUOTA], [BTN_SET, BTN_ABOUT]],
     resize_keyboard=True)
 # Admin console: Auto Screener scan semua pair, Draft kekal untuk review.
 MENU_ADMIN = ReplyKeyboardMarkup(
     [[BTN_ANALISA, BTN_DRAFT], [BTN_SCREENER, BTN_PROFIT],
-     [BTN_TOOLS, BTN_KUOTA], [BTN_JURNAL, BTN_SET]],
+     [BTN_TOOLS, BTN_HISTORY], [BTN_JURNAL, BTN_SET]],
     resize_keyboard=True)
 
 
@@ -1958,6 +1959,10 @@ async def on_text(update: Update, ctx):
         if tg.id not in ADMIN_IDS:
             return await say(chat, "🔒 Profit Guard hanya untuk admin.")
         return await run_profit_guard(chat, tg)
+    if t == BTN_HISTORY:
+        if tg.id not in ADMIN_IDS:
+            return await say(chat, "🔒 History hanya untuk admin.")
+        return await history_cmd(update, ctx)
     if t == BTN_SCREENER:
         if tg.id not in ADMIN_IDS:
             return await say(chat, "🔒 Auto Screener hanya untuk admin.")
@@ -2536,34 +2541,38 @@ async def history_cmd(update: Update, ctx):
     if update.effective_user.id not in ADMIN_IDS:
         return await say(update.effective_chat, "\U0001f512 Admin sahaja.")
 
-    # /history [jam] - default 2 jam, boleh sampai 48 jam
+    # Reply-keyboard sends the button label as ctx.args[0]; drop it and any
+    # bare "6h"-style window argument so both entry points share one path.
+    args = [a for a in (ctx.args or []) if a != BTN_HISTORY]
     hours = HISTORY_WINDOW_H
-    if ctx.args and ctx.args[0].lower().endswith("h") and ctx.args[0][:-1].isdigit():
-        hours = max(1, min(int(ctx.args[0][:-1]), 48))
-        ctx.args = ctx.args[1:]
-    if not ctx.args:
+    if args and args[0].lower().endswith("h") and args[0][:-1].isdigit():
+        hours = max(1, min(int(args[0][:-1]), 48))
+        args = args[1:]
+
+    if not args:
         rows = _expired_trades(hours)
         if not rows:
             return await say(update.effective_chat,
                              "\u2705 Tiada signal expired dalam %d jam lepas." % hours)
-        lines = ["\U0001F5D1 <b>Signal Expired</b> — %d jam lepas\n" % hours]
+        lines = ["\U0001f5d1 <b>Signal Expired</b> \u2014 %d jam lepas\n" % hours]
         for t in rows[:15]:
             lines.append(
-                f"<code>#{t['id']}</code> {t['pair']} {t['bias']} · "
-                f"entry <code>{t['entry']}</code> · "
+                f"<code>#{t['id']}</code> {t['pair']} {t['bias']} \u00b7 "
+                f"entry <code>{t['entry']}</code> \u00b7 "
                 f"POI <code>{t['poi_low']}-{t['poi_high']}</code>")
         lines.append("")
-        lines.append("`/history <id> repost` — buka semula (window 30 minit)")
-        lines.append("`/history <id> delete` — buang setup")
-        lines.append("`/history 6h` — panjangkan window")
+        lines.append("`/history <id> repost` \u2014 buka semula (window 30 minit)")
+        lines.append("`/history <id> delete` \u2014 buang setup")
+        lines.append("`/history 6h` \u2014 panjangkan window")
         await say(update.effective_chat, "\n".join(lines))
         return
 
+
     try:
-        tid = int(ctx.args[0])
+        tid = int(args[0])
     except (TypeError, ValueError):
         return await say(update.effective_chat, "ID mesti nombor. Contoh: /history 56 repost")
-    action = (ctx.args[1] if len(ctx.args) > 1 else "").lower()
+    action = (args[1] if len(args) > 1 else "").lower()
 
     if action == "repost":
         row = db.execute("SELECT * FROM trades WHERE id=?", (tid,)).fetchone()
