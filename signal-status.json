@@ -1,5 +1,5 @@
 {
- "updated": "2026-10-24T02:48:02+08:00",
+ "updated": "2026-10-24T02:49:02+08:00",
  "signals": {
   "XAUUSD_20261024_001738": {
    "status": "pending"
@@ -16,8 +16,10 @@
    "status": "pending"
   },
   "XAUUSD_20261023_234626": {
-   "status": "active",
-   "entry_at": "2026-10-23T23:55:00+08:00"
+   "status": "collected",
+   "pips": 72.1,
+   "unit": "pips",
+   "closed": "2026-10-24T02:48:20+08:00"
   },
   "BTCUSD_20261023_195517": {
    "status": "tp",
