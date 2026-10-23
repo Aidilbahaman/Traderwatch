@@ -181,8 +181,11 @@ const DATA = {
     entryAt: "2026-10-23T23:55:00+08:00",
     rr: 4.1                  // (entry-sl = 6.5, tp-entry = 26.5)
   },
+  /* Berita dibaca dari calendar.json (dijana oleh calendar-feed.py).
+     Fallback di bawah hanya dipakai jika fail itu tidak dapat dimuatkan. */
+  newsUrl: "../calendar.json",   /* fail di root repo, bukan dalam apple-style/ */
   news: [
-    /* TODO: real data — kalendar ekonomi belum disambung; nilai ini sampel */
+    /* TODO: real data — fallback sahaja; calendar.json yang sebenar diutamakan */
     { title: "USD · Core PCE", impact: "Impak tinggi", time: "20:30 MYT",
       countdownTo: "2026-10-24T20:30:00+08:00",
       extraLabel: "Fed Chair bercakap", extraTime: "22:00 esok" }
@@ -417,8 +420,47 @@ function renderActive() {
 
 /* ---------- render: berita + countdown ---------- */
 let cdTimer = null;
+
+/* Tukar event calendar.json -> bentuk yang renderNews guna. */
+function normaliseCalendar(payload) {
+  if (!payload) return null;
+  const pick = payload.next_usd_high || payload.next_high;
+  if (!pick) return null;
+  const when = new Date(pick.iso);
+  if (!isFinite(when.getTime())) return null;
+  const bits = [];
+  if (pick.forecast) bits.push("fc " + pick.forecast);
+  if (pick.previous) bits.push("prev " + pick.previous);
+  return {
+    title: (pick.ccy ? pick.ccy + " · " : "") + pick.title,
+    impact: pick.impact === "High" ? "Impak tinggi" : (pick.impact || "—"),
+    time: fmtMYT(pick.iso),
+    countdownTo: pick.iso,
+    extraLabel: bits.join(" · ") || "Butiran belum tersedia",
+    extraTime: fmtMYT(pick.iso, true)
+  };
+}
+
+async function loadNews() {
+  if (!DATA.newsUrl) return (DATA.news || [])[0] || null;
+  try {
+    const r = await fetch(DATA.newsUrl + "?t=" + Date.now(), { cache: "no-store" });
+    if (!r.ok) throw new Error("HTTP " + r.status);
+    const payload = await r.json();
+    const ev = normaliseCalendar(payload);
+    /* kalendar sah tetapi tiada acara akan datang -> hormati empty state */
+    if (!ev) return { __empty: true, reason: "Tiada acara high-impact akan datang dalam kalendar." };
+    return ev;
+  } catch (err) {
+    return (DATA.news || [])[0] || { __empty: true, reason: "Kalendar tidak dapat dimuatkan." };
+  }
+}
+
 function renderNews() {
-  const ev = (DATA.news || [])[0];
+  renderNewsFrom(DATA.news && DATA.news[0]);
+}
+
+function renderNewsFrom(ev) {
   const box = $("#news");
   if (!box) return;
 
@@ -427,11 +469,12 @@ function renderNews() {
   const sub = $(".sub", box);
   const evRow = $(".ev", box);
 
-  if (!ev) {
+  if (!ev || ev.__empty) {
     if (h2) h2.textContent = "Tiada berita";
     if (cd) cd.textContent = "--:--:--";
-    if (sub) sub.textContent = "Kalendar belum tersedia.";
+    if (sub) sub.textContent = (ev && ev.reason) || "Kalendar belum tersedia.";
     if (evRow) evRow.hidden = true;
+    if (cdTimer) { clearInterval(cdTimer); cdTimer = null; }
     return;
   }
 
@@ -555,15 +598,15 @@ function showLoading() {
 }
 
 /* ---------- boot ---------- */
-function render() {
+async function render() {
   try {
     renderUser();
     renderStats();
     renderActive();
-    renderNews();
     renderHistory();
     renderPlans();
     renderNote();
+    renderNewsFrom(await loadNews());
   } catch (err) {
     const note = $(".note");
     if (note) note.textContent = "Ralat memaparkan data: " + (err && err.message ? err.message : err);

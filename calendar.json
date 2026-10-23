@@ -1,0 +1,12 @@
+{
+ "generated_at": "2026-10-24T02:19:57.221655+08:00",
+ "source": "ForexFactory weekly feed",
+ "next_high": null,
+ "next_usd_high": null,
+ "upcoming_high": [],
+ "counts": {
+  "all_upcoming": 3,
+  "high": 0,
+  "usd_high": 0
+ }
+}
