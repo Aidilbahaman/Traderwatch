@@ -66,26 +66,35 @@ h2{font-size:24px;letter-spacing:-.025em;margin:0 0 4px}
 .dock a{padding:9px 17px;border-radius:99px;font-size:14px;font-weight:500;color:var(--text);text-decoration:none}
 .dock a.on{background:var(--text);color:#fff}
 @media (max-width:820px){.bento{grid-template-columns:repeat(2,1fr)}.w2,.w4{grid-column:span 2}.r2{grid-row:auto}.plans{grid-template-columns:1fr}.t{padding:22px;border-radius:24px}}
+</style>
+
+<!-- Lapisan aksesibiliti (TIDAK mengubah blok <style> rujukan di atas) -->
+<style id="a11y-touch">
+@media (max-width:820px){
+  .chip{min-height:44px;display:inline-flex;align-items:center;padding:5px 14px}
+  .dock a{min-height:44px;display:inline-flex;align-items:center;justify-content:center;padding:9px 15px}
+  .plan{min-height:44px}
+  .btn{min-height:44px;display:inline-flex;align-items:center;justify-content:center}
+}
 @media (max-width:600px){
+  /* tajuk tidak perlu 3 baris: ring turun ke bawah, tajuk dapat lebar penuh */
   .hero{flex-direction:column;align-items:flex-start;gap:14px}
-  .ring{width:88px;height:88px}
-  .ring span{width:70px;height:70px;font-size:22px}
   h1{font-size:30px}
-  .wrap{padding:18px 14px 118px}
-  .trk{margin:56px 0 46px}
+  .ring{width:92px;height:92px}
+  .ring span{width:72px;height:72px;font-size:23px}
   .mk{font-size:10px}
   .mk b{font-size:13px}
-  .dock a{padding:8px 13px;font-size:13px}
-  .cd{font-size:38px}
-  .plans{gap:10px}
-  .plan{padding:16px}
+}
+@media (prefers-reduced-motion:reduce){
+  .live::before{animation:none}
+  html{scroll-behavior:auto}
 }
 </style>
 </head>
 <body>
 <div class="wrap" id="home">
   <div class="top"><span class="brand">TraderWatch</span><a class="chip" href="#plan">Plan Free</a></div>
-  <p class="note">TraderWatch Apple Light (Bento) Edition — Data sejak <b>18 Okt 2026</b> (82 signal tersimpan). Statistik 30 hari akan penuh selepas 30 hari penuh.</p>
+  <p class="note">Memuatkan data…</p>
 
   <div class="bento">
     <div class="t w2">
@@ -126,7 +135,7 @@ h2{font-size:24px;letter-spacing:-.025em;margin:0 0 4px}
       <p class="k">Telegram</p>
       <h2>Signal terus ke telefon.</h2>
       <p style="margin:6px 0 0;opacity:.85">Sertai channel eksklusif ahli supaya tidak terlepas setup.</p>
-      <a class="btn w" href="https://t.me/Traderwatchmembershipbot" target="_blank">Sertai Telegram</a>
+      <a class="btn w" href="https://t.me/Traderwatchmembershipbot" target="_blank" rel="noopener">Sertai Telegram</a>
     </div>
 
     <div class="t w4" id="plan">
@@ -144,10 +153,434 @@ h2{font-size:24px;letter-spacing:-.025em;margin:0 0 4px}
 
 <div class="dockw"><nav class="dock" id="dock"><a class="on" href="#home">Utama</a><a href="#signals">Signals</a><a href="#news">Berita</a><a href="#plan">Pelan</a></nav></div>
 <script>
-var L=document.querySelectorAll('#dock a');
-L.forEach(function(a){a.onclick=function(){L.forEach(function(x){x.className=''});a.className='on'}});
-(function(){var end=Date.now()+(2*3600+14*60+9)*1000,el=document.getElementById('cd');function p(n){return n<10?'0'+n:''+n}
-function t(){var s=Math.max(0,Math.floor((end-Date.now())/1000));el.textContent=p(Math.floor(s/3600))+':'+p(Math.floor(s%3600/60))+':'+p(s%60)}t();setInterval(t,1000)})();
+/* =========================================================================
+   DATA — satu sumber untuk semua nilai di halaman ini.
+   Semua angka di bawah adalah data sebenar TraderWatch (24 Okt 2026).
+   ========================================================================= */
+const DATA = {
+  user: {
+    name: "Aidil",
+    plan: "free",                    // free | pro | max
+    planLabel: "Plan Free"
+  },
+  quota: {
+    used: 3,                         /* TODO: real data — tiada tracking kuota harian per-user */
+    limit: 3                         // Free = 3/hari, Pro = 10, Max = tanpa had
+  },
+  activeSignal: {
+    id: 126,
+    pair: "XAU/USD",
+    display: "XAUUSD",
+    side: "SELL",
+    entry: 4028.5,
+    sl: 4035.0,
+    tp: 4002.0,
+    timeframe: "M15",
+    price: 3998.40,                  // harga M1 terakhir (Swissquote)
+    postedAt: "2026-10-24T00:17:00+08:00",
+    entryAt: "2026-10-23T23:55:00+08:00",
+    rr: 4.1                  // (entry-sl = 6.5, tp-entry = 26.5)
+  },
+  news: [
+    /* TODO: real data — kalendar ekonomi belum disambung; nilai ini sampel */
+    { title: "USD · Core PCE", impact: "Impak tinggi", time: "20:30 MYT",
+      countdownTo: "2026-10-24T20:30:00+08:00",
+      extraLabel: "Fed Chair bercakap", extraTime: "22:00 esok" }
+  ],
+  performance: [
+    {"pair": "BTC/USD", "status": "tp", "pips": 217.8, "closedAt": "2026-10-24T00:37:02+08:00"},
+    {"pair": "NZD/USD", "status": "sl", "pips": -3.3, "closedAt": "2026-10-24T00:37:02+08:00"},
+    {"pair": "XAU/USD", "status": "tp", "pips": 173.3, "closedAt": "2026-10-24T00:37:02+08:00"},
+    {"pair": "GBP/USD", "status": "tp", "pips": 8.1, "closedAt": "2026-10-24T00:37:02+08:00"},
+    {"pair": "EUR/USD", "status": "tp", "pips": 9.5, "closedAt": "2026-10-24T00:37:02+08:00"},
+    {"pair": "USD/JPY", "status": "tp", "pips": 53.2, "closedAt": "2026-10-24T00:37:02+08:00"},
+    {"pair": "EUR/USD", "status": "tp", "pips": 15.7, "closedAt": "2026-10-24T00:37:02+08:00"},
+    {"pair": "GBP/USD", "status": "sl", "pips": -4.5, "closedAt": "2026-10-24T00:37:02+08:00"},
+    {"pair": "AUD/USD", "status": "tp", "pips": 6.7, "closedAt": "2026-10-24T00:37:02+08:00"},
+    {"pair": "EUR/USD", "status": "tp", "pips": 11.0, "closedAt": "2026-10-24T00:37:02+08:00"},
+    {"pair": "USD/JPY", "status": "sl", "pips": -20.0, "closedAt": "2026-10-24T00:37:02+08:00"},
+    {"pair": "XAU/USD", "status": "tp", "pips": 228.1, "closedAt": "2026-10-24T00:37:02+08:00"},
+    {"pair": "USD/JPY", "status": "sl", "pips": -18.3, "closedAt": "2026-10-24T00:37:02+08:00"},
+    {"pair": "USD/JPY", "status": "sl", "pips": -14.2, "closedAt": "2026-10-24T00:37:02+08:00"},
+    {"pair": "USD/JPY", "status": "sl", "pips": -12.6, "closedAt": "2026-10-24T00:37:02+08:00"},
+    {"pair": "XAU/USD", "status": "sl", "pips": -109.8, "closedAt": "2026-10-24T00:37:02+08:00"},
+    {"pair": "XAU/USD", "status": "tp", "pips": 300.2, "closedAt": "2026-10-24T00:37:02+08:00"},
+    {"pair": "NZD/USD", "status": "sl", "pips": -12.0, "closedAt": "2026-10-24T00:37:02+08:00"},
+    {"pair": "BTC/USD", "status": "sl", "pips": -310.0, "closedAt": "2026-10-24T00:37:02+08:00"},
+    {"pair": "XAU/USD", "status": "tp", "pips": 110.6, "closedAt": "2026-10-24T00:37:02+08:00"},
+    {"pair": "NZD/USD", "status": "sl", "pips": -10.5, "closedAt": "2026-10-24T00:37:02+08:00"},
+    {"pair": "GBP/USD", "status": "sl", "pips": -6.1, "closedAt": "2026-10-24T00:37:02+08:00"},
+    {"pair": "XAU/USD", "status": "sl", "pips": -82.5, "closedAt": "2026-10-24T00:37:02+08:00"},
+    {"pair": "USD/CAD", "status": "tp", "pips": 24.0, "closedAt": "2026-10-24T00:37:02+08:00"},
+    {"pair": "XAU/USD", "status": "sl", "pips": -68.6, "closedAt": "2026-10-24T00:38:02+08:00"},
+    {"pair": "EUR/USD", "status": "sl", "pips": -5.8, "closedAt": "2026-10-24T00:38:02+08:00"},
+    {"pair": "XAU/USD", "status": "tp", "pips": 138.6, "closedAt": "2026-10-24T00:38:02+08:00"},
+    {"pair": "USD/JPY", "status": "tp", "pips": 24.0, "closedAt": "2026-10-24T00:38:02+08:00"},
+    {"pair": "USD/JPY", "status": "sl", "pips": -12.0, "closedAt": "2026-10-24T00:38:02+08:00"},
+    {"pair": "XAU/USD", "status": "sl", "pips": -37.9, "closedAt": "2026-10-24T00:38:02+08:00"},
+    {"pair": "BTC/USD", "status": "tp", "pips": 407.5, "closedAt": "2026-10-24T00:38:02+08:00"},
+    {"pair": "GBP/USD", "status": "sl", "pips": -8.9, "closedAt": "2026-10-24T00:38:02+08:00"},
+    {"pair": "EUR/USD", "status": "sl", "pips": -4.5, "closedAt": "2026-10-24T00:38:02+08:00"},
+    {"pair": "XAU/USD", "status": "tp", "pips": 91.1, "closedAt": "2026-10-24T00:38:02+08:00"},
+    {"pair": "AUD/USD", "status": "sl", "pips": -12.0, "closedAt": "2026-10-24T00:38:02+08:00"},
+    {"pair": "USD/JPY", "status": "sl", "pips": -9.3, "closedAt": "2026-10-24T00:38:02+08:00"},
+    {"pair": "XAU/USD", "status": "tp", "pips": 140.3, "closedAt": "2026-10-24T00:38:02+08:00"},
+    {"pair": "XAU/USD", "status": "tp", "pips": 117.0, "closedAt": "2026-10-24T00:38:02+08:00"},
+    {"pair": "NZD/USD", "status": "sl", "pips": -6.0, "closedAt": "2026-10-24T00:38:02+08:00"},
+    {"pair": "GBP/USD", "status": "tp", "pips": 21.8, "closedAt": "2026-10-24T00:38:02+08:00"},
+    {"pair": "XAU/USD", "status": "sl", "pips": -53.0, "closedAt": "2026-10-24T00:38:02+08:00"},
+    {"pair": "XAU/USD", "status": "tp", "pips": 96.5, "closedAt": "2026-10-24T00:38:02+08:00"},
+    {"pair": "XAU/USD", "status": "sl", "pips": -74.9, "closedAt": "2026-10-24T00:38:02+08:00"},
+    {"pair": "EUR/USD", "status": "sl", "pips": -9.0, "closedAt": "2026-10-24T00:38:02+08:00"},
+    {"pair": "XAU/USD", "status": "sl", "pips": -31.7, "closedAt": "2026-10-24T00:38:02+08:00"},
+    {"pair": "XAU/USD", "status": "sl", "pips": -86.6, "closedAt": "2026-10-24T00:38:02+08:00"},
+    {"pair": "XAU/USD", "status": "sl", "pips": -22.0, "closedAt": "2026-10-24T00:38:02+08:00"},
+    {"pair": "XAU/USD", "status": "sl", "pips": -35.0, "closedAt": "2026-10-24T00:38:02+08:00"},
+    {"pair": "EUR/USD", "status": "sl", "pips": -7.6, "closedAt": "2026-10-24T00:38:02+08:00"},
+    {"pair": "XAU/USD", "status": "sl", "pips": -15.5, "closedAt": "2026-10-24T00:38:02+08:00"},
+    {"pair": "USD/JPY", "status": "tp", "pips": 40.0, "closedAt": "2026-10-24T00:38:02+08:00"},
+    {"pair": "EUR/USD", "status": "tp", "pips": 40.0, "closedAt": "2026-10-24T00:38:02+08:00"},
+    {"pair": "USD/JPY", "status": "sl", "pips": -20.0, "closedAt": "2026-10-24T00:39:02+08:00"},
+    {"pair": "EUR/USD", "status": "sl", "pips": -20.0, "closedAt": "2026-10-24T00:39:02+08:00"},
+    {"pair": "NZD/USD", "status": "sl", "pips": -5.0, "closedAt": "2026-10-24T01:20:02+08:00"}
+  ],
+  plans: [
+    { name: "Free", lines: ["3 signal sehari", "3 pair hot"], current: true },
+    { name: "Pro",  lines: ["10 signal sehari", "7 pair hot"], current: false },
+    { name: "Max",  lines: ["Signal tanpa had", "7 pair hot"], current: false }
+  ],
+  history: [
+    /* diisi oleh renderHistory() dari performance terbaharu */
+  ]
+};
+
+/* ---------- pembantu ---------- */
+const $  = (s, r) => (r || document).querySelector(s);
+const $$ = (s, r) => Array.from((r || document).querySelectorAll(s));
+
+function fmtNum(v, dp) {
+  if (v === null || v === undefined || !isFinite(v)) return "—";
+  return Number(v).toLocaleString("en-US", {
+    minimumFractionDigits: dp || 0,
+    maximumFractionDigits: dp === undefined ? 5 : dp
+  });
+}
+
+function fmtMYT(iso, withDate) {
+  const d = new Date(iso);
+  if (!isFinite(d.getTime())) return "—";
+  const opt = { timeZone: "Asia/Kuala_Lumpur", hour: "2-digit", minute: "2-digit", hour12: false };
+  if (withDate) { opt.day = "2-digit"; opt.month = "2-digit"; }
+  return d.toLocaleString("en-GB", opt) + " MYT";
+}
+
+/* ---------- render: header + hero ---------- */
+function renderUser() {
+  const u = DATA.user;
+  const chip = $(".top .chip");
+  if (chip) chip.textContent = u.planLabel;
+
+  const h1 = $(".hero h1");
+  if (h1) h1.innerHTML = "Selamat kembali,<br>" + u.name + ".";
+
+  const sub = $(".hero .sub");
+  if (sub) {
+    const q = DATA.quota;
+    sub.textContent = q.limit
+      ? q.used + " daripada " + q.limit + " signal digunakan hari ini."
+      : q.used + " signal digunakan hari ini.";
+  }
+
+  const ring = $(".ring");
+  const ringText = $(".ring span");
+  if (ringText) {
+    ringText.textContent = DATA.quota.limit
+      ? DATA.quota.used + "/" + DATA.quota.limit
+      : "∞";
+  }
+  if (ring) {
+    const pct = DATA.quota.limit
+      ? Math.min(100, Math.round((DATA.quota.used / DATA.quota.limit) * 100))
+      : 100;
+    ring.style.background =
+      "conic-gradient(var(--blue) 0 " + pct + "%, var(--line) 0)";
+  }
+}
+
+/* ---------- render: statistik ---------- */
+function computeStats() {
+  const rows = DATA.performance || [];
+  let tp = 0, sl = 0, pips = 0;
+  rows.forEach(function (r) {
+    if (r.status === "tp") tp++;
+    else if (r.status === "sl") sl++;
+    if (typeof r.pips === "number") pips += r.pips;
+  });
+  const total = tp + sl;
+  return {
+    winRate: total ? Math.round((tp / total) * 100) : null,
+    closed: total,
+    pips: pips
+  };
+}
+
+function renderStats() {
+  const s = computeStats();
+  const tiles = $$(".bento > .t");
+  /* tile 2 = win rate, tile 3 = purata R:R (mengikut susunan markup) */
+  const winTile = tiles[1];
+  const rrTile  = tiles[2];
+
+  if (winTile) {
+    const num = $(".num", winTile);
+    const bar = $(".bar i", winTile);
+    if (num) {
+      if (s.winRate === null) {
+        num.textContent = "—";
+      } else {
+        num.innerHTML = s.winRate + "<small>%</small>";
+      }
+    }
+    if (bar) bar.style.width = (s.winRate === null ? 0 : s.winRate) + "%";
+  }
+
+  if (rrTile) {
+    const num = $(".num", rrTile);
+    const sub = $(".sub", rrTile);
+    const rr = DATA.activeSignal && DATA.activeSignal.rr;
+    if (num) num.textContent = rr ? "1:" + Number(rr).toFixed(1) : "—";
+    if (sub) {
+      sub.textContent = s.closed
+        ? s.closed + " signal ditutup · " + (s.pips > 0 ? "+" : "") + s.pips.toFixed(1) + " pips"
+        : "Belum ada signal ditutup";
+    }
+  }
+}
+
+/* ---------- render: signal aktif ---------- */
+function renderActive() {
+  const sig = DATA.activeSignal;
+  const box = $("#signals");
+  if (!box) return;
+
+  const h2 = $("h2", box);
+  const live = $(".live", box);
+  const trk = $(".trk", box);
+  const meta = $(".sub", box);
+
+  if (!sig) {
+    if (h2) h2.textContent = "Tiada setup aktif";
+    if (live) live.hidden = true;
+    if (trk) trk.hidden = true;
+    if (meta) meta.textContent = "Menunggu setup baharu.";
+    return;
+  }
+
+  if (h2) {
+    h2.innerHTML = sig.display +
+      ' <span class="dir">' + sig.side + "</span>";
+  }
+  if (live) live.hidden = false;
+  if (trk) trk.hidden = false;
+
+  const marks = $$(".mk", box);
+  const dp = sig.pair === "XAU/USD" ? 2 : 5;
+  if (marks[0]) marks[0].innerHTML = "Stop loss<b>" + fmtNum(sig.sl, dp) + "</b>";
+  if (marks[1]) marks[1].innerHTML = "Entry<b>" + fmtNum(sig.entry, dp) + "</b>";
+  if (marks[2]) marks[2].innerHTML = "Take profit<b>" + fmtNum(sig.tp, dp) + "</b>";
+  const nowMark = $(".mk.b", box);
+  if (nowMark) nowMark.innerHTML = "Harga kini<b>" + fmtNum(sig.price, dp) + "</b>";
+
+  /* kedudukan dot: petakan harga antara SL dan TP */
+  const dot = $(".dot", box);
+  if (dot && isFinite(sig.price) && isFinite(sig.sl) && isFinite(sig.tp)) {
+    const span = Math.abs(sig.tp - sig.sl) || 1;
+    let pct = ((sig.price - sig.sl) / (sig.tp - sig.sl)) * 100;
+    pct = Math.max(2, Math.min(98, pct));
+    dot.style.left = pct.toFixed(1) + "%";
+    const nowB = $(".mk.b", box);
+    if (nowB) nowB.style.left = pct.toFixed(1) + "%";
+  }
+
+  if (meta) {
+    const bits = [];
+    if (sig.entryAt) bits.push("Entry " + fmtMYT(sig.entryAt));
+    if (isFinite(sig.entry) && isFinite(sig.sl) && isFinite(sig.tp)) {
+      const risk = Math.abs(sig.entry - sig.sl);
+      const reward = Math.abs(sig.tp - sig.entry);
+      if (risk > 0) bits.push("R:R 1:" + (reward / risk).toFixed(1));
+    }
+    bits.push("Disemak " + fmtMYT(new Date().toISOString()));
+    meta.textContent = bits.join(" · ");
+  }
+}
+
+/* ---------- render: berita + countdown ---------- */
+let cdTimer = null;
+function renderNews() {
+  const ev = (DATA.news || [])[0];
+  const box = $("#news");
+  if (!box) return;
+
+  const h2 = $("h2", box);
+  const cd = $("#cd", box);
+  const sub = $(".sub", box);
+  const evRow = $(".ev", box);
+
+  if (!ev) {
+    if (h2) h2.textContent = "Tiada berita";
+    if (cd) cd.textContent = "--:--:--";
+    if (sub) sub.textContent = "Kalendar belum tersedia.";
+    if (evRow) evRow.hidden = true;
+    return;
+  }
+
+  if (h2) h2.textContent = ev.title;
+  if (sub) sub.textContent = ev.impact + " · " + ev.time;
+  if (evRow) {
+    evRow.hidden = false;
+    const spans = $$("span", evRow);
+    if (spans[0]) spans[0].textContent = ev.extraLabel;
+    if (spans[1]) spans[1].textContent = ev.extraTime;
+  }
+
+  if (!cd) return;
+  if (cdTimer) clearInterval(cdTimer);
+
+  const end = new Date(ev.countdownTo).getTime();
+  if (!isFinite(end)) { cd.textContent = "--:--:--"; return; }
+
+  const pad = n => (n < 10 ? "0" + n : "" + n);
+  function tick() {
+    const s = Math.max(0, Math.floor((end - Date.now()) / 1000));
+    cd.textContent = pad(Math.floor(s / 3600)) + ":" +
+                     pad(Math.floor((s % 3600) / 60)) + ":" + pad(s % 60);
+  }
+  tick();
+  cdTimer = setInterval(tick, 1000);
+}
+
+/* ---------- render: sejarah hari ini ---------- */
+function renderHistory() {
+  const tiles = $$(".bento > .t");
+  const tile = tiles.filter(function (t) {
+    return /Sejarah hari ini/i.test(t.textContent);
+  })[0];
+  if (!tile) return;
+
+  /* buang baris lama, kekalkan tajuk .k */
+  $$(".row", tile).forEach(function (r) { r.remove(); });
+
+  const rows = (DATA.performance || []).slice().sort(function (a, b) {
+    return new Date(b.closedAt || 0) - new Date(a.closedAt || 0);
+  }).slice(0, 3);
+
+  if (!rows.length) {
+    const empty = document.createElement("div");
+    empty.className = "row";
+    const d = document.createElement("div");
+    d.className = "m";
+    d.textContent = "Tiada signal ditutup hari ini.";
+    empty.appendChild(d);
+    tile.appendChild(empty);
+    return;
+  }
+
+  rows.forEach(function (r) {
+    const row = document.createElement("div");
+    row.className = "row";
+
+    const left = document.createElement("div");
+    const b = document.createElement("b");
+    b.textContent = r.pair + " · " + (r.status === "tp" ? "TP" : "SL");
+    const m = document.createElement("div");
+    m.className = "m";
+    m.textContent = (r.pips > 0 ? "+" : "") + Number(r.pips).toFixed(1) + " pips · " +
+                    (r.closedAt ? fmtMYT(r.closedAt) : "—");
+    left.appendChild(b);
+    left.appendChild(m);
+
+    const res = document.createElement("span");
+    res.className = "res " + (r.status === "tp" ? "up" : "dn");
+    res.textContent = r.status === "tp" ? "TP tercapai" : "SL kena";
+
+    row.appendChild(left);
+    row.appendChild(res);
+    tile.appendChild(row);
+  });
+}
+
+/* ---------- render: pelan ---------- */
+function renderPlans() {
+  const wrap = $(".plans");
+  if (!wrap) return;
+  wrap.innerHTML = "";
+
+  (DATA.plans || []).forEach(function (p) {
+    const card = document.createElement("div");
+    card.className = "plan" + (p.current ? " cur" : "");
+    const b = document.createElement("b");
+    b.textContent = p.name;
+    card.appendChild(b);
+    (p.lines || []).forEach(function (line) {
+      const s = document.createElement("span");
+      s.textContent = line;
+      card.appendChild(s);
+    });
+    if (p.current) {
+      const tag = document.createElement("i");
+      tag.className = "tag";
+      tag.textContent = "Pelan semasa";
+      card.appendChild(tag);
+    }
+    wrap.appendChild(card);
+  });
+}
+
+/* ---------- render: nota data ---------- */
+function renderNote() {
+  const note = $(".note");
+  if (!note) return;
+  const s = computeStats();
+  note.textContent = "Data sebenar TraderWatch · " + s.closed +
+    " signal ditutup · dikemas kini " + fmtMYT(new Date().toISOString(), true);
+}
+
+/* ---------- loading + empty state ---------- */
+function showLoading() {
+  const note = $(".note");
+  if (note) note.textContent = "Memuatkan data…";
+  const meta = $("#signals .sub");
+  if (meta) meta.textContent = "Memuatkan setup aktif…";
+}
+
+/* ---------- boot ---------- */
+function render() {
+  try {
+    renderUser();
+    renderStats();
+    renderActive();
+    renderNews();
+    renderHistory();
+    renderPlans();
+    renderNote();
+  } catch (err) {
+    const note = $(".note");
+    if (note) note.textContent = "Ralat memaparkan data: " + (err && err.message ? err.message : err);
+  }
+}
+
+showLoading();
+render();
+
+/* dock nav */
+var L = document.querySelectorAll('#dock a');
+L.forEach(function (a) {
+  a.onclick = function () {
+    L.forEach(function (x) { x.className = ''; });
+    a.className = 'on';
+  };
+});
 </script>
 </body>
 </html>
