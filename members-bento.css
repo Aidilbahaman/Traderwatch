@@ -116,6 +116,18 @@ header{
 .hero-row{ display:flex; justify-content:space-between; align-items:center; gap:18px; height:100%; }
 .hero-row > div:first-child{ min-width:0; }
 .hero-tile h1{ margin:0 0 8px; }
+/* Rujukan Bento: tajuk 2 baris (nama + noktah), bukan 3.
+   Beri tajuk lebar penuh yang ada; jangan biar ring menolaknya. */
+.hero-row > div:first-child{ flex:1 1 auto; }
+.hero-row .ring{ flex:0 0 auto; }
+/* app.css menetapkan h1{clamp(2.4rem,6vw,4.4rem)} = 70px max. ID selector
+   diperlukan untuk menang specificity tanpa !important. */
+#hello{
+  font-size:clamp(26px,3.2vw,38px);
+  line-height:1.12;
+  letter-spacing:-.035em;
+  margin:0 0 8px;
+}
 .ring{
   width:112px; height:112px; border-radius:50%;
   background:conic-gradient(var(--blue) 0 66%, var(--line) 0);

@@ -46,7 +46,7 @@
 @media(max-width:760px){.tw-offer-panel{grid-template-columns:1fr;gap:18px}.tw-offer-action{width:100%}.tw-offer-panel:after{right:4%;top:16%;font-size:96px;opacity:.7}}
 .page section.block{padding:0}.page section.block + section.block{margin-top:4px}.page .tw-chart-news + .tg-link{margin-top:4px}.page .tg-link + .tw-motion{margin-top:4px}@media(max-width:600px){.page section.block{padding:0}.page section.block + section.block{margin-top:2px}.page .tw-chart-news + .tg-link{margin-top:2px}.page .tg-link + .tw-motion{margin-top:2px}}
 </style>
-<link rel="stylesheet" href="members-bento.css?v=20261024h">
+<link rel="stylesheet" href="members-bento.css?v=20261024i">
 <link rel="stylesheet" href="assets/css/tw-motion-bg.css?v=202610182344">
 <script src="assets/js/tw-fundamental-news.js?v=2026101901" defer></script>
 </head>
@@ -231,11 +231,33 @@ if(member){
   previewBanner(member);
   const plan = ["free", "pro", "max"].includes(member.plan) ? member.plan : "free";
   document.body.dataset.tier = plan;
-  document.getElementById("hello").textContent = "Welcome " + (member.name.split(" ")[0] || "trader");
+  /* Format rujukan: "Selamat kembali," + baris baharu + nama. */
+  document.getElementById("hello").innerHTML =
+    "Selamat kembali,<br>" + (member.name.split(" ")[0] || "trader") + ".";
   const badge = document.getElementById("planBadge");
   badge.textContent = plan.charAt(0).toUpperCase() + plan.slice(1);
   badge.classList.toggle("pro", plan !== "free");
-  document.getElementById("planLine").textContent = plan === "max" ? "Max Member · unlimited valid setups across 7 hot pairs." : plan === "pro" ? "Pro Member · up to 10 valid setups daily across 7 hot pairs." : "Free Member · up to 3 valid setups daily across 3 hot pairs.";
+  /* planLine = kiraan setup digunakan hari ini (bukan teks plan).
+     Teks plan kekal dalam badge header. */
+  (function setPlanLine(){
+    const el = document.getElementById("planLine");
+    if(!el) return;
+    const cap = plan === "max" ? null : plan === "pro" ? 10 : 3;
+    fetch("signal-status.json?t=" + Date.now(), { cache: "no-store" })
+      .then(r => r.ok ? r.json() : null)
+      .then(sj => {
+        const sigs = (sj && sj.signals) || {};
+        const today = new Date().toLocaleDateString("en-CA", { timeZone: "Asia/Kuala_Lumpur" }).replace(/-/g, "");
+        const used = Object.keys(sigs).filter(k => k.includes("_" + today + "_")).length;
+        el.textContent = cap === null
+          ? used + " signal digunakan hari ini."
+          : used + " daripada " + cap + " signal digunakan hari ini.";
+        el.dataset.used = used;
+        el.dataset.cap = cap === null ? "" : cap;
+        window.dispatchEvent(new CustomEvent("tw:quota", { detail: { used, cap } }));
+      })
+      .catch(() => { el.textContent = ""; });
+  })();
   const upgraded = new URLSearchParams(location.search).get("upgraded");
   if(upgraded === "max" || upgraded === "pro"){
     const n = document.getElementById("upgradeNote"); n.hidden = false; n.textContent = "Payment confirmed. Your " + (upgraded === "max" ? "Max" : "Pro") + " access is now active.";
@@ -498,16 +520,23 @@ if(member){
       const ring = document.getElementById("planRing");
       if(!el || !ring) return;
       const cap = plan === "max" ? null : plan === "pro" ? 10 : 3;
+
+      /* Guna kiraan yang SAMA dengan planLine supaya ring dan teks tak
+         bercanggah. planLine menulis data-used/data-cap pada elemennya. */
+      const pl = document.getElementById("planLine");
+      let used = pl && pl.dataset.used !== undefined && pl.dataset.used !== ""
+        ? Number(pl.dataset.used)
+        : null;
+      if(used === null || !isFinite(used)){
+        const domCount = document.querySelectorAll("#signalGrid .sig").length;
+        used = domCount || (window.TW_SIGNALS || []).length || 0;
+      }
+
       if(cap === null){
         el.textContent = "∞";
         ring.style.background = "conic-gradient(var(--blue) 0 100%, var(--line) 0)";
         return;
       }
-      /* Utamakan bilangan kad yang benar-benar dipaparkan; jika grid belum
-         dirender, guna window.TW_SIGNALS. Jika kedua-duanya kosong, papar 0. */
-      const domCount = document.querySelectorAll("#signalGrid .sig").length;
-      const arrCount = (window.TW_SIGNALS || []).length;
-      const used = domCount || arrCount || 0;
       el.textContent = used + "/" + cap;
       const pct = Math.max(0, Math.min(100, (used / cap) * 100));
       ring.style.background = "conic-gradient(var(--blue) 0 " + pct + "%, var(--line) 0)";
@@ -652,6 +681,7 @@ if(member){
       bootBento();
     }
     window.addEventListener("tw:signals", function(){ runActive(); runStats(); });
+    window.addEventListener("tw:quota", function(){ setRing(); });
   })();
 }
 })();
