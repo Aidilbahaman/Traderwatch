@@ -348,7 +348,11 @@ def main():
                 changed += 1
                 log(f"ENTRY {sig['pair']} @ {sig['entry']} ({_iso_mine(entry_at)})")
         elif prev.get("status") != "active":
-            state["signals"][key] = {"status": "active"}
+            # Setup BELUM filled: harga tidak pernah menyentuh entry, jadi
+            # trade ini tidak wujud. Ia mesti "pending", bukan "active" —
+            # kalau ditanda active, ia muncul sebagai posisi terbuka di
+            # website walaupun tiada fill.
+            state["signals"][key] = {"status": "pending"}
             changed += 1
         if gap:
             time.sleep(gap)

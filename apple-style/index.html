@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>TraderWatch – Apple Light (Bento)</title>
+<style>
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);color-scheme:light;
+--bg:#f5f5f7;--text:#1d1d1f;--muted:#86868b;--line:#e8e8ed;--blue:#0a84ff;--green:#1fa35c;--red:#e5372b;--shadow:0 1px 0 rgba(0,0,0,.04),0 10px 34px rgba(0,0,0,.05)}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--text);font:16px/1.47 -apple-system,BlinkMacSystemFont,"SF Pro Text","Helvetica Neue",Helvetica,Arial,sans-serif;-webkit-font-smoothing:antialiased}
+.wrap{max-width:1040px;margin:0 auto;padding:22px 18px 130px}
+.top{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px}
+.brand{font-weight:700;letter-spacing:-.02em;font-size:19px}
+.chip{font-size:12px;font-weight:600;padding:5px 12px;border-radius:99px;background:#fff;box-shadow:var(--shadow);color:var(--blue);text-decoration:none}
+.note{text-align:center;font-size:12px;color:var(--muted);margin:0 0 14px}
+.bento{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+.t{background:#fff;border-radius:28px;padding:26px;box-shadow:var(--shadow);position:relative;overflow:hidden;scroll-margin-top:16px}
+.w2{grid-column:span 2}.w4{grid-column:span 4}.r2{grid-row:span 2}
+.dark{background:#1d1d1f;color:#f5f5f7}
+.blue{background:linear-gradient(150deg,#2997ff,#0a5fd8);color:#fff}
+.k{font-size:13px;font-weight:600;color:var(--muted);margin:0 0 8px}
+.dark .k{color:#98989d}.blue .k{color:rgba(255,255,255,.75)}
+h1{font-size:clamp(32px,5vw,46px);line-height:1.05;letter-spacing:-.035em;margin:0 0 10px}
+h2{font-size:24px;letter-spacing:-.025em;margin:0 0 4px}
+.sub{color:var(--muted);margin:0}
+.num{font-size:clamp(44px,7vw,60px);font-weight:700;letter-spacing:-.045em;line-height:1}
+.num small{font-size:.4em;font-weight:500;color:var(--muted);letter-spacing:0}
+.ring{width:112px;height:112px;border-radius:50%;background:conic-gradient(var(--blue) 0 66%,var(--line) 0);display:grid;place-items:center;flex:none}
+.ring span{width:88px;height:88px;border-radius:50%;background:#fff;display:grid;place-items:center;font-size:28px;font-weight:700;letter-spacing:-.03em}
+.hero{display:flex;justify-content:space-between;align-items:center;gap:18px;height:100%}
+.bar{height:6px;background:var(--line);border-radius:99px;margin-top:18px;overflow:hidden}
+.bar i{display:block;height:100%;width:64%;background:var(--green);border-radius:99px}
+.live{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;color:var(--blue);background:#e7f2ff;padding:4px 11px;border-radius:99px}
+.live::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--blue);animation:p 1.6s infinite}
+@keyframes p{50%{opacity:.25}}
+.fh{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+.dir{font-size:12px;font-weight:700;color:var(--green);letter-spacing:.06em}
+.trk{position:relative;height:10px;border-radius:99px;margin:62px 0 52px;background:linear-gradient(90deg,#ffd9d5 0 35.7%,#d5f2e1 35.7% 100%)}
+.mk{position:absolute;bottom:20px;transform:translateX(-50%);text-align:center;font-size:11px;color:var(--muted);line-height:1.3;white-space:nowrap}
+.mk b{display:block;font-size:14px;color:var(--text);font-variant-numeric:tabular-nums}
+.mk.l{left:0;transform:none;text-align:left}.mk.r{right:0;left:auto;transform:none;text-align:right}
+.mk.b{bottom:auto;top:22px}
+.tick{position:absolute;left:35.7%;top:-5px;bottom:-5px;width:2px;background:var(--text);border-radius:2px}
+.dot{position:absolute;left:53.9%;top:50%;width:20px;height:20px;border-radius:50%;background:#fff;border:5px solid var(--blue);transform:translate(-50%,-50%);box-shadow:0 2px 10px rgba(10,132,255,.45)}
+.row{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:14px 0;border-top:1px solid var(--line)}
+.row:first-of-type{border-top:0}
+.row b{font-weight:600}
+.row .m{font-size:13px;color:var(--muted)}
+.res{font-size:13px;font-weight:600}
+.up{color:var(--green)}.dn{color:var(--red)}
+.cd{font-size:clamp(40px,6vw,52px);font-weight:600;letter-spacing:-.03em;font-variant-numeric:tabular-nums;line-height:1.05;margin:6px 0}
+.ev{display:flex;justify-content:space-between;font-size:14px;padding-top:12px;margin-top:14px;border-top:1px solid #3a3a3c;color:#c7c7cc}
+.btn{display:inline-block;margin-top:18px;padding:11px 22px;border-radius:99px;background:var(--blue);color:#fff;text-decoration:none;font-size:15px;font-weight:500}
+.btn.w{background:#fff;color:#0a5fd8;font-weight:600}
+.plans{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:18px}
+.plan{background:var(--bg);border-radius:20px;padding:20px;border:2px solid transparent}
+.plan.cur{border-color:var(--blue);background:#fff}
+.plan b{display:block;font-size:20px;letter-spacing:-.02em;margin-bottom:6px}
+.plan span{display:block;font-size:14px;color:var(--muted)}
+.tag{display:inline-block;margin-top:10px;font-size:11px;font-weight:700;color:var(--blue)}
+.risk{text-align:center;font-size:12px;color:var(--muted);max-width:620px;margin:26px auto 0}
+.dockw{position:fixed;left:0;right:0;bottom:0;padding:0 16px calc(14px + env(safe-area-inset-bottom,0px));display:flex;justify-content:center;pointer-events:none;z-index:10}
+.dock{pointer-events:auto;display:flex;gap:2px;padding:5px;border-radius:99px;background:rgba(255,255,255,.78);-webkit-backdrop-filter:saturate(180%) blur(24px);backdrop-filter:saturate(180%) blur(24px);box-shadow:0 10px 34px rgba(0,0,0,.16),0 0 0 1px rgba(0,0,0,.05)}
+.dock a{padding:9px 17px;border-radius:99px;font-size:14px;font-weight:500;color:var(--text);text-decoration:none}
+.dock a.on{background:var(--text);color:#fff}
+@media (max-width:820px){.bento{grid-template-columns:repeat(2,1fr)}.w2,.w4{grid-column:span 2}.r2{grid-row:auto}.plans{grid-template-columns:1fr}.t{padding:22px;border-radius:24px}}
+</style>
+</head>
+<body>
+<div class="wrap" id="home">
+  <div class="top"><span class="brand">TraderWatch</span><a class="chip" href="#plan">Plan Free</a></div>
+  <p class="note">TraderWatch Apple Light (Bento) Edition</p>
+
+  <div class="bento">
+    <div class="t w2">
+      <div class="hero">
+        <div><p class="k">Utama</p><h1>Selamat kembali,<br>Aidil.</h1><p class="sub">2 daripada 3 signal digunakan hari ini.</p></div>
+        <div class="ring"><span>2/3</span></div>
+      </div>
+    </div>
+    <div class="t"><p class="k">Win rate · 30 hari</p><div class="num">64<small>%</small></div><div class="bar"><i></i></div></div>
+    <div class="t"><p class="k">Purata R:R</p><div class="num">1:1.8</div><p class="sub" style="margin-top:12px;font-size:14px">42 signal</p></div>
+
+    <div class="t w2 r2" id="signals">
+      <div class="fh"><div><p class="k">Signal aktif</p><h2>XAUUSD <span class="dir">BUY</span></h2></div><span class="live">Aktif</span></div>
+      <div class="trk">
+        <span class="mk l">Stop loss<b>2,709.90</b></span>
+        <span class="mk" style="left:35.7%">Entry<b>2,715.40</b></span>
+        <span class="mk r">Take profit<b>2,725.30</b></span>
+        <i class="tick"></i><i class="dot"></i>
+        <span class="mk b" style="left:53.9%">Harga kini<b>2,718.20</b></span>
+      </div>
+      <p class="sub" style="font-size:13px">Dikeluarkan 09:42 MYT · R:R 1:1.8 · Disemak 3 minit lalu</p>
+    </div>
+    <div class="t w2 dark r2" id="news">
+      <p class="k">Berita seterusnya</p>
+      <h2>USD · Core PCE</h2>
+      <div class="cd" id="cd">--:--:--</div>
+      <p class="sub" style="color:#98989d;font-size:14px">Impak tinggi · 20:30 MYT</p>
+      <div class="ev"><span>Fed Chair bercakap</span><span>22:00 esok</span></div>
+    </div>
+
+    <div class="t w2">
+      <p class="k">Sejarah hari ini</p>
+      <div class="row"><div><b>EURUSD · SELL</b><div class="m">07:15 → 08:50 MYT</div></div><span class="res up">TP tercapai</span></div>
+      <div class="row"><div><b>GBPUSD · BUY</b><div class="m">Semalam 21:10</div></div><span class="res dn">SL kena</span></div>
+      <div class="row"><div class="m">Tiada signal baharu. Kemas kini seterusnya dalam sesi London.</div></div>
+    </div>
+    <div class="t w2 blue">
+      <p class="k">Telegram</p>
+      <h2>Signal terus ke telefon.</h2>
+      <p style="margin:6px 0 0;opacity:.85">Sertai channel eksklusif ahli supaya tidak terlepas setup.</p>
+      <a class="btn w" href="https://t.me/Traderwatchmembershipbot" target="_blank">Sertai Telegram</a>
+    </div>
+
+    <div class="t w4" id="plan">
+      <p class="k">Keahlian</p><h2>Pilih pelan yang sesuai.</h2>
+      <div class="plans">
+        <div class="plan cur"><b>Free</b><span>3 signal sehari</span><span>3 pair hot</span><i class="tag">Pelan semasa</i></div>
+        <div class="plan"><b>Pro</b><span>10 signal sehari</span><span>7 pair hot</span></div>
+        <div class="plan"><b>Max</b><span>Signal tanpa had</span><span>7 pair hot</span></div>
+      </div>
+      <a class="btn" href="subscribe.html">Naik taraf ke Pro</a>
+    </div>
+  </div>
+  <p class="risk">Trading forex dan produk berleveraj berisiko tinggi dan mungkin tidak sesuai untuk semua orang. Signal dan carta hanyalah maklumat, bukan nasihat kewangan.</p>
+</div>
+
+<div class="dockw"><nav class="dock" id="dock"><a class="on" href="#home">Utama</a><a href="#signals">Signals</a><a href="#news">Berita</a><a href="#plan">Pelan</a></nav></div>
+<script>
+var L=document.querySelectorAll('#dock a');
+L.forEach(function(a){a.onclick=function(){L.forEach(function(x){x.className=''});a.className='on'}});
+(function(){var end=Date.now()+(2*3600+14*60+9)*1000,el=document.getElementById('cd');function p(n){return n<10?'0'+n:''+n}
+function t(){var s=Math.max(0,Math.floor((end-Date.now())/1000));el.textContent=p(Math.floor(s/3600))+':'+p(Math.floor(s%3600/60))+':'+p(s%60)}t();setInterval(t,1000)})();
+</script>
+</body>
+</html>

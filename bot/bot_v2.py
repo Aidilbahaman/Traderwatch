@@ -448,7 +448,7 @@ def spend(tg_id, vision=0, energy=0):
 # Default route: serveras.click. MiniMax m3.1 flash :free OpenRouter DIHAPUS
 # 22 Okt 2026 (free launch period tamat) — jangan rujuk semula.
 LLM_URL = os.environ.get("LLM_URL", "https://serveras.click/v1/chat/completions")
-LLM_MODEL = os.environ.get("LLM_MODEL", "asai/deepseek-v4.1-flash-1017")
+LLM_MODEL = os.environ.get("LLM_MODEL", "asai/freemodel-4-ds-v4.1flash")
 LLM_KEY_ENV = os.environ.get("LLM_KEY_ENV", "HERMES_CUSTOM_SERVERAS_CLICK_API_KEY")
 
 # Route per model supaya chain fellback boleh campur provider safely.
@@ -654,7 +654,7 @@ ENV_FILE = pathlib.Path("/home/ubuntu/tw-bot/.env")
 # Provider serveras rawak: ~1/3 calls thinking semua token (content=0ch),
 # jadi chain ada retry. GLM dikekalkan sebagai fallback (chain: DeepSeek, GLM).
 # Admin masih boleh tukar preset lewat /model.
-DEFAULT_PRESET = "deepseek-v41-1017"
+DEFAULT_PRESET = "freemodel-4-ds-v4.1flash"
 
 
 def _apply_pin():
@@ -712,7 +712,7 @@ def _persist_llm_preset(name):
     for line in lines:
         key = line.split("=", 1)[0].strip() if "=" in line else None
         if key == "LLM_MODEL":
-            out.append(f"LLM_MODEL={cfg['model']}"); seen.add(key)
+            out.append(f"LLM_MODEL=asai/freemodel-4-ds-v4.1flash
         elif key == "LLM_FALLBACK_MODELS":
             out.append(f"LLM_FALLBACK_MODELS={cfg['fallback']}"); seen.add(key)
         elif key == "LLM_URL":
@@ -722,7 +722,7 @@ def _persist_llm_preset(name):
         else:
             out.append(line)
     if "LLM_MODEL" not in seen:
-        out.append(f"LLM_MODEL={cfg['model']}")
+        out.append(f"LLM_MODEL=asai/freemodel-4-ds-v4.1flash
     if "LLM_FALLBACK_MODELS" not in seen:
         out.append(f"LLM_FALLBACK_MODELS={cfg['fallback']}")
     if "LLM_URL" not in seen:
