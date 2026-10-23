@@ -379,7 +379,13 @@ if(member){
   /* Signals come from Supabase. The server decides what each plan can see. */
   const grid = document.getElementById("signalGrid"), note = document.getElementById("signalNote");
   function mytParts(iso){
-    const d = new Date(iso);
+    /* Supabase menyimpan posted_at sebagai timestamp TANPA zon (UTC).
+       new Date("2026-10-23T16:17:38") ditafsir sebagai LOCAL oleh browser,
+       jadi kunci jadi salah dan status tidak dijumpai. Paksa UTC bila tiada
+       penanda zon. */
+    let s = String(iso || "");
+    if(s && !/(Z|[+-]\d{2}:?\d{2})$/.test(s)) s = s.replace(" ", "T") + "Z";
+    const d = new Date(s);
     if(!Number.isFinite(d.getTime())) return null;
     const p = new Intl.DateTimeFormat("en-GB",{timeZone:"Asia/Kuala_Lumpur",year:"numeric",month:"2-digit",day:"2-digit",hour:"2-digit",minute:"2-digit",second:"2-digit",hour12:false}).formatToParts(d);
     const g = t => (p.find(x=>x.type===t)||{}).value || "";
