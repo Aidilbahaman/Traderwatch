@@ -449,14 +449,16 @@ if(member){
         const st = statuses[signalKey(s.pair, s.posted_at)];
         if(!st || !st.closed) return false;
         const t = new Date(st.closed).getTime();
-        return Number.isFinite(t) && (Date.now() - t) <= 24 * 60 * 60 * 1000;
+        /* Trade ditutup kekal 48 jam supaya hasil manual (TP dikutip) sempat
+           dilihat ahli, bukan hilang selepas 24 jam. */
+        return Number.isFinite(t) && (Date.now() - t) <= 48 * 60 * 60 * 1000;
       };
       const allowed = plan === "free" ? HOT_PAIRS.slice(0,3) : HOT_PAIRS;
       const forPlan = s => allowed.includes(normalizePair(s.pair));
       const todays = deduped.filter(s => isToday(s) && forPlan(s));
       const older = deduped.filter(s => !isToday(s) && forPlan(s));
       const carriedOpen = older.filter(stillOpen);
-      const carriedClosed = older.filter(closedRecently).slice(0, 3);
+      const carriedClosed = older.filter(closedRecently).slice(0, 5);
       const carried = carriedOpen.concat(carriedClosed);
       const selected = (plan === "max" ? todays : todays.slice(0, plan === "pro" ? 10 : 3)).concat(carried);
       /* simpan untuk fillBento() — signal-status.json tidak menyimpan entry/sl/tp */
