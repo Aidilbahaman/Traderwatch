@@ -1,5 +1,5 @@
 {
- "updated": "2026-10-23T14:10:02+08:00",
+ "updated": "2026-10-23T14:12:10+08:00",
  "signals": {
   "USDCAD_20261018_110101": {
    "status": "sl",
@@ -471,7 +471,12 @@
    "entry_at": "2026-10-23T13:33:00+08:00"
   },
   "GBPUSD_20261023_132222": {
-   "status": "active"
+   "status": "void_unfilled",
+   "pips": 0.0,
+   "r": 0.0,
+   "unit": "pips",
+   "closed": "2026-10-23T06:15:00+08:00",
+   "note": "Entry 1.33921 never reached. Swissquote M1 replay from 2026-10-23T05:22Z: high 1.33913, 0.8 pips below entry. POI band 1.33909-1.33934 touched 05:41Z but the entry line was never met. No position, so TP/SL are void."
   },
   "EURUSD_20261023_132204": {
    "status": "active"
