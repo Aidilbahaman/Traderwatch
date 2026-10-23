@@ -9,7 +9,7 @@
   --panel2:#ffffff;
   --line:#e8e8ed;
   --text:#1d1d1f;
-  --muted:#86868b;
+  --muted:#6e6e73;
   --buy:#1fa35c;
   --sell:#e5372b;
   --gold:#0a84ff;
@@ -227,7 +227,10 @@ header{
   flex:1; min-height:300px; height:clamp(300px,28vw,420px);
 }
 .tw-member-note{ padding:10px 0 0; color:#98989d; font-size:11px; margin:0; }
-.tw-member-note a{ color:var(--sky); text-decoration:none; }
+.tw-member-note a{
+  color:var(--sky); text-decoration:none;
+  display:inline-flex; align-items:center; min-height:44px; padding:0 2px;
+}
 
 /* ---------- Telegram tile ---------- */
 .tg-tile .tg-action{ display:flex; flex-wrap:wrap; align-items:center; gap:10px; margin-top:18px; }
@@ -308,6 +311,15 @@ footer p{ color:var(--muted); max-width:70ch; margin:0 auto; text-align:center; 
   .upgrade .btn{ width:100%; }
   .ring{ width:96px; height:96px; }
   .ring span{ width:76px; height:76px; font-size:23px; }
+  /* phone tap targets: min 44px touch area */
+  .nav nav a{ display:inline-flex; align-items:center; min-height:44px; padding:0 2px; }
+  .linkbtn{ display:inline-flex; align-items:center; min-height:44px; }
+  .logo{ display:inline-flex; align-items:center; justify-content:center; min-height:44px; min-width:44px; }
+  .tabs button{ min-height:44px; }
+  .btn{ min-height:44px; }
+  .tw-btn{ min-height:44px; }
+  .tw-filters select{ min-height:44px; }
+  .tw-calc summary{ min-height:44px; display:flex; align-items:center; }
 }
 @media (max-width:600px){
   .page{ padding:16px 0 80px; }
@@ -325,6 +337,10 @@ footer p{ color:var(--muted); max-width:70ch; margin:0 auto; text-align:center; 
   #charts .tv.big{ height:420px; min-height:420px; }
   .tw-member-news .tw-fundamental-widget{ height:360px; min-height:320px; }
   .nav nav a{ font-size:13px; }
+  /* header: allow nav to scroll horizontally instead of squashing */
+  .nav{ flex-wrap:nowrap; overflow-x:auto; -webkit-overflow-scrolling:touch; scrollbar-width:none; }
+  .nav::-webkit-scrollbar{ display:none; }
+  .nav nav{ display:flex; flex-wrap:nowrap; gap:8px; }
 }
 @media (prefers-reduced-motion:reduce){
   *{ animation-duration:.001ms !important; transition-duration:.001ms !important; }
