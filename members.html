@@ -46,7 +46,7 @@
 @media(max-width:760px){.tw-offer-panel{grid-template-columns:1fr;gap:18px}.tw-offer-action{width:100%}.tw-offer-panel:after{right:4%;top:16%;font-size:96px;opacity:.7}}
 .page section.block{padding:0}.page section.block + section.block{margin-top:4px}.page .tw-chart-news + .tg-link{margin-top:4px}.page .tg-link + .tw-motion{margin-top:4px}@media(max-width:600px){.page section.block{padding:0}.page section.block + section.block{margin-top:2px}.page .tw-chart-news + .tg-link{margin-top:2px}.page .tg-link + .tw-motion{margin-top:2px}}
 </style>
-<link rel="stylesheet" href="members-bento.css?v=20261024g">
+<link rel="stylesheet" href="members-bento.css?v=20261024h">
 <link rel="stylesheet" href="assets/css/tw-motion-bg.css?v=202610182344">
 <script src="assets/js/tw-fundamental-news.js?v=2026101901" defer></script>
 </head>
@@ -91,6 +91,42 @@
         </div>
       </section>
 
+      <section class="t">
+        <p class="k">Win rate · 30 hari</p>
+        <div class="num" id="statWin">—</div>
+        <div class="bar"><i id="statWinBar" style="width:0%"></i></div>
+      </section>
+
+      <section class="t">
+        <p class="k">Purata R:R</p>
+        <div class="num" id="statRR">—</div>
+        <p class="sub" id="statCount" style="margin-top:12px;font-size:13px">—</p>
+      </section>
+
+      <section class="t w2 r2" id="activeTile">
+        <div class="tile-head">
+          <div><p class="k">Signal aktif</p><h2 id="activePair">Tiada setup aktif</h2></div>
+          <span class="live" id="activeBadge" hidden>Aktif</span>
+        </div>
+        <div class="trk" id="activeTrk" hidden>
+          <span class="mk l">Stop loss<b id="trkSL">—</b></span>
+          <span class="mk" style="left:35.7%">Entry<b id="trkEntry">—</b></span>
+          <span class="mk r">Take profit<b id="trkTP">—</b></span>
+          <i class="tick"></i><i class="dot" id="trkDot"></i>
+          <span class="mk b" style="left:53.9%">Harga kini<b id="trkNow">—</b></span>
+        </div>
+        <p class="sub" id="activeMeta" style="font-size:13px">Menunggu setup baharu.</p>
+      </section>
+
+      <section class="t w2 dark tw-member-news" id="fundamental-news">
+        <div class="tw-member-news-head">
+          <div><span class="tw-member-kicker">Fundamental news</span><h3>High-impact USD events</h3></div>
+          <span class="tw-member-filter">USD · High</span>
+        </div>
+        <div class="tw-fundamental-widget" aria-label="High-impact USD economic calendar"></div>
+        <p class="tw-member-note">Calendar data by <a href="https://www.tradingview.com/economic-calendar/" target="_blank" rel="noopener noreferrer">TradingView</a>. Educational context only — not financial advice.</p>
+      </section>
+
       <section class="t w2" id="signals">
         <div class="tile-head">
           <div><p class="k">Setup harian</p><h2>Signals</h2></div>
@@ -107,15 +143,6 @@
         <div class="tabs" role="tablist" aria-label="Chart pair" id="tabs"></div>
         <div class="tv big" id="chart"></div>
         <div class="tvnote">Charts by TradingView. Prices may be delayed.</div>
-      </section>
-
-      <section class="t w2 dark tw-member-news" id="fundamental-news">
-        <div class="tw-member-news-head">
-          <div><span class="tw-member-kicker">Fundamental news</span><h3>High-impact USD events</h3></div>
-          <span class="tw-member-filter">USD · High</span>
-        </div>
-        <div class="tw-fundamental-widget" aria-label="High-impact USD economic calendar"></div>
-        <p class="tw-member-note">Calendar data by <a href="https://www.tradingview.com/economic-calendar/" target="_blank" rel="noopener noreferrer">TradingView</a>. Educational context only — not financial advice.</p>
       </section>
 
       <section class="t w2 blue tg-tile" id="tgLink" hidden>
@@ -446,6 +473,118 @@ if(member){
     }
   }
   load();
+
+  /* ---------- Stat tiles + active signal track (Apple Bento) ---------- */
+  (function fillBento(){
+    const PAIR_PIP = { XAUUSD:0.1, USDJPY:0.01, BTCUSD:1, GBPUSD:0.0001, NZDUSD:0.0001,
+                       EURUSD:0.0001, AUDUSD:0.0001, USDCAD:0.0001 };
+
+    function setRing(){
+      const el = document.getElementById("planRingText");
+      const ring = document.getElementById("planRing");
+      if(!el || !ring) return;
+      const cap = plan === "max" ? null : plan === "pro" ? 10 : 3;
+      if(cap === null){ el.textContent = "∞"; ring.style.background = "conic-gradient(var(--blue) 0 100%, var(--line) 0)"; return; }
+      const used = (document.querySelectorAll("#signalGrid .sig") || []).length;
+      el.textContent = used + "/" + cap;
+      const pct = Math.max(0, Math.min(100, (used / cap) * 100));
+      ring.style.background = "conic-gradient(var(--blue) 0 " + pct + "%, var(--line) 0)";
+    }
+
+    async function fillStats(){
+      try{
+        const r = await fetch("signal-status.json?t=" + Date.now(), { cache: "no-store" });
+        if(!r.ok) return;
+        const sj = await r.json();
+        const sigs = (sj && sj.signals) || {};
+        const cutoff = Date.now() - 30 * 86400000;
+        let wins = 0, losses = 0, pips = 0, closed = 0, rrSum = 0, rrN = 0;
+
+        Object.keys(sigs).forEach(k => {
+          const s = sigs[k] || {};
+          const st = s.status;
+          if(st !== "tp" && st !== "sl") return;
+          const when = new Date(s.closed || s.closed_at || 0).getTime();
+          if(Number.isFinite(when) && when < cutoff) return;
+          closed++;
+          if(st === "tp") wins++; else losses++;
+          if(typeof s.pips === "number") pips += s.pips;
+          if(typeof s.entry === "number" && typeof s.sl === "number" && typeof s.tp === "number"){
+            const risk = Math.abs(s.entry - s.sl), reward = Math.abs(s.tp - s.entry);
+            if(risk > 0){ rrSum += reward / risk; rrN++; }
+          }
+        });
+
+        const total = wins + losses;
+        const winEl = document.getElementById("statWin");
+        const barEl = document.getElementById("statWinBar");
+        const rrEl = document.getElementById("statRR");
+        const cntEl = document.getElementById("statCount");
+
+        if(winEl){
+          if(total > 0){
+            const pct = Math.round((wins / total) * 100);
+            winEl.innerHTML = pct + "<small>%</small>";
+            if(barEl) barEl.style.width = pct + "%";
+          }else{
+            winEl.textContent = "—";
+          }
+        }
+        if(rrEl) rrEl.textContent = rrN > 0 ? "1:" + (rrSum / rrN).toFixed(1) : "—";
+        if(cntEl) cntEl.textContent = closed > 0
+          ? closed + " signal ditutup · " + (pips > 0 ? "+" : "") + pips.toFixed(1) + " pips"
+          : "Belum ada signal ditutup";
+      }catch(_){}
+    }
+
+    async function fillActive(){
+      try{
+        const r = await fetch("signal-status.json?t=" + Date.now(), { cache: "no-store" });
+        if(!r.ok) return;
+        const sj = await r.json();
+        const sigs = (sj && sj.signals) || {};
+        let bestKey = null, best = null;
+        Object.keys(sigs).forEach(k => {
+          const s = sigs[k];
+          if(s && s.status === "active"){ bestKey = k; best = s; }
+        });
+        const pairEl = document.getElementById("activePair");
+        const badge = document.getElementById("activeBadge");
+        const trk = document.getElementById("activeTrk");
+        const meta = document.getElementById("activeMeta");
+        if(!best || !pairEl) return;
+
+        const code = String(bestKey).split("_")[0];
+        const nice = code.length === 6 ? code.slice(0,3) + "/" + code.slice(3) : code;
+        const side = best.side || "SELL";
+        pairEl.innerHTML = nice + ' <span class="dir">' + side + "</span>";
+        if(badge) badge.hidden = false;
+        if(trk) trk.hidden = false;
+
+        const e = Number(best.entry), sl = Number(best.sl), tp = Number(best.tp);
+        const fmt = v => Number.isFinite(v) ? v.toLocaleString("en-US", {minimumFractionDigits:0, maximumFractionDigits:5}) : "—";
+        const set = (id, v) => { const el = document.getElementById(id); if(el) el.textContent = v; };
+        set("trkEntry", fmt(e)); set("trkSL", fmt(sl)); set("trkTP", fmt(tp));
+
+        const entered = best.entry_at ? new Date(best.entry_at) : null;
+        const bits = [];
+        if(entered && Number.isFinite(entered.getTime())){
+          const h = Math.floor((Date.now() - entered.getTime()) / 3600000);
+          bits.push("Entry " + entered.toLocaleString("en-GB", {timeZone:"Asia/Kuala_Lumpur", hour:"2-digit", minute:"2-digit"}) + " MYT");
+          bits.push(h + "j berjalan");
+        }
+        if(Number.isFinite(e) && Number.isFinite(sl) && Number.isFinite(tp)){
+          const risk = Math.abs(e - sl), reward = Math.abs(tp - e);
+          if(risk > 0) bits.push("R:R 1:" + (reward / risk).toFixed(1));
+        }
+        if(meta) meta.textContent = bits.join(" · ") || "Setup aktif.";
+        setRing();
+      }catch(_){}
+    }
+
+    fillStats();
+    fillActive();
+  })();
 }
 })();
 </script>
