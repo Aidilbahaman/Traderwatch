@@ -1,5 +1,5 @@
 {
- "updated": "2026-10-23T14:25:02+08:00",
+ "updated": "2026-10-23T14:30:02+08:00",
  "signals": {
   "USDCAD_20261018_110101": {
    "status": "sl",
@@ -487,6 +487,12 @@
   "USDJPY_20261023_132128": {
    "status": "expired",
    "pips": 0.0
+  },
+  "GBPUSD_20261023_142938": {
+   "status": "active"
+  },
+  "NZDUSD_20261023_142920": {
+   "status": "active"
   }
  }
 }
