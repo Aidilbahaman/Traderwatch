@@ -494,19 +494,19 @@ footer p{ color:var(--muted); max-width:70ch; margin:0 auto; text-align:center; 
 }
 @media (max-width:600px){
   .hero-row{
-    grid-template-columns:1fr;
-    gap:16px;
+    grid-template-columns:minmax(0,1fr) auto;
+    gap:12px;
   }
   .hero-left{ align-items:flex-start; }
-  .hero-right{ width:100%; justify-content:center; }
+  .hero-right{ width:auto; justify-content:flex-end; }
   .page{ padding:16px 0 80px; }
   .wrap{ padding:0 14px; }
   .t,#signals.t,#charts.t,#fundamental-news.t,#upgradeBox.t{ padding:20px; border-radius:22px; }
   .bento{ gap:12px; }
   h1{ font-size:30px; }
   h2{ font-size:20px; }
-  .ring{ width:84px; height:84px; }
-  .ring span{ width:66px; height:66px; font-size:20px; }
+  .ring{ width:76px; height:76px; }
+  .ring span{ width:58px; height:58px; font-size:18px; }
   .tw-stats{ grid-template-columns:1fr; }
   .tw-filters{ grid-template-columns:1fr; }
   .tw-row{ grid-template-columns:1fr; }
