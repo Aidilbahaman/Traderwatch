@@ -160,6 +160,25 @@ def parse_ts(value):
     return d.astimezone(timezone.utc)
 
 
+def _price_in_zone(sig, price):
+    """True bila harga berada dalam zon POI setup.
+
+    Zon POI lebih lebar daripada entry: entry ialah satu bar, POI ialah
+    julat harga yang/setup fifa sabtu menunggu. Selama harga berada dalam
+    julat itu, setup masih "live" dan timer expiry tidak berjalan.
+    """
+    if price is None:
+        return False
+    try:
+        entry = float(sig["entry"])
+        poi_low = float(sig.get("poi_low") or entry)
+        poi_high = float(sig.get("poi_high") or entry)
+    except (KeyError, TypeError, ValueError):
+        return False
+    lo, hi = min(poi_low, poi_high), max(poi_low, poi_high)
+    return lo <= float(price) <= hi
+
+
 def is_expired(sig, st, now_dt, expiry_min=None, price=None, bars=None):
     """True bila pending limit melebihi tempoh.
 
@@ -197,6 +216,29 @@ def is_expired(sig, st, now_dt, expiry_min=None, price=None, bars=None):
             return False
         try:
             since = parse_ts(posted)
+        except Exception:
+            return False
+        # Harga masih dalam zon POI -> timer belum mula. Cumulative
+        # 30 minit hanya dikira bila harga berada DI LUAR zon; bila harga
+        # masuk semula, strike direset supaya setup tidak mati although
+        # price pernah singgung zone beberapa kali.
+        if _price_in_zone(sig, price):
+            st["in_zone"] = True
+            st["out_of_zone_since"] = None
+            st.pop("expiry_strikes", None)
+            return False
+        # Timer mula dari bila harga pertama kali berada di luar zon.
+        # Kalau setup sudah lama dihantar dan belum pernah masuk zon, anchor
+        # ialah posted_at — jadi 30 minit dikira dari penghantaran, bukan
+        # dari minit pertama cron RUN, yang mengelakkan anchor fake
+        # "now - 30min" yang sentiasa tepat pada ambang dan tidak pernah
+        # bertambah.
+        anchor = st.get("out_of_zone_since") or st.get("in_zone_since")
+        if not anchor:
+            anchor = st.get("first_touch") or posted
+            st["out_of_zone_since"] = anchor
+        try:
+            since = parse_ts(anchor)
         except Exception:
             return False
         if (now_dt - since).total_seconds() <= expiry_min * 60:
