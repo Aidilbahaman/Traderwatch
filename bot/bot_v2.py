@@ -2487,6 +2487,30 @@ async def notify_cmd(update: Update, ctx):
 
 HISTORY_WINDOW_H = 2   # /history tunjuk expired dalam 2 jam terakhir
 
+TG_SENT_FILE = pathlib.Path("/home/ubuntu/web/.tg-sent-ids.json")
+
+
+def _forget_sent(supabase_id):
+    """Buang supabase_id daripada .tg-sent-ids.json.
+
+    signal-telegram-sender hanya hantar signal yang id-nya belum ada dalam
+    fail ini. Jadi bila owner repost setup yang pernah dihantar, id itu
+    mesti dibuang dulu — verified=True sahaja tidak mencukupi, dan cron akan
+    kekal	log "no new signals".
+    """
+    try:
+        if not TG_SENT_FILE.exists():
+            return False
+        data = json.loads(TG_SENT_FILE.read_text())
+        before = len(data)
+        data = [x for x in data if str(x) != str(supabase_id)]
+        if len(data) == before:
+            return False
+        TG_SENT_FILE.write_text(json.dumps(data))
+        return True
+    except (OSError, ValueError):
+        return False
+
 
 def _expired_trades(hours=None):
     """Expired / void trades from bot.db, newest first.
@@ -2590,6 +2614,10 @@ async def history_cmd(update: Update, ctx):
                          {"verified": True})
             except Exception:
                 pass
+            # Sender yang haptic semua signal yang ada dalam .tg-sent-ids.json,
+            # jadi hanya set verified=True tidak cukup untuk hantar semula.
+            # Buang id daripada senarai supaya cron hantar ikut.
+            _forget_sent(int(row["supabase_id"]))
         await say(update.effective_chat,
                   "\u2705 <b>#%s repost</b>\n\n"
                   "%s %s\nEntry <code>%s</code>\nPOI <code>%s-%s</code>\n"
