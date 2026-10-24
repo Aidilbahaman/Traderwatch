@@ -456,8 +456,32 @@ header{
 .upgrade .btn{ flex:none; }
 
 /* ---------- Toolkits tile ---------- */
-#toolkits{ padding:0; background:transparent; box-shadow:none; }
+/* Toolkit dipasang oleh members-tools.js ke dalam tile ini. Tile sendiri
+   membawa padding/background; isi dalaman (tw-bar) tidak perlu kad lagi. */
+#toolkits{
+  padding:22px;
+  background:#fff;
+  border-radius:var(--radius);
+  box-shadow:var(--shadow);
+  min-width:0;
+}
 #toolkits:empty{ display:none; }
+#toolkits .tw-bar{ margin:0; gap:12px; }
+#toolkits .tw-stats{ grid-template-columns:repeat(3,1fr); }
+#toolkits .tw-filters{ grid-template-columns:repeat(3,1fr); }
+#toolkits .tw2{ margin:0; border-radius:18px; }
+#toolkits .tw2-band{ padding:16px; }
+#toolkits .tw2-kpis{ grid-template-columns:repeat(2,minmax(0,1fr)); }
+
+@media (min-width:900px){
+  #toolkits .tw2-kpis{ grid-template-columns:repeat(4,minmax(0,1fr)); }
+}
+@media (max-width:600px){
+  #toolkits{ padding:16px; border-radius:22px; }
+  #toolkits .tw-stats{ grid-template-columns:1fr; }
+  #toolkits .tw-filters{ grid-template-columns:1fr; }
+  #toolkits .tw2-kpis{ grid-template-columns:repeat(2,minmax(0,1fr)); }
+}
 
 /* ---------- Banners ---------- */
 .maint{ background:linear-gradient(135deg,rgba(255,159,10,.14),rgba(255,159,10,.05)); border-bottom:1px solid rgba(255,159,10,.3); }

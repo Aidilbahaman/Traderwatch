@@ -301,7 +301,15 @@
     bar.appendChild(f);
 
     bar.appendChild(buildCalc());
-    heading.insertAdjacentElement('afterend', bar);
+    /* Dashboard Bento: toolkit ada tile sendiri (#toolkits). Jika tile itu
+       wujud, masukkan di situ — bukan dalam tile Signals, yang menjadikan
+       kad signal sempit dan toolkit tersorok di bawah senarai. */
+    var host = document.getElementById('toolkits');
+    if (host) {
+      host.appendChild(bar);
+    } else {
+      heading.insertAdjacentElement('afterend', bar);
+    }
   }
 
   function makeSelect(name, opts) {
