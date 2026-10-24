@@ -41,7 +41,8 @@ html{background:var(--bg)}
   background:
     linear-gradient(158deg,#e3eaf3 0%,#d2dce8 38%,#c2cedd 68%,#b7c5d6 100%)}
 /* 4 spot cahaya — blur besar, opacity rendah, drift perlahan */
-#bgslate i{position:absolute;display:block;border-radius:50%;
+#bgslate i{display:none !important;   /* dimatikan sementara — fokus pada wajah */
+  position:absolute;display:block;border-radius:50%;
   opacity:.55;
   /* PENTING: JANGAN guna contain:paint pada elemen beranimasi.
      Chrome beku repaint — jam animasi jalan, tapi elemen tak dilukis semula.
@@ -70,22 +71,48 @@ html{background:var(--bg)}
    Abstrak, bukan foto: tiada isu privasi, tiada consent perlu.
    Opacity rendah supaya ia kehadiran, bukan gangguan.
    ============================================================ */
+/* ============================================================
+   Wajah — besar, tengah, "memerhati dari sebalik kaca".
+   Di belakang kad (z-index 0), kad glass separa lutsinar
+   jadi wajah kelihatan menembusi — seperti orang di sebalik
+   tingkap beku.
+   ============================================================ */
 #listener{
-  position:absolute;
-  right:-2vmax;
-  bottom:-3vmax;
-  width:clamp(170px,25vmax,320px);
+  position:fixed;
+  left:50%;
+  bottom:-6vh;
+  transform:translateX(-50%);
+  width:min(78vmin, 720px);
   height:auto;
-  opacity:.11;
-  filter:blur(9px);
-  transform-origin:50% 100%;
+  z-index:0;
+  opacity:.46;
   pointer-events:none;
   will-change:transform,opacity;
-  /* sedikit condong — bahasa badan "menyampuk mendengar" */
-  rotate:-2deg;
+  transform-origin:50% 100%;
 }
 @media (max-width:900px){
-  #listener{ width:clamp(140px,34vmax,220px); right:-4vmax; opacity:.09; filter:blur(7px) }
+  #listener{ width:min(92vmin,520px); bottom:-4vh; opacity:.40 }
+}
+@media (prefers-reduced-motion:reduce){
+  #listener{ opacity:.34 }
+}
+
+@media (max-width:900px){
+  #listener{
+    right:-8vmax; bottom:calc(64px + env(safe-area-inset-bottom,0px));
+    width:clamp(150px,40vmax,210px);
+    opacity:.11; filter:blur(4px);
+  }
+}
+@media (prefers-reduced-motion:reduce){
+  #listener{ animation:none }
+}
+@media (max-width:900px){
+  #listener{
+    left:auto; right:-6vmax; bottom:0;
+    width:clamp(150px,40vmax,230px);
+    opacity:.24; filter:blur(3px);
+  }
 }
 
 /* grain halus — bagi tekstur slate, bukan plastik */
@@ -383,34 +410,80 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
 
 <div id="bgslate" aria-hidden="true">
   <i class="s1"></i><i class="s2"></i><i class="s3"></i><i class="s4"></i>
-  <!-- Siluet profil: dahi → hidung → bibir → dagu → bahu -->
-  <svg id="listener" viewBox="0 0 200 240" role="presentation">
-    <defs>
-      <linearGradient id="lgFace" x1="0" y1="0" x2="1" y2="1">
-        <stop offset="0%"   stop-color="#2f7fd8" stop-opacity=".62"/>
-        <stop offset="48%"  stop-color="#3f9fd0" stop-opacity=".44"/>
-        <stop offset="100%" stop-color="#6f6ad8" stop-opacity=".26"/>
-      </linearGradient>
-    </defs>
-    <path fill="url(#lgFace)" d="
-      M 104 12
-      C 72 12 50 38 48 74
-      C 47 98 54 114 62 126
-      C 67 134 68 144 67 154
-      L 67 240
-      L 168 240
-      L 168 196
-      C 146 190 136 180 132 168
-      C 129 159 131 153 128 148
-      C 124 141 129 136 131 131
-      C 133 127 130 124 129 120
-      C 127 113 135 107 137 99
-      C 139 92 131 86 129 78
-      C 127 68 131 52 124 40
-      C 119 30 114 18 104 12
-      Z"/>
-  </svg>
 </div>
+
+<!-- Wajah: depan, besar, memerhati dari sebalik kaca -->
+<svg id="listener" viewBox="0 0 400 520" role="presentation" aria-hidden="true">
+  <defs>
+    <linearGradient id="fSkin" x1="0.2" y1="0" x2="0.8" y2="1">
+      <stop offset="0%"   stop-color="#1f4f8f" stop-opacity=".92"/>
+      <stop offset="46%"  stop-color="#2f6fae" stop-opacity=".80"/>
+      <stop offset="100%" stop-color="#123a6b" stop-opacity=".68"/>
+    </linearGradient>
+    <radialGradient id="fGlow" cx="50%" cy="42%" r="58%">
+      <stop offset="0%"   stop-color="#7fb6ff" stop-opacity=".34"/>
+      <stop offset="100%" stop-color="#7fb6ff" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <!-- halo di belakang kepala -->
+  <ellipse cx="200" cy="190" rx="168" ry="196" fill="url(#fGlow)"/>
+
+  <!-- bahu -->
+  <path fill="url(#fSkin)" d="M200 356
+    C 128 356 62 396 44 452
+    C 36 478 33 500 32 520
+    L 368 520
+    C 367 500 364 478 356 452
+    C 338 396 272 356 200 356 Z"/>
+
+  <!-- leher -->
+  <path fill="url(#fSkin)" d="M172 300 L228 300 L232 366 Q200 380 168 366 Z"/>
+
+  <!-- kepala -->
+  <path fill="url(#fSkin)" d="M200 34
+    C 122 34 74 96 74 178
+    C 74 252 96 300 130 330
+    C 152 350 176 360 200 360
+    C 224 360 248 350 270 330
+    C 304 300 326 252 326 178
+    C 326 96 278 34 200 34 Z"/>
+
+  <!-- rambut -->
+  <path fill="#0f2b52" fill-opacity=".88" d="M200 30
+    C 118 30 68 92 70 176
+    C 71 150 84 132 104 122
+    C 132 108 168 104 200 104
+    C 232 104 268 108 296 122
+    C 316 132 329 150 330 176
+    C 332 92 282 30 200 30 Z"/>
+
+  <!-- kening -->
+  <path fill="#0b1f3c" fill-opacity=".55"
+        d="M126 190 q28 -12 56 -3 q-28 -1 -56 9 Z"/>
+  <path fill="#0b1f3c" fill-opacity=".55"
+        d="M274 190 q-28 -12 -56 -3 q28 -1 56 9 Z"/>
+
+  <!-- mata (kumpulan — untuk blink) -->
+  <g id="fEyes">
+    <ellipse cx="152" cy="216" rx="21" ry="13" fill="#0a1c33" fill-opacity=".90"/>
+    <ellipse cx="248" cy="216" rx="21" ry="13" fill="#0a1c33" fill-opacity=".90"/>
+    <circle cx="157" cy="213" r="5.5" fill="#dcecff" fill-opacity=".92"/>
+    <circle cx="253" cy="213" r="5.5" fill="#dcecff" fill-opacity=".92"/>
+  </g>
+
+  <!-- hidung -->
+  <path fill="#0a1c33" fill-opacity=".26"
+        d="M200 224 q-10 34 -14 46 q10 8 28 2 q-10 -14 -14 -48 Z"/>
+
+  <!-- mulut -->
+  <path fill="#0a1c33" fill-opacity=".38"
+        d="M164 296 q36 18 72 0 q-36 30 -72 0 Z"/>
+
+  <!-- sorotan pipi -->
+  <ellipse cx="130" cy="252" rx="26" ry="18" fill="#9cc7ff" fill-opacity=".12"/>
+  <ellipse cx="270" cy="252" rx="26" ry="18" fill="#9cc7ff" fill-opacity=".12"/>
+</svg>
 
 <div class="ribbon">PREVIEW · DATA SEBENAR 82 SIGNAL · <b>belum live</b></div>
 
@@ -1006,28 +1079,55 @@ function fmtPx(n, dp){
     paused = document.hidden;
   });
 
-  /* ---------- "Pendengar": bernafas + angguk perlahan ----------
-     Dua kitaran berbeza supaya tidak nampak mekanikal:
-     nafas 5.5s (skala dada), angguk 7.3s (pusingan kepala kecil). */
+  /* ============================================================
+     Wajah: bernafas + mata bergerak + kelip.
+     Tiga kitaran berbeza supaya nampak hidup.
+     ============================================================ */
   var face = document.getElementById('listener');
   if(face){
-    var fy = face.getBoundingClientRect().top + window.scrollY;
-    function breathe(now){
-      if(paused){ requestAnimationFrame(breathe); return; }
+    var eyes = document.getElementById('fEyes');
+    var baseRot = -1.5;
+
+    function faceTick(now){
+      if(paused){ requestAnimationFrame(faceTick); return; }
       var t = now - t0;
-      /* nafas: 1.00 -> 1.018 -> 1.00 */
-      var br = 1 + Math.sin(t / 5500 * Math.PI * 2) * 0.009;
-      /* angguk: -1.1deg -> +1.1deg, lebih perlahan */
-      var nod = Math.sin(t / 7300 * Math.PI * 2) * 1.1;
-      /* senget sedikit ikut masa, sangat halus */
-      var tilt = -2 + Math.sin(t / 11000 * Math.PI * 2) * 0.7;
+
+      /* 1) nafas — 5.4s, skala 0.7% (dada naik-turun) */
+      var breath = 1 + Math.sin(t / 5400 * Math.PI * 2) * 0.007;
+
+      /* 2) hanyut kepala — 11s, sedikit kiri-kanan (seperti memerhati) */
+      var swayX = Math.sin(t / 11000 * Math.PI * 2) * 6;
+      var swayY = Math.sin(t / 7900  * Math.PI * 2) * 4;
+
+      /* 3) senget — 17s, ±1.2° */
+      var rot = baseRot + Math.sin(t / 17000 * Math.PI * 2) * 1.2;
+
       face.style.transform =
-        'translateY(' + (Math.sin(t / 7300 * Math.PI * 2) * 1.5).toFixed(2) + 'px) ' +
-        'rotate(' + tilt.toFixed(2) + 'deg) ' +
-        'scale(' + br.toFixed(4) + ')';
-      requestAnimationFrame(breathe);
+        'translateX(calc(-50% + ' + swayX.toFixed(2) + 'px)) ' +
+        'translateY(' + swayY.toFixed(2) + 'px) ' +
+        'rotate(' + rot.toFixed(2) + 'deg) ' +
+        'scale(' + breath.toFixed(4) + ')';
+
+      /* 4) mata bergerak — pandang kiri/kanan/tengah, 6.2s */
+      if(eyes){
+        var look = Math.sin(t / 6200 * Math.PI * 2);      /* -1..1 */
+        var lookY = Math.sin(t / 9100 * Math.PI * 2) * 2; /* sedikit atas-bawah */
+        eyes.setAttribute('transform',
+          'translate(' + (look * 4).toFixed(2) + ',' + lookY.toFixed(2) + ')');
+      }
+
+      /* 5) kelip — setiap ~4.3s, 130ms */
+      var blinkPhase = (t % 4300) / 4300;
+      if(eyes){
+        var closed = blinkPhase > 0.965;
+        eyes.style.transform = closed ? 'scaleY(0.08)' : '';
+        eyes.style.transformOrigin = '200px 216px';
+        eyes.style.transformBox = 'view-box';
+      }
+
+      requestAnimationFrame(faceTick);
     }
-    requestAnimationFrame(breathe);
+    requestAnimationFrame(faceTick);
   }
 })();
 
