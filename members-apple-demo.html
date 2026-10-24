@@ -41,8 +41,7 @@ html{background:var(--bg)}
   background:
     linear-gradient(158deg,#e3eaf3 0%,#d2dce8 38%,#c2cedd 68%,#b7c5d6 100%)}
 /* 4 spot cahaya — blur besar, opacity rendah, drift perlahan */
-#bgslate i{display:none !important;   /* dimatikan sementara — fokus pada wajah */
-  position:absolute;display:block;border-radius:50%;
+#bgslate i{position:absolute;display:block;border-radius:50%;
   opacity:.55;
   /* PENTING: JANGAN guna contain:paint pada elemen beranimasi.
      Chrome beku repaint — jam animasi jalan, tapi elemen tak dilukis semula.
@@ -89,6 +88,7 @@ html{background:var(--bg)}
   pointer-events:none;
   will-change:transform,opacity;
   transform-origin:50% 100%;
+  display:none;              /* dimatikan — kembali ke spot gradient */
 }
 @media (max-width:900px){
   #listener{ width:min(92vmin,520px); bottom:-4vh; opacity:.40 }
@@ -1084,7 +1084,8 @@ function fmtPx(n, dp){
      Tiga kitaran berbeza supaya nampak hidup.
      ============================================================ */
   var face = document.getElementById('listener');
-  if(face){
+  /* Wajah dimatikan (display:none) — jangan jalankan faceTick langsung. */
+  if(face && getComputedStyle(face).display !== 'none'){
     var eyes = document.getElementById('fEyes');
     var baseRot = -1.5;
 
