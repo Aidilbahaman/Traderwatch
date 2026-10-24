@@ -35,15 +35,26 @@ html{background:var(--bg)}
    Background: slate + spot cahaya gradient bergerak (loop)
    Tiada video — ringan, loop sempurna, tiada decode video.
    ============================================================ */
-#bgslate{position:fixed;inset:0;z-index:-2;pointer-events:none;overflow:hidden;
+#bgslate{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden;
+  isolation:isolate;
+  /* z-index:0 (bukan -2) — Chrome boleh lukis elemen negatif DI BELAKANG root
+     background, jadi spot tak nampak langsung. .app di atas dengan z-index:1. */
   background:
     linear-gradient(158deg,#e3eaf3 0%,#d2dce8 38%,#c2cedd 68%,#b7c5d6 100%)}
 /* 4 spot cahaya — blur besar, opacity rendah, drift perlahan */
 #bgslate i{position:absolute;display:block;border-radius:50%;
-  opacity:.55;transform:translate3d(0,0,0);
-  /* Tiada filter:blur() — radial-gradient dengan stop lembut sudah cukup blur.
-     blur(72px) atas elemen 800px x4 = 8fps. Ini guna GPU gradient, bukan gaussian. */
-  contain:paint}
+  opacity:.55;
+  /* Chrome: promote ke layer sendiri SEBELUM animasi mula.
+     translateZ(0) + will-change elak repaint setiap frame. */
+  transform:translate3d(0,0,0);
+  will-change:transform;
+  backface-visibility:hidden;
+  -webkit-backface-visibility:hidden;
+  pointer-events:none;
+  /* Chrome kadang tak composite radial-gradient besar dengan baik;
+     contain + isolation paksa layer berasingan. */
+  contain:layout paint style;
+  isolation:isolate}
 #bgslate .s1{width:58vmax;height:58vmax;left:-16vmax;top:-18vmax;
   background:radial-gradient(circle at 50% 50%,rgba(74,168,255,.85) 0%,rgba(74,168,255,.42) 26%,rgba(74,168,255,.14) 52%,rgba(74,168,255,0) 74%);
   animation:drift1 26s ease-in-out infinite alternate}
@@ -59,23 +70,23 @@ html{background:var(--bg)}
 
 @keyframes drift1{
   0%{transform:translate3d(0,0,0) scale(1)}
-  50%{transform:translate3d(14vmax,10vmax,0) scale(1.16)}
-  100%{transform:translate3d(26vmax,4vmax,0) scale(1.04)}
+  50%{transform:translate3d(24%,17%,0) scale(1.16)}
+  100%{transform:translate3d(45%,7%,0) scale(1.04)}
 }
 @keyframes drift2{
   0%{transform:translate3d(0,0,0) scale(1.06)}
-  50%{transform:translate3d(-16vmax,14vmax,0) scale(.94)}
-  100%{transform:translate3d(-6vmax,26vmax,0) scale(1.12)}
+  50%{transform:translate3d(-31%,27%,0) scale(.94)}
+  100%{transform:translate3d(-12%,50%,0) scale(1.12)}
 }
 @keyframes drift3{
   0%{transform:translate3d(0,0,0) scale(.96)}
-  50%{transform:translate3d(20vmax,-12vmax,0) scale(1.14)}
-  100%{transform:translate3d(4vmax,-24vmax,0) scale(1)}
+  50%{transform:translate3d(36%,-21%,0) scale(1.14)}
+  100%{transform:translate3d(7%,-43%,0) scale(1)}
 }
 @keyframes drift4{
   0%{transform:translate3d(0,0,0) scale(1.08)}
-  50%{transform:translate3d(-22vmax,-10vmax,0) scale(.92)}
-  100%{transform:translate3d(-10vmax,-26vmax,0) scale(1.1)}
+  50%{transform:translate3d(-48%,-22%,0) scale(.92)}
+  100%{transform:translate3d(-22%,-57%,0) scale(1.1)}
 }
 
 /* grain halus — bagi tekstur slate, bukan plastik */
@@ -99,7 +110,8 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
 .kick{font:600 10.5px/1 var(--mono);letter-spacing:.09em;text-transform:uppercase;color:var(--faint)}
 
 /* ---------- shell ---------- */
-.app{display:grid;grid-template-columns:224px minmax(0,1fr) 336px;
+.app{position:relative;z-index:1;
+  display:grid;grid-template-columns:224px minmax(0,1fr) 336px;
   min-height:100vh;min-height:100dvh}
 
 /* ---------- sidebar ---------- */
@@ -326,7 +338,7 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
 .tabbar{display:none}
 
 /* ---------- demo ribbon ---------- */
-.ribbon{position:sticky;top:0;z-index:99;background:#1d1d1f;color:#fff;
+.ribbon{position:relative;z-index:2;background:#1d1d1f;color:#fff;
   font:600 10.5px/1.35 var(--mono);letter-spacing:.05em;text-align:center;
   padding:8px 14px}
 .ribbon b{color:#4ade80}
@@ -345,7 +357,7 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
   .row2{grid-template-columns:1fr}
   .cal{grid-template-columns:repeat(4,1fr)}
   .act-grid{grid-template-columns:repeat(2,1fr);gap:12px}
-  .tabbar{display:flex;position:fixed;left:0;right:0;bottom:0;z-index:50;
+  .tabbar{display:flex;position:fixed;left:0;right:0;bottom:0;z-index:60;
     padding:7px 6px calc(7px + env(safe-area-inset-bottom,0px));
     background:rgba(255,255,255,.92);
     border-top:1px solid var(--line)}
