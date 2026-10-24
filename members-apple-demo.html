@@ -65,6 +65,29 @@ html{background:var(--bg)}
 
 
 
+/* ============================================================
+   "Pendengar" — siluet profil manusia di latar.
+   Abstrak, bukan foto: tiada isu privasi, tiada consent perlu.
+   Opacity rendah supaya ia kehadiran, bukan gangguan.
+   ============================================================ */
+#listener{
+  position:absolute;
+  right:-2vmax;
+  bottom:-3vmax;
+  width:clamp(170px,25vmax,320px);
+  height:auto;
+  opacity:.11;
+  filter:blur(9px);
+  transform-origin:50% 100%;
+  pointer-events:none;
+  will-change:transform,opacity;
+  /* sedikit condong — bahasa badan "menyampuk mendengar" */
+  rotate:-2deg;
+}
+@media (max-width:900px){
+  #listener{ width:clamp(140px,34vmax,220px); right:-4vmax; opacity:.09; filter:blur(7px) }
+}
+
 /* grain halus — bagi tekstur slate, bukan plastik */
 #bgslate::after{content:"";position:absolute;inset:0;opacity:.05;
   /* Tiada mix-blend-mode: multiply — ia paksa compositing seluruh page setiap frame */
@@ -360,6 +383,33 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
 
 <div id="bgslate" aria-hidden="true">
   <i class="s1"></i><i class="s2"></i><i class="s3"></i><i class="s4"></i>
+  <!-- Siluet profil: dahi → hidung → bibir → dagu → bahu -->
+  <svg id="listener" viewBox="0 0 200 240" role="presentation">
+    <defs>
+      <linearGradient id="lgFace" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0%"   stop-color="#2f7fd8" stop-opacity=".62"/>
+        <stop offset="48%"  stop-color="#3f9fd0" stop-opacity=".44"/>
+        <stop offset="100%" stop-color="#6f6ad8" stop-opacity=".26"/>
+      </linearGradient>
+    </defs>
+    <path fill="url(#lgFace)" d="
+      M 104 12
+      C 72 12 50 38 48 74
+      C 47 98 54 114 62 126
+      C 67 134 68 144 67 154
+      L 67 240
+      L 168 240
+      L 168 196
+      C 146 190 136 180 132 168
+      C 129 159 131 153 128 148
+      C 124 141 129 136 131 131
+      C 133 127 130 124 129 120
+      C 127 113 135 107 137 99
+      C 139 92 131 86 129 78
+      C 127 68 131 52 124 40
+      C 119 30 114 18 104 12
+      Z"/>
+  </svg>
 </div>
 
 <div class="ribbon">PREVIEW · DATA SEBENAR 82 SIGNAL · <b>belum live</b></div>
@@ -955,6 +1005,30 @@ function fmtPx(n, dp){
   document.addEventListener('visibilitychange', function(){
     paused = document.hidden;
   });
+
+  /* ---------- "Pendengar": bernafas + angguk perlahan ----------
+     Dua kitaran berbeza supaya tidak nampak mekanikal:
+     nafas 5.5s (skala dada), angguk 7.3s (pusingan kepala kecil). */
+  var face = document.getElementById('listener');
+  if(face){
+    var fy = face.getBoundingClientRect().top + window.scrollY;
+    function breathe(now){
+      if(paused){ requestAnimationFrame(breathe); return; }
+      var t = now - t0;
+      /* nafas: 1.00 -> 1.018 -> 1.00 */
+      var br = 1 + Math.sin(t / 5500 * Math.PI * 2) * 0.009;
+      /* angguk: -1.1deg -> +1.1deg, lebih perlahan */
+      var nod = Math.sin(t / 7300 * Math.PI * 2) * 1.1;
+      /* senget sedikit ikut masa, sangat halus */
+      var tilt = -2 + Math.sin(t / 11000 * Math.PI * 2) * 0.7;
+      face.style.transform =
+        'translateY(' + (Math.sin(t / 7300 * Math.PI * 2) * 1.5).toFixed(2) + 'px) ' +
+        'rotate(' + tilt.toFixed(2) + 'deg) ' +
+        'scale(' + br.toFixed(4) + ')';
+      requestAnimationFrame(breathe);
+    }
+    requestAnimationFrame(breathe);
+  }
 })();
 
 /* ---------- view switching (scroll ke seksyen) ---------- */
