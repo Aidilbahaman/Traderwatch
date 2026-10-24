@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0a0e14">
+<title>traderwatch@stats:~$</title>
+<style>
+:root{
+  --bg:#0a0e14; --panel:#0f141c; --line:#1e2632;
+  --fg:#c8d3e0; --dim:#5c6b7f;
+  --green:#3ddc84; --red:#ff5f56; --amber:#ffb454; --cyan:#4fc3f7;
+  --mono:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,"Liberation Mono",monospace;
+}
+*{box-sizing:border-box}
+html{background:var(--bg)}
+body{margin:0;background:var(--bg);color:var(--fg);
+  font:13px/1.55 var(--mono);-webkit-font-smoothing:antialiased;
+  padding:0 0 env(safe-area-inset-bottom)}
+a{color:var(--cyan);text-decoration:none}
+.wrap{max-width:980px;margin:0 auto;padding:14px 12px 80px}
+
+/* window chrome */
+.bar{display:flex;align-items:center;gap:7px;padding:9px 12px;background:#151b24;
+  border:1px solid var(--line);border-bottom:0;border-radius:8px 8px 0 0;position:sticky;top:0;z-index:20}
+.dot{width:11px;height:11px;border-radius:50%;flex:none}
+.d1{background:#ff5f56}.d2{background:#ffbd2e}.d3{background:#27c93f}
+.bar .t{flex:1;text-align:center;color:var(--dim);font-size:11.5px;letter-spacing:.02em}
+.term{background:var(--panel);border:1px solid var(--line);border-radius:0 0 8px 8px;
+  padding:14px 14px 18px;overflow:hidden}
+
+/* prompt lines */
+.p{margin:0 0 2px;word-break:break-word}
+.p .u{color:var(--green)}
+.p .path{color:var(--cyan)}
+.p .sym{color:var(--dim)}
+.p .cmd{color:#fff}
+.p .out{color:var(--fg)}
+.dim{color:var(--dim)}
+.g{color:var(--green)}.r{color:var(--red)}.a{color:var(--amber)}.c{color:var(--cyan)}
+
+/* ascii blocks */
+pre{margin:6px 0 14px;font:inherit;white-space:pre;overflow-x:auto;
+  -webkit-overflow-scrolling:touch}
+pre.tight{line-height:1.35}
+@media(max-width:520px){
+  pre{font-size:9.5px;letter-spacing:-.03em}
+  .term{padding:11px 8px 15px}
+  .log{font-size:10px}
+  .log .ts{margin-right:5px}
+}
+hr.sep{border:0;border-top:1px dashed var(--line);margin:16px 0}
+
+/* stat grid */
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin:8px 0 14px}
+.cell{border:1px solid var(--line);border-radius:6px;padding:9px 10px;background:#0b1017;min-width:0}
+.cell .lbl{color:var(--dim);font-size:10.5px;letter-spacing:.06em;text-transform:uppercase}
+.cell .val{font-size:20px;font-weight:700;letter-spacing:-.02em;margin-top:3px;
+  font-variant-numeric:tabular-nums}
+.cell .note{color:var(--dim);font-size:10.5px;margin-top:2px;line-height:1.4}
+
+/* ascii bars */
+.bars{margin:8px 0 12px}
+.brow{display:flex;align-items:center;gap:8px;font-size:11.5px;margin-bottom:3px}
+.brow .nm{width:64px;flex:none;color:var(--fg)}
+.brow .tk{flex:1;height:12px;position:relative;background:#0b1017;border-radius:2px;
+  overflow:hidden;min-width:0}
+.brow .tk i{position:absolute;top:0;bottom:0;display:block;border-radius:2px}
+.brow .vv{width:74px;flex:none;text-align:right;font-variant-numeric:tabular-nums}
+@media(max-width:420px){.brow .nm{width:52px;font-size:11px}.brow .vv{width:66px;font-size:11px}}
+
+/* log lines */
+.log{margin:8px 0 12px;font-size:11.5px}
+.log div{padding:2px 0;border-bottom:1px solid rgba(30,38,50,.6)}
+.log div:last-child{border-bottom:0}
+.log .ts{color:var(--dim);margin-right:8px}
+
+/* blinking cursor */
+.cur{display:inline-block;width:7px;height:14px;background:var(--green);
+  vertical-align:-2px;animation:bl 1.1s step-end infinite;margin-left:2px}
+@keyframes bl{50%{opacity:0}}
+
+/* warning block */
+.warn{border-left:2px solid var(--amber);padding:8px 0 8px 11px;margin:10px 0;
+  color:var(--amber);font-size:11.5px;background:rgba(255,180,84,.05)}
+.err{border-left:2px solid var(--red);padding:8px 0 8px 11px;margin:10px 0;
+  color:#ff8b84;font-size:11.5px;background:rgba(255,95,86,.05)}
+.ok{border-left:2px solid var(--green);padding:8px 0 8px 11px;margin:10px 0;
+  color:var(--green);font-size:11.5px;background:rgba(61,220,132,.05)}
+
+/* tabs */
+.tabs{display:flex;gap:6px;margin:10px 0 4px;flex-wrap:wrap}
+.tab{font:inherit;font-size:11px;padding:4px 10px;border-radius:4px;cursor:pointer;
+  background:#0b1017;border:1px solid var(--line);color:var(--dim)}
+.tab.on{background:rgba(79,195,247,.12);border-color:var(--cyan);color:var(--cyan)}
+
+.badge{display:inline-block;font-size:10px;padding:2px 6px;border-radius:3px;
+  border:1px solid currentColor;letter-spacing:.05em;vertical-align:1px}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="bar">
+    <span class="dot d1"></span><span class="dot d2"></span><span class="dot d3"></span>
+    <span class="t">traderwatch — stats — 82×24</span>
+  </div>
+
+  <div class="term">
+
+    <p class="p"><span class="u">bob@traderwatch</span><span class="sym">:</span><span class="path">~/dashboard</span><span class="sym">$</span> <span class="cmd">./tw --stats --all-time</span></p>
+    <p class="p dim">resolving signals ................ <span class="g">82 records</span></p>
+    <p class="p dim">reading signal-status.json ....... <span class="g">ok</span></p>
+    <p class="p dim">cross-check supabase rpc ......... <span class="g">ok</span></p>
+    <p class="p dim">computing pips (BTCUSD pip=1.0) .. <span class="g">ok</span></p>
+    <p class="p" style="margin-top:8px"><span class="g">▸</span> <span class="cmd">RINGKASAN</span></p>
+
+<pre class="tight">┌─ PERFORMANCE ────────────────────────────────────────────┐
+│  NET PIPS      <span class="g">+1198.0</span>       CLOSED        61           │
+│  WIN RATE      <span class="a">38%</span>           23W / 38L                   │
+│  PROFIT FACTOR <span class="g">1.98</span>           EXPIRED       21 (26%)     │
+│  MAX DRAWDOWN  <span class="r">−360.9</span>         TRIGGER RATE  74%          │
+└──────────────────────────────────────────────────────────┘</pre>
+
+    <div class="grid">
+      <div class="cell">
+        <div class="lbl">Purata menang</div>
+        <div class="val g">+103.4</div>
+        <div class="note">22 TP · pips</div>
+      </div>
+      <div class="cell">
+        <div class="lbl">Purata rugi</div>
+        <div class="val r">−34.8</div>
+        <div class="note">33 SL · pips</div>
+      </div>
+      <div class="cell">
+        <div class="lbl">Streak menang</div>
+        <div class="val g">5</div>
+        <div class="note">terbaik</div>
+      </div>
+      <div class="cell">
+        <div class="lbl">Streak rugi</div>
+        <div class="val r">8</div>
+        <div class="note">terburuk · sekarang 1 SL</div>
+      </div>
+    </div>
+
+    <hr class="sep">
+
+    <p class="p"><span class="u">bob@traderwatch</span><span class="sym">:</span><span class="path">~/dashboard</span><span class="sym">$</span> <span class="cmd">./tw --daily --last 7</span></p>
+
+<pre class="tight">TARIKH     PIPS       W/L      EXP   BAR
+<span class="r">18 Okt</span>     <span class="r">−40.0</span>      0W/2L     9   <span class="r">▁</span>
+<span class="g">19 Okt</span>     <span class="g">+80.0</span>      2W/0L     7   <span class="g">▂</span>
+<span class="r">20 Okt</span>    <span class="r">−166.7</span>      0W/5L     0   <span class="r">▁▁</span>
+<span class="g">21 Okt</span>    <span class="g">+703.2</span>      8W/13L    0   <span class="g">▁▁▁▁▁▁▁▁</span>
+<span class="g">22 Okt</span>     <span class="g">+66.9</span>      4W/10L    0   <span class="g">▁</span>
+<span class="g">23 Okt</span>    <span class="g">+559.6</span>      8W/2L     3   <span class="g">▁▁▁▁▁▁</span>
+<span class="r">24 Okt</span>      <span class="r">−5.0</span>      0W/1L     2   <span class="r">▏</span>
+─────────────────────────────────────────
+4/7 hari untung (57%) · terburuk 20 Okt</pre>
+
+    <div class="warn">
+      <b>! PERHATIAN</b><br>
+      20 Okt: 0 menang, 5 rugi berturut · −166.7 pips dalam sehari.<br>
+      Ini hari yang buat member berhenti langganan.
+    </div>
+
+    <hr class="sep">
+
+    <p class="p"><span class="u">bob@traderwatch</span><span class="sym">:</span><span class="path">~/dashboard</span><span class="sym">$</span> <span class="cmd">./tw --pairs</span></p>
+
+    <div class="bars">
+      <div class="brow"><span class="nm">XAU/USD</span><span class="tk"><i style="left:50%;width:48%;background:var(--green)"></i></span><span class="vv g">+850.3</span></div>
+      <div class="brow"><span class="nm">BTC/USD</span><span class="tk"><i style="left:50%;width:18%;background:var(--green)"></i></span><span class="vv g">+315.3</span></div>
+      <div class="brow"><span class="nm">EUR/USD</span><span class="tk"><i style="left:50%;width:2.6%;background:var(--green)"></i></span><span class="vv g">+29.3</span></div>
+      <div class="brow"><span class="nm">USD/CAD</span><span class="tk"><i style="left:50%;width:2.1%;background:var(--green)"></i></span><span class="vv g">+24.0</span></div>
+      <div class="brow"><span class="nm">USD/JPY</span><span class="tk"><i style="left:50%;width:1%;background:var(--green)"></i></span><span class="vv g">+10.8</span></div>
+      <div class="brow"><span class="nm">GBP/USD</span><span class="tk"><i style="left:50%;width:1%;background:var(--green)"></i></span><span class="vv g">+10.4</span></div>
+      <div class="brow"><span class="nm">AUD/USD</span><span class="tk"><i style="right:50%;width:0.6%;background:var(--red)"></i></span><span class="vv r">−5.3</span></div>
+      <div class="brow"><span class="nm">NZD/USD</span><span class="tk"><i style="right:50%;width:2.2%;background:var(--red)"></i></span><span class="vv r">−36.8</span></div>
+    </div>
+
+<pre class="tight dim">XAU/USD menyumbang 76% daripada jumlah pips.
+NZD/USD 0 menang dari 5 trade  <span class="r">← pair paling lemah</span></pre>
+
+    <hr class="sep">
+
+    <p class="p"><span class="u">bob@traderwatch</span><span class="sym">:</span><span class="path">~/dashboard</span><span class="sym">$</span> <span class="cmd">./tw --sessions</span></p>
+
+    <div class="bars">
+      <div class="brow"><span class="nm">16–20</span><span class="tk"><i style="left:0;width:100%;background:var(--green)"></i></span><span class="vv g">+765.1</span></div>
+      <div class="brow"><span class="nm">08–12</span><span class="tk"><i style="left:0;width:58%;background:var(--green)"></i></span><span class="vv g">+447.2</span></div>
+      <div class="brow"><span class="nm">12–16</span><span class="tk"><i style="left:0;width:11%;background:var(--green)"></i></span><span class="vv g">+85.9</span></div>
+      <div class="brow"><span class="nm">20–24</span><span class="tk"><i style="left:0;width:6.5%;background:var(--green)"></i></span><span class="vv g">+49.7</span></div>
+      <div class="brow"><span class="nm">00–04</span><span class="tk"><i style="right:0;width:6.3%;background:var(--red)"></i></span><span class="vv r">−48.2</span></div>
+      <div class="brow"><span class="nm">04–08</span><span class="tk"><i style="right:0;width:13.3%;background:var(--red)"></i></span><span class="vv r">−101.7</span></div>
+    </div>
+
+<pre class="tight dim">Sesi London/NY (16–20) hasil terbesar walaupun win rate 31%.
+Sesi Asia awal (04–08) paling rugi: −101.7 pips.</pre>
+
+    <hr class="sep">
+
+    <p class="p"><span class="u">bob@traderwatch</span><span class="sym">:</span><span class="path">~/dashboard</span><span class="sym">$</span> <span class="cmd">./tw --log --tail 12</span></p>
+
+    <div class="log">
+      <div><span class="ts">23/10 05:23</span><span class="c">XAUUSD</span> SELL entry 4021.945 <span class="g">→ TP +173.3p</span></div>
+      <div><span class="ts">23/10 06:29</span><span class="c">GBPUSD</span> SELL entry 1.33977 <span class="r">→ SL −7.0p</span></div>
+      <div><span class="ts">23/10 06:29</span><span class="c">NZDUSD</span> SELL entry 0.56987 <span class="r">→ SL −5.0p</span></div>
+      <div><span class="ts">23/10 11:55</span><span class="c">BTCUSD</span> SELL entry 81617.845 <span class="g">→ TP +217.8p</span></div>
+      <div><span class="ts">23/10 15:46</span><span class="c">XAUUSD</span> SELL entry 4028.5 <span class="g">→ collected +72.1p</span></div>
+      <div><span class="ts">24/10 00:16</span><span class="c">AUDUSD</span> SELL <span class="a">→ expired</span></div>
+      <div><span class="ts">24/10 00:17</span><span class="c">NZDUSD</span> SELL entry 0.5689 <span class="r">→ SL −5.0p</span></div>
+      <div><span class="ts">24/10 00:17</span><span class="c">XAUUSD</span> SELL <span class="a">→ expired</span></div>
+    </div>
+
+    <hr class="sep">
+
+    <p class="p"><span class="u">bob@traderwatch</span><span class="sym">:</span><span class="path">~/dashboard</span><span class="sym">$</span> <span class="cmd">./tw --check-integrity</span></p>
+
+    <div class="err">
+      <b>✗ FAIL</b> — medan <code>closed</code> rosak<br>
+      18 rekod durasi <b>0.00 jam</b> · 1 rekod <b>128 jam</b><br>
+      Tanda timestamp ditulis guna <code>now()</code> semasa backfill,<br>
+      bukan masa sebenar TP/SL kena.<br>
+      <span class="dim">→ widget "masa tutup" TIDAK dipaparkan.</span>
+    </div>
+
+    <div class="err">
+      <b>✗ FAIL</b> — dua sumber statistik bercanggah<br>
+      toolkit: <b>39%</b> · <b>+810.6</b> · 51 signal<br>
+      stat tile: <b>38%</b> · <b>+1198.0</b> · 61 signal<br>
+      <span class="dim">→ cadangan: buang KPI row toolkit.</span>
+    </div>
+
+    <div class="ok">
+      <b>✓ PASS</b> — 82 signal tally dengan Telegram<br>
+      <b>✓ PASS</b> — BTCUSD dikira pips (pip=1.0)<br>
+      <b>✓ PASS</b> — kalendar guna tarikh tempatan (MYT)
+    </div>
+
+    <hr class="sep">
+
+    <p class="p"><span class="u">bob@traderwatch</span><span class="sym">:</span><span class="path">~/dashboard</span><span class="sym">$</span> <span class="cmd">./tw --next</span></p>
+
+<pre class="tight">[1] buang KPI row toolkit        <span class="r">percanggahan</span>
+[2] kalendar prestasi harian     <span class="g">jujur</span>
+[3] streak rugi terburuk         <span class="g">jujur</span>
+[4] kecilkan charts 645→320px    <span class="a">ruang</span>
+[5] kecilkan tgLink 645→120px    <span class="a">ruang</span>
+[6] widget masa tutup            <span class="r">data rosak</span></pre>
+
+    <p class="p" style="margin-top:14px"><span class="u">bob@traderwatch</span><span class="sym">:</span><span class="path">~/dashboard</span><span class="sym">$</span> <span class="cur"></span></p>
+
+  </div>
+
+  <p class="dim" style="text-align:center;font-size:10.5px;margin-top:14px">
+    PREVIEW · data sebenar 82 signal · belum live
+  </p>
+
+</div>
+</body>
+</html>
