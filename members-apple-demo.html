@@ -36,7 +36,6 @@ html{background:var(--bg)}
    Tiada video — ringan, loop sempurna, tiada decode video.
    ============================================================ */
 #bgslate{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden;
-  isolation:isolate;
   /* z-index:0 (bukan -2) — Chrome boleh lukis elemen negatif DI BELAKANG root
      background, jadi spot tak nampak langsung. .app di atas dengan z-index:1. */
   background:
@@ -44,50 +43,27 @@ html{background:var(--bg)}
 /* 4 spot cahaya — blur besar, opacity rendah, drift perlahan */
 #bgslate i{position:absolute;display:block;border-radius:50%;
   opacity:.55;
-  /* Chrome: promote ke layer sendiri SEBELUM animasi mula.
-     translateZ(0) + will-change elak repaint setiap frame. */
+  /* PENTING: JANGAN guna contain:paint pada elemen beranimasi.
+     Chrome beku repaint — jam animasi jalan, tapi elemen tak dilukis semula.
+     Gejala: nampak statik, tapi berubah bila refresh (full repaint). */
   transform:translate3d(0,0,0);
   will-change:transform;
   backface-visibility:hidden;
   -webkit-backface-visibility:hidden;
-  pointer-events:none;
-  /* Chrome kadang tak composite radial-gradient besar dengan baik;
-     contain + isolation paksa layer berasingan. */
-  contain:layout paint style;
-  isolation:isolate}
+  pointer-events:none}
 #bgslate .s1{width:58vmax;height:58vmax;left:-16vmax;top:-18vmax;
-  background:radial-gradient(circle at 50% 50%,rgba(74,168,255,.85) 0%,rgba(74,168,255,.42) 26%,rgba(74,168,255,.14) 52%,rgba(74,168,255,0) 74%);
-  animation:drift1 26s ease-in-out infinite alternate}
+  background:radial-gradient(circle at 50% 50%,rgba(74,168,255,.85) 0%,rgba(74,168,255,.42) 26%,rgba(74,168,255,.14) 52%,rgba(74,168,255,0) 74%);}
 #bgslate .s2{width:52vmax;height:52vmax;right:-14vmax;top:-10vmax;
-  background:radial-gradient(circle at 50% 50%,rgba(90,210,232,.8) 0%,rgba(90,210,232,.4) 26%,rgba(90,210,232,.13) 52%,rgba(90,210,232,0) 74%);
-  animation:drift2 34s ease-in-out infinite alternate}
+  background:radial-gradient(circle at 50% 50%,rgba(90,210,232,.8) 0%,rgba(90,210,232,.4) 26%,rgba(90,210,232,.13) 52%,rgba(90,210,232,0) 74%);}
 #bgslate .s3{width:56vmax;height:56vmax;left:8vmax;bottom:-26vmax;
-  background:radial-gradient(circle at 50% 50%,rgba(67,209,138,.78) 0%,rgba(67,209,138,.38) 26%,rgba(67,209,138,.12) 52%,rgba(67,209,138,0) 74%);
-  animation:drift3 30s ease-in-out infinite alternate}
+  background:radial-gradient(circle at 50% 50%,rgba(67,209,138,.78) 0%,rgba(67,209,138,.38) 26%,rgba(67,209,138,.12) 52%,rgba(67,209,138,0) 74%);}
 #bgslate .s4{width:46vmax;height:46vmax;right:2vmax;bottom:-18vmax;
-  background:radial-gradient(circle at 50% 50%,rgba(155,140,245,.75) 0%,rgba(155,140,245,.36) 26%,rgba(155,140,245,.11) 52%,rgba(155,140,245,0) 74%);
-  animation:drift4 38s ease-in-out infinite alternate}
+  background:radial-gradient(circle at 50% 50%,rgba(155,140,245,.75) 0%,rgba(155,140,245,.36) 26%,rgba(155,140,245,.11) 52%,rgba(155,140,245,0) 74%);}
 
-@keyframes drift1{
-  0%{transform:translate3d(0,0,0) scale(1)}
-  50%{transform:translate3d(24%,17%,0) scale(1.16)}
-  100%{transform:translate3d(45%,7%,0) scale(1.04)}
-}
-@keyframes drift2{
-  0%{transform:translate3d(0,0,0) scale(1.06)}
-  50%{transform:translate3d(-31%,27%,0) scale(.94)}
-  100%{transform:translate3d(-12%,50%,0) scale(1.12)}
-}
-@keyframes drift3{
-  0%{transform:translate3d(0,0,0) scale(.96)}
-  50%{transform:translate3d(36%,-21%,0) scale(1.14)}
-  100%{transform:translate3d(7%,-43%,0) scale(1)}
-}
-@keyframes drift4{
-  0%{transform:translate3d(0,0,0) scale(1.08)}
-  50%{transform:translate3d(-48%,-22%,0) scale(.92)}
-  100%{transform:translate3d(-22%,-57%,0) scale(1.1)}
-}
+
+
+
+
 
 /* grain halus — bagi tekstur slate, bukan plastik */
 #bgslate::after{content:"";position:absolute;inset:0;opacity:.05;
@@ -931,6 +907,54 @@ function fmtPx(n, dp){
       '<span style="font-size:11.5px">'+n.n+'</span></span>'+
       '<span class="pill red">'+n.lvl+'</span></li>';
   }).join("");
+})();
+
+/* ============================================================
+   Background spot: JS-driven (bukan CSS animation).
+   Chrome beku CSS transform animation pada sesetengah GPU/driver.
+   rAF + transform adalah main-thread, mustahil tersekat.
+   ============================================================ */
+(function(){
+  var spots = [].slice.call(document.querySelectorAll('#bgslate i'));
+  if(!spots.length) return;
+  if(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+  /* laluan setiap spot: [dx%, dy%, scale] */
+  var paths = [
+    [[0,0,1.00],[24,17,1.16],[45,7,1.04]],
+    [[0,0,1.06],[-31,27,0.94],[-12,50,1.12]],
+    [[0,0,0.96],[36,-21,1.14],[7,-43,1.00]],
+    [[0,0,1.08],[-48,-22,0.92],[-22,-57,1.10]]
+  ];
+  var durs = [26000, 34000, 30000, 38000];
+
+  var t0 = performance.now();
+  var paused = false;
+
+  function lerp(a,b,t){ return a + (b-a)*t; }
+  function ease(t){ return t<0.5 ? 2*t*t : 1-Math.pow(-2*t+2,2)/2; }
+
+  function tick(now){
+    if(paused){ requestAnimationFrame(tick); return; }
+    for(var i=0;i<spots.length;i++){
+      var d = durs[i];
+      var el = (now - t0) % (d*2);            /* 0..2d — alternate */
+      var p = el <= d ? el/d : (2*d - el)/d;  /* ping-pong 0..1 */
+      var e = ease(p);
+      var kf = paths[i];
+      var seg = e < 0.5 ? 0 : 1;
+      var lt = seg === 0 ? e*2 : (e-0.5)*2;
+      var A = kf[seg], B = kf[seg+1];
+      var dx = lerp(A[0],B[0],lt), dy = lerp(A[1],B[1],lt), sc = lerp(A[2],B[2],lt);
+      spots[i].style.transform = 'translate3d('+dx.toFixed(2)+'%,'+dy.toFixed(2)+'%,0) scale('+sc.toFixed(4)+')';
+    }
+    requestAnimationFrame(tick);
+  }
+  requestAnimationFrame(tick);
+
+  document.addEventListener('visibilitychange', function(){
+    paused = document.hidden;
+  });
 })();
 
 /* ---------- view switching (scroll ke seksyen) ---------- */
