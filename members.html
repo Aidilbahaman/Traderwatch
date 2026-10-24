@@ -105,15 +105,15 @@
         <p class="sub" id="statCount" style="margin-top:12px;font-size:13px">—</p>
       </section>
 
-      <section class="t w4" id="perfTile">
+      <section class="t w2" id="perfTile">
         <div class="perf-head">
           <p class="k">Pips kumulatif</p>
           <div class="perf-big" id="perfNet">+0.0 pips</div>
           <p class="perf-sub" id="perfSub">—</p>
         </div>
         <div class="perf-wrap">
-          <svg id="perfChart" viewBox="0 0 720 240" preserveAspectRatio="none" role="img"
-               aria-label="Pips kumulatif mengikut pair"></svg>
+          <svg id="perfChart" viewBox="0 0 320 150" role="img"
+               aria-label="Pips kumulatif TraderWatch"></svg>
         </div>
       </section>
 
@@ -270,7 +270,8 @@ if(member){
     if(!el) return;
     const n = Math.max(0, Number(used) || 0);
     if(TIER_CAP === null){
-      el.textContent = tierName + " Member · " + n + " signal · tanpa had";
+      /* Max: tanpa had — jangan campur dengan kiraan harian. */
+      el.textContent = tierName + " Member · signal tanpa had";
     }else if(plan === "free"){
       /* Free: 3 signal setiap tetingkap 5 jam, reset 00/05/10/15/20 MYT. */
       el.textContent = tierName + " Member · " + n + " of " + TIER_CAP
