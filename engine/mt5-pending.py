@@ -34,6 +34,9 @@ LOT = float(os.environ.get("MT5_LOT", "1.00"))
 MAGIC_BASE = int(os.environ.get("MT5_MAGIC_BASE", "20261000"))
 DEVIATION = int(os.environ.get("MT5_DEVIATION", "20"))
 MAX_PENDING = int(os.environ.get("MT5_MAX_PENDING", "5"))
+# Senarai symbol dibenarkan (kosong = semua). Guna untuk hadkan ke BTCUSD
+# semasa ujian luar waktu forex.
+ALLOW = [x.strip().upper() for x in os.environ.get("MT5_ALLOW", "").split(",") if x.strip()]
 
 PREFIX = "/home/mt5/.mt5"
 PY = r"C:\Python311\python.exe"
@@ -268,7 +271,7 @@ def active_signals():
 
 
 def main():
-    log(f"START mode={MODE} lot={LOT} max_pending={MAX_PENDING}")
+    log(f"START mode={MODE} lot={LOT} max_pending={MAX_PENDING} allow={ALLOW or 'semua'}")
 
     st = load_state()
     seen = st.get("signals", {})
@@ -308,6 +311,8 @@ def main():
             break
 
         pair = str(s["pair"]).replace("/", "").upper()
+        if ALLOW and pair not in ALLOW:
+            continue
         side = str(s["side"]).upper()
         entry, sl, tp = float(s["entry"]), float(s["sl"]), float(s["tp"])
         magic = MAGIC_BASE + int(s["id"])
