@@ -13,7 +13,7 @@
    ============================================================ */
 :root{
   --bg:#f5f5f7; --panel:rgba(255,255,255,.72); --panel-solid:#fff; --line:#e8e8ed;
-  --glass:rgba(255,255,255,.58); --glass-2:rgba(255,255,255,.76);
+  --glass:rgba(255,255,255,.50); --glass-2:rgba(255,255,255,.66);
   --ink:#1d1d1f; --mute:#6e6e73; --faint:#86868b;
   --blue:#0a84ff; --sky:#2997ff; --deep:#0071e3;
   --green:#1fa35c; --green-dk:#1a7a42; --green-bg:#e3f4e8;
@@ -27,16 +27,68 @@
 }
 *{box-sizing:border-box}
 html{-webkit-text-size-adjust:100%;scroll-behavior:smooth}
+/* body mesti TRANSPARENT — jika tidak, ia menutup video di z-index:-2 */
 body{margin:0;color:var(--ink);font:15px/1.5 var(--sf);
-  -webkit-font-smoothing:antialiased;background:var(--bg)}
-/* Ambient wash — glass perlu sesuatu untuk refract, jika tidak nampak flat putih */
-body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;
+  -webkit-font-smoothing:antialiased;background:transparent}
+html{background:var(--bg)}
+/* ============================================================
+   Background: slate + spot cahaya gradient bergerak (loop)
+   Tiada video — ringan, loop sempurna, tiada decode video.
+   ============================================================ */
+#bgslate{position:fixed;inset:0;z-index:-2;pointer-events:none;overflow:hidden;
   background:
-    radial-gradient(48% 36% at 6% 2%, rgba(41,151,255,.22), transparent 64%),
-    radial-gradient(42% 32% at 94% 10%, rgba(31,163,92,.16), transparent 66%),
-    radial-gradient(56% 40% at 50% 102%, rgba(10,132,255,.14), transparent 68%),
-    radial-gradient(34% 26% at 78% 62%, rgba(199,119,0,.07), transparent 70%),
-    var(--bg)}
+    linear-gradient(158deg,#e3eaf3 0%,#d2dce8 38%,#c2cedd 68%,#b7c5d6 100%)}
+/* 4 spot cahaya — blur besar, opacity rendah, drift perlahan */
+#bgslate i{position:absolute;display:block;border-radius:50%;
+  filter:blur(72px);opacity:.62;will-change:transform;
+  transform:translate3d(0,0,0)}
+#bgslate .s1{width:58vmax;height:58vmax;left:-16vmax;top:-18vmax;
+  background:radial-gradient(circle at 50% 50%,#4aa8ff 0%,rgba(74,168,255,.55) 34%,rgba(74,168,255,0) 70%);
+  animation:drift1 26s ease-in-out infinite alternate}
+#bgslate .s2{width:52vmax;height:52vmax;right:-14vmax;top:-10vmax;
+  background:radial-gradient(circle at 50% 50%,#5ad2e8 0%,rgba(90,210,232,.5) 32%,rgba(90,210,232,0) 70%);
+  animation:drift2 34s ease-in-out infinite alternate}
+#bgslate .s3{width:56vmax;height:56vmax;left:8vmax;bottom:-26vmax;
+  background:radial-gradient(circle at 50% 50%,#43d18a 0%,rgba(67,209,138,.48) 32%,rgba(67,209,138,0) 70%);
+  animation:drift3 30s ease-in-out infinite alternate}
+#bgslate .s4{width:46vmax;height:46vmax;right:2vmax;bottom:-18vmax;
+  background:radial-gradient(circle at 50% 50%,#9b8cf5 0%,rgba(155,140,245,.46) 32%,rgba(155,140,245,0) 70%);
+  animation:drift4 38s ease-in-out infinite alternate}
+
+@keyframes drift1{
+  0%{transform:translate3d(0,0,0) scale(1)}
+  50%{transform:translate3d(14vmax,10vmax,0) scale(1.16)}
+  100%{transform:translate3d(26vmax,4vmax,0) scale(1.04)}
+}
+@keyframes drift2{
+  0%{transform:translate3d(0,0,0) scale(1.06)}
+  50%{transform:translate3d(-16vmax,14vmax,0) scale(.94)}
+  100%{transform:translate3d(-6vmax,26vmax,0) scale(1.12)}
+}
+@keyframes drift3{
+  0%{transform:translate3d(0,0,0) scale(.96)}
+  50%{transform:translate3d(20vmax,-12vmax,0) scale(1.14)}
+  100%{transform:translate3d(4vmax,-24vmax,0) scale(1)}
+}
+@keyframes drift4{
+  0%{transform:translate3d(0,0,0) scale(1.08)}
+  50%{transform:translate3d(-22vmax,-10vmax,0) scale(.92)}
+  100%{transform:translate3d(-10vmax,-26vmax,0) scale(1.1)}
+}
+
+/* grain halus — bagi tekstur slate, bukan plastik */
+#bgslate::after{content:"";position:absolute;inset:0;opacity:.055;mix-blend-mode:multiply;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='140' height='140'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3'/></filter><rect width='140' height='140' filter='url(%23n)'/></svg>")}
+
+/* scrim supaya teks kekal kontras atas spot terang */
+#bgslate::before{content:"";position:absolute;inset:0;
+  background:
+    radial-gradient(70% 46% at 50% 0%,rgba(245,245,247,.44),transparent 72%),
+    linear-gradient(180deg,rgba(245,245,247,.34) 0%,rgba(245,245,247,.16) 45%,rgba(245,245,247,.42) 100%)}
+
+@media (prefers-reduced-motion:reduce){
+  #bgslate i{animation:none}
+}
 a{color:inherit;text-decoration:none}
 button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
 :focus-visible{outline:2px solid var(--blue);outline-offset:2px;border-radius:8px}
@@ -320,6 +372,10 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
 </style>
 </head>
 <body>
+
+<div id="bgslate" aria-hidden="true">
+  <i class="s1"></i><i class="s2"></i><i class="s3"></i><i class="s4"></i>
+</div>
 
 <div class="ribbon">PREVIEW · DATA SEBENAR 82 SIGNAL · <b>belum live</b></div>
 
