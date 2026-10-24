@@ -286,7 +286,7 @@
       var box = el('div', 'tw-stat');
       var b = el('b', null, '–');
       box.appendChild(b);
-      box.appendChild(el('span', null, p[1] + ' (' + CONFIG.statsDays + ' hari)'));
+      box.appendChild(el('span', null, p[1] + ' (sejak mula)'));
       statEls[p[0]] = b;
       stats.appendChild(box);
     });
@@ -343,12 +343,11 @@
 
   function renderStats() {
     if (!statusData || !statusData.signals || !statEls.win) return;
-    var cutoff = Date.now() - CONFIG.statsDays * 86400000;
+    /* Tiada had hari: kira semua signal ditutup sejak mula. */
     var wins = 0, losses = 0, pips = 0;
     Object.keys(statusData.signals).forEach(function (k) {
       var s = statusData.signals[k];
       var m = k.match(/_(\d{4})(\d{2})(\d{2})_/);
-      if (m && new Date(+m[1], +m[2] - 1, +m[3]).getTime() < cutoff) return;
       if (s.status === 'tp' || s.status === 'collected') { wins++; pips += s.pips || 0; }
       else if (s.status === 'sl') { losses++; pips += s.pips || 0; }
     });
