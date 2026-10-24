@@ -255,14 +255,28 @@ if(member){
      get_signals() tahu berapa setup sebenar untuk plan ini hari ini. */
   const TIER_CAP = plan === "max" ? null : plan === "pro" ? 10 : 3;
   const tierName = plan === "max" ? "Max" : plan === "pro" ? "Pro" : "Free";
+  /* Tetingkap kuota Free: grid 5 jam (00/05/10/15/20 MYT). */
+  function nextResetLabel(){
+    const now = new Date();
+    const myt = new Date(now.toLocaleString("en-US", { timeZone: "Asia/Kuala_Lumpur" }));
+    const h = myt.getHours();
+    const next = (Math.floor(h / 5) + 1) * 5;
+    const hh = String(next % 24).padStart(2, "0");
+    return hh + ":00 MYT";
+  }
+
   function setTierInfo(used){
     const el = document.getElementById("planLine");
     if(!el) return;
     const n = Math.max(0, Number(used) || 0);
     if(TIER_CAP === null){
-      el.textContent = tierName + " Member · " + n + " signal hari ini · tanpa had";
+      el.textContent = tierName + " Member · " + n + " signal · tanpa had";
+    }else if(plan === "free"){
+      /* Free: 3 signal setiap tetingkap 5 jam, reset 00/05/10/15/20 MYT. */
+      el.textContent = tierName + " Member · " + n + " of " + TIER_CAP
+        + " signal setiap 5 jam · reset " + nextResetLabel();
     }else{
-      el.textContent = tierName + " Member · " + n + " of " + TIER_CAP + " free signal for today";
+      el.textContent = tierName + " Member · " + n + " of " + TIER_CAP + " signal";
     }
     el.dataset.used = n;
     el.dataset.cap = TIER_CAP === null ? "" : TIER_CAP;

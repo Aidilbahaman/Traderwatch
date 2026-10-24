@@ -88,6 +88,18 @@ TG = load_secrets("telegram.env")
 SB = load_secrets("supabase.env")
 SIGNALS_TOKEN = TG.get("TELEGRAM_SIGNALS_BOT_TOKEN") or TG["TELEGRAM_BOT_TOKEN"]
 ADMIN_CHAT = TG.get("TELEGRAM_ADMIN_CHAT_ID", "")
+
+# Kuota Telegram untuk ahli Free: 3 signal setiap tetingkap 5 jam.
+try:
+    import sys as _sys
+    _sys.path.insert(0, "/home/ubuntu/web")
+    import importlib.util as _ilu
+    _spec = _ilu.spec_from_file_location("free_quota", "/home/ubuntu/web/free-quota.py")
+    free_quota = _ilu.module_from_spec(_spec)
+    _spec.loader.exec_module(free_quota)
+except Exception as _ex:
+    free_quota = None
+    log(f"FREE-QUOTA-WARN: {type(_ex).__name__}: {_ex}")
 SB_URL = SB["SUPABASE_URL"].rstrip("/")
 SB_KEY = SB["SUPABASE_SERVICE_KEY"]
 
@@ -434,8 +446,9 @@ def fetch_signals():
 
 
 def fetch_targets():
+    """Pro/Max + Free (Free dihadkan 3 signal / 5 jam oleh free_quota)."""
     rows = sb_get("profiles?select=id,name,plan,telegram_chat_id"
-                  "&plan=in.(pro,max)&telegram_chat_id=not.is.null") or []
+                  "&plan=in.(free,pro,max)&telegram_chat_id=not.is.null") or []
     tc = test_chat()
     if tc is not None:
         rows = [r for r in rows if int(r["telegram_chat_id"]) == tc]
@@ -899,8 +912,12 @@ def _repair_notify(sig, st, sid, targets, pending, dry_run=False):
     return True
 
 
-def dispatch(text, targets, dry_run=False, png=None):
+def dispatch(text, targets, dry_run=False, png=None, event=None, sig_key=None):
     """Hantar ke semua target + admin. Jika ada PNG, guna photo+caption.
+
+    Kuota Free: HANYA event 'entry' menolak 1 kuota (1 setup triggered entry =
+    1 kuota). Notifikasi TP/SL/expired selepas itu percuma — ahli Free sudah
+    "membayar" untuk setup itu apabila entry berlaku.
 
     Pulangkan (sent, failed, ok_chats) — ok_chats ialah senarai chat_id yang
     berjaya terima, supaya state boleh catat siapa yang sudah tahu. Tanpa
@@ -908,15 +925,49 @@ def dispatch(text, targets, dry_run=False, png=None):
     """
     sent = failed = 0
     ok_chats = []
-    chats = [int(t["telegram_chat_id"]) for t in targets]
+
+    # Peta chat_id -> profil (untuk semak plan/quota Free).
+    by_chat = {}
+    for t in targets:
+        try:
+            by_chat[int(t["telegram_chat_id"])] = t
+        except Exception:
+            continue
+
+    chats = list(by_chat.keys())
     if ADMIN_CHAT and ADMIN_CHAT.isdigit() and int(ADMIN_CHAT) not in chats:
         chats.append(int(ADMIN_CHAT))
+
     for cid in chats:
+        prof = by_chat.get(cid)
+        plan = str((prof or {}).get("plan") or "").lower()
+        quota_note = ""
+
+        # Free: 3 setup setiap tetingkap 5 jam. Hanya event 'entry' ditolak.
+        # TP/SL/expired untuk setup yang sama adalah percuma.
+        if prof and plan == "free" and free_quota is not None and event == "entry":
+            try:
+                res = free_quota.consume(prof.get("id"))
+            except Exception as ex:
+                log(f"FREE-QUOTA-FAIL chat={cid} {type(ex).__name__}: {ex}")
+                res = {"allowed": True, "remaining": None}
+            if not res.get("allowed"):
+                log(f"FREE-QUOTA-SKIP chat={cid} window={res.get('window')} "
+                    f"reset={res.get('reset_label')}")
+                continue
+            rem = res.get("remaining")
+            if rem is not None:
+                quota_note = ("\n\n━━━━━━━━━━━━━━━━━━━━\n"
+                              f"🎟 Kuota Free: <b>{rem}/{res.get('limit')}</b> tinggal · "
+                              f"reset {res.get('reset_label')}")
+
         if dry_run:
-            log(f"DRY-RUN would send -> {cid}")
+            log(f"DRY-RUN would send -> {cid} plan={plan or '-'}")
             sent += 1
             continue
-        ok, desc = tg_photo(cid, png, text) if png else tg_send(cid, text)
+
+        body = text + quota_note
+        ok, desc = tg_photo(cid, png, body) if png else tg_send(cid, body)
         if ok:
             sent += 1
             ok_chats.append(cid)
@@ -1053,7 +1104,8 @@ def _run(dry_run=False):
                     if pending:
                         text = build_message("entry", sig, price, st)
                         png = render_result_chart(sig, st)
-                        s, f, ok_chats = dispatch(text, targets, dry_run=dry_run, png=png)
+                        s, f, ok_chats = dispatch(text, targets, dry_run=dry_run,
+                                                  png=png, event="entry", sig_key=str(sid))
                         st["notified"] = sorted(set(st.get("notified") or [])
                                                 | set(str(c) for c in ok_chats))
                         log(f"BOOTSTRAP-ENTRY #{sid} {sig['pair']} price={price} "
@@ -1084,7 +1136,8 @@ def _run(dry_run=False):
             st["closed"] = "expired"
             text = build_message("expired", sig, None, st)
             png = render_result_chart(sig, st)
-            s, f, ok_chats = dispatch(text, targets, dry_run=dry_run, png=png)
+            s, f, ok_chats = dispatch(text, targets, dry_run=dry_run, png=png,
+                                      event="expired", sig_key=str(sid))
             st["notified"] = sorted(set(st.get("notified") or []) | set(str(c) for c in ok_chats))
             log(f"EVENT expired #{sid} {sig['pair']} "
                 f"chart={'yes' if png else 'no'} sent={s} fail={f}")
@@ -1094,7 +1147,8 @@ def _run(dry_run=False):
         for ev in found:
             text = build_message(ev, sig, price, st)
             png = render_result_chart(sig, st) if ev in ("tp", "sl", "entry", "expired") else None
-            s, f, ok_chats = dispatch(text, targets, dry_run=dry_run, png=png)
+            s, f, ok_chats = dispatch(text, targets, dry_run=dry_run, png=png,
+                                      event=ev, sig_key=str(sid))
             st["notified"] = sorted(set(st.get("notified") or []) | set(str(c) for c in ok_chats))
             log(f"EVENT {ev} #{sid} {sig['pair']} price={price} "
                 f"chart={'yes' if png else 'no'} sent={s} fail={f}")
