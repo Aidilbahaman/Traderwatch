@@ -654,27 +654,18 @@ if(member){
             : "—";
         }
         if(cntEl){
-          /* NET pips (forex) + NET USD (BTC) dipapar berasingan — unit berbeza
-             tidak boleh dicampur dalam satu nombor. */
-          let netPips = 0, netUsd = 0;
+          /* BTCUSD: 1 pip = USD 1 pergerakan harga (PIP.BTCUSD = 1.0 dalam
+             engine), jadi unit usd pada BTC memang sudah dalam "pip".
+             Semua trade boleh dijumlahkan sebagai pips. */
+          let netPips = 0;
           Object.keys(sigs).forEach(function(k){
             const v = sigs[k] || {};
             if(v.status !== "tp" && v.status !== "sl" && v.status !== "collected") return;
-            if(typeof v.pips !== "number") return;
-            if(v.unit === "usd") netUsd += v.pips;
-            else netPips += v.pips;
+            if(typeof v.pips === "number") netPips += v.pips;
           });
-          const bits = [];
-          if(closed > 0){
-            bits.push(closed + " signal ditutup");
-            bits.push((netPips > 0 ? "+" : "") + netPips.toFixed(1) + " pips");
-            if(netUsd !== 0){
-              bits.push("BTC " + (netUsd > 0 ? "+" : "-") + "$" + Math.abs(netUsd).toFixed(1));
-            }
-            cntEl.textContent = bits.join(" · ");
-          }else{
-            cntEl.textContent = "Belum ada signal ditutup";
-          }
+          cntEl.textContent = closed > 0
+            ? closed + " signal ditutup · " + (netPips > 0 ? "+" : "") + netPips.toFixed(1) + " pips"
+            : "Belum ada signal ditutup";
         }
         renderPerf(sigs);
       }catch(_){}
@@ -805,9 +796,8 @@ if(member){
       }
       rows.sort(function(a,b){ return a.t - b.t; });
 
-      /* Graf = pips (forex). BTC dikira dalam USD dan dipapar berasingan
-         dalam subteks — unit berbeza tidak boleh dicampur pada paksi sama. */
-      const pipRows = rows.filter(function(r){ return r.unit !== "usd"; });
+      /* BTCUSD pip = 1.0 (USD 1 per $1 move), jadi semua trade dikira pips. */
+      const pipRows = rows;
       let cum = 0;
       const pts = [0];
       pipRows.forEach(function(r){ cum += r.pips; pts.push(cum); });
@@ -824,14 +814,7 @@ if(member){
         netEl.className = "perf-big " + (cum >= 0 ? "pos" : "neg");
       }
       if(subEl){
-        let txt = pipRows.length + " signal · TP berturut-turut terbaik: " + best;
-        /* BTC dalam USD: papar berasingan, jangan campur dengan pips. */
-        let usdTotal = 0;
-        rows.forEach(function(r){ if(r.unit === "usd") usdTotal += r.pips; });
-        if(usdTotal !== 0){
-          txt += " · BTC " + (usdTotal > 0 ? "+" : "-") + "$" + Math.abs(usdTotal).toFixed(1);
-        }
-        subEl.textContent = txt;
+        subEl.textContent = pipRows.length + " signal · TP berturut-turut terbaik: " + best;
       }
 
       const H = 150;
