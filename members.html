@@ -13,6 +13,17 @@
 --page:radial-gradient(700px 480px at 6% -6%,rgba(10,132,255,.18),transparent 62%),radial-gradient(640px 460px at 100% 4%,rgba(175,82,222,.14),transparent 60%),radial-gradient(700px 500px at 60% 110%,rgba(48,209,88,.12),transparent 60%),#f5f5f7}
 @media (prefers-color-scheme:dark){:root{--bg:#000;--ink:#f5f5f7;--mute:#98989d;--line:rgba(255,255,255,.1);--blue:#0a84ff;--green:#30d158;--green-ink:#30d158;--red:#ff453a;--card:rgba(44,44,46,var(--glass));--fill:rgba(120,120,128,.24);--thumb:#636366;--shadow:0 16px 40px rgba(0,0,0,.45);
 --page:radial-gradient(700px 480px at 6% -6%,rgba(10,132,255,.28),transparent 62%),radial-gradient(640px 460px at 100% 4%,rgba(175,82,222,.22),transparent 60%),radial-gradient(700px 500px at 60% 110%,rgba(48,209,88,.16),transparent 60%),#000}}
+
+/* ===== Manual theme override =====
+   :root carries the light palette; [data-theme="dark"] mirrors the media
+   query so the toggle works even when the OS says "light". */
+:root[data-theme="dark"]{--bg:#000;--ink:#f5f5f7;--mute:#98989d;--line:rgba(255,255,255,.1);--blue:#0a84ff;--green:#30d158;--green-ink:#30d158;--red:#ff453a;--card:rgba(44,44,46,var(--glass));--fill:rgba(120,120,128,.24);--thumb:#636366;--shadow:0 16px 40px rgba(0,0,0,.45);
+--page:radial-gradient(700px 480px at 6% -6%,rgba(10,132,255,.28),transparent 62%),radial-gradient(640px 460px at 100% 4%,rgba(175,82,222,.22),transparent 60%),radial-gradient(700px 500px at 60% 110%,rgba(48,209,88,.16),transparent 60%),#000}
+:root[data-theme="light"]{--bg:#f5f5f7;--ink:#1d1d1f;--mute:#6e6e73;--line:rgba(0,0,0,.08);--blue:#0071e3;--green:#248a3d;--green-ink:#248a3d;--red:#d70015;--card:rgba(255,255,255,var(--glass));--fill:rgba(120,120,128,.12);--thumb:#fff;--shadow:0 1px 1px rgba(0,0,0,.03),0 14px 36px rgba(0,0,0,.07);
+--page:radial-gradient(700px 480px at 6% -6%,rgba(10,132,255,.18),transparent 62%),radial-gradient(640px 460px at 100% 4%,rgba(175,82,222,.14),transparent 60%),radial-gradient(700px 500px at 60% 110%,rgba(48,209,88,.12),transparent 60%),#f5f5f7}
+.themebtn{border:0;background:var(--fill);color:var(--ink);width:30px;height:30px;border-radius:99px;cursor:pointer;font-size:14px;line-height:1;display:grid;place-items:center;flex:none;padding:0}
+.themebtn:hover{filter:brightness(1.08)}
+@media (max-width:1060px){.themebtn{display:none}}
 *{box-sizing:border-box}
 body{margin:0;background:var(--page);background-attachment:fixed;color:var(--ink);font:400 14px/1.45 -apple-system,BlinkMacSystemFont,"SF Pro Text","Inter","Segoe UI",Roboto,sans-serif;-webkit-font-smoothing:antialiased;font-variant-numeric:tabular-nums}
 a{color:inherit;text-decoration:none}button{font-family:inherit}
@@ -115,7 +126,7 @@ ul{list-style:none;margin:0;padding:0}.steps li{display:flex;align-items:center;
   <button class="nav" data-view="tools" type="button">Toolkits</button>
   <a class="nav" href="education.html">Learn<span class="new">NEW</span></a>
  </nav>
- <div class="tools-r"><span class="mkt" id="mkt"><i></i><span id="mktTxt"></span></span><span class="clock" id="clock"></span><span class="pill" id="plan">Free</span><a class="mute" href="#" id="logout">Log out</a></div>
+ <div class="tools-r"><span class="mkt" id="mkt"><i></i><span id="mktTxt"></span></span><span class="clock" id="clock"></span><span class="pill" id="plan">Free</span><button class="themebtn" id="themebtn" type="button" aria-label="Switch to night mode" title="Night / light mode">&#9789;</button><a class="mute" href="#" id="logout">Log out</a></div>
 </div></header>
 
 <div class="shell">
@@ -510,7 +521,21 @@ function renderPerf(){
     + 'stroke-width="1" stroke-dasharray="3 3"/>';
 
   var col = tot>=0 ? "var(--green)" : "var(--red)", body = "";
-  if(mode==="cum"){
+
+  /* One closed trading day is not a line: a polyline needs two points and a
+     polygon collapses to zero area. Draw an explicit marker instead so the
+     panel never looks broken. */
+  if(d.length === 1){
+    var px = L + pw/2, py = Y(d[0].cum);
+    body = '<line x1="'+L+'" x2="'+(W-R)+'" y1="'+Y(0)+'" y2="'+Y(0)+'" '
+      + 'stroke="var(--mute)" stroke-width="1" stroke-dasharray="3 3"/>'
+      + '<circle cx="'+px.toFixed(1)+'" cy="'+py.toFixed(1)+'" r="6" fill="'+col+'" fill-opacity=".9"/>'
+      + '<circle cx="'+px.toFixed(1)+'" cy="'+py.toFixed(1)+'" r="12" fill="'+col+'" fill-opacity=".18"/>'
+      + '<text x="'+px.toFixed(1)+'" y="'+(py-16).toFixed(1)+'" text-anchor="middle" '
+      + 'style="font:600 13px -apple-system,sans-serif" fill="'+col+'">'+fmtP(d[0].cum)+'</text>'
+      + '<text x="'+px.toFixed(1)+'" y="'+(H-6)+'" text-anchor="middle" '
+      + 'style="font:11px -apple-system,sans-serif" fill="var(--mute)">'+fmtD(d[0].date)+'</text>';
+  } else if(mode==="cum"){
     var line = d.map(function(p,i){return X(i).toFixed(1)+","+Y(p.cum).toFixed(1)}).join(" ");
     body = '<polygon points="'+X(0)+','+Y(0)+' '+line+' '+X(d.length-1)+','+Y(0)+'" '
       + 'fill="'+col+'" fill-opacity=".12"/>'
@@ -525,8 +550,9 @@ function renderPerf(){
         + '" rx="1.5" fill="'+(p.day>=0?"var(--green)":"var(--red)")+'"/>';
     }).join("");
   }
-  var xl = '<text x="'+L+'" y="'+(H-6)+'">'+fmtD(d[0].date)+'</text>'
-    + '<text x="'+(W-R)+'" y="'+(H-6)+'" text-anchor="end">'+fmtD(d[d.length-1].date)+'</text>';
+  var xl = d.length === 1 ? ""
+    : '<text x="'+L+'" y="'+(H-6)+'">'+fmtD(d[0].date)+'</text>'
+      + '<text x="'+(W-R)+'" y="'+(H-6)+'" text-anchor="end">'+fmtD(d[d.length-1].date)+'</text>';
   box.innerHTML = '<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Pips performance chart">'
     + g + body + xl + '<line id="pcx" y1="'+T+'" y2="'+(T+ph)+'" stroke="var(--mute)" '
     + 'stroke-width="1" style="display:none"/></svg>';
@@ -535,7 +561,8 @@ function renderPerf(){
   function move(e){
     var r = svg.getBoundingClientRect();
     var px = (e.touches ? e.touches[0].clientX : e.clientX) - r.left;
-    var i = mode==="cum" ? Math.round((px-L)/pw*(d.length-1)) : Math.floor((px-L)/pw*d.length);
+    var i = d.length === 1 ? 0
+      : (mode==="cum" ? Math.round((px-L)/pw*(d.length-1)) : Math.floor((px-L)/pw*d.length));
     i = Math.max(0, Math.min(d.length-1, i));
     var p = d[i], x = X(i);
     cx.setAttribute("x1", x); cx.setAttribute("x2", x); cx.style.display = "";
@@ -594,6 +621,47 @@ window.addEventListener("resize", function(){
   if($("v-perf").classList.contains("on")) renderPerf();
 });
 
+/* ---------- theme: night / light ---------- */
+var THEME_KEY = "tw_theme";
+function systemTheme(){
+  return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+}
+function currentTheme(){
+  return document.documentElement.dataset.theme || systemTheme();
+}
+function applyTheme(t){
+  document.documentElement.dataset.theme = t;
+  var b = $("themebtn");
+  if(b){
+    var night = t === "dark";
+    b.innerHTML = night ? "&#9728;" : "&#9789;";          // sun when dark, moon when light
+    b.setAttribute("aria-label", night ? "Switch to light mode" : "Switch to night mode");
+    b.setAttribute("title", night ? "Switch to light mode" : "Switch to night mode");
+  }
+  try{ localStorage.setItem(THEME_KEY, t); }catch(_){}
+}
+function toggleTheme(){
+  var next = currentTheme() === "dark" ? "light" : "dark";
+  applyTheme(next);
+  /* TradingView reads its theme at embed time, so the widget has to be
+     rebuilt. Only do that once the user has actually opened the chart. */
+  if(chartLoaded) loadChart(PAIRS[currentPair]);
+  if($("v-perf").classList.contains("on")) renderPerf();
+}
+(function initTheme(){
+  var saved = null;
+  try{ saved = localStorage.getItem(THEME_KEY); }catch(_){}
+  applyTheme(saved === "dark" || saved === "light" ? saved : systemTheme());
+  var b = $("themebtn");
+  if(b) b.addEventListener("click", toggleTheme);
+  /* Follow the OS while the user has not chosen explicitly. */
+  window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", function(){
+    var forced = null;
+    try{ forced = localStorage.getItem(THEME_KEY); }catch(_){}
+    if(!forced) applyTheme(systemTheme());
+  });
+})();
+
 /* ---------- TradingView chart ---------- */
 var chartLoaded = false, currentPair = "XAUUSD";
 function loadChart(sym){
@@ -608,7 +676,7 @@ function loadChart(sym){
   var sc = document.createElement("script");
   sc.src = "https://s3.tradingview.com/external-embedding/embed-widget-advanced-chart.js";
   sc.async = true;
-  var dark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+  var dark = currentTheme() === "dark";
   sc.text = JSON.stringify({autosize:true, symbol:sym, interval:"60",
     timezone:"Asia/Kuala_Lumpur", theme:dark?"dark":"light", style:"1", locale:"en",
     allow_symbol_change:false, hide_side_toolbar:window.innerWidth<980,
