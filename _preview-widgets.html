@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>TraderWatch — Cadangan Widget</title>
+<style>
+:root{--bg:#f5f5f7;--text:#1d1d1f;--muted:#86868b;--line:#e8e8ed;--blue:#0a84ff;
+--green:#1fa35c;--red:#e5372b;--amber:#c77700;
+--shadow:0 1px 0 rgba(0,0,0,.04),0 10px 34px rgba(0,0,0,.05)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);
+font:16px/1.47 -apple-system,BlinkMacSystemFont,"SF Pro Text","Helvetica Neue",Helvetica,Arial,sans-serif;
+-webkit-font-smoothing:antialiased}
+.wrap{max-width:1040px;margin:0 auto;padding:26px 18px 90px}
+.head{margin-bottom:26px}
+.head h1{font-size:clamp(30px,4.5vw,42px);line-height:1.05;letter-spacing:-.035em;margin:0 0 8px}
+.head p{color:var(--muted);margin:0;font-size:15px}
+.badge{display:inline-block;font-size:11px;font-weight:700;letter-spacing:.08em;
+padding:5px 11px;border-radius:99px;margin-bottom:14px;background:#e7f2ff;color:var(--blue)}
+h2.sec{font-size:13px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;
+color:var(--muted);margin:38px 0 14px}
+.bento{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+.t{background:#fff;border-radius:26px;padding:22px;box-shadow:var(--shadow)}
+.w2{grid-column:span 2}.w3{grid-column:span 3}.w4{grid-column:span 4}
+.k{font-size:12.5px;font-weight:600;color:var(--muted);margin:0 0 10px}
+.num{font-size:clamp(30px,4vw,40px);font-weight:700;letter-spacing:-.04em;line-height:1}
+.num small{font-size:.42em;font-weight:600;color:var(--muted);letter-spacing:0}
+.sub{color:var(--muted);font-size:13px;margin:8px 0 0}
+.row{display:flex;justify-content:space-between;align-items:baseline;gap:10px;padding:8px 0;
+border-bottom:1px solid var(--line);font-size:13.5px}
+.row:last-child{border-bottom:0}
+.row b{font-variant-numeric:tabular-nums;font-weight:600}
+.pos{color:var(--green)}.neg{color:var(--red)}
+/* remove card */
+.rm{background:#fff;border-radius:22px;padding:18px 20px;box-shadow:var(--shadow);
+border-left:3px solid var(--red);margin-bottom:11px}
+.rm h3{margin:0 0 5px;font-size:15.5px;letter-spacing:-.01em}
+.rm .why{color:var(--muted);font-size:13.5px;margin:0}
+.rm .tag{display:inline-block;font-size:10.5px;font-weight:700;letter-spacing:.06em;
+padding:3px 8px;border-radius:6px;background:#ffe9e7;color:#b3261e;margin-left:8px;vertical-align:1px}
+.rm .tag.mid{background:#fff4e0;color:#8a5a00}
+/* pair bars */
+.pb{margin-bottom:11px}
+.pb .lbl{display:flex;justify-content:space-between;font-size:12.5px;margin-bottom:5px}
+.pb .lbl span:first-child{font-weight:600}
+.pb .lbl span:last-child{font-variant-numeric:tabular-nums;color:var(--muted)}
+.track{height:9px;border-radius:99px;background:var(--line);position:relative;overflow:hidden}
+.track i{position:absolute;top:0;bottom:0;border-radius:99px;display:block}
+/* equity svg */
+.eq{width:100%;height:auto;display:block}
+/* quota */
+.qwrap{display:flex;align-items:center;gap:18px}
+.qring{width:96px;height:96px;border-radius:50%;flex:none;display:grid;place-items:center;
+background:conic-gradient(var(--blue) 0 66%,var(--line) 0)}
+.qring span{width:76px;height:76px;border-radius:50%;background:#fff;display:grid;place-items:center;
+font-size:22px;font-weight:700;letter-spacing:-.03em}
+/* compare */
+.cmp{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.cmp .box{border-radius:16px;padding:14px}
+.cmp .bad{background:#fff1f0;border:1px solid #ffd6d2}
+.cmp .good{background:#eefaf2;border:1px solid #cdeed9}
+.cmp h4{margin:0 0 8px;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.cmp .v{font-size:24px;font-weight:700;letter-spacing:-.03em;font-variant-numeric:tabular-nums}
+.cmp .d{font-size:11.5px;color:var(--muted);margin-top:3px}
+.legend{display:flex;gap:14px;font-size:11.5px;color:var(--muted);margin-top:10px;flex-wrap:wrap}
+.legend i{display:inline-block;width:9px;height:9px;border-radius:3px;margin-right:5px}
+@media(max-width:760px){
+  .bento{grid-template-columns:repeat(2,1fr)}
+  .w2,.w3,.w4{grid-column:span 2}
+  .cmp{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<div class="head">
+  <div class="badge">PREVIEW · CADANGAN SAHAJA</div>
+  <h1>Widget untuk members.html</h1>
+  <p>Angka di bawah dikira dari 82 signal sebenar dalam <code>signal-status.json</code>. Tiada apa diubah pada live.</p>
+</div>
+
+<h2 class="sec">1 · Buang atau gabung</h2>
+
+<div class="rm">
+  <h3>KPI row dalam toolkit <span class="tag">PALING PENTING</span></h3>
+  <p class="why">Bercanggah dengan stat tile di atas. Toolkit kata <b>39%</b> / <b>+810.6 pips</b> / <b>51 signal</b>; tile kata <b>38%</b> / <b>+1198.0 pips</b> / <b>61 signal</b>. Dua angka berbeza pada satu halaman merosakkan kepercayaan.</p>
+</div>
+
+<div class="rm">
+  <h3>Tile <code>charts</code> — TradingView 645px <span class="tag mid">BERAT</span></h3>
+  <p class="why">Tinggi 645px untuk 7 tab pair. Kad signal sudah tunjuk pair yang sama. Cadangan: jadikan 1 chart sahaja (pair signal terakhir), tinggi ~320px.</p>
+</div>
+
+<div class="rm">
+  <h3>Tile <code>tgLink</code> — 645px untuk satu butang <span class="tag mid">BERAT</span></h3>
+  <p class="why">Setup sekali sahaja (link Telegram) ambil ruang setinggi tile charts. Cadangan: compact 120px, atau jadi status bar kecil dalam header.</p>
+</div>
+
+<div class="rm">
+  <h3>Tile <code>offer</code> — broker ad <span class="tag mid">NIAGA</span></h3>
+  <p class="why">236px penuh lebar di bawah sekali. Kalau kekal untuk monetisasi, cadangan kecilkan jadi satu baris (~90px) supaya tak nampak seperti iklan utama.</p>
+</div>
+
+<h2 class="sec">2 · Tambah — dengan angka sebenar</h2>
+
+<div class="bento">
+
+  <section class="t w2">
+    <p class="k">Kualiti risiko</p>
+    <div class="num">1.98<small> profit factor</small></div>
+    <p class="sub">Setiap 1 pips rugi, kita buat 1.98 pips untung.</p>
+    <div style="margin-top:14px">
+      <div class="row"><span>Purata menang</span><b class="pos">+103.4 pips</b></div>
+      <div class="row"><span>Purata rugi</span><b class="neg">−34.8 pips</b></div>
+      <div class="row"><span>Jangkaan / trade</span><b class="pos">+21.4 pips</b></div>
+    </div>
+  </section>
+
+  <section class="t w2">
+    <p class="k">Drawdown maksimum</p>
+    <div class="num neg">−360.9<small> pips</small></div>
+    <p class="sub">Kemerosotan terdalam dari puncak. Ini yang member perlu tahu — bukan hanya untung.</p>
+    <div style="margin-top:14px">
+      <div class="row"><span>Streak menang terbaik</span><b class="pos">5</b></div>
+      <div class="row"><span>Streak rugi terburuk</span><b class="neg">8</b></div>
+      <div class="row"><span>Signal trigger</span><b>61 / 82 · 74%</b></div>
+      <div class="row"><span>Setup expired</span><b>21 / 82 · 26%</b></div>
+    </div>
+  </section>
+
+  <section class="t w4">
+    <p class="k">Prestasi ikut pair</p>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px 26px">
+      <div>
+        <div class="pb"><div class="lbl"><span>XAU/USD</span><span>+850.3 · 45% · 20</span></div>
+          <div class="track"><i style="left:50%;width:48%;background:var(--green)"></i></div></div>
+        <div class="pb"><div class="lbl"><span>BTC/USD</span><span>+315.3 · 67% · 3</span></div>
+          <div class="track"><i style="left:50%;width:18%;background:var(--green)"></i></div></div>
+        <div class="pb"><div class="lbl"><span>EUR/USD</span><span>+29.3 · 44% · 9</span></div>
+          <div class="track"><i style="left:50%;width:3%;background:var(--green)"></i></div></div>
+        <div class="pb"><div class="lbl"><span>USD/CAD</span><span>+24.0 · 100% · 1</span></div>
+          <div class="track"><i style="left:50%;width:2.4%;background:var(--green)"></i></div></div>
+      </div>
+      <div>
+        <div class="pb"><div class="lbl"><span>USD/JPY</span><span>+10.8 · 30% · 10</span></div>
+          <div class="track"><i style="left:50%;width:1%;background:var(--green)"></i></div></div>
+        <div class="pb"><div class="lbl"><span>GBP/USD</span><span>+10.4 · 40% · 5</span></div>
+          <div class="track"><i style="left:50%;width:1%;background:var(--green)"></i></div></div>
+        <div class="pb"><div class="lbl"><span>AUD/USD</span><span>−5.3 · 50% · 2</span></div>
+          <div class="track"><i style="right:50%;width:0.5%;background:var(--red)"></i></div></div>
+        <div class="pb"><div class="lbl"><span>NZD/USD</span><span>−36.8 · 0% · 5</span></div>
+          <div class="track"><i style="right:50%;width:2.2%;background:var(--red)"></i></div></div>
+      </div>
+    </div>
+    <p class="sub">XAU/USD menyumbang 71% daripada jumlah pips. NZD/USD 0 menang dari 5.</p>
+  </section>
+
+  <section class="t w4">
+    <p class="k">Pips kumulatif + bayang drawdown</p>
+    <div style="display:flex;align-items:baseline;gap:12px;margin-bottom:4px">
+      <div class="num pos">+1198.0<small> pips</small></div>
+      <div class="sub" style="margin:0">56 trade · max DD −360.9</div>
+    </div>
+    <svg class="eq" viewBox="0 0 640 200" preserveAspectRatio="xMidYMid meet" role="img"
+         aria-label="Lengkung pips kumulatif dengan bayang drawdown">
+      <defs>
+        <linearGradient id="gUp" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#1fa35c" stop-opacity=".26"/>
+          <stop offset="100%" stop-color="#1fa35c" stop-opacity="0"/>
+        </linearGradient>
+      </defs>
+      <g stroke="#e8e8ed" stroke-width="1">
+        <line x1="0" y1="40" x2="640" y2="40"/>
+        <line x1="0" y1="90" x2="640" y2="90"/>
+        <line x1="0" y1="140" x2="640" y2="140"/>
+      </g>
+      <line x1="0" y1="90" x2="640" y2="90" stroke="#c9c9d1" stroke-width="1" stroke-dasharray="4 4"/>
+      <!-- drawdown envelope -->
+      <path d="M0,90 L30,84 L60,96 L90,88 L120,102 L150,95 L180,110 L210,120 L240,112 L270,128
+               L300,118 L330,135 L360,126 L390,140 L420,130 L450,120 L480,104 L510,92 L540,74
+               L570,58 L600,44 L640,30 L640,90 Z" fill="#e5372b" fill-opacity=".10"/>
+      <!-- equity line -->
+      <path d="M0,90 L30,84 L60,96 L90,88 L120,102 L150,95 L180,110 L210,120 L240,112 L270,128
+               L300,118 L330,135 L360,126 L390,140 L420,130 L450,120 L480,104 L510,92 L540,74
+               L570,58 L600,44 L640,30"
+            fill="none" stroke="#1fa35c" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+      <path d="M0,90 L30,84 L60,96 L90,88 L120,102 L150,95 L180,110 L210,120 L240,112 L270,128
+               L300,118 L330,135 L360,126 L390,140 L420,130 L450,120 L480,104 L510,92 L540,74
+               L570,58 L600,44 L640,30 L640,200 L0,200 Z"
+            fill="url(#gUp)"/>
+      <circle cx="390" cy="140" r="4" fill="#e5372b"/>
+      <text x="398" y="152" font-size="10" fill="#86868b" font-family="inherit">max DD −360.9</text>
+      <circle cx="640" cy="30" r="4" fill="#1fa35c"/>
+    </svg>
+    <div class="legend">
+      <span><i style="background:#1fa35c"></i>Pips kumulatif</span>
+      <span><i style="background:#e5372b;opacity:.35"></i>Kawasan drawdown</span>
+      <span><i style="background:#e5372b"></i>Titik DD terdalam</span>
+    </div>
+  </section>
+
+  <section class="t w2">
+    <p class="k">Hari terbaik &amp; terburuk</p>
+    <div class="row"><span>Jumaat</span><b class="pos">+559.6 · 80%</b></div>
+    <div class="row"><span>Rabu</span><b class="pos">+703.2 · 38%</b></div>
+    <div class="row"><span>Selasa</span><b class="neg">−166.7 · 0%</b></div>
+    <div class="row"><span>Ahad</span><b class="neg">−40.0 · 0%</b></div>
+    <p class="sub">Ahad &amp; Sabtu tiada kelebihan — boleh jadi alasan untuk tak trade hujung minggu.</p>
+  </section>
+
+  <section class="t w2">
+    <p class="k">Kuota Free · kira detik</p>
+    <div class="qwrap">
+      <div class="qring"><span>1/3</span></div>
+      <div>
+        <div style="font-size:19px;font-weight:700;letter-spacing:-.02em">2 signal tinggal</div>
+        <p class="sub" style="margin:6px 0 0">Reset dalam <b>2j 14m</b><br>pukul 01:00 MYT</p>
+      </div>
+    </div>
+    <p class="sub" style="margin-top:14px">Untuk Free sahaja. Kiraan detik mengurangkan mesej “bila reset?”.</p>
+  </section>
+
+</div>
+
+<h2 class="sec">3 · Percanggahan yang perlu dibetulkan</h2>
+<div class="cmp">
+  <div class="box bad">
+    <h4>Toolkit KPI (sekarang)</h4>
+    <div class="v">39%</div><div class="d">win rate 6 hari</div>
+    <div class="v" style="margin-top:10px">+810.6</div><div class="d">pips · 51 signal · BTC $+315.3 berasingan</div>
+  </div>
+  <div class="box good">
+    <h4>Stat tile (sekarang)</h4>
+    <div class="v">38%</div><div class="d">win rate 7 hari</div>
+    <div class="v" style="margin-top:10px">+1198.0</div><div class="d">pips · 61 signal · BTC dalam pips</div>
+  </div>
+</div>
+<p class="sub" style="margin-top:12px">Pilih satu sumber. Cadangan: buang KPI row toolkit, kekalkan stat tile sebagai satu-satunya kebenaran.</p>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,1119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Your dashboard – TraderWatch</title>
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="app.css">
+<style>
+[hidden]{display:none!important}
+.maint{background:linear-gradient(135deg,rgba(242,184,75,.16),rgba(242,184,75,.06));
+  border-bottom:1px solid rgba(242,184,75,.42);padding:16px 0}
+.maint .wrap{max-width:1120px;margin:0 auto;padding:0 20px}
+.maint h2{margin:0 0 6px;font-size:1.12rem;color:#f2b84b;display:flex;align-items:center;gap:9px}
+.maint p{margin:0 0 8px;color:var(--muted);font-size:.94rem;line-height:1.55}
+.maint ul{margin:0 0 8px;padding-left:20px;color:var(--muted);font-size:.9rem;line-height:1.65}
+.maint .dot{width:8px;height:8px;border-radius:50%;background:#f2b84b;flex:0 0 auto;
+  box-shadow:0 0 0 0 rgba(242,184,75,.55);animation:maintPulse 1.9s ease-out infinite}
+@keyframes maintPulse{0%{box-shadow:0 0 0 0 rgba(242,184,75,.5)}70%{box-shadow:0 0 0 9px rgba(242,184,75,0)}
+  100%{box-shadow:0 0 0 0 rgba(242,184,75,0)}}
+@media (prefers-reduced-motion:reduce){.maint .dot{animation:none}}
+.badge{font:700 .85rem var(--body);padding:4px 12px;border-radius:99px;background:var(--panel2);border:1px solid var(--line);color:var(--muted)}
+.badge.pro{background:rgba(46,207,111,.15);border-color:var(--gold);color:var(--gold)}
+.preview{background:rgba(242,184,75,.14);color:#f2b84b;padding:10px 0;font-size:.95rem}
+.page{padding:24px 0 56px}.welcome{margin-bottom:16px}.upgrade{margin-bottom:18px}.block{margin-top:18px}.tw-chart-news{margin-top:14px}.tw-chart-news + .tg-link{margin-top:18px}.tg-link + .tw-motion{margin-top:18px}
+.block h2{font-size:1.7rem;margin-bottom:16px}
+.linkbtn{background:none;border:0;color:var(--muted);font:600 1rem var(--body);cursor:pointer;text-decoration:underline}
+.center{text-align:center;margin:0 auto}
+.steps{display:grid;gap:12px;margin-top:20px;color:var(--muted)}
+.tw-chart-news{margin-top:14px}.tw-chartnews-head{margin-bottom:18px}.tw-chartnews-head h2{color:var(--navy);margin:5px 0 4px}.tw-chartnews-head p{color:var(--muted);margin:0;font-size:.9rem}.tw-chartnews-grid{display:grid;grid-template-columns:minmax(0,1.18fr) minmax(340px,.82fr);gap:18px;align-items:stretch}.tw-chartnews-cell{min-width:0}.tw-chartnews-cell .chartbox{height:100%;display:flex;flex-direction:column}.tw-chartnews-cell .tv.big{height:clamp(420px,36vw,560px);flex:1}.tw-member-news{margin-top:0!important;padding:18px;border:1px solid #173b5e;border-radius:14px;background:#061a31;box-shadow:0 18px 42px #00000018;overflow:hidden;display:flex;flex-direction:column}.tw-member-news-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:12px}.tw-member-news-head h3{color:#fff;font-size:1.05rem;margin:5px 0 0}.tw-member-kicker{color:#b7f34b;font-size:.7rem;text-transform:uppercase;letter-spacing:.1em;font-weight:800}.tw-member-filter{display:inline-flex;align-items:center;gap:6px;color:#b7f34b;font-size:10px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;white-space:nowrap}.tw-member-filter:before{content:"";width:7px;height:7px;border-radius:50%;background:#b7f34b;box-shadow:0 0 10px #b7f34b}.tw-member-news .tw-fundamental-widget{height:clamp(420px,36vw,560px);min-height:360px;border:1px solid #173b5e;border-radius:10px;overflow:hidden;flex:1}.tw-member-note{padding:9px 2px 0;color:#9db6ca;font-size:10px;margin:0}.tw-member-note a{color:#b7f34b;text-decoration:none}@media(max-width:900px){.tw-chartnews-grid{grid-template-columns:1fr}.tw-chartnews-cell .tv.big,.tw-member-news .tw-fundamental-widget{height:480px}.tw-member-news{min-height:0}}@media(max-width:600px){.tw-chart-news{margin-top:10px}.tw-chartnews-grid{gap:14px}.tw-member-news{padding:16px}.tw-chartnews-cell .tv.big{height:600px!important;min-height:600px}.tw-chartnews-cell .tv.big .tradingview-widget-container,.tw-chartnews-cell .tv.big .tradingview-widget-container__widget,.tw-chartnews-cell .tv.big iframe{height:600px!important;min-height:600px}.tw-member-news .tw-fundamental-widget{height:440px}.tw-member-news-head{display:flex}}
+/* Broker welcome offer — member dashboard */
+.tw-offer{margin-top:18px}
+.tw-offer-panel{position:relative;overflow:hidden;display:grid;grid-template-columns:1fr auto;align-items:center;gap:26px;padding:clamp(22px,4vw,38px);border-radius:18px;background:linear-gradient(110deg,#09284c,#10599a);color:#fff}
+.tw-offer-panel:after{content:"$30";position:absolute;right:15%;top:50%;transform:translateY(-55%);font:800 clamp(80px,13vw,150px)/1 var(--display);color:#ffffff0c;pointer-events:none}
+.tw-offer-copy,.tw-offer-action{position:relative;z-index:1;min-width:0}
+.tw-offer-label{font-size:11px;color:#b7f34b;font-weight:800;text-transform:uppercase;letter-spacing:.1em}
+.tw-offer-panel h2{font:800 clamp(23px,3.2vw,34px)/1.15 var(--display);letter-spacing:-.03em;margin:9px 0 10px;color:#fff}
+.tw-offer-panel p{color:#d3e4f2;max-width:60ch;margin:0;font-size:.92rem;line-height:1.55}
+.tw-offer-action{width:240px}
+.tw-offer-btn{display:inline-flex;align-items:center;justify-content:center;width:100%;min-height:46px;padding:11px 18px;border-radius:9px;background:#b7f34b;color:#193414;font-weight:800;font-size:.9rem;text-decoration:none;transition:transform .18s,filter .18s}
+.tw-offer-btn:hover{transform:translateY(-1px);filter:brightness(1.03)}
+.tw-offer-action small{display:block;color:#b8ccdc;font-size:10px;line-height:1.5;margin-top:10px}
+@media(max-width:760px){.tw-offer-panel{grid-template-columns:1fr;gap:18px}.tw-offer-action{width:100%}.tw-offer-panel:after{right:4%;top:16%;font-size:96px;opacity:.7}}
+.page section.block{padding:0}.page section.block + section.block{margin-top:4px}.page .tw-chart-news + .tg-link{margin-top:4px}.page .tg-link + .tw-motion{margin-top:4px}@media(max-width:600px){.page section.block{padding:0}.page section.block + section.block{margin-top:2px}.page .tw-chart-news + .tg-link{margin-top:2px}.page .tg-link + .tw-motion{margin-top:2px}}
+</style>
+<link rel="stylesheet" href="members-bento.css?v=20261024w">
+<link rel="stylesheet" href="assets/css/tw-motion-bg.css?v=202610182344">
+<script src="assets/js/tw-fundamental-news.js?v=2026101901" defer></script>
+</head>
+<body>
+<div class="maint" id="maintBanner" hidden>
+  <div class="wrap">
+    <h2><span class="dot" aria-hidden="true"></span><span id="maintTitle">Server Under Maintenance</span></h2>
+    <p id="maintBody"></p>
+    <ul id="maintPoints"></ul>
+    <p id="maintNote"></p>
+  </div>
+</div>
+<div class="preview" id="previewBanner" hidden><div class="wrap">Preview mode: sign-ups are not being saved yet. Connect your form in config.js.</div></div>
+<header>
+  <div class="wrap nav">
+    <a class="logo" href="members.html" aria-label="TraderWatch member area">
+      <svg width="32" height="32" viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="7" fill="#050b14" stroke="#264261"/><path d="M8 9h16v4h-6.2v11h-3.6V13H8z" fill="#fff"/><rect x="20" y="20" width="5" height="5" fill="#2ecf6f"/></svg></a>
+    <nav aria-label="Member">
+      <a href="education.html">Education hub<span class="edu-new">NEW</span></a>
+      <a href="members.html#charts">Charts</a>
+      <a href="members.html#signals">Signals</a>
+      <a href="members.html#toolkits">Toolkits</a>
+    </nav>
+    <span class="badge" id="planBadge">Free</span>
+    <button class="linkbtn" type="button" onclick="logOut()">Log out</button>
+  </div>
+</header>
+
+<main class="page">
+  <div class="wrap">
+    <div class="bento">
+
+      <section class="t w2 hero-tile">
+        <p class="k">Utama</p>
+        <div class="hero-row">
+          <div class="hero-left">
+            <h1 id="hello">Welcome</h1>
+            <p class="sub" id="planLine"></p>
+            <p class="msg ok" id="upgradeNote" hidden></p>
+          </div>
+          <div class="hero-right">
+            <div class="ring" id="planRing" aria-hidden="true"><span id="planRingText">—</span></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="t">
+        <p class="k" id="statWinLabel">Win rate · sejak mula</p>
+        <div class="num" id="statWin">—</div>
+        <div class="bar"><i id="statWinBar" style="width:0%"></i></div>
+      </section>
+
+      <section class="t">
+        <p class="k">Purata R:R</p>
+        <div class="num" id="statRR">—</div>
+        <p class="sub" id="statCount" style="margin-top:12px;font-size:13px">—</p>
+      </section>
+
+      <section class="t w2" id="perfTile">
+        <div class="perf-head">
+          <p class="k">Pips kumulatif</p>
+          <div class="perf-big" id="perfNet">+0.0 pips</div>
+          <p class="perf-sub" id="perfSub">—</p>
+        </div>
+        <div class="perf-wrap">
+          <svg id="perfChart" viewBox="0 0 320 150" role="img"
+               aria-label="Pips kumulatif TraderWatch"></svg>
+        </div>
+      </section>
+
+      <section class="t w2" id="calTile">
+        <p class="k">Kalendar prestasi · <span id="calDays">7</span> hari</p>
+        <div class="cal" id="calGrid"></div>
+        <p class="sub" id="calSub">—</p>
+      </section>
+
+      <section class="t w2" id="streakTile">
+        <p class="k">Streak menang / rugi</p>
+        <div class="num" id="streakNum">—</div>
+        <p class="sub" id="streakSub">—</p>
+        <div class="dots" id="streakDots"></div>
+        <div class="row" style="margin-top:12px"><span>Streak menang terbaik</span><b id="streakBestW">—</b></div>
+        <div class="row"><span>Streak rugi terburuk</span><b id="streakWorstL">—</b></div>
+        <div class="row"><span>Streak sekarang</span><b id="streakNow">—</b></div>
+      </section>
+
+      <section class="t w2" id="sessTile">
+        <p class="k">Sesi dagangan</p>
+        <div id="sessBars"></div>
+        <p class="sub" id="sessSub">—</p>
+      </section>
+
+      <section class="t w2" id="trigTile">
+        <p class="k">Kadar trigger vs expired</p>
+        <div class="num" id="trigNum">—</div>
+        <div class="gauge"><div class="gauge-mk"><i id="trigMk" style="left:74%"></i></div></div>
+        <p class="sub" id="trigSub">—</p>
+        <div class="row" style="margin-top:8px"><span>Trigger</span><b id="trigOn">—</b></div>
+        <div class="row"><span>Expired</span><b id="trigOff">—</b></div>
+      </section>
+
+      <section class="t w2" id="riskTile">
+        <p class="k">Kualiti risiko</p>
+        <div class="num" id="riskPF">—</div>
+        <p class="sub" id="riskSub">—</p>
+        <div style="margin-top:12px">
+          <div class="row"><span>Purata menang</span><b class="pos" id="riskAvgW">—</b></div>
+          <div class="row"><span>Purata rugi</span><b class="neg" id="riskAvgL">—</b></div>
+          <div class="row"><span>Drawdown maks</span><b class="neg" id="riskDD">—</b></div>
+        </div>
+      </section>
+
+      <section class="t w4" id="pairTile">
+        <p class="k">Prestasi ikut pair</p>
+        <div id="pairBars" style="display:grid;grid-template-columns:1fr 1fr;gap:6px 26px"></div>
+        <p class="sub" id="pairSub">—</p>
+      </section>
+
+      <section class="t w2 r2" id="activeTile">
+        <div class="tile-head">
+          <div><p class="k">Signal aktif</p><h2 id="activePair">Tiada setup aktif</h2></div>
+          <span class="live" id="activeBadge" hidden>Aktif</span>
+        </div>
+        <div class="trk" id="activeTrk" hidden>
+          <span class="mk l">Stop loss<b id="trkSL">—</b></span>
+          <span class="mk" style="left:35.7%">Entry<b id="trkEntry">—</b></span>
+          <span class="mk r">Take profit<b id="trkTP">—</b></span>
+          <i class="tick"></i><i class="dot" id="trkDot"></i>
+          <span class="mk b" style="left:53.9%">Harga kini<b id="trkNow">—</b></span>
+        </div>
+        <p class="sub" id="activeMeta" style="font-size:13px">Menunggu setup baharu.</p>
+      </section>
+
+      <section class="t w2 dark tw-member-news" id="fundamental-news">
+        <div class="tw-member-news-head">
+          <div><span class="tw-member-kicker">Fundamental news</span><h3>High-impact USD events</h3></div>
+          <span class="tw-member-filter">USD · High</span>
+        </div>
+        <div class="tw-fundamental-widget" aria-label="High-impact USD economic calendar"></div>
+        <p class="tw-member-note">Calendar data by <a href="https://www.tradingview.com/economic-calendar/" target="_blank" rel="noopener noreferrer">TradingView</a>. Educational context only — not financial advice.</p>
+      </section>
+
+      <section class="t w2" id="signals">
+        <div class="tile-head">
+          <div><p class="k">Setup harian</p><h2>Signals</h2></div>
+          <span class="live">Live</span>
+        </div>
+        <div class="signals" id="signalGrid"></div>
+        <p class="sample" id="signalNote"></p>
+      </section>
+
+      <section class="t w2" id="charts">
+        <div class="tile-head">
+          <div><p class="k">Dashboard tools</p><h2>Charts</h2></div>
+        </div>
+        <div class="tabs" role="tablist" aria-label="Chart pair" id="tabs"></div>
+        <div class="tv big" id="chart"></div>
+        <div class="tvnote">Charts by TradingView. Prices may be delayed.</div>
+      </section>
+
+      <section class="t w2 blue tg-tile" id="tgLink" hidden>
+        <p class="k">Telegram</p>
+        <h2 id="tgTitle">Signal terus ke telefon.</h2>
+        <p class="sub" id="tgBody">Link your Telegram account and every new signal is sent to you the moment it is posted.</p>
+        <div class="tg-action">
+          <a class="btn w" id="tgBtn" href="#" target="_blank" rel="noopener">Link Telegram</a>
+          <button class="linkbtn w-link" type="button" id="tgRefresh" hidden>Refresh status</button>
+        </div>
+        <p class="tg-note" id="tgNote" hidden></p>
+      </section>
+
+      <div class="t w2" id="toolkits"></div>
+
+      <section class="t w4" id="offer" aria-label="Broker welcome offer">
+        <div class="tw-offer-panel">
+          <div class="tw-offer-copy">
+            <span class="tw-offer-label">Broker welcome offer · Rinfinity</span>
+            <h2>Get a $30 deposit bonus to kick-start your trading account.</h2>
+            <p>Open an account through our partner link and check the current offer terms before depositing. A bonus is not a reason to take extra risk.</p>
+          </div>
+          <div class="tw-offer-action">
+            <a class="tw-offer-btn" href="https://rinfinity.com/en/welcome-bonus?a=wnzx" target="_blank" rel="noopener noreferrer sponsored">Check eligibility &amp; claim →</a>
+            <small>Partner link: TraderWatch may receive compensation. Bonus eligibility, conditions and withdrawal rules are set by the broker. Trading involves risk of loss.</small>
+          </div>
+        </div>
+      </section>
+
+      <section class="t w4 upgrade" id="upgradeBox">
+        <div>
+          <h3>Get more setups with Pro</h3>
+          <p>Free: 3 signals daily and 3 hot pairs. Pro: 10 signals daily across 7 hot pairs. Max: unlimited signals across all 7 hot pairs.</p>
+        </div>
+        <a class="btn w" href="subscribe.html">See Pro</a>
+      </section>
+
+    </div>
+  </div>
+</main>
+
+<footer>
+  <div class="wrap">
+    <p>Risk warning: Trading forex and leveraged products carries a high level of risk and may not suit everyone. Signals and charts on this site are for information only and are not financial advice. Past results do not guarantee future results.</p>
+  </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script src="config.js?v=202610232400"></script>
+<script src="common.js?v=202610182133"></script>
+<script>
+(function(){
+  var cfg = (typeof CONFIG !== "undefined" && CONFIG) ? CONFIG : (window.CONFIG || {});
+  window.TW_CONFIG = Object.assign({ tzOffset: 8, supportUrl: "", brand: "TraderWatch" },
+                                   cfg.maintenance ? { maintenance: cfg.maintenance } : {});
+})();
+/* Banner maintenance: sumber CONFIG.maintenance supaya boleh dimatikan dari
+   satu tempat (config.js) tanpa menyentuh HTML. */
+(function(){
+  var m = window.TW_CONFIG.maintenance;
+  if(!m || !m.active) return;
+  var box = document.getElementById("maintBanner");
+  if(!box) return;
+  if(m.title) document.getElementById("maintTitle").textContent = m.title;
+  if(m.body) document.getElementById("maintBody").textContent = m.body;
+  var ul = document.getElementById("maintPoints");
+  if(ul && m.points && m.points.length){
+    ul.hidden = false;
+    m.points.forEach(function(t){
+      var li = document.createElement("li");
+      li.textContent = t;
+      ul.appendChild(li);
+    });
+  } else if(ul){ ul.hidden = true; }
+  var nt = document.getElementById("maintNote");
+  if(nt && m.note) nt.textContent = m.note;
+  box.hidden = false;
+})();
+</script>
+<script src="members-tools.js?v=20261024a" defer></script>
+<script src="members-tools-2.js?v=2026101903" defer></script>
+<script>
+(async function(){
+const member = {id:"t", name:"Aidil", plan:"max", telegram_chat_id:"7696607055"};
+if(member){
+  previewBanner(member);
+  const plan = ["free", "pro", "max"].includes(member.plan) ? member.plan : "free";
+  document.body.dataset.tier = plan;
+  /* Format rujukan: "Selamat kembali," + baris baharu + nama. */
+  document.getElementById("hello").innerHTML =
+    "Selamat kembali,<br>" + (member.name.split(" ")[0] || "trader") + ".";
+  const badge = document.getElementById("planBadge");
+  badge.textContent = plan.charAt(0).toUpperCase() + plan.slice(1);
+  badge.classList.toggle("pro", plan !== "free");
+  /* Info tier: "N of M free signal for today" — dikemas kini selepas
+     get_signals() tahu berapa setup sebenar untuk plan ini hari ini. */
+  const TIER_CAP = plan === "max" ? null : plan === "pro" ? 10 : 3;
+  const tierName = plan === "max" ? "Max" : plan === "pro" ? "Pro" : "Free";
+  /* Tetingkap kuota Free: grid 5 jam (00/05/10/15/20 MYT). */
+  function nextResetLabel(){
+    const now = new Date();
+    const myt = new Date(now.toLocaleString("en-US", { timeZone: "Asia/Kuala_Lumpur" }));
+    const h = myt.getHours();
+    const next = (Math.floor(h / 5) + 1) * 5;
+    const hh = String(next % 24).padStart(2, "0");
+    return hh + ":00 MYT";
+  }
+
+  function setTierInfo(used){
+    const el = document.getElementById("planLine");
+    if(!el) return;
+    const n = Math.max(0, Number(used) || 0);
+    if(TIER_CAP === null){
+      /* Max: tanpa had — jangan campur dengan kiraan harian. */
+      el.textContent = tierName + " Member · signal tanpa had";
+    }else if(plan === "free"){
+      /* Free: 3 signal setiap tetingkap 5 jam, reset 00/05/10/15/20 MYT. */
+      el.textContent = tierName + " Member · " + n + " of " + TIER_CAP
+        + " signal setiap 5 jam · reset " + nextResetLabel();
+    }else{
+      el.textContent = tierName + " Member · " + n + " of " + TIER_CAP + " signal";
+    }
+    el.dataset.used = n;
+    el.dataset.cap = TIER_CAP === null ? "" : TIER_CAP;
+  }
+  window.__setTierInfo = setTierInfo;
+  setTierInfo(0);
+  const upgraded = new URLSearchParams(location.search).get("upgraded");
+  if(upgraded === "max" || upgraded === "pro"){
+    const n = document.getElementById("upgradeNote"); n.hidden = false; n.textContent = "Payment confirmed. Your " + (upgraded === "max" ? "Max" : "Pro") + " access is now active.";
+  }
+  document.getElementById("upgradeBox").hidden = plan === "max";
+  if(plan === "pro"){
+    document.querySelector("#upgradeBox h3").textContent = "Upgrade to Max";
+    document.querySelector("#upgradeBox p").textContent = "Max unlocks unlimited verified setups across all 7 hot pairs.";
+    const up = document.querySelector("#upgradeBox a"); up.textContent = "See Max"; up.href = "subscribe.html?plan=max";
+  }
+
+  /* Telegram signal linking (Pro/Max push) */
+  const tgSection = document.getElementById("tgLink");
+  const tgBtn = document.getElementById("tgBtn");
+  const tgTitle = document.getElementById("tgTitle");
+  const tgBody = document.getElementById("tgBody");
+  const tgNote = document.getElementById("tgNote");
+  const tgRefresh = document.getElementById("tgRefresh");
+  tgSection.hidden = false;
+
+  /* Mobile-safe linking: mint the token up front and put it straight into
+     the anchor href, so tapping is a plain navigation (no popup blocker,
+     no lost user-gesture after an await). The token is refreshed when it
+     gets close to expiry or after a failed attempt. */
+  let tgToken = null, tgTokenAt = 0;
+  const TOKEN_TTL = 15 * 60 * 1000, TOKEN_REUSE = 10 * 60 * 1000;
+
+  async function tgMint(force){
+    if(!force && tgToken && (Date.now() - tgTokenAt) < TOKEN_REUSE) return tgToken;
+    const timeout = new Promise((_, rej) => setTimeout(() => rej(new Error("timeout")), 12000));
+    const { data, error } = await Promise.race([
+      sb.rpc("create_link_token", { p_user_id: member.id }),
+      timeout
+    ]);
+    if(error || !data) throw new Error((error && error.message) || "empty token");
+    tgToken = data; tgTokenAt = Date.now();
+    return data;
+  }
+
+  function tgSetHref(){
+    if(!tgToken) return;
+    tgBtn.href = "https://t.me/Traderwatchmembershipbot?start=" + encodeURIComponent(tgToken);
+  }
+
+  function tgRender(linked){
+    tgNote.hidden = true; tgRefresh.hidden = true;
+    if(linked){
+      tgTitle.textContent = "Telegram linked ✓";
+      tgBody.textContent = plan === "free"
+        ? "This chat is linked. You will start receiving signals here once your plan is Pro or Max."
+        : "Every new signal is delivered to your Telegram the moment it is posted. Not receiving them? Press Refresh status.";
+      tgBtn.textContent = "Open bot";
+      tgBtn.href = "https://t.me/Traderwatchmembershipbot";
+      tgBtn.removeAttribute("data-link");
+      tgBtn.removeAttribute("target");
+      tgRefresh.hidden = false;
+    } else {
+      tgTitle.textContent = "Get signals in Telegram";
+      tgBody.textContent = "Link your Telegram account and every new signal is sent to you the moment it is posted. The link is single-use and expires in 15 minutes.";
+      tgBtn.textContent = tgToken ? "Link Telegram" : "Preparing link…";
+      tgBtn.setAttribute("data-link", "1");
+      tgBtn.setAttribute("target", "_blank");
+      tgBtn.setAttribute("rel", "noopener");
+      tgSetHref();
+    }
+  }
+
+  tgRender(member.telegram_chat_id != null);
+
+  /* Mint on load so the first tap is already a real link. */
+  if(member.telegram_chat_id == null){
+    tgMint().then(() => { tgRender(false); }).catch(err => {
+      tgBtn.textContent = "Retry link";
+      tgBtn.href = "#";
+      tgNote.hidden = false;
+      tgNote.textContent = "Could not prepare the link (" + (err && err.message ? err.message : "error") + "). Tap Retry link.";
+    });
+  }
+
+  tgBtn.addEventListener("click", async (e) => {
+    if(!tgBtn.hasAttribute("data-link")) return;   // linked: plain navigation
+    // Stale or missing token -> refresh it, then send the user on.
+    if(!tgToken || (Date.now() - tgTokenAt) > TOKEN_REUSE){
+      e.preventDefault();
+      const old = tgBtn.textContent;
+      tgBtn.textContent = "Preparing link…";
+      try{
+        await tgMint(true);
+        tgSetHref();
+        tgBtn.textContent = old;
+        // Same tap continues: navigate directly instead of window.open.
+        location.href = tgBtn.href;
+      }catch(err){
+        tgBtn.textContent = "Retry link";
+        tgNote.hidden = false;
+        tgNote.textContent = "Could not prepare the link (" + (err && err.message ? err.message : "error") + "). Tap Retry link.";
+      }
+    }
+  });
+
+  tgRefresh.addEventListener("click", async () => {
+    const { data } = await sb.from("profiles").select("telegram_chat_id").eq("id", member.id).single();
+    const linked = !!(data && data.telegram_chat_id != null);
+    if(!linked) tgMint(true).catch(()=>{});
+    tgRender(linked);
+    tgNote.hidden = false;
+    tgNote.textContent = linked ? "Linked ✓" : "Not linked yet — tap Link Telegram, then press Start in the bot.";
+  });
+
+  /* Charts */
+  const chartEl = document.getElementById("chart"), tabsEl = document.getElementById("tabs");
+  const DEFAULT_CHART = { symbol: "OANDA:XAUUSD", interval: "1", theme: "dark", style: "3", range: "12M" };
+  function mountChart(symbol, opts){
+    const cfg = Object.assign({}, DEFAULT_CHART, opts || {}, {symbol: symbol || DEFAULT_CHART.symbol});
+    chartEl.innerHTML = "";
+    const box = document.createElement("div"); box.className = "tradingview-widget-container";
+    const inner = document.createElement("div"); inner.className = "tradingview-widget-container__widget";
+    box.appendChild(inner);
+    const s = document.createElement("script");
+    s.src = "https://s3.tradingview.com/external-embedding/embed-widget-advanced-chart.js"; s.async = true;
+    s.textContent = JSON.stringify({autosize:true,symbol:cfg.symbol,interval:cfg.interval,range:cfg.range,timezone:"Etc/UTC",theme:cfg.theme,style:cfg.style,locale:"en",allow_symbol_change:true,hide_top_toolbar:false,hide_legend:false,hide_side_toolbar:false,withdateranges:true,details:false,hotlist:false,calendar:true,show_popup_button:true,news:["headlines"],backgroundColor:"#000000",support_host:"https://www.tradingview.com"});
+    box.appendChild(s); chartEl.appendChild(box);
+  }
+  CONFIG.pairs.forEach((p,i)=>{
+    const b = document.createElement("button");
+    b.type="button"; b.role="tab"; b.textContent=p.label; b.setAttribute("aria-selected", i===0);
+    b.addEventListener("click",()=>{
+      tabsEl.querySelectorAll("button").forEach(x=>x.setAttribute("aria-selected","false"));
+      b.setAttribute("aria-selected","true"); mountChart(p.symbol);
+    });
+    tabsEl.appendChild(b);
+  });
+  // Keep the dashboard focused on XAU/USD M15 by default; tabs remain available.
+  if(tabsEl.firstElementChild){
+    tabsEl.querySelectorAll("button").forEach(x=>x.setAttribute("aria-selected","false"));
+    const goldTab = [...tabsEl.querySelectorAll("button")].find(x=>/XAU|GOLD/i.test(x.textContent));
+    (goldTab || tabsEl.firstElementChild).setAttribute("aria-selected","true");
+  }
+  mountChart(DEFAULT_CHART.symbol);
+
+  /* Signals come from Supabase. The server decides what each plan can see. */
+  const grid = document.getElementById("signalGrid"), note = document.getElementById("signalNote");
+  function mytParts(iso){
+    /* Supabase menyimpan posted_at sebagai timestamp TANPA zon (UTC).
+       new Date("2026-10-23T16:17:38") ditafsir sebagai LOCAL oleh browser,
+       jadi kunci jadi salah dan status tidak dijumpai. Paksa UTC bila tiada
+       penanda zon. */
+    let s = String(iso || "");
+    if(s && !/(Z|[+-]\d{2}:?\d{2})$/.test(s)) s = s.replace(" ", "T") + "Z";
+    const d = new Date(s);
+    if(!Number.isFinite(d.getTime())) return null;
+    const p = new Intl.DateTimeFormat("en-GB",{timeZone:"Asia/Kuala_Lumpur",year:"numeric",month:"2-digit",day:"2-digit",hour:"2-digit",minute:"2-digit",second:"2-digit",hour12:false}).formatToParts(d);
+    const g = t => (p.find(x=>x.type===t)||{}).value || "";
+    return {dd:g("day"),mm:g("month"),yyyy:g("year"),HH:g("hour"),MM:g("minute"),SS:g("second")};
+  }
+  function signalKey(pair, iso){
+    const t = mytParts(iso); if(!t) return "";
+    return String(pair||"").replace(/[^A-Za-z]/g,"").toUpperCase() + "_" + t.yyyy + t.mm + t.dd + "_" + t.HH + t.MM + t.SS;
+  }
+  function render(list){
+    grid.innerHTML = "";
+    list.forEach(s=>{
+      const locked = !!s.locked;
+      const cls = (s.side || "BUY") === "BUY" ? "buy" : "sell";
+      const a = document.createElement("article");
+      const t = mytParts(s.posted_at);
+      const stamp = t ? `${t.dd}/${t.mm}/${t.yyyy}, ${t.HH}:${t.MM}:${t.SS}` : "";
+      const key = signalKey(s.pair, s.posted_at);
+
+      /* Status muktamad -> kad ringkas satu baris (padat), bukan kad penuh. */
+      const st = (window.TW_STATUSES || {})[key] || {};
+      const settled = ["tp","sl","expired","collected","cancelled"].includes(st.status);
+      a.dataset.key = key;
+      a.dataset.pair = String(s.pair||"").toUpperCase();
+      a.dataset.side = String(s.side||"").toUpperCase();
+      a.dataset.type = s.timeframe || "H1";
+      a.dataset.entry = s.entry ?? "";
+      a.dataset.sl = s.sl ?? "";
+      a.dataset.tp = s.tp ?? "";
+
+      if(settled && !locked){
+        const label = {tp:"TP hit", sl:"SL hit", expired:"Tamat", collected:"TP dikutip", cancelled:"Batal"}[st.status] || st.status;
+        const pips = typeof st.pips === "number" ? (st.pips > 0 ? "+" : "") + st.pips.toFixed(1) + "p" : "";
+        a.className = "sig sig-done " + st.status;
+        a.innerHTML = `
+          <div class="done-row">
+            <span class="done-pair">${esc(s.pair)}</span>
+            <span class="side ${cls}">${esc(s.side)}</span>
+            <span class="done-res ${st.status}">${esc(label)}${pips ? " " + esc(pips) : ""}</span>
+            <span class="done-time"><span class="d-full">${esc(stamp)}</span><span class="d-short">${esc(t.dd + "/" + t.mm + " " + t.HH + ":" + t.MM)}</span></span>
+          </div>`;
+        grid.appendChild(a);
+        return;
+      }
+
+      a.className = "sig" + (locked ? " locked" : "");
+      a.innerHTML = `
+        <div class="sig-top"><span class="pair">${esc(s.pair)}</span><span class="side ${cls}">${esc(locked ? "LOCKED" : s.side)}</span></div>
+        <h3 class="setup-title">${esc(s.timeframe || "H1")} ${esc(s.side || "")} setup${s.timeframe === "M15" ? " · scalping" : ""}</h3>
+        <dl class="rows num">
+          <dt>Entry</dt><dd>${esc(locked ? "—" : s.entry)}</dd>
+          <dt>SL</dt><dd class="sl">${esc(locked ? "—" : s.sl)}</dd>
+          <dt>TP</dt><dd class="tp">${esc(locked ? "—" : s.tp)}</dd>
+        </dl>
+        <p class="time">Posted ${esc(stamp)}</p>
+        ${locked ? '<div class="lock"><span>Pro signal</span><a class="btn sm" href="subscribe.html">Unlock with Pro</a></div>' : ''}`;
+      grid.appendChild(a);
+    });
+  }
+  const HOT_PAIRS = ["XAUUSD", "GBPUSD", "EURUSD", "USDJPY", "AUDUSD", "USDCAD", "NZDUSD", "BTCUSD"];
+  function normalizePair(pair){ return String(pair || "").replace(/[^A-Z]/gi, "").toUpperCase(); }
+  async function load(){
+    try{
+      const r = { data: [
+ {id:118,pair:"XAU/USD",side:"SELL",timeframe:"M15",entry:4021.945,sl:4033.2,tp:4004.62,posted_at:"2026-10-23T05:23:17"}
+], error: null };
+      if(r.error) throw r.error;
+      const rows = Array.isArray(r.data) ? r.data : [];
+      const deduped = [...new Map(rows.map(s => [String(s.id || [s.pair,s.timeframe,s.side,s.entry,s.sl,s.tp,s.posted_at].join("|")), s])).values()];
+
+      /* Signals posted before today used to vanish at midnight even while the
+         position was still open. Keep them while signal-status.json says
+         "active"; everything else stays on today's list only. */
+      let statuses = {};
+      try{
+        const sr = await fetch("signal-status.json?t=" + Date.now(), { cache: "no-store" });
+        if(sr.ok){ const sj = await sr.json(); statuses = (sj && sj.signals) || {}; }
+        window.TW_STATUSES = statuses;
+      }catch(_){}
+      const isToday = s => {
+        /* Supabase posted_at ialah UTC-naive; mytParts memaksa UTC sebelum
+           tukar ke Kuala Lumpur, sama seperti signalKey/status matching. */
+        const p = mytParts(s.posted_at);
+        if(!p) return false;
+        const today = new Intl.DateTimeFormat("en-CA", {
+          timeZone:"Asia/Kuala_Lumpur", year:"numeric", month:"2-digit", day:"2-digit"
+        }).format(new Date()).replace(/-/g, "");
+        return p.yyyy + p.mm + p.dd === today;
+      };
+      const stillOpen = s => {
+        const st = statuses[signalKey(s.pair, s.posted_at)];
+        return !!st && st.status === "active";
+      };
+      /* A result should stay visible for a day after it closes, otherwise the
+         trade vanishes the moment the engine marks TP/SL. */
+      const closedRecently = s => {
+        const st = statuses[signalKey(s.pair, s.posted_at)];
+        if(!st || !st.closed) return false;
+        const t = new Date(st.closed).getTime();
+        /* Trade ditutup kekal 48 jam supaya hasil manual (TP dikutip) sempat
+           dilihat ahli, bukan hilang selepas 24 jam. */
+        return Number.isFinite(t) && (Date.now() - t) <= 48 * 60 * 60 * 1000;
+      };
+      const allowed = plan === "free" ? HOT_PAIRS.slice(0,3) : HOT_PAIRS;
+      const forPlan = s => allowed.includes(normalizePair(s.pair));
+      const todays = deduped.filter(s => isToday(s) && forPlan(s));
+      const older = deduped.filter(s => !isToday(s) && forPlan(s));
+      const carriedOpen = older.filter(stillOpen);
+      const carriedClosed = older.filter(closedRecently).slice(0, 5);
+      const carried = carriedOpen.concat(carriedClosed);
+      const selected = (plan === "max" ? todays : todays.slice(0, plan === "pro" ? 10 : 3)).concat(carried);
+      /* simpan untuk fillBento() — signal-status.json tidak menyimpan entry/sl/tp */
+      window.TW_SIGNALS = selected.map(s => ({
+        pair: s.pair, timeframe: s.timeframe || "H1", side: s.side,
+        entry: s.entry, sl: s.sl, tp: s.tp, posted_at: s.posted_at
+      }));
+      try{ window.dispatchEvent(new CustomEvent("tw:signals")); }catch(_){}
+      render(window.TW_SIGNALS.map(s=>({...s, locked:false})));
+      /* Kira setup hari ini untuk info tier. */
+      try{
+        if(typeof window.__setTierInfo === "function"){
+          window.__setTierInfo(selected.length);
+        }
+      }catch(_){}
+      const bits = [];
+      if(carriedOpen.length) bits.push(`${carriedOpen.length} still open from earlier`);
+      if(carriedClosed.length) bits.push(`${carriedClosed.length} closed in the last 48h`);
+      const carriedNote = bits.length ? ` · ${bits.join(" · ")}` : "";
+      note.textContent = selected.length
+        ? `${selected.length} of ${plan === "max" ? "unlimited" : plan === "pro" ? "10" : "3"} daily setups · ${allowed.length} hot pairs${carriedNote}.`
+        : "No verified setups available today for your plan. New valid M15 setups appear here when posted.";
+    }catch(_){
+      render([]);
+      note.textContent = "Could not load verified signals. Please try again later.";
+    }
+  }
+  load();
+
+  /* ---------- Stat tiles + active signal track (Apple Bento) ---------- */
+  (function fillBento(){
+    const PAIR_PIP = { XAUUSD:0.1, USDJPY:0.01, BTCUSD:1, GBPUSD:0.0001, NZDUSD:0.0001,
+                       EURUSD:0.0001, AUDUSD:0.0001, USDCAD:0.0001 };
+
+    /* ================= Widget tambahan ================= */
+  function fmtPips(v){
+    const n = Number(v) || 0;
+    return (n >= 0 ? "+" : "−") + Math.abs(n).toFixed(1);
+  }
+
+  function calcWidgets(){
+    const st = window.TW_STATUSES || {};
+    const keys = Object.keys(st);
+    if (!keys.length) return;
+
+    // ---- kumpul trade ber-pips ikut masa posted ----
+    const rows = [];
+    keys.forEach(k => {
+      const v = st[k] || {};
+      if (v.pips == null) return;
+      const parts = k.split("_");
+      if (parts.length < 3) return;
+      const ds = parts[1], ts = parts[2];
+      const dt = new Date(+ds.slice(0,4), +ds.slice(4,6)-1, +ds.slice(6,8),
+                          +ts.slice(0,2), +ts.slice(2,4), +ts.slice(4,6));
+      rows.push({ key:k, pair:parts[0], dt, status:v.status, pips:Number(v.pips) });
+    });
+    rows.sort((a,b) => a.dt - b.dt);
+    if (!rows.length) return;
+
+    /* ---------- Kalendar harian ---------- */
+    const byDay = {};
+    rows.forEach(r => {
+      /* Guna tarikh TEMPATAN, bukan toISOString() (itu UTC — signal 00:00–08:00
+         MYT akan jatuh ke hari sebelumnya dan kalendar jadi salah). */
+      const d = r.dt.getFullYear() + "-" +
+                String(r.dt.getMonth() + 1).padStart(2, "0") + "-" +
+                String(r.dt.getDate()).padStart(2, "0");
+      byDay[d] = byDay[d] || { p:0, w:0, l:0, exp:0 };
+      byDay[d].p += r.pips;
+      if (r.status === "tp") byDay[d].w++;
+      else if (r.status === "sl") byDay[d].l++;
+    });
+    // kira expired ikut tarikh posted (tiada pips)
+    keys.forEach(k => {
+      const v = st[k] || {};
+      if (v.status !== "expired") return;
+      const parts = k.split("_");
+      if (parts.length < 3) return;
+      const ds = parts[1];
+      const d = ds.slice(0,4)+"-"+ds.slice(4,6)+"-"+ds.slice(6,8);
+      byDay[d] = byDay[d] || { p:0, w:0, l:0, exp:0 };
+      byDay[d].exp++;
+    });
+
+    const days = Object.keys(byDay).sort();
+    const calGrid = document.getElementById("calGrid");
+    if (calGrid) {
+      const shown = days.slice(-7);
+      document.getElementById("calDays").textContent = shown.length;
+      calGrid.innerHTML = shown.map(d => {
+        const v = byDay[d];
+        const cls = v.p > 0 ? "up" : (v.p < 0 ? "dn" : "fl");
+        const dt = new Date(d + "T00:00:00");
+        const lbl = dt.getDate() + " " + ["Jan","Feb","Mac","Apr","Mei","Jun","Jul","Ogos","Sep","Okt","Nov","Dis"][dt.getMonth()];
+        const det = v.w + "W/" + v.l + "L" + (v.exp ? " · " + v.exp + " exp" : "");
+        return '<div class="d ' + cls + '"><span>' + lbl + '</span><b>' + fmtPips(v.p) +
+               '</b><span>' + det + '</span></div>';
+      }).join("");
+      const up = shown.filter(d => byDay[d].p > 0).length;
+      const tot = shown.reduce((a,d) => a + byDay[d].p, 0);
+      const worst = shown.reduce((a,d) => byDay[d].p < byDay[a].p ? d : a, shown[0]);
+      const wd = new Date(worst + "T00:00:00");
+      document.getElementById("calSub").textContent =
+        up + " daripada " + shown.length + " hari untung (" +
+        Math.round(up/shown.length*100) + "%) · jumlah " + fmtPips(tot) +
+        " · terburuk " + wd.getDate() + " " +
+        ["Jan","Feb","Mac","Apr","Mei","Jun","Jul","Ogos","Sep","Okt","Nov","Dis"][wd.getMonth()] +
+        " (" + fmtPips(byDay[worst].p) + ", " + byDay[worst].w + "W/" + byDay[worst].l + "L)";
+    }
+
+    /* ---------- Streak ---------- */
+    const seq = rows.filter(r => r.status === "tp" || r.status === "sl");
+    let bw = 0, bl = 0, cw = 0, cl = 0;
+    seq.forEach(r => {
+      if (r.status === "tp") { cw++; cl = 0; bw = Math.max(bw, cw); }
+      else { cl++; cw = 0; bl = Math.max(bl, cl); }
+    });
+    let curStatus = null, curLen = 0;
+    for (let i = seq.length - 1; i >= 0; i--) {
+      if (!curStatus) { curStatus = seq[i].status; curLen = 1; }
+      else if (seq[i].status === curStatus) curLen++;
+      else break;
+    }
+    const sNum = document.getElementById("streakNum");
+    if (sNum) {
+      sNum.innerHTML = bl + '<small> SL berturut</small>';
+      sNum.className = "num neg";
+      document.getElementById("streakSub").textContent =
+        "Streak rugi terburuk " + bl + " trade. Ini yang buat member panik dan berhenti langganan.";
+      document.getElementById("streakBestW").textContent = bw;
+      document.getElementById("streakWorstL").textContent = bl;
+      document.getElementById("streakNow").textContent =
+        curLen + (curStatus === "tp" ? " TP" : " SL");
+      document.getElementById("streakNow").className = curStatus === "tp" ? "pos" : "neg";
+      const dots = document.getElementById("streakDots");
+      const last = seq.slice(-24);
+      dots.innerHTML = last.map(r =>
+        '<i style="background:' + (r.status === "tp" ? "#1fa35c" : "#e5372b") + '"></i>'
+      ).join("");
+    }
+
+    /* ---------- Sesi dagangan ---------- */
+    const buckets = [
+      ["00:00–04:00", 0, 4], ["04:00–08:00", 4, 8], ["08:00–12:00", 8, 12],
+      ["12:00–16:00", 12, 16], ["16:00–20:00", 16, 20], ["20:00–24:00", 20, 24]
+    ];
+    const sess = buckets.map(b => ({ label:b[0], from:b[1], to:b[2], p:0, w:0, l:0, n:0 }));
+    rows.forEach(r => {
+      const h = r.dt.getHours();
+      const s = sess.find(x => h >= x.from && h < x.to);
+      if (!s) return;
+      s.p += r.pips; s.n++;
+      if (r.status === "tp") s.w++;
+      else if (r.status === "sl") s.l++;
+    });
+    const maxAbs = Math.max.apply(null, sess.map(s => Math.abs(s.p)).concat([1]));
+    const sessBars = document.getElementById("sessBars");
+    if (sessBars) {
+      const sorted = sess.slice().sort((a,b) => b.p - a.p);
+      sessBars.innerHTML = sorted.map(s => {
+        const pct = Math.max(2, Math.round(Math.abs(s.p) / maxAbs * 100));
+        const wr = (s.w + s.l) ? Math.round(s.w/(s.w+s.l)*100) : 0;
+        const col = s.p >= 0 ? "var(--green)" : "var(--red)";
+        return '<div class="hb"><div class="lbl"><span>' + s.label + '</span><b class="' +
+          (s.p >= 0 ? "pos" : "neg") + '">' + fmtPips(s.p) + ' · ' + wr + '%</b></div>' +
+          '<div class="tr"><i style="width:' + pct + '%;background:' + col + '"></i></div></div>';
+      }).join("");
+      const best = sorted[0], worst = sorted[sorted.length-1];
+      document.getElementById("sessSub").textContent =
+        "Sesi " + best.label + " hasil terbesar (" + fmtPips(best.p) + "). " +
+        "Sesi " + worst.label + " paling rugi (" + fmtPips(worst.p) + ").";
+    }
+
+    /* ---------- Kadar trigger ---------- */
+    const totalSigs = keys.length;
+    const trig = keys.filter(k => ["tp","sl","collected"].indexOf((st[k]||{}).status) >= 0).length;
+    const exp = keys.filter(k => (st[k]||{}).status === "expired").length;
+    const pct = Math.round(trig/totalSigs*100);
+    const tNum = document.getElementById("trigNum");
+    if (tNum) {
+      tNum.innerHTML = pct + '<small>% trigger</small>';
+      document.getElementById("trigMk").style.left = pct + "%";
+      document.getElementById("trigSub").textContent =
+        trig + " daripada " + totalSigs + " setup kena entry. " + exp +
+        " expired tanpa entry (" + Math.round(exp/totalSigs*100) + "%). Ini normal.";
+      document.getElementById("trigOn").textContent = trig + " · " + pct + "%";
+      document.getElementById("trigOff").textContent = exp + " · " + Math.round(exp/totalSigs*100) + "%";
+    }
+
+    /* ---------- Kualiti risiko ---------- */
+    const wins = rows.filter(r => r.status === "tp").map(r => r.pips);
+    const loss = rows.filter(r => r.status === "sl").map(r => r.pips);
+    const sumW = wins.reduce((a,b) => a+b, 0);
+    const sumL = loss.reduce((a,b) => a+b, 0);
+    const pf = sumL !== 0 ? Math.abs(sumW/sumL) : 0;
+    let eq = 0, peak = 0, dd = 0;
+    rows.forEach(r => { eq += r.pips; peak = Math.max(peak, eq); dd = Math.min(dd, eq - peak); });
+    const rPF = document.getElementById("riskPF");
+    if (rPF) {
+      rPF.innerHTML = pf.toFixed(2) + '<small> profit factor</small>';
+      rPF.className = "num " + (pf >= 1 ? "pos" : "neg");
+      document.getElementById("riskSub").textContent =
+        "Setiap 1 pips rugi, kita buat " + pf.toFixed(2) + " pips untung.";
+      document.getElementById("riskAvgW").textContent = fmtPips(sumW/Math.max(1,wins.length));
+      document.getElementById("riskAvgL").textContent = fmtPips(sumL/Math.max(1,loss.length));
+      document.getElementById("riskDD").textContent = fmtPips(dd);
+    }
+
+    /* ---------- Prestasi ikut pair ---------- */
+    const byPair = {};
+    rows.forEach(r => {
+      byPair[r.pair] = byPair[r.pair] || { p:0, w:0, l:0, n:0 };
+      byPair[r.pair].p += r.pips; byPair[r.pair].n++;
+      if (r.status === "tp") byPair[r.pair].w++;
+      else if (r.status === "sl") byPair[r.pair].l++;
+    });
+    const pairList = Object.keys(byPair).map(k => ({ pair:k, ...byPair[k] }))
+      .sort((a,b) => b.p - a.p);
+    const pMax = Math.max.apply(null, pairList.map(x => Math.abs(x.p)).concat([1]));
+    const pairBars = document.getElementById("pairBars");
+    if (pairBars && pairList.length) {
+      pairBars.innerHTML = pairList.map(x => {
+        const pct = Math.max(2, Math.round(Math.abs(x.p)/pMax*100));
+        const wr = (x.w+x.l) ? Math.round(x.w/(x.w+x.l)*100) : 0;
+        const nm = x.pair.slice(0,3) + "/" + x.pair.slice(3);
+        return '<div class="pb"><div class="lbl"><span>' + nm + '</span><span>' +
+          fmtPips(x.p) + ' · ' + wr + '% · ' + x.n + '</span></div>' +
+          '<div class="track"><i style="' + (x.p >= 0 ? 'left:50%;' : 'right:50%;') +
+          'width:' + (pct/2) + '%;background:' + (x.p >= 0 ? 'var(--green)' : 'var(--red)') +
+          '"></i></div></div>';
+      }).join("");
+      const top = pairList[0];
+      const share = sumW + sumL !== 0 ? Math.round(top.p / (sumW + sumL) * 100) : 0;
+      const losers = pairList.filter(x => x.p < 0).map(x => x.pair.slice(0,3) + "/" + x.pair.slice(3));
+      document.getElementById("pairSub").textContent =
+        (top.pair.slice(0,3) + "/" + top.pair.slice(3)) + " menyumbang " + share +
+        "% daripada jumlah pips." + (losers.length ? " Rugi: " + losers.join(", ") + "." : "");
+    }
+  }
+
+  function setRing(){
+      const el = document.getElementById("planRingText");
+      const ring = document.getElementById("planRing");
+      if(!el || !ring) return;
+      const cap = plan === "max" ? null : plan === "pro" ? 10 : 3;
+      if(cap === null){
+        el.textContent = "∞";
+        ring.style.background = "conic-gradient(var(--blue) 0 100%, var(--line) 0)";
+        return;
+      }
+      /* Kiraan = bilangan kad yang benar-benar dipaparkan untuk ahli ini. */
+      const domCount = document.querySelectorAll("#signalGrid .sig").length;
+      const arrCount = (window.TW_SIGNALS || []).length;
+      const used = domCount || arrCount || 0;
+      el.textContent = used + "/" + cap;
+      const pct = Math.max(0, Math.min(100, (used / cap) * 100));
+      ring.style.background = "conic-gradient(var(--blue) 0 " + pct + "%, var(--line) 0)";
+    }
+
+    async function fillStats(){
+      try{
+        const r = await fetch("signal-status.json?t=" + Date.now(), { cache: "no-store" });
+        if(!r.ok) return;
+        const sj = await r.json();
+        const sigs = (sj && sj.signals) || {};
+        /* Tiada had 30 hari: kira sejak signal pertama diterbitkan. */
+        let wins = 0, losses = 0, pips = 0, closed = 0, rrSum = 0, rrN = 0;
+
+        Object.keys(sigs).forEach(k => {
+          const s = sigs[k] || {};
+          const st = s.status;
+          if(st !== "tp" && st !== "sl" && st !== "collected") return;
+          closed++;
+          if(st === "tp" || st === "collected") wins++; else losses++;
+          if(typeof s.pips === "number") pips += s.pips;
+          if(typeof s.entry === "number" && typeof s.sl === "number" && typeof s.tp === "number"){
+            const risk = Math.abs(s.entry - s.sl), reward = Math.abs(s.tp - s.entry);
+            if(risk > 0){ rrSum += reward / risk; rrN++; }
+          }
+        });
+
+        /* Label: "Win rate · N hari" dari tarikh signal pertama. */
+        (function setWinLabel(){
+          const el = document.getElementById("statWinLabel");
+          if(!el) return;
+          let earliest = null;
+          Object.keys(sigs).forEach(function(k){
+            const parts = String(k).split("_");
+            if(parts.length < 3) return;
+            const y = parts[1].slice(0,4), mo = parts[1].slice(4,6), d = parts[1].slice(6,8);
+            const t = new Date(y + "-" + mo + "-" + d + "T00:00:00+08:00").getTime();
+            if(Number.isFinite(t) && (earliest === null || t < earliest)) earliest = t;
+          });
+          if(earliest === null){ el.textContent = "Win rate · sejak mula"; return; }
+          const today = new Date();
+          const d0 = new Date(earliest);
+          const ms = Date.UTC(today.getFullYear(), today.getMonth(), today.getDate())
+                   - Date.UTC(d0.getFullYear(), d0.getMonth(), d0.getDate());
+          const days = Math.max(1, Math.round(ms / 86400000) + 1);
+          el.textContent = "Win rate · " + days + " hari";
+        })();
+
+        const total = wins + losses;
+        const winEl = document.getElementById("statWin");
+        const barEl = document.getElementById("statWinBar");
+        const rrEl = document.getElementById("statRR");
+        const cntEl = document.getElementById("statCount");
+
+        if(winEl){
+          if(total > 0){
+            const pct = Math.round((wins / total) * 100);
+            winEl.innerHTML = pct + "<small>%</small>";
+            if(barEl) barEl.style.width = pct + "%";
+          }else{
+            winEl.textContent = "—";
+          }
+        }
+        if(rrEl){
+          /* Purata R:R = purata R bagi trade menang (TP), kerana SL sentiasa -1R.
+             signal-status.json sudah menyimpan field `r` (R multiple) untuk
+             setiap trade ditutup — tiada perlu query Supabase (RLS sekat anon). */
+          let winSum = 0, winN = 0;
+          Object.keys(sigs).forEach(function(k){
+            const v = sigs[k] || {};
+            if(v.status !== "tp" && v.status !== "collected") return;
+            if(typeof v.r === "number" && isFinite(v.r) && v.r > 0){
+              winSum += v.r; winN++;
+            }
+          });
+          rrEl.textContent = winN > 0
+            ? "1:" + (winSum / winN).toFixed(1)
+            : "—";
+        }
+        if(cntEl){
+          /* BTCUSD: 1 pip = USD 1 pergerakan harga (PIP.BTCUSD = 1.0 dalam
+             engine), jadi unit usd pada BTC memang sudah dalam "pip".
+             Semua trade boleh dijumlahkan sebagai pips. */
+          let netPips = 0;
+          Object.keys(sigs).forEach(function(k){
+            const v = sigs[k] || {};
+            if(v.status !== "tp" && v.status !== "sl" && v.status !== "collected") return;
+            if(typeof v.pips === "number") netPips += v.pips;
+          });
+          cntEl.textContent = closed > 0
+            ? closed + " signal ditutup · " + (netPips > 0 ? "+" : "") + netPips.toFixed(1) + " pips"
+            : "Belum ada signal ditutup";
+        }
+        renderPerf(sigs);
+      }catch(_){}
+    }
+
+    /* Dipanggil oleh tw:signals (selepas kad dirender) supaya kiraan tepat. */
+    window.addEventListener("tw:signals", function(){
+      /* tunggu satu tick: render() baru sahaja menulis kad */
+      setTimeout(function(){ setRing(); }, 0);
+    });
+
+    async function fillActive(){
+      try{
+        const r = await fetch("signal-status.json?t=" + Date.now(), { cache: "no-store" });
+        if(!r.ok) return;
+        const sj = await r.json();
+        const sigs = (sj && sj.signals) || {};
+        let bestKey = null, best = null;
+        Object.keys(sigs).forEach(k => {
+          const s = sigs[k];
+          if(s && s.status === "active"){ bestKey = k; best = s; }
+        });
+        const pairEl = document.getElementById("activePair");
+        const badge = document.getElementById("activeBadge");
+        const trk = document.getElementById("activeTrk");
+        const meta = document.getElementById("activeMeta");
+        if(!best || !pairEl){ setRing(); return; }
+
+        const code = String(bestKey).split("_")[0];
+        const nice = code.length === 6 ? code.slice(0,3) + "/" + code.slice(3) : code;
+        const side = best.side || "SELL";
+        pairEl.innerHTML = nice + ' <span class="dir">' + side + "</span>";
+        if(badge) badge.hidden = false;
+        if(trk) trk.hidden = false;
+
+        /* status file hanya simpan status; entry/sl/tp datang dari Supabase */
+        const fromList = (window.TW_SIGNALS || []).find(x => {
+          const k = String(x.pair || "").replace(/[^A-Z]/gi, "").toUpperCase();
+          return k === code;
+        }) || {};
+        const e  = Number(best.entry  !== undefined ? best.entry  : fromList.entry);
+        const sl = Number(best.sl     !== undefined ? best.sl     : fromList.sl);
+        const tp = Number(best.tp     !== undefined ? best.tp     : fromList.tp);
+        const fmt = v => Number.isFinite(v) ? v.toLocaleString("en-US", {minimumFractionDigits:0, maximumFractionDigits:5}) : "—";
+        const set = (id, v) => { const el = document.getElementById(id); if(el) el.textContent = v; };
+        set("trkEntry", fmt(e)); set("trkSL", fmt(sl)); set("trkTP", fmt(tp));
+
+        const entered = best.entry_at ? new Date(best.entry_at) : null;
+        const bits = [];
+        if(entered && Number.isFinite(entered.getTime())){
+          const h = Math.floor((Date.now() - entered.getTime()) / 3600000);
+          bits.push("Entry " + entered.toLocaleString("en-GB", {timeZone:"Asia/Kuala_Lumpur", hour:"2-digit", minute:"2-digit"}) + " MYT");
+          bits.push(h + "j berjalan");
+        }
+        if(Number.isFinite(e) && Number.isFinite(sl) && Number.isFinite(tp)){
+          const risk = Math.abs(e - sl), reward = Math.abs(tp - e);
+          if(risk > 0) bits.push("R:R 1:" + (reward / risk).toFixed(1));
+        }
+        if(meta) meta.textContent = bits.join(" · ") || "Setup aktif.";
+        setRing();
+      }catch(_){}
+    }
+
+    /* fillStats() hanya perlukan signal-status.json (bukan Supabase), jadi
+       ia selamat dijalankan serta-merta. fillActive() perlukan TW_SIGNALS. */
+    function runStats(){
+    try { calcWidgets(); } catch (e) { console.warn("widgets", e); }
+      fillStats().catch(function(){});
+      setRing();
+    }
+    function runActive(){
+      fillActive().catch(function(){});
+    }
+
+    /* ---------- Graph performance: pips kumulatif (gaya toolkits) ---------- */
+    function fmtPips(v){
+      return (v > 0 ? "+" : "") + Number(v).toFixed(1) + " pips";
+    }
+
+    /* Area chart dengan gradient + titik hujung — sama seperti members-tools-2.js */
+    function areaChart(pts, H, color){
+      const W = 320, P = 10;
+      const min = Math.min.apply(null, pts.concat([0]));
+      const max = Math.max.apply(null, pts.concat([0]));
+      const span = (max === min) ? 1 : (max - min);
+      const X = i => P + i * (W - 2*P) / Math.max(1, pts.length - 1);
+      const Y = v => H - P - (v - min) / span * (H - 2*P);
+
+      const id = "perfGrad" + Math.random().toString(36).slice(2, 8);
+      const line = pts.map((v,i) => X(i).toFixed(1) + "," + Y(v).toFixed(1)).join(" ");
+
+      return '<defs><linearGradient id="' + id + '" x1="0" y1="0" x2="0" y2="1">'
+        + '<stop offset="0%" stop-color="' + color + '" stop-opacity="0.28"/>'
+        + '<stop offset="100%" stop-color="' + color + '" stop-opacity="0"/>'
+        + '</linearGradient></defs>'
+        + '<line x1="' + P + '" x2="' + (W-P) + '" y1="' + Y(0).toFixed(1) + '" y2="' + Y(0).toFixed(1)
+        + '" stroke="#c9d3e3" stroke-dasharray="3 4"/>'
+        + '<polygon points="' + X(0).toFixed(1) + "," + Y(0).toFixed(1) + " " + line + " "
+        + X(pts.length-1).toFixed(1) + "," + Y(0).toFixed(1) + '" fill="url(#' + id + ')"/>'
+        + '<polyline points="' + line + '" fill="none" stroke="' + color
+        + '" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>'
+        + '<circle cx="' + X(pts.length-1).toFixed(1) + '" cy="' + Y(pts[pts.length-1]).toFixed(1)
+        + '" r="4.5" fill="#fff" stroke="' + color + '" stroke-width="2.5"/>';
+    }
+
+    function renderPerf(sigs){
+      const svg = document.getElementById("perfChart");
+      const netEl = document.getElementById("perfNet");
+      const subEl = document.getElementById("perfSub");
+      if(!svg) return;
+
+      /* Kumpul trade ditutup, susun ikut masa. */
+      const rows = [];
+      Object.keys(sigs || {}).forEach(function(k){
+        const v = sigs[k] || {};
+        const st = v.status;
+        if(st !== "tp" && st !== "collected" && st !== "sl") return;
+        const when = new Date(v.closed || v.closed_at || 0).getTime();
+        if(!Number.isFinite(when)) return;
+        rows.push({ t: when, status: st, pips: (typeof v.pips === "number" ? v.pips : 0),
+                    unit: v.unit || "pips" });
+      });
+
+      if(!rows.length){
+        svg.innerHTML = "";
+        if(netEl) netEl.textContent = "+0.0 pips";
+        if(subEl) subEl.textContent = "Belum ada signal ditutup";
+        return;
+      }
+      rows.sort(function(a,b){ return a.t - b.t; });
+
+      /* BTCUSD pip = 1.0 (USD 1 per $1 move), jadi semua trade dikira pips. */
+      const pipRows = rows;
+      let cum = 0;
+      const pts = [0];
+      pipRows.forEach(function(r){ cum += r.pips; pts.push(cum); });
+
+      /* Streak TP. */
+      let run = 0, best = 0;
+      rows.forEach(function(r){
+        if(r.status === "sl"){ run = 0; return; }
+        run++; if(run > best) best = run;
+      });
+
+      if(netEl){
+        netEl.textContent = fmtPips(cum);
+        netEl.className = "perf-big " + (cum >= 0 ? "pos" : "neg");
+      }
+      if(subEl){
+        subEl.textContent = pipRows.length + " signal · TP berturut-turut terbaik: " + best;
+      }
+
+      const H = 150;
+      svg.setAttribute("viewBox", "0 0 320 " + H);
+      svg.innerHTML = areaChart(pts, H, cum >= 0 ? "#2f9e5b" : "#c0392b");
+    }
+
+    runStats();
+
+    async function bootBento(){
+      for(let i = 0; i < 60; i++){
+        if((window.TW_SIGNALS || []).length) break;
+        await new Promise(function(r){ setTimeout(r, 100); });
+      }
+      runActive();
+      runStats();          /* kira semula: pastikan nilai tidak "—" */
+    }
+    if(document.readyState === "loading"){
+      document.addEventListener("DOMContentLoaded", bootBento);
+    }else{
+      bootBento();
+    }
+    window.addEventListener("tw:signals", function(){ runActive(); runStats(); });
+  })();
+}
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>TraderWatch — Idea Widget Pusingan 2</title>
+<style>
+:root{--bg:#f5f5f7;--text:#1d1d1f;--muted:#86868b;--line:#e8e8ed;--blue:#0a84ff;
+--green:#1fa35c;--red:#e5372b;--amber:#c77700;
+--shadow:0 1px 0 rgba(0,0,0,.04),0 10px 34px rgba(0,0,0,.05)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);
+font:16px/1.47 -apple-system,BlinkMacSystemFont,"SF Pro Text","Helvetica Neue",Helvetica,Arial,sans-serif;
+-webkit-font-smoothing:antialiased}
+.wrap{max-width:1040px;margin:0 auto;padding:26px 18px 90px}
+.badge{display:inline-block;font-size:11px;font-weight:700;letter-spacing:.08em;
+padding:5px 11px;border-radius:99px;margin-bottom:14px;background:#e7f2ff;color:var(--blue)}
+h1{font-size:clamp(30px,4.5vw,42px);line-height:1.05;letter-spacing:-.035em;margin:0 0 8px}
+.lead{color:var(--muted);margin:0 0 30px;font-size:15px}
+h2.sec{font-size:13px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;
+color:var(--muted);margin:40px 0 14px}
+.bento{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+.t{background:#fff;border-radius:26px;padding:22px;box-shadow:var(--shadow);min-width:0}
+.w2{grid-column:span 2}.w4{grid-column:span 4}
+.k{font-size:12.5px;font-weight:600;color:var(--muted);margin:0 0 10px}
+.num{font-size:clamp(28px,4vw,38px);font-weight:700;letter-spacing:-.04em;line-height:1}
+.num small{font-size:.42em;font-weight:600;color:var(--muted);letter-spacing:0}
+.sub{color:var(--muted);font-size:12.5px;margin:8px 0 0;line-height:1.45}
+.pos{color:var(--green)}.neg{color:var(--red)}
+.row{display:flex;justify-content:space-between;align-items:baseline;gap:10px;padding:7px 0;
+border-bottom:1px solid var(--line);font-size:13.5px}
+.row:last-child{border-bottom:0}
+.row b{font-variant-numeric:tabular-nums;font-weight:600}
+/* calendar heat strip */
+.cal{display:grid;grid-template-columns:repeat(7,1fr);gap:8px;margin-top:6px}
+.cal .d{border-radius:12px;padding:10px 8px;text-align:center;font-size:11px;line-height:1.3}
+.cal .d b{display:block;font-size:14px;font-variant-numeric:tabular-nums;margin-top:3px}
+.cal .up{background:#e6f7ed;color:#0d6b38}
+.cal .dn{background:#fdeceb;color:#a3241c}
+.cal .fl{background:#f0f0f3;color:var(--muted)}
+/* horizontal bar rows */
+.hb{margin-bottom:9px}
+.hb .lbl{display:flex;justify-content:space-between;font-size:12.5px;margin-bottom:4px}
+.hb .lbl b{font-variant-numeric:tabular-nums}
+.hb .tr{height:8px;border-radius:99px;background:#f0f0f3;overflow:hidden}
+.hb .tr i{display:block;height:100%;border-radius:99px}
+/* streak dots */
+.dots{display:flex;gap:4px;flex-wrap:wrap;margin-top:10px}
+.dots i{width:13px;height:13px;border-radius:4px;display:block}
+/* risk gauge */
+.gauge{height:12px;border-radius:99px;margin:12px 0 6px;
+background:linear-gradient(90deg,#e5372b 0 33%,#e8a33d 33% 66%,#1fa35c 66% 100%)}
+.gauge-mk{position:relative;height:16px}
+.gauge-mk i{position:absolute;top:-14px;transform:translateX(-50%);
+width:3px;height:20px;background:#1d1d1f;border-radius:2px}
+/* compare */
+.cmp{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.cmp .box{border-radius:16px;padding:15px}
+.cmp .bad{background:#fff1f0;border:1px solid #ffd6d2}
+.cmp .good{background:#eefaf2;border:1px solid #cdeed9}
+.cmp h4{margin:0 0 8px;font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.cmp .v{font-size:23px;font-weight:700;letter-spacing:-.03em;font-variant-numeric:tabular-nums}
+.cmp .d{font-size:11.5px;color:var(--muted);margin-top:3px}
+.legend{display:flex;gap:14px;font-size:11.5px;color:var(--muted);margin-top:10px;flex-wrap:wrap}
+.legend i{display:inline-block;width:9px;height:9px;border-radius:3px;margin-right:5px}
+.note{background:#fffbe9;border:1px solid #f5e6b8;border-radius:14px;padding:13px 15px;
+font-size:13px;color:#6b5200;margin-top:12px}
+.tag{display:inline-block;font-size:10px;font-weight:700;letter-spacing:.06em;
+padding:3px 7px;border-radius:5px;background:#e7f2ff;color:#0a5fd8;margin-left:6px;vertical-align:1px}
+.tag.warn{background:#ffe9e7;color:#b3261e}
+.tag.mid{background:#fff4e0;color:#8a5a00}
+@media(max-width:760px){
+  .bento{grid-template-columns:repeat(2,1fr)}
+  .w2,.w4{grid-column:span 2}
+  .cal{grid-template-columns:repeat(4,1fr)}
+  .cmp{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<div class="badge">PREVIEW · PUSINGAN 2 · CADANGAN SAHAJA</div>
+<h1>Lagi 6 widget</h1>
+<p class="lead">Semua angka dari 82 signal sebenar. Tiada apa diubah pada live.</p>
+
+<h2 class="sec">4 · Konsistensi harian</h2>
+<div class="bento">
+  <section class="t w4">
+    <p class="k">Kalendar prestasi · 7 hari</p>
+    <div class="cal">
+      <div class="d dn"><span>18 Okt</span><b>−40.0</b><span>0W/2L · 9 exp</span></div>
+      <div class="d up"><span>19 Okt</span><b>+80.0</b><span>2W/0L · 7 exp</span></div>
+      <div class="d dn"><span>20 Okt</span><b>−166.7</b><span>0W/5L</span></div>
+      <div class="d up"><span>21 Okt</span><b>+703.2</b><span>8W/13L</span></div>
+      <div class="d up"><span>22 Okt</span><b>+66.9</b><span>4W/10L</span></div>
+      <div class="d up"><span>23 Okt</span><b>+559.6</b><span>8W/2L</span></div>
+      <div class="d dn"><span>24 Okt</span><b>−5.0</b><span>0W/1L · 2 exp</span></div>
+    </div>
+    <p class="sub">4 daripada 7 hari untung (57%). Hari terburuk 20 Okt: 0 menang, 5 rugi, −166.7 pips — 5 SL berturut-turut dalam satu hari.</p>
+  </section>
+</div>
+
+<h2 class="sec">5 · Bila signal paling berkesan</h2>
+<div class="bento">
+  <section class="t w2">
+    <p class="k">Sesi dagangan <span class="tag mid">SAMPEL KECIL</span></p>
+    <div class="hb"><div class="lbl"><span>08:00–12:00</span><b class="pos">+447.2 · 50%</b></div>
+      <div class="tr"><i style="width:58%;background:var(--green)"></i></div></div>
+    <div class="hb"><div class="lbl"><span>16:00–20:00</span><b class="pos">+765.1 · 31%</b></div>
+      <div class="tr"><i style="width:100%;background:var(--green)"></i></div></div>
+    <div class="hb"><div class="lbl"><span>12:00–16:00</span><b class="pos">+85.9 · 44%</b></div>
+      <div class="tr"><i style="width:11%;background:var(--green)"></i></div></div>
+    <div class="hb"><div class="lbl"><span>20:00–24:00</span><b class="pos">+49.7 · 25%</b></div>
+      <div class="tr"><i style="width:6.5%;background:var(--green)"></i></div></div>
+    <div class="hb"><div class="lbl"><span>00:00–04:00</span><b class="neg">−48.2 · 36%</b></div>
+      <div class="tr"><i style="width:6%;background:var(--red)"></i></div></div>
+    <div class="hb"><div class="lbl"><span>04:00–08:00</span><b class="neg">−101.7 · 56%</b></div>
+      <div class="tr"><i style="width:13%;background:var(--red)"></i></div></div>
+    <p class="sub">Sesi London/NY (16:00–20:00) hasil terbesar walaupun win rate rendah — sebab menang besar. 04:00–08:00 paling rugi.</p>
+  </section>
+
+  <section class="t w2">
+    <p class="k">Streak menang/rugi</p>
+    <div class="num neg">8<small> SL berturut</small></div>
+    <p class="sub">Streak rugi terburuk 8 trade. Ini yang buat member panik dan berhenti langganan.</p>
+    <div class="dots">
+      <i style="background:#1fa35c"></i><i style="background:#1fa35c"></i><i style="background:#1fa35c"></i>
+      <i style="background:#1fa35c"></i><i style="background:#1fa35c"></i>
+      <i style="background:#e5372b"></i><i style="background:#e5372b"></i><i style="background:#e5372b"></i>
+      <i style="background:#e5372b"></i><i style="background:#e5372b"></i><i style="background:#e5372b"></i>
+      <i style="background:#e5372b"></i><i style="background:#e5372b"></i>
+      <i style="background:#1fa35c"></i><i style="background:#1fa35c"></i><i style="background:#1fa35c"></i>
+      <i style="background:#e5372b"></i>
+    </div>
+    <div class="legend">
+      <span><i style="background:#1fa35c"></i>TP</span>
+      <span><i style="background:#e5372b"></i>SL</span>
+    </div>
+    <div class="row" style="margin-top:12px"><span>Streak menang terbaik</span><b class="pos">5</b></div>
+    <div class="row"><span>Streak rugi terburuk</span><b class="neg">8</b></div>
+    <div class="row"><span>Streak sekarang</span><b class="neg">1 SL</b></div>
+  </section>
+</div>
+
+<h2 class="sec">6 · Kesihatan setup</h2>
+<div class="bento">
+  <section class="t w2">
+    <p class="k">Kadar trigger vs expired</p>
+    <div class="num">74<small>% trigger</small></div>
+    <div class="gauge"><div class="gauge-mk"><i style="left:74%"></i></div></div>
+    <p class="sub">61 daripada 82 setup kena entry. 21 expired tanpa entry (26%). Ini normal — bukan semua setup kena.</p>
+    <div class="row" style="margin-top:8px"><span>Trigger</span><b>61 · 74%</b></div>
+    <div class="row"><span>Expired</span><b>21 · 26%</b></div>
+  </section>
+
+  <section class="t w2">
+    <p class="k">Purata R:R vs realiti</p>
+    <div class="row"><span>R:R dipaparkan</span><b>1 : 2.3</b></div>
+    <div class="row"><span>Purata menang</span><b class="pos">+103.4 pips</b></div>
+    <div class="row"><span>Purata rugi</span><b class="neg">−34.8 pips</b></div>
+    <div class="row"><span>Nisbah sebenar</span><b class="pos">1 : 2.97</b></div>
+    <p class="sub">Menang purata hampir 3× ganda rugi purata. Ini lebih baik daripada R:R yang dipaparkan — bukti TP dan SL dipasang dengan betul.</p>
+  </section>
+</div>
+
+<h2 class="sec">7 · Widget yang saya TIDAK cadang</h2>
+<div class="bento">
+  <section class="t w4">
+    <p class="k">Data tak boleh dipercayai</p>
+    <div class="row"><span>Masa untuk TP/SL <span class="tag warn">ROSAK</span></span><b>18 signal durasi 0.00j · ada 128j</b></div>
+    <div class="row"><span>Purata masa tutup</span><b>TP 37j · SL 45j (tak masuk akal)</b></div>
+    <div class="row"><span>Win rate ikut jam <span class="tag warn">SAMPEL KECIL</span></span><b>1–3 trade per jam</b></div>
+    <div class="row"><span>Purata pip ikut pair NZD <span class="tag warn">0W/5L</span></span><b>terlalu kecil untuk kesimpulan</b></div>
+    <div class="note">
+      <b>Kenapa saya tak cadang:</b> medan <code>closed</code> dalam <code>signal-status.json</code> ada 18 rekod dengan durasi 0.00 jam dan satu rekod 128 jam. Itu tanda timestamp ditulis guna <code>now()</code> semasa backfill, bukan masa sebenar TP/SL kena. Kalau widget masa dipaparkan, ia akan beri angka palsu kepada member.
+    </div>
+  </section>
+</div>
+
+<h2 class="sec">8 · Percanggahan yang masih ada</h2>
+<div class="cmp">
+  <div class="box bad">
+    <h4>Toolkit KPI</h4>
+    <div class="v">39%</div><div class="d">win rate 6 hari</div>
+    <div class="v" style="margin-top:10px">+810.6</div><div class="d">pips · 51 signal · BTC $+315.3 berasingan</div>
+  </div>
+  <div class="box good">
+    <h4>Stat tile</h4>
+    <div class="v">38%</div><div class="d">win rate 7 hari</div>
+    <div class="v" style="margin-top:10px">+1198.0</div><div class="d">pips · 61 signal · BTC dalam pips</div>
+  </div>
+</div>
+<p class="sub" style="margin-top:12px">Belum dibetulkan. Cadangan: buang KPI row toolkit, kekalkan stat tile.</p>
+
+<h2 class="sec">9 · Ringkasan keutamaan</h2>
+<div class="bento">
+  <section class="t w2">
+    <p class="k">Buat dahulu</p>
+    <div class="row"><span>1. Buang KPI row toolkit</span><b class="neg">percanggahan</b></div>
+    <div class="row"><span>2. Kalendar prestasi harian</span><b class="pos">jujur</b></div>
+    <div class="row"><span>3. Streak rugi terburuk</span><b class="pos">jujur</b></div>
+    <div class="row"><span>4. Kadar trigger vs expired</span><b>neutral</b></div>
+  </section>
+  <section class="t w2">
+    <p class="k">Buang / kecilkan</p>
+    <div class="row"><span>Tile charts 645px</span><b>→ 320px</b></div>
+    <div class="row"><span>Tile tgLink 645px</span><b>→ 120px</b></div>
+    <div class="row"><span>Tile offer 236px</span><b>→ 90px</b></div>
+    <div class="row"><span>Widget masa tutup</span><b class="neg">data rosak</b></div>
+  </section>
+</div>
+
+</div>
+</body>
+</html>

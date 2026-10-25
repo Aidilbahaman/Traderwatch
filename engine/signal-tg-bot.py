@@ -75,6 +75,34 @@ ADMIN_USER_ID = ADMIN_CHAT_ID
 ADMIN_LINK = (f'<a href="tg://user?id={ADMIN_USER_ID}">Message Admin</a>'
               if ADMIN_USER_ID.isdigit() else "the admin")
 
+# ---------- Reply keyboard member ----------
+# Butang supaya member tak perlu taip command. Semua label mesti sepadan
+# dengan pemetaan dalam COMMAND_MAP di bawah.
+BTN_STATUS = "📊 Status Langganan"
+BTN_ACTIVE = "📈 Active Trade"
+BTN_FEEDBACK = "⭐ Beri Feedback"
+BTN_ADMIN = "👤 Hubungi Admin"
+BTN_HELP = "❓ Bantuan"
+
+REPLY_KB = {
+    "keyboard": [
+        [{"text": BTN_STATUS}, {"text": BTN_ACTIVE}],
+        [{"text": BTN_FEEDBACK}, {"text": BTN_ADMIN}],
+        [{"text": BTN_HELP}],
+    ],
+    "resize_keyboard": True,
+    "is_persistent": True,
+}
+
+# Label butang -> command yang sebenar
+COMMAND_MAP = {
+    BTN_STATUS: "/status",
+    BTN_ACTIVE: "/activetrades",
+    BTN_FEEDBACK: "/feedback",
+    BTN_ADMIN: "/admin",
+    BTN_HELP: "/help",
+}
+
 # Feedback member: rating 1-5 + nota pilihan, disimpan sebagai JSONL untuk
 # disemak admin. Tiada quote diterbitkan tanpa kebenaran member.
 FEEDBACK_FILE = Path("/home/ubuntu/web/.member-feedback.jsonl")
@@ -232,9 +260,13 @@ def notify_admin(text):
     return res.get("ok")
 
 
-def reply(chat_id, text):
-    tg("sendMessage", chat_id=chat_id, text=text,
-       parse_mode="HTML", disable_web_page_preview="true")
+def reply(chat_id, text, reply_markup=None):
+    """Hantar mesej. reply_markup (JSON string) untuk reply keyboard."""
+    kw = {"chat_id": chat_id, "text": text, "parse_mode": "HTML",
+          "disable_web_page_preview": "true"}
+    if reply_markup:
+        kw["reply_markup"] = reply_markup
+    tg("sendMessage", **kw)
 
 
 def profile_for(uid):
@@ -326,6 +358,7 @@ STATUS_FILE = REPO / "signal-status.json"
 MUTES_FILE = Path("/home/ubuntu/web/.tw-signal-mutes.json")
 PIP = {"XAU/USD": 0.1, "USD/JPY": 0.01}
 DEFAULT_PIP = 0.0001
+LINE = "─" * 20
 
 
 def esc(x):
@@ -613,6 +646,17 @@ def handle_callback(cq):
     chat_id = (msg.get("chat") or {}).get("id")
     if not chat_id:
         return
+    if data == "refresh_active_pos":
+        # Butang Refresh dalam Active Trade — jalankan semula /activetrades
+        tg("answerCallbackQuery", callback_query_id=cq_id, text="Memuat semula…")
+        try:
+            handle({"chat": {"id": chat_id},
+                    "from": (msg.get("from") or {}),
+                    "text": "/activetrades"})
+        except Exception as ex:
+            reply(chat_id, f"Gagal refresh: {esc(str(ex)[:100])}")
+        return
+
     if data.startswith("fb:"):
         # Rating 1-5 dipilih; minta nota ringkas sebagai mesej seterusnya.
         try:
@@ -715,6 +759,7 @@ def handle(msg):
     chat = msg.get("chat") or {}
     chat_id = chat.get("id")
     text = (msg.get("text") or "").strip()
+    log(f"IN chat={chat_id} text={text[:40]!r}")
     if not chat_id:
         return
     # Nota feedback: mesej biasa selepas member pilih rating.
@@ -769,6 +814,19 @@ def handle(msg):
                  "nothing is published unless you say yes."),
            parse_mode="HTML", reply_markup=kb)
         return
+    # Butang reply keyboard -> command sebenar.
+    # PENTING: label butang ada RUANG ("📈 Active Trade"), jadi parts[0]
+    # hanya dapat emoji. Banding TEKS PENUH dahulu sebelum fallback ke parts[0].
+    _full = (text or "").strip()
+    _map_lower = {k.lower(): v for k, v in COMMAND_MAP.items()}
+    if _full.lower() in _map_lower:
+        cmd = _map_lower[_full.lower()]
+    else:
+        _raw = parts[0].split("@")[0].strip() if parts else ""
+        if _raw.lower() in _map_lower:
+            cmd = _map_lower[_raw.lower()]
+    log(f"CMD full={_full[:30]!r} -> cmd={cmd!r}")
+
     if cmd == "/skip":
         PENDING_FEEDBACK.pop(int(chat_id), None)
         reply(chat_id, "Okay, skipped. Taip /feedback bila-bila masa.")
@@ -786,87 +844,116 @@ def handle(msg):
             reply(chat_id, "👋 Welcome to TraderWatch signals.\n\n"
                            "Open your member dashboard and press "
                            "<b>Link Telegram</b> — it sends you a personal "
-                           "link that connects this chat to your account.")
+                           "link that connects this chat to your account.",
+                  reply_markup=json.dumps(REPLY_KB))
     elif cmd == "/stop":
         unlink(chat_id)
     elif cmd == "/position" or cmd == "/activetrades":
+        # Sumber: signal TraderWatch (Supabase + signal-status.json),
+        # BUKAN trades dalam bot.db. Signal dianggap aktif selagi belum
+        # tp/sl/expired/collected/cancelled.
         try:
-            import sqlite3
-            import pathlib
-            import datetime
-            conn = sqlite3.connect('/home/ubuntu/tw-bot/bot.db')
-            conn.row_factory = sqlite3.Row
-            rows = conn.execute("SELECT * FROM trades WHERE status='ACTIVE' ORDER BY created_at DESC").fetchall()
-            if not rows:
-                reply(chat_id, "Tiada trade aktif sekarang.")
+            import datetime as _dt
+
+            try:
+                rows = sb_get("signals?select=id,pair,side,entry,sl,tp,timeframe,"
+                              "posted_at&order=posted_at.desc&limit=40") or []
+            except Exception as ex:
+                reply(chat_id, f"Gagal baca signal: {esc(str(ex)[:120])}")
                 return
 
-            current_prices = {}
-            try:
-                sq_db = pathlib.Path("/home/ubuntu/web/Traderwatch-repo/state/sq-bars.db")
-                if sq_db.exists():
-                    sq_conn = sqlite3.connect(str(sq_db))
-                    sq_conn.row_factory = sqlite3.Row
-                    for p_name in set(r["pair"] for r in rows):
-                        cur_row = sq_conn.execute("SELECT c FROM bars WHERE pair=? AND gran='M1' ORDER BY ts DESC LIMIT 1", (p_name,)).fetchone()
-                        if cur_row:
-                            current_prices[p_name] = float(cur_row["c"])
-                    sq_conn.close()
-            except Exception:
-                pass
+            DONE = {"tp", "sl", "expired", "collected", "cancelled"}
+            active = []
+            for s in rows:
+                info = signal_status(s.get("id"), s)
+                st = (info[1] or {}) if info else {}
+                status = str(st.get("status") or "").lower()
+                if status in DONE:
+                    continue
+                active.append((s, st))
 
-            msg = "📈 <b>Active Trade Position</b>\n\n"
-            total_pips = 0.0
-            idx = 0
+            if not active:
+                reply(chat_id, "📈 <b>Active Trade</b>\n\n"
+                               "Tiada signal aktif sekarang.\n"
+                               "Menunggu setup baharu.")
+                return
 
-            for r in rows:
-                idx += 1
-                pair = r["pair"]
-                side = r["bias"]
+            # harga semasa dari Swissquote (sumber utama)
+            import sqlite3 as _sq
+            sq_path = REPO / "state" / "sq-bars.db"
+            prices = {}
+            if sq_path.exists():
                 try:
-                    entry = float(r["entry"])
+                    con = _sq.connect(f"file:{sq_path}?mode=ro", uri=True)
+                    for s, _ in active:
+                        code = "".join(ch for ch in str(s["pair"]).upper() if ch.isalpha())
+                        r = con.execute(
+                            "SELECT c FROM bars WHERE pair=? AND gran='M1' "
+                            "ORDER BY ts DESC LIMIT 1", (code,)).fetchone()
+                        if r:
+                            prices[s["pair"]] = float(r[0])
+                    con.close()
+                except Exception:
+                    pass
+
+            msg = "📈 <b>ACTIVE TRADE</b>\n" + LINE + "\n"
+            total_pips = 0.0
+            counted = 0
+            i = 0
+
+            for s, st in active[:8]:
+                i += 1
+                pair = str(s["pair"]).upper()
+                side = str(s["side"]).upper()
+                try:
+                    entry = float(s["entry"])
+                    sl = float(s["sl"])
+                    tp = float(s["tp"])
                 except (TypeError, ValueError):
                     continue
 
-                now_price = current_prices.get(pair, entry)
-                pips = (now_price - entry) if side == "BUY" else (entry - now_price)
-                pips *= (10.0 if "XAU" in pair else (100.0 if "JPY" in pair else 10000.0))
-                total_pips += pips
+                pip = PIP.get(pair, DEFAULT_PIP)
+                now_p = prices.get(pair)
+                entered = bool(st.get("entry"))
 
-                emoji_dir = "🟢" if side == "BUY" else "🔴"
-                pips_emoji = "🟢" if pips >= 0 else "🔴"
-                pips_str = f"+{pips:.1f}" if pips >= 0 else f"{pips:.1f}"
+                # status baris
+                if entered and now_p:
+                    diff = (now_p - entry) if side == "BUY" else (entry - now_p)
+                    pips = diff / pip
+                    total_pips += pips
+                    counted += 1
+                    pips_s = f"+{pips:.1f}" if pips >= 0 else f"{pips:.1f}"
+                    emo = "🟢" if pips >= 0 else "🔴"
+                    line2 = f"Running: {emo} <b>{pips_s} pips</b>"
+                elif entered:
+                    line2 = "Running: ⏳ harga belum tersedia"
+                else:
+                    line2 = "Status: ⏸ <i>menunggu entry</i>"
 
-                try:
-                    created = datetime.datetime.fromisoformat(r["created_at"].replace("Z", "+00:00"))
-                    now_dt = datetime.datetime.now(datetime.timezone.utc)
-                    if created.tzinfo is None:
-                        created = created.replace(tzinfo=datetime.timezone.utc)
-                    delta = now_dt - created
-                    hours = int(delta.total_seconds() // 3600)
-                    minutes = int((delta.total_seconds() % 3600) // 60)
-                    if hours >= 24:
-                        days = hours // 24
-                        rem_h = hours % 24
-                        dur_str = f"{days}h {rem_h}j {minutes}m"
-                    else:
-                        dur_str = f"{hours}j {minutes}m"
-                except Exception:
-                    dur_str = "Baru sahaja"
+                # jarak ke entry
+                dist = ""
+                if now_p and not entered:
+                    d = abs(now_p - entry) / pip
+                    dist = f" · {d:.0f} pips dari entry"
 
-                msg += f"{idx}) <b>{pair}</b> {emoji_dir} {side}\n"
-                msg += f"Entry: {entry} → Now: {now_price}\n"
-                msg += f"Running: {pips_emoji} {pips_str} pips\n"
-                msg += f"Berjalan: {dur_str}\n\n"
+                msg += (f"\n{i}) <b>{pair}</b> {'🟢' if side == 'BUY' else '🔴'} {side}\n"
+                        f"Entry <b>{entry}</b> · SL {sl} · TP {tp}\n"
+                        f"{line2}{dist}\n")
 
-            tot_emoji = "🟢" if total_pips >= 0 else "🔴"
-            tot_str = f"+{total_pips:.1f}" if total_pips >= 0 else f"{total_pips:.1f}"
-            msg += f"<b>Total running:</b> {tot_emoji} {tot_str} pips"
+            if counted:
+                tot_s = f"+{total_pips:.1f}" if total_pips >= 0 else f"{total_pips:.1f}"
+                msg += (f"\n{LINE}\n<b>Total running:</b> "
+                        f"{'🟢' if total_pips >= 0 else '🔴'} {tot_s} pips")
 
-            kb_inline = json.dumps({"inline_keyboard": [[{"text": "🔄 Refresh", "callback_data": "refresh_active_pos"}]]})
-            tg("sendMessage", chat_id=chat_id, text=msg, parse_mode="HTML", reply_markup=kb_inline)
+            msg += f"\n\n<i>{len(active)} signal aktif</i>"
+
+            kb = json.dumps({"inline_keyboard": [[
+                {"text": "🔄 Refresh", "callback_data": "refresh_active_pos"}]]})
+            tg("sendMessage", chat_id=chat_id, text=msg,
+               parse_mode="HTML", reply_markup=kb)
         except Exception as e:
-            reply(chat_id, f"Gagal memuatkan posisi: {e}")
+            reply(chat_id, f"Gagal memuatkan signal aktif: {esc(str(e)[:120])}")
+
     elif cmd == "/status":
         status(chat_id)
     elif cmd == "/help":

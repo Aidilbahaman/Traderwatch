@@ -46,7 +46,7 @@
 @media(max-width:760px){.tw-offer-panel{grid-template-columns:1fr;gap:18px}.tw-offer-action{width:100%}.tw-offer-panel:after{right:4%;top:16%;font-size:96px;opacity:.7}}
 .page section.block{padding:0}.page section.block + section.block{margin-top:4px}.page .tw-chart-news + .tg-link{margin-top:4px}.page .tg-link + .tw-motion{margin-top:4px}@media(max-width:600px){.page section.block{padding:0}.page section.block + section.block{margin-top:2px}.page .tw-chart-news + .tg-link{margin-top:2px}.page .tg-link + .tw-motion{margin-top:2px}}
 </style>
-<link rel="stylesheet" href="members-bento.css?v=20261024v">
+<link rel="stylesheet" href="members-bento.css?v=20261024w">
 <link rel="stylesheet" href="assets/css/tw-motion-bg.css?v=202610182344">
 <script src="assets/js/tw-fundamental-news.js?v=2026101901" defer></script>
 </head>
@@ -115,6 +115,54 @@
           <svg id="perfChart" viewBox="0 0 320 150" role="img"
                aria-label="Pips kumulatif TraderWatch"></svg>
         </div>
+      </section>
+
+      <section class="t w2" id="calTile">
+        <p class="k">Kalendar prestasi · <span id="calDays">7</span> hari</p>
+        <div class="cal" id="calGrid"></div>
+        <p class="sub" id="calSub">—</p>
+      </section>
+
+      <section class="t w2" id="streakTile">
+        <p class="k">Streak menang / rugi</p>
+        <div class="num" id="streakNum">—</div>
+        <p class="sub" id="streakSub">—</p>
+        <div class="dots" id="streakDots"></div>
+        <div class="row" style="margin-top:12px"><span>Streak menang terbaik</span><b id="streakBestW">—</b></div>
+        <div class="row"><span>Streak rugi terburuk</span><b id="streakWorstL">—</b></div>
+        <div class="row"><span>Streak sekarang</span><b id="streakNow">—</b></div>
+      </section>
+
+      <section class="t w2" id="sessTile">
+        <p class="k">Sesi dagangan</p>
+        <div id="sessBars"></div>
+        <p class="sub" id="sessSub">—</p>
+      </section>
+
+      <section class="t w2" id="trigTile">
+        <p class="k">Kadar trigger vs expired</p>
+        <div class="num" id="trigNum">—</div>
+        <div class="gauge"><div class="gauge-mk"><i id="trigMk" style="left:74%"></i></div></div>
+        <p class="sub" id="trigSub">—</p>
+        <div class="row" style="margin-top:8px"><span>Trigger</span><b id="trigOn">—</b></div>
+        <div class="row"><span>Expired</span><b id="trigOff">—</b></div>
+      </section>
+
+      <section class="t w2" id="riskTile">
+        <p class="k">Kualiti risiko</p>
+        <div class="num" id="riskPF">—</div>
+        <p class="sub" id="riskSub">—</p>
+        <div style="margin-top:12px">
+          <div class="row"><span>Purata menang</span><b class="pos" id="riskAvgW">—</b></div>
+          <div class="row"><span>Purata rugi</span><b class="neg" id="riskAvgL">—</b></div>
+          <div class="row"><span>Drawdown maks</span><b class="neg" id="riskDD">—</b></div>
+        </div>
+      </section>
+
+      <section class="t w4" id="pairTile">
+        <p class="k">Prestasi ikut pair</p>
+        <div id="pairBars" style="display:grid;grid-template-columns:1fr 1fr;gap:6px 26px"></div>
+        <p class="sub" id="pairSub">—</p>
       </section>
 
       <section class="t w2 r2" id="activeTile">
@@ -575,7 +623,214 @@ if(member){
     const PAIR_PIP = { XAUUSD:0.1, USDJPY:0.01, BTCUSD:1, GBPUSD:0.0001, NZDUSD:0.0001,
                        EURUSD:0.0001, AUDUSD:0.0001, USDCAD:0.0001 };
 
-    function setRing(){
+    /* ================= Widget tambahan ================= */
+  function fmtPips(v){
+    const n = Number(v) || 0;
+    return (n >= 0 ? "+" : "−") + Math.abs(n).toFixed(1);
+  }
+
+  function calcWidgets(){
+    const st = window.TW_STATUSES || {};
+    const keys = Object.keys(st);
+    if (!keys.length) return;
+
+    // ---- kumpul trade ber-pips ikut masa posted ----
+    const rows = [];
+    keys.forEach(k => {
+      const v = st[k] || {};
+      if (v.pips == null) return;
+      const parts = k.split("_");
+      if (parts.length < 3) return;
+      const ds = parts[1], ts = parts[2];
+      const dt = new Date(+ds.slice(0,4), +ds.slice(4,6)-1, +ds.slice(6,8),
+                          +ts.slice(0,2), +ts.slice(2,4), +ts.slice(4,6));
+      rows.push({ key:k, pair:parts[0], dt, status:v.status, pips:Number(v.pips) });
+    });
+    rows.sort((a,b) => a.dt - b.dt);
+    if (!rows.length) return;
+
+    /* ---------- Kalendar harian ---------- */
+    const byDay = {};
+    rows.forEach(r => {
+      /* Guna tarikh TEMPATAN, bukan toISOString() (itu UTC — signal 00:00–08:00
+         MYT akan jatuh ke hari sebelumnya dan kalendar jadi salah). */
+      const d = r.dt.getFullYear() + "-" +
+                String(r.dt.getMonth() + 1).padStart(2, "0") + "-" +
+                String(r.dt.getDate()).padStart(2, "0");
+      byDay[d] = byDay[d] || { p:0, w:0, l:0, exp:0 };
+      byDay[d].p += r.pips;
+      if (r.status === "tp") byDay[d].w++;
+      else if (r.status === "sl") byDay[d].l++;
+    });
+    // kira expired ikut tarikh posted (tiada pips)
+    keys.forEach(k => {
+      const v = st[k] || {};
+      if (v.status !== "expired") return;
+      const parts = k.split("_");
+      if (parts.length < 3) return;
+      const ds = parts[1];
+      const d = ds.slice(0,4)+"-"+ds.slice(4,6)+"-"+ds.slice(6,8);
+      byDay[d] = byDay[d] || { p:0, w:0, l:0, exp:0 };
+      byDay[d].exp++;
+    });
+
+    const days = Object.keys(byDay).sort();
+    const calGrid = document.getElementById("calGrid");
+    if (calGrid) {
+      const shown = days.slice(-7);
+      document.getElementById("calDays").textContent = shown.length;
+      calGrid.innerHTML = shown.map(d => {
+        const v = byDay[d];
+        const cls = v.p > 0 ? "up" : (v.p < 0 ? "dn" : "fl");
+        const dt = new Date(d + "T00:00:00");
+        const lbl = dt.getDate() + " " + ["Jan","Feb","Mac","Apr","Mei","Jun","Jul","Ogos","Sep","Okt","Nov","Dis"][dt.getMonth()];
+        const det = v.w + "W/" + v.l + "L" + (v.exp ? " · " + v.exp + " exp" : "");
+        return '<div class="d ' + cls + '"><span>' + lbl + '</span><b>' + fmtPips(v.p) +
+               '</b><span>' + det + '</span></div>';
+      }).join("");
+      const up = shown.filter(d => byDay[d].p > 0).length;
+      const tot = shown.reduce((a,d) => a + byDay[d].p, 0);
+      const worst = shown.reduce((a,d) => byDay[d].p < byDay[a].p ? d : a, shown[0]);
+      const wd = new Date(worst + "T00:00:00");
+      document.getElementById("calSub").textContent =
+        up + " daripada " + shown.length + " hari untung (" +
+        Math.round(up/shown.length*100) + "%) · jumlah " + fmtPips(tot) +
+        " · terburuk " + wd.getDate() + " " +
+        ["Jan","Feb","Mac","Apr","Mei","Jun","Jul","Ogos","Sep","Okt","Nov","Dis"][wd.getMonth()] +
+        " (" + fmtPips(byDay[worst].p) + ", " + byDay[worst].w + "W/" + byDay[worst].l + "L)";
+    }
+
+    /* ---------- Streak ---------- */
+    const seq = rows.filter(r => r.status === "tp" || r.status === "sl");
+    let bw = 0, bl = 0, cw = 0, cl = 0;
+    seq.forEach(r => {
+      if (r.status === "tp") { cw++; cl = 0; bw = Math.max(bw, cw); }
+      else { cl++; cw = 0; bl = Math.max(bl, cl); }
+    });
+    let curStatus = null, curLen = 0;
+    for (let i = seq.length - 1; i >= 0; i--) {
+      if (!curStatus) { curStatus = seq[i].status; curLen = 1; }
+      else if (seq[i].status === curStatus) curLen++;
+      else break;
+    }
+    const sNum = document.getElementById("streakNum");
+    if (sNum) {
+      sNum.innerHTML = bl + '<small> SL berturut</small>';
+      sNum.className = "num neg";
+      document.getElementById("streakSub").textContent =
+        "Streak rugi terburuk " + bl + " trade. Ini yang buat member panik dan berhenti langganan.";
+      document.getElementById("streakBestW").textContent = bw;
+      document.getElementById("streakWorstL").textContent = bl;
+      document.getElementById("streakNow").textContent =
+        curLen + (curStatus === "tp" ? " TP" : " SL");
+      document.getElementById("streakNow").className = curStatus === "tp" ? "pos" : "neg";
+      const dots = document.getElementById("streakDots");
+      const last = seq.slice(-24);
+      dots.innerHTML = last.map(r =>
+        '<i style="background:' + (r.status === "tp" ? "#1fa35c" : "#e5372b") + '"></i>'
+      ).join("");
+    }
+
+    /* ---------- Sesi dagangan ---------- */
+    const buckets = [
+      ["00:00–04:00", 0, 4], ["04:00–08:00", 4, 8], ["08:00–12:00", 8, 12],
+      ["12:00–16:00", 12, 16], ["16:00–20:00", 16, 20], ["20:00–24:00", 20, 24]
+    ];
+    const sess = buckets.map(b => ({ label:b[0], from:b[1], to:b[2], p:0, w:0, l:0, n:0 }));
+    rows.forEach(r => {
+      const h = r.dt.getHours();
+      const s = sess.find(x => h >= x.from && h < x.to);
+      if (!s) return;
+      s.p += r.pips; s.n++;
+      if (r.status === "tp") s.w++;
+      else if (r.status === "sl") s.l++;
+    });
+    const maxAbs = Math.max.apply(null, sess.map(s => Math.abs(s.p)).concat([1]));
+    const sessBars = document.getElementById("sessBars");
+    if (sessBars) {
+      const sorted = sess.slice().sort((a,b) => b.p - a.p);
+      sessBars.innerHTML = sorted.map(s => {
+        const pct = Math.max(2, Math.round(Math.abs(s.p) / maxAbs * 100));
+        const wr = (s.w + s.l) ? Math.round(s.w/(s.w+s.l)*100) : 0;
+        const col = s.p >= 0 ? "var(--green)" : "var(--red)";
+        return '<div class="hb"><div class="lbl"><span>' + s.label + '</span><b class="' +
+          (s.p >= 0 ? "pos" : "neg") + '">' + fmtPips(s.p) + ' · ' + wr + '%</b></div>' +
+          '<div class="tr"><i style="width:' + pct + '%;background:' + col + '"></i></div></div>';
+      }).join("");
+      const best = sorted[0], worst = sorted[sorted.length-1];
+      document.getElementById("sessSub").textContent =
+        "Sesi " + best.label + " hasil terbesar (" + fmtPips(best.p) + "). " +
+        "Sesi " + worst.label + " paling rugi (" + fmtPips(worst.p) + ").";
+    }
+
+    /* ---------- Kadar trigger ---------- */
+    const totalSigs = keys.length;
+    const trig = keys.filter(k => ["tp","sl","collected"].indexOf((st[k]||{}).status) >= 0).length;
+    const exp = keys.filter(k => (st[k]||{}).status === "expired").length;
+    const pct = Math.round(trig/totalSigs*100);
+    const tNum = document.getElementById("trigNum");
+    if (tNum) {
+      tNum.innerHTML = pct + '<small>% trigger</small>';
+      document.getElementById("trigMk").style.left = pct + "%";
+      document.getElementById("trigSub").textContent =
+        trig + " daripada " + totalSigs + " setup kena entry. " + exp +
+        " expired tanpa entry (" + Math.round(exp/totalSigs*100) + "%). Ini normal.";
+      document.getElementById("trigOn").textContent = trig + " · " + pct + "%";
+      document.getElementById("trigOff").textContent = exp + " · " + Math.round(exp/totalSigs*100) + "%";
+    }
+
+    /* ---------- Kualiti risiko ---------- */
+    const wins = rows.filter(r => r.status === "tp").map(r => r.pips);
+    const loss = rows.filter(r => r.status === "sl").map(r => r.pips);
+    const sumW = wins.reduce((a,b) => a+b, 0);
+    const sumL = loss.reduce((a,b) => a+b, 0);
+    const pf = sumL !== 0 ? Math.abs(sumW/sumL) : 0;
+    let eq = 0, peak = 0, dd = 0;
+    rows.forEach(r => { eq += r.pips; peak = Math.max(peak, eq); dd = Math.min(dd, eq - peak); });
+    const rPF = document.getElementById("riskPF");
+    if (rPF) {
+      rPF.innerHTML = pf.toFixed(2) + '<small> profit factor</small>';
+      rPF.className = "num " + (pf >= 1 ? "pos" : "neg");
+      document.getElementById("riskSub").textContent =
+        "Setiap 1 pips rugi, kita buat " + pf.toFixed(2) + " pips untung.";
+      document.getElementById("riskAvgW").textContent = fmtPips(sumW/Math.max(1,wins.length));
+      document.getElementById("riskAvgL").textContent = fmtPips(sumL/Math.max(1,loss.length));
+      document.getElementById("riskDD").textContent = fmtPips(dd);
+    }
+
+    /* ---------- Prestasi ikut pair ---------- */
+    const byPair = {};
+    rows.forEach(r => {
+      byPair[r.pair] = byPair[r.pair] || { p:0, w:0, l:0, n:0 };
+      byPair[r.pair].p += r.pips; byPair[r.pair].n++;
+      if (r.status === "tp") byPair[r.pair].w++;
+      else if (r.status === "sl") byPair[r.pair].l++;
+    });
+    const pairList = Object.keys(byPair).map(k => ({ pair:k, ...byPair[k] }))
+      .sort((a,b) => b.p - a.p);
+    const pMax = Math.max.apply(null, pairList.map(x => Math.abs(x.p)).concat([1]));
+    const pairBars = document.getElementById("pairBars");
+    if (pairBars && pairList.length) {
+      pairBars.innerHTML = pairList.map(x => {
+        const pct = Math.max(2, Math.round(Math.abs(x.p)/pMax*100));
+        const wr = (x.w+x.l) ? Math.round(x.w/(x.w+x.l)*100) : 0;
+        const nm = x.pair.slice(0,3) + "/" + x.pair.slice(3);
+        return '<div class="pb"><div class="lbl"><span>' + nm + '</span><span>' +
+          fmtPips(x.p) + ' · ' + wr + '% · ' + x.n + '</span></div>' +
+          '<div class="track"><i style="' + (x.p >= 0 ? 'left:50%;' : 'right:50%;') +
+          'width:' + (pct/2) + '%;background:' + (x.p >= 0 ? 'var(--green)' : 'var(--red)') +
+          '"></i></div></div>';
+      }).join("");
+      const top = pairList[0];
+      const share = sumW + sumL !== 0 ? Math.round(top.p / (sumW + sumL) * 100) : 0;
+      const losers = pairList.filter(x => x.p < 0).map(x => x.pair.slice(0,3) + "/" + x.pair.slice(3));
+      document.getElementById("pairSub").textContent =
+        (top.pair.slice(0,3) + "/" + top.pair.slice(3)) + " menyumbang " + share +
+        "% daripada jumlah pips." + (losers.length ? " Rugi: " + losers.join(", ") + "." : "");
+    }
+  }
+
+  function setRing(){
       const el = document.getElementById("planRingText");
       const ring = document.getElementById("planRing");
       if(!el || !ring) return;
@@ -747,6 +1002,7 @@ if(member){
     /* fillStats() hanya perlukan signal-status.json (bukan Supabase), jadi
        ia selamat dijalankan serta-merta. fillActive() perlukan TW_SIGNALS. */
     function runStats(){
+    try { calcWidgets(); } catch (e) { console.warn("widgets", e); }
       fillStats().catch(function(){});
       setRing();
     }

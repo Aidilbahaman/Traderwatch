@@ -38,6 +38,12 @@ MAX_PENDING = int(os.environ.get("MT5_MAX_PENDING", "5"))
 # semasa ujian luar waktu forex.
 ALLOW = [x.strip().upper() for x in os.environ.get("MT5_ALLOW", "").split(",") if x.strip()]
 
+# ---------- kill switch ----------
+# Berhenti hantar order baru bila rugi harian capai had. Posisi sedia ada
+# TIDAK ditutup (biar TP/SL uruskan) — hanya tiada order baru.
+KILL_PCT = float(os.environ.get("MT5_KILL_PCT", "3.0"))     # % equity sehari
+KILL_STATE = REPO / "state" / "mt5-kill.json"
+
 PREFIX = "/home/mt5/.mt5"
 PY = r"C:\Python311\python.exe"
 WIN_SCRIPT_HOST = "/home/mt5/.mt5/drive_c/mt5work/mt5_pending.py"
@@ -270,8 +276,76 @@ def active_signals():
     return out
 
 
+def _today():
+    return datetime.now(MYT).strftime("%Y-%m-%d")
+
+
+def kill_status(equity_now):
+    """Semak sama ada kill switch aktif hari ini.
+
+    Baseline = equity pada pemeriksaan PERTAMA hari itu. Jika equity jatuh
+    lebih dari KILL_PCT dari baseline, kill = True sampai esok.
+    """
+    try:
+        d = json.loads(KILL_STATE.read_text())
+    except Exception:
+        d = {}
+
+    day = _today()
+    if d.get("day") != day:
+        d = {"day": day, "baseline": equity_now, "killed": False}
+
+    if d.get("baseline") is None or d.get("baseline", 0) <= 0:
+        d["baseline"] = equity_now
+
+    base = float(d["baseline"])
+    loss_pct = (base - equity_now) / base * 100 if base else 0
+
+    if loss_pct >= KILL_PCT:
+        d["killed"] = True
+        d["killed_at"] = datetime.now(MYT).isoformat()
+        d["loss_pct"] = round(loss_pct, 2)
+
+    KILL_STATE.parent.mkdir(parents=True, exist_ok=True)
+    KILL_STATE.write_text(json.dumps(d, indent=1))
+    return d, loss_pct
+
+
+def equity_now():
+    """Baca equity akaun dari MT5 (read-only)."""
+    import subprocess as _sp
+    cmd = ["sudo", "-n", "-u", "mt5", "env", "DISPLAY=:99", f"WINEPREFIX={PREFIX}",
+           "/opt/wine-staging/bin/wine", PY, "-c",
+           "import MetaTrader5 as m,json;m.initialize();"
+           "a=m.account_info();"
+           "print(json.dumps({'equity':a.equity if a else 0,'balance':a.balance if a else 0}));"
+           "m.shutdown()"]
+    r = _sp.run(cmd, capture_output=True, text=True, timeout=120, cwd="/tmp")
+    for line in (r.stdout or "").splitlines():
+        if line.strip().startswith("{"):
+            try:
+                return json.loads(line)
+            except Exception:
+                pass
+    return {"equity": 0, "balance": 0}
+
+
 def main():
-    log(f"START mode={MODE} lot={LOT} max_pending={MAX_PENDING} allow={ALLOW or 'semua'}")
+    log(f"START mode={MODE} lot={LOT} max_pending={MAX_PENDING} allow={ALLOW or 'semua'} kill={KILL_PCT}%")
+
+    # ---------- kill switch check ----------
+    acc = equity_now()
+    eq = float(acc.get("equity") or 0)
+    if eq > 0:
+        ks, loss_pct = kill_status(eq)
+        log(f"equity={eq:.2f} baseline={ks['baseline']:.2f} "
+            f"loss_hari_ini={loss_pct:.2f}% killed={ks.get('killed')}")
+        if ks.get("killed"):
+            log(f"KILL SWITCH AKTIF — rugi {loss_pct:.2f}% >= {KILL_PCT}%. "
+                f"Tiada order baru sehingga esok.")
+            return 0
+    else:
+        log("AMARAN: tidak dapat baca equity — kill switch dilangkau")
 
     st = load_state()
     seen = st.get("signals", {})
