@@ -493,9 +493,13 @@ function renderPerf(){
   var wins = d.filter(function(p){return p.day>0}).length;
   var best = Math.max.apply(null, d.map(function(p){return p.day}));
   var worst = Math.min.apply(null, d.map(function(p){return p.day}));
+  /* "Winning days" is a share of trading days that actually have a result,
+     not of the whole range: a 30-day window with 6 recorded days should not
+     report 20% as if the other 24 days were losses. */
+  var recorded = d.filter(function(p){return p.day !== 0}).length;
   var te = $("pTotal"); te.textContent = fmtP(tot);
   te.className = "v " + (tot>=0 ? "pos":"neg");
-  $("pWin").textContent = Math.round(wins/d.length*100)+"%";
+  $("pWin").textContent = recorded ? Math.round(wins/recorded*100)+"%" : "—";
   $("pBest").textContent = fmtP(best);
   $("pWorst").textContent = fmtP(worst);
 
@@ -846,17 +850,36 @@ function todayKey(){
     month:"2-digit",day:"2-digit"}).format(new Date()).replace(/-/g,"");
 }
 
+/* Which day a result belongs to.
+   `closed` is NOT reliable: the lifecycle backfill stamped every historical
+   row with the same timestamp (2026-10-24T00:37:02), so grouping on it
+   collapses all history into one day. The signal key carries the real
+   posting date (PAIR_YYYYMMDD_HHMMSS), so use that. Fall back to entry_at,
+   then closed, for rows whose key is not parseable. */
+function resultDate(key, v){
+  var m = String(key||"").match(/_(\d{4})(\d{2})(\d{2})_/);
+  if(m) return m[1] + "-" + m[2] + "-" + m[3];
+  var ea = fmtDateKey(v && v.entry_at);
+  if(ea) return ea;
+  return fmtDateKey(v && v.closed);
+}
+
 function computePerformance(statuses){
-  /* Real closed results only: one point per KL trading day, net pips. */
+  /* One point per KL trading day, net pips.
+     unit:"usd" rows (BTCUSD) are dollars, not pips — adding them would
+     inflate the total, so they are excluded from the pip series. */
   var byDay = {};
   Object.keys(statuses).forEach(function(k){
     var v = statuses[k];
     if(!v || typeof v.pips !== "number") return;
-    var key = fmtDateKey(v.closed);
+    if(String(v.unit||"pips").toLowerCase() === "usd") return;
+    var key = resultDate(k, v);
     if(!key) return;
     byDay[key] = (byDay[key]||0) + v.pips;
   });
-  return Object.keys(byDay).sort().map(function(k){ return {date:k, pips:byDay[k]} });
+  return Object.keys(byDay).sort().map(function(k){
+    return {date:k, pips: Math.round(byDay[k]*10)/10};
+  });
 }
 
 function computeStats(statuses){
