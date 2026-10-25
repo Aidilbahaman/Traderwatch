@@ -143,6 +143,18 @@ resend.addEventListener("click", async ()=>{
   }catch(_){ show("Unable to resend right now. Please try again later.", false); resend.disabled = false; }
 });
 
+/* Inside a Telegram Mini App the session may already exist. Bounce straight
+   to the destination instead of showing the form again. `next` is validated
+   the same way as the submit handlers: one leading slash, never a full URL. */
+(async function skipIfSignedIn(){
+  try{
+    const { data } = await sb.auth.getSession();
+    if(!data || !data.session) return;
+    const nxt = new URLSearchParams(location.search).get("next");
+    location.replace(nxt && /^\/(?!\/)/.test(nxt) ? nxt : "members.html");
+  }catch(_){}
+})();
+
 document.getElementById("forgot").addEventListener("click", async ()=>{
   const email = form.email.value.trim();
   if(!/^\S+@\S+\.\S+$/.test(email)) return show("Enter your email above first, then press Forgot your password.", false);
