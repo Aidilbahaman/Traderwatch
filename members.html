@@ -5,8 +5,15 @@
 <meta name="robots" content="noindex">
 <meta name="theme-color" content="#f5f5f7" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>Your dashboard – TraderWatch</title>
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="TraderWatch">
+<link rel="apple-touch-icon" href="assets/icon-180.png">
+<link rel="icon" type="image/png" sizes="192x192" href="assets/icon-192.png">
 <style>
 :root{--glass:.5;--bg:#f5f5f7;--ink:#1d1d1f;--mute:#6e6e73;--line:rgba(0,0,0,.08);--blue:#0071e3;--green:#248a3d;--green-ink:#248a3d;--red:#d70015;
 --card:rgba(255,255,255,var(--glass));--fill:rgba(120,120,128,.12);--thumb:#fff;--shadow:0 1px 1px rgba(0,0,0,.03),0 14px 36px rgba(0,0,0,.07);
@@ -27,6 +34,9 @@
    manual control for dark mode when the OS is set to light. */
 @media (max-width:1060px){.themebtn{display:grid;width:34px;height:34px;font-size:15px}}
 *{box-sizing:border-box}
+/* No pinch-zoom and no double-tap zoom: this is an app surface, not a
+   document to magnify. manipulation also removes the 300ms tap delay. */
+html,body{touch-action:manipulation;-webkit-text-size-adjust:100%;text-size-adjust:100%}
 body{margin:0;background:var(--page);background-attachment:fixed;color:var(--ink);font:400 14px/1.45 -apple-system,BlinkMacSystemFont,"SF Pro Text","Inter","Segoe UI",Roboto,sans-serif;-webkit-font-smoothing:antialiased;font-variant-numeric:tabular-nums}
 a{color:inherit;text-decoration:none}button{font-family:inherit}
 :focus-visible{outline:2px solid var(--blue);outline-offset:2px;border-radius:8px}
@@ -171,7 +181,8 @@ ul{list-style:none;margin:0;padding:0}.steps li{display:flex;align-items:center;
   <button class="nav" data-view="ideas" type="button">Community<span class="new">NEW</span></button>
   <a class="nav" href="education.html">Learn<span class="new">NEW</span></a>
  </nav>
- <div class="tools-r"><span class="mkt" id="mkt"><i></i><span id="mktTxt"></span></span><span class="clock" id="clock"></span><span class="pill" id="plan">Free</span><button class="themebtn" id="themebtn" type="button" aria-label="Switch to night mode" title="Night / light mode">&#9789;</button><a class="mute" href="#" id="logout">Log out</a></div>
+ <div class="tools-r"><span class="mkt" id="mkt"><i></i><span id="mktTxt"></span></span><span class="clock" id="clock"></span><span class="pill" id="plan">Free</span><button class="themebtn" id="themebtn" type="button" aria-label="Switch to night mode" title="Night / light mode">&#9789;</button>
+<a class="themebtn hide" id="addhome" href="#" role="button" aria-label="Add to home screen" title="Add to home screen">&#8962;</a><a class="mute" href="#" id="logout">Log out</a></div>
 </div></header>
 
 <div class="shell">
@@ -375,6 +386,28 @@ ul{list-style:none;margin:0;padding:0}.steps li{display:flex;align-items:center;
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
 <script src="config.js?v=202610260200"></script>
 <script src="common.js?v=202610260200"></script>
+
+<script>
+/* ===== Block zoom gestures =====
+   iOS Safari still pinch-zooms even with user-scalable=no in several
+   versions, so the gesture events are cancelled too. touchmove is only
+   blocked for multi-touch: single-finger scrolling must keep working. */
+(function(){
+  function stop(e){ if(e.touches && e.touches.length > 1) e.preventDefault(); }
+  document.addEventListener("touchstart", stop, {passive:false});
+  document.addEventListener("touchmove",  stop, {passive:false});
+  ["gesturestart","gesturechange","gestureend"].forEach(function(t){
+    document.addEventListener(t, function(e){ e.preventDefault(); }, {passive:false});
+  });
+  /* Double-tap zoom: ignore a second tap that lands within 300ms. */
+  var lastTap = 0;
+  document.addEventListener("touchend", function(e){
+    var now = Date.now();
+    if(now - lastTap < 300){ e.preventDefault(); }
+    lastTap = now;
+  }, {passive:false});
+})();
+</script>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 
 <script>
@@ -1230,6 +1263,92 @@ document.querySelectorAll("#prange [data-r]").forEach(function(b){
 window.addEventListener("resize", function(){
   if($("v-perf").classList.contains("on")) renderPerf();
 });
+
+
+/* ---------- add to home screen ---------- */
+(function initAddHome(){
+  var btn = $("addhome");
+  if(!btn) return;
+
+  var tg = null;
+  try{ tg = window.Telegram && window.Telegram.WebApp; }catch(_){}
+  var inTg = !!(tg && ((tg.platform && tg.platform !== "unknown") || (tg.initData && tg.initData.length)));
+
+  /* The markup starts with class "hide", and .hide{display:none!important}
+     beats a plain inline style. Remove the class first, then set display, and
+     use !important inline when hiding so nothing can re-show it. */
+  function setVisible(on){
+    btn.classList.remove("hide");
+    if(on){
+      btn.style.setProperty("display", "grid");
+    }else{
+      btn.style.setProperty("display", "none", "important");
+    }
+  }
+
+  /* beforeinstallprompt fires on desktop Chrome whenever the manifest makes
+     the app installable — including inside a Telegram WebView. It must not
+     override the decision made below, so it only records the prompt and
+     re-shows the button when we have already decided the button is allowed. */
+  var deferredPrompt = null;
+  var mayShow = false;
+  window.addEventListener("beforeinstallprompt", function(e){
+    e.preventDefault();
+    deferredPrompt = e;
+    if(mayShow) setVisible(true);
+  });
+
+  if(inTg){
+    if(typeof tg.checkHomeScreenStatus === "function"){
+      var settled = false;
+      try{
+        tg.checkHomeScreenStatus(function(status){
+          settled = true;
+          /* "added" and "unsupported" both mean there is nothing to offer. */
+          mayShow = (status !== "added" && status !== "unsupported");
+        setVisible(mayShow);
+        });
+      }catch(_){ mayShow = false; setVisible(false); }
+      /* Some clients never invoke the callback. Default to hidden after a
+         short wait rather than showing a button that may do nothing. This
+         must only run when the callback has not already decided. */
+      setTimeout(function(){ if(!settled){ settled = true; mayShow = false; setVisible(false); } }, 1500);
+    }else{
+      /* Client older than Bot API 8.0: no shortcut API at all. */
+      mayShow = false; setVisible(false);
+    }
+  }else if(window.matchMedia("(display-mode: standalone)").matches){
+    mayShow = false; setVisible(false);      // already installed
+  }else if(/iPhone|iPad|iPod/.test(navigator.userAgent)){
+    mayShow = true; setVisible(true);        // iOS: show the how-to sheet
+  }else{
+    mayShow = false; setVisible(false);      // desktop browsers: no prompt
+  }
+
+  btn.addEventListener("click", async function(e){
+    e.preventDefault();
+
+    if(inTg && typeof tg.addToHomeScreen === "function"){
+      try{ tg.addToHomeScreen(); }catch(_){}
+      return;
+    }
+    if(deferredPrompt){
+      deferredPrompt.prompt();
+      try{
+        var choice = await deferredPrompt.userChoice;
+        if(choice && choice.outcome === "accepted") setVisible(false);
+      }catch(_){}
+      deferredPrompt = null;
+      return;
+    }
+    var ios = /iPhone|iPad|iPod/.test(navigator.userAgent);
+    var msg = ios
+      ? "To add TraderWatch to your home screen:\n\n1. Tap the Share button in Safari\n2. Scroll down and tap \"Add to Home Screen\"\n3. Tap Add"
+      : "To add TraderWatch to your home screen:\n\nOpen the browser menu and choose \"Install app\" or \"Add to Home screen\".";
+    if(tg && tg.showAlert){ try{ tg.showAlert(msg); return }catch(_){} }
+    alert(msg);
+  });
+})();
 
 /* ---------- theme: night / light ---------- */
 var THEME_KEY = "tw_theme";
