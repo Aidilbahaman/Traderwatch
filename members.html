@@ -159,6 +159,7 @@ ul{list-style:none;margin:0;padding:0}.steps li{display:flex;align-items:center;
    <div class="pbar">
     <div class="seg" id="pmode" role="group" aria-label="Chart type">
      <button type="button" data-m="cum" aria-pressed="true">Cumulative</button>
+     <button type="button" data-m="trade" aria-pressed="false">Per trade</button>
      <button type="button" data-m="day" aria-pressed="false">Daily</button>
     </div>
     <div class="seg" id="prange" role="group" aria-label="Period">
@@ -455,10 +456,16 @@ function fmtP(n){ n = Math.round(n); return (n>0?"+":"") + n.toLocaleString("en-
 function fmtD(s){ return new Date(s+"T12:00:00").toLocaleDateString("en-US",{day:"numeric",month:"short"}) }
 var range = 30, mode = "cum";
 
-function perfData(n){
+function perfData(n, granularity){
+  /* granularity "trade" walks every closed signal; "day" nets them per day.
+     Trade mode ignores the day range and shows the most recent n trades so
+     the curve stays readable instead of squashing 53 points into a week. */
+  var src = granularity === "trade" ? (S.trades||[]) : (S.performance||[]);
+  var slice = granularity === "trade" ? src.slice(-n) : src.slice(-n);
   var cum = 0;
-  return (S.performance||[]).slice(-n).map(function(x){
-    cum += x.pips; return {date:x.date, day:x.pips, cum:cum};
+  return slice.map(function(x, i){
+    cum += x.pips;
+    return {date:x.date, day:x.pips, cum:cum, i:i, n:slice.length};
   });
 }
 
@@ -482,100 +489,171 @@ function renderSpark(){
 }
 
 function renderPerf(){
-  var d = perfData(range), box = $("pc"), tip = $("ptip");
+  var isTrade = mode === "trade";
+  var d = isTrade ? perfData(80, "trade") : perfData(range, "day");
+  var box = $("pc"), tip = $("ptip");
+
+  /* Stat cards describe whichever granularity is on screen. */
+  var labels = isTrade
+    ? ["Total pips", "Winning trades", "Best trade", "Worst trade"]
+    : ["Total pips", "Winning days", "Best day", "Worst day"];
+  document.querySelectorAll(".pstats .kpi .mute").forEach(function(el, i){
+    if(labels[i]) el.textContent = labels[i];
+  });
+
   if(!d.length){
     box.innerHTML = '<div class="mute" style="padding:40px;text-align:center">'
-      + 'No closed signals in this period yet.</div>';
+      + 'No closed signals yet. The curve appears once a setup closes.</div>';
     ["pTotal","pWin","pBest","pWorst"].forEach(function(i){$(i).textContent="—"});
     return;
   }
+
   var tot = d[d.length-1].cum;
   var wins = d.filter(function(p){return p.day>0}).length;
   var best = Math.max.apply(null, d.map(function(p){return p.day}));
   var worst = Math.min.apply(null, d.map(function(p){return p.day}));
-  /* "Winning days" is a share of trading days that actually have a result,
-     not of the whole range: a 30-day window with 6 recorded days should not
-     report 20% as if the other 24 days were losses. */
+  /* Denominator is results that actually happened, not every slot in the
+     window: a 30-day range holding 7 results must not read as 23% . */
   var recorded = d.filter(function(p){return p.day !== 0}).length;
+
   var te = $("pTotal"); te.textContent = fmtP(tot);
   te.className = "v " + (tot>=0 ? "pos":"neg");
-  $("pWin").textContent = recorded ? Math.round(wins/recorded*100)+"%" : "—";
+  $("pWin").textContent  = recorded ? Math.round(wins/recorded*100)+"%" : "—";
   $("pBest").textContent = fmtP(best);
   $("pWorst").textContent = fmtP(worst);
 
-  var W = box.clientWidth||600, H = box.clientHeight||260;
-  var L = 46, R = 8, T = 10, B = 24, pw = W-L-R, ph = H-T-B;
-  var vals = d.map(function(p){return mode==="cum"?p.cum:p.day});
+  var W = box.clientWidth || 600, H = box.clientHeight || 260;
+  var L = 48, R = 12, T = 14, B = 26, pw = W-L-R, ph = H-T-B;
+
+  /* Cumulative is the only meaningful y-axis here: daily bars get their own
+     zero-based scale. */
+  var vals = isTrade || mode === "cum"
+    ? d.map(function(p){return p.cum})
+    : d.map(function(p){return p.day});
   var mn = Math.min(0, Math.min.apply(null, vals));
   var mx = Math.max(0, Math.max.apply(null, vals));
-  var pad = (mx-mn)*0.08 || 10;
-  mn -= mn<0 ? pad : 0; mx += pad;
+  var pad = (mx-mn)*0.10 || 10;
+  mn -= mn < 0 ? pad : 0;
+  mx += pad;
+
   function X(i){
-    return L + (mode==="cum" ? (d.length>1 ? i/(d.length-1) : .5)*pw : (i+.5)/d.length*pw);
+    if(d.length === 1) return L + pw/2;
+    return L + (i/(d.length-1))*pw;
   }
   function Y(v){ return T + (mx-v)/(mx-mn)*ph }
 
+  /* ---- grid + y labels ---- */
   var g = "";
   for(var k=0;k<=4;k++){
     var v = mn+(mx-mn)*k/4, y = Y(v);
-    g += '<line x1="'+L+'" x2="'+(W-R)+'" y1="'+y+'" y2="'+y+'" stroke="var(--line)" stroke-width="1"/>'
-      + '<text x="'+(L-6)+'" y="'+(y+4)+'" text-anchor="end">'+Math.round(v)+'</text>';
+    g += '<line x1="'+L+'" x2="'+(W-R)+'" y1="'+y.toFixed(1)+'" y2="'+y.toFixed(1)
+      + '" stroke="var(--line)" stroke-width="1"/>'
+      + '<text x="'+(L-8)+'" y="'+(y+4).toFixed(1)+'" text-anchor="end" '
+      + 'style="font:11px -apple-system,sans-serif" fill="var(--mute)">'
+      + Math.round(v).toLocaleString("en-US")+'</text>';
   }
-  g += '<line x1="'+L+'" x2="'+(W-R)+'" y1="'+Y(0)+'" y2="'+Y(0)+'" stroke="var(--mute)" '
-    + 'stroke-width="1" stroke-dasharray="3 3"/>';
+  var zeroY = Y(0).toFixed(1);
+  g += '<line x1="'+L+'" x2="'+(W-R)+'" y1="'+zeroY+'" y2="'+zeroY+'" '
+    + 'stroke="var(--mute)" stroke-width="1" stroke-dasharray="4 4" stroke-opacity=".55"/>';
 
-  var col = tot>=0 ? "var(--green)" : "var(--red)", body = "";
+  var col = tot>=0 ? "var(--green)" : "var(--red)";
+  var body = "";
 
-  /* One closed trading day is not a line: a polyline needs two points and a
-     polygon collapses to zero area. Draw an explicit marker instead so the
-     panel never looks broken. */
   if(d.length === 1){
-    var px = L + pw/2, py = Y(d[0].cum);
-    body = '<line x1="'+L+'" x2="'+(W-R)+'" y1="'+Y(0)+'" y2="'+Y(0)+'" '
-      + 'stroke="var(--mute)" stroke-width="1" stroke-dasharray="3 3"/>'
-      + '<circle cx="'+px.toFixed(1)+'" cy="'+py.toFixed(1)+'" r="6" fill="'+col+'" fill-opacity=".9"/>'
-      + '<circle cx="'+px.toFixed(1)+'" cy="'+py.toFixed(1)+'" r="12" fill="'+col+'" fill-opacity=".18"/>'
-      + '<text x="'+px.toFixed(1)+'" y="'+(py-16).toFixed(1)+'" text-anchor="middle" '
-      + 'style="font:600 13px -apple-system,sans-serif" fill="'+col+'">'+fmtP(d[0].cum)+'</text>'
-      + '<text x="'+px.toFixed(1)+'" y="'+(H-6)+'" text-anchor="middle" '
-      + 'style="font:11px -apple-system,sans-serif" fill="var(--mute)">'+fmtD(d[0].date)+'</text>';
-  } else if(mode==="cum"){
-    var line = d.map(function(p,i){return X(i).toFixed(1)+","+Y(p.cum).toFixed(1)}).join(" ");
-    body = '<polygon points="'+X(0)+','+Y(0)+' '+line+' '+X(d.length-1)+','+Y(0)+'" '
-      + 'fill="'+col+'" fill-opacity=".12"/>'
-      + '<polyline points="'+line+'" fill="none" stroke="'+col+'" stroke-width="2.2" '
-      + 'stroke-linejoin="round"/>';
+    /* A polyline needs two points and a polygon collapses to zero area. */
+    var px = X(0), py = Y(d[0].cum);
+    body = '<circle cx="'+px.toFixed(1)+'" cy="'+py.toFixed(1)+'" r="13" '
+      + 'fill="'+col+'" fill-opacity=".16"/>'
+      + '<circle cx="'+px.toFixed(1)+'" cy="'+py.toFixed(1)+'" r="5.5" fill="'+col+'"/>'
+      + '<text x="'+px.toFixed(1)+'" y="'+(py-20).toFixed(1)+'" text-anchor="middle" '
+      + 'style="font:600 13px -apple-system,sans-serif" fill="'+col+'">'+fmtP(d[0].cum)+'</text>';
+  } else if(isTrade || mode === "cum"){
+    var pts = d.map(function(p,i){
+      return {x:X(i), y:Y(p.cum), p:p};
+    });
+    var line = pts.map(function(o){return o.x.toFixed(1)+","+o.y.toFixed(1)}).join(" ");
+    var area = 'M'+pts[0].x.toFixed(1)+','+zeroY
+      + ' L' + pts.map(function(o){return o.x.toFixed(1)+","+o.y.toFixed(1)}).join(" L")
+      + ' L'+pts[pts.length-1].x.toFixed(1)+','+zeroY+' Z';
+
+    /* Dots: only while they stay readable. 53 trades at ~14px spacing is
+       fine; hundreds would turn the line into a smear. */
+    var dots = pts.length <= 90
+      ? pts.map(function(o){
+          return '<circle cx="'+o.x.toFixed(1)+'" cy="'+o.y.toFixed(1)+'" r="2.6" '
+            + 'fill="var(--card)" stroke="'+col+'" stroke-width="1.6"/>';
+        }).join("")
+      : "";
+
+    body = '<defs><linearGradient id="pcfill" x1="0" y1="0" x2="0" y2="1">'
+      + '<stop offset="0" stop-color="'+col+'" stop-opacity=".26"/>'
+      + '<stop offset="1" stop-color="'+col+'" stop-opacity="0"/>'
+      + '</linearGradient></defs>'
+      + '<path d="'+area+'" fill="url(#pcfill)"/>'
+      + '<polyline points="'+line+'" fill="none" stroke="'+col+'" stroke-width="2" '
+      + 'stroke-linejoin="round" stroke-linecap="round"/>'
+      + dots;
   } else {
-    var bw = Math.max(1, pw/d.length*0.7);
+    var bw = Math.max(1, pw/d.length*0.62);
     body = d.map(function(p,i){
       var y0 = Y(0), y1 = Y(p.day);
       return '<rect x="'+(X(i)-bw/2).toFixed(1)+'" y="'+Math.min(y0,y1).toFixed(1)
         + '" width="'+bw.toFixed(1)+'" height="'+Math.max(1,Math.abs(y1-y0)).toFixed(1)
-        + '" rx="1.5" fill="'+(p.day>=0?"var(--green)":"var(--red)")+'"/>';
+        + '" rx="2" fill="'+(p.day>=0?"var(--green)":"var(--red)")+'" fill-opacity=".85"/>';
     }).join("");
   }
-  var xl = d.length === 1 ? ""
-    : '<text x="'+L+'" y="'+(H-6)+'">'+fmtD(d[0].date)+'</text>'
-      + '<text x="'+(W-R)+'" y="'+(H-6)+'" text-anchor="end">'+fmtD(d[d.length-1].date)+'</text>';
-  box.innerHTML = '<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Pips performance chart">'
-    + g + body + xl + '<line id="pcx" y1="'+T+'" y2="'+(T+ph)+'" stroke="var(--mute)" '
-    + 'stroke-width="1" style="display:none"/></svg>';
 
-  var svg = box.firstChild, cx = svg.querySelector("#pcx");
+  /* ---- x labels ---- */
+  var xl = "";
+  if(d.length === 1){
+    xl = '<text x="'+X(0).toFixed(1)+'" y="'+(H-7)+'" text-anchor="middle" '
+      + 'style="font:11px -apple-system,sans-serif" fill="var(--mute)">'+fmtD(d[0].date)+'</text>';
+  } else {
+    xl = '<text x="'+L+'" y="'+(H-7)+'" style="font:11px -apple-system,sans-serif" '
+      + 'fill="var(--mute)">'+fmtD(d[0].date)+'</text>'
+      + '<text x="'+(W-R)+'" y="'+(H-7)+'" text-anchor="end" '
+      + 'style="font:11px -apple-system,sans-serif" fill="var(--mute)">'
+      + fmtD(d[d.length-1].date)+'</text>';
+    if(isTrade){
+      xl += '<text x="'+((L+W-R)/2).toFixed(1)+'" y="'+(H-7)+'" text-anchor="middle" '
+        + 'style="font:11px -apple-system,sans-serif" fill="var(--mute)">'
+        + d.length+' closed trades</text>';
+    }
+  }
+
+  var aria = (isTrade ? "Cumulative pips per closed trade" : "Cumulative pips per trading day")
+    + ", " + d.length + " points";
+  box.innerHTML = '<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="'+aria+'">'
+    + g + body + xl
+    + '<line id="pcx" y1="'+T+'" y2="'+(T+ph)+'" stroke="var(--mute)" stroke-width="1" '
+    + 'style="display:none"/><circle id="pcd" r="4" fill="'+col+'" style="display:none"/>'
+    + '</svg>';
+
+  /* ---- hover ---- */
+  var svg = box.firstChild, cx = svg.querySelector("#pcx"), dot = svg.querySelector("#pcd");
   function move(e){
     var r = svg.getBoundingClientRect();
-    var px = (e.touches ? e.touches[0].clientX : e.clientX) - r.left;
-    var i = d.length === 1 ? 0
-      : (mode==="cum" ? Math.round((px-L)/pw*(d.length-1)) : Math.floor((px-L)/pw*d.length));
+    var clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    var px = (clientX - r.left) * (W / r.width);
+    var i = d.length === 1 ? 0 : Math.round((px-L)/pw*(d.length-1));
     i = Math.max(0, Math.min(d.length-1, i));
-    var p = d[i], x = X(i);
+    var p = d[i], x = X(i), y = Y(p.cum);
     cx.setAttribute("x1", x); cx.setAttribute("x2", x); cx.style.display = "";
-    tip.innerHTML = fmtD(p.date)+"<br>Day: <b>"+fmtP(p.day)+"</b> · Cumulative: <b>"+fmtP(p.cum)+"</b>";
+    dot.setAttribute("cx", x); dot.setAttribute("cy", y); dot.style.display = "";
+    tip.innerHTML = (isTrade ? "Trade "+(i+1)+" of "+d.length+"<br>" : "")
+      + fmtD(p.date)
+      + "<br>Result: <b>"+fmtP(p.day)+"</b>"
+      + " · Cumulative: <b>"+fmtP(p.cum)+"</b>";
     tip.style.display = "block";
-    var tx = Math.min(Math.max(x-tip.offsetWidth/2, 4), W-tip.offsetWidth-4);
-    tip.style.left = (tx+10)+"px"; tip.style.top = "14px";
+    var tx = Math.min(Math.max(x - tip.offsetWidth/2, 4), W - tip.offsetWidth - 4);
+    tip.style.left = (tx + 10) + "px";
+    tip.style.top = "14px";
   }
-  function out(){ cx.style.display = "none"; tip.style.display = "none" }
+  function out(){
+    cx.style.display = "none";
+    dot.style.display = "none";
+    tip.style.display = "none";
+  }
   svg.addEventListener("mousemove", move);
   svg.addEventListener("touchmove", move, {passive:true});
   svg.addEventListener("mouseleave", out);
@@ -865,18 +943,38 @@ function resultDate(key, v){
 }
 
 function computePerformance(statuses){
-  /* One point per KL trading day, net pips.
+  /* Two series, both built from the same filtered rows:
+
+     S.trades    one point per closed signal, in closing order. This is what
+                 makes the curve show real up-and-down movement instead of a
+                 seven-step staircase.
+     S.performance one point per KL trading day (net pips), used by the
+                 daily bars and the sidebar sparkline.
+
      unit:"usd" rows (BTCUSD) are dollars, not pips — adding them would
-     inflate the total, so they are excluded from the pip series. */
-  var byDay = {};
+     inflate the total, so they are excluded from both series. */
+  var rows = [], byDay = {};
   Object.keys(statuses).forEach(function(k){
     var v = statuses[k];
     if(!v || typeof v.pips !== "number") return;
     if(String(v.unit||"pips").toLowerCase() === "usd") return;
     var key = resultDate(k, v);
     if(!key) return;
+    rows.push({key:key, day:key, pips:v.pips, closed:v.closed || ""});
     byDay[key] = (byDay[key]||0) + v.pips;
   });
+
+  /* Order trades inside a day by their close time when it is meaningful.
+     The backfill stamped many rows with the same timestamp, so the signal
+     key is the stable tiebreaker. */
+  rows.sort(function(a,b){
+    if(a.day !== b.day) return a.day < b.day ? -1 : 1;
+    if(a.closed !== b.closed) return a.closed < b.closed ? -1 : 1;
+    return a.key < b.key ? -1 : (a.key > b.key ? 1 : 0);
+  });
+
+  S.trades = rows.map(function(r){ return {date:r.day, pips:Math.round(r.pips*10)/10} });
+
   return Object.keys(byDay).sort().map(function(k){
     return {date:k, pips: Math.round(byDay[k]*10)/10};
   });
