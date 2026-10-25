@@ -110,8 +110,10 @@ ul{list-style:none;margin:0;padding:0}.steps li{display:flex;align-items:center;
  .metrics{grid-template-columns:repeat(2,minmax(0,1fr))}.metrics .kpi:nth-child(3){border-left:0}.metrics .kpi:nth-child(n+3){border-top:1px solid var(--line)}
  .cards,.tools,.pf{grid-template-columns:1fr}.pstats{grid-template-columns:repeat(2,minmax(0,1fr))}.chartbox{height:360px;min-height:0}
  .t-lv{gap:18px}.strip{gap:14px}body{padding-bottom:calc(76px + env(safe-area-inset-bottom,0px));padding-top:env(safe-area-inset-top,0px)}
- .tabbar{display:flex;position:fixed;left:10px;right:10px;bottom:calc(10px + env(safe-area-inset-bottom,0px));z-index:30;background:var(--card);backdrop-filter:blur(28px) saturate(180%);-webkit-backdrop-filter:blur(28px) saturate(180%);border:1px solid var(--line);border-radius:22px;box-shadow:var(--shadow);padding:5px;overflow-x:auto;gap:2px}
- .tabbar button,.tabbar a{flex:1 1 0;min-width:0;text-align:center;font:500 11px -apple-system,sans-serif;padding:11px 1px;color:var(--mute);border-radius:17px;background:none;border:0;cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;letter-spacing:-.01em}
+ .tabbar{display:flex;position:fixed;left:10px;right:10px;bottom:calc(10px + env(safe-area-inset-bottom,0px));z-index:30;background:var(--card);backdrop-filter:blur(28px) saturate(180%);-webkit-backdrop-filter:blur(28px) saturate(180%);border:1px solid var(--line);border-radius:22px;box-shadow:var(--shadow);padding:5px;gap:2px;overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch;scrollbar-width:none;-ms-overflow-style:none;scroll-snap-type:x proximity;overscroll-behavior-x:contain}
+ .tabbar::-webkit-scrollbar{display:none}
+ .tabbar button,.tabbar a{scroll-snap-align:center}
+ .tabbar button,.tabbar a{flex:0 0 auto;min-width:72px;text-align:center;font:500 12px -apple-system,sans-serif;padding:11px 12px;color:var(--mute);border-radius:17px;background:none;border:0;cursor:pointer;white-space:nowrap}
  .tabbar .on{background:var(--thumb);color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.15)}
 }
 @media (prefers-reduced-motion:reduce){.mbar i,.box .bar i{transition:none}}
@@ -363,10 +365,10 @@ ul{list-style:none;margin:0;padding:0}.steps li{display:flex;align-items:center;
 <nav class="tabbar" aria-label="Mobile menu">
  <button type="button" data-view="chart" class="on">Charts</button>
  <button type="button" data-view="signals">Signals</button>
- <button type="button" data-view="perf">Perf</button>
+ <button type="button" data-view="perf">Performance</button>
  <button type="button" data-view="port">Portfolio</button>
  <button type="button" data-view="tools">Toolkits</button>
- <button type="button" data-view="ideas">Ideas</button>
+ <button type="button" data-view="ideas">Community</button>
  <a href="education.html">Learn</a>
 </nav>
 
@@ -1191,6 +1193,17 @@ function show(v){
   if(v==="chart" && !chartLoaded) loadChart(PAIRS[currentPair]);
   if(v==="perf") renderPerf();
   if(v==="ideas" && !ideasLoaded) loadIdeas();
+
+  /* The mobile tab bar scrolls horizontally. Bring the active tab into view
+     so a member who lands on Community does not have to hunt for it, and so
+     the active state is never off-screen. */
+  var bar = document.querySelector(".tabbar");
+  var active = bar && bar.querySelector('[data-view="' + v + '"]');
+  if(bar && active && bar.scrollWidth > bar.clientWidth + 1){
+    var target = active.offsetLeft - (bar.clientWidth - active.offsetWidth) / 2;
+    try{ bar.scrollTo({ left: Math.max(0, target), behavior: "smooth" }); }
+    catch(_){ bar.scrollLeft = Math.max(0, target); }
+  }
 }
 document.querySelectorAll("[data-view]").forEach(function(b){
   b.addEventListener("click", function(){ show(b.dataset.view) });
