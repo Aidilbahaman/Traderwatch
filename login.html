@@ -15,6 +15,12 @@
 .box h1{font-size:2rem;margin-bottom:18px}
 .alt{margin-top:18px;color:var(--muted);display:grid;gap:8px}
 .linkbtn{background:none;border:0;color:var(--muted);font:600 1rem var(--body);cursor:pointer;text-decoration:underline;padding:0;text-align:left}
+
+/* Telegram fullscreen: pad by the insets the client reports. Zero in a
+   normal browser, so nothing changes there. */
+:root[data-tg="1"] .top{padding-top:calc(12px + var(--tg-top,0px))}
+:root[data-tg="1"] body{padding-bottom:calc(76px + var(--tg-bottom,0px))}
+:root[data-tg="1"] .tabbar{bottom:calc(10px + var(--tg-bottom,0px))}
 </style>
 </head>
 <body>
@@ -56,6 +62,73 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
 <script src="config.js?v=202610182133"></script>
 <script src="common.js?v=202610182133"></script>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+
+<script>
+/* ===== Telegram Mini App bootstrap =====
+   Outside Telegram this file does nothing: window.Telegram is undefined and
+   every guard below returns early. */
+(function(){
+  var tg = window.Telegram && window.Telegram.WebApp;
+  /* telegram-web-app.js defines window.Telegram even in a normal browser, so
+     presence is not proof. Outside Telegram the platform is "unknown" and
+     initData is empty — treat that as a plain web visit and do nothing. */
+  if(!tg) return;
+  var inTelegram = (tg.platform && tg.platform !== "unknown") || (tg.initData && tg.initData.length > 0);
+  if(!inTelegram) return;
+
+  var root = document.documentElement;
+  root.setAttribute("data-tg", "1");
+
+  /* Fullscreen removes the app name and the kebab menu. The close button
+     stays: Telegram does not expose a way to hide it, and it is the user's
+     only way out. */
+  try{ tg.ready(); }catch(_){}
+  try{ tg.expand(); }catch(_){}
+  function goFull(){
+    if(typeof tg.requestFullscreen === "function" && !tg.isFullscreen){
+      try{ tg.requestFullscreen(); }catch(_){}
+    }
+  }
+  goFull();
+
+  /* Telegram reports insets in px. Mirror them into CSS variables so the
+     sticky header and the floating tab bar do not slide under the status
+     bar or the close button. */
+  function applyInsets(){
+    var sa = tg.safeAreaInset || {}, cs = tg.contentSafeAreaInset || {};
+    var top = Math.max(sa.top || 0, cs.top || 0);
+    var bottom = Math.max(sa.bottom || 0, cs.bottom || 0);
+    root.style.setProperty("--tg-top", top + "px");
+    root.style.setProperty("--tg-bottom", bottom + "px");
+  }
+  applyInsets();
+  try{
+    tg.onEvent("safeAreaChanged", applyInsets);
+    tg.onEvent("contentSafeAreaChanged", applyInsets);
+    tg.onEvent("fullscreenChanged", function(){
+      applyInsets();
+      if(!tg.isFullscreen) goFull();
+    });
+  }catch(_){}
+
+  /* Keep the page in sync with Telegram's light/dark setting unless the
+     member already chose a theme with our own toggle. */
+  try{
+    var forced = null;
+    try{ forced = localStorage.getItem("tw_theme"); }catch(_){}
+    if(!forced && tg.colorScheme){
+      document.documentElement.dataset.theme = tg.colorScheme === "dark" ? "dark" : "light";
+    }
+    if(tg.setHeaderColor){
+      var dark = (document.documentElement.dataset.theme || tg.colorScheme) === "dark";
+      tg.setHeaderColor(dark ? "#000000" : "#f5f5f7");
+      tg.setBackgroundColor(dark ? "#000000" : "#f5f5f7");
+    }
+  }catch(_){}
+})();
+</script>
+
 <script>
 const form = document.getElementById("loginForm"), msg = document.getElementById("msg");
 const resend = document.getElementById("resend"), resendTimer = document.getElementById("resendTimer");
