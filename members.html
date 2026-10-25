@@ -159,6 +159,7 @@ ul{list-style:none;margin:0;padding:0}.steps li{display:flex;align-items:center;
    <div class="pbar">
     <div class="seg" id="pmode" role="group" aria-label="Chart type">
      <button type="button" data-m="cum" aria-pressed="true">Cumulative</button>
+     <button type="button" data-m="hour" aria-pressed="false">Hourly</button>
      <button type="button" data-m="trade" aria-pressed="false">Per trade</button>
      <button type="button" data-m="day" aria-pressed="false">Daily</button>
     </div>
@@ -454,14 +455,23 @@ function renderTools(){
 /* ---------- performance (from real closed-signal pips) ---------- */
 function fmtP(n){ n = Math.round(n); return (n>0?"+":"") + n.toLocaleString("en-US") }
 function fmtD(s){ return new Date(s+"T12:00:00").toLocaleDateString("en-US",{day:"numeric",month:"short"}) }
+/* "2026-10-21 14:00" -> "21 Oct 14:00" */
+function fmtHour(s){
+  var m = String(s||"").match(/^(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2})$/);
+  if(!m) return String(s||"");
+  var dt = new Date(+m[1], +m[2]-1, +m[3], +m[4], +m[5]);
+  return dt.toLocaleDateString("en-US",{day:"numeric",month:"short"}) + " " + m[4] + ":" + m[5];
+}
 var range = 30, mode = "cum";
 
 function perfData(n, granularity){
   /* granularity "trade" walks every closed signal; "day" nets them per day.
      Trade mode ignores the day range and shows the most recent n trades so
      the curve stays readable instead of squashing 53 points into a week. */
-  var src = granularity === "trade" ? (S.trades||[]) : (S.performance||[]);
-  var slice = granularity === "trade" ? src.slice(-n) : src.slice(-n);
+  var src = granularity === "trade" ? (S.trades||[])
+          : granularity === "hour"  ? (S.hourly||[])
+          : (S.performance||[]);
+  var slice = src.slice(-n);
   var cum = 0;
   return slice.map(function(x, i){
     cum += x.pips;
@@ -490,12 +500,17 @@ function renderSpark(){
 
 function renderPerf(){
   var isTrade = mode === "trade";
-  var d = isTrade ? perfData(80, "trade") : perfData(range, "day");
+  var isHour  = mode === "hour";
+  var d = isTrade ? perfData(80, "trade")
+        : isHour  ? perfData(200, "hour")
+        : perfData(range, "day");
   var box = $("pc"), tip = $("ptip");
 
   /* Stat cards describe whichever granularity is on screen. */
   var labels = isTrade
     ? ["Total pips", "Winning trades", "Best trade", "Worst trade"]
+    : isHour
+    ? ["Total pips", "Winning hours", "Best hour", "Worst hour"]
     : ["Total pips", "Winning days", "Best day", "Worst day"];
   document.querySelectorAll(".pstats .kpi .mute").forEach(function(el, i){
     if(labels[i]) el.textContent = labels[i];
@@ -525,9 +540,10 @@ function renderPerf(){
   var W = box.clientWidth || 600, H = box.clientHeight || 260;
   var L = 48, R = 12, T = 14, B = 26, pw = W-L-R, ph = H-T-B;
 
-  /* Cumulative is the only meaningful y-axis here: daily bars get their own
-     zero-based scale. */
-  var vals = isTrade || mode === "cum"
+  /* The y-scale must match whatever the body actually draws. Trade, hourly
+     and cumulative modes all plot the running cumulative, so scaling them
+     against per-period pips pushed the line far outside the plot area. */
+  var vals = (isTrade || isHour || mode === "cum")
     ? d.map(function(p){return p.cum})
     : d.map(function(p){return p.day});
   var mn = Math.min(0, Math.min.apply(null, vals));
@@ -567,7 +583,7 @@ function renderPerf(){
       + '<circle cx="'+px.toFixed(1)+'" cy="'+py.toFixed(1)+'" r="5.5" fill="'+col+'"/>'
       + '<text x="'+px.toFixed(1)+'" y="'+(py-20).toFixed(1)+'" text-anchor="middle" '
       + 'style="font:600 13px -apple-system,sans-serif" fill="'+col+'">'+fmtP(d[0].cum)+'</text>';
-  } else if(isTrade || mode === "cum"){
+  } else if(isTrade || isHour || mode === "cum"){
     var pts = d.map(function(p,i){
       return {x:X(i), y:Y(p.cum), p:p};
     });
@@ -607,21 +623,25 @@ function renderPerf(){
   var xl = "";
   if(d.length === 1){
     xl = '<text x="'+X(0).toFixed(1)+'" y="'+(H-7)+'" text-anchor="middle" '
-      + 'style="font:11px -apple-system,sans-serif" fill="var(--mute)">'+fmtD(d[0].date)+'</text>';
+      + 'style="font:11px -apple-system,sans-serif" fill="var(--mute)">'
+      + (isHour ? fmtHour(d[0].date) : fmtD(d[0].date))+'</text>';
   } else {
+    var fmtX = isHour ? fmtHour : fmtD;
     xl = '<text x="'+L+'" y="'+(H-7)+'" style="font:11px -apple-system,sans-serif" '
-      + 'fill="var(--mute)">'+fmtD(d[0].date)+'</text>'
+      + 'fill="var(--mute)">'+fmtX(d[0].date)+'</text>'
       + '<text x="'+(W-R)+'" y="'+(H-7)+'" text-anchor="end" '
       + 'style="font:11px -apple-system,sans-serif" fill="var(--mute)">'
-      + fmtD(d[d.length-1].date)+'</text>';
-    if(isTrade){
+      + fmtX(d[d.length-1].date)+'</text>';
+    if(isTrade || isHour){
       xl += '<text x="'+((L+W-R)/2).toFixed(1)+'" y="'+(H-7)+'" text-anchor="middle" '
         + 'style="font:11px -apple-system,sans-serif" fill="var(--mute)">'
-        + d.length+' closed trades</text>';
+        + d.length + (isHour ? ' active hours' : ' closed trades') + '</text>';
     }
   }
 
-  var aria = (isTrade ? "Cumulative pips per closed trade" : "Cumulative pips per trading day")
+  var aria = (isTrade ? "Cumulative pips per closed trade"
+            : isHour ? "Cumulative pips per active hour"
+            : "Cumulative pips per trading day")
     + ", " + d.length + " points";
   box.innerHTML = '<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="'+aria+'">'
     + g + body + xl
@@ -640,8 +660,10 @@ function renderPerf(){
     var p = d[i], x = X(i), y = Y(p.cum);
     cx.setAttribute("x1", x); cx.setAttribute("x2", x); cx.style.display = "";
     dot.setAttribute("cx", x); dot.setAttribute("cy", y); dot.style.display = "";
+    var when = isHour ? fmtHour(p.date) : fmtD(p.date);
     tip.innerHTML = (isTrade ? "Trade "+(i+1)+" of "+d.length+"<br>" : "")
-      + fmtD(p.date)
+      + (isHour ? "" : "")
+      + when
       + "<br>Result: <b>"+fmtP(p.day)+"</b>"
       + " · Cumulative: <b>"+fmtP(p.cum)+"</b>";
     tip.style.display = "block";
@@ -935,11 +957,24 @@ function todayKey(){
    posting date (PAIR_YYYYMMDD_HHMMSS), so use that. Fall back to entry_at,
    then closed, for rows whose key is not parseable. */
 function resultDate(key, v){
-  var m = String(key||"").match(/_(\d{4})(\d{2})(\d{2})_/);
+  var m = String(key||"").match(/_(\d{4})(\d{2})(\d{2})_(\d{2})/);
   if(m) return m[1] + "-" + m[2] + "-" + m[3];
   var ea = fmtDateKey(v && v.entry_at);
   if(ea) return ea;
   return fmtDateKey(v && v.closed);
+}
+
+/* Hour bucket for the hourly curve. The signal key carries the posting hour
+   (PAIR_YYYYMMDD_HHMMSS); entry_at is the fallback. Returns "YYYY-MM-DD HH:00"
+   in Kuala Lumpur time, or null when nothing usable is available. */
+function resultHour(key, v){
+  var m = String(key||"").match(/_(\d{4})(\d{2})(\d{2})_(\d{2})(\d{2})/);
+  if(m) return m[1]+"-"+m[2]+"-"+m[3]+" "+m[4]+":00";
+  var iso = (v && v.entry_at) || (v && v.closed);
+  if(!iso) return null;
+  var t = mytParts(iso);
+  if(!t) return null;
+  return t.yyyy+"-"+t.mm+"-"+t.dd+" "+t.HH+":00";
 }
 
 function computePerformance(statuses){
@@ -974,6 +1009,21 @@ function computePerformance(statuses){
   });
 
   S.trades = rows.map(function(r){ return {date:r.day, pips:Math.round(r.pips*10)/10} });
+
+  /* Hourly buckets: finer than a day, so the curve shows intraday swings
+     instead of a seven-step staircase. */
+  var byHour = {};
+  Object.keys(statuses).forEach(function(k){
+    var v = statuses[k];
+    if(!v || typeof v.pips !== "number") return;
+    if(String(v.unit||"pips").toLowerCase() === "usd") return;
+    var hr = resultHour(k, v);
+    if(!hr) return;
+    byHour[hr] = (byHour[hr]||0) + v.pips;
+  });
+  S.hourly = Object.keys(byHour).sort().map(function(k){
+    return {date:k, pips: Math.round(byHour[k]*10)/10};
+  });
 
   return Object.keys(byDay).sort().map(function(k){
     return {date:k, pips: Math.round(byDay[k]*10)/10};
