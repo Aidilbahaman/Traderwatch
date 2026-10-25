@@ -121,6 +121,40 @@ ul{list-style:none;margin:0;padding:0}.steps li{display:flex;align-items:center;
 :root[data-tg="1"] .top{padding-top:calc(12px + var(--tg-top,0px))}
 :root[data-tg="1"] body{padding-bottom:calc(76px + var(--tg-bottom,0px))}
 :root[data-tg="1"] .tabbar{bottom:calc(10px + var(--tg-bottom,0px))}
+
+/* ===== Community: trading ideas ===== */
+.ideabar{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+.ideacard{background:var(--fill);border-radius:16px;padding:16px;margin-bottom:12px;display:flex;flex-direction:column;gap:10px}
+.ideacompose{background:var(--card);border:1px solid var(--line);box-shadow:var(--shadow)}
+.ideacard h3{font-size:15px;margin:0;font-weight:600}
+.ideacard .ideatop{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+.ideacard .ideawho{font-size:12px;color:var(--mute)}
+.ideacard .ideatitle{font-size:15px;font-weight:600;letter-spacing:-.01em;margin:2px 0 0}
+.ideacard .ideabody{font-size:13px;line-height:1.55;color:var(--ink);opacity:.9;white-space:pre-wrap;margin:0}
+.ideagrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.ideacard label{display:block;font-size:12px;color:var(--mute);margin:6px 0 4px}
+.ideacard input,.ideacard select,.ideacard textarea{width:100%;font:inherit;font-size:14px;color:var(--ink);
+ background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:10px 12px;font-family:inherit}
+.ideacard textarea{resize:vertical;min-height:90px}
+.ideacard input:focus,.ideacard select:focus,.ideacard textarea:focus{outline:2px solid var(--blue);outline-offset:1px}
+.ideafoot{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-top:4px}
+.ideax{border:0;background:none;color:var(--mute);font-size:22px;line-height:1;cursor:pointer;padding:0 4px}
+.idealevels{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:4px}
+.idealevels>div{background:var(--bg);border-radius:10px;padding:8px 10px}
+.idealevels span{display:block;font-size:10px;text-transform:uppercase;letter-spacing:.05em;color:var(--mute)}
+.idealevels b{font-size:13px;font-variant-numeric:tabular-nums}
+.ideaacts{display:flex;gap:8px;align-items:center;margin-top:4px;flex-wrap:wrap}
+.ideaacts button{border:0;background:var(--bg);color:var(--ink);border-radius:99px;padding:7px 14px;
+ font-size:12px;font-weight:600;cursor:pointer}
+.ideaacts button[aria-pressed="true"]{background:color-mix(in srgb,var(--green) 20%,transparent);color:var(--green)}
+.ideaacts button.danger{color:var(--red)}
+.ideacomments{margin-top:8px;border-top:1px solid var(--line);padding-top:10px;display:flex;flex-direction:column;gap:8px}
+.ideacomment{font-size:12px;line-height:1.5}
+.ideacomment b{font-size:12px}
+.ideacommentrow{display:flex;gap:8px}
+.ideacommentrow input{flex:1;padding:8px 10px;font-size:13px;border-radius:10px;background:var(--bg);border:1px solid var(--line);color:var(--ink)}
+.ideacommentrow button{border:0;background:var(--blue);color:#fff;border-radius:10px;padding:0 14px;font-size:13px;font-weight:600;cursor:pointer}
+@media (max-width:700px){.ideagrid{grid-template-columns:1fr}.idealevels{grid-template-columns:repeat(3,1fr)}}
 </style>
 </head>
 <body>
@@ -132,6 +166,7 @@ ul{list-style:none;margin:0;padding:0}.steps li{display:flex;align-items:center;
   <button class="nav" data-view="perf" type="button">Performance</button>
   <button class="nav" data-view="port" type="button">Portfolio</button>
   <button class="nav" data-view="tools" type="button">Toolkits</button>
+  <button class="nav" data-view="ideas" type="button">Community<span class="new">NEW</span></button>
   <a class="nav" href="education.html">Learn<span class="new">NEW</span></a>
  </nav>
  <div class="tools-r"><span class="mkt" id="mkt"><i></i><span id="mktTxt"></span></span><span class="clock" id="clock"></span><span class="pill" id="plan">Free</span><button class="themebtn" id="themebtn" type="button" aria-label="Switch to night mode" title="Night / light mode">&#9789;</button><a class="mute" href="#" id="logout">Log out</a></div>
@@ -219,6 +254,52 @@ ul{list-style:none;margin:0;padding:0}.steps li{display:flex;align-items:center;
   <section class="view" id="v-tools">
    <div class="tools" id="tools"></div>
   </section>
+
+  <section class="view" id="v-ideas">
+   <div class="ideabar">
+    <div class="seg" id="ideaFilter" role="group" aria-label="Filter ideas">
+     <button type="button" data-if="all" aria-pressed="true">All ideas</button>
+     <button type="button" data-if="mine" aria-pressed="false">Mine</button>
+    </div>
+    <button class="btn g" type="button" id="ideaNew">+ Share an idea</button>
+   </div>
+
+   <form class="ideacard ideacompose hide" id="ideaForm" autocomplete="off">
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:10px">
+     <h3 style="margin:0">Share your view</h3>
+     <button type="button" class="ideax" id="ideaCancel" aria-label="Cancel">&#215;</button>
+    </div>
+    <div class="ideagrid">
+     <div><label for="ideaPair">Pair</label>
+      <select id="ideaPair"></select></div>
+     <div><label for="ideaTf">Timeframe</label>
+      <select id="ideaTf">
+       <option>M15</option><option>H1</option><option selected>H4</option><option>D1</option>
+      </select></div>
+     <div><label for="ideaSide">Bias</label>
+      <select id="ideaSide"><option>BUY</option><option>SELL</option><option selected>NEUTRAL</option></select></div>
+    </div>
+    <label for="ideaTitle">Headline</label>
+    <input id="ideaTitle" maxlength="120" placeholder="e.g. XAUUSD retest of H4 demand before the next leg up" required>
+    <label for="ideaBody">Your analysis</label>
+    <textarea id="ideaBody" rows="5" maxlength="4000" placeholder="Structure, liquidity, what would invalidate the idea..."></textarea>
+    <div class="ideagrid">
+     <div><label for="ideaEntry">Entry (optional)</label><input id="ideaEntry" inputmode="decimal"></div>
+     <div><label for="ideaSl">Stop loss (optional)</label><input id="ideaSl" inputmode="decimal"></div>
+     <div><label for="ideaTp">Target (optional)</label><input id="ideaTp" inputmode="decimal"></div>
+    </div>
+    <div class="ideafoot">
+     <span class="fine" id="ideaMsg" aria-live="polite"></span>
+     <button class="btn g" type="submit" id="ideaSubmit">Publish idea</button>
+    </div>
+    <div class="fine">Ideas are opinions shared by members, not signals or financial advice. TraderWatch does not verify them.</div>
+   </form>
+
+   <div id="ideaList"></div>
+   <div class="fine" id="ideaEmpty" style="text-align:center;padding:28px 10px">
+    No ideas shared yet. Be the first.
+   </div>
+  </section>
   </div>
  </main>
  <aside class="rail" aria-label="Summary">
@@ -285,6 +366,7 @@ ul{list-style:none;margin:0;padding:0}.steps li{display:flex;align-items:center;
  <button type="button" data-view="perf">Performance</button>
  <button type="button" data-view="port">Portfolio</button>
  <button type="button" data-view="tools">Toolkits</button>
+ <button type="button" data-view="ideas">Community</button>
  <a href="education.html">Learn</a>
 </nav>
 
@@ -806,6 +888,292 @@ function renderPerf(){
   svg.addEventListener("touchend", out);
 }
 
+
+/* =====================================================================
+   Community — trading ideas
+   Members publish their own view (pair, bias, levels, short analysis),
+   like each other's ideas and reply in comments. Rows live in Supabase
+   behind RLS; this file only talks to the get_ideas() RPC and the three
+   tables. Nothing here is a signal and nothing is verified by TraderWatch.
+   ===================================================================== */
+var IDEAS = [], ideaFilterMode = "all", ideasLoaded = false;
+var ME = { id: null, name: "Member" };   /* set in boot() from requireMember() */
+
+function ideaPairList(){
+  return ["XAUUSD","EURUSD","GBPUSD","USDJPY","AUDUSD","USDCAD","NZDUSD","BTCUSD"];
+}
+function ideaSymbol(pair){
+  var known = {XAUUSD:"OANDA:XAUUSD", EURUSD:"FX:EURUSD", GBPUSD:"FX:GBPUSD",
+    USDJPY:"FX:USDJPY", AUDUSD:"FX:AUDUSD", USDCAD:"FX:USDCAD",
+    NZDUSD:"FX:NZDUSD", BTCUSD:"BITSTAMP:BTCUSD"};
+  return known[pair] || ("FX:" + pair);
+}
+function ideaTime(iso){
+  if(!iso) return "";
+  var d = new Date(iso);
+  if(!Number.isFinite(d.getTime())) return "";
+  var mins = Math.round((Date.now() - d.getTime())/60000);
+  if(mins < 1) return "just now";
+  if(mins < 60) return mins + " min ago";
+  if(mins < 1440) return Math.round(mins/60) + "h ago";
+  return d.toLocaleDateString("en-US",{day:"numeric",month:"short"});
+}
+function ideaInitials(name){
+  var parts = String(name||"M").trim().split(/\s+/);
+  return ((parts[0]||"M")[0] + (parts[1]||"")[0] || "M").toUpperCase();
+}
+
+/* ---------- load ---------- */
+async function loadIdeas(){
+  var list = $("ideaList"), empty = $("ideaEmpty");
+  if(!list) return;
+  list.innerHTML = '<div class="ideacard"><div class="mute">Loading ideas…</div></div>';
+  empty.classList.add("hide");
+  try{
+    var r = await sb.rpc("get_ideas", { p_limit: 50, p_offset: 0 });
+    if(r.error) throw r.error;
+    IDEAS = Array.isArray(r.data) ? r.data : [];
+    ideasLoaded = true;
+  }catch(ex){
+    list.innerHTML = '<div class="ideacard"><div class="mute">Ideas could not be loaded right now.</div></div>';
+    return;
+  }
+  renderIdeas();
+}
+
+/* ---------- render ---------- */
+function renderIdeas(){
+  var list = $("ideaList"), empty = $("ideaEmpty");
+  if(!list) return;
+  var rows = IDEAS.filter(function(i){
+    if(ideaFilterMode === "mine") return i.is_mine;
+    return true;
+  });
+
+  if(!rows.length){
+    list.innerHTML = "";
+    empty.classList.remove("hide");
+    empty.textContent = ideaFilterMode === "mine"
+      ? "You have not shared an idea yet."
+      : "No ideas shared yet. Be the first.";
+    return;
+  }
+  empty.classList.add("hide");
+
+  list.innerHTML = rows.map(function(i){
+    var lv = "";
+    if(i.entry != null || i.sl != null || i.tp != null){
+      lv = '<div class="idealevels">'
+        + '<div><span>Entry</span><b>' + (i.entry != null ? esc(String(i.entry)) : "—") + '</b></div>'
+        + '<div><span>Stop</span><b style="color:var(--red)">' + (i.sl != null ? esc(String(i.sl)) : "—") + '</b></div>'
+        + '<div><span>Target</span><b style="color:var(--green-ink)">' + (i.tp != null ? esc(String(i.tp)) : "—") + '</b></div>'
+        + '</div>';
+    }
+    var sideCls = i.side === "SELL" ? "red" : (i.side === "BUY" ? "" : "");
+    return '<article class="ideacard" data-idea="' + i.id + '">'
+      + '<div class="ideatop"><div>'
+      + '<div class="ideawho"><b>' + esc(i.author_name || "Member") + '</b> · ' + esc(ideaTime(i.created_at)) + '</div>'
+      + '<div class="ideatitle">' + esc(i.pair) + ' '
+      + '<span class="pill ' + sideCls + '">' + esc(i.side) + '</span> '
+      + '<span class="mute" style="font-size:12px">' + esc(i.timeframe) + '</span></div>'
+      + '<div class="ideatitle" style="font-weight:500">' + esc(i.title) + '</div>'
+      + '</div></div>'
+      + (i.body ? '<p class="ideabody">' + esc(i.body) + '</p>' : '')
+      + lv
+      + '<div class="ideaacts">'
+      + '<button type="button" data-act="like" aria-pressed="' + (i.liked ? "true":"false") + '">'
+      + (i.liked ? "♥" : "♡") + ' ' + i.likes + '</button>'
+      + '<button type="button" data-act="comments">💬 ' + i.comments + '</button>'
+      + (i.is_mine ? '<button type="button" data-act="delete" class="danger">Delete</button>' : '')
+      + '</div>'
+      + '<div class="ideacomments hide" data-comments="' + i.id + '"></div>'
+      + '</article>';
+  }).join("");
+
+  list.querySelectorAll("[data-idea]").forEach(function(card){
+    var id = Number(card.getAttribute("data-idea"));
+    card.querySelector('[data-act="like"]').addEventListener("click", function(){ toggleLike(id, card); });
+    card.querySelector('[data-act="comments"]').addEventListener("click", function(){ toggleComments(id, card); });
+    var del = card.querySelector('[data-act="delete"]');
+    if(del) del.addEventListener("click", function(){ deleteIdea(id); });
+  });
+}
+
+/* ---------- like ---------- */
+async function toggleLike(id, card){
+  var row = IDEAS.filter(function(i){ return Number(i.id) === id })[0];
+  if(!row) return;
+  var btn = card.querySelector('[data-act="like"]');
+  var wasLiked = !!row.liked;
+
+  /* Optimistic: flip immediately, revert if the server disagrees. */
+  row.liked = !wasLiked;
+  row.likes = Math.max(0, Number(row.likes) + (wasLiked ? -1 : 1));
+  btn.setAttribute("aria-pressed", row.liked ? "true" : "false");
+  btn.textContent = (row.liked ? "♥" : "♡") + " " + row.likes;
+
+  try{
+    if(wasLiked){
+      var d = await sb.from("idea_likes").delete().eq("idea_id", id).eq("user_id", ME.id);
+      if(d.error) throw d.error;
+    }else{
+      var ins = await sb.from("idea_likes").insert({ idea_id: id, user_id: ME.id });
+      if(ins.error) throw ins.error;
+    }
+  }catch(_){
+    row.liked = wasLiked;
+    row.likes = Math.max(0, Number(row.likes) + (wasLiked ? 1 : -1));
+    btn.setAttribute("aria-pressed", row.liked ? "true" : "false");
+    btn.textContent = (row.liked ? "♥" : "♡") + " " + row.likes;
+  }
+}
+
+/* ---------- comments ---------- */
+async function toggleComments(id, card){
+  var box = card.querySelector('[data-comments="' + id + '"]');
+  if(!box) return;
+  if(!box.classList.contains("hide")){ box.classList.add("hide"); return }
+  box.classList.remove("hide");
+  box.innerHTML = '<div class="mute" style="font-size:12px">Loading comments…</div>';
+
+  var rows = [];
+  try{
+    var r = await sb.from("idea_comments")
+      .select("id,body,created_at,user_id,profiles(name)")
+      .eq("idea_id", id).order("created_at", {ascending:true}).limit(50);
+    if(r.error) throw r.error;
+    rows = Array.isArray(r.data) ? r.data : [];
+  }catch(_){
+    box.innerHTML = '<div class="mute" style="font-size:12px">Comments could not be loaded.</div>';
+    return;
+  }
+
+  box.innerHTML = rows.map(function(c){
+    var who = (c.profiles && c.profiles.name) || "Member";
+    return '<div class="ideacomment"><b>' + esc(who) + '</b> '
+      + '<span class="mute">' + esc(ideaTime(c.created_at)) + '</span><br>'
+      + esc(c.body) + '</div>';
+  }).join("") || '<div class="mute" style="font-size:12px">No comments yet.</div>';
+
+  var row = document.createElement("div");
+  row.className = "ideacommentrow";
+  row.innerHTML = '<input type="text" maxlength="1000" placeholder="Write a reply…" aria-label="Write a reply">'
+    + '<button type="button">Send</button>';
+  box.appendChild(row);
+
+  var input = row.querySelector("input"), send = row.querySelector("button");
+  async function post(){
+    var text = input.value.trim();
+    if(!text) return;
+    send.disabled = true;
+    try{
+      var ins = await sb.from("idea_comments").insert({ idea_id: id, user_id: ME.id, body: text });
+      if(ins.error) throw ins.error;
+      input.value = "";
+      var i = IDEAS.filter(function(x){ return Number(x.id) === id })[0];
+      if(i) i.comments = Number(i.comments) + 1;
+      await toggleComments(id, card);   // reload the thread
+      await toggleComments(id, card);   // reopen it
+    }catch(_){
+      send.disabled = false;
+    }
+  }
+  send.addEventListener("click", post);
+  input.addEventListener("keydown", function(e){ if(e.key === "Enter") post() });
+}
+
+/* ---------- create ---------- */
+function openCompose(open){
+  var f = $("ideaForm");
+  if(!f) return;
+  f.classList.toggle("hide", !open);
+  if(open){
+    var sel = $("ideaPair");
+    if(sel && !sel.options.length){
+      sel.innerHTML = ideaPairList().map(function(p){
+        return '<option>' + p + '</option>';
+      }).join("");
+    }
+    $("ideaMsg").textContent = "";
+    $("ideaTitle").focus();
+  }
+}
+
+async function submitIdea(e){
+  e.preventDefault();
+  var msg = $("ideaMsg"), btn = $("ideaSubmit");
+  var title = $("ideaTitle").value.trim();
+  var body  = $("ideaBody").value.trim();
+  if(title.length < 3){ msg.textContent = "Headline needs at least 3 characters."; return }
+
+  var num = function(id){
+    var v = $(id).value.trim();
+    if(!v) return null;
+    var n = Number(v);
+    return Number.isFinite(n) ? n : null;
+  };
+
+  var payload = {
+    user_id: ME.id,
+    pair: $("ideaPair").value,
+    side: $("ideaSide").value,
+    timeframe: $("ideaTf").value,
+    title: title,
+    body: body,
+    entry: num("ideaEntry"),
+    sl: num("ideaSl"),
+    tp: num("ideaTp"),
+    symbol: ideaSymbol($("ideaPair").value)
+  };
+
+  btn.disabled = true;
+  msg.textContent = "Publishing…";
+  try{
+    var r = await sb.from("ideas").insert(payload).select("id");
+    if(r.error) throw r.error;
+    $("ideaForm").reset();
+    openCompose(false);
+    await loadIdeas();
+  }catch(ex){
+    msg.textContent = "Could not publish: " + (ex && ex.message ? ex.message : "unknown error");
+  }finally{
+    btn.disabled = false;
+  }
+}
+
+/* ---------- delete ---------- */
+async function deleteIdea(id){
+  if(!confirm("Delete this idea? Comments and likes go with it.")) return;
+  try{
+    var r = await sb.from("ideas").delete().eq("id", id).eq("user_id", ME.id);
+    if(r.error) throw r.error;
+    IDEAS = IDEAS.filter(function(i){ return Number(i.id) !== id });
+    renderIdeas();
+  }catch(_){
+    alert("Could not delete that idea.");
+  }
+}
+
+/* ---------- wire the view ---------- */
+(function wireIdeas(){
+  var form = $("ideaForm");
+  if(form) form.addEventListener("submit", submitIdea);
+  var nw = $("ideaNew");
+  if(nw) nw.addEventListener("click", function(){ openCompose(form.classList.contains("hide")) });
+  var cx = $("ideaCancel");
+  if(cx) cx.addEventListener("click", function(){ openCompose(false) });
+
+  document.querySelectorAll("#ideaFilter [data-if]").forEach(function(b){
+    b.addEventListener("click", function(){
+      ideaFilterMode = b.dataset.if;
+      document.querySelectorAll("#ideaFilter [data-if]").forEach(function(x){
+        x.setAttribute("aria-pressed", x === b ? "true" : "false");
+      });
+      renderIdeas();
+    });
+  });
+})();
+
 function renderAll(){
   renderStrip(); renderStats(); renderMini(); renderNews();
   renderCards(); renderTools(); renderSpark();
@@ -814,7 +1182,7 @@ function renderAll(){
 
 /* ---------- view switching ---------- */
 function show(v){
-  ["chart","signals","perf","port","tools"].forEach(function(k){
+  ["chart","signals","perf","port","tools","ideas"].forEach(function(k){
     $("v-"+k).classList.toggle("on", k===v);
   });
   document.querySelectorAll("[data-view]").forEach(function(b){
@@ -822,6 +1190,7 @@ function show(v){
   });
   if(v==="chart" && !chartLoaded) loadChart(PAIRS[currentPair]);
   if(v==="perf") renderPerf();
+  if(v==="ideas" && !ideasLoaded) loadIdeas();
 }
 document.querySelectorAll("[data-view]").forEach(function(b){
   b.addEventListener("click", function(){ show(b.dataset.view) });
@@ -1191,6 +1560,7 @@ async function boot(){
   TIER_CAP = PLAN==="max" ? null : (PLAN==="pro" ? 10 : 3);
   document.body.dataset.tier = PLAN;
   S.user = {name: member.name, plan: PLAN.charAt(0).toUpperCase()+PLAN.slice(1)};
+  ME = { id: member.id, name: member.name || "Member" };
   S.quota.cap = TIER_CAP;
 
   /* logout */
