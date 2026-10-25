@@ -23,7 +23,9 @@
 --page:radial-gradient(700px 480px at 6% -6%,rgba(10,132,255,.18),transparent 62%),radial-gradient(640px 460px at 100% 4%,rgba(175,82,222,.14),transparent 60%),radial-gradient(700px 500px at 60% 110%,rgba(48,209,88,.12),transparent 60%),#f5f5f7}
 .themebtn{border:0;background:var(--fill);color:var(--ink);width:30px;height:30px;border-radius:99px;cursor:pointer;font-size:14px;line-height:1;display:grid;place-items:center;flex:none;padding:0}
 .themebtn:hover{filter:brightness(1.08)}
-@media (max-width:1060px){.themebtn{display:none}}
+/* Theme toggle stays reachable on phones: it is the only
+   manual control for dark mode when the OS is set to light. */
+@media (max-width:1060px){.themebtn{display:grid;width:34px;height:34px;font-size:15px}}
 *{box-sizing:border-box}
 body{margin:0;background:var(--page);background-attachment:fixed;color:var(--ink);font:400 14px/1.45 -apple-system,BlinkMacSystemFont,"SF Pro Text","Inter","Segoe UI",Roboto,sans-serif;-webkit-font-smoothing:antialiased;font-variant-numeric:tabular-nums}
 a{color:inherit;text-decoration:none}button{font-family:inherit}
@@ -225,7 +227,7 @@ ul{list-style:none;margin:0;padding:0}.steps li{display:flex;align-items:center;
   </div>
 
   <div class="box">
-   <div style="display:flex;justify-content:space-between;align-items:baseline"><h3 style="margin:0">30-day pips</h3><b id="sparTotal"></b></div>
+   <div style="display:flex;justify-content:space-between;align-items:baseline"><h3 style="margin:0">Hourly pips</h3><b id="sparTotal"></b></div>
    <div id="spark" style="height:48px;margin-top:6px"></div>
    <a href="#" data-goto="perf" style="display:inline-block;margin-top:6px;font-weight:700;text-decoration:underline">View full performance</a>
   </div>
@@ -480,18 +482,25 @@ function perfData(n, granularity){
 }
 
 function renderSpark(){
-  var d = perfData(30), el = $("spark"), t = $("sparTotal");
+  /* Hourly curve, matching the Performance tab's Hourly mode. The sidebar
+     used to net results per day, which flattened the shape to seven steps. */
+  var d = perfData(200, "hour"), el = $("spark"), t = $("sparTotal");
   if(!d.length){ el.innerHTML = ""; t.textContent = "—"; t.className = ""; return }
   var tot = d[d.length-1].cum, W = 300, H = 48;
   var mn = Math.min(0, Math.min.apply(null, d.map(function(p){return p.cum})));
   var mx = Math.max(0, Math.max.apply(null, d.map(function(p){return p.cum})));
   var rg = (mx-mn)||1;
+  var zeroY = (H-3-(0-mn)/rg*(H-6)).toFixed(1);
   var pts = d.map(function(p,i){
     return (i/((d.length-1)||1)*W).toFixed(1) + "," + (H-3-(p.cum-mn)/rg*(H-6)).toFixed(1);
   }).join(" ");
   var c = tot>=0 ? "var(--green)" : "var(--red)";
   el.innerHTML = '<svg viewBox="0 0 '+W+' '+H+'" preserveAspectRatio="none" '
-    + 'style="width:100%;height:100%" role="img" aria-label="30-day pips chart">'
+    + 'style="width:100%;height:100%" role="img" aria-label="Hourly cumulative pips, '
+    + d.length + ' active hours">'
+    + '<line x1="0" x2="'+W+'" y1="'+zeroY+'" y2="'+zeroY+'" stroke="var(--mute)" '
+    + 'stroke-width="1" stroke-dasharray="3 3" stroke-opacity=".5" '
+    + 'vector-effect="non-scaling-stroke"/>'
     + '<polyline points="'+pts+'" fill="none" stroke="'+c+'" stroke-width="2" '
     + 'vector-effect="non-scaling-stroke"/></svg>';
   t.textContent = fmtP(tot)+" pips";
@@ -592,23 +601,15 @@ function renderPerf(){
       + ' L' + pts.map(function(o){return o.x.toFixed(1)+","+o.y.toFixed(1)}).join(" L")
       + ' L'+pts[pts.length-1].x.toFixed(1)+','+zeroY+' Z';
 
-    /* Dots: only while they stay readable. 53 trades at ~14px spacing is
-       fine; hundreds would turn the line into a smear. */
-    var dots = pts.length <= 90
-      ? pts.map(function(o){
-          return '<circle cx="'+o.x.toFixed(1)+'" cy="'+o.y.toFixed(1)+'" r="2.6" '
-            + 'fill="var(--card)" stroke="'+col+'" stroke-width="1.6"/>';
-        }).join("")
-      : "";
-
+    /* No per-point markers: at 30+ points they read as noise on the line.
+       The hover dot below is the only marker shown. */
     body = '<defs><linearGradient id="pcfill" x1="0" y1="0" x2="0" y2="1">'
       + '<stop offset="0" stop-color="'+col+'" stop-opacity=".26"/>'
       + '<stop offset="1" stop-color="'+col+'" stop-opacity="0"/>'
       + '</linearGradient></defs>'
       + '<path d="'+area+'" fill="url(#pcfill)"/>'
-      + '<polyline points="'+line+'" fill="none" stroke="'+col+'" stroke-width="2" '
-      + 'stroke-linejoin="round" stroke-linecap="round"/>'
-      + dots;
+      + '<polyline points="'+line+'" fill="none" stroke="'+col+'" stroke-width="2.2" '
+      + 'stroke-linejoin="round" stroke-linecap="round"/>';
   } else {
     var bw = Math.max(1, pw/d.length*0.62);
     body = d.map(function(p,i){
