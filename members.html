@@ -1,1117 +1,901 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Your dashboard – TraderWatch</title>
 <meta name="robots" content="noindex">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="app.css">
+<meta name="theme-color" content="#f5f5f7" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Your dashboard – TraderWatch</title>
 <style>
-[hidden]{display:none!important}
-.maint{background:linear-gradient(135deg,rgba(242,184,75,.16),rgba(242,184,75,.06));
-  border-bottom:1px solid rgba(242,184,75,.42);padding:16px 0}
-.maint .wrap{max-width:1120px;margin:0 auto;padding:0 20px}
-.maint h2{margin:0 0 6px;font-size:1.12rem;color:#f2b84b;display:flex;align-items:center;gap:9px}
-.maint p{margin:0 0 8px;color:var(--muted);font-size:.94rem;line-height:1.55}
-.maint ul{margin:0 0 8px;padding-left:20px;color:var(--muted);font-size:.9rem;line-height:1.65}
-.maint .dot{width:8px;height:8px;border-radius:50%;background:#f2b84b;flex:0 0 auto;
-  box-shadow:0 0 0 0 rgba(242,184,75,.55);animation:maintPulse 1.9s ease-out infinite}
-@keyframes maintPulse{0%{box-shadow:0 0 0 0 rgba(242,184,75,.5)}70%{box-shadow:0 0 0 9px rgba(242,184,75,0)}
-  100%{box-shadow:0 0 0 0 rgba(242,184,75,0)}}
-@media (prefers-reduced-motion:reduce){.maint .dot{animation:none}}
-.badge{font:700 .85rem var(--body);padding:4px 12px;border-radius:99px;background:var(--panel2);border:1px solid var(--line);color:var(--muted)}
-.badge.pro{background:rgba(46,207,111,.15);border-color:var(--gold);color:var(--gold)}
-.preview{background:rgba(242,184,75,.14);color:#f2b84b;padding:10px 0;font-size:.95rem}
-.page{padding:24px 0 56px}.welcome{margin-bottom:16px}.upgrade{margin-bottom:18px}.block{margin-top:18px}.tw-chart-news{margin-top:14px}.tw-chart-news + .tg-link{margin-top:18px}.tg-link + .tw-motion{margin-top:18px}
-.block h2{font-size:1.7rem;margin-bottom:16px}
-.linkbtn{background:none;border:0;color:var(--muted);font:600 1rem var(--body);cursor:pointer;text-decoration:underline}
-.center{text-align:center;margin:0 auto}
-.steps{display:grid;gap:12px;margin-top:20px;color:var(--muted)}
-.tw-chart-news{margin-top:14px}.tw-chartnews-head{margin-bottom:18px}.tw-chartnews-head h2{color:var(--navy);margin:5px 0 4px}.tw-chartnews-head p{color:var(--muted);margin:0;font-size:.9rem}.tw-chartnews-grid{display:grid;grid-template-columns:minmax(0,1.18fr) minmax(340px,.82fr);gap:18px;align-items:stretch}.tw-chartnews-cell{min-width:0}.tw-chartnews-cell .chartbox{height:100%;display:flex;flex-direction:column}.tw-chartnews-cell .tv.big{height:clamp(420px,36vw,560px);flex:1}.tw-member-news{margin-top:0!important;padding:18px;border:1px solid #173b5e;border-radius:14px;background:#061a31;box-shadow:0 18px 42px #00000018;overflow:hidden;display:flex;flex-direction:column}.tw-member-news-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:12px}.tw-member-news-head h3{color:#fff;font-size:1.05rem;margin:5px 0 0}.tw-member-kicker{color:#b7f34b;font-size:.7rem;text-transform:uppercase;letter-spacing:.1em;font-weight:800}.tw-member-filter{display:inline-flex;align-items:center;gap:6px;color:#b7f34b;font-size:10px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;white-space:nowrap}.tw-member-filter:before{content:"";width:7px;height:7px;border-radius:50%;background:#b7f34b;box-shadow:0 0 10px #b7f34b}.tw-member-news .tw-fundamental-widget{height:clamp(420px,36vw,560px);min-height:360px;border:1px solid #173b5e;border-radius:10px;overflow:hidden;flex:1}.tw-member-note{padding:9px 2px 0;color:#9db6ca;font-size:10px;margin:0}.tw-member-note a{color:#b7f34b;text-decoration:none}@media(max-width:900px){.tw-chartnews-grid{grid-template-columns:1fr}.tw-chartnews-cell .tv.big,.tw-member-news .tw-fundamental-widget{height:480px}.tw-member-news{min-height:0}}@media(max-width:600px){.tw-chart-news{margin-top:10px}.tw-chartnews-grid{gap:14px}.tw-member-news{padding:16px}.tw-chartnews-cell .tv.big{height:600px!important;min-height:600px}.tw-chartnews-cell .tv.big .tradingview-widget-container,.tw-chartnews-cell .tv.big .tradingview-widget-container__widget,.tw-chartnews-cell .tv.big iframe{height:600px!important;min-height:600px}.tw-member-news .tw-fundamental-widget{height:440px}.tw-member-news-head{display:flex}}
-/* Broker welcome offer — member dashboard */
-.tw-offer{margin-top:18px}
-.tw-offer-panel{position:relative;overflow:hidden;display:grid;grid-template-columns:1fr auto;align-items:center;gap:26px;padding:clamp(22px,4vw,38px);border-radius:18px;background:linear-gradient(110deg,#09284c,#10599a);color:#fff}
-.tw-offer-panel:after{content:"$30";position:absolute;right:15%;top:50%;transform:translateY(-55%);font:800 clamp(80px,13vw,150px)/1 var(--display);color:#ffffff0c;pointer-events:none}
-.tw-offer-copy,.tw-offer-action{position:relative;z-index:1;min-width:0}
-.tw-offer-label{font-size:11px;color:#b7f34b;font-weight:800;text-transform:uppercase;letter-spacing:.1em}
-.tw-offer-panel h2{font:800 clamp(23px,3.2vw,34px)/1.15 var(--display);letter-spacing:-.03em;margin:9px 0 10px;color:#fff}
-.tw-offer-panel p{color:#d3e4f2;max-width:60ch;margin:0;font-size:.92rem;line-height:1.55}
-.tw-offer-action{width:240px}
-.tw-offer-btn{display:inline-flex;align-items:center;justify-content:center;width:100%;min-height:46px;padding:11px 18px;border-radius:9px;background:#b7f34b;color:#193414;font-weight:800;font-size:.9rem;text-decoration:none;transition:transform .18s,filter .18s}
-.tw-offer-btn:hover{transform:translateY(-1px);filter:brightness(1.03)}
-.tw-offer-action small{display:block;color:#b8ccdc;font-size:10px;line-height:1.5;margin-top:10px}
-@media(max-width:760px){.tw-offer-panel{grid-template-columns:1fr;gap:18px}.tw-offer-action{width:100%}.tw-offer-panel:after{right:4%;top:16%;font-size:96px;opacity:.7}}
-.page section.block{padding:0}.page section.block + section.block{margin-top:4px}.page .tw-chart-news + .tg-link{margin-top:4px}.page .tg-link + .tw-motion{margin-top:4px}@media(max-width:600px){.page section.block{padding:0}.page section.block + section.block{margin-top:2px}.page .tw-chart-news + .tg-link{margin-top:2px}.page .tg-link + .tw-motion{margin-top:2px}}
+:root{--glass:.5;--bg:#f5f5f7;--ink:#1d1d1f;--mute:#6e6e73;--line:rgba(0,0,0,.08);--blue:#0071e3;--green:#248a3d;--green-ink:#248a3d;--red:#d70015;
+--card:rgba(255,255,255,var(--glass));--fill:rgba(120,120,128,.12);--thumb:#fff;--shadow:0 1px 1px rgba(0,0,0,.03),0 14px 36px rgba(0,0,0,.07);
+--page:radial-gradient(700px 480px at 6% -6%,rgba(10,132,255,.18),transparent 62%),radial-gradient(640px 460px at 100% 4%,rgba(175,82,222,.14),transparent 60%),radial-gradient(700px 500px at 60% 110%,rgba(48,209,88,.12),transparent 60%),#f5f5f7}
+@media (prefers-color-scheme:dark){:root{--bg:#000;--ink:#f5f5f7;--mute:#98989d;--line:rgba(255,255,255,.1);--blue:#0a84ff;--green:#30d158;--green-ink:#30d158;--red:#ff453a;--card:rgba(44,44,46,var(--glass));--fill:rgba(120,120,128,.24);--thumb:#636366;--shadow:0 16px 40px rgba(0,0,0,.45);
+--page:radial-gradient(700px 480px at 6% -6%,rgba(10,132,255,.28),transparent 62%),radial-gradient(640px 460px at 100% 4%,rgba(175,82,222,.22),transparent 60%),radial-gradient(700px 500px at 60% 110%,rgba(48,209,88,.16),transparent 60%),#000}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--page);background-attachment:fixed;color:var(--ink);font:400 14px/1.45 -apple-system,BlinkMacSystemFont,"SF Pro Text","Inter","Segoe UI",Roboto,sans-serif;-webkit-font-smoothing:antialiased;font-variant-numeric:tabular-nums}
+a{color:inherit;text-decoration:none}button{font-family:inherit}
+:focus-visible{outline:2px solid var(--blue);outline-offset:2px;border-radius:8px}
+.bar,.strip,.metrics,.ws,.box,.pchart{background:var(--card);backdrop-filter:blur(28px) saturate(180%);-webkit-backdrop-filter:blur(28px) saturate(180%);border:1px solid var(--line);border-radius:22px;box-shadow:var(--shadow)}
+.top{position:sticky;top:0;z-index:20;padding:12px 16px 0;max-width:1472px;margin:auto}
+.bar{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:12px;padding:9px 14px}
+.brand{display:flex;align-items:center;gap:10px;font-weight:700;font-size:15px;letter-spacing:-.01em}
+.mark{width:28px;height:28px;border-radius:8px;background:var(--ink);color:var(--bg);display:grid;place-items:center;font-size:14px;position:relative}
+.mark::after{content:"";position:absolute;right:-2px;bottom:-2px;width:8px;height:8px;border-radius:50%;background:var(--green);border:2px solid var(--bg)}
+.segnav{display:flex;gap:2px;background:var(--fill);border-radius:12px;padding:3px}
+.nav{border:0;background:none;padding:7px 15px;border-radius:9px;font:500 13px -apple-system,BlinkMacSystemFont,"SF Pro Text",sans-serif;color:var(--mute);cursor:pointer;white-space:nowrap}
+.nav:hover{color:var(--ink)}.nav.on{background:var(--thumb);color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.18)}
+.new{font-size:10px;background:var(--blue);color:#fff;border-radius:99px;padding:1px 6px;margin-left:6px}
+.tools-r{display:flex;align-items:center;justify-content:flex-end;gap:12px;font-size:13px}
+.mkt{display:flex;align-items:center;gap:6px;color:var(--mute)}.mkt i{width:8px;height:8px;border-radius:50%;background:var(--mute)}
+.mkt.on i{background:var(--green);box-shadow:0 0 0 3px color-mix(in srgb,var(--green) 25%,transparent)}
+.clock{color:var(--mute);min-width:86px;text-align:right}
+.pill{display:inline-block;padding:2px 10px;border-radius:99px;background:color-mix(in srgb,var(--green) 16%,transparent);color:var(--green);font-size:12px;font-weight:600}
+.pill.red{background:color-mix(in srgb,var(--red) 14%,transparent);color:var(--red)}
+.mute{color:var(--mute)}.pos{color:var(--green)}.neg{color:var(--red)}.hide{display:none!important}.fine{font-size:12px;color:var(--mute)}
+.shell{max-width:1472px;margin:16px auto;padding:0 16px;display:grid;grid-template-columns:minmax(0,1fr) 372px;gap:16px;align-items:start}
+.main{display:flex;flex-direction:column;gap:14px;min-width:0}
+h1{font-size:30px;margin:4px 0 0;font-weight:700;letter-spacing:-.025em}
+h3{font-size:15px;margin:0 0 10px;font-weight:600;letter-spacing:-.01em}
+.metrics{display:grid;grid-template-columns:repeat(4,minmax(0,1fr))}
+.kpi{padding:14px 18px}.metrics .kpi+.kpi{border-left:1px solid var(--line)}
+.kpi .v{font-size:28px;font-weight:600;letter-spacing:-.025em;line-height:1.15}
+.bar2,.bar>i{}
+.mbar{height:5px;border-radius:3px;background:var(--fill);overflow:hidden;margin-top:10px}.mbar i{display:block;height:100%;background:var(--blue);border-radius:3px;transition:width .4s}
+.strip{display:flex;align-items:center;gap:24px;padding:16px 20px;flex-wrap:wrap}
+.strip.buy{background:linear-gradient(120deg,color-mix(in srgb,var(--green) 13%,var(--card)),var(--card) 60%)}
+.strip.sell{background:linear-gradient(120deg,color-mix(in srgb,var(--red) 12%,var(--card)),var(--card) 60%)}
+.eyebrow{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--mute);font-weight:600}
+.t-pair{font-size:26px;font-weight:700;letter-spacing:-.02em;line-height:1.2}
+.t-pair .side{font-style:normal;font-size:12px;font-weight:700;padding:2px 10px;border-radius:99px;background:var(--green);color:#fff;margin-left:10px;vertical-align:middle}
+.t-pair .side.sell{background:var(--red)}
+.t-lv{display:flex;gap:26px}.t-lv span{display:block;font-size:11px;color:var(--mute);text-transform:uppercase;letter-spacing:.05em}.t-lv b{font-size:18px;font-weight:600}
+.ladder{position:relative;flex:1;min-width:220px;padding:10px 6px 24px}
+.trk{position:relative;height:8px;border-radius:99px;background:var(--fill)}
+.trk i{position:absolute;top:0;bottom:0;border-radius:99px;opacity:.9}.rk{background:var(--red)}.rw{background:var(--green)}
+.trk u{position:absolute;top:-5px;width:3px;height:18px;background:var(--ink);border-radius:2px;transform:translateX(-50%)}
+.ladder em{position:absolute;top:28px;font-size:11px;font-style:normal;color:var(--mute);transform:translateX(-50%)}
+.ws{padding:14px;display:flex;flex-direction:column;gap:12px}
+.view{display:none;flex-direction:column;gap:12px}.view.on{display:flex}
+.seg{display:flex;gap:6px;flex-wrap:wrap}
+.seg button{border:0;background:var(--fill);color:var(--ink);padding:6px 14px;border-radius:99px;font:500 13px -apple-system,BlinkMacSystemFont,"SF Pro Text",sans-serif;cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
+.chartbox{height:min(60dvh,600px);min-height:380px;border-radius:16px;overflow:hidden;background:var(--bg)}
+.cards,.tools{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.tools{grid-template-columns:repeat(3,minmax(0,1fr))}
+.sc,.tile{background:var(--fill);border-radius:16px;padding:14px;display:block}
+.sc .hd{display:flex;justify-content:space-between;align-items:center;gap:8px}.sc .nm{font-weight:600;font-size:16px}
+.sc .lv{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:10px}.sc .lv span{display:block;font-size:11px;color:var(--mute)}
+.ghost{border:1px dashed var(--line);background:none;color:var(--mute);display:flex;align-items:center;justify-content:center;text-align:center;min-height:90px}
+.pbar{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.pstats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.pstats .kpi{background:var(--fill);border-radius:14px;padding:10px 12px}.pstats .kpi .v{font-size:20px}
+.pchart{position:relative;min-height:300px;padding:10px;display:flex;box-shadow:none;background:var(--fill);backdrop-filter:none;-webkit-backdrop-filter:none;border:0;border-radius:16px}
+#pc{flex:1;min-width:0;min-height:260px;width:100%}#pc svg{display:block;width:100%;height:100%}#pc text{fill:var(--mute);font:11px -apple-system,sans-serif}
+.tip{position:absolute;pointer-events:none;background:var(--ink);color:var(--bg);border-radius:8px;padding:6px 10px;font-size:12px;white-space:nowrap;display:none;z-index:2}
+.rail{display:flex;flex-direction:column;gap:12px;min-width:0}.box{padding:16px}
+.mini{display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-top:1px solid var(--line);gap:8px}.mini:first-of-type{border-top:0}.mini small{display:block;color:var(--mute);font-size:12px}
+ul{list-style:none;margin:0;padding:0}.steps li{display:flex;align-items:center;gap:10px;padding:8px 0;border-top:1px solid var(--line)}.steps li:first-child{border-top:0}
+.chk{width:22px;height:22px;border-radius:50%;border:1.5px solid var(--line);background:none;display:grid;place-items:center;flex:none;cursor:pointer;color:transparent;font-size:12px;padding:0}
+.done .chk{background:var(--green);border-color:var(--green);color:#fff}.done .lbl{color:var(--mute);text-decoration:line-through}
+.bar>i{}
+.box .bar{height:5px;border-radius:3px;background:var(--fill);overflow:hidden;margin-top:8px;border:0;box-shadow:none;display:block;padding:0;backdrop-filter:none;-webkit-backdrop-filter:none}
+.box .bar i{display:block;height:100%;background:var(--blue);border-radius:3px;transition:width .4s}
+.btn{display:inline-block;padding:9px 18px;border-radius:99px;background:var(--ink);color:var(--bg);font-weight:600;font-size:13px;border:0;cursor:pointer}
+.btn.g{background:var(--blue);color:#fff}.btn.ghostb{background:var(--fill);color:var(--ink)}
+.up{border-color:color-mix(in srgb,var(--blue) 55%,transparent)}
+.pf{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.pf .box{box-shadow:none;background:var(--fill);backdrop-filter:none;-webkit-backdrop-filter:none;border:0;border-radius:16px}
+.pf label{display:block;font-size:12px;color:var(--mute);margin:10px 0 4px}
+.pf input{width:100%;font:inherit;font-size:14px;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:10px 12px}
+.pf input:focus{outline:2px solid var(--blue);outline-offset:1px}.pf .row2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.pf-act{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:14px}.pf-big{font-size:32px;font-weight:700;letter-spacing:-.02em}.pf-pl{font-size:16px;font-weight:600;margin:2px 0 8px}
+#pf-hcard{background:var(--fill);box-shadow:none;backdrop-filter:none;-webkit-backdrop-filter:none;border:0;border-radius:16px}
+.pf-ax{display:flex;justify-content:space-between;font-size:12px;color:var(--mute);margin:4px 0 8px}#pf-eq{width:100%;height:180px;display:block}
+.tabbar{display:none}
+@media (max-width:1060px){
+ .shell{grid-template-columns:1fr}.segnav,.clock{display:none}.bar{grid-template-columns:1fr auto}
+ .metrics{grid-template-columns:repeat(2,minmax(0,1fr))}.metrics .kpi:nth-child(3){border-left:0}.metrics .kpi:nth-child(n+3){border-top:1px solid var(--line)}
+ .cards,.tools,.pf{grid-template-columns:1fr}.pstats{grid-template-columns:repeat(2,minmax(0,1fr))}.chartbox{height:360px;min-height:0}
+ .t-lv{gap:18px}.strip{gap:14px}body{padding-bottom:calc(76px + env(safe-area-inset-bottom,0px));padding-top:env(safe-area-inset-top,0px)}
+ .tabbar{display:flex;position:fixed;left:10px;right:10px;bottom:calc(10px + env(safe-area-inset-bottom,0px));z-index:30;background:var(--card);backdrop-filter:blur(28px) saturate(180%);-webkit-backdrop-filter:blur(28px) saturate(180%);border:1px solid var(--line);border-radius:22px;box-shadow:var(--shadow);padding:5px;overflow-x:auto;gap:2px}
+ .tabbar button,.tabbar a{flex:1;min-width:80px;text-align:center;font:500 12px -apple-system,sans-serif;padding:11px 4px;color:var(--mute);border-radius:17px;background:none;border:0;cursor:pointer;white-space:nowrap}
+ .tabbar .on{background:var(--thumb);color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.15)}
+}
+@media (prefers-reduced-motion:reduce){.mbar i,.box .bar i{transition:none}}
 </style>
-<link rel="stylesheet" href="members-bento.css?v=20261024w">
-<link rel="stylesheet" href="assets/css/tw-motion-bg.css?v=202610182344">
-<script src="assets/js/tw-fundamental-news.js?v=2026101901" defer></script>
 </head>
 <body>
-<div class="maint" id="maintBanner" hidden>
-  <div class="wrap">
-    <h2><span class="dot" aria-hidden="true"></span><span id="maintTitle">Server Under Maintenance</span></h2>
-    <p id="maintBody"></p>
-    <ul id="maintPoints"></ul>
-    <p id="maintNote"></p>
+<header class="top"><div class="bar">
+ <a class="brand" href="members.html"><span class="mark">T</span>TraderWatch</a>
+ <nav class="segnav" aria-label="Main menu">
+  <button class="nav on" data-view="chart" type="button">Charts</button>
+  <button class="nav" data-view="signals" type="button">Signals</button>
+  <button class="nav" data-view="perf" type="button">Performance</button>
+  <button class="nav" data-view="port" type="button">Portfolio</button>
+  <button class="nav" data-view="tools" type="button">Toolkits</button>
+  <a class="nav" href="education.html">Learn<span class="new">NEW</span></a>
+ </nav>
+ <div class="tools-r"><span class="mkt" id="mkt"><i></i><span id="mktTxt"></span></span><span class="clock" id="clock"></span><span class="pill" id="plan">Free</span><a class="mute" href="#" id="logout">Log out</a></div>
+</div></header>
+
+<div class="shell">
+ <main class="main">
+  <div><h1>Welcome, <span id="uname">member</span></h1><div class="mute" id="today"></div></div>
+  <div class="metrics">
+   <div class="kpi"><div class="mute">30-day win rate</div><div class="v" id="win">—</div></div>
+   <div class="kpi"><div class="mute">Average R:R</div><div class="v" id="rr">—</div></div>
+   <div class="kpi"><div class="mute">Active signal</div><div class="v" id="act">0</div></div>
+   <div class="kpi"><div class="mute" style="display:flex;justify-content:space-between"><span>Today</span><b id="quotaTxt" style="color:var(--ink)">0 / 3</b></div><div class="mbar"><i id="quotaBar" style="width:0"></i></div></div>
   </div>
-</div>
-<div class="preview" id="previewBanner" hidden><div class="wrap">Preview mode: sign-ups are not being saved yet. Connect your form in config.js.</div></div>
-<header>
-  <div class="wrap nav">
-    <a class="logo" href="members.html" aria-label="TraderWatch member area">
-      <svg width="32" height="32" viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="7" fill="#050b14" stroke="#264261"/><path d="M8 9h16v4h-6.2v11h-3.6V13H8z" fill="#fff"/><rect x="20" y="20" width="5" height="5" fill="#2ecf6f"/></svg></a>
-    <nav aria-label="Member">
-      <a href="education.html">Education hub<span class="edu-new">NEW</span></a>
-      <a href="members.html#charts">Charts</a>
-      <a href="members.html#signals">Signals</a>
-      <a href="members.html#toolkits">Toolkits</a>
-    </nav>
-    <span class="badge" id="planBadge">Free</span>
-    <button class="linkbtn" type="button" onclick="logOut()">Log out</button>
-  </div>
-</header>
+  <div class="strip" id="strip" aria-live="polite"></div>
+  <div class="ws">
+  <section class="view on" id="v-chart">
+   <div class="seg" id="pairs" role="group" aria-label="Choose pair"></div>
+   <div class="chartbox" id="chart"></div>
+   <div class="fine">Charts by TradingView. Prices may be delayed.</div>
+  </section>
 
-<main class="page">
-  <div class="wrap">
-    <div class="bento">
+  <section class="view" id="v-signals">
+   <div class="seg" role="group" aria-label="Filter signals">
+    <button type="button" data-f="all" aria-pressed="true">All</button>
+    <button type="button" data-f="active" aria-pressed="false">Active</button>
+    <button type="button" data-f="closed" aria-pressed="false">Closed</button>
+   </div>
+   <div class="cards scroll" id="cards"></div>
+  </section>
 
-      <section class="t w2 hero-tile">
-        <p class="k">Utama</p>
-        <div class="hero-row">
-          <div class="hero-left">
-            <h1 id="hello">Welcome</h1>
-            <p class="sub" id="planLine"></p>
-            <p class="msg ok" id="upgradeNote" hidden></p>
-          </div>
-          <div class="hero-right">
-            <div class="ring" id="planRing" aria-hidden="true"><span id="planRingText">—</span></div>
-          </div>
-        </div>
-      </section>
-
-      <section class="t">
-        <p class="k" id="statWinLabel">Win rate · sejak mula</p>
-        <div class="num" id="statWin">—</div>
-        <div class="bar"><i id="statWinBar" style="width:0%"></i></div>
-      </section>
-
-      <section class="t">
-        <p class="k">Purata R:R</p>
-        <div class="num" id="statRR">—</div>
-        <p class="sub" id="statCount" style="margin-top:12px;font-size:13px">—</p>
-      </section>
-
-      <section class="t w2" id="perfTile">
-        <div class="perf-head">
-          <p class="k">Pips kumulatif</p>
-          <div class="perf-big" id="perfNet">+0.0 pips</div>
-          <p class="perf-sub" id="perfSub">—</p>
-        </div>
-        <div class="perf-wrap">
-          <svg id="perfChart" viewBox="0 0 320 150" role="img"
-               aria-label="Pips kumulatif TraderWatch"></svg>
-        </div>
-      </section>
-
-      <section class="t w2" id="calTile">
-        <p class="k">Kalendar prestasi · <span id="calDays">7</span> hari</p>
-        <div class="cal" id="calGrid"></div>
-        <p class="sub" id="calSub">—</p>
-      </section>
-
-      <section class="t w2" id="streakTile">
-        <p class="k">Streak menang / rugi</p>
-        <div class="num" id="streakNum">—</div>
-        <p class="sub" id="streakSub">—</p>
-        <div class="dots" id="streakDots"></div>
-        <div class="row" style="margin-top:12px"><span>Streak menang terbaik</span><b id="streakBestW">—</b></div>
-        <div class="row"><span>Streak rugi terburuk</span><b id="streakWorstL">—</b></div>
-        <div class="row"><span>Streak sekarang</span><b id="streakNow">—</b></div>
-      </section>
-
-      <section class="t w2" id="sessTile">
-        <p class="k">Sesi dagangan</p>
-        <div id="sessBars"></div>
-        <p class="sub" id="sessSub">—</p>
-      </section>
-
-      <section class="t w2" id="trigTile">
-        <p class="k">Kadar trigger vs expired</p>
-        <div class="num" id="trigNum">—</div>
-        <div class="gauge"><div class="gauge-mk"><i id="trigMk" style="left:74%"></i></div></div>
-        <p class="sub" id="trigSub">—</p>
-        <div class="row" style="margin-top:8px"><span>Trigger</span><b id="trigOn">—</b></div>
-        <div class="row"><span>Expired</span><b id="trigOff">—</b></div>
-      </section>
-
-      <section class="t w2" id="riskTile">
-        <p class="k">Kualiti risiko</p>
-        <div class="num" id="riskPF">—</div>
-        <p class="sub" id="riskSub">—</p>
-        <div style="margin-top:12px">
-          <div class="row"><span>Purata menang</span><b class="pos" id="riskAvgW">—</b></div>
-          <div class="row"><span>Purata rugi</span><b class="neg" id="riskAvgL">—</b></div>
-          <div class="row"><span>Drawdown maks</span><b class="neg" id="riskDD">—</b></div>
-        </div>
-      </section>
-
-      <section class="t w4" id="pairTile">
-        <p class="k">Prestasi ikut pair</p>
-        <div id="pairBars" style="display:grid;grid-template-columns:1fr 1fr;gap:6px 26px"></div>
-        <p class="sub" id="pairSub">—</p>
-      </section>
-
-      <section class="t w2 r2" id="activeTile">
-        <div class="tile-head">
-          <div><p class="k">Signal aktif</p><h2 id="activePair">Tiada setup aktif</h2></div>
-          <span class="live" id="activeBadge" hidden>Aktif</span>
-        </div>
-        <div class="trk" id="activeTrk" hidden>
-          <span class="mk l">Stop loss<b id="trkSL">—</b></span>
-          <span class="mk" style="left:35.7%">Entry<b id="trkEntry">—</b></span>
-          <span class="mk r">Take profit<b id="trkTP">—</b></span>
-          <i class="tick"></i><i class="dot" id="trkDot"></i>
-          <span class="mk b" style="left:53.9%">Harga kini<b id="trkNow">—</b></span>
-        </div>
-        <p class="sub" id="activeMeta" style="font-size:13px">Menunggu setup baharu.</p>
-      </section>
-
-      <section class="t w2 dark tw-member-news" id="fundamental-news">
-        <div class="tw-member-news-head">
-          <div><span class="tw-member-kicker">Fundamental news</span><h3>High-impact USD events</h3></div>
-          <span class="tw-member-filter">USD · High</span>
-        </div>
-        <div class="tw-fundamental-widget" aria-label="High-impact USD economic calendar"></div>
-        <p class="tw-member-note">Calendar data by <a href="https://www.tradingview.com/economic-calendar/" target="_blank" rel="noopener noreferrer">TradingView</a>. Educational context only — not financial advice.</p>
-      </section>
-
-      <section class="t w2" id="signals">
-        <div class="tile-head">
-          <div><p class="k">Setup harian</p><h2>Signals</h2></div>
-          <span class="live">Live</span>
-        </div>
-        <div class="signals" id="signalGrid"></div>
-        <p class="sample" id="signalNote"></p>
-      </section>
-
-      <section class="t w2" id="charts">
-        <div class="tile-head">
-          <div><p class="k">Dashboard tools</p><h2>Charts</h2></div>
-        </div>
-        <div class="tabs" role="tablist" aria-label="Chart pair" id="tabs"></div>
-        <div class="tv big" id="chart"></div>
-        <div class="tvnote">Charts by TradingView. Prices may be delayed.</div>
-      </section>
-
-      <section class="t w2 blue tg-tile" id="tgLink" hidden>
-        <p class="k">Telegram</p>
-        <h2 id="tgTitle">Signal terus ke telefon.</h2>
-        <p class="sub" id="tgBody">Link your Telegram account and every new signal is sent to you the moment it is posted.</p>
-        <div class="tg-action">
-          <a class="btn w" id="tgBtn" href="#" target="_blank" rel="noopener">Link Telegram</a>
-          <button class="linkbtn w-link" type="button" id="tgRefresh" hidden>Refresh status</button>
-        </div>
-        <p class="tg-note" id="tgNote" hidden></p>
-      </section>
-
-      <div class="t w2" id="toolkits"></div>
-
-      <section class="t w4" id="offer" aria-label="Broker welcome offer">
-        <div class="tw-offer-panel">
-          <div class="tw-offer-copy">
-            <span class="tw-offer-label">Broker welcome offer · Rinfinity</span>
-            <h2>Get a $30 deposit bonus to kick-start your trading account.</h2>
-            <p>Open an account through our partner link and check the current offer terms before depositing. A bonus is not a reason to take extra risk.</p>
-          </div>
-          <div class="tw-offer-action">
-            <a class="tw-offer-btn" href="https://rinfinity.com/en/welcome-bonus?a=wnzx" target="_blank" rel="noopener noreferrer sponsored">Check eligibility &amp; claim →</a>
-            <small>Partner link: TraderWatch may receive compensation. Bonus eligibility, conditions and withdrawal rules are set by the broker. Trading involves risk of loss.</small>
-          </div>
-        </div>
-      </section>
-
-      <section class="t w4 upgrade" id="upgradeBox">
-        <div>
-          <h3>Get more setups with Pro</h3>
-          <p>Free: 3 signals daily and 3 hot pairs. Pro: 10 signals daily across 7 hot pairs. Max: unlimited signals across all 7 hot pairs.</p>
-        </div>
-        <a class="btn w" href="subscribe.html">See Pro</a>
-      </section>
-
+  <section class="view" id="v-perf">
+   <div class="pbar">
+    <div class="seg" id="pmode" role="group" aria-label="Chart type">
+     <button type="button" data-m="cum" aria-pressed="true">Cumulative</button>
+     <button type="button" data-m="day" aria-pressed="false">Daily</button>
     </div>
-  </div>
-</main>
+    <div class="seg" id="prange" role="group" aria-label="Period">
+     <button type="button" data-r="7" aria-pressed="false">7 days</button>
+     <button type="button" data-r="30" aria-pressed="true">30 days</button>
+     <button type="button" data-r="90" aria-pressed="false">90 days</button>
+    </div>
+   </div>
+   <div class="pstats">
+    <div class="kpi"><div class="mute">Total pips</div><div class="v" id="pTotal">—</div></div>
+    <div class="kpi"><div class="mute">Winning days</div><div class="v" id="pWin">—</div></div>
+    <div class="kpi"><div class="mute">Best day</div><div class="v pos" id="pBest">—</div></div>
+    <div class="kpi"><div class="mute">Worst day</div><div class="v neg" id="pWorst">—</div></div>
+   </div>
+   <div class="pchart"><div id="pc"></div><div class="tip" id="ptip"></div></div>
+   <div class="fine">Pips are counted after a signal closes, before spread and slippage. The period follows the most recent trading days. Past results do not guarantee future results.</div>
+  </section>
 
-<footer>
-  <div class="wrap">
-    <p>Risk warning: Trading forex and leveraged products carries a high level of risk and may not suit everyone. Signals and charts on this site are for information only and are not financial advice. Past results do not guarantee future results.</p>
+  <section class="view scroll" id="v-port">
+   <div class="seg" id="pf-tabs" role="group" aria-label="Accounts"></div>
+   <div class="pf">
+    <div class="box">
+     <h3>Manual portfolio</h3>
+     <label for="pf-name">Account name</label><input id="pf-name" maxlength="40" placeholder="Personal trading account">
+     <label id="pf-cl">Currency</label>
+     <div class="seg" id="pf-cur" role="group" aria-labelledby="pf-cl"><button type="button" data-c="MYR" aria-pressed="false">MYR</button><button type="button" data-c="USD" aria-pressed="true">USD</button><button type="button" data-c="EUR" aria-pressed="false">EUR</button><button type="button" data-c="GBP" aria-pressed="false">GBP</button></div>
+     <div class="row2"><div><label for="pf-start">Starting balance</label><input id="pf-start" type="number" inputmode="decimal" min="0" step="any" placeholder="1000"></div>
+     <div><label for="pf-bal">Current balance</label><input id="pf-bal" type="number" inputmode="decimal" min="0" step="any" placeholder="1240"></div></div>
+     <div class="pf-act"><button class="btn g" type="button" id="pf-save">Save account</button><button class="btn ghostb" type="button" id="pf-del">Delete</button><span class="fine" id="pf-msg" aria-live="polite"></span></div>
+    </div>
+    <div class="box">
+     <h3>Profit &amp; loss</h3>
+     <div class="mute" id="pf-n"></div>
+     <div class="pf-big" id="pf-out">—</div>
+     <div class="pf-pl" id="pf-pl">Enter your starting and current balance.</div>
+     <div class="fine">Current balance minus starting balance. Saved in this browser on this device only. No broker or bank connection needed. Clearing browser data removes it.</div>
+    </div>
+   </div>
+   <div class="box" id="pf-hcard">
+    <h3>Balance history</h3>
+    <svg id="pf-eq" viewBox="0 0 600 200" preserveAspectRatio="none" role="img" aria-label="Account balance over time"></svg>
+    <div class="pf-ax"><span id="pf-a0"></span><span id="pf-a1"></span></div>
+    <div id="pf-log"></div>
+    <div class="fine" style="margin-top:6px">A point is added each time you save a new current balance. The dashed line is your starting balance.</div>
+   </div>
+  </section>
+
+  <section class="view" id="v-tools">
+   <div class="tools" id="tools"></div>
+  </section>
   </div>
-</footer>
+ </main>
+ <aside class="rail" aria-label="Summary">
+  <div class="box hide" id="onboard">
+   <div style="display:flex;justify-content:space-between;align-items:baseline"><h3 style="margin:0">Get started in 3 steps</h3><span class="fine" id="onboardCount"></span></div>
+   <div class="bar"><i id="onboardBar" style="width:0"></i></div>
+   <ul class="steps" style="margin-top:6px">
+    <li data-step="1"><button class="chk" type="button" aria-label="Mark done">&#10003;</button><a class="lbl" href="#" data-goto="signals">View your first signal</a></li>
+    <li data-step="2"><button class="chk" type="button" aria-label="Mark done">&#10003;</button><a class="lbl" id="tgLink" href="#" target="_blank" rel="noopener">Connect Telegram for alerts</a></li>
+    <li data-step="3"><button class="chk" type="button" aria-label="Mark done">&#10003;</button><a class="lbl" href="education.html">Watch the risk basics video</a></li>
+   </ul>
+  </div>
+
+  <div class="box">
+   <div style="display:flex;justify-content:space-between;align-items:baseline"><h3 style="margin:0">30-day pips</h3><b id="sparTotal"></b></div>
+   <div id="spark" style="height:48px;margin-top:6px"></div>
+   <a href="#" data-goto="perf" style="display:inline-block;margin-top:6px;font-weight:700;text-decoration:underline">View full performance</a>
+  </div>
+
+  <div class="box">
+   <h3>Today's signals</h3>
+   <div id="mini"></div>
+  </div>
+
+  <div class="box">
+   <h3>High-impact USD news</h3>
+   <ul id="news"></ul>
+   <div class="fine" style="margin-top:6px">Calendar data by <a href="https://www.tradingview.com/economic-calendar/" target="_blank" rel="noopener" style="text-decoration:underline">TradingView</a>. For learning context, not financial advice.</div>
+  </div>
+
+  <div class="box">
+   <h3>Learn</h3>
+   <div class="mute">Continue: Order Block basics</div>
+   <div class="bar"><i style="width:38%"></i></div>
+   <a href="education.html" style="display:inline-block;margin-top:8px;font-weight:700;text-decoration:underline">Continue learning</a>
+  </div>
+
+  <div class="box">
+   <h3>Community</h3>
+   <div id="lb"></div>
+   <a class="btn ghostb" href="https://t.me/Traderwatchmembershipbot" target="_blank" rel="noopener" style="margin-top:10px">Open Telegram community</a>
+   <div class="fine" style="margin-top:6px">Member leaderboard is not published yet. TraderWatch is a platform by traders, for traders.</div>
+  </div>
+
+  <div class="box up">
+   <h3>Upgrade to Pro</h3>
+   <div class="mute">Free: 3 signals a day. Pro: 10 signals across 7 pairs. Max: unlimited.</div>
+   <a class="btn g" href="subscribe.html" style="margin-top:10px">View Pro</a>
+  </div>
+
+  <div class="box">
+   <h3>Broker offer: $30 bonus (Rinfinity)</h3>
+   <div class="fine">Partner link: TraderWatch may receive compensation. Terms are set by the broker. A bonus is not a reason to take more risk.</div>
+   <a class="btn ghostb" href="https://rinfinity.com/en/welcome-bonus?a=wnzx" target="_blank" rel="noopener sponsored" style="margin-top:10px">Check eligibility</a>
+  </div>
+
+  <div class="fine">Risk warning: trading forex and leveraged products carries a high level of risk and may not suit everyone. Signals and charts on this site are for information only and are not financial advice. Past results do not guarantee future results.</div>
+ </aside>
+</div>
+
+<nav class="tabbar" aria-label="Mobile menu">
+ <button type="button" data-view="chart" class="on">Charts</button>
+ <button type="button" data-view="signals">Signals</button>
+ <button type="button" data-view="perf">Performance</button>
+ <button type="button" data-view="port">Portfolio</button>
+ <button type="button" data-view="tools">Toolkits</button>
+ <a href="education.html">Learn</a>
+</nav>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
-<script src="config.js?v=202610232400"></script>
-<script src="common.js?v=202610182133"></script>
+<script src="config.js?v=202610260200"></script>
+<script src="common.js?v=202610260200"></script>
 <script>
-(function(){
-  var cfg = (typeof CONFIG !== "undefined" && CONFIG) ? CONFIG : (window.CONFIG || {});
-  window.TW_CONFIG = Object.assign({ tzOffset: 8, supportUrl: "", brand: "TraderWatch" },
-                                   cfg.maintenance ? { maintenance: cfg.maintenance } : {});
-})();
-/* Banner maintenance: sumber CONFIG.maintenance supaya boleh dimatikan dari
-   satu tempat (config.js) tanpa menyentuh HTML. */
-(function(){
-  var m = window.TW_CONFIG.maintenance;
-  if(!m || !m.active) return;
-  var box = document.getElementById("maintBanner");
-  if(!box) return;
-  if(m.title) document.getElementById("maintTitle").textContent = m.title;
-  if(m.body) document.getElementById("maintBody").textContent = m.body;
-  var ul = document.getElementById("maintPoints");
-  if(ul && m.points && m.points.length){
-    ul.hidden = false;
-    m.points.forEach(function(t){
-      var li = document.createElement("li");
-      li.textContent = t;
-      ul.appendChild(li);
-    });
-  } else if(ul){ ul.hidden = true; }
-  var nt = document.getElementById("maintNote");
-  if(nt && m.note) nt.textContent = m.note;
-  box.hidden = false;
-})();
-</script>
-<script src="members-tools.js?v=20261024a" defer></script>
-<script src="members-tools-2.js?v=2026101903" defer></script>
-<script>
-(async function(){
-const member = await requireMember();
-if(member){
-  previewBanner(member);
-  const plan = ["free", "pro", "max"].includes(member.plan) ? member.plan : "free";
-  document.body.dataset.tier = plan;
-  /* Format rujukan: "Selamat kembali," + baris baharu + nama. */
-  document.getElementById("hello").innerHTML =
-    "Selamat kembali,<br>" + (member.name.split(" ")[0] || "trader") + ".";
-  const badge = document.getElementById("planBadge");
-  badge.textContent = plan.charAt(0).toUpperCase() + plan.slice(1);
-  badge.classList.toggle("pro", plan !== "free");
-  /* Info tier: "N of M free signal for today" — dikemas kini selepas
-     get_signals() tahu berapa setup sebenar untuk plan ini hari ini. */
-  const TIER_CAP = plan === "max" ? null : plan === "pro" ? 10 : 3;
-  const tierName = plan === "max" ? "Max" : plan === "pro" ? "Pro" : "Free";
-  /* Tetingkap kuota Free: grid 5 jam (00/05/10/15/20 MYT). */
-  function nextResetLabel(){
-    const now = new Date();
-    const myt = new Date(now.toLocaleString("en-US", { timeZone: "Asia/Kuala_Lumpur" }));
-    const h = myt.getHours();
-    const next = (Math.floor(h / 5) + 1) * 5;
-    const hh = String(next % 24).padStart(2, "0");
-    return hh + ":00 MYT";
-  }
 
-  function setTierInfo(used){
-    const el = document.getElementById("planLine");
-    if(!el) return;
-    const n = Math.max(0, Number(used) || 0);
-    if(TIER_CAP === null){
-      /* Max: tanpa had — jangan campur dengan kiraan harian. */
-      el.textContent = tierName + " Member · signal tanpa had";
-    }else if(plan === "free"){
-      /* Free: 3 signal setiap tetingkap 5 jam, reset 00/05/10/15/20 MYT. */
-      el.textContent = tierName + " Member · " + n + " of " + TIER_CAP
-        + " signal setiap 5 jam · reset " + nextResetLabel();
-    }else{
-      el.textContent = tierName + " Member · " + n + " of " + TIER_CAP + " signal";
-    }
-    el.dataset.used = n;
-    el.dataset.cap = TIER_CAP === null ? "" : TIER_CAP;
-  }
-  window.__setTierInfo = setTierInfo;
-  setTierInfo(0);
-  const upgraded = new URLSearchParams(location.search).get("upgraded");
-  if(upgraded === "max" || upgraded === "pro"){
-    const n = document.getElementById("upgradeNote"); n.hidden = false; n.textContent = "Payment confirmed. Your " + (upgraded === "max" ? "Max" : "Pro") + " access is now active.";
-  }
-  document.getElementById("upgradeBox").hidden = plan === "max";
-  if(plan === "pro"){
-    document.querySelector("#upgradeBox h3").textContent = "Upgrade to Max";
-    document.querySelector("#upgradeBox p").textContent = "Max unlocks unlimited verified setups across all 7 hot pairs.";
-    const up = document.querySelector("#upgradeBox a"); up.textContent = "See Max"; up.href = "subscribe.html?plan=max";
-  }
+/* ===== TraderWatch member terminal — real data only =====
+   Auth: requireMember() from common.js (Supabase session).
+   Signals: sb.rpc("get_signals") filtered by plan, same rules as before.
+   Status: signal-status.json (active / tp / sl / expired / collected + pips).
+   Nothing here invents numbers: unavailable values render as an em dash. */
 
-  /* Telegram signal linking (Pro/Max push) */
-  const tgSection = document.getElementById("tgLink");
-  const tgBtn = document.getElementById("tgBtn");
-  const tgTitle = document.getElementById("tgTitle");
-  const tgBody = document.getElementById("tgBody");
-  const tgNote = document.getElementById("tgNote");
-  const tgRefresh = document.getElementById("tgRefresh");
-  tgSection.hidden = false;
+var TELEGRAM_URL = "https://t.me/Traderwatchmembershipbot";
+var PAIRS = {XAUUSD:"OANDA:XAUUSD",EURUSD:"FX:EURUSD",GBPUSD:"FX:GBPUSD",USDJPY:"FX:USDJPY",BTCUSD:"BITSTAMP:BTCUSD"};
+var TOOLS = [
+ {t:"Risk & lot sizing",d:"See how lot size follows from your stop distance and risk per trade.",h:"education.html"},
+ {t:"Trade journal",d:"Track your own account balance and equity curve on this device.",h:"#port"},
+ {t:"Pre-entry checklist",d:"Check the setup is valid and risk is controlled before you take it.",h:"education.html"}
+];
 
-  /* Mobile-safe linking: mint the token up front and put it straight into
-     the anchor href, so tapping is a plain navigation (no popup blocker,
-     no lost user-gesture after an await). The token is refreshed when it
-     gets close to expiry or after a failed attempt. */
-  let tgToken = null, tgTokenAt = 0;
-  const TOKEN_TTL = 15 * 60 * 1000, TOKEN_REUSE = 10 * 60 * 1000;
+var S = {
+  user:{name:"member",plan:"Free"},
+  stats:{win:null,rr:null},
+  quota:{used:0,total:3,cap:3},
+  signals:[],
+  news:[],
+  performance:[],
+  statuses:{}
+};
+var PLAN = "free", TIER_CAP = 3;
 
-  async function tgMint(force){
-    if(!force && tgToken && (Date.now() - tgTokenAt) < TOKEN_REUSE) return tgToken;
-    const timeout = new Promise((_, rej) => setTimeout(() => rej(new Error("timeout")), 12000));
-    const { data, error } = await Promise.race([
-      sb.rpc("create_link_token", { p_user_id: member.id }),
-      timeout
-    ]);
-    if(error || !data) throw new Error((error && error.message) || "empty token");
-    tgToken = data; tgTokenAt = Date.now();
-    return data;
-  }
+var $ = function(id){return document.getElementById(id)};
+function esc(s){return String(s==null?"":s).replace(/[&<>"]/g,function(c){
+  return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
 
-  function tgSetHref(){
-    if(!tgToken) return;
-    tgBtn.href = "https://t.me/Traderwatchmembershipbot?start=" + encodeURIComponent(tgToken);
-  }
-
-  function tgRender(linked){
-    tgNote.hidden = true; tgRefresh.hidden = true;
-    if(linked){
-      tgTitle.textContent = "Telegram linked ✓";
-      tgBody.textContent = plan === "free"
-        ? "This chat is linked. You will start receiving signals here once your plan is Pro or Max."
-        : "Every new signal is delivered to your Telegram the moment it is posted. Not receiving them? Press Refresh status.";
-      tgBtn.textContent = "Open bot";
-      tgBtn.href = "https://t.me/Traderwatchmembershipbot";
-      tgBtn.removeAttribute("data-link");
-      tgBtn.removeAttribute("target");
-      tgRefresh.hidden = false;
-    } else {
-      tgTitle.textContent = "Get signals in Telegram";
-      tgBody.textContent = "Link your Telegram account and every new signal is sent to you the moment it is posted. The link is single-use and expires in 15 minutes.";
-      tgBtn.textContent = tgToken ? "Link Telegram" : "Preparing link…";
-      tgBtn.setAttribute("data-link", "1");
-      tgBtn.setAttribute("target", "_blank");
-      tgBtn.setAttribute("rel", "noopener");
-      tgSetHref();
-    }
-  }
-
-  tgRender(member.telegram_chat_id != null);
-
-  /* Mint on load so the first tap is already a real link. */
-  if(member.telegram_chat_id == null){
-    tgMint().then(() => { tgRender(false); }).catch(err => {
-      tgBtn.textContent = "Retry link";
-      tgBtn.href = "#";
-      tgNote.hidden = false;
-      tgNote.textContent = "Could not prepare the link (" + (err && err.message ? err.message : "error") + "). Tap Retry link.";
-    });
-  }
-
-  tgBtn.addEventListener("click", async (e) => {
-    if(!tgBtn.hasAttribute("data-link")) return;   // linked: plain navigation
-    // Stale or missing token -> refresh it, then send the user on.
-    if(!tgToken || (Date.now() - tgTokenAt) > TOKEN_REUSE){
-      e.preventDefault();
-      const old = tgBtn.textContent;
-      tgBtn.textContent = "Preparing link…";
-      try{
-        await tgMint(true);
-        tgSetHref();
-        tgBtn.textContent = old;
-        // Same tap continues: navigate directly instead of window.open.
-        location.href = tgBtn.href;
-      }catch(err){
-        tgBtn.textContent = "Retry link";
-        tgNote.hidden = false;
-        tgNote.textContent = "Could not prepare the link (" + (err && err.message ? err.message : "error") + "). Tap Retry link.";
-      }
-    }
-  });
-
-  tgRefresh.addEventListener("click", async () => {
-    const { data } = await sb.from("profiles").select("telegram_chat_id").eq("id", member.id).single();
-    const linked = !!(data && data.telegram_chat_id != null);
-    if(!linked) tgMint(true).catch(()=>{});
-    tgRender(linked);
-    tgNote.hidden = false;
-    tgNote.textContent = linked ? "Linked ✓" : "Not linked yet — tap Link Telegram, then press Start in the bot.";
-  });
-
-  /* Charts */
-  const chartEl = document.getElementById("chart"), tabsEl = document.getElementById("tabs");
-  const DEFAULT_CHART = { symbol: "OANDA:XAUUSD", interval: "1", theme: "dark", style: "3", range: "12M" };
-  function mountChart(symbol, opts){
-    const cfg = Object.assign({}, DEFAULT_CHART, opts || {}, {symbol: symbol || DEFAULT_CHART.symbol});
-    chartEl.innerHTML = "";
-    const box = document.createElement("div"); box.className = "tradingview-widget-container";
-    const inner = document.createElement("div"); inner.className = "tradingview-widget-container__widget";
-    box.appendChild(inner);
-    const s = document.createElement("script");
-    s.src = "https://s3.tradingview.com/external-embedding/embed-widget-advanced-chart.js"; s.async = true;
-    s.textContent = JSON.stringify({autosize:true,symbol:cfg.symbol,interval:cfg.interval,range:cfg.range,timezone:"Etc/UTC",theme:cfg.theme,style:cfg.style,locale:"en",allow_symbol_change:true,hide_top_toolbar:false,hide_legend:false,hide_side_toolbar:false,withdateranges:true,details:false,hotlist:false,calendar:true,show_popup_button:true,news:["headlines"],backgroundColor:"#000000",support_host:"https://www.tradingview.com"});
-    box.appendChild(s); chartEl.appendChild(box);
-  }
-  CONFIG.pairs.forEach((p,i)=>{
-    const b = document.createElement("button");
-    b.type="button"; b.role="tab"; b.textContent=p.label; b.setAttribute("aria-selected", i===0);
-    b.addEventListener("click",()=>{
-      tabsEl.querySelectorAll("button").forEach(x=>x.setAttribute("aria-selected","false"));
-      b.setAttribute("aria-selected","true"); mountChart(p.symbol);
-    });
-    tabsEl.appendChild(b);
-  });
-  // Keep the dashboard focused on XAU/USD M15 by default; tabs remain available.
-  if(tabsEl.firstElementChild){
-    tabsEl.querySelectorAll("button").forEach(x=>x.setAttribute("aria-selected","false"));
-    const goldTab = [...tabsEl.querySelectorAll("button")].find(x=>/XAU|GOLD/i.test(x.textContent));
-    (goldTab || tabsEl.firstElementChild).setAttribute("aria-selected","true");
-  }
-  mountChart(DEFAULT_CHART.symbol);
-
-  /* Signals come from Supabase. The server decides what each plan can see. */
-  const grid = document.getElementById("signalGrid"), note = document.getElementById("signalNote");
-  function mytParts(iso){
-    /* Supabase menyimpan posted_at sebagai timestamp TANPA zon (UTC).
-       new Date("2026-10-23T16:17:38") ditafsir sebagai LOCAL oleh browser,
-       jadi kunci jadi salah dan status tidak dijumpai. Paksa UTC bila tiada
-       penanda zon. */
-    let s = String(iso || "");
-    if(s && !/(Z|[+-]\d{2}:?\d{2})$/.test(s)) s = s.replace(" ", "T") + "Z";
-    const d = new Date(s);
-    if(!Number.isFinite(d.getTime())) return null;
-    const p = new Intl.DateTimeFormat("en-GB",{timeZone:"Asia/Kuala_Lumpur",year:"numeric",month:"2-digit",day:"2-digit",hour:"2-digit",minute:"2-digit",second:"2-digit",hour12:false}).formatToParts(d);
-    const g = t => (p.find(x=>x.type===t)||{}).value || "";
-    return {dd:g("day"),mm:g("month"),yyyy:g("year"),HH:g("hour"),MM:g("minute"),SS:g("second")};
-  }
-  function signalKey(pair, iso){
-    const t = mytParts(iso); if(!t) return "";
-    return String(pair||"").replace(/[^A-Za-z]/g,"").toUpperCase() + "_" + t.yyyy + t.mm + t.dd + "_" + t.HH + t.MM + t.SS;
-  }
-  function render(list){
-    grid.innerHTML = "";
-    list.forEach(s=>{
-      const locked = !!s.locked;
-      const cls = (s.side || "BUY") === "BUY" ? "buy" : "sell";
-      const a = document.createElement("article");
-      const t = mytParts(s.posted_at);
-      const stamp = t ? `${t.dd}/${t.mm}/${t.yyyy}, ${t.HH}:${t.MM}:${t.SS}` : "";
-      const key = signalKey(s.pair, s.posted_at);
-
-      /* Status muktamad -> kad ringkas satu baris (padat), bukan kad penuh. */
-      const st = (window.TW_STATUSES || {})[key] || {};
-      const settled = ["tp","sl","expired","collected","cancelled"].includes(st.status);
-      a.dataset.key = key;
-      a.dataset.pair = String(s.pair||"").toUpperCase();
-      a.dataset.side = String(s.side||"").toUpperCase();
-      a.dataset.type = s.timeframe || "H1";
-      a.dataset.entry = s.entry ?? "";
-      a.dataset.sl = s.sl ?? "";
-      a.dataset.tp = s.tp ?? "";
-
-      if(settled && !locked){
-        const label = {tp:"TP hit", sl:"SL hit", expired:"Tamat", collected:"TP dikutip", cancelled:"Batal"}[st.status] || st.status;
-        const pips = typeof st.pips === "number" ? (st.pips > 0 ? "+" : "") + st.pips.toFixed(1) + "p" : "";
-        a.className = "sig sig-done " + st.status;
-        a.innerHTML = `
-          <div class="done-row">
-            <span class="done-pair">${esc(s.pair)}</span>
-            <span class="side ${cls}">${esc(s.side)}</span>
-            <span class="done-res ${st.status}">${esc(label)}${pips ? " " + esc(pips) : ""}</span>
-            <span class="done-time"><span class="d-full">${esc(stamp)}</span><span class="d-short">${esc(t.dd + "/" + t.mm + " " + t.HH + ":" + t.MM)}</span></span>
-          </div>`;
-        grid.appendChild(a);
-        return;
-      }
-
-      a.className = "sig" + (locked ? " locked" : "");
-      a.innerHTML = `
-        <div class="sig-top"><span class="pair">${esc(s.pair)}</span><span class="side ${cls}">${esc(locked ? "LOCKED" : s.side)}</span></div>
-        <h3 class="setup-title">${esc(s.timeframe || "H1")} ${esc(s.side || "")} setup${s.timeframe === "M15" ? " · scalping" : ""}</h3>
-        <dl class="rows num">
-          <dt>Entry</dt><dd>${esc(locked ? "—" : s.entry)}</dd>
-          <dt>SL</dt><dd class="sl">${esc(locked ? "—" : s.sl)}</dd>
-          <dt>TP</dt><dd class="tp">${esc(locked ? "—" : s.tp)}</dd>
-        </dl>
-        <p class="time">Posted ${esc(stamp)}</p>
-        ${locked ? '<div class="lock"><span>Pro signal</span><a class="btn sm" href="subscribe.html">Unlock with Pro</a></div>' : ''}`;
-      grid.appendChild(a);
-    });
-  }
-  const HOT_PAIRS = ["XAUUSD", "GBPUSD", "EURUSD", "USDJPY", "AUDUSD", "USDCAD", "NZDUSD", "BTCUSD"];
-  function normalizePair(pair){ return String(pair || "").replace(/[^A-Z]/gi, "").toUpperCase(); }
-  async function load(){
-    try{
-      const r = await sb.rpc("get_signals");
-      if(r.error) throw r.error;
-      const rows = Array.isArray(r.data) ? r.data : [];
-      const deduped = [...new Map(rows.map(s => [String(s.id || [s.pair,s.timeframe,s.side,s.entry,s.sl,s.tp,s.posted_at].join("|")), s])).values()];
-
-      /* Signals posted before today used to vanish at midnight even while the
-         position was still open. Keep them while signal-status.json says
-         "active"; everything else stays on today's list only. */
-      let statuses = {};
-      try{
-        const sr = await fetch("signal-status.json?t=" + Date.now(), { cache: "no-store" });
-        if(sr.ok){ const sj = await sr.json(); statuses = (sj && sj.signals) || {}; }
-        window.TW_STATUSES = statuses;
-      }catch(_){}
-      const isToday = s => {
-        /* Supabase posted_at ialah UTC-naive; mytParts memaksa UTC sebelum
-           tukar ke Kuala Lumpur, sama seperti signalKey/status matching. */
-        const p = mytParts(s.posted_at);
-        if(!p) return false;
-        const today = new Intl.DateTimeFormat("en-CA", {
-          timeZone:"Asia/Kuala_Lumpur", year:"numeric", month:"2-digit", day:"2-digit"
-        }).format(new Date()).replace(/-/g, "");
-        return p.yyyy + p.mm + p.dd === today;
-      };
-      const stillOpen = s => {
-        const st = statuses[signalKey(s.pair, s.posted_at)];
-        return !!st && st.status === "active";
-      };
-      /* A result should stay visible for a day after it closes, otherwise the
-         trade vanishes the moment the engine marks TP/SL. */
-      const closedRecently = s => {
-        const st = statuses[signalKey(s.pair, s.posted_at)];
-        if(!st || !st.closed) return false;
-        const t = new Date(st.closed).getTime();
-        /* Trade ditutup kekal 48 jam supaya hasil manual (TP dikutip) sempat
-           dilihat ahli, bukan hilang selepas 24 jam. */
-        return Number.isFinite(t) && (Date.now() - t) <= 48 * 60 * 60 * 1000;
-      };
-      const allowed = plan === "free" ? HOT_PAIRS.slice(0,3) : HOT_PAIRS;
-      const forPlan = s => allowed.includes(normalizePair(s.pair));
-      const todays = deduped.filter(s => isToday(s) && forPlan(s));
-      const older = deduped.filter(s => !isToday(s) && forPlan(s));
-      const carriedOpen = older.filter(stillOpen);
-      const carriedClosed = older.filter(closedRecently).slice(0, 5);
-      const carried = carriedOpen.concat(carriedClosed);
-      const selected = (plan === "max" ? todays : todays.slice(0, plan === "pro" ? 10 : 3)).concat(carried);
-      /* simpan untuk fillBento() — signal-status.json tidak menyimpan entry/sl/tp */
-      window.TW_SIGNALS = selected.map(s => ({
-        pair: s.pair, timeframe: s.timeframe || "H1", side: s.side,
-        entry: s.entry, sl: s.sl, tp: s.tp, posted_at: s.posted_at
-      }));
-      try{ window.dispatchEvent(new CustomEvent("tw:signals")); }catch(_){}
-      render(window.TW_SIGNALS.map(s=>({...s, locked:false})));
-      /* Kira setup hari ini untuk info tier. */
-      try{
-        if(typeof window.__setTierInfo === "function"){
-          window.__setTierInfo(selected.length);
-        }
-      }catch(_){}
-      const bits = [];
-      if(carriedOpen.length) bits.push(`${carriedOpen.length} still open from earlier`);
-      if(carriedClosed.length) bits.push(`${carriedClosed.length} closed in the last 48h`);
-      const carriedNote = bits.length ? ` · ${bits.join(" · ")}` : "";
-      note.textContent = selected.length
-        ? `${selected.length} of ${plan === "max" ? "unlimited" : plan === "pro" ? "10" : "3"} daily setups · ${allowed.length} hot pairs${carriedNote}.`
-        : "No verified setups available today for your plan. New valid M15 setups appear here when posted.";
-    }catch(_){
-      render([]);
-      note.textContent = "Could not load verified signals. Please try again later.";
-    }
-  }
-  load();
-
-  /* ---------- Stat tiles + active signal track (Apple Bento) ---------- */
-  (function fillBento(){
-    const PAIR_PIP = { XAUUSD:0.1, USDJPY:0.01, BTCUSD:1, GBPUSD:0.0001, NZDUSD:0.0001,
-                       EURUSD:0.0001, AUDUSD:0.0001, USDCAD:0.0001 };
-
-    /* ================= Widget tambahan ================= */
-  function fmtPips(v){
-    const n = Number(v) || 0;
-    return (n >= 0 ? "+" : "−") + Math.abs(n).toFixed(1);
-  }
-
-  function calcWidgets(){
-    const st = window.TW_STATUSES || {};
-    const keys = Object.keys(st);
-    if (!keys.length) return;
-
-    // ---- kumpul trade ber-pips ikut masa posted ----
-    const rows = [];
-    keys.forEach(k => {
-      const v = st[k] || {};
-      if (v.pips == null) return;
-      const parts = k.split("_");
-      if (parts.length < 3) return;
-      const ds = parts[1], ts = parts[2];
-      const dt = new Date(+ds.slice(0,4), +ds.slice(4,6)-1, +ds.slice(6,8),
-                          +ts.slice(0,2), +ts.slice(2,4), +ts.slice(4,6));
-      rows.push({ key:k, pair:parts[0], dt, status:v.status, pips:Number(v.pips) });
-    });
-    rows.sort((a,b) => a.dt - b.dt);
-    if (!rows.length) return;
-
-    /* ---------- Kalendar harian ---------- */
-    const byDay = {};
-    rows.forEach(r => {
-      /* Guna tarikh TEMPATAN, bukan toISOString() (itu UTC — signal 00:00–08:00
-         MYT akan jatuh ke hari sebelumnya dan kalendar jadi salah). */
-      const d = r.dt.getFullYear() + "-" +
-                String(r.dt.getMonth() + 1).padStart(2, "0") + "-" +
-                String(r.dt.getDate()).padStart(2, "0");
-      byDay[d] = byDay[d] || { p:0, w:0, l:0, exp:0 };
-      byDay[d].p += r.pips;
-      if (r.status === "tp") byDay[d].w++;
-      else if (r.status === "sl") byDay[d].l++;
-    });
-    // kira expired ikut tarikh posted (tiada pips)
-    keys.forEach(k => {
-      const v = st[k] || {};
-      if (v.status !== "expired") return;
-      const parts = k.split("_");
-      if (parts.length < 3) return;
-      const ds = parts[1];
-      const d = ds.slice(0,4)+"-"+ds.slice(4,6)+"-"+ds.slice(6,8);
-      byDay[d] = byDay[d] || { p:0, w:0, l:0, exp:0 };
-      byDay[d].exp++;
-    });
-
-    const days = Object.keys(byDay).sort();
-    const calGrid = document.getElementById("calGrid");
-    if (calGrid) {
-      const shown = days.slice(-7);
-      document.getElementById("calDays").textContent = shown.length;
-      calGrid.innerHTML = shown.map(d => {
-        const v = byDay[d];
-        const cls = v.p > 0 ? "up" : (v.p < 0 ? "dn" : "fl");
-        const dt = new Date(d + "T00:00:00");
-        const lbl = dt.getDate() + " " + ["Jan","Feb","Mac","Apr","Mei","Jun","Jul","Ogos","Sep","Okt","Nov","Dis"][dt.getMonth()];
-        const det = v.w + "W/" + v.l + "L" + (v.exp ? " · " + v.exp + " exp" : "");
-        return '<div class="d ' + cls + '"><span>' + lbl + '</span><b>' + fmtPips(v.p) +
-               '</b><span>' + det + '</span></div>';
-      }).join("");
-      const up = shown.filter(d => byDay[d].p > 0).length;
-      const tot = shown.reduce((a,d) => a + byDay[d].p, 0);
-      const worst = shown.reduce((a,d) => byDay[d].p < byDay[a].p ? d : a, shown[0]);
-      const wd = new Date(worst + "T00:00:00");
-      document.getElementById("calSub").textContent =
-        up + " daripada " + shown.length + " hari untung (" +
-        Math.round(up/shown.length*100) + "%) · jumlah " + fmtPips(tot) +
-        " · terburuk " + wd.getDate() + " " +
-        ["Jan","Feb","Mac","Apr","Mei","Jun","Jul","Ogos","Sep","Okt","Nov","Dis"][wd.getMonth()] +
-        " (" + fmtPips(byDay[worst].p) + ", " + byDay[worst].w + "W/" + byDay[worst].l + "L)";
-    }
-
-    /* ---------- Streak ---------- */
-    const seq = rows.filter(r => r.status === "tp" || r.status === "sl");
-    let bw = 0, bl = 0, cw = 0, cl = 0;
-    seq.forEach(r => {
-      if (r.status === "tp") { cw++; cl = 0; bw = Math.max(bw, cw); }
-      else { cl++; cw = 0; bl = Math.max(bl, cl); }
-    });
-    let curStatus = null, curLen = 0;
-    for (let i = seq.length - 1; i >= 0; i--) {
-      if (!curStatus) { curStatus = seq[i].status; curLen = 1; }
-      else if (seq[i].status === curStatus) curLen++;
-      else break;
-    }
-    const sNum = document.getElementById("streakNum");
-    if (sNum) {
-      sNum.innerHTML = bl + '<small> SL berturut</small>';
-      sNum.className = "num neg";
-      document.getElementById("streakSub").textContent =
-        "Streak rugi terburuk " + bl + " trade. Ini yang buat member panik dan berhenti langganan.";
-      document.getElementById("streakBestW").textContent = bw;
-      document.getElementById("streakWorstL").textContent = bl;
-      document.getElementById("streakNow").textContent =
-        curLen + (curStatus === "tp" ? " TP" : " SL");
-      document.getElementById("streakNow").className = curStatus === "tp" ? "pos" : "neg";
-      const dots = document.getElementById("streakDots");
-      const last = seq.slice(-24);
-      dots.innerHTML = last.map(r =>
-        '<i style="background:' + (r.status === "tp" ? "#1fa35c" : "#e5372b") + '"></i>'
-      ).join("");
-    }
-
-    /* ---------- Sesi dagangan ---------- */
-    const buckets = [
-      ["00:00–04:00", 0, 4], ["04:00–08:00", 4, 8], ["08:00–12:00", 8, 12],
-      ["12:00–16:00", 12, 16], ["16:00–20:00", 16, 20], ["20:00–24:00", 20, 24]
-    ];
-    const sess = buckets.map(b => ({ label:b[0], from:b[1], to:b[2], p:0, w:0, l:0, n:0 }));
-    rows.forEach(r => {
-      const h = r.dt.getHours();
-      const s = sess.find(x => h >= x.from && h < x.to);
-      if (!s) return;
-      s.p += r.pips; s.n++;
-      if (r.status === "tp") s.w++;
-      else if (r.status === "sl") s.l++;
-    });
-    const maxAbs = Math.max.apply(null, sess.map(s => Math.abs(s.p)).concat([1]));
-    const sessBars = document.getElementById("sessBars");
-    if (sessBars) {
-      const sorted = sess.slice().sort((a,b) => b.p - a.p);
-      sessBars.innerHTML = sorted.map(s => {
-        const pct = Math.max(2, Math.round(Math.abs(s.p) / maxAbs * 100));
-        const wr = (s.w + s.l) ? Math.round(s.w/(s.w+s.l)*100) : 0;
-        const col = s.p >= 0 ? "var(--green)" : "var(--red)";
-        return '<div class="hb"><div class="lbl"><span>' + s.label + '</span><b class="' +
-          (s.p >= 0 ? "pos" : "neg") + '">' + fmtPips(s.p) + ' · ' + wr + '%</b></div>' +
-          '<div class="tr"><i style="width:' + pct + '%;background:' + col + '"></i></div></div>';
-      }).join("");
-      const best = sorted[0], worst = sorted[sorted.length-1];
-      document.getElementById("sessSub").textContent =
-        "Sesi " + best.label + " hasil terbesar (" + fmtPips(best.p) + "). " +
-        "Sesi " + worst.label + " paling rugi (" + fmtPips(worst.p) + ").";
-    }
-
-    /* ---------- Kadar trigger ---------- */
-    const totalSigs = keys.length;
-    const trig = keys.filter(k => ["tp","sl","collected"].indexOf((st[k]||{}).status) >= 0).length;
-    const exp = keys.filter(k => (st[k]||{}).status === "expired").length;
-    const pct = Math.round(trig/totalSigs*100);
-    const tNum = document.getElementById("trigNum");
-    if (tNum) {
-      tNum.innerHTML = pct + '<small>% trigger</small>';
-      document.getElementById("trigMk").style.left = pct + "%";
-      document.getElementById("trigSub").textContent =
-        trig + " daripada " + totalSigs + " setup kena entry. " + exp +
-        " expired tanpa entry (" + Math.round(exp/totalSigs*100) + "%). Ini normal.";
-      document.getElementById("trigOn").textContent = trig + " · " + pct + "%";
-      document.getElementById("trigOff").textContent = exp + " · " + Math.round(exp/totalSigs*100) + "%";
-    }
-
-    /* ---------- Kualiti risiko ---------- */
-    const wins = rows.filter(r => r.status === "tp").map(r => r.pips);
-    const loss = rows.filter(r => r.status === "sl").map(r => r.pips);
-    const sumW = wins.reduce((a,b) => a+b, 0);
-    const sumL = loss.reduce((a,b) => a+b, 0);
-    const pf = sumL !== 0 ? Math.abs(sumW/sumL) : 0;
-    let eq = 0, peak = 0, dd = 0;
-    rows.forEach(r => { eq += r.pips; peak = Math.max(peak, eq); dd = Math.min(dd, eq - peak); });
-    const rPF = document.getElementById("riskPF");
-    if (rPF) {
-      rPF.innerHTML = pf.toFixed(2) + '<small> profit factor</small>';
-      rPF.className = "num " + (pf >= 1 ? "pos" : "neg");
-      document.getElementById("riskSub").textContent =
-        "Setiap 1 pips rugi, kita buat " + pf.toFixed(2) + " pips untung.";
-      document.getElementById("riskAvgW").textContent = fmtPips(sumW/Math.max(1,wins.length));
-      document.getElementById("riskAvgL").textContent = fmtPips(sumL/Math.max(1,loss.length));
-      document.getElementById("riskDD").textContent = fmtPips(dd);
-    }
-
-    /* ---------- Prestasi ikut pair ---------- */
-    const byPair = {};
-    rows.forEach(r => {
-      byPair[r.pair] = byPair[r.pair] || { p:0, w:0, l:0, n:0 };
-      byPair[r.pair].p += r.pips; byPair[r.pair].n++;
-      if (r.status === "tp") byPair[r.pair].w++;
-      else if (r.status === "sl") byPair[r.pair].l++;
-    });
-    const pairList = Object.keys(byPair).map(k => ({ pair:k, ...byPair[k] }))
-      .sort((a,b) => b.p - a.p);
-    const pMax = Math.max.apply(null, pairList.map(x => Math.abs(x.p)).concat([1]));
-    const pairBars = document.getElementById("pairBars");
-    if (pairBars && pairList.length) {
-      pairBars.innerHTML = pairList.map(x => {
-        const pct = Math.max(2, Math.round(Math.abs(x.p)/pMax*100));
-        const wr = (x.w+x.l) ? Math.round(x.w/(x.w+x.l)*100) : 0;
-        const nm = x.pair.slice(0,3) + "/" + x.pair.slice(3);
-        return '<div class="pb"><div class="lbl"><span>' + nm + '</span><span>' +
-          fmtPips(x.p) + ' · ' + wr + '% · ' + x.n + '</span></div>' +
-          '<div class="track"><i style="' + (x.p >= 0 ? 'left:50%;' : 'right:50%;') +
-          'width:' + (pct/2) + '%;background:' + (x.p >= 0 ? 'var(--green)' : 'var(--red)') +
-          '"></i></div></div>';
-      }).join("");
-      const top = pairList[0];
-      const share = sumW + sumL !== 0 ? Math.round(top.p / (sumW + sumL) * 100) : 0;
-      const losers = pairList.filter(x => x.p < 0).map(x => x.pair.slice(0,3) + "/" + x.pair.slice(3));
-      document.getElementById("pairSub").textContent =
-        (top.pair.slice(0,3) + "/" + top.pair.slice(3)) + " menyumbang " + share +
-        "% daripada jumlah pips." + (losers.length ? " Rugi: " + losers.join(", ") + "." : "");
-    }
-  }
-
-  function setRing(){
-      const el = document.getElementById("planRingText");
-      const ring = document.getElementById("planRing");
-      if(!el || !ring) return;
-      const cap = plan === "max" ? null : plan === "pro" ? 10 : 3;
-      if(cap === null){
-        el.textContent = "∞";
-        ring.style.background = "conic-gradient(var(--blue) 0 100%, var(--line) 0)";
-        return;
-      }
-      /* Kiraan = bilangan kad yang benar-benar dipaparkan untuk ahli ini. */
-      const domCount = document.querySelectorAll("#signalGrid .sig").length;
-      const arrCount = (window.TW_SIGNALS || []).length;
-      const used = domCount || arrCount || 0;
-      el.textContent = used + "/" + cap;
-      const pct = Math.max(0, Math.min(100, (used / cap) * 100));
-      ring.style.background = "conic-gradient(var(--blue) 0 " + pct + "%, var(--line) 0)";
-    }
-
-    async function fillStats(){
-      try{
-        const r = await fetch("signal-status.json?t=" + Date.now(), { cache: "no-store" });
-        if(!r.ok) return;
-        const sj = await r.json();
-        const sigs = (sj && sj.signals) || {};
-        /* Tiada had 30 hari: kira sejak signal pertama diterbitkan. */
-        let wins = 0, losses = 0, pips = 0, closed = 0, rrSum = 0, rrN = 0;
-
-        Object.keys(sigs).forEach(k => {
-          const s = sigs[k] || {};
-          const st = s.status;
-          if(st !== "tp" && st !== "sl" && st !== "collected") return;
-          closed++;
-          if(st === "tp" || st === "collected") wins++; else losses++;
-          if(typeof s.pips === "number") pips += s.pips;
-          if(typeof s.entry === "number" && typeof s.sl === "number" && typeof s.tp === "number"){
-            const risk = Math.abs(s.entry - s.sl), reward = Math.abs(s.tp - s.entry);
-            if(risk > 0){ rrSum += reward / risk; rrN++; }
-          }
-        });
-
-        /* Label: "Win rate · N hari" dari tarikh signal pertama. */
-        (function setWinLabel(){
-          const el = document.getElementById("statWinLabel");
-          if(!el) return;
-          let earliest = null;
-          Object.keys(sigs).forEach(function(k){
-            const parts = String(k).split("_");
-            if(parts.length < 3) return;
-            const y = parts[1].slice(0,4), mo = parts[1].slice(4,6), d = parts[1].slice(6,8);
-            const t = new Date(y + "-" + mo + "-" + d + "T00:00:00+08:00").getTime();
-            if(Number.isFinite(t) && (earliest === null || t < earliest)) earliest = t;
-          });
-          if(earliest === null){ el.textContent = "Win rate · sejak mula"; return; }
-          const today = new Date();
-          const d0 = new Date(earliest);
-          const ms = Date.UTC(today.getFullYear(), today.getMonth(), today.getDate())
-                   - Date.UTC(d0.getFullYear(), d0.getMonth(), d0.getDate());
-          const days = Math.max(1, Math.round(ms / 86400000) + 1);
-          el.textContent = "Win rate · " + days + " hari";
-        })();
-
-        const total = wins + losses;
-        const winEl = document.getElementById("statWin");
-        const barEl = document.getElementById("statWinBar");
-        const rrEl = document.getElementById("statRR");
-        const cntEl = document.getElementById("statCount");
-
-        if(winEl){
-          if(total > 0){
-            const pct = Math.round((wins / total) * 100);
-            winEl.innerHTML = pct + "<small>%</small>";
-            if(barEl) barEl.style.width = pct + "%";
-          }else{
-            winEl.textContent = "—";
-          }
-        }
-        if(rrEl){
-          /* Purata R:R = purata R bagi trade menang (TP), kerana SL sentiasa -1R.
-             signal-status.json sudah menyimpan field `r` (R multiple) untuk
-             setiap trade ditutup — tiada perlu query Supabase (RLS sekat anon). */
-          let winSum = 0, winN = 0;
-          Object.keys(sigs).forEach(function(k){
-            const v = sigs[k] || {};
-            if(v.status !== "tp" && v.status !== "collected") return;
-            if(typeof v.r === "number" && isFinite(v.r) && v.r > 0){
-              winSum += v.r; winN++;
-            }
-          });
-          rrEl.textContent = winN > 0
-            ? "1:" + (winSum / winN).toFixed(1)
-            : "—";
-        }
-        if(cntEl){
-          /* BTCUSD: 1 pip = USD 1 pergerakan harga (PIP.BTCUSD = 1.0 dalam
-             engine), jadi unit usd pada BTC memang sudah dalam "pip".
-             Semua trade boleh dijumlahkan sebagai pips. */
-          let netPips = 0;
-          Object.keys(sigs).forEach(function(k){
-            const v = sigs[k] || {};
-            if(v.status !== "tp" && v.status !== "sl" && v.status !== "collected") return;
-            if(typeof v.pips === "number") netPips += v.pips;
-          });
-          cntEl.textContent = closed > 0
-            ? closed + " signal ditutup · " + (netPips > 0 ? "+" : "") + netPips.toFixed(1) + " pips"
-            : "Belum ada signal ditutup";
-        }
-        renderPerf(sigs);
-      }catch(_){}
-    }
-
-    /* Dipanggil oleh tw:signals (selepas kad dirender) supaya kiraan tepat. */
-    window.addEventListener("tw:signals", function(){
-      /* tunggu satu tick: render() baru sahaja menulis kad */
-      setTimeout(function(){ setRing(); }, 0);
-    });
-
-    async function fillActive(){
-      try{
-        const r = await fetch("signal-status.json?t=" + Date.now(), { cache: "no-store" });
-        if(!r.ok) return;
-        const sj = await r.json();
-        const sigs = (sj && sj.signals) || {};
-        let bestKey = null, best = null;
-        Object.keys(sigs).forEach(k => {
-          const s = sigs[k];
-          if(s && s.status === "active"){ bestKey = k; best = s; }
-        });
-        const pairEl = document.getElementById("activePair");
-        const badge = document.getElementById("activeBadge");
-        const trk = document.getElementById("activeTrk");
-        const meta = document.getElementById("activeMeta");
-        if(!best || !pairEl){ setRing(); return; }
-
-        const code = String(bestKey).split("_")[0];
-        const nice = code.length === 6 ? code.slice(0,3) + "/" + code.slice(3) : code;
-        const side = best.side || "SELL";
-        pairEl.innerHTML = nice + ' <span class="dir">' + side + "</span>";
-        if(badge) badge.hidden = false;
-        if(trk) trk.hidden = false;
-
-        /* status file hanya simpan status; entry/sl/tp datang dari Supabase */
-        const fromList = (window.TW_SIGNALS || []).find(x => {
-          const k = String(x.pair || "").replace(/[^A-Z]/gi, "").toUpperCase();
-          return k === code;
-        }) || {};
-        const e  = Number(best.entry  !== undefined ? best.entry  : fromList.entry);
-        const sl = Number(best.sl     !== undefined ? best.sl     : fromList.sl);
-        const tp = Number(best.tp     !== undefined ? best.tp     : fromList.tp);
-        const fmt = v => Number.isFinite(v) ? v.toLocaleString("en-US", {minimumFractionDigits:0, maximumFractionDigits:5}) : "—";
-        const set = (id, v) => { const el = document.getElementById(id); if(el) el.textContent = v; };
-        set("trkEntry", fmt(e)); set("trkSL", fmt(sl)); set("trkTP", fmt(tp));
-
-        const entered = best.entry_at ? new Date(best.entry_at) : null;
-        const bits = [];
-        if(entered && Number.isFinite(entered.getTime())){
-          const h = Math.floor((Date.now() - entered.getTime()) / 3600000);
-          bits.push("Entry " + entered.toLocaleString("en-GB", {timeZone:"Asia/Kuala_Lumpur", hour:"2-digit", minute:"2-digit"}) + " MYT");
-          bits.push(h + "j berjalan");
-        }
-        if(Number.isFinite(e) && Number.isFinite(sl) && Number.isFinite(tp)){
-          const risk = Math.abs(e - sl), reward = Math.abs(tp - e);
-          if(risk > 0) bits.push("R:R 1:" + (reward / risk).toFixed(1));
-        }
-        if(meta) meta.textContent = bits.join(" · ") || "Setup aktif.";
-        setRing();
-      }catch(_){}
-    }
-
-    /* fillStats() hanya perlukan signal-status.json (bukan Supabase), jadi
-       ia selamat dijalankan serta-merta. fillActive() perlukan TW_SIGNALS. */
-    function runStats(){
-    try { calcWidgets(); } catch (e) { console.warn("widgets", e); }
-      fillStats().catch(function(){});
-      setRing();
-    }
-    function runActive(){
-      fillActive().catch(function(){});
-    }
-
-    /* ---------- Graph performance: pips kumulatif (gaya toolkits) ---------- */
-    function fmtPips(v){
-      return (v > 0 ? "+" : "") + Number(v).toFixed(1) + " pips";
-    }
-
-    /* Area chart dengan gradient + titik hujung — sama seperti members-tools-2.js */
-    function areaChart(pts, H, color){
-      const W = 320, P = 10;
-      const min = Math.min.apply(null, pts.concat([0]));
-      const max = Math.max.apply(null, pts.concat([0]));
-      const span = (max === min) ? 1 : (max - min);
-      const X = i => P + i * (W - 2*P) / Math.max(1, pts.length - 1);
-      const Y = v => H - P - (v - min) / span * (H - 2*P);
-
-      const id = "perfGrad" + Math.random().toString(36).slice(2, 8);
-      const line = pts.map((v,i) => X(i).toFixed(1) + "," + Y(v).toFixed(1)).join(" ");
-
-      return '<defs><linearGradient id="' + id + '" x1="0" y1="0" x2="0" y2="1">'
-        + '<stop offset="0%" stop-color="' + color + '" stop-opacity="0.28"/>'
-        + '<stop offset="100%" stop-color="' + color + '" stop-opacity="0"/>'
-        + '</linearGradient></defs>'
-        + '<line x1="' + P + '" x2="' + (W-P) + '" y1="' + Y(0).toFixed(1) + '" y2="' + Y(0).toFixed(1)
-        + '" stroke="#c9d3e3" stroke-dasharray="3 4"/>'
-        + '<polygon points="' + X(0).toFixed(1) + "," + Y(0).toFixed(1) + " " + line + " "
-        + X(pts.length-1).toFixed(1) + "," + Y(0).toFixed(1) + '" fill="url(#' + id + ')"/>'
-        + '<polyline points="' + line + '" fill="none" stroke="' + color
-        + '" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>'
-        + '<circle cx="' + X(pts.length-1).toFixed(1) + '" cy="' + Y(pts[pts.length-1]).toFixed(1)
-        + '" r="4.5" fill="#fff" stroke="' + color + '" stroke-width="2.5"/>';
-    }
-
-    function renderPerf(sigs){
-      const svg = document.getElementById("perfChart");
-      const netEl = document.getElementById("perfNet");
-      const subEl = document.getElementById("perfSub");
-      if(!svg) return;
-
-      /* Kumpul trade ditutup, susun ikut masa. */
-      const rows = [];
-      Object.keys(sigs || {}).forEach(function(k){
-        const v = sigs[k] || {};
-        const st = v.status;
-        if(st !== "tp" && st !== "collected" && st !== "sl") return;
-        const when = new Date(v.closed || v.closed_at || 0).getTime();
-        if(!Number.isFinite(when)) return;
-        rows.push({ t: when, status: st, pips: (typeof v.pips === "number" ? v.pips : 0),
-                    unit: v.unit || "pips" });
-      });
-
-      if(!rows.length){
-        svg.innerHTML = "";
-        if(netEl) netEl.textContent = "+0.0 pips";
-        if(subEl) subEl.textContent = "Belum ada signal ditutup";
-        return;
-      }
-      rows.sort(function(a,b){ return a.t - b.t; });
-
-      /* BTCUSD pip = 1.0 (USD 1 per $1 move), jadi semua trade dikira pips. */
-      const pipRows = rows;
-      let cum = 0;
-      const pts = [0];
-      pipRows.forEach(function(r){ cum += r.pips; pts.push(cum); });
-
-      /* Streak TP. */
-      let run = 0, best = 0;
-      rows.forEach(function(r){
-        if(r.status === "sl"){ run = 0; return; }
-        run++; if(run > best) best = run;
-      });
-
-      if(netEl){
-        netEl.textContent = fmtPips(cum);
-        netEl.className = "perf-big " + (cum >= 0 ? "pos" : "neg");
-      }
-      if(subEl){
-        subEl.textContent = pipRows.length + " signal · TP berturut-turut terbaik: " + best;
-      }
-
-      const H = 150;
-      svg.setAttribute("viewBox", "0 0 320 " + H);
-      svg.innerHTML = areaChart(pts, H, cum >= 0 ? "#2f9e5b" : "#c0392b");
-    }
-
-    runStats();
-
-    async function bootBento(){
-      for(let i = 0; i < 60; i++){
-        if((window.TW_SIGNALS || []).length) break;
-        await new Promise(function(r){ setTimeout(r, 100); });
-      }
-      runActive();
-      runStats();          /* kira semula: pastikan nilai tidak "—" */
-    }
-    if(document.readyState === "loading"){
-      document.addEventListener("DOMContentLoaded", bootBento);
-    }else{
-      bootBento();
-    }
-    window.addEventListener("tw:signals", function(){ runActive(); runStats(); });
-  })();
+/* ---------- time helpers (Supabase posted_at is UTC-naive) ---------- */
+function mytParts(iso){
+  var s = String(iso||"");
+  if(s && !/(Z|[+-]\d{2}:?\d{2})$/.test(s)) s = s.replace(" ","T") + "Z";
+  var d = new Date(s);
+  if(!Number.isFinite(d.getTime())) return null;
+  var p = new Intl.DateTimeFormat("en-GB",{timeZone:"Asia/Kuala_Lumpur",year:"numeric",
+    month:"2-digit",day:"2-digit",hour:"2-digit",minute:"2-digit",second:"2-digit",
+    hour12:false}).formatToParts(d);
+  var g = function(t){var f=p.find(function(x){return x.type===t});return (f&&f.value)||""};
+  return {dd:g("day"),mm:g("month"),yyyy:g("year"),HH:g("hour"),MM:g("minute"),SS:g("second")};
 }
+function signalKey(pair,iso){
+  var t = mytParts(iso); if(!t) return "";
+  return String(pair||"").replace(/[^A-Za-z]/g,"").toUpperCase()
+    + "_" + t.yyyy + t.mm + t.dd + "_" + t.HH + t.MM + t.SS;
+}
+function mytToday(){
+  return new Intl.DateTimeFormat("en-CA",{timeZone:"Asia/Kuala_Lumpur",year:"numeric",
+    month:"2-digit",day:"2-digit"}).format(new Date()).replace(/-/g,"");
+}
+function fmtDateKey(iso){
+  var t = mytParts(iso); return t ? (t.yyyy+"-"+t.mm+"-"+t.dd) : null;
+}
+
+/* ---------- renderers ---------- */
+function renderStrip(){
+  var el = $("strip");
+  var active = S.signals.filter(function(x){return x.status==="active"});
+  var a = active[0];
+  if(!a){
+    el.className = "strip";
+    el.innerHTML = '<div class="t-l"><span class="eyebrow">Active signal</span>'
+      + '<div class="t-pair">No active setup</div>'
+      + '<div class="mute">Waiting for the next valid setup.</div></div>';
+    return;
+  }
+  var n = function(x){return parseFloat(String(x).replace(/,/g,""))};
+  var e = n(a.entry), sl = n(a.sl), tp = n(a.tp);
+  if(!Number.isFinite(e) || !Number.isFinite(sl) || !Number.isFinite(tp)){
+    el.className = "strip";
+    el.innerHTML = '<div class="t-l"><span class="eyebrow">Active signal</span>'
+      + '<div class="t-pair">'+esc(a.pair)+'</div>'
+      + '<div class="mute">Levels unavailable for this setup.</div></div>';
+    return;
+  }
+  var lo = Math.min(e,sl,tp), hi = Math.max(e,sl,tp), rg = (hi-lo)||1;
+  var P = function(v){return (4+(v-lo)/rg*92).toFixed(1)};
+  var rk = [Math.min(e,sl),Math.max(e,sl)], rw = [Math.min(e,tp),Math.max(e,tp)];
+  var sell = a.side === "SELL";
+  el.className = "strip " + (sell?"sell":"buy");
+  el.innerHTML = '<div class="t-l"><span class="eyebrow">'+esc(a.tf)+' · '+esc(a.note||"")
+    + '</span><div class="t-pair">'+esc(a.pair)
+    + '<i class="side '+(sell?"sell":"")+'">'+esc(a.side)+'</i></div>'
+    + '<div class="mute">'+(a.rr?("R:R "+esc(a.rr)):"R:R —")+'</div></div>'
+    + '<div class="t-lv"><div><span>Entry</span><b>'+esc(a.entry)+'</b></div>'
+    + '<div><span>Stop loss</span><b class="neg">'+esc(a.sl)+'</b></div>'
+    + '<div><span>Take profit</span><b class="pos">'+esc(a.tp)+'</b></div></div>'
+    + '<div class="ladder" role="img" aria-label="Risk and reward from stop loss to take profit">'
+    + '<div class="trk"><i class="rk" style="left:'+P(rk[0])+'%;width:'+(P(rk[1])-P(rk[0])).toFixed(1)+'%"></i>'
+    + '<i class="rw" style="left:'+P(rw[0])+'%;width:'+(P(rw[1])-P(rw[0])).toFixed(1)+'%"></i>'
+    + '<u style="left:'+P(e)+'%"></u></div>'
+    + '<em style="left:'+P(sl)+'%">SL</em><em style="left:'+P(e)+'%">Entry</em>'
+    + '<em style="left:'+P(tp)+'%">TP</em></div>';
+}
+
+function renderStats(){
+  $("win").textContent = S.stats.win==null ? "—" : S.stats.win+"%";
+  $("rr").textContent  = S.stats.rr==null ? "—" : "1:"+S.stats.rr;
+  $("act").textContent = S.signals.filter(function(x){return x.status==="active"}).length;
+  var used = S.quota.used, cap = S.quota.cap;
+  $("quotaTxt").textContent = cap==null ? (used+" used") : (used+" / "+cap);
+  $("quotaBar").style.width = cap==null ? "100%" : Math.min(100,Math.round(used/cap*100))+"%";
+  $("uname").textContent = S.user.name;
+  $("plan").textContent  = S.user.plan;
+}
+
+function renderMini(){
+  var h = S.signals.map(function(s){
+    return '<div class="mini"><span><b>'+esc(s.pair)+'</b> '
+      + '<span class="pill '+(s.side==="SELL"?"red":"")+'">'+esc(s.side)+'</span>'
+      + '<small>'+esc(s.tf)+' · '+esc(s.note||"")+'</small></span>'
+      + '<span style="text-align:right"><small>Entry</small>'+esc(s.entry)+'</span></div>';
+  }).join("");
+  if(S.quota.cap != null){
+    var left = Math.max(0, S.quota.cap - S.quota.used);
+    if(left>0) h += '<div class="mini" style="color:var(--mute)">'+left
+      + ' slots left in this window. They appear when a setup is valid.</div>';
+  }
+  $("mini").innerHTML = h || '<div class="mute">No setup right now. Waiting for the next valid one.</div>';
+}
+
+function renderNews(){
+  $("news").innerHTML = S.news.length
+    ? S.news.map(function(n){
+        return '<li class="mini"><span><b>'+esc(n.time)+'</b> '+esc(n.name)+'</span>'
+          + '<span class="pill red">'+esc(n.lvl)+'</span></li>'}).join("")
+    : '<li class="mute">No high-impact USD events in the next 24 hours.</li>';
+}
+
+var filter = "all";
+function renderCards(){
+  var list = S.signals.filter(function(x){
+    if(filter==="active") return x.status==="active";
+    if(filter==="closed") return x.status!=="active";
+    return true;
+  });
+  var html = list.map(function(s){
+    return '<article class="sc"><div class="hd"><span class="nm">'+esc(s.pair)+' '
+      + '<span class="pill '+(s.side==="SELL"?"red":"")+'">'+esc(s.side)+'</span></span>'
+      + '<span class="mute" style="font-size:12px">'+esc(s.tf)+' · '+esc(s.note||"")+'</span></div>'
+      + '<div class="lv"><div><span>Entry</span>'+esc(s.entry)+'</div>'
+      + '<div><span>SL</span><b style="color:var(--red)">'+esc(s.sl)+'</b></div>'
+      + '<div><span>TP</span><b style="color:var(--green-ink)">'+esc(s.tp)+'</b></div>'
+      + '<div><span>R:R</span>'+esc(s.rr||"—")+'</div></div></article>';
+  }).join("");
+  if(filter!=="closed" && S.quota.cap!=null){
+    var left = Math.max(0, S.quota.cap - S.quota.used);
+    if(left>0) html += '<div class="sc ghost">'+left+' signal slots left in this window.'
+      + '<br>They appear when a setup is valid.</div>';
+  }
+  $("cards").innerHTML = html || '<div class="sc ghost">No signals in this view.</div>';
+}
+
+function renderTools(){
+  $("tools").innerHTML = TOOLS.map(function(t){
+    return '<a class="tile" href="'+esc(t.h)+'"><h3>'+esc(t.t)+'</h3>'
+      + '<div class="mute">'+esc(t.d)+'</div></a>'}).join("");
+  /* Tiles may point at an in-page view (#port). Those must switch the
+     view instead of jumping the scroll position. */
+  $("tools").querySelectorAll('a[href^="#"]').forEach(function(a){
+    a.addEventListener("click", function(e){
+      var v = a.getAttribute("href").slice(1);
+      if($("v-"+v)){ e.preventDefault(); show(v) }
+    });
+  });
+}
+
+/* ---------- performance (from real closed-signal pips) ---------- */
+function fmtP(n){ n = Math.round(n); return (n>0?"+":"") + n.toLocaleString("en-US") }
+function fmtD(s){ return new Date(s+"T12:00:00").toLocaleDateString("en-US",{day:"numeric",month:"short"}) }
+var range = 30, mode = "cum";
+
+function perfData(n){
+  var cum = 0;
+  return (S.performance||[]).slice(-n).map(function(x){
+    cum += x.pips; return {date:x.date, day:x.pips, cum:cum};
+  });
+}
+
+function renderSpark(){
+  var d = perfData(30), el = $("spark"), t = $("sparTotal");
+  if(!d.length){ el.innerHTML = ""; t.textContent = "—"; t.className = ""; return }
+  var tot = d[d.length-1].cum, W = 300, H = 48;
+  var mn = Math.min(0, Math.min.apply(null, d.map(function(p){return p.cum})));
+  var mx = Math.max(0, Math.max.apply(null, d.map(function(p){return p.cum})));
+  var rg = (mx-mn)||1;
+  var pts = d.map(function(p,i){
+    return (i/((d.length-1)||1)*W).toFixed(1) + "," + (H-3-(p.cum-mn)/rg*(H-6)).toFixed(1);
+  }).join(" ");
+  var c = tot>=0 ? "var(--green)" : "var(--red)";
+  el.innerHTML = '<svg viewBox="0 0 '+W+' '+H+'" preserveAspectRatio="none" '
+    + 'style="width:100%;height:100%" role="img" aria-label="30-day pips chart">'
+    + '<polyline points="'+pts+'" fill="none" stroke="'+c+'" stroke-width="2" '
+    + 'vector-effect="non-scaling-stroke"/></svg>';
+  t.textContent = fmtP(tot)+" pips";
+  t.className = tot>=0 ? "pos" : "neg";
+}
+
+function renderPerf(){
+  var d = perfData(range), box = $("pc"), tip = $("ptip");
+  if(!d.length){
+    box.innerHTML = '<div class="mute" style="padding:40px;text-align:center">'
+      + 'No closed signals in this period yet.</div>';
+    ["pTotal","pWin","pBest","pWorst"].forEach(function(i){$(i).textContent="—"});
+    return;
+  }
+  var tot = d[d.length-1].cum;
+  var wins = d.filter(function(p){return p.day>0}).length;
+  var best = Math.max.apply(null, d.map(function(p){return p.day}));
+  var worst = Math.min.apply(null, d.map(function(p){return p.day}));
+  var te = $("pTotal"); te.textContent = fmtP(tot);
+  te.className = "v " + (tot>=0 ? "pos":"neg");
+  $("pWin").textContent = Math.round(wins/d.length*100)+"%";
+  $("pBest").textContent = fmtP(best);
+  $("pWorst").textContent = fmtP(worst);
+
+  var W = box.clientWidth||600, H = box.clientHeight||260;
+  var L = 46, R = 8, T = 10, B = 24, pw = W-L-R, ph = H-T-B;
+  var vals = d.map(function(p){return mode==="cum"?p.cum:p.day});
+  var mn = Math.min(0, Math.min.apply(null, vals));
+  var mx = Math.max(0, Math.max.apply(null, vals));
+  var pad = (mx-mn)*0.08 || 10;
+  mn -= mn<0 ? pad : 0; mx += pad;
+  function X(i){
+    return L + (mode==="cum" ? (d.length>1 ? i/(d.length-1) : .5)*pw : (i+.5)/d.length*pw);
+  }
+  function Y(v){ return T + (mx-v)/(mx-mn)*ph }
+
+  var g = "";
+  for(var k=0;k<=4;k++){
+    var v = mn+(mx-mn)*k/4, y = Y(v);
+    g += '<line x1="'+L+'" x2="'+(W-R)+'" y1="'+y+'" y2="'+y+'" stroke="var(--line)" stroke-width="1"/>'
+      + '<text x="'+(L-6)+'" y="'+(y+4)+'" text-anchor="end">'+Math.round(v)+'</text>';
+  }
+  g += '<line x1="'+L+'" x2="'+(W-R)+'" y1="'+Y(0)+'" y2="'+Y(0)+'" stroke="var(--mute)" '
+    + 'stroke-width="1" stroke-dasharray="3 3"/>';
+
+  var col = tot>=0 ? "var(--green)" : "var(--red)", body = "";
+  if(mode==="cum"){
+    var line = d.map(function(p,i){return X(i).toFixed(1)+","+Y(p.cum).toFixed(1)}).join(" ");
+    body = '<polygon points="'+X(0)+','+Y(0)+' '+line+' '+X(d.length-1)+','+Y(0)+'" '
+      + 'fill="'+col+'" fill-opacity=".12"/>'
+      + '<polyline points="'+line+'" fill="none" stroke="'+col+'" stroke-width="2.2" '
+      + 'stroke-linejoin="round"/>';
+  } else {
+    var bw = Math.max(1, pw/d.length*0.7);
+    body = d.map(function(p,i){
+      var y0 = Y(0), y1 = Y(p.day);
+      return '<rect x="'+(X(i)-bw/2).toFixed(1)+'" y="'+Math.min(y0,y1).toFixed(1)
+        + '" width="'+bw.toFixed(1)+'" height="'+Math.max(1,Math.abs(y1-y0)).toFixed(1)
+        + '" rx="1.5" fill="'+(p.day>=0?"var(--green)":"var(--red)")+'"/>';
+    }).join("");
+  }
+  var xl = '<text x="'+L+'" y="'+(H-6)+'">'+fmtD(d[0].date)+'</text>'
+    + '<text x="'+(W-R)+'" y="'+(H-6)+'" text-anchor="end">'+fmtD(d[d.length-1].date)+'</text>';
+  box.innerHTML = '<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Pips performance chart">'
+    + g + body + xl + '<line id="pcx" y1="'+T+'" y2="'+(T+ph)+'" stroke="var(--mute)" '
+    + 'stroke-width="1" style="display:none"/></svg>';
+
+  var svg = box.firstChild, cx = svg.querySelector("#pcx");
+  function move(e){
+    var r = svg.getBoundingClientRect();
+    var px = (e.touches ? e.touches[0].clientX : e.clientX) - r.left;
+    var i = mode==="cum" ? Math.round((px-L)/pw*(d.length-1)) : Math.floor((px-L)/pw*d.length);
+    i = Math.max(0, Math.min(d.length-1, i));
+    var p = d[i], x = X(i);
+    cx.setAttribute("x1", x); cx.setAttribute("x2", x); cx.style.display = "";
+    tip.innerHTML = fmtD(p.date)+"<br>Day: <b>"+fmtP(p.day)+"</b> · Cumulative: <b>"+fmtP(p.cum)+"</b>";
+    tip.style.display = "block";
+    var tx = Math.min(Math.max(x-tip.offsetWidth/2, 4), W-tip.offsetWidth-4);
+    tip.style.left = (tx+10)+"px"; tip.style.top = "14px";
+  }
+  function out(){ cx.style.display = "none"; tip.style.display = "none" }
+  svg.addEventListener("mousemove", move);
+  svg.addEventListener("touchmove", move, {passive:true});
+  svg.addEventListener("mouseleave", out);
+  svg.addEventListener("touchend", out);
+}
+
+function renderAll(){
+  renderStrip(); renderStats(); renderMini(); renderNews();
+  renderCards(); renderTools(); renderSpark();
+  if($("v-perf").classList.contains("on")) renderPerf();
+}
+
+/* ---------- view switching ---------- */
+function show(v){
+  ["chart","signals","perf","port","tools"].forEach(function(k){
+    $("v-"+k).classList.toggle("on", k===v);
+  });
+  document.querySelectorAll("[data-view]").forEach(function(b){
+    b.classList.toggle("on", b.dataset.view===v);
+  });
+  if(v==="chart" && !chartLoaded) loadChart(PAIRS[currentPair]);
+  if(v==="perf") renderPerf();
+}
+document.querySelectorAll("[data-view]").forEach(function(b){
+  b.addEventListener("click", function(){ show(b.dataset.view) });
+});
+document.querySelectorAll("[data-goto]").forEach(function(a){
+  a.addEventListener("click", function(e){ e.preventDefault(); show(a.dataset.goto) });
+});
+document.querySelectorAll("#pmode [data-m]").forEach(function(b){
+  b.addEventListener("click", function(){
+    mode = b.dataset.m;
+    document.querySelectorAll("#pmode [data-m]").forEach(function(x){
+      x.setAttribute("aria-pressed", x===b ? "true":"false")});
+    renderPerf();
+  });
+});
+document.querySelectorAll("#prange [data-r]").forEach(function(b){
+  b.addEventListener("click", function(){
+    range = Number(b.dataset.r);
+    document.querySelectorAll("#prange [data-r]").forEach(function(x){
+      x.setAttribute("aria-pressed", x===b ? "true":"false")});
+    renderPerf();
+  });
+});
+window.addEventListener("resize", function(){
+  if($("v-perf").classList.contains("on")) renderPerf();
+});
+
+/* ---------- TradingView chart ---------- */
+var chartLoaded = false, currentPair = "XAUUSD";
+function loadChart(sym){
+  chartLoaded = true;
+  var box = $("chart"); box.innerHTML = "";
+  var w = document.createElement("div");
+  w.className = "tradingview-widget-container";
+  w.style.cssText = "height:100%;width:100%";
+  var inner = document.createElement("div");
+  inner.className = "tradingview-widget-container__widget";
+  inner.style.cssText = "height:100%;width:100%";
+  var sc = document.createElement("script");
+  sc.src = "https://s3.tradingview.com/external-embedding/embed-widget-advanced-chart.js";
+  sc.async = true;
+  var dark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+  sc.text = JSON.stringify({autosize:true, symbol:sym, interval:"60",
+    timezone:"Asia/Kuala_Lumpur", theme:dark?"dark":"light", style:"1", locale:"en",
+    allow_symbol_change:false, hide_side_toolbar:window.innerWidth<980,
+    support_host:"https://www.tradingview.com"});
+  w.appendChild(inner); w.appendChild(sc); box.appendChild(w);
+}
+(function(){
+  var keys = Object.keys(PAIRS);
+  $("pairs").innerHTML = keys.map(function(k,i){
+    return '<button type="button" data-p="'+k+'" aria-pressed="'+(i===0)+'">'+k+'</button>'}).join("");
+  $("pairs").addEventListener("click", function(e){
+    var b = e.target.closest("button"); if(!b) return;
+    currentPair = b.dataset.p;
+    $("pairs").querySelectorAll("button").forEach(function(x){
+      x.setAttribute("aria-pressed", x===b ? "true":"false")});
+    loadChart(PAIRS[currentPair]);
+  });
+  loadChart(PAIRS[keys[0]]);
 })();
+
+/* ---------- onboarding checklist (7-day window) ---------- */
+(function(){
+  function get(k){ try{ return localStorage.getItem(k) }catch(e){ return null } }
+  function set(k,v){ try{ localStorage.setItem(k,v) }catch(e){} }
+  var first = get("tw_first"); if(!first){ first = String(Date.now()); set("tw_first", first) }
+  var days = (Date.now()-Number(first))/86400000;
+  var box = $("onboard"); $("tgLink").href = TELEGRAM_URL;
+  function paint(){
+    var n = 0;
+    box.querySelectorAll("li").forEach(function(li){
+      var d = get("tw_step"+li.dataset.step)==="1";
+      li.classList.toggle("done", d); if(d) n++;
+    });
+    $("onboardCount").textContent = n+" / 3 done";
+    $("onboardBar").style.width = Math.round(n/3*100)+"%";
+    box.classList.toggle("hide", n===3 || days>7);
+  }
+  box.addEventListener("click", function(e){
+    var li = e.target.closest("li"); if(!li) return;
+    set("tw_step"+li.dataset.step, "1"); paint();
+  });
+  paint();
+})();
+
+$("today").textContent = new Date().toLocaleDateString("en-US",
+  {weekday:"long", day:"numeric", month:"long", timeZone:"Asia/Kuala_Lumpur"});
+
+/* ---------- manual portfolio (browser-local, unchanged behaviour) ---------- */
+var PK = "tw_portfolio_v1", PF = {accts:[], sel:null}, pcur = "USD";
+try{ var raw = JSON.parse(localStorage.getItem(PK)); if(raw && raw.accts) PF = raw }catch(e){}
+function psave(){ try{ localStorage.setItem(PK, JSON.stringify(PF)); return true }catch(e){ return false } }
+function money(v,c){ return new Intl.NumberFormat("en-US",{style:"currency",currency:c}).format(v) }
+function pAcct(){ return PF.accts.filter(function(a){return a.id===PF.sel})[0] }
+function pcalc(){
+  var st = parseFloat($("pf-start").value), b = parseFloat($("pf-bal").value);
+  $("pf-n").textContent = $("pf-name").value.trim() || "Your account";
+  if(!(st>0) || !(b>=0)){
+    $("pf-out").textContent = "—";
+    $("pf-pl").textContent = "Enter your starting and current balance.";
+    $("pf-pl").className = "pf-pl"; return;
+  }
+  var d = b-st, p = d/st*100, g = d>=0 ? "+" : "-";
+  $("pf-out").textContent = money(b, pcur);
+  $("pf-pl").textContent = g+money(Math.abs(d), pcur)+" ("+g+Math.abs(p).toFixed(2)+"%)";
+  $("pf-pl").className = "pf-pl " + (d>=0 ? "pos":"neg");
+}
+function pseg(){
+  document.querySelectorAll("#pf-cur button").forEach(function(b){
+    b.setAttribute("aria-pressed", b.dataset.c===pcur)});
+}
+function ptabs(){
+  $("pf-tabs").innerHTML = PF.accts.map(function(a){
+    return '<button type="button" data-id="'+a.id+'" aria-pressed="'+(a.id===PF.sel)+'">'
+      + esc(a.name)+'</button>'}).join("")
+    + '<button type="button" data-id="" aria-pressed="'+(PF.sel===null)+'">+ New account</button>';
+  document.querySelectorAll("#pf-tabs button").forEach(function(c){
+    c.onclick = function(){ PF.sel = c.dataset.id || null; $("pf-msg").textContent = ""; pform() };
+  });
+}
+function phist(){
+  var a = pAcct(), c = $("pf-hcard");
+  if(!a){ c.style.display = "none"; return }
+  c.style.display = "";
+  var h = (a.hist && a.hist.length) ? a.hist.slice() : [{t:null,b:a.start},{t:null,b:a.bal}];
+  var v = h.map(function(x){return x.b}), all = v.concat([a.start]);
+  var mn = Math.min.apply(null, all), mx = Math.max.apply(null, all), rg = (mx-mn)||1, n = h.length;
+  var y = function(q){ return 190-(q-mn)/rg*170 };
+  var pts = h.map(function(x,i){
+    return [(n>1 ? i/(n-1)*600 : 300).toFixed(1), y(x.b).toFixed(1)]});
+  var line = pts.map(function(p,i){ return (i?"L":"M")+p[0]+" "+p[1] }).join(" ");
+  var col = v[n-1] >= a.start ? "var(--green)" : "var(--red)";
+  var by = y(a.start).toFixed(1);
+  $("pf-eq").innerHTML = '<line x1="0" x2="600" y1="'+by+'" y2="'+by+'" stroke="var(--mute)" '
+    + 'stroke-dasharray="4 4" stroke-width="1" vector-effect="non-scaling-stroke"/>'
+    + '<path d="'+line+' L'+pts[n-1][0]+' 200 L'+pts[0][0]+' 200Z" fill="'+col+'" fill-opacity=".12"/>'
+    + '<path d="'+line+'" fill="none" stroke="'+col+'" stroke-width="2.2" '
+    + 'stroke-linejoin="round" vector-effect="non-scaling-stroke"/>';
+  var fd = function(t){ return new Date(t).toLocaleDateString("en-US",{month:"short",day:"numeric"}) };
+  $("pf-a0").textContent = h[0].t ? fd(h[0].t) : "Start";
+  $("pf-a1").textContent = h[n-1].t ? fd(h[n-1].t) : "Now";
+  $("pf-log").innerHTML = h.slice(-5).reverse().map(function(x,i){
+    var idx = n-1-i, ch = "";
+    if(idx>0){
+      var d = x.b - h[idx-1].b;
+      ch = ' <span class="'+(d>=0?"pos":"neg")+'">'+(d>=0?"+":"-")
+        + money(Math.abs(d), a.cur)+'</span>';
+    }
+    return '<div class="mini"><span class="mute">'+(x.t ? fd(x.t) : (idx?"Now":"Start"))
+      + '</span><span>'+money(x.b, a.cur)+ch+'</span></div>';
+  }).join("");
+}
+function pform(){
+  var a = pAcct();
+  $("pf-name").value  = a ? a.name : "";
+  $("pf-start").value = a ? a.start : "";
+  $("pf-bal").value   = a ? a.bal : "";
+  pcur = a ? a.cur : "USD";
+  pseg(); pcalc(); ptabs(); phist();
+  $("pf-del").style.display = a ? "" : "none";
+}
+document.querySelectorAll("#pf-cur button").forEach(function(b){
+  b.onclick = function(){ pcur = b.dataset.c; pseg(); pcalc() };
+});
+["pf-name","pf-start","pf-bal"].forEach(function(i){ $(i).oninput = pcalc });
+$("pf-save").onclick = function(){
+  var st = parseFloat($("pf-start").value), b = parseFloat($("pf-bal").value);
+  if(!(st>0) || !(b>=0)){
+    $("pf-msg").textContent = "Enter a starting balance above 0 and a current balance."; return;
+  }
+  var name = $("pf-name").value.trim() || "Personal trading account", a = pAcct();
+  if(a){ a.name = name; a.cur = pcur; a.start = st; a.bal = b }
+  else { a = {id:"a"+Date.now(), name:name, cur:pcur, start:st, bal:b}; PF.accts.push(a); PF.sel = a.id }
+  var now = Date.now();
+  if(!a.hist || !a.hist.length) a.hist = [{t:now,b:st}];
+  if(a.hist.length===1 || a.hist[a.hist.length-1].b !== b) a.hist.push({t:now,b:b});
+  if(a.hist.length>200) a.hist.splice(1, a.hist.length-200);
+  var ok = psave(); pform();
+  $("pf-msg").textContent = ok ? "Saved in this browser." : "Could not save. Your browser may block storage.";
+};
+$("pf-del").onclick = function(){
+  if(!confirm("Delete this account from this browser?")) return;
+  PF.accts = PF.accts.filter(function(x){ return x.id !== PF.sel });
+  PF.sel = PF.accts.length ? PF.accts[0].id : null;
+  psave(); pform(); $("pf-msg").textContent = "Account deleted.";
+};
+if(!pAcct() && PF.accts.length) PF.sel = PF.accts[0].id;
+pform();
+
+/* ---------- community: no invented leaderboard ---------- */
+$("lb").innerHTML = '<div class="mute" style="padding:6px 0">'
+  + 'Member leaderboard is not published yet.</div>';
+
+/* ---------- market status + clock ---------- */
+function tick(){
+  var d = new Date(), day = d.getUTCDay(), h = d.getUTCHours();
+  var closed = (day===6) || (day===5 && h>=22) || (day===0 && h<22);
+  $("mkt").className = "mkt " + (closed ? "off":"on");
+  $("mktTxt").textContent = closed ? "Forex closed" : "Forex open";
+  $("clock").textContent = d.toLocaleTimeString("en-GB",
+    {timeZone:"Asia/Kuala_Lumpur", hour:"2-digit", minute:"2-digit", second:"2-digit"})+" MYT";
+}
+tick(); setInterval(tick, 1000);
+
+/* ===== BOOT: auth, then real signals ===== */
+function todayKey(){
+  return new Intl.DateTimeFormat("en-CA",{timeZone:"Asia/Kuala_Lumpur",year:"numeric",
+    month:"2-digit",day:"2-digit"}).format(new Date()).replace(/-/g,"");
+}
+
+function computePerformance(statuses){
+  /* Real closed results only: one point per KL trading day, net pips. */
+  var byDay = {};
+  Object.keys(statuses).forEach(function(k){
+    var v = statuses[k];
+    if(!v || typeof v.pips !== "number") return;
+    var key = fmtDateKey(v.closed);
+    if(!key) return;
+    byDay[key] = (byDay[key]||0) + v.pips;
+  });
+  return Object.keys(byDay).sort().map(function(k){ return {date:k, pips:byDay[k]} });
+}
+
+function computeStats(statuses){
+  /* Win rate + average R from closed signals that carry an "r" value. */
+  var rs = [];
+  Object.keys(statuses).forEach(function(k){
+    var v = statuses[k];
+    if(!v) return;
+    if(v.status === "expired") return;              // never filled: not a win or a loss
+    if(typeof v.r === "number") rs.push(v.r);
+  });
+  if(!rs.length) return {win:null, rr:null};
+  var wins = rs.filter(function(r){ return r > 0 }).length;
+  var gains = rs.filter(function(r){ return r > 0 });
+  var losses = rs.filter(function(r){ return r < 0 });
+  var avgWin = gains.length ? gains.reduce(function(a,b){return a+b},0)/gains.length : null;
+  var avgLoss = losses.length ? Math.abs(losses.reduce(function(a,b){return a+b},0)/losses.length) : null;
+  var rr = (avgWin!=null && avgLoss) ? Math.round(avgWin/avgLoss*10)/10 : null;
+  return {win: Math.round(wins/rs.length*100), rr: rr};
+}
+
+async function boot(){
+  var member = await requireMember();
+  if(!member) return;                                  // requireMember redirects
+
+  PLAN = ["free","pro","max"].includes(member.plan) ? member.plan : "free";
+  TIER_CAP = PLAN==="max" ? null : (PLAN==="pro" ? 10 : 3);
+  document.body.dataset.tier = PLAN;
+  S.user = {name: member.name, plan: PLAN.charAt(0).toUpperCase()+PLAN.slice(1)};
+  S.quota.cap = TIER_CAP;
+
+  /* logout */
+  var lo = $("logout");
+  if(lo) lo.addEventListener("click", function(e){ e.preventDefault(); logOut() });
+
+  /* statuses first: drives stats + performance */
+  try{
+    var sr = await fetch("signal-status.json?t="+Date.now(), {cache:"no-store"});
+    if(sr.ok){
+      var sj = await sr.json();
+      S.statuses = (sj && sj.signals) || {};
+      S.performance = computePerformance(S.statuses);
+      var st = computeStats(S.statuses);
+      S.stats = st;
+    }
+  }catch(_){}
+
+  /* real signals, same plan rules as the previous members.html */
+  var HOT_PAIRS = ["XAUUSD","GBPUSD","EURUSD","USDJPY","AUDUSD","USDCAD","NZDUSD","BTCUSD"];
+  function normPair(p){ return String(p||"").replace(/[^A-Z]/gi,"").toUpperCase() }
+  try{
+    var r = await sb.rpc("get_signals");
+    if(r.error) throw r.error;
+    var rows = Array.isArray(r.data) ? r.data : [];
+    var deduped = Array.from(new Map(rows.map(function(s){
+      return [String(s.id || [s.pair,s.timeframe,s.side,s.entry,s.sl,s.tp,s.posted_at].join("|")), s];
+    })).values());
+
+    var tk = todayKey();
+    var isToday = function(s){ var p = mytParts(s.posted_at); return !!p && (p.yyyy+p.mm+p.dd === tk) };
+    var stillOpen = function(s){
+      var v = S.statuses[signalKey(s.pair, s.posted_at)];
+      return !!v && v.status === "active";
+    };
+    var closedRecently = function(s){
+      var v = S.statuses[signalKey(s.pair, s.posted_at)];
+      if(!v || !v.closed) return false;
+      var t = new Date(v.closed).getTime();
+      return Number.isFinite(t) && (Date.now()-t) <= 48*60*60*1000;
+    };
+    var allowed = PLAN==="free" ? HOT_PAIRS.slice(0,3) : HOT_PAIRS;
+    var forPlan = function(s){ return allowed.includes(normPair(s.pair)) };
+    var todays = deduped.filter(function(s){ return isToday(s) && forPlan(s) });
+    var older  = deduped.filter(function(s){ return !isToday(s) && forPlan(s) });
+    var carried = older.filter(stillOpen).concat(older.filter(closedRecently).slice(0,5));
+    var selected = (PLAN==="max" ? todays : todays.slice(0, PLAN==="pro" ? 10 : 3)).concat(carried);
+
+    S.signals = selected.map(function(s){
+      var v = S.statuses[signalKey(s.pair, s.posted_at)] || {};
+      var t = mytParts(s.posted_at);
+      var note = t ? (t.dd+"/"+t.mm+" "+t.HH+":"+t.MM) : "";
+      if(v.status && v.status!=="active") note = String(v.status).toUpperCase() + (note ? " · "+note : "");
+      var entry = Number(s.entry), sl = Number(s.sl), tp = Number(s.tp);
+      var rr = (Number.isFinite(entry) && Number.isFinite(sl) && Number.isFinite(tp) && entry!==sl)
+        ? "1:" + (Math.abs(tp-entry)/Math.abs(entry-sl)).toFixed(1) : null;
+      return {
+        pair: s.pair, side: (s.side||"BUY").toUpperCase(),
+        tf: s.timeframe || "H1",
+        entry: s.entry, sl: s.sl, tp: s.tp, rr: rr,
+        status: (v.status === "active" || !v.status) ? "active" : "closed",
+        note: note
+      };
+    });
+
+    /* quota: how many setups this plan actually received today */
+    S.quota.used = todays.length;
+  }catch(ex){
+    $("mini").innerHTML = '<div class="mute">Signals could not be loaded right now.</div>';
+    $("cards").innerHTML = '<div class="sc ghost">Signals could not be loaded right now.</div>';
+  }
+
+  renderAll();
+  show("chart");
+}
+
+boot();
+
 </script>
 </body>
 </html>
