@@ -309,6 +309,50 @@ ul{list-style:none;margin:0;padding:0}.steps li{display:flex;align-items:center;
   var root = document.documentElement;
   root.setAttribute("data-tg", "1");
 
+  /* ---- diagnostic panel (admin only) ----
+     Fullscreen needs Bot API 8.0+. This shows what the member's client
+     actually reports so a failure can be told apart from a stale client.
+     Visible only when ?diag=1 or the stored flag is on; nothing is shown to
+     ordinary members. */
+  (function diagnostics(){
+    var want = false;
+    try{ want = new URLSearchParams(location.search).get("diag") === "1"; }catch(_){}
+    try{ if(!want) want = localStorage.getItem("tw_diag") === "1"; }catch(_){}
+
+    var okFull = typeof tg.requestFullscreen === "function";
+    var ver = tg.version || "unknown";
+    var info = {
+      "Bot API": ver,
+      "Platform": tg.platform || "unknown",
+      "Fullscreen": okFull ? "supported" : "NOT supported (needs 8.0+)",
+      "In fullscreen": tg.isFullscreen ? "yes" : "no",
+      "Init data": tg.initData ? "present (" + tg.initData.length + " chars)" : "empty",
+      "Safe top": (tg.safeAreaInset && tg.safeAreaInset.top) || 0,
+      "Safe bottom": (tg.safeAreaInset && tg.safeAreaInset.bottom) || 0,
+      "Content top": (tg.contentSafeAreaInset && tg.contentSafeAreaInset.top) || 0
+    };
+    if(!want) return;
+
+    var box = document.createElement("div");
+    box.id = "tgDiag";
+    box.style.cssText = "position:fixed;left:8px;right:8px;bottom:calc(84px + var(--tg-bottom,0px));"
+      + "z-index:9999;background:rgba(20,20,22,.94);color:#f5f5f7;border-radius:14px;"
+      + "padding:12px 14px;font:12px/1.6 -apple-system,BlinkMacSystemFont,sans-serif;"
+      + "box-shadow:0 12px 40px rgba(0,0,0,.5);max-height:60vh;overflow:auto";
+    var rows = Object.keys(info).map(function(k){
+      var bad = (k === "Fullscreen" && !okFull);
+      return '<div style="display:flex;justify-content:space-between;gap:12px">'
+        + '<span style="opacity:.65">' + k + '</span>'
+        + '<b style="color:' + (bad ? "#ff453a" : "#30d158") + '">' + info[k] + '</b></div>';
+    }).join("");
+    box.innerHTML = '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">'
+      + '<b style="font-size:13px">Telegram diagnostics</b>'
+      + '<button id="tgDiagX" style="background:none;border:0;color:#f5f5f7;font-size:18px;'
+      + 'line-height:1;cursor:pointer;padding:0 4px">&#215;</button></div>' + rows;
+    document.body.appendChild(box);
+    box.querySelector("#tgDiagX").addEventListener("click", function(){ box.remove() });
+  })();
+
   /* Fullscreen removes the app name and the kebab menu. The close button
      stays: Telegram does not expose a way to hide it, and it is the user's
      only way out. */
