@@ -475,12 +475,14 @@
       "closed": "2026-10-26T13:30:03+08:00"
     },
     "XAUUSD_20261026_134403": {
-      "status": "pending",
+      "status": "expired",
       "entry": 4008.81,
       "sl": 4003.26,
       "tp": 4019.28,
       "side": "BUY",
-      "pair": "XAUUSD"
+      "pair": "XAUUSD",
+      "expired_at": "2026-10-26T17:52:06.668666+08:00",
+      "reason": "outside POI zone >30min (entry 4008.81 not triggered)"
     },
     "GBPUSD_20261026_163000": {
       "pair": "GBPUSD",
