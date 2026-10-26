@@ -20,10 +20,12 @@
    "entry_at": "2026-10-25T06:34:00+08:00"
   },
   "BTCUSD_20261025_031417": {
-   "status": "pending"
+   "status": "expired",
+   "closed": "2026-10-26T11:15:02+08:00"
   },
   "XAUUSD_20261024_001738": {
-   "status": "pending"
+   "status": "expired",
+   "closed": "2026-10-26T11:15:02+08:00"
   },
   "NZDUSD_20261024_001715": {
    "status": "sl",
@@ -34,7 +36,8 @@
    "entry_at": "2026-10-24T00:18:00+08:00"
   },
   "AUDUSD_20261024_001653": {
-   "status": "pending"
+   "status": "expired",
+   "closed": "2026-10-26T11:15:02+08:00"
   },
   "XAUUSD_20261023_234626": {
    "status": "tp",
@@ -53,7 +56,8 @@
    "entry_at": "2026-10-23T19:58:00+08:00"
   },
   "GBPUSD_20261023_142938": {
-   "status": "pending"
+   "status": "expired",
+   "closed": "2026-10-26T11:15:02+08:00"
   },
   "NZDUSD_20261023_142920": {
    "status": "sl",
@@ -136,7 +140,8 @@
    "entry_at": "2026-10-26T05:41:00+08:00"
   },
   "XAUUSD_20261023_020855": {
-   "status": "pending"
+   "status": "expired",
+   "closed": "2026-10-26T11:15:02+08:00"
   },
   "USDJPY_20261022_170024": {
    "status": "sl",
@@ -462,5 +467,5 @@
    "status": "expired"
   }
  },
- "updated": "2026-10-26T11:14:02+08:00"
+ "updated": "2026-10-26T11:15:03+08:00"
 }
