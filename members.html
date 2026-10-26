@@ -168,6 +168,30 @@ ul{list-style:none;margin:0;padding:0}.steps li{display:flex;align-items:center;
 .ideacommentrow button{border:0;background:var(--blue);color:#fff;border-radius:10px;padding:0 14px;font-size:13px;font-weight:600;cursor:pointer}
 @media (max-width:700px){.ideagrid{grid-template-columns:1fr}.idealevels{grid-template-columns:repeat(3,1fr)}}
 </style>
+
+/* ===== Performance / smooth 50-60fps tweaks ===== */
+/* Only apply backdrop-filter to the sticky top bar when visible */
+.top{will-change:transform;contain:layout style paint;}
+.bar,.strip,.metrics,.ws,.box,.pchart{will-change:auto;contain:layout style paint;}
+/* Heavy canvas chart only renders when visible tab is active */
+canvas{contain:layout size style;will-change:auto;}
+/* Reduce animation overhead: only animate width (mbar), not shadow/filter */
+.mbar i{contain:layout style;will-change:width;transition:width .15s ease;}
+/* Library rows: no expensive filter animations */
+.musu-row{will-change:auto;contain:layout style paint;}
+/* Defer chart drawing: only paint when chart tab active */
+#v-chart{content-visibility:auto;contain-intrinsic-size:1px 600px;}
+/* Mobile: disable heavy filter when off-screen to save GPU */
+@media (prefers-reduced-motion:reduce){
+  .bar,.strip,.metrics{backdrop-filter:none!important;-webkit-backdrop-filter:none!important;}
+  .mbar i{transition:none!important;}
+}
+/* Ensure scroll is smooth but not janky */
+html{scroll-behavior:auto;}
+body{scrollbar-gutter:stable;}
+/* Mobile swipe: no delay, smooth touch */
+.segnav,.nav{touch-action:manipulation;will-change:auto;}
+
 </head>
 <body>
 <header class="top"><div class="bar">
@@ -358,6 +382,10 @@ ul{list-style:none;margin:0;padding:0}.steps li{display:flex;align-items:center;
     <div class="fine" style="margin-bottom:8px">Audio lesson / market mood — play below.</div>
   </div>
    <div id="mu-lib" style="margin-top:10px"></div>
+  <div id="live-tv" class="box" style="padding:12px 14px;margin-top:12px;border-radius:16px;background:var(--card);border:1px solid var(--line);box-shadow:var(--shadow)">
+    <h3 style="font-size:13px;margin:0 0 8px;font-weight:600;letter-spacing:-.01em">Live TV / Berita</h3>
+    <iframe width="100%" height="215" src="https://www.youtube.com/embed/QB5BNdBFujE" title="Live TV News" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen style="border-radius:12px;border:0;"></iframe>
+  </div>
     <a class="btn ghostb" href="https://t.me/Traderwatchmembershipbot" target="_blank" rel="noopener" style="margin-top:10px">Open Telegram community</a>
    <div class="fine" style="margin-top:6px">Member leaderboard is not published yet. TraderWatch is a platform by traders, for traders.</div>
   </div>
@@ -1653,7 +1681,7 @@ function tick(){
   $("clock").textContent = d.toLocaleTimeString("en-GB",
     {timeZone:"Asia/Kuala_Lumpur", hour:"2-digit", minute:"2-digit", second:"2-digit"})+" MYT";
 }
-tick(); setInterval(tick, 1000);
+tick(); var tickTimer = setInterval(tick, 800);
 
 /* ===== BOOT: auth, then real signals ===== */
 function todayKey(){
