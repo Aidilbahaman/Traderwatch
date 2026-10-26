@@ -364,22 +364,9 @@ body{scrollbar-gutter:stable;}
   </div>
 
   <div id="session-times" style="margin-top:10px;border-radius:16px;background:var(--card);border:1px solid var(--line);box-shadow:var(--shadow);padding:12px 14px">
-    <h3 style="font-size:13px;margin:0 0 10px;font-weight:600;letter-spacing:-.01em">Tabel Sesi Dagangan (MYT UTC+8)</h3>
-    <table style="width:100%;border-collapse:collapse;font-size:12px;color:var(--ink)">
-      <thead><tr style="border-bottom:1px solid var(--line)">
-        <th style="text-align:left;padding:8px 10px;font-size:11px;color:var(--mute);text-transform:uppercase;letter-spacing:.05em">Sesi</th>
-        <th style="text-align:center;padding:8px 10px;font-size:11px;color:var(--mute);text-transform:uppercase;letter-spacing:.05em">Mula</th>
-        <th style="text-align:center;padding:8px 10px;font-size:11px;color:var(--mute);text-transform:uppercase;letter-spacing:.05em">Tamat</th>
-        <th style="text-align:right;padding:8px 10px;font-size:11px;color:var(--mute);text-transform:uppercase;letter-spacing:.05em">Selang</th>
-      </tr></thead>
-      <tbody>
-        <tr><td style="padding:8px 10px;font-weight:600">🔹 Asia</td><td style="text-align:center;padding:8px 10px;color:var(--green)">09:00</td><td style="text-align:center;padding:8px 10px;color:var(--red)">18:00</td><td style="text-align:right;padding:8px 10px;font-weight:700">9 jam</td></tr>
-        <tr><td style="padding:8px 10px;font-weight:600">🔸 London</td><td style="text-align:center;padding:8px 10px;color:var(--green)">14:00</td><td style="text-align:center;padding:8px 10px;color:var(--red)">23:00</td><td style="text-align:right;padding:8px 10px;font-weight:700">9 jam</td></tr>
-        <tr><td style="padding:8px 10px;font-weight:600">🔶 Eropa</td><td style="text-align:center;padding:8px 10px;color:var(--green)">02:00</td><td style="text-align:center;padding:8px 10px;color:var(--red)">10:00</td><td style="text-align:right;padding:8px 10px;font-weight:700">8 jam</td></tr>
-        <tr><td style="padding:8px 10px;font-weight:600">☀️ NY</td><td style="text-align:center;padding:8px 10px;color:var(--green)">19:00</td><td style="text-align:center;padding:8px 10px;color:var(--red)">04:00 (+1)</td><td style="text-align:right;padding:8px 10px;font-weight:700">9 jam</td></tr>
-      </tbody>
-    </table>
-    <div class="fine" style="margin-top:8px">Garis masa dagangan forex; +1 bermaksud berikut hari. Hari cuti Jumaat/Sabtu dimatikan.</div>
+    <h3 style="font-size:13px;margin:0 0 10px;font-weight:600;letter-spacing:-.01em">Sesi Dagangan (MYT UTC+8)</h3>
+    <div id="session-timeline"></div>
+    <div class="fine" style="margin-top:8px">Bar akan auto-update mengikut waktu sekarang; "+1 bermaksud berikut hari.</div>
   </div>
 
   <div class="box">
@@ -1906,3 +1893,40 @@ boot();
 </script>
 </body>
 </html>
+<script>
+(function(){
+  const sessions=[
+    {name:'Asia',from:[9,0],to:[18,0],dur:9,h:'#42a5f5'},
+    {name:'London',from:[14,0],to:[23,0],dur:9,h:'#7cb342'},
+    {name:'Eropa',from:[2,0],to:[10,0],dur:8,h:'#ef5350'},
+    {name:'NY',from:[19,0],to:[28,0],dur:9,h:'#ffa726'} // to 04+1 = 28
+  ];
+  function nowMYT(){const d=new Date();return new Date(d.toLocaleString('en-US',{timeZone:'Asia/Kuala_Lumpur'}));}
+  function mins(t){return t[0]*60+t[1];}
+  const el=document.getElementById('session-timeline');
+  if(!el) return;
+  function render(){
+    const n=nowMYT();
+    const mn=n.getHours()*60+n.getMinutes();
+    let html='<div style="display:flex;gap:6px;align-items:center;margin-bottom:6px;font-size:11px;color:var(--mute)"><span style="font-weight:700;color:var(--ink);font-size:13px">WAKTU SEKARANG</span><span id="now-label" style="font-family:monospace;background:var(--ink);color:#fff;padding:2px 6px;border-radius:6px">--:--</span></div>';
+    html+='<div style="display:flex;flex-direction:column;gap:8px">';
+    sessions.forEach(s=>{
+      const s0=mins(s.from); let s1=mins(s.to); if(s1<s0)s1+=24*60; // NY crosses midnight
+      const progress=Math.max(0,Math.min(100,((mn-s0)/(s1-s0))*100));
+      const isActive=(mn>=s0&&mn<s1);
+      html+=`<div style="display:flex;align-items:center;gap:10px">
+        <div style="width:66px;font-weight:700;font-size:12px;color:${isActive?'#fff':'var(--ink)'};background:${isActive?s.h:'#e8eaf6'};padding:4px 6px;border-radius:6px;text-align:center">${s.name}</div>
+        <div style="flex:1;position:relative;height:18px;background:#e8eaf6;border-radius:9px;overflow:hidden">
+          <div style="position:absolute;left:0;top:0;height:100%;width:${progress}%;background:linear-gradient(90deg,${s.h}88,${s.h});border-radius:9px;animation:pulse 1.5s infinite ease-in-out"></div>
+        </div>
+        <div style="font-family:monospace;font-size:11px;color:var(--mute);min-width:80px;text-align:right">${('0'+s.from[0]).slice(-2)}:${('0'+s.from[1]).slice(-2)} — ${('0'+(s.to[0]%24)).slice(-2)}:${('0'+s.to[1]).slice(-2)}</div>
+      </div>`;
+    });
+    html+='</div>';
+    el.innerHTML=html;
+    document.getElementById('now-label').textContent=(('0'+n.getHours()).slice(-2))+":"+(('0'+n.getMinutes()).slice(-2));
+  }
+  render(); setInterval(render,30000); // update setiap 30 saat
+})();
+</script>
+<style>@keyframes pulse{0%,100%{opacity:0.95}50%{opacity:1}}</style>
