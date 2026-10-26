@@ -353,6 +353,10 @@ ul{list-style:none;margin:0;padding:0}.steps li{display:flex;align-items:center;
   <div class="box">
    <h3>Community</h3>
    <div id="lb"></div>
+  <div id="mu-sp" class="box" style="padding:12px 14px;margin-top:12px;border-radius:16px;background:var(--card);border:1px solid var(--line);box-shadow:var(--shadow)">
+    <h3 style="font-size:13px;margin:0 0 8px;font-weight:600;letter-spacing:-.01em">Musik / Audio</h3>
+    <div class="fine" style="margin-bottom:8px">Audio lesson / market mood — play below.</div>
+  </div>
    <a class="btn ghostb" href="https://t.me/Traderwatchmembershipbot" target="_blank" rel="noopener" style="margin-top:10px">Open Telegram community</a>
    <div class="fine" style="margin-top:6px">Member leaderboard is not published yet. TraderWatch is a platform by traders, for traders.</div>
   </div>
@@ -1574,6 +1578,20 @@ pform();
 $("lb").innerHTML = '<div class="mute" style="padding:6px 0">'
   + 'Member leaderboard is not published yet.</div>';
 
+/* ---------- music / audio section ---------- */
+function muInit(){
+  var el = document.getElementById("mu-sp");
+  if(!el) return;
+  var a = document.createElement("audio");
+  a.setAttribute("controls","controls"); a.setAttribute("src","assets/audio-lesson.mp3");
+  a.setAttribute("preload","none");
+  a.style.width = "100%"; a.style.height = "42px";
+  a.style.borderRadius = "12px"; a.style.background = "var(--fill)";
+  el.innerHTML = "";
+  el.appendChild(a);
+}
+muInit();
+
 /* ---------- market status + clock ---------- */
 function tick(){
   var d = new Date(), day = d.getUTCDay(), h = d.getUTCHours();
@@ -1634,6 +1652,7 @@ function computePerformance(statuses){
     var v = statuses[k];
     if(!v || typeof v.pips !== "number") return;
     if(String(v.unit||"pips").toLowerCase() === "usd") return;
+    if(v.status === "expired" || v.status === "cancelled" || v.status === "void_unfilled") return;  // signal dibatalkan / tamat — jangan dikira
     var key = resultDate(k, v);
     if(!key) return;
     rows.push({key:key, day:key, pips:v.pips, closed:v.closed || ""});
@@ -1658,6 +1677,7 @@ function computePerformance(statuses){
     var v = statuses[k];
     if(!v || typeof v.pips !== "number") return;
     if(String(v.unit||"pips").toLowerCase() === "usd") return;
+    if(v.status === "expired" || v.status === "cancelled" || v.status === "void_unfilled") return;  // signal dibatalkan / tamat — jangan dikira
     var hr = resultHour(k, v);
     if(!hr) return;
     byHour[hr] = (byHour[hr]||0) + v.pips;
@@ -1677,7 +1697,7 @@ function computeStats(statuses){
   Object.keys(statuses).forEach(function(k){
     var v = statuses[k];
     if(!v) return;
-    if(v.status === "expired") return;              // never filled: not a win or a loss
+    if(v.status === "expired" || v.status === "cancelled" || v.status === "void_unfilled") return;               // signal dibatalkan / tamat — jangan dikira
     if(typeof v.r === "number") rs.push(v.r);
   });
   if(!rs.length) return {win:null, rr:null};
