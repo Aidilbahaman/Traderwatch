@@ -357,7 +357,8 @@ ul{list-style:none;margin:0;padding:0}.steps li{display:flex;align-items:center;
     <h3 style="font-size:13px;margin:0 0 8px;font-weight:600;letter-spacing:-.01em">Musik / Audio</h3>
     <div class="fine" style="margin-bottom:8px">Audio lesson / market mood — play below.</div>
   </div>
-   <a class="btn ghostb" href="https://t.me/Traderwatchmembershipbot" target="_blank" rel="noopener" style="margin-top:10px">Open Telegram community</a>
+   <div id="mu-lib" style="margin-top:10px"></div>
+    <a class="btn ghostb" href="https://t.me/Traderwatchmembershipbot" target="_blank" rel="noopener" style="margin-top:10px">Open Telegram community</a>
    <div class="fine" style="margin-top:6px">Member leaderboard is not published yet. TraderWatch is a platform by traders, for traders.</div>
   </div>
 
@@ -1578,19 +1579,70 @@ pform();
 $("lb").innerHTML = '<div class="mute" style="padding:6px 0">'
   + 'Member leaderboard is not published yet.</div>';
 
-/* ---------- music / audio section ---------- */
+/* ---------- music / audio library section ---------- */
+// Song catalog — one entry per track in the library. Each click plays (or stops).
+var MU_LIB = [
+  {t:"Market Mood",       c:"#1A2B4A", src:"assets/audio-lesson.mp3"},
+  {t:"Signals Guide",     c:"#0d3b66", src:"assets/traderwatch-signals-guide-muted.mp3"},
+  {t:"Live News",         c:"#8b3a9e", src:"assets/traderwatch-news-live-muted.mp3"},
+];
+var muAudio = null;          // the single <audio> element
+var muCurrent = null;        // index of the currently playing track
+
 function muInit(){
-  var el = document.getElementById("mu-sp");
-  if(!el) return;
-  var a = document.createElement("audio");
-  a.setAttribute("controls","controls"); a.setAttribute("src","assets/audio-lesson.mp3");
-  a.setAttribute("preload","none");
-  a.style.width = "100%"; a.style.height = "42px";
-  a.style.borderRadius = "12px"; a.style.background = "var(--fill)";
-  el.innerHTML = "";
-  el.appendChild(a);
+  if(muAudio) return;
+  muAudio = document.createElement("audio");
+  muAudio.setAttribute("controls","controls");
+  muAudio.style.width="100%"; muAudio.style.height="40px";
+  muAudio.style.borderRadius="12px"; muAudio.style.background="#0a1630";
+  document.body.appendChild(muAudio);
+  renderMu();
 }
 muInit();
+
+function renderMu(){
+  var lib = document.getElementById("mu-lib");
+  if(!lib) return;
+  lib.innerHTML = "";
+  MU_LIB.forEach(function(track, idx){
+    var row = document.createElement("div");
+    row.className = "musu-row" + (idx === muCurrent ? " on" : "");
+    row.style.cssText = "display:flex;align-items:center;gap:10px;padding:10px 12px;margin:6px 0;border-radius:12px;background:var(--card);border:1px solid var(--line);box-shadow:var(--shadow);cursor:pointer;transition:.2s";
+    row.onclick = function(){ toggleTrack(idx); };
+
+    var ic = document.createElement("div");
+    ic.style.cssText = "width:36px;height:36px;border-radius:50%;background:"+track.c+";color:#fff;display:grid;place-items:center;flex-shrink:0";
+    ic.textContent = "♪";
+
+    var info = document.createElement("div");
+    info.style.cssText = "flex:1;min-width:0";
+    var tn = document.createElement("span");
+    tn.className = "fine"; tn.textContent = track.t; tn.style.fontWeight = 600;
+    var sn = document.createElement("span");
+    sn.style.fontSize = "11px"; sn.textContent = "Music / Audio";
+    info.appendChild(tn); info.appendChild(sn);
+
+    var pb = document.createElement("button");
+    pb.style.cssText = "width:32px;height:32px;border-radius:50%;border:0;cursor:pointer;flex-shrink:0;font-size:13px;color:#fff;background:"+(muCurrent===idx ? track.c : "var(--fill)");
+    pb.textContent = muCurrent===idx ? "⏹" : "▶";
+    row.appendChild(ic); row.appendChild(info); row.appendChild(pb);
+
+    lib.appendChild(row);
+  });
+}
+
+function toggleTrack(idx){
+  MU_LIB.forEach(function(t){ if(idx!==t) t.playing=false; });
+  muCurrent = (muCurrent === idx) ? null : idx;
+  applySource();
+  renderMu();
+}
+
+function applySource(){
+  if(!muAudio || !muCurrent) return;
+  var tr = MU_LIB[muCurrent];
+  muAudio.src = tr.src;
+}
 
 /* ---------- market status + clock ---------- */
 function tick(){
