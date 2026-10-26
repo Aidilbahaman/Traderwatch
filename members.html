@@ -169,6 +169,7 @@ ul{list-style:none;margin:0;padding:0}.steps li{display:flex;align-items:center;
 @media (max-width:700px){.ideagrid{grid-template-columns:1fr}.idealevels{grid-template-columns:repeat(3,1fr)}}
 </style>
 
+<style>
 /* ===== Performance / smooth 50-60fps tweaks ===== */
 /* Only apply backdrop-filter to the sticky top bar when visible */
 .top{will-change:transform;contain:layout style paint;}
@@ -191,6 +192,7 @@ html{scroll-behavior:auto;}
 body{scrollbar-gutter:stable;}
 /* Mobile swipe: no delay, smooth touch */
 .segnav,.nav{touch-action:manipulation;will-change:auto;}
+</style>
 
 </head>
 <body>
@@ -348,6 +350,11 @@ body{scrollbar-gutter:stable;}
     <li data-step="2"><button class="chk" type="button" aria-label="Mark done">&#10003;</button><a class="lbl" id="tgLink" href="#" target="_blank" rel="noopener">Connect Telegram for alerts</a></li>
     <li data-step="3"><button class="chk" type="button" aria-label="Mark done">&#10003;</button><a class="lbl" href="education.html">Watch the risk basics video</a></li>
    </ul>
+  </div>
+
+  <div class="box" id="live-tv" style="border-radius:16px;background:var(--card);border:1px solid var(--line);box-shadow:var(--shadow)">
+    <h3 style="font-size:13px;margin:0 0 8px;font-weight:600;letter-spacing:-.01em">Live TV / Berita</h3>
+    <iframe width="100%" height="215" src="https://www.youtube.com/embed/QB5BNdBFujE" title="Live TV News" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen style="border-radius:12px;border:0;"></iframe>
   </div>
 
   <div class="box">
