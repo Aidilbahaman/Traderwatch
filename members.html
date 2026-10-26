@@ -753,6 +753,12 @@ function renderPerf(){
   var d = isTrade ? perfData(80, "trade")
         : isHour  ? perfData(200, "hour")
         : perfData(range, "day");
+  /* Weekend / holiday: when market closed, use latest close-day candle
+     rather than leaving chart empty until next trading session. */
+  if(!d.length && S.performance && S.performance.length){
+    var last = S.performance[S.performance.length-1];
+    d = [{date: last.date, cum: Math.round(last.pips*10)/10, day: Math.round(last.pips*10)/10, i: 0, n: 1}];
+  }
   var box = $("pc"), tip = $("ptip");
 
   /* Stat cards describe whichever granularity is on screen. */
