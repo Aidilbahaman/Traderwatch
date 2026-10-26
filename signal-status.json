@@ -1,7 +1,8 @@
 {
  "signals": {
   "XAUUSD_20261026_105743": {
-   "status": "pending"
+   "status": "expired",
+   "closed": "2026-10-26T11:30:02+08:00"
   },
   "USDJPY_20261026_100001": {
    "status": "sl",
@@ -467,5 +468,5 @@
    "status": "expired"
   }
  },
- "updated": "2026-10-26T11:29:02+08:00"
+ "updated": "2026-10-26T11:30:02+08:00"
 }
