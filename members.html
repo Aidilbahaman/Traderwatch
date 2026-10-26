@@ -1888,6 +1888,25 @@ async function boot(){
 boot();
 
 </script>
+
+<!-- COMMAND CENTER: Tier Upgrade + Next TP + Signal Keyboard -->
+<div id="command-center" style="max-width:720px;margin:24px auto;padding:16px;background:#1A2B4A;border-radius:16px;border:1px solid #2a4066;font-family:system-ui,sans-serif;color:#fff;box-shadow:0 8px 30px rgba(0,0,0,.35);">
+  <h3 style="margin:0 0 10px;font-size:15px;color:#7ec8ff;letter-spacing:.5px">⚡ COMMAND CENTER — TIER & SIGNAL</h3>
+  <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px">
+    <button onclick="alert('Upgrade ke PRO — status: PENDING APPROVAL (jangan ubah gateway dulu)')" style="padding:6px 14px;border:none;border-radius:6px;background:#ff9800;color:#fff;cursor:pointer;font-weight:700;">⬆ Upgrade PRO</button>
+    <button onclick="alert('Upgrade ke MAX — status: PENDING APPROVAL (jangan ubah gateway dulu)')" style="padding:6px 14px;border:none;border-radius:6px;background:#e91e63;color:#fff;cursor:pointer;font-weight:700;">⬆ Upgrade MAX</button>
+  </div>
+  <div style="font-size:12px;color:#b0bec5;line-height:1.6">
+    <strong style="color:#fff">Nama:</strong> <span id="cc-name">A. Aidil</span> &nbsp;|&nbsp;
+    <strong style="color:#fff">Email:</strong> <span id="cc-email">aidilvevo@gmail.com</span> &nbsp;|&nbsp;
+    <strong style="color:#fff">Tier:</strong> <span id="cc-tier" style="color:#7ec8ff">FREE</span> (pending upgrade) &nbsp;|&nbsp;
+    <strong style="color:#fff">Pembayaran:</strong> <span id="cc-pay" style="color:#7ec8ff">ACTIVE (Supabase)</span>
+  </div>
+  <div style="margin-top:10px;padding:10px;background:#152744;border-radius:8px;font-size:13px;color:#fff">
+    <strong style="color:#ffd54f">📈 NEXT TP RECORD (24 JAM):</strong>
+    <span id="cc-next-tp">XAUUSD #132 (entry 4008.81) — EXPIRED (luar POI >30 min) | USDJPY (SL) | GBPUSD (SL) | BTCUSD expired</span>
+  </div>
+</div>
 </body>
 </html>
 <script>
