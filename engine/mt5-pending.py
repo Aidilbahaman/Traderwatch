@@ -29,11 +29,14 @@ REPO = HERE.parent
 STATE = REPO / "state" / "mt5-orders.json"
 MYT = timezone(timedelta(hours=8))
 
-MODE = os.environ.get("MT5_MODE", "plan")          # plan | live
+MODE = os.environ.get("MT5_MODE", "live")          # plan | live
 LOT = float(os.environ.get("MT5_LOT", "1.00"))
 MAGIC_BASE = int(os.environ.get("MT5_MAGIC_BASE", "20261000"))
 DEVIATION = int(os.environ.get("MT5_DEVIATION", "20"))
-MAX_PENDING = int(os.environ.get("MT5_MAX_PENDING", "5"))
+# Ubah max_pending jadi lebih banyak (cth: 10) supaya banyak pending order boleh masuk serentak
+MAX_PENDING = int(os.environ.get("MT5_MAX_PENDING", "10"))
+# Turunkan sleep kepada 2 saat untuk respon yang lebih pantas (hampir instant)
+SLEEP_SEC = 2
 # Senarai symbol dibenarkan (kosong = semua). Guna untuk hadkan ke BTCUSD
 # semasa ujian luar waktu forex.
 ALLOW = [x.strip().upper() for x in os.environ.get("MT5_ALLOW", "").split(",") if x.strip()]
@@ -429,4 +432,18 @@ def main():
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    import signal, time
+    # Continuous loop: check new signals every 5 seconds (instant)
+    def sigterm_handler(signum, frame):
+        log("SIGTERM — shutting down mt5-pending gracefully")
+        sys.exit(0)
+    signal.signal(signal.SIGTERM, sigterm_handler)
+    signal.signal(signal.SIGINT, sigterm_handler)
+    while True:
+        try:
+            main()
+        except SystemExit:
+            pass  # main called sys.exit intentionally; continue loop
+        except Exception as ex:
+            log(f"FATAL {type(ex).__name__}: {ex}")
+        time.sleep(SLEEP_SEC)

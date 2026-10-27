@@ -1174,6 +1174,7 @@ def main():
         STATE_FILE.unlink(missing_ok=True)
         log("state direset")
         return 0
+    import signal, time, os
     dry_run = "--dry-run" in args
 
     # Flock-based single instance. Age-based "stale lock" tidak selamat:
@@ -1189,16 +1190,30 @@ def main():
         log("SKIP instance lain sedang jalan")
         lock_fd.close()
         return 0
-    lock_fd.write(str(__import__("os").getpid()))
+    lock_fd.write(str(os.getpid()))
     lock_fd.flush()
-    try:
-        return _run(dry_run=dry_run)
-    finally:
+
+    def _sig_handler(signum, frame):
+        log("SIGTERM received — shutting down lifecycle alert gracefully")
         try:
             fcntl.flock(lock_fd, fcntl.LOCK_UN)
         except OSError:
             pass
         lock_fd.close()
+        sys.exit(0)
+
+    signal.signal(signal.SIGTERM, _sig_handler)
+    signal.signal(signal.SIGINT, _sig_handler)
+
+    # Loop continuous 5-second checks (Swissquote-aligned)
+    while True:
+        try:
+            _run(dry_run=dry_run)
+        except Exception as ex:
+            log(f"FATAL cycle error {type(ex).__name__}: {ex}")
+        time.sleep(5)
+
+    return 0
 
 
 if __name__ == "__main__":

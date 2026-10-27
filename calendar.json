@@ -1,5 +1,5 @@
 {
- "generated_at": "2026-10-25T23:15:01.650214+08:00",
+ "generated_at": "2026-10-26T13:45:02.640728+08:00",
  "source": "ForexFactory weekly feed",
  "next_high": {
   "iso": "2026-10-28T08:30:00+08:00",
@@ -116,7 +116,7 @@
   }
  ],
  "counts": {
-  "all_upcoming": 96,
+  "all_upcoming": 94,
   "high": 23,
   "usd_high": 5
  }
