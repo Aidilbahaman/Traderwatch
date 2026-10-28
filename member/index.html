@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TraderWatch Member Portal</title>
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #0b0f19; color: #f3f4f6; margin: 0; padding: 20px; display: flex; justify-content: center; align-items: center; height: 100vh; }
+    .card { background: #111827; padding: 24px; border-radius: 12px; width: 100%; max-width: 400px; box-shadow: 0 4px 12px rgba(0,0,0,0.5); border: 1px solid #1f2937; }
+    h2 { margin-top: 0; color: #3b82f6; text-align: center; }
+    input { width: 100%; padding: 12px; margin: 8px 0 16px 0; background: #1f2937; border: 1px solid #374151; color: #fff; border-radius: 6px; box-sizing: border-box; }
+    button { width: 100%; padding: 12px; background: #3b82f6; color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; }
+    button:hover { background: #2563eb; }
+    .msg { margin-top: 12px; text-align: center; font-size: 14px; }
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+  <div class="card" id="auth-card">
+    <h2>TraderWatch Member</h2>
+    <div id="login-form">
+      <label>Email</label>
+      <input type="email" id="email" placeholder="nama@email.com">
+      <label>Password</label>
+      <input type="password" id="password" placeholder="••••••••">
+      <button onclick="handleLogin()">Log Masuk</button>
+      <div class="msg" id="msg"></div>
+    </div>
+    <div id="dashboard" style="display:none;">
+      <h3>Selamat Datang, Ahli!</h3>
+      <p>Isyarat & Analisis Terkini eksklusif.</p>
+      <div id="signals-box"></div>
+      <button onclick="handleLogout()" style="background:#ef4444; margin-top: 16px;">Log Keluar</button>
+    </div>
+  </div>
+
+  <script>
+    // Placeholder config - updated when deployed
+    const supabaseUrl = 'https://vicfiftvhxemuhxxmkxk.supabase.co';
+    const supabaseKey = 'sb_publishable_4LzgHiCMUXmXUOkPtvIHVw_F7ks9otV';
+    // Gunakan klien Supabase sedia ada dari TraderWatch repo jika ada
+    let supabaseClient = null;
+    try {
+      supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
+    } catch(e) {}
+
+    async function handleLogin() {
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+      const msg = document.getElementById('msg');
+      msg.innerText = "Sedang masuk...";
+      
+      // Simulasi / sambungan sebenar Supabase
+      if(email && password) {
+        document.getElementById('login-form').style.display = 'none';
+        document.getElementById('dashboard').style.display = 'block';
+        loadSignals();
+      } else {
+        msg.innerText = "Sila masukkan email dan password.";
+      }
+    }
+
+    async function loadSignals() {
+      document.getElementById('signals-box').innerHTML = `
+        <div style="background:#1f2937; padding:12px; border-radius:6px; margin-top:8px;">
+          <strong>XAUUSD BUY</strong><br>
+          <small>Entry: 2750.00 | TP: 2770.00 | SL: 2740.00</small>
+        </div>
+      `;
+    }
+
+    function handleLogout() {
+      document.getElementById('dashboard').style.display = 'none';
+      document.getElementById('login-form').style.display = 'block';
+    }
+  </script>
+</body>
+</html>
