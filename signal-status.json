@@ -691,7 +691,24 @@
   },
   "AUDUSD_20261029_204954": {
    "status": "pending"
+  },
+  "XAUUSD_20261029_205331": {
+   "status": "active",
+   "entry_at": "2026-10-29T20:54:00+08:00"
+  },
+  "USDJPY_20261029_205108": {
+   "status": "pending"
+  },
+  "NZDUSD_20261029_205044": {
+   "status": "pending"
+  },
+  "EURUSD_20261029_205022": {
+   "status": "pending"
+  },
+  "GBPUSD_20261029_204910": {
+   "status": "active",
+   "entry_at": "2026-10-29T20:51:00+08:00"
   }
  },
- "updated": "2026-10-29T20:50:02+08:00"
+ "updated": "2026-10-29T20:55:03+08:00"
 }
