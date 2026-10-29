@@ -394,6 +394,26 @@ def main():
         entry, sl, tp = float(s["entry"]), float(s["sl"]), float(s["tp"])
         magic = MAGIC_BASE + int(s["id"])
 
+        # Idempotency guard: order_send() boleh diterima MT5 tetapi bridge
+        # Wine boleh timeout sebelum JSON sampai kepada parent. Dalam keadaan
+        # itu state file belum sempat menyimpan sid, jadi retry seterusnya
+        # mesti reconcile dengan order/position sebenar dahulu — jangan hantar
+        # lot kedua untuk signal yang sama.
+        existing_orders = [o for o in pending if int(o.get("magic", 0) or 0) == magic]
+        existing_positions = [p for p in positions if int(p.get("magic", 0) or 0) == magic]
+        if existing_orders or existing_positions:
+            base = {"pair": pair, "side": side, "entry": entry, "sl": sl,
+                    "tp": tp, "magic": magic}
+            if existing_positions:
+                base.update({"status": "filled", "position_ticket": existing_positions[0].get("ticket")})
+            else:
+                base.update({"status": "pending", "ticket": existing_orders[0].get("ticket"),
+                             "type": existing_orders[0].get("type")})
+            seen[sid] = base
+            log(f"RECONCILE #{sid} existing={'position' if existing_positions else 'pending'} "
+                f"count={len(existing_positions) + len(existing_orders)} — no duplicate order")
+            continue
+
         if MODE != "live":
             log(f"PLAN #{sid} {pair} {side} LIMIT entry={entry} sl={sl} tp={tp} lot={LOT}")
             seen[sid] = {"status": "planned", "pair": pair, "side": side,
