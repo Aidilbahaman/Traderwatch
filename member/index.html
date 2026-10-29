@@ -128,7 +128,7 @@ var TV='https://s3.tradingview.com/external-embedding/embed-widget-';
 function themeNow(){return document.documentElement.getAttribute('data-theme')||'dark'}
 function mountTv(el,src,cfg){if(!el)return;el.innerHTML='';var d=document.createElement('div');d.className='tradingview-widget-container';var i=document.createElement('div');i.className='tradingview-widget-container__widget';d.appendChild(i);var s=document.createElement('script');s.type='text/javascript';s.src=src;s.async=true;s.innerHTML=JSON.stringify(cfg);d.appendChild(s);el.appendChild(d)}
 function mountAllTv(){var t=themeNow();
- mountTv($('tvChart'),TV+'advanced-chart.js',{autosize:true,symbol:'OANDA:XAUUSD',interval:'D',timeframe:'12M',timezone:'Asia/Kuala_Lumpur',theme:t,style:'1',locale:'en',allow_symbol_change:true,withdateranges:true,hide_side_toolbar:false,support_host:'https://www.tradingview.com'});
+ mountTv($('tvChart'),TV+'advanced-chart.js',{autosize:true,symbol:'OANDA:XAUUSD',interval:'D',range:'12M',timezone:'Asia/Kuala_Lumpur',theme:t,style:'1',locale:'en',allow_symbol_change:true,withdateranges:true,hide_side_toolbar:false,support_host:'https://www.tradingview.com'});
  mountTv($('tvNews'),TV+'timeline.js',{feedMode:'all_symbols',isTransparent:true,displayMode:'regular',width:'100%',height:'100%',colorTheme:t,locale:'en'});
  mountTv($('tvCal'),TV+'events.js',{colorTheme:t,isTransparent:true,width:'100%',height:'100%',locale:'en',importanceFilter:'-1,0,1',countryFilter:'us,eu,gb,jp,au,ca,ch,cn,nz'})}
 function applyTheme(t,remount){document.documentElement.setAttribute('data-theme',t);try{localStorage.setItem('tw-theme',t)}catch(e){}
