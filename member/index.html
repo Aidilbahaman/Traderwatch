@@ -1,78 +1,99 @@
-<!DOCTYPE html>
-<html lang="ms">
+<!doctype html>
+<html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>TraderWatch Member Portal</title>
-  <style>
-    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #0b0f19; color: #f3f4f6; margin: 0; padding: 20px; display: flex; justify-content: center; align-items: center; height: 100vh; }
-    .card { background: #111827; padding: 24px; border-radius: 12px; width: 100%; max-width: 400px; box-shadow: 0 4px 12px rgba(0,0,0,0.5); border: 1px solid #1f2937; }
-    h2 { margin-top: 0; color: #3b82f6; text-align: center; }
-    input { width: 100%; padding: 12px; margin: 8px 0 16px 0; background: #1f2937; border: 1px solid #374151; color: #fff; border-radius: 6px; box-sizing: border-box; }
-    button { width: 100%; padding: 12px; background: #3b82f6; color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; }
-    button:hover { background: #2563eb; }
-    .msg { margin-top: 12px; text-align: center; font-size: 14px; }
-  </style>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0b0d10"><meta name="description" content="Trader Watch — a mobile-first trading journal and market workspace.">
+<title>Trader Watch — Trading Workspace</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<style>
+:root{--bg:#0b0d10;--panel:#12151a;--panel2:#171b21;--line:#252b33;--text:#f0f3f6;--muted:#89939f;--green:#b7f36b;--red:#ff777d;--blue:#8ab4ff;--r:18px;--nav:72px}
+*{box-sizing:border-box}html{background:var(--bg);scroll-behavior:smooth}body{margin:0;background:radial-gradient(ellipse at 80% -20%,#1d2a1b 0,transparent 38%),var(--bg);color:var(--text);font:14px/1.5 Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;letter-spacing:-.015em}button,input,select{font:inherit}button{cursor:pointer}button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--green);outline-offset:3px}.app{max-width:1440px;margin:auto;min-height:100vh}.topbar{height:76px;padding:0 24px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #ffffff0d;position:sticky;top:0;z-index:10;background:#0b0d10eF;backdrop-filter:blur(18px)}.brand{display:flex;align-items:center;gap:11px;font-weight:800;font-size:17px;letter-spacing:-.05em}.logo{width:36px;height:36px;border-radius:12px;background:var(--green);color:#10150b;display:grid;place-items:center;font-weight:950;font-size:18px;box-shadow:0 0 24px #b7f36b22}.brand small{display:block;color:var(--muted);font-size:10px;font-weight:500;letter-spacing:.08em;text-transform:uppercase}.top-actions{display:flex;align-items:center;gap:10px}.iconbtn,.avatar,.pillbtn{border:1px solid var(--line);background:var(--panel);color:var(--text);border-radius:12px;padding:10px 12px}.avatar{width:36px;height:36px;border-radius:50%;padding:0;background:#283326;color:var(--green);font-weight:800}.layout{display:grid;grid-template-columns:220px minmax(0,1fr);gap:28px;padding:28px 24px 60px}.sidebar{position:sticky;top:100px;height:calc(100vh - 125px);display:flex;flex-direction:column;gap:7px}.navlabel{font-size:10px;text-transform:uppercase;letter-spacing:.13em;color:#67717c;padding:12px 12px 7px}.navitem{display:flex;align-items:center;gap:12px;padding:12px;border-radius:12px;color:#9da6b0;text-decoration:none;border:1px solid transparent;transition:.2s}.navitem:hover,.navitem.active{background:#b7f36b12;border-color:#b7f36b22;color:var(--green)}.navitem .ni{width:20px;text-align:center;font-size:17px}.sidebottom{margin-top:auto;padding:15px;background:var(--panel);border:1px solid var(--line);border-radius:15px;color:var(--muted);font-size:12px}.sidebottom strong{color:var(--text);display:block;margin-bottom:5px}.main{min-width:0;max-width:1060px;width:100%;margin:auto}.eyebrow{font-size:11px;color:var(--green);letter-spacing:.14em;text-transform:uppercase;font-weight:750}.heading{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin:3px 0 23px}.heading h1{font-size:clamp(26px,4vw,35px);line-height:1.1;letter-spacing:-.055em;margin:8px 0}.heading p{margin:0;color:var(--muted)}.date{font-size:12px;color:var(--muted);border:1px solid var(--line);padding:9px 12px;border-radius:11px;white-space:nowrap}.grid{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:14px}.card{background:linear-gradient(145deg,#171b21,#111419 75%);border:1px solid var(--line);border-radius:var(--r);padding:20px;min-width:0;box-shadow:0 12px 40px #0000000a}.metric{grid-column:span 3;min-height:146px}.metric-top{display:flex;align-items:center;justify-content:space-between;color:var(--muted);font-size:12px}.metric-icon{width:29px;height:29px;border-radius:9px;display:grid;place-items:center;background:#ffffff09;color:#d9e0e6}.metric-value{font-size:clamp(24px,3vw,32px);font-weight:750;letter-spacing:-.055em;margin:13px 0 6px;font-variant-numeric:tabular-nums}.positive{color:var(--green)}.negative{color:var(--red)}.metric-foot{font-size:11px;color:var(--muted)}.metric-foot strong{font-weight:650}.section-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:18px}.section-head h2{font-size:15px;letter-spacing:-.025em;margin:0}.section-head p{font-size:12px;color:var(--muted);margin:4px 0 0}.chartcard{grid-column:span 8}.charttools{display:flex;gap:5px}.charttools button{border:0;color:var(--muted);background:transparent;padding:6px 9px;border-radius:8px;font-size:11px}.charttools button.active{background:#b7f36b18;color:var(--green)}.chartwrap{height:225px;position:relative}.chartwrap svg{width:100%;height:100%;overflow:visible}.chartlabels{display:flex;justify-content:space-between;color:#626c77;font-size:10px;margin-top:4px}.charttip{font-size:11px;color:var(--muted);display:flex;justify-content:space-between;margin-top:12px}.watchcard{grid-column:span 4}.pair{display:flex;align-items:center;gap:10px;min-width:0}.coin{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;font-size:10px;font-weight:800;background:#29271c;color:#f3cb75;flex-shrink:0}.coin.blue{background:#1c2a42;color:#8ab4ff}.coin.purple{background:#2a2140;color:#c6a5ff}.pairname{font-weight:700;font-size:12px}.pairsub{font-size:10px;color:var(--muted);margin-top:2px}.price{text-align:right;font-variant-numeric:tabular-nums;font-weight:650;font-size:12px}.price small{display:block;font-size:10px;font-weight:550;margin-top:2px}.watchrow{display:flex;align-items:center;justify-content:space-between;padding:13px 0;border-bottom:1px solid #ffffff0a}.watchrow:last-child{border-bottom:0}.mini-line{width:48px;height:23px}.tradecard{grid-column:span 7}.riskcard{grid-column:span 5}.tablewrap{overflow-x:auto}table{border-collapse:collapse;width:100%;white-space:nowrap}th{text-align:left;font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:#77818c;font-weight:600;padding:10px 9px;border-bottom:1px solid var(--line)}td{padding:14px 9px;border-bottom:1px solid #ffffff0a;font-size:12px}tbody tr:last-child td{border-bottom:0}.badge{display:inline-flex;align-items:center;gap:5px;padding:5px 8px;border-radius:7px;font-size:10px;font-weight:700}.badge.win{background:#b7f36b15;color:var(--green)}.badge.loss{background:#ff777d15;color:var(--red)}.badge.open{background:#8ab4ff15;color:var(--blue)}.viewall{background:none;border:0;color:var(--green);font-size:11px;font-weight:700}.riskbig{font-size:31px;font-weight:750;letter-spacing:-.06em;margin:9px 0 4px}.progress{height:6px;background:#292e35;border-radius:99px;overflow:hidden;margin:15px 0 8px}.progress span{display:block;height:100%;width:64%;background:var(--green);border-radius:99px;transition:width .3s}.riskstats{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:20px}.riskstats div{padding:13px;background:#ffffff05;border-radius:12px}.riskstats small{display:block;color:var(--muted);font-size:10px}.riskstats strong{display:block;margin-top:5px;font-size:15px}.bottomnav{display:none}.modalback{position:fixed;inset:0;z-index:30;background:#000a;display:none;align-items:center;justify-content:center;padding:18px;backdrop-filter:blur(8px)}.modalback.show{display:flex}.modal{width:min(480px,100%);padding:24px;border:1px solid #303741;border-radius:20px;background:#14181e;box-shadow:0 30px 100px #0008}.modal h2{margin:0 0 6px;font-size:22px}.modal p{color:var(--muted);font-size:12px;margin:0 0 20px}.formgrid{display:grid;grid-template-columns:1fr 1fr;gap:13px}.field{display:flex;flex-direction:column;gap:7px}.field.full{grid-column:1/-1}.field label{font-size:11px;color:#aab3bd}.field input,.field select{width:100%;border:1px solid #303741;background:#0d1014;color:var(--text);padding:12px;border-radius:10px;min-width:0}.formactions{display:flex;justify-content:flex-end;gap:8px;margin-top:20px}.btn{border:1px solid var(--line);background:#20252c;color:var(--text);padding:11px 15px;border-radius:11px;font-weight:650;font-size:12px}.btn.primary{background:var(--green);border-color:var(--green);color:#10150b}.toast{position:fixed;z-index:50;bottom:28px;left:50%;transform:translate(-50%,20px);opacity:0;pointer-events:none;background:#e6f9d1;color:#17200d;padding:11px 17px;border-radius:12px;font-weight:700;font-size:12px;transition:.25s}.toast.show{opacity:1;transform:translate(-50%,0)}.empty{text-align:center;color:var(--muted);padding:24px;font-size:12px}.mobileonly{display:none}
+@media(min-width:1400px){.layout{gap:34px;padding-left:32px;padding-right:32px}.card{padding:22px}}
+@media(max-width:900px){.layout{grid-template-columns:185px minmax(0,1fr);gap:18px;padding:22px 18px 40px}.metric{grid-column:span 6}.chartcard{grid-column:span 12}.watchcard{grid-column:span 12}.watchcard .watchrow{display:inline-flex;width:49%;padding-right:10px}.tradecard,.riskcard{grid-column:span 12}}
+@media(max-width:620px){:root{--nav:66px}.topbar{height:62px;padding:0 16px}.brand{font-size:15px}.logo{width:32px;height:32px;border-radius:10px}.brand small{font-size:9px}.top-actions{gap:7px}.top-actions .iconbtn{padding:8px 10px}.top-actions .avatar{width:32px;height:32px}.layout{display:block;padding:23px 14px calc(var(--nav) + 25px)}.sidebar{display:none}.heading{margin-bottom:19px;align-items:center}.heading h1{font-size:28px}.heading p{font-size:12px}.date{display:none}.grid{gap:10px}.card{border-radius:16px;padding:16px}.metric{min-height:127px;padding:15px;grid-column:span 6}.metric-top{font-size:11px}.metric-icon{width:25px;height:25px}.metric-value{font-size:26px;margin:11px 0 5px}.metric-foot{font-size:10px}.chartcard{grid-column:span 12;padding:16px 13px}.chartwrap{height:190px}.watchcard{grid-column:span 12}.watchcard .watchrow{width:100%;padding:12px 0}.watchcard .watchrow:nth-last-child(2){border-bottom:1px solid #ffffff0a}.tradecard,.riskcard{grid-column:span 12}.section-head h2{font-size:14px}.section-head p{font-size:11px}.mobileonly{display:block}.bottomnav{display:flex;position:fixed;z-index:20;bottom:0;left:0;right:0;height:calc(var(--nav) + env(safe-area-inset-bottom));padding:7px 5px calc(7px + env(safe-area-inset-bottom));justify-content:space-around;align-items:center;background:#101318f2;border-top:1px solid #ffffff12;backdrop-filter:blur(18px)}.bottomnav a{width:20%;display:flex;flex-direction:column;align-items:center;gap:3px;text-decoration:none;color:#77818c;font-size:9px}.bottomnav a span:first-child{font-size:19px;line-height:1.2}.bottomnav a.active{color:var(--green)}.bottomnav .navadd{width:43px;height:43px;border-radius:15px;display:grid;place-items:center;background:var(--green);color:#11170b;font-size:24px;margin-top:-21px;box-shadow:0 4px 18px #b7f36b25}.riskstats{gap:8px}.riskstats div{padding:12px}.formgrid{grid-template-columns:1fr}.field.full{grid-column:auto}.modal{padding:20px}.formactions .btn{flex:1}.charttools button{padding:6px 7px}.tablewrap{margin:0 -5px}td{padding:13px 8px}}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;transition:none!important;animation:none!important}}
+</style>
+<style>
+.gate{position:fixed;inset:0;z-index:80;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;background:#0b0d10;color:#89939f;font:13px/1.5 Inter,ui-sans-serif,system-ui,sans-serif;text-align:center;padding:24px}
+.gate[hidden]{display:none}
+.gatespin{width:34px;height:34px;border-radius:50%;border:2px solid #252b33;border-top-color:#b7f36b;animation:gspin .9s linear infinite}
+@keyframes gspin{to{transform:rotate(360deg)}}
+.gate a{color:#b7f36b;font-weight:700;text-decoration:none;border-bottom:1px solid #b7f36b55}
+.app[hidden]{display:none}
+.note{font-size:10px;color:#626c77}
+.watchrow .price .badge{display:block;margin-top:3px}
+@media(prefers-reduced-motion:reduce){.gatespin{animation:none;border-top-color:#252b33}}
+</style>
 </head>
 <body>
-  <div class="card" id="auth-card">
-    <h2>TraderWatch Member</h2>
-    <div id="login-form">
-      <label>Email</label>
-      <input type="email" id="email" placeholder="nama@email.com">
-      <label>Password</label>
-      <input type="password" id="password" placeholder="••••••••">
-      <button onclick="handleLogin()">Log Masuk</button>
-      <div class="msg" id="msg"></div>
-    </div>
-    <div id="dashboard" style="display:none;">
-      <h3>Selamat Datang, Ahli!</h3>
-      <p>Isyarat & Analisis Terkini eksklusif.</p>
-      <div id="signals-box"></div>
-      <button onclick="handleLogout()" style="background:#ef4444; margin-top: 16px;">Log Keluar</button>
-    </div>
-  </div>
+<div class="gate" id="gate"><div class="gatespin"></div><p id="gateMsg">Checking your session…</p></div>
+<div class="app" id="app" hidden>
+<header class="topbar"><div class="brand"><div class="logo">T</div><div>TRADER WATCH<small>Trading workspace</small></div></div><div class="top-actions"><button class="iconbtn" id="refresh" aria-label="Refresh dashboard" title="Refresh">↻</button><button class="iconbtn" id="addTop" aria-label="Add trade">＋ <span class="desktoplabel">Trade</span></button><button class="avatar" aria-label="Profile">A</button></div></header>
+<div class="layout">
+<aside class="sidebar"><div class="navlabel">Workspace</div><a href="#overview" class="navitem active"><span class="ni">◫</span>Overview</a><a href="#markets" class="navitem"><span class="ni">⌁</span>Markets</a><a href="#trades" class="navitem"><span class="ni">⇄</span>Signals</a><a href="#risk" class="navitem"><span class="ni">◈</span>Signal status</a><a href="#performance" class="navitem"><span class="ni">▥</span>Performance</a><div class="navlabel">Personal</div><a href="#portfolio" class="navitem"><span class="ni">▤</span>Portfolio</a><div class="sidebottom"><strong>Trade with a plan.</strong>Signals here are published by TraderWatch. Confirmations are delivered through @Traderwatchmembershipbot.</div></aside>
+<main class="main" id="overview">
+<div class="heading"><div><div class="eyebrow" id="today">MEMBER DESK</div><h1 id="greet">Your trading desk<span style="color:var(--green)">.</span></h1><p>Live signals and published results — nothing estimated.</p></div><div class="date" id="planPill">◷ &nbsp; —</div></div>
+<section class="grid" aria-label="Trading account summary">
+<div class="card metric"><div class="metric-top">Net result <span class="metric-icon">◈</span></div><div class="metric-value" id="balance">—</div><div class="metric-foot"><strong id="balanceChange">—</strong> <span id="balanceNote">published results</span></div></div>
+<div class="card metric"><div class="metric-top">Active setups <span class="metric-icon">↗</span></div><div class="metric-value positive" id="netprofit">—</div><div class="metric-foot" id="netprofitNote">Live setup feed</div></div>
+<div class="card metric"><div class="metric-top">Win rate <span class="metric-icon">◎</span></div><div class="metric-value" id="winrate">—</div><div class="metric-foot"><strong id="winCount">—</strong> <span>of closed setups</span></div></div>
+<div class="card metric"><div class="metric-top">Closed setups <span class="metric-icon">⇄</span></div><div class="metric-value" id="tradecount">—</div><div class="metric-foot" id="tradecountNote">TP / SL / collected only</div></div>
+<div class="card chartcard" id="performance"><div class="section-head"><div><h2>Performance</h2><p id="chartSub">Cumulative pips · published results</p></div><div class="charttools" aria-label="Chart period"><button class="active" data-period="1W">1W</button><button data-period="1M">1M</button><button data-period="3M">3M</button></div></div><div class="chartwrap"><svg id="chart" viewBox="0 0 600 210" preserveAspectRatio="none" role="img" aria-label="Cumulative pips chart from published results"><defs><linearGradient id="fill" x1="0" x2="0" y1="0" y2="1"><stop offset="0%" stop-color="#b7f36b" stop-opacity=".2"/><stop offset="100%" stop-color="#b7f36b" stop-opacity="0"/></linearGradient></defs><g stroke="#ffffff0b" stroke-width="1"><path d="M0 25H600 M0 70H600 M0 115H600 M0 160H600 M0 205H600"/></g><path id="area" fill="url(#fill)" d=""/><path id="line" fill="none" stroke="#b7f36b" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" d=""/><circle id="dot" r="4" fill="#b7f36b" stroke="#12151a" stroke-width="2" cx="0" cy="0"/></svg></div><div class="chartlabels" id="chartlabels"></div><div class="charttip"><span>Cumulative pips</span><span class="positive" id="chartreturn">—</span></div></div>
+<div class="card watchcard" id="markets"><div class="section-head"><div><h2>Signal watch</h2><p>Published setups · live status</p></div><button class="viewall" id="editMarkets" type="button">Refresh ↗</button></div>
+<div class="watchrow"><div class="pair"><div class="coin">·</div><div><div class="pairname">Loading signal</div><div class="pairsub">Waiting for account data</div></div></div><div class="price">—<small>—</small></div></div>
+<div class="watchrow"><div class="pair"><div class="coin blue">·</div><div><div class="pairname">Loading signal</div><div class="pairsub">Waiting for account data</div></div></div><div class="price">—<small>—</small></div></div>
+<div class="watchrow"><div class="pair"><div class="coin purple">·</div><div><div class="pairname">Loading signal</div><div class="pairsub">Waiting for account data</div></div></div><div class="price">—<small>—</small></div></div>
+<div class="watchrow"><div class="pair"><div class="coin">·</div><div><div class="pairname">Loading signal</div><div class="pairsub">Waiting for account data</div></div></div><div class="price">—<small>—</small></div></div>
+</div>
+<div class="card tradecard" id="trades"><div class="section-head"><div><h2>Published signals</h2><p>Verified setups from your TraderWatch account</p></div><button class="viewall" id="addTrade" type="button">Refresh</button></div><div class="tablewrap"><table><thead><tr><th>Instrument</th><th>Direction</th><th>Result</th><th>Outcome</th></tr></thead><tbody id="tradeRows"><tr><td colspan="4" class="empty">Loading published signals…</td></tr></tbody></table></div><div class="empty" id="tradeEmpty" hidden>No published signals for this account yet.</div><div style="display:flex;justify-content:space-between;align-items:center;margin-top:12px"><span id="tradeFoot" style="font-size:10px;color:var(--muted)">Source: TraderWatch Supabase · verified signals only</span><button class="viewall" id="allTrades" type="button" hidden>View all →</button></div></div>
+<div class="card riskcard" id="risk"><div class="section-head"><div><h2>Signal status</h2><p>Published setup breakdown</p></div><span class="metric-icon">◈</span></div><div style="color:var(--muted);font-size:12px">Setups currently running</div><div class="riskbig"><span id="riskused">—</span><span style="font-size:14px;color:var(--muted);font-weight:500"> active</span></div><div class="progress"><span id="riskbar"></span></div><div style="display:flex;justify-content:space-between;font-size:10px;color:var(--muted)"><span id="riskpct">—</span><span id="riskremain">—</span></div><div class="riskstats"><div><small>Data source</small><strong id="riskSrc">—</strong></div><div><small>Status feed</small><strong id="riskFeed">—</strong></div></div><div class="note" style="margin-top:14px">TP/SL results are confirmed from Swissquote M1 data and delivered through <b>@Traderwatchmembershipbot</b>.</div></div>
+</section>
+<footer style="padding:24px 0 0;color:#626c77;font-size:10px;display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap"><span>TRADER WATCH · Built for disciplined trading.</span><span id="footNote">Member dashboard · Published TraderWatch signals and results. Not financial advice.</span></footer>
+</main></div>
+<nav class="bottomnav" aria-label="Main navigation"><a class="active" href="#overview"><span>◫</span><span>Home</span></a><a href="#markets"><span>⌁</span><span>Markets</span></a><a href="#trades" aria-label="Signals"><span class="navadd">◆</span><span>Signals</span></a><a href="#performance"><span>▥</span><span>Stats</span></a><a href="#risk"><span>◈</span><span>Status</span></a></nav>
+</div>
+<script>
+(function(){
+'use strict';
+var SUPABASE_URL='https://vicfiftvhxemuhxxmkxk.supabase.co';
+var SUPABASE_KEY='sb_publishable_4LzgHiCMUXmXUOkPtvIHVw_F7ks9otV';
+var gate=document.getElementById('gate'),app=document.getElementById('app'),msg=document.getElementById('gateMsg');
+var $=function(id){return document.getElementById(id)};
+var esc=function(v){return String(v==null?'':v).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})};
+var code=function(v){return String(v||'').replace(/[^A-Za-z0-9]/g,'').toUpperCase()};
+var price=function(v,p){var n=Number(v);if(!Number.isFinite(n))return '—';var d=code(p)==='XAUUSD'?2:code(p)==='USDJPY'?3:5;return n.toFixed(d).replace(/0+$/,'').replace(/\.$/,'')};
+var parseISO=function(iso){var s=String(iso==null?'':iso).trim();if(!s)return null;if(!/([zZ]|[+-]\d{2}:?\d{2})$/.test(s))s=s.replace(' ','T')+'Z';var d=new Date(s);return isNaN(d.getTime())?null:d};
+var statusKey=function(pair,iso){try{var d=parseISO(iso);if(!d)return '';var q=new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Kuala_Lumpur',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',second:'2-digit',hourCycle:'h23'}).formatToParts(d).reduce(function(a,x){a[x.type]=x.value;return a},{});return code(pair)+'_'+q.year+q.month+q.day+'_'+q.hour+q.minute+q.second}catch(e){return ''}};
+var PERF_FROM='2026-10-18',PERF_LABEL='18 Oct 2026';
+var keyDate=function(k){var m=String(k==null?'':k).match(/_(\d{4})(\d{2})(\d{2})_(\d{2})(\d{2})(\d{2})$/);return m?m[1]+'-'+m[2]+'-'+m[3]:null};
+function perfSet(statuses){var out=[];Object.keys(statuses||{}).forEach(function(k){var v=statuses[k]||{},st=String(v.status||'').toLowerCase();if(st!=='tp'&&st!=='sl'&&st!=='collected')return;if(typeof v.pips!=='number')return;if(String(v.unit||'pips').toLowerCase()==='usd')return;var d=keyDate(k);if(!d||d<PERF_FROM)return;var mk=String(k).match(/_(\d{4})(\d{2})(\d{2})_(\d{2})(\d{2})(\d{2})$/),ts=mk?mk[1]+mk[2]+mk[3]+mk[4]+mk[5]+mk[6]:'';var cl=String(v.closed||'').replace(/[^0-9]/g,'').slice(0,14);out.push({k:k,d:d,pips:Number(v.pips),ts:ts||cl})});out.sort(function(a,b){return a.ts<b.ts?-1:(a.ts>b.ts?1:(a.k<b.k?-1:1))});return out}
+function setGate(t){if(msg)msg.textContent=t}
+function show(){gate.hidden=true;app.hidden=false}
+function redirect(){location.replace('../login.html?next='+encodeURIComponent(location.pathname+location.search))}
+function render(rows,statuses,member){
+ var xs=(rows||[]).map(function(s){var v=(statuses||{})[statusKey(s.pair,s.posted_at)]||{};return {s:s,v:v,status:v.status||'active'}});
+ var active=xs.filter(function(x){return x.status==='active'}),closed=xs.filter(function(x){return x.status!=='active'}),withPips=closed.filter(function(x){return typeof x.v.pips==='number'}),wins=withPips.filter(function(x){return Number(x.v.pips)>0}).length,total=withPips.reduce(function(a,x){return a+Number(x.v.pips||0)},0);
+ $('today').textContent=String(member.name||member.email||'MEMBER').toUpperCase();$('planPill').textContent='◷  '+String(member.plan||'free').toUpperCase()+' MEMBER';
+ var perf=perfSet(statuses),pWin=perf.filter(function(x){return x.pips>0}).length,pNet=perf.reduce(function(a,x){return a+x.pips},0),pSign=pNet>=0?'+':'−';
+ $('netprofit').textContent=String(active.length);$('netprofitNote').textContent='active published setups';
+ $('tradecount').textContent=perf.length?String(perf.length):'—';$('tradecountNote').textContent='closed results since '+PERF_LABEL;
+ $('winrate').textContent=perf.length?(pWin/perf.length*100).toFixed(1)+'%':'—';$('winCount').textContent=perf.length?(pWin+' wins of '+perf.length):'—';
+ $('balance').textContent=perf.length?(pSign+Math.abs(pNet).toFixed(1)+' pips'):'—';$('balanceChange').textContent=perf.length?'since '+PERF_LABEL:'—';$('balanceNote').textContent='published results since '+PERF_LABEL;
+ var wc=$('markets');wc.querySelector('.section-head h2').textContent='Signal watch';wc.querySelector('.section-head p').textContent='Published setups · live status';
+ wc.querySelectorAll('.watchrow').forEach(function(el,i){var x=xs[i];if(!x){el.remove();return}var s=x.s;el.innerHTML='<div class="pair"><div class="coin">'+(x.status==='active'?'•':'✓')+'</div><div><div class="pairname">'+esc(s.pair)+' · '+esc(s.side||'BUY')+'</div><div class="pairsub">E '+price(s.entry,s.pair)+' · '+esc(x.status.toUpperCase())+'</div></div></div><div class="price">'+price(s.entry,s.pair)+'<small class="'+(s.side==='SELL'?'negative':'positive')+'">SL '+price(s.sl,s.pair)+'</small></div>'});
+ var body=$('tradeRows');body.innerHTML='';xs.slice(0,10).forEach(function(x){var s=x.s,tr=document.createElement('tr');var label=x.status==='active'?'Active':String(x.status).toUpperCase();tr.innerHTML='<td><strong>'+esc(s.pair)+'</strong></td><td>'+esc(s.side||'—')+'</td><td>'+esc('E '+price(s.entry,s.pair)+' · TP '+price(s.tp,s.pair))+'</td><td><span class="badge '+(x.status==='active'?'open':(Number(x.v.pips)>0?'win':'loss'))+'">● '+esc(label)+'</span></td>';body.appendChild(tr)});if(!xs.length)body.innerHTML='<tr><td colspan="4" class="empty">No verified signals available.</td></tr>';
+ $('riskused').textContent=String(active.length);$('riskpct').textContent=active.length+' active';$('riskremain').textContent=closed.length+' closed';$('riskSrc').textContent='Supabase';$('riskFeed').textContent='Published';$('riskbar').style.width=rows.length?Math.min(100,active.length/rows.length*100)+'%':'0%';
+ var run=0,vals=perf.map(function(x){run+=x.pips;return run});
+ if(!perf.length){$('chartreturn').textContent='—';$('chartSub').textContent='No closed results since '+PERF_LABEL;$('line').setAttribute('d','');$('area').setAttribute('d','');return}
+ var min=Math.min.apply(null,vals.concat([0])),max=Math.max.apply(null,vals.concat([0])),range=max-min||1,pts=vals.map(function(v,i){return [i*600/(vals.length-1||1),198-(v-min)/range*170]}),d=pts.map(function(p,i){return(i?'L':'M')+p[0].toFixed(1)+' '+p[1].toFixed(1)}).join(' ');
+ $('line').setAttribute('d',d);$('area').setAttribute('d',d+' L600 210 L0 210 Z');$('dot').setAttribute('cx',pts[pts.length-1][0]);$('dot').setAttribute('cy',pts[pts.length-1][1]);
+ $('chartreturn').textContent=(run>=0?'+':'−')+Math.abs(run).toFixed(1)+' pips';$('chartSub').textContent='Cumulative pips · since '+PERF_LABEL;
+ var step=Math.max(1,Math.ceil(perf.length/7));
+ $('chartlabels').innerHTML=perf.filter(function(_,i){return i%step===0}).slice(0,7).map(function(x){return '<span>'+x.d.slice(8)+'/'+x.d.slice(5,7)+'</span>'}).join('');
+}
+async function boot(){try{if(!window.supabase||!window.supabase.createClient)throw Error('Supabase client unavailable');var sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY),r=await sb.auth.getSession(),session=r.data&&r.data.session;if(!session){setGate('Please sign in to open your member dashboard.');setTimeout(redirect,500);return}var p=await sb.from('profiles').select('name,plan').eq('id',session.user.id).single(),member=p.data||{name:session.user.email,plan:'free'};setGate('Loading published signals…');var st=await fetch('../signal-status.json?t='+Date.now(),{cache:'no-store'}),sj=st.ok?await st.json():{};var q=await sb.rpc('get_signals');if(q.error)throw q.error;render(q.data||[],sj.signals||{},member);show()}catch(e){setGate('Dashboard data is temporarily unavailable. Please try again.');console.error('TraderWatch dashboard:',e)}}
+$('refresh').onclick=function(){location.reload()};$('addTrade').onclick=function(){location.reload()};boot();
+})();
 
-  <script>
-    // Placeholder config - updated when deployed
-    const supabaseUrl = 'https://vicfiftvhxemuhxxmkxk.supabase.co';
-    const supabaseKey = 'sb_publishable_4LzgHiCMUXmXUOkPtvIHVw_F7ks9otV';
-    // Gunakan klien Supabase sedia ada dari TraderWatch repo jika ada
-    let supabaseClient = null;
-    try {
-      supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
-    } catch(e) {}
-
-    async function handleLogin() {
-      const email = document.getElementById('email').value;
-      const password = document.getElementById('password').value;
-      const msg = document.getElementById('msg');
-      msg.innerText = "Sedang masuk...";
-      
-      // Simulasi / sambungan sebenar Supabase
-      if(email && password) {
-        document.getElementById('login-form').style.display = 'none';
-        document.getElementById('dashboard').style.display = 'block';
-        loadSignals();
-      } else {
-        msg.innerText = "Sila masukkan email dan password.";
-      }
-    }
-
-    async function loadSignals() {
-      document.getElementById('signals-box').innerHTML = `
-        <div style="background:#1f2937; padding:12px; border-radius:6px; margin-top:8px;">
-          <strong>XAUUSD BUY</strong><br>
-          <small>Entry: 2750.00 | TP: 2770.00 | SL: 2740.00</small>
-        </div>
-      `;
-    }
-
-    function handleLogout() {
-      document.getElementById('dashboard').style.display = 'none';
-      document.getElementById('login-form').style.display = 'block';
-    }
-  </script>
-</body>
-</html>
+</script>
+</body></html>
