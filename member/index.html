@@ -62,7 +62,12 @@
 :root[data-theme="light"] .gate{background:var(--bg);color:var(--muted)}
 :root[data-theme="light"] .tw-modal{background:#0f172a66}
 :root[data-theme="light"] .tbtn{background:#fff;border-color:var(--line);color:var(--text)}
-@media(max-width:620px){.tvbox-chart{height:340px}.tvbox-list{height:380px}.tierpill{padding:7px 9px;font-size:10px}}
+.tvbox-live{height:420px;background:#000}
+.tvbox-live iframe{width:100%;height:100%;border:0;display:block}
+.livedot{display:inline-block;width:8px;height:8px;border-radius:50%;background:#ff4d4f;margin-right:7px;vertical-align:middle;box-shadow:0 0 0 0 #ff4d4f88;animation:livepulse 1.9s infinite}
+@keyframes livepulse{0%{box-shadow:0 0 0 0 #ff4d4f88}70%{box-shadow:0 0 0 9px #ff4d4f00}100%{box-shadow:0 0 0 0 #ff4d4f00}}
+@media(prefers-reduced-motion:reduce){.livedot{animation:none}}
+@media(max-width:620px){.tvbox-chart{height:340px}.tvbox-live{height:230px}.tvbox-list{height:380px}.tierpill{padding:7px 9px;font-size:10px}}
 </style>
 </head>
 <body>
@@ -88,6 +93,7 @@
 <div class="card tradecard" id="trades"><div class="section-head"><div><h2>Published signals</h2><p>Verified setups from your TraderWatch account</p></div><button class="viewall" id="addTrade" type="button">Refresh</button></div><div class="tablewrap"><table><thead><tr><th>Instrument</th><th>Direction</th><th>Result</th><th>Outcome</th></tr></thead><tbody id="tradeRows"><tr><td colspan="4" class="empty">Loading published signals…</td></tr></tbody></table></div><div class="empty" id="tradeEmpty" hidden>No published signals for this account yet.</div><div style="display:flex;justify-content:space-between;align-items:center;margin-top:12px"><span id="tradeFoot" style="font-size:10px;color:var(--muted)">Source: TraderWatch Supabase · verified signals only</span><button class="viewall" id="allTrades" type="button" hidden>View all →</button></div></div>
 <div class="card riskcard" id="risk"><div class="section-head"><div><h2>Signal status</h2><p>Published setup breakdown</p></div><span class="metric-icon">◈</span></div><div style="color:var(--muted);font-size:12px">Setups currently running</div><div class="riskbig"><span id="riskused">—</span><span style="font-size:14px;color:var(--muted);font-weight:500"> active</span></div><div class="progress"><span id="riskbar"></span></div><div style="display:flex;justify-content:space-between;font-size:10px;color:var(--muted)"><span id="riskpct">—</span><span id="riskremain">—</span></div><div class="riskstats"><div><small>Data source</small><strong id="riskSrc">—</strong></div><div><small>Status feed</small><strong id="riskFeed">—</strong></div></div><div class="note" style="margin-top:14px">TP/SL results are confirmed from Swissquote M1 data and delivered through <b>@Traderwatchmembershipbot</b>.</div></div>
 </section>
+<div class="card livecard" id="liveCard"><div class="section-head"><div><h2><span class="livedot"></span>Market live</h2><p id="liveSub">Bloomberg Business News Live · autoplay with sound</p></div><button class="viewall" id="liveSound" type="button">🔊 Enable sound</button></div><div class="tvbox tvbox-live" id="ytLive"></div><div class="note" id="liveNote" style="margin-top:10px">Autoplay with audio is requested. If your browser or Telegram blocks it, tap <b>Enable sound</b> once — the stream keeps playing.</div></div>
 <div class="card" id="tgcard" class="card" style="margin-top:14px"><div class="section-head"><div><h2>Telegram Link</h2><p id="tgSub">Alert notifications delivered via @Traderwatchmembershipbot</p></div><span class="metric-icon">✉</span></div><div id="tgBody" class="tg-body"><div id="tgStatus">—</div><a id="tgCta" href="https://t.me/Traderwatchmembershipbot" target="_blank" style="display:inline-block;padding:10px 17px;background:#0088cc;color:#fff;text-decoration:none;border-radius:10px;font-size:13px;font-weight:700">Connect Telegram →</a></div></div>
 <div class="card tvcard" id="tvChartCard"><div class="section-head"><div><h2>Live market chart</h2><p>TradingView · 12M · symbol changeable</p></div><span class="metric-icon">▥</span></div><div class="tvbox tvbox-chart" id="tvChart"></div></div>
 <div class="card tvcard" id="tvNewsCard"><div class="section-head"><div><h2>Market news</h2><p>TradingView news feed · all symbols</p></div><span class="metric-icon">✉</span></div><div class="tvbox tvbox-list" id="tvNews"></div></div>
@@ -136,10 +142,25 @@ function applyTheme(t,remount){document.documentElement.setAttribute('data-theme
  var s=$('setThemeBtn');if(s)s.textContent=t==='light'?'Switch to dark mode':'Switch to light mode';
  var m=document.querySelector('meta[name="theme-color"]');if(m)m.setAttribute('content',t==='light'?'#f4f6f8':'#0b0d10');
  if(remount)mountAllTv()}
+var LIVE_ID='QB5BNdBFujE',liveReady=false;
+function ytFrame(){var el=$('ytLive');return el?el.querySelector('iframe'):null}
+function ytCmd(func,args){var f=ytFrame();if(!f||!f.contentWindow)return false;try{f.contentWindow.postMessage(JSON.stringify({event:'command',func:func,args:args||[]}),'*');return true}catch(e){return false}}
+function liveSoundOn(){ytCmd('unMute');ytCmd('setVolume',[100]);ytCmd('playVideo');var b=$('liveSound');if(b){b.textContent='\u{1F50A} Sound on \u2713';setTimeout(function(){if(b)b.hidden=true},1500)}}
+function mountLive(){var el=$('ytLive');if(!el||el.querySelector('iframe'))return;
+ var src='https://www.youtube.com/embed/'+LIVE_ID+'?autoplay=1&mute=0&playsinline=1&rel=0&modestbranding=1&enablejsapi=1&origin='+encodeURIComponent(location.origin);
+ var f=document.createElement('iframe');f.id='ytFrame';f.title='TraderWatch live market stream';
+ f.setAttribute('allow','autoplay; encrypted-media; picture-in-picture; fullscreen; clipboard-write');
+ f.setAttribute('allowfullscreen','');f.setAttribute('referrerpolicy','origin');
+ f.src=src;el.appendChild(f);
+ try{if(localStorage.getItem('tw-live-sound')==='1')setTimeout(liveSoundOn,1200)}catch(e){}}
+window.addEventListener('message',function(e){try{var d=typeof e.data==='string'?JSON.parse(e.data):e.data;if(!d||!d.event)return;
+ if(d.event==='onReady'){liveReady=true;ytCmd('playVideo');ytCmd('unMute');ytCmd('setVolume',[100])}
+ if(d.event==='onStateChange'&&Number(d.info)===1){var b=$('liveSound');if(b)b.hidden=true}}catch(x){}});
+var _soundTried=false;function liveFirstGesture(){if(_soundTried)return;_soundTried=true;liveSoundOn();try{localStorage.setItem('tw-live-sound','1')}catch(e){}}
 function openSettings(){var m=$('settingsModal');if(m)m.hidden=false}
 function closeSettings(){var m=$('settingsModal');if(m)m.hidden=true}
 function setGate(t){if(msg)msg.textContent=t}
-function show(){gate.hidden=true;app.hidden=false;mountAllTv()}
+function show(){gate.hidden=true;app.hidden=false;mountAllTv();mountLive()}
 function redirect(){location.replace('../login.html?next='+encodeURIComponent(location.pathname+location.search))}
 function render(rows,statuses,member){
  var xs=(rows||[]).map(function(s){var v=(statuses||{})[statusKey(s.pair,s.posted_at)]||{};return {s:s,v:v,status:v.status||'active'}});
@@ -177,7 +198,10 @@ $('avatarBtn').onclick=openSettings;$('settingsClose').onclick=closeSettings;
 $('settingsModal').addEventListener('click',function(e){if(e.target===$('settingsModal'))closeSettings()});
 document.addEventListener('keydown',function(e){if(e.key==='Escape')closeSettings()});
 $('signOutBtn').onclick=function(){if(SB){SB.auth.signOut().then(function(){location.replace('../login.html')})}else{location.replace('../login.html')}};
-$('addTrade').onclick=function(){location.reload()};boot();
+$('addTrade').onclick=function(){location.reload()};
+$('liveSound').onclick=function(){liveSoundOn();try{localStorage.setItem('tw-live-sound','1')}catch(e){}};
+document.addEventListener('pointerdown',liveFirstGesture,{once:true});
+boot();
 })();
 
 </script>
