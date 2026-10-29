@@ -24,11 +24,51 @@
 .watchrow .price .badge{display:block;margin-top:3px}
 @media(prefers-reduced-motion:reduce){.gatespin{animation:none;border-top-color:#252b33}}
 </style>
+<style>
+.tvbox{width:100%;border-radius:14px;overflow:hidden;background:#0e1116}
+.tvbox-chart{height:460px}
+.tvbox-list{height:430px}
+:root[data-theme="light"] .tvbox{background:#f7f9fb}
+.tierpill{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);background:var(--panel);color:var(--muted);border-radius:11px;padding:8px 12px;font-size:11px;font-weight:800;letter-spacing:.09em;text-transform:uppercase;white-space:nowrap}
+.tierpill.free{color:var(--muted);border-color:var(--line)}
+.tierpill.pro{color:#8ab4ff;border-color:#8ab4ff55;background:#8ab4ff12}
+.tierpill.max{color:var(--green);border-color:#b7f36b55;background:#b7f36b12}
+.tw-modal{position:fixed;inset:0;z-index:90;display:flex;align-items:center;justify-content:center;padding:20px;background:#05070ad9;backdrop-filter:blur(6px)}
+.tw-modal[hidden]{display:none}
+.tw-modal-card{width:min(430px,100%);background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:20px;box-shadow:0 24px 70px #00000080}
+.tw-modal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.tw-modal-head h2{margin:0;font-size:17px;letter-spacing:-.02em}
+.tw-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:11px 0;border-bottom:1px solid var(--line);font-size:12px;color:var(--muted)}
+.tw-row strong{color:var(--text);font-weight:700;text-align:right;word-break:break-all}
+.tw-actions{display:flex;flex-direction:column;gap:9px;margin-top:16px}
+.tbtn{border:1px solid var(--line);background:var(--panel2);color:var(--text);border-radius:11px;padding:11px 14px;font-size:13px;font-weight:700;cursor:pointer;text-align:center;text-decoration:none}
+.tbtn:hover{border-color:var(--green)}
+.tbtn.primary{background:#0088cc;border-color:#0088cc;color:#fff}
+.tbtn.danger{color:var(--red);border-color:#ff777d55}
+:root[data-theme="light"]{--bg:#f4f6f8;--panel:#ffffff;--panel2:#f7f9fb;--line:#e2e7ee;--text:#121821;--muted:#5c6875;--green:#3f9d1f;--red:#cf3f4b;--blue:#2f6fd0}
+:root[data-theme="light"] body{background:radial-gradient(ellipse at 80% -20%,#e6f2df 0,transparent 38%),var(--bg);color:var(--text)}
+:root[data-theme="light"] .topbar{background:#fffffff0;border-bottom-color:#00000012}
+:root[data-theme="light"] .card{background:linear-gradient(145deg,#ffffff,#f7f9fb 75%);border-color:var(--line)}
+:root[data-theme="light"] .bottomnav{background:#fffffff5;border-top-color:#00000012}
+:root[data-theme="light"] .iconbtn,:root[data-theme="light"] .avatar,:root[data-theme="light"] .pillbtn{background:#fff;border-color:var(--line);color:var(--text)}
+:root[data-theme="light"] .avatar{background:#e8f2e2;color:#2f7d16}
+:root[data-theme="light"] .navitem{color:#4b5563}
+:root[data-theme="light"] .navitem:hover,:root[data-theme="light"] .navitem.active{background:#3f9d1f12;border-color:#3f9d1f33;color:#2f7d16}
+:root[data-theme="light"] .navlabel{color:#8a939e}
+:root[data-theme="light"] .sidebottom{background:#fff;border-color:var(--line)}
+:root[data-theme="light"] table th{color:var(--muted);border-bottom-color:var(--line)}
+:root[data-theme="light"] table td,:root[data-theme="light"] .watchrow{border-bottom-color:#eef2f7}
+:root[data-theme="light"] .note,:root[data-theme="light"] #tradeFoot{color:#7b8794}
+:root[data-theme="light"] .gate{background:var(--bg);color:var(--muted)}
+:root[data-theme="light"] .tw-modal{background:#0f172a66}
+:root[data-theme="light"] .tbtn{background:#fff;border-color:var(--line);color:var(--text)}
+@media(max-width:620px){.tvbox-chart{height:340px}.tvbox-list{height:380px}.tierpill{padding:7px 9px;font-size:10px}}
+</style>
 </head>
 <body>
 <div class="gate" id="gate"><div class="gatespin"></div><p id="gateMsg">Checking your session…</p></div>
 <div class="app" id="app" hidden>
-<header class="topbar"><div class="brand"><div class="logo">T</div><div>TRADER WATCH<small>Trading workspace</small></div></div><div class="top-actions"><button class="iconbtn" id="refresh" aria-label="Refresh dashboard" title="Refresh">↻</button><button class="iconbtn" id="addTop" aria-label="Add trade">＋ <span class="desktoplabel">Trade</span></button><button class="avatar" aria-label="Profile">A</button></div></header>
+<header class="topbar"><div class="brand"><div class="logo">T</div><div>TRADER WATCH<small>Trading workspace</small></div></div><div class="top-actions"><button class="iconbtn" id="themeBtn" aria-label="Toggle light or dark theme" title="Switch theme">🌙</button><span class="tierpill free" id="tierBadge" title="Your membership tier">FREE</span><button class="avatar" id="avatarBtn" aria-label="Open account settings" title="Settings">A</button></div></header>
 <div class="layout">
 <aside class="sidebar"><div class="navlabel">Workspace</div><a href="#overview" class="navitem active"><span class="ni">◫</span>Overview</a><a href="#markets" class="navitem"><span class="ni">⌁</span>Markets</a><a href="#trades" class="navitem"><span class="ni">⇄</span>Signals</a><a href="#risk" class="navitem"><span class="ni">◈</span>Signal status</a><a href="#performance" class="navitem"><span class="ni">▥</span>Performance</a><div class="navlabel">Personal</div><a href="#portfolio" class="navitem"><span class="ni">▤</span>Portfolio</a><div class="sidebottom"><strong>Trade with a plan.</strong>Signals here are published by TraderWatch. Confirmations are delivered through @Traderwatchmembershipbot.</div></aside>
 <main class="main" id="overview">
@@ -49,6 +89,21 @@
 <div class="card riskcard" id="risk"><div class="section-head"><div><h2>Signal status</h2><p>Published setup breakdown</p></div><span class="metric-icon">◈</span></div><div style="color:var(--muted);font-size:12px">Setups currently running</div><div class="riskbig"><span id="riskused">—</span><span style="font-size:14px;color:var(--muted);font-weight:500"> active</span></div><div class="progress"><span id="riskbar"></span></div><div style="display:flex;justify-content:space-between;font-size:10px;color:var(--muted)"><span id="riskpct">—</span><span id="riskremain">—</span></div><div class="riskstats"><div><small>Data source</small><strong id="riskSrc">—</strong></div><div><small>Status feed</small><strong id="riskFeed">—</strong></div></div><div class="note" style="margin-top:14px">TP/SL results are confirmed from Swissquote M1 data and delivered through <b>@Traderwatchmembershipbot</b>.</div></div>
 </section>
 <div class="card" id="tgcard" class="card" style="margin-top:14px"><div class="section-head"><div><h2>Telegram Link</h2><p id="tgSub">Alert notifications delivered via @Traderwatchmembershipbot</p></div><span class="metric-icon">✉</span></div><div id="tgBody" class="tg-body"><div id="tgStatus">—</div><a id="tgCta" href="https://t.me/Traderwatchmembershipbot" target="_blank" style="display:inline-block;padding:10px 17px;background:#0088cc;color:#fff;text-decoration:none;border-radius:10px;font-size:13px;font-weight:700">Connect Telegram →</a></div></div>
+<div class="card tvcard" id="tvChartCard"><div class="section-head"><div><h2>Live market chart</h2><p>TradingView · 12M · symbol changeable</p></div><span class="metric-icon">▥</span></div><div class="tvbox tvbox-chart" id="tvChart"></div></div>
+<div class="card tvcard" id="tvNewsCard"><div class="section-head"><div><h2>Market news</h2><p>TradingView news feed · all symbols</p></div><span class="metric-icon">✉</span></div><div class="tvbox tvbox-list" id="tvNews"></div></div>
+<div class="card tvcard" id="tvCalCard"><div class="section-head"><div><h2>Economic calendar</h2><p>TradingView · high &amp; medium impact</p></div><span class="metric-icon">◷</span></div><div class="tvbox tvbox-list" id="tvCal"></div></div>
+<div class="tw-modal" id="settingsModal" hidden><div class="tw-modal-card" role="dialog" aria-modal="true" aria-labelledby="settingsTitle">
+<div class="tw-modal-head"><h2 id="settingsTitle">Account settings</h2><button class="iconbtn" id="settingsClose" aria-label="Close settings">✕</button></div>
+<div class="tw-row"><span>Name</span><strong id="setName">—</strong></div>
+<div class="tw-row"><span>Email</span><strong id="setEmail">—</strong></div>
+<div class="tw-row"><span>Membership</span><strong id="setPlan">—</strong></div>
+<div class="tw-row"><span>Telegram alerts</span><strong id="setTg">—</strong></div>
+<div class="tw-actions">
+<button class="tbtn" id="setThemeBtn" type="button">Switch to light mode</button>
+<a class="tbtn primary" id="setTgBtn" href="https://t.me/Traderwatchmembershipbot" target="_blank" rel="noopener">Link Telegram</a>
+<button class="tbtn danger" id="signOutBtn" type="button">Sign out</button>
+</div>
+</div></div>
 <footer style="padding:24px 0 0;color:#626c77;font-size:10px;display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap"><span>TRADER WATCH · Built for disciplined trading.</span><span id="footNote">Member dashboard · Published TraderWatch signals and results. Not financial advice.</span></footer>
 </main></div>
 <nav class="bottomnav" aria-label="Main navigation"><a class="active" href="#overview"><span>◫</span><span>Home</span></a><a href="#markets"><span>⌁</span><span>Markets</span></a><a href="#trades" aria-label="Signals"><span class="navadd">◆</span><span>Signals</span></a><a href="#performance"><span>▥</span><span>Stats</span></a><a href="#risk"><span>◈</span><span>Status</span></a></nav>
@@ -68,13 +123,33 @@ var statusKey=function(pair,iso){try{var d=parseISO(iso);if(!d)return '';var q=n
 var PERF_FROM='2026-10-18',PERF_LABEL='18 Oct 2026';
 var keyDate=function(k){var m=String(k==null?'':k).match(/_(\d{4})(\d{2})(\d{2})_(\d{2})(\d{2})(\d{2})$/);return m?m[1]+'-'+m[2]+'-'+m[3]:null};
 function perfSet(statuses){var out=[];Object.keys(statuses||{}).forEach(function(k){var v=statuses[k]||{},st=String(v.status||'').toLowerCase();if(st!=='tp'&&st!=='sl'&&st!=='collected')return;if(typeof v.pips!=='number')return;if(String(v.unit||'pips').toLowerCase()==='usd')return;var d=keyDate(k);if(!d||d<PERF_FROM)return;var mk=String(k).match(/_(\d{4})(\d{2})(\d{2})_(\d{2})(\d{2})(\d{2})$/),ts=mk?mk[1]+mk[2]+mk[3]+mk[4]+mk[5]+mk[6]:'';var cl=String(v.closed||'').replace(/[^0-9]/g,'').slice(0,14);out.push({k:k,d:d,pips:Number(v.pips),ts:ts||cl})});out.sort(function(a,b){return a.ts<b.ts?-1:(a.ts>b.ts?1:(a.k<b.k?-1:1))});return out}
+var SB=null;
+var TV='https://s3.tradingview.com/external-embedding/embed-widget-';
+function themeNow(){return document.documentElement.getAttribute('data-theme')||'dark'}
+function mountTv(el,src,cfg){if(!el)return;el.innerHTML='';var d=document.createElement('div');d.className='tradingview-widget-container';var i=document.createElement('div');i.className='tradingview-widget-container__widget';d.appendChild(i);var s=document.createElement('script');s.type='text/javascript';s.src=src;s.async=true;s.innerHTML=JSON.stringify(cfg);d.appendChild(s);el.appendChild(d)}
+function mountAllTv(){var t=themeNow();
+ mountTv($('tvChart'),TV+'advanced-chart.js',{autosize:true,symbol:'OANDA:XAUUSD',interval:'D',timeframe:'12M',timezone:'Asia/Kuala_Lumpur',theme:t,style:'1',locale:'en',allow_symbol_change:true,withdateranges:true,hide_side_toolbar:false,support_host:'https://www.tradingview.com'});
+ mountTv($('tvNews'),TV+'timeline.js',{feedMode:'all_symbols',isTransparent:true,displayMode:'regular',width:'100%',height:'100%',colorTheme:t,locale:'en'});
+ mountTv($('tvCal'),TV+'events.js',{colorTheme:t,isTransparent:true,width:'100%',height:'100%',locale:'en',importanceFilter:'-1,0,1',countryFilter:'us,eu,gb,jp,au,ca,ch,cn,nz'})}
+function applyTheme(t,remount){document.documentElement.setAttribute('data-theme',t);try{localStorage.setItem('tw-theme',t)}catch(e){}
+ var b=$('themeBtn');if(b){b.textContent=t==='light'?'\u2600':'\u{1F319}';b.title=t==='light'?'Switch to dark mode':'Switch to light mode'}
+ var s=$('setThemeBtn');if(s)s.textContent=t==='light'?'Switch to dark mode':'Switch to light mode';
+ var m=document.querySelector('meta[name="theme-color"]');if(m)m.setAttribute('content',t==='light'?'#f4f6f8':'#0b0d10');
+ if(remount)mountAllTv()}
+function openSettings(){var m=$('settingsModal');if(m)m.hidden=false}
+function closeSettings(){var m=$('settingsModal');if(m)m.hidden=true}
 function setGate(t){if(msg)msg.textContent=t}
-function show(){gate.hidden=true;app.hidden=false}
+function show(){gate.hidden=true;app.hidden=false;mountAllTv()}
 function redirect(){location.replace('../login.html?next='+encodeURIComponent(location.pathname+location.search))}
 function render(rows,statuses,member){
  var xs=(rows||[]).map(function(s){var v=(statuses||{})[statusKey(s.pair,s.posted_at)]||{};return {s:s,v:v,status:v.status||'active'}});
  var active=xs.filter(function(x){return x.status==='active'}),closed=xs.filter(function(x){return x.status!=='active'}),withPips=closed.filter(function(x){return typeof x.v.pips==='number'}),wins=withPips.filter(function(x){return Number(x.v.pips)>0}).length,total=withPips.reduce(function(a,x){return a+Number(x.v.pips||0)},0);
  $('today').textContent=String(member.name||member.email||'MEMBER').toUpperCase();$('planPill').textContent='◷  '+String(member.plan||'free').toUpperCase()+' MEMBER';
+ var plan=String(member.plan||'free').toLowerCase(),planUp=plan.toUpperCase();
+ var tb=$('tierBadge');if(tb){tb.textContent=planUp;tb.className='tierpill '+plan;tb.title=planUp+' membership'}
+ $('setName').textContent=member.name||'\u2014';$('setEmail').textContent=member.email||'\u2014';$('setPlan').textContent=planUp;
+ $('setTg').textContent=member.telegram_chat_id?'Linked':'Not linked';
+ $('setTgBtn').textContent=member.telegram_chat_id?'Open @Traderwatchmembershipbot':'Link Telegram';
  var perf=perfSet(statuses),pWin=perf.filter(function(x){return x.pips>0}).length,pNet=perf.reduce(function(a,x){return a+x.pips},0),pSign=pNet>=0?'+':'−';
  $('netprofit').textContent=String(active.length);$('netprofitNote').textContent='active published setups';
  $('tradecount').textContent=perf.length?String(perf.length):'—';$('tradecountNote').textContent='closed results since '+PERF_LABEL;
@@ -93,8 +168,16 @@ function render(rows,statuses,member){
  $('chartlabels').innerHTML=perf.filter(function(_,i){return i%step===0}).slice(0,7).map(function(x){return '<span>'+x.d.slice(8)+'/'+x.d.slice(5,7)+'</span>'}).join('');
 $('tgStatus').innerHTML=member.telegram_chat_id?'<span class="tg-connected">✓ Linked · notifications to '+esc(String(member.telegram_chat_id))+'</span>':'<span class="tg-unlinked">✗ Not linked — connect below</span>';$('tgSub').textContent=member.telegram_chat_id?'Linked Telegram account receives live alert notifications':'Connect Telegram to receive live alert notifications';$('tgCta').textContent=member.telegram_chat_id?'Open @Traderwatchmembershipbot':'Connect Telegram →';$('tgCta').style.background=member.telegram_chat_id?'#b7f36b':'#0088cc';$('tgCta').style.color=member.telegram_chat_id?'#0b0d10':'#fff';
 }
-async function boot(){try{if(!window.supabase||!window.supabase.createClient)throw Error('Supabase client unavailable');var sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY),r=await sb.auth.getSession(),session=r.data&&r.data.session;if(!session){setGate('Please sign in to open your member dashboard.');setTimeout(redirect,500);return}var p=await sb.from('profiles').select('name,plan,telegram_chat_id').eq('id',session.user.id).single(),member=p.data||{name:session.user.email,plan:'free',telegram_chat_id:null};setGate('Loading published signals…');var st=await fetch('../signal-status.json?t='+Date.now(),{cache:'no-store'}),sj=st.ok?await st.json():{};var q=await sb.rpc('get_signals');if(q.error)throw q.error;render(q.data||[],sj.signals||{},member);show()}catch(e){setGate('Dashboard data is temporarily unavailable. Please try again.');console.error('TraderWatch dashboard:',e)}}
-$('refresh').onclick=function(){location.reload()};$('addTrade').onclick=function(){location.reload()};boot();
+async function boot(){try{if(!window.supabase||!window.supabase.createClient)throw Error('Supabase client unavailable');var sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY),r=await sb.auth.getSession(),session=r.data&&r.data.session;if(!session){setGate('Please sign in to open your member dashboard.');setTimeout(redirect,500);return}var p=await sb.from('profiles').select('name,plan,telegram_chat_id').eq('id',session.user.id).single(),member=p.data||{name:session.user.email,plan:'free',telegram_chat_id:null};member.email=member.email||session.user.email;setGate('Loading published signals…');var st=await fetch('../signal-status.json?t='+Date.now(),{cache:'no-store'}),sj=st.ok?await st.json():{};var q=await sb.rpc('get_signals');if(q.error)throw q.error;render(q.data||[],sj.signals||{},member);show()}catch(e){setGate('Dashboard data is temporarily unavailable. Please try again.');console.error('TraderWatch dashboard:',e)}}
+var savedTheme='dark';try{savedTheme=localStorage.getItem('tw-theme')||'dark'}catch(e){}
+applyTheme(savedTheme,false);
+$('themeBtn').onclick=function(){applyTheme(themeNow()==='light'?'dark':'light',true)};
+$('setThemeBtn').onclick=function(){applyTheme(themeNow()==='light'?'dark':'light',true)};
+$('avatarBtn').onclick=openSettings;$('settingsClose').onclick=closeSettings;
+$('settingsModal').addEventListener('click',function(e){if(e.target===$('settingsModal'))closeSettings()});
+document.addEventListener('keydown',function(e){if(e.key==='Escape')closeSettings()});
+$('signOutBtn').onclick=function(){if(SB){SB.auth.signOut().then(function(){location.replace('../login.html')})}else{location.replace('../login.html')}};
+$('addTrade').onclick=function(){location.reload()};boot();
 })();
 
 </script>
