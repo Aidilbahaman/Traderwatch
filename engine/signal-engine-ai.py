@@ -280,6 +280,31 @@ def in_session(now=None):
     return h >= 8 or h < 1
 
 
+def h1_trend(bars_m15):
+    """Trend H1 daripada agregat M15: +1 UP, -1 DOWN, 0 tidak jelas.
+
+    4 bar M15 = 1 jam. EMA20/EMA50 atas 60 jam (~240 bar M15).
+    """
+    closes = [b[3] for b in bars_m15]
+    if len(closes) < 240:
+        return 0
+    h1 = [closes[i] for i in range(3, len(closes), 4)]
+    if len(h1) < 60:
+        return 0
+    e20, e50 = M.ema(h1, 20), M.ema(h1, 50)
+    gap = (e20[-1] - e50[-1]) / max(1e-9, e20[-1])
+    if gap > 0.0005:
+        return 1
+    if gap < -0.0005:
+        return -1
+    return 0
+
+
+# Pair yang wajib ikut arah H1 (peraturan owner 30 Okt 2026):
+# XAU/USD dilarang counter-trend selepas BUY #185 dalam downtrend.
+TREND_FOLLOW_PAIRS = {"XAU/USD"}
+
+
 def decide(model, bars):
     """Return (side, confidence) or (None, 0.0)."""
     closes = [b[3] for b in bars]
@@ -310,6 +335,16 @@ def decide(model, bars):
     conf = max(p_long, p_short)
     if conf < THRESHOLD:
         return None, conf
+    if model.get("_pair") in TREND_FOLLOW_PAIRS:
+        tr = h1_trend(bars)
+        want = "BUY" if tr > 0 else ("SELL" if tr < 0 else None)
+        if want is None:
+            log(f"TREND-SKIP {model.get('_pair')}: H1 tidak jelas, counter-trend dilarang")
+            return None, conf
+        if side != want:
+            log(f"TREND-SKIP {model.get('_pair')}: model {side} lawan H1 "
+                f"({'UP' if tr > 0 else 'DOWN'}), disekat")
+            return None, conf
     return side, conf
 
 
@@ -352,6 +387,15 @@ def notify_owner(pair, side, row, conf, txt):
         icon = "\U0001f7e2 BUY" if str(side).upper() == "BUY" else "\U0001f534 SELL"
         rr = (abs(float(row["tp"]) - float(row["entry"]))
               / max(1e-9, abs(float(row["entry"]) - float(row["sl"]))))
+        sl_pips = abs(float(row["entry"]) - float(row["sl"])) / M.pip_of(pair)
+        # Anggaran risiko wang pada 0.01 lot (akaun kecil): FX ≈ $1/pip/lot penuh,
+        # XAU ≈ $1 per $1 per oz → 0.01 lot = 1 oz ≈ $1 per $1 gerak.
+        if pair == "XAU/USD":
+            risk_usd = sl_pips * 0.1
+        else:
+            risk_usd = sl_pips * 0.1
+        acct_note = (f"\n\u26a0\ufe0f Risiko ≈ <b>${risk_usd:.0f}</b> pada 0.01 lot"
+                     + (" — akaun bawah $100, pertimbang skip atau lot lebih kecil" if risk_usd > 5 else ""))
         arrow = "\u2b06\ufe0f" if str(side).upper() == "BUY" else "\u2b07\ufe0f"
         msg = (f"\U0001f916 <b>AI CADANGAN (draft #{sid})</b>\n"
                f"\U0001f4ca <b>{pair}</b> \u00b7 M15\n"
@@ -359,7 +403,7 @@ def notify_owner(pair, side, row, conf, txt):
                f"\U0001f3af Entry <code>{row['entry']}</code>\n"
                f"\U0001f6e1\ufe0f SL <code>{row['sl']}</code> | "
                f"\U0001f3af TP <code>{row['tp']}</code> (RR 1:{rr:.1f})\n"
-               f"\U0001f9e0 Confidence {conf:.3f}\n\n"
+               f"\U0001f9e0 Confidence {conf:.3f}{acct_note}\n\n"
                f"Balas di bot: <b>Post</b> untuk hantar ke member, "
                f"<b>Tolak</b> untuk buang draft ini.")
         data = urllib.parse.urlencode(
