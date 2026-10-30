@@ -41,6 +41,7 @@ CANDLES = 300
 REPO = HERE.parent
 STATUS_FILE = REPO / "signal-status.json"
 MODEL_FILE = REPO / "state" / "ai-m15-model.json"
+MEMO_FILE = REPO / "state" / "learning-memo.json"
 LOCK = Path("/tmp/signal-engine-ai.lock")
 
 THRESHOLD = 0.55
@@ -212,6 +213,18 @@ def lifecycle_state():
         return json.loads(p.read_text())
     except Exception:
         return {}
+
+
+def gated_by_memo(pair):
+    """True jika learning-memo gate pair ini (WR<25% / net<=-25, min 5 setups).
+
+    Fail open bila memo tiada — gate prestasi, bukan gate keselamatan.
+    """
+    try:
+        gates = (json.loads(MEMO_FILE.read_text()).get("gates") or {}).get("pairs") or []
+        return pair.replace("/", "").upper() in {str(g).upper() for g in gates}
+    except Exception:
+        return False
 
 
 def pair_blocked(pair, state, life):
@@ -393,6 +406,10 @@ def main():
             if pair not in models:
                 skipped += 1
                 continue
+            if gated_by_memo(pair):
+                log(f"GATE {pair}: disekat learning-memo (prestasi lemah)")
+                skipped += 1
+                continue
             if pair_blocked(pair, state, life):
                 log(f"SKIP {pair}: existing active setup")
                 skipped += 1
@@ -428,6 +445,11 @@ def main():
             side, conf = decide(model, bars)
             if side is None:
                 log(f"HOLD {pair} {TIMEFRAME}: conf {conf:.3f} < {THRESHOLD}")
+                time.sleep(CALL_GAP)
+                continue
+
+            if gated_by_memo(pair):
+                log(f"GATE {pair} {TIMEFRAME} {side} conf={conf:.3f}: disekat memo (skip)")
                 time.sleep(CALL_GAP)
                 continue
 
