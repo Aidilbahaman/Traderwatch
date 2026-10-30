@@ -328,14 +328,20 @@ OWNER_CHAT_ID = "7696607055"
 def notify_owner(pair, side, row, conf, txt):
     """Hantar cadangan draft kepada owner secara private (Telegram).
 
+    Sender: @CCSTWbot (BOT_TOKEN dalam /home/ubuntu/tw-bot/.env) supaya
+    nampak sebagai chat dengan bot admin, bukan sender member.
     Fail-safe: sebarang kegagalan hantar TIDAK menggagalkan engine run;
     draft kekal dalam Supabase verified=false untuk review manual.
     """
     try:
-        bot_tok = load_secrets("telegram.env").get("TELEGRAM_BOT_TOKEN", "")
+        bot_tok = ""
+        try:
+            bot_tok = pathlib.Path("/home/ubuntu/tw-bot/.env").read_text().split("BOT_TOKEN=")[1].split()[0].strip().strip('"').strip("'")
+        except Exception:
+            bot_tok = ""
         if not bot_tok:
             sev = load_secrets("telegram.env")
-            bot_tok = sev.get("TELEGRAM_SIGNALS_BOT_TOKEN", "") or sev.get("BOT_TOKEN", "")
+            bot_tok = sev.get("TELEGRAM_ADMIN_BOT_TOKEN", "") or sev.get("TELEGRAM_BOT_TOKEN", "")
         if not bot_tok:
             log("WARN notify_owner: tiada token Telegram, skip notifikasi")
             return
