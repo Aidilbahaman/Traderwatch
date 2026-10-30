@@ -49,7 +49,7 @@ MAX_SIGNALS = 1000
 PHOTO_CAPTION_LIMIT = 1024
 # Setup LIMIT yang tak kena entry dalam tempoh ini dianggap gagal.
 # Hanya untuk buy limit / sell limit — setup yang dah entry tidak terjejas.
-EXPIRY_MIN = int(__import__("os").environ.get("LIFECYCLE_EXPIRY_MIN", "30"))
+EXPIRY_MIN = int(__import__("os").environ.get("LIFECYCLE_EXPIRY_MIN", "90"))
 # Grace window: signal yang baru posting (dalam GRACE_MIN minit) ketika bot
 # mula/reset TIDAK boleh dilabel "legacy". Sebelum ini, signal yang posting
 # 32 saat sebelum bot start di-bootstrap sebagai legacy dan notification
