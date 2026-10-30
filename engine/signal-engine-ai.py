@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""TraderWatch AI signal engine — M15, logistic model decides side + trade.
+"""TraderWatch AI signal engine - M15, logistic model decides side + trade.
 
 The model is trained offline by train-ai-model.py and loaded from
 state/ai-m15-model.json. This script never refits, so a cron tick cannot stall.
@@ -91,7 +91,7 @@ def sb(path, method="GET", body=None):
 
 
 def sq_bars(symbol, interval, outputsize=CANDLES):
-    """Swissquote bars (dari collector daemon) — tiada had kuota."""
+    """Swissquote bars (dari collector daemon) - tiada had kuota."""
     import importlib.util as _il
     spec = _il.spec_from_file_location("sqc", HERE / "sq_collector.py")
     m = _il.module_from_spec(spec)
@@ -218,7 +218,7 @@ def lifecycle_state():
 def gated_by_memo(pair):
     """True jika learning-memo gate pair ini (WR<25% / net<=-25, min 5 setups).
 
-    Fail open bila memo tiada — gate prestasi, bukan gate keselamatan.
+    Fail open bila memo tiada - gate prestasi, bukan gate keselamatan.
     """
     try:
         gates = (json.loads(MEMO_FILE.read_text()).get("gates") or {}).get("pairs") or []
@@ -230,7 +230,7 @@ def gated_by_memo(pair):
 def pair_blocked(pair, state, life):
     """True jika pair patut dilangkau kerana setup masih hidup.
 
-    Setup yang sudah expired/legacy/tp/sl TIDAK menyekat pair baru — ini
+    Setup yang sudah expired/legacy/tp/sl TIDAK menyekat pair baru - ini
     yang membolehkan enjin cari setup pengganti selepas 30 minit tamat.
     """
     code, txt = sb(f"signals?select=id,posted_at&pair=eq.{urllib.parse.quote(pair)}"
@@ -271,7 +271,7 @@ def pair_has_active(pair, state):
 
 
 def in_session(now=None):
-    """08:00-01:00 MYT — covers Asian open through New York close.
+    """08:00-01:00 MYT - covers Asian open through New York close.
 
     Sized so 7 pairs at a 10-minute scan plus a 15-minute status sweep land
     around 700 of the 800 free daily credits.
@@ -360,7 +360,7 @@ def build_levels(pair, side, price, atr):
 OWNER_CHAT_ID = "7696607055"
 
 
-def notify_owner(pair, side, row, conf, txt):
+def notify_owner(pair, side, row, conf, txt, news_line=""):
     """Hantar cadangan draft kepada owner secara private (Telegram).
 
     Sender: @CCSTWbot (BOT_TOKEN dalam /home/ubuntu/tw-bot/.env) supaya
@@ -387,23 +387,23 @@ def notify_owner(pair, side, row, conf, txt):
         icon = "\U0001f7e2 BUY" if str(side).upper() == "BUY" else "\U0001f534 SELL"
         rr = (abs(float(row["tp"]) - float(row["entry"]))
               / max(1e-9, abs(float(row["entry"]) - float(row["sl"]))))
-        sl_pips = abs(float(row["entry"]) - float(row["sl"])) / M.pip_of(pair)
-        # Anggaran risiko wang pada 0.01 lot (akaun kecil): FX ≈ $1/pip/lot penuh,
-        # XAU ≈ $1 per $1 per oz → 0.01 lot = 1 oz ≈ $1 per $1 gerak.
-        if pair == "XAU/USD":
-            risk_usd = sl_pips * 0.1
-        else:
-            risk_usd = sl_pips * 0.1
-        acct_note = (f"\n\u26a0\ufe0f Risiko ≈ <b>${risk_usd:.0f}</b> pada 0.01 lot"
-                     + (" — akaun bawah $100, pertimbang skip atau lot lebih kecil" if risk_usd > 5 else ""))
+        pip = M.pip_of(pair)
+        sl_pips = abs(float(row["entry"]) - float(row["sl"])) / pip
+        tp_pips = abs(float(row["tp"]) - float(row["entry"])) / pip
+        # Anggaran wang pada 0.01 lot: 1 pip FX ~ $0.10; XAU 0.1 pip-unit ~ $0.10.
+        risk_usd = sl_pips * 0.1
+        reward_usd = tp_pips * 0.1
+        acct_note = (f"\n\u26a0\ufe0f Risiko ~<b>${risk_usd:.0f}</b> ({sl_pips:.1f} pips) | "
+                     f"Reward ~<b>${reward_usd:.0f}</b> ({tp_pips:.1f} pips) pada 0.01 lot"
+                     + (" - akaun bawah $100, pertimbang skip atau lot lebih kecil" if risk_usd > 5 else ""))
         arrow = "\u2b06\ufe0f" if str(side).upper() == "BUY" else "\u2b07\ufe0f"
         msg = (f"\U0001f916 <b>AI CADANGAN (draft #{sid})</b>\n"
                f"\U0001f4ca <b>{pair}</b> \u00b7 M15\n"
                f"{icon}\n"
                f"\U0001f3af Entry <code>{row['entry']}</code>\n"
-               f"\U0001f6e1\ufe0f SL <code>{row['sl']}</code> | "
-               f"\U0001f3af TP <code>{row['tp']}</code> (RR 1:{rr:.1f})\n"
-               f"\U0001f9e0 Confidence {conf:.3f}{acct_note}\n\n"
+               f"\U0001f6e1\ufe0f SL <code>{row['sl']}</code> ({sl_pips:.1f} pips) | "
+               f"\U0001f3af TP <code>{row['tp']}</code> ({tp_pips:.1f} pips, RR 1:{rr:.1f})\n"
+               f"\U0001f9e0 Confidence {conf:.3f}{acct_note}{news_line}\n\n"
                f"Balas di bot: <b>Post</b> untuk hantar ke member, "
                f"<b>Tolak</b> untuk buang draft ini.")
         data = urllib.parse.urlencode(
@@ -418,9 +418,70 @@ def notify_owner(pair, side, row, conf, txt):
         log(f"WARN notify_owner gagal ({type(e).__name__}); draft kekal untuk review manual")
 
 
+CAL_URL = "https://nfs.faireconomy.media/ff_calendar_thisweek.json"
+CAL_CACHE = REPO / "state" / "calendar-cache.json"
+NEWS_WINDOW_MIN = 30     # embargo +/-30 min (peraturan sedia ada)
+BOOST_WINDOW_H = 6       # pengesahan kuat: High-impact <=6j ke depan
+
+
+def _get_calendar():
+    """Kalendar ForexFactory mingguan; cache <=6j; raise bila tiada data segar."""
+    raw = None
+    try:
+        req = urllib.request.Request(CAL_URL, headers={"User-Agent": "TraderWatch/1.0"})
+        with urllib.request.urlopen(req, timeout=20) as r:
+            body = r.read()
+        if body.lstrip()[:1] in (b"[", b"{"):
+            raw = json.loads(body)
+            CAL_CACHE.write_bytes(body)
+    except Exception:
+        raw = None
+    if raw is None:
+        age = 1e18
+        try:
+            age = datetime.now().timestamp() - CAL_CACHE.stat().st_mtime
+        except Exception:
+            pass
+        if age <= 6 * 3600:
+            raw = json.loads(CAL_CACHE.read_text())
+        else:
+            raise RuntimeError("kalendar tidak tersedia")
+    out = []
+    for x in raw if isinstance(raw, list) else []:
+        if x.get("impact") != "High":
+            continue
+        t = datetime.fromisoformat(str(x.get("date")))
+        if t.tzinfo is None:
+            t = t.replace(tzinfo=timezone.utc)
+        out.append({"when": t.astimezone(TZ_KL), "ccy": x.get("country", ""),
+                    "title": x.get("title", ""),                    "fc": x.get("forecast", ""),
+                    "prev": x.get("previous", "")})
+    return sorted(out, key=lambda z: z["when"])
+
+
+def news_context(pair, now_kl=None):
+    """Kembalikan (embargo_event, upcoming_list) untuk pair.
+
+    ccys = mata wang pair + USD. embargo = dalam +/-NEWS_WINDOW_MIN.
+    upcoming = High-impact dalam 0..BOOST_WINDOW_H jam ke depan.
+    Gagal kalendar -> raise (lapor, jangan anggap tiada berita).
+    """
+    now_kl = now_kl or datetime.now(TZ_KL)
+    ccys = {"USD", pair[:3], pair[4:7]}
+    embargo, upcoming = None, []
+    for ev in _get_calendar():
+        if ev["ccy"] not in ccys:
+            continue
+        dt_min = (ev["when"] - now_kl).total_seconds() / 60
+        if abs(dt_min) <= NEWS_WINDOW_MIN and embargo is None:
+            embargo = ev
+        elif 0 < dt_min <= BOOST_WINDOW_H * 60:
+            upcoming.append(ev)
+    return embargo, upcoming
+
+
 def credit_budget_ok(reserve=100):
     """False when the daily quota is nearly gone.
-
     New signals are optional; closing TP/SL is not. Once the day's usage gets
     within `reserve` credits of the plan limit, the engine stands down so
     signal-status.py can still resolve open setups.
@@ -544,6 +605,26 @@ def main():
                 time.sleep(CALL_GAP)
                 continue
 
+            try:
+                embargo, upcoming = news_context(pair)
+            except Exception as ex:
+                errors += 1
+                log(f"NEWS-FAIL {pair}: kalendar tidak tersedia ({type(ex).__name__}) - skip, bukan anggap tiada berita")
+                time.sleep(CALL_GAP)
+                continue
+            if embargo:
+                log(f"NEWS-BLOCK {pair}: {embargo['ccy']} {embargo['title']} @ {embargo['when']:%H:%M MYT} - dalam embargo, skip")
+                skipped += 1
+                time.sleep(CALL_GAP)
+                continue
+            news_boost = bool(upcoming)
+            news_line = ""
+            if news_boost:
+                nxt = upcoming[0]
+                log(f"NEWS-BOOST {pair}: {nxt['ccy']} {nxt['title']} @ {nxt['when']:%H:%M MYT} - pengesahan kuat")
+                news_line = (f"\n\U0001f4f0 News: <b>{nxt['ccy']} {nxt['title']}</b> "
+                             f"@{nxt['when']:%H:%M MYT} (pengesahan kuat)")
+
             if gated_by_memo(pair):
                 log(f"GATE {pair} {TIMEFRAME} {side} conf={conf:.3f}: disekat memo (skip)")
                 time.sleep(CALL_GAP)
@@ -571,7 +652,7 @@ def main():
                 inserted += 1
                 log(f"DRAFT {pair} {TIMEFRAME} {side} E={row['entry']} "
                     f"SL={row['sl']} TP={row['tp']} conf={conf:.3f} (verified=false, menunggu owner)")
-                notify_owner(pair, side, row, conf, txt)
+                notify_owner(pair, side, row, conf, txt, news_line)
             else:
                 errors += 1
                 log(f"INSERT-FAIL {pair}: {code} {txt[:120]}")
