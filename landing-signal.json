@@ -1,0 +1,11 @@
+{
+ "id": 182,
+ "pair": "XAU/USD",
+ "side": "SELL",
+ "entry": 4008.43,
+ "sl": 4021.0,
+ "tp": 3989.0,
+ "timeframe": "M15",
+ "posted_at": "2026-10-30T04:07:11.794373",
+ "status": "tp"
+}
