@@ -275,7 +275,20 @@ def decide(model, bars):
     e20, e50 = M.ema(closes, 20), M.ema(closes, 50)
     rsi, atr = M.rsi_s(closes), M.atr_s(bars)
     i = len(bars) - 1
-    f = M.feature_row(model["_pair"], bars, e20, e50, rsi, atr, i)
+    feat_idx = model.get("feat_idx")
+    if feat_idx is None or feat_idx == "v1-8dim":
+        # v1 pair: frozen 8-dim features, unchanged path.
+        f = M.feature_row(model["_pair"], bars, e20, e50, rsi, atr, i)
+    else:
+        # v2x pair: project the shared v2 computation to the pair's indices.
+        # Fail closed on any v2 input shortfall (returns None, 0.0 below).
+        try:
+            ctx = M.build_v2_ctx(model["_pair"], bars,
+                                 STATUS_FILE if STATUS_FILE.exists() else None)
+            f = M.feature_row_v2x(model["_pair"], bars, e20, e50, rsi, atr,
+                                  i, ctx, feat_idx)
+        except Exception:
+            f = None
     if f is None:
         return None, 0.0
     p_long = M.predict(model["long"], f)

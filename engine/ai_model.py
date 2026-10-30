@@ -202,7 +202,8 @@ def feature_row_v2(pair, bars, e20, e50, rsi, atr, i, ctx):
         return None
     start = i - V2_POI_LOOKBACK
     swings = []
-    for k in range(start + 2, i):
+    khi = min(i, len(bars) - 2)  # k+2 must index inside bars (live i = last bar)
+    for k in range(start + 2, khi):
         hk, lk = bars[k][1], bars[k][2]
         if all(hk > bars[m][1] for m in (k - 2, k - 1, k + 1, k + 2)):
             swings.append((k, hk, "high"))
@@ -252,6 +253,23 @@ def feature_row_v2(pair, bars, e20, e50, rsi, atr, i, ctx):
         atr_pct,
         1.0,
     ]
+
+
+def feature_row_v2x(pair, bars, e20, e50, rsi, atr, i, ctx, feat_idx):
+    """Projected v2 feature vector for a v2x per-pair subset, or None.
+
+    feat_idx: list of indices into the v2 13-dim vector (or "v1-8dim").
+    Returns None when the shared v2 row is unavailable (fail closed).
+    """
+    if feat_idx == "v1-8dim" or feat_idx is None:
+        return feature_row(pair, bars, e20, e50, rsi, atr, i)
+    f2 = feature_row_v2(pair, bars, e20, e50, rsi, atr, i, ctx)
+    if f2 is None:
+        return None
+    try:
+        return [f2[j] for j in feat_idx]
+    except (IndexError, TypeError):
+        return None
 
 
 def fit(rows, key, epochs=250, lr=0.06, l2=0.02):
