@@ -415,7 +415,14 @@ def notify_owner(pair, side, row, conf, txt, news_line=""):
             r.read()
         log(f"NOTIFY owner draft #{sid} {pair} {side}")
     except Exception as e:
-        log(f"WARN notify_owner gagal ({type(e).__name__}); draft kekal untuk review manual")
+        detail = ""
+        try:
+            import urllib.error as _ue
+            if isinstance(e, _ue.HTTPError):
+                detail = f" HTTP {e.code}: {e.read().decode(errors='replace')[:200]}"
+        except Exception:
+            pass
+        log(f"WARN notify_owner gagal ({type(e).__name__}{detail}); draft kekal untuk review manual")
 
 
 CAL_URL = "https://nfs.faireconomy.media/ff_calendar_thisweek.json"
