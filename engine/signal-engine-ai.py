@@ -406,9 +406,13 @@ def notify_owner(pair, side, row, conf, txt, news_line=""):
                f"\U0001f9e0 Confidence {conf:.3f}{acct_note}{news_line}\n\n"
                f"Balas di bot: <b>Post</b> untuk hantar ke member, "
                f"<b>Tolak</b> untuk buang draft ini.")
+        kb = {"inline_keyboard": [[
+            {"text": "\u2705 Post ke member", "callback_data": f"ai:post:{sid}"},
+            {"text": "\u274c Tolak", "callback_data": f"ai:reject:{sid}"}]]}
         data = urllib.parse.urlencode(
             {"chat_id": OWNER_CHAT_ID, "text": msg,
-             "parse_mode": "HTML"}).encode()
+             "parse_mode": "HTML",
+             "reply_markup": json.dumps(kb)}).encode()
         req = urllib.request.Request(
             "https://api.telegram.org/bot" + bot_tok + "/sendMessage", data=data)
         with urllib.request.urlopen(req, timeout=20) as r:

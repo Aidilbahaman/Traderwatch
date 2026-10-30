@@ -255,8 +255,10 @@ def active_signals():
     Signal yang sudah entry/tp/sl/expired TIDAK boleh di-order semula.
     """
     try:
-        rows = sb_get("signals?select=id,pair,side,timeframe,entry,sl,tp,posted_at"
-                      "&order=posted_at.desc&limit=25")
+        # Hanya signal verified=true (diluluskan owner) layak jadi pending order.
+        # Draft verified=false (cadangan AI menunggu keputusan) MESTI diabaikan.
+        rows = sb_get("signals?select=id,pair,side,timeframe,entry,sl,tp,posted_at,verified"
+                      "&verified=is.true&order=posted_at.desc&limit=25")
     except Exception as e:
         log(f"SB-ERR {type(e).__name__}: {str(e)[:80]}")
         return []
