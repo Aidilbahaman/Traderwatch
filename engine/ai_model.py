@@ -88,6 +88,172 @@ def sigmoid(z):
     return 1 / (1 + math.exp(-z))
 
 
+# ---- FEATURE VERSION 2 (SMC / session-aware, additive) --------------------
+# v1 feature_row() above is frozen. v2 keeps v1 dims 0-4 + bias, REPLACES the
+# two UTC session flags with a 3-way KL (MYT) one-hot, and adds:
+#   H1 trend alignment | POI-proxy distance | KL one-hot x3 | R-mean20 | ATR%
+# Total v2 length = 13. feature_row_v2 returns None when bar history is
+# insufficient (fail closed). The R-form feature falls back to 0.0 (neutral
+# prior) when no closed trades precede the bar -- returning None there would
+# erase nearly all training rows because the closed-trade record starts later
+# than the M1 caches.
+FEATURE_VERSION_V2 = 2
+V2_MIN_H1_BARS = 50      # H1 EMA50 needs ~50 H1 bars before the gap is stable
+V2_ATR_LOOKBACK = 100    # ATR percentile window
+V2_POI_LOOKBACK = 20     # M15 swing scan window
+V2_R_WINDOW = 20         # trailing closed trades per pair
+V2_R_CLIP = 2.0
+# KL (UTC+8) sessions, hours in MYT: Asia 00-07, London 08-15, NY 16-23.
+KL_SESSIONS = (("asia", 0, 8), ("london", 8, 16), ("ny", 16, 24))
+
+V2_FEATURE_NAMES = [
+    "ema_gap_atr", "dist_ema20_atr", "rsi_norm", "rsi_slope", "atr_pips",
+    "h1_trend_sign", "poi_dist_atr",
+    "kl_asia", "kl_london", "kl_ny",
+    "rmean20", "atr_pctile", "bias",
+]
+
+
+def pair_code(pair):
+    return "".join(ch for ch in str(pair).upper() if ch.isalpha())
+
+
+def build_v2_ctx(pair, m1_bars, status_path=None):
+    """Precompute v2 side inputs: H1 EMA pair + per-pair closed-trade R list.
+
+    m1_bars: sorted (ts_ms, high, low, close) M1 tuples.
+    status_path: signal-status.json path (may be None -> R prior always 0.0).
+    """
+    from bisect import bisect_right  # local import: keeps module import-light
+
+    # H1 bars aggregated from M1 (60-min slots), closes only for EMAs.
+    buckets = {}
+    for ts, h, l, c in m1_bars:
+        slot = ts - (ts % 3600000)
+        if slot in buckets:
+            b = buckets[slot]
+            buckets[slot] = (b[0], max(b[1], h), min(b[2], l), c)
+        else:
+            buckets[slot] = (slot, h, l, c)
+    h1 = [buckets[k] for k in sorted(buckets)]
+    h_ts = [b[0] for b in h1]
+    h_close = [b[3] for b in h1]
+    h_e20 = ema(h_close, 20) if h_close else []
+    h_e50 = ema(h_close, 50) if h_close else []
+
+    # Closed-trade R events for this pair, sorted by entry time.
+    code = pair_code(pair)
+    r_events = []
+    if status_path is not None:
+        try:
+            sigs = json.loads(Path(status_path).read_text()).get("signals") or {}
+        except Exception:
+            sigs = {}
+        for key, info in sigs.items():
+            if not isinstance(info, dict):
+                continue
+            if str(key).split("_", 1)[0].upper() != code:
+                continue
+            r = info.get("r")
+            if not isinstance(r, (int, float)):
+                continue
+            ea = info.get("entry_at") or info.get("closed")
+            try:
+                d = datetime.fromisoformat(str(ea).replace("Z", "+00:00"))
+                if d.tzinfo is None:
+                    d = d.replace(tzinfo=timezone.utc)
+            except Exception:
+                continue
+            r_events.append((int(d.timestamp() * 1000), float(r)))
+    r_events.sort(key=lambda x: x[0])
+    return {"h_ts": h_ts, "h_e20": h_e20, "h_e50": h_e50,
+            "r_ts": [t for t, _ in r_events],
+            "r_vals": [r for _, r in r_events]}
+
+
+def feature_row_v2(pair, bars, e20, e50, rsi, atr, i, ctx):
+    """13-dim v2 feature vector at M15 bar i, or None on short history."""
+    from bisect import bisect_right
+
+    if i < 60:
+        return None
+    a = atr[i]
+    if a <= 0:
+        return None
+
+    # H1 trend alignment: sign of the H1 EMA20/50 gap at this timestamp.
+    h_ts = ctx.get("h_ts") or []
+    hi = bisect_right(h_ts, bars[i][0]) - 1
+    if hi < V2_MIN_H1_BARS or hi >= len(ctx.get("h_e20") or []):
+        return None
+    gap = ctx["h_e20"][hi] - ctx["h_e50"][hi]
+    h1_sign = 1.0 if gap > 0 else (-1.0 if gap < 0 else 0.0)
+
+    # ATR percentile rank vs trailing 100 bars.
+    if i + 1 < V2_ATR_LOOKBACK:
+        return None
+    win = atr[i + 1 - V2_ATR_LOOKBACK:i + 1]
+    atr_pct = sum(1 for x in win if x <= a) / float(len(win))
+
+    # POI proxy: signed distance (in ATR) to the nearest unmitigated recent
+    # M15 swing high/low. Swing = strict local extreme over +-2 bars inside
+    # the trailing window; unmitigated = no later close through the level.
+    if i < V2_POI_LOOKBACK + 2:
+        return None
+    start = i - V2_POI_LOOKBACK
+    swings = []
+    for k in range(start + 2, i):
+        hk, lk = bars[k][1], bars[k][2]
+        if all(hk > bars[m][1] for m in (k - 2, k - 1, k + 1, k + 2)):
+            swings.append((k, hk, "high"))
+        elif all(lk < bars[m][2] for m in (k - 2, k - 1, k + 1, k + 2)):
+            swings.append((k, lk, "low"))
+    if not swings:
+        return None
+    close = bars[i][3]
+    unmit = []
+    for k, lvl, kind in swings:
+        later = [bars[m][3] for m in range(k + 1, i + 1)]
+        if kind == "high" and any(c > lvl for c in later):
+            continue
+        if kind == "low" and any(c < lvl for c in later):
+            continue
+        unmit.append(lvl)
+    pool = unmit or [lvl for _, lvl, _ in swings]
+    level = min(pool, key=lambda L: abs(close - L))
+    poi_dist = (close - level) / a
+
+    # KL (MYT) session one-hot, replacing the v1 UTC flags.
+    kl_hour = (datetime.fromtimestamp(
+        bars[i][0] / 1000, tz=timezone.utc).hour + 8) % 24
+    sess = [0.0, 0.0, 0.0]
+    for s, (name, lo, hi_) in enumerate(KL_SESSIONS):
+        if lo <= kl_hour < hi_:
+            sess[s] = 1.0
+            break
+
+    # Prior-20-trade R-multiple rolling mean (neutral 0.0 when no history).
+    r_ts, r_vals = ctx.get("r_ts") or [], ctx.get("r_vals") or []
+    pos = bisect_right(r_ts, bars[i][0])
+    recent = r_vals[max(0, pos - V2_R_WINDOW):pos]
+    rmean = sum(recent) / len(recent) if recent else 0.0
+    rmean = max(-V2_R_CLIP, min(V2_R_CLIP, rmean))
+
+    return [
+        (e20[i] - e50[i]) / a,
+        (close - e20[i]) / a,
+        (rsi[i] - 50) / 25,
+        (rsi[i] - rsi[i - 1]) / 5,
+        a / pip_of(pair) / 100,
+        h1_sign,
+        poi_dist,
+        sess[0], sess[1], sess[2],
+        rmean,
+        atr_pct,
+        1.0,
+    ]
+
+
 def fit(rows, key, epochs=250, lr=0.06, l2=0.02):
     n = len(rows[0]["f"])
     mu, sd = [0.0] * n, [1.0] * n
