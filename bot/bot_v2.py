@@ -2422,6 +2422,51 @@ async def on_callback(update: Update, ctx):
                                    f"Tekan ✅ Confirm untuk teruskan.",
                              IM([[IB("✅ Confirm post", callback_data="pos:confirm")],
                                  [IB("❌ Cancel", callback_data="pos:cancel")]]))
+    if d.startswith("ai:"):
+        # AI draft approve/reject (Supabase signals id, bukan trades id).
+        # Hanya owner; flip verified true=post ke member, false+komen=tolak.
+        if tg.id not in ADMIN_IDS:
+            return await say(chat, "\U0001f512 Admin sahaja.")
+        try:
+            _, action, sid = d.split(":", 2)
+            rows = sb_request(f"signals?id=eq.{int(sid)}&select=id,pair,side,entry,sl,tp,verified")
+            if not rows:
+                return await say(chat, "\u26a0\ufe0f Draft tidak dijumpai (mungkin sudah dipadam).")
+            r0 = rows[0]
+            if action == "post":
+                if r0.get("verified"):
+                    return await say(chat, f"\u2139\ufe0f Draft #{sid} sudah live sebelum ini.")
+                upd = sb_patch(f"signals?id=eq.{int(sid)}", {"verified": True})
+                if not (upd and upd[0].get("verified")):
+                    return await say(chat, f"\u26a0\ufe0f Gagal publish #{sid} (read-back tidak verified).")
+                try:
+                    out = await asyncio.to_thread(trigger_sender)
+                    sent = f"\n\U0001f4e4 {e(str(out[0]))}" if out else ""
+                except Exception as ex:
+                    sent = f"\n\u26a0\ufe0f Sender gagal: {e(str(ex))[:120]}"
+                try:
+                    await q.edit_message_text(
+                        f"\u2705 <b>AI draft #{sid} DITERBITKAN</b>\n"
+                        f"{e(str(r0['pair']))} \u00b7 {e(str(r0['side']))} \u00b7 "
+                        f"E <code>{e(str(r0['entry']))}</code>{sent}",
+                        parse_mode=ParseMode.HTML)
+                except Exception:
+                    pass
+                return await say(chat, f"\u2705 Draft #{sid} diterbitkan ke member.")
+            elif action == "reject":
+                upd = sb_patch(f"signals?id=eq.{int(sid)}", {"verified": False})
+                try:
+                    await q.edit_message_text(
+                        f"\u274c <b>AI draft #{sid} DITOLAK</b>\n"
+                        f"{e(str(r0['pair']))} \u00b7 {e(str(r0['side']))} — tidak dihantar ke member.",
+                        parse_mode=ParseMode.HTML)
+                except Exception:
+                    pass
+                return await say(chat, f"\u274c Draft #{sid} ditolak.")
+            else:
+                return await say(chat, "\u26a0\ufe0f Aksi tidak dikenali.")
+        except Exception as ex:
+            return await say(chat, f"\u26a0\ufe0f Gagal: {e(str(ex))[:200]}")
     if d.startswith("admin:"):
         if tg.id not in ADMIN_IDS:
             return await say(chat, "🔒 Admin sahaja.")

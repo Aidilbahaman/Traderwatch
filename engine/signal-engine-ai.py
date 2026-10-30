@@ -322,6 +322,52 @@ def build_levels(pair, side, price, atr):
     return price + sl_dist, price - tp_dist
 
 
+OWNER_CHAT_ID = "7696607055"
+
+
+def notify_owner(pair, side, row, conf, txt):
+    """Hantar cadangan draft kepada owner secara private (Telegram).
+
+    Fail-safe: sebarang kegagalan hantar TIDAK menggagalkan engine run;
+    draft kekal dalam Supabase verified=false untuk review manual.
+    """
+    try:
+        bot_tok = load_secrets("telegram.env").get("TELEGRAM_BOT_TOKEN", "")
+        if not bot_tok:
+            sev = load_secrets("telegram.env")
+            bot_tok = sev.get("TELEGRAM_SIGNALS_BOT_TOKEN", "") or sev.get("BOT_TOKEN", "")
+        if not bot_tok:
+            log("WARN notify_owner: tiada token Telegram, skip notifikasi")
+            return
+        try:
+            sid = (json.loads(txt or "[]") or [{}])[0].get("id", "?")
+        except Exception:
+            sid = "?"
+        icon = "\U0001f7e2 BUY" if str(side).upper() == "BUY" else "\U0001f534 SELL"
+        rr = (abs(float(row["tp"]) - float(row["entry"]))
+              / max(1e-9, abs(float(row["entry"]) - float(row["sl"]))))
+        arrow = "\u2b06\ufe0f" if str(side).upper() == "BUY" else "\u2b07\ufe0f"
+        msg = (f"\U0001f916 <b>AI CADANGAN (draft #{sid})</b>\n"
+               f"\U0001f4ca <b>{pair}</b> \u00b7 M15\n"
+               f"{icon}\n"
+               f"\U0001f3af Entry <code>{row['entry']}</code>\n"
+               f"\U0001f6e1\ufe0f SL <code>{row['sl']}</code> | "
+               f"\U0001f3af TP <code>{row['tp']}</code> (RR 1:{rr:.1f})\n"
+               f"\U0001f9e0 Confidence {conf:.3f}\n\n"
+               f"Balas di bot: <b>Post</b> untuk hantar ke member, "
+               f"<b>Tolak</b> untuk buang draft ini.")
+        data = urllib.parse.urlencode(
+            {"chat_id": OWNER_CHAT_ID, "text": msg,
+             "parse_mode": "HTML"}).encode()
+        req = urllib.request.Request(
+            "https://api.telegram.org/bot" + bot_tok + "/sendMessage", data=data)
+        with urllib.request.urlopen(req, timeout=20) as r:
+            r.read()
+        log(f"NOTIFY owner draft #{sid} {pair} {side}")
+    except Exception as e:
+        log(f"WARN notify_owner gagal ({type(e).__name__}); draft kekal untuk review manual")
+
+
 def credit_budget_ok(reserve=100):
     """False when the daily quota is nearly gone.
 
@@ -458,9 +504,12 @@ def main():
             entry = closes[-1]
             sl, tp = build_levels(pair, side, entry, atr)
             dp = DP.get(pair, DEFAULT_DP)
+            # Mod cadangan (owner-approved): AI tidak publish sendiri.
+            # Draft disimpan verified=False (member tidak nampak), dan
+            # cadangan dihantar ke owner secara private untuk Approve/Reject.
             row = {"pair": pair, "timeframe": TIMEFRAME, "side": side,
                    "entry": f"{entry:.{dp}f}", "sl": f"{sl:.{dp}f}",
-                   "tp": f"{tp:.{dp}f}", "verified": True}
+                   "tp": f"{tp:.{dp}f}", "verified": False}
             if dry:
                 inserted += 1
                 log(f"DRY {pair} {TIMEFRAME} {side} E={row['entry']} "
@@ -470,8 +519,9 @@ def main():
             code, txt = sb("signals", "POST", row)
             if code in (200, 201):
                 inserted += 1
-                log(f"POST {pair} {TIMEFRAME} {side} E={row['entry']} "
-                    f"SL={row['sl']} TP={row['tp']} conf={conf:.3f}")
+                log(f"DRAFT {pair} {TIMEFRAME} {side} E={row['entry']} "
+                    f"SL={row['sl']} TP={row['tp']} conf={conf:.3f} (verified=false, menunggu owner)")
+                notify_owner(pair, side, row, conf, txt)
             else:
                 errors += 1
                 log(f"INSERT-FAIL {pair}: {code} {txt[:120]}")
