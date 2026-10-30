@@ -98,11 +98,11 @@ BTN_SCREENER = "🤖 Auto Screener"
 BTN_PROFIT = "💰 Profit Guard"
 BTN_HISTORY = "🗑 History Expired"
 MENU = ReplyKeyboardMarkup(
-    [[BTN_ANALISA, BTN_TOOLS], [BTN_JURNAL, BTN_KUOTA], [BTN_POS, BTN_SET], [BTN_STATUS, BTN_ABOUT]],
+    [[BTN_ANALISA, BTN_TOOLS], [BTN_JURNAL, BTN_KUOTA], [BTN_POS, BTN_SET], [BTN_ABOUT]],
     resize_keyboard=True)
 # Admin console: Auto Screener scan semua pair, Draft kekal untuk review.
 MENU_ADMIN = ReplyKeyboardMarkup(
-    [[BTN_ANALISA, BTN_DRAFT], [BTN_STATUS], [BTN_SCREENER, BTN_PROFIT],
+    [[BTN_ANALISA, BTN_DRAFT], [BTN_SCREENER, BTN_PROFIT],
      [BTN_TOOLS, BTN_HISTORY], [BTN_JURNAL, BTN_SET], [BTN_POS]],
     resize_keyboard=True)
 
@@ -712,7 +712,7 @@ def _persist_llm_preset(name):
     for line in lines:
         key = line.split("=", 1)[0].strip() if "=" in line else None
         if key == "LLM_MODEL":
-            out.append(f"LLM_MODEL=asai/freemodel-4-ds-v4.1flash
+            out.append(f"LLM_MODEL={cfg['model']}"); seen.add(key)
         elif key == "LLM_FALLBACK_MODELS":
             out.append(f"LLM_FALLBACK_MODELS={cfg['fallback']}"); seen.add(key)
         elif key == "LLM_URL":
@@ -722,7 +722,7 @@ def _persist_llm_preset(name):
         else:
             out.append(line)
     if "LLM_MODEL" not in seen:
-        out.append(f"LLM_MODEL=asai/freemodel-4-ds-v4.1flash
+        out.append(f"LLM_MODEL={cfg['model']}")
     if "LLM_FALLBACK_MODELS" not in seen:
         out.append(f"LLM_FALLBACK_MODELS={cfg['fallback']}")
     if "LLM_URL" not in seen:
@@ -1389,12 +1389,39 @@ def get_calendar():
     return _cal["data"]
 
 
+_unlock_logged = False
+
+
 def news_block(pair):
     """Embargo: berita High-Impact dalam +/-30 minit untuk mata wang berkaitan.
 
     None = tiada embargo, dict = event embargo. Kegagalan kalendar mesti
     dilaporkan, bukan dianggap "tiada berita".
+
+    Owner boleh buka embargo sementara dengan NEWS_UNLOCK_UNTIL (ISO, WIB).
+    Selepas masa itu luput, embargo berkuat kuasa semula secara automatik —
+    tiada perubahan kekal pada kod.
     """
+    global _unlock_logged
+    until = (os.environ.get("NEWS_UNLOCK_UNTIL") or "").strip()
+    if until:
+        try:
+            t = datetime.fromisoformat(until.replace("Z", "+00:00"))
+            if t.tzinfo is None:
+                t = t.replace(tzinfo=WIB)
+            t = t.astimezone(WIB)
+            if now() < t:
+                if not _unlock_logged:
+                    _unlock_logged = True
+                    print(f"NEWS-UNLOCK aktif sehingga {t.isoformat(timespec='seconds')} "
+                          f"({t:%H:%M} WIB) — embargo berita dilangkau", flush=True)
+                return None
+            if _unlock_logged:
+                _unlock_logged = False
+                print(f"NEWS-UNLOCK tamat ({t.isoformat(timespec='seconds')}) — "
+                      f"embargo berita aktif semula", flush=True)
+        except Exception as ex:
+            print(f"NEWS-UNLOCK nilai tidak sah: {ex}", flush=True)
     ccys = {"USD", pair[:3], pair[3:6]}
     for ev in get_calendar():
         if ev["ccy"] in ccys and abs((ev["when"] - now()).total_seconds()) <= 1800:
@@ -1705,14 +1732,35 @@ async def do_analysis(chat, tg, ctx, pair):
         await say(chat, cap, kb)
 
 
-def screener_is_candidate(j, v):
-    """Auto Screener hanya benarkan A+/A dengan RR tervalidasi."""
+MEMO_PATH = pathlib.Path("/home/ubuntu/web/Traderwatch-repo/state/learning-memo.json")
+
+
+def load_learning_memo():
+    """Baca memo prestasi + gates; pulangkan {} bila fail tiada/rosak."""
+    try:
+        return json.loads(MEMO_PATH.read_text())
+    except Exception:
+        return {}
+
+
+def gated_pairs():
+    return set(load_learning_memo().get("gates", {}).get("pairs", []) or [])
+
+
+def screener_is_candidate(j, v, pair=None):
+    """Hanya A+/A, RR tervalidasi, dan bukan pair yang di-gate prestasi."""
     grade = str(j.get("grade", "")).strip().upper()
-    return grade in {"A+", "A"} and float(v.get("rr1", 0)) >= MIN_RR
+    if not (grade in {"A+", "A"} and float(v.get("rr1", 0)) >= MIN_RR):
+        return False
+    if pair and pair.upper() in gated_pairs():
+        return False
+    return True
 
 
 async def screener_analyse_pair(pair):
     """Analisis satu pair tanpa simpan draft atau publish apa-apa."""
+    if pair.upper() in gated_pairs():
+        return {"pair": pair, "skip": "gated"}
     ev = await asyncio.to_thread(news_block, pair)
     if ev:
         return {"pair": pair, "skip": "news"}
@@ -1720,6 +1768,9 @@ async def screener_analyse_pair(pair):
     price = m15[-1]["c"]
     prompt = PROMPT.format(pair=pair, price=fmt(pair, price),
                            h1=compact(h1, 30, pair), m15=compact(m15, 40, pair))
+    _memo = load_learning_memo().get("memo")
+    if _memo:
+        prompt = prompt + "\n\n" + _memo[:1800]
     j = extract_json(await ask_agent(prompt, use_staruh=True))
     try:
         v = validate(pair, j)
@@ -2095,9 +2146,6 @@ async def on_text(update: Update, ctx):
             return await run_auto_screener(chat, tg)
         finally:
             SCREENER_RUNNING.discard(tg.id)
-        if t == BTN_STATUS: return await cc_status(update, ctx)
-    if t == BTN_UPGRADE_PRO: return await cc_upgrade_pro(update, ctx)
-    if t == BTN_UPGRADE_MAX: return await cc_upgrade_max(update, ctx)
     if t == BTN_TOOLS:
         return await say(chat, TOOLS, IM([[IB("⚡ Liquidity Sweep Hunter", callback_data="tool:sweep")],
                                           [IB("🔭 Macro Outlook", callback_data="tool:outlook")],
@@ -2975,54 +3023,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-
-# --- Command Center: Tier Upgrade + Status + Next TP ---
-BTN_UPGRADE_PRO = "⬆ Upgrade PRO"
-BTN_UPGRADE_MAX = "⬆ Upgrade MAX"
-BTN_STATUS = "📋 Status Kawan"
-
-CC_KEYBOARD = ReplyKeyboardMarkup(
-    [[BTN_UPGRADE_PRO, BTN_UPGRADE_MAX], [BTN_STATUS, BTN_KUOTA]],
-    resize_keyboard=True)
-
-# Helper: get user tier/status
-async def cc_status(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    chat_id = update.effective_chat.id
-    user = db.execute("SELECT name,tier FROM users WHERE tg_id=?", (chat_id,)).fetchone()
-    name = user["name"] if user and user["name"] else "Unknown"
-    tier = user["tier"] if user and user["tier"] else "FREE"
-    # Read latest TP from signal-status if available
-    tp_text = "XAUUSD #132 EXPIRED | USDJPY SL | GBPUSD SL"
-    try:
-        import json
-        with open("/home/ubuntu/web/Traderwatch-repo/signal-status.json") as f:
-            d=json.load(f)
-        # Find first TP within 24h (simplified)
-        for sid,v in d.get("signals",{}).items():
-            if v.get("status")=="tp" and "20261026" in sid:
-                tp_text = sid + " TP (+" + str(v.get("pips","?") ) + " pips)"
-                break
-    except:
-        pass
-    msg = f"⚡ <b>COMMAND CENTER</b>
-👤 Nama: <b>{name}</b>
-📧 Email: <b>aidilvevo@gmail.com</b>
-💳 Tier: <b>{tier}</b> (pending upgrade approval — gateway belum diubah)
-💰 Pembayaran: <b>ACTIVE</b> (Supabase)
-📈 Next TP 24h: <b>{tp_text}</b>
-
-Gunakan butang ⬆ untuk upgrade (memerlukan approval)."
-    await context.bot.send_message(chat_id=chat_id, text=msg, reply_markup=CC_KEYBOARD, parse_mode=ParseMode.HTML)
-
-async def cc_upgrade_pro(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await update.message.reply_text("⬆ <b>Upgrade PRO</b> — status: <b>PENDING APPROVAL</b>. Bayaran/gedung belum disentuh. Sambung dengan admin untuk lengkapkan.", reply_markup=CC_KEYBOARD, parse_mode=ParseMode.HTML)
-
-async def cc_upgrade_max(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await update.message.reply_text("⬆ <b>Upgrade MAX</b> — status: <b>PENDING APPROVAL</b>. Kelulusan diperlukan sebelum gateway/subscription berubah.", reply_markup=CC_KEYBOARD, parse_mode=ParseMode.HTML)
-
-# Register handlers (append after existing ones — assume main loop picks them via command/text handlers)
-# We'll register via command aliases too
-CC_COMMANDS = {
-    "status_cc", "tier", "upgrade", "commandcenter", "cc"
-}
