@@ -809,8 +809,9 @@
    "status": "pending"
   },
   "BTCUSD_20261031_155108": {
-   "status": "pending"
+   "status": "active",
+   "entry_at": "2026-10-31T19:44:00+08:00"
   }
  },
- "updated": "2026-10-31T19:40:02+08:00"
+ "updated": "2026-10-31T19:45:03+08:00"
 }
