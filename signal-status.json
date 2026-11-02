@@ -823,7 +823,22 @@
   },
   "XAUUSD_20261102_095020": {
    "status": "pending"
+  },
+  "USDJPY_20261102_095924": {
+   "status": "pending"
+  },
+  "GBPUSD_20261102_095900": {
+   "status": "pending"
+  },
+  "USDCAD_20261102_095728": {
+   "status": "pending"
+  },
+  "EURUSD_20261102_095654": {
+   "status": "pending"
+  },
+  "AUDUSD_20261102_095629": {
+   "status": "pending"
   }
  },
- "updated": "2026-11-02T09:55:02+08:00"
+ "updated": "2026-11-02T10:00:04+08:00"
 }
