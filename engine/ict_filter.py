@@ -91,6 +91,57 @@ def sweep(bars, lookback=20):
     return None
 
 
+def order_blocks(bars, price, lookback=60, disp_mult=0.6, max_age=60):
+    """Order Block: candle terakhir lawan arah sebelum displacement kuat.
+
+    Bullish OB: candle BEARISH dengan body > 0.4x ATR, diikuti 3 close naik
+    dengan sekurang-kurangnya satu body > disp_mult x ATR. Bearish OB
+    sebaliknya. Hanya OB yang belum ditembusi (umur <= max_age) dan
+    berhampiran harga (<=3 ATR) dilapor.
+    """
+    if len(bars) < lookback + 5:
+        return []
+    atr = _atr(bars) or 0.0
+    if atr <= 0:
+        return []
+    seg = bars[-lookback:]
+    closes = [float(b["c"]) for b in seg]
+    opens = [float(b["o"]) for b in seg]
+    bodies = [abs(c - o) for c, o in zip(closes, opens)]
+    out = []
+    for i in range(len(seg) - 4):
+        # displacement: 3 close sehala berturut, sekurang-kurangnya satu
+        # body kuat; candle base mesti lawan arah dengan body bermakna.
+        up_run = all(closes[i + k] > closes[i + k - 1] for k in (1, 2, 3))
+        dn_run = all(closes[i + k] < closes[i + k - 1] for k in (1, 2, 3))
+        if not (up_run or dn_run):
+            continue
+        if max(bodies[i + 1:i + 4]) < disp_mult * atr:
+            continue
+        base_body = abs(closes[i] - opens[i])
+        if base_body < 0.4 * atr:
+            continue
+        age = len(seg) - i
+        if age > max_age + 4:
+            continue
+        if up_run and closes[i] < opens[i]:
+            # candle bearish terakhir sebelum mark-up = bullish OB
+            top, bot = float(seg[i]["h"]), float(seg[i]["l"])
+            broken = any(float(b["c"]) < bot for b in seg[i + 1:])
+            if not broken:
+                out.append({"dir": "BUY", "top": top, "bot": bot, "age": age})
+        elif dn_run and closes[i] > opens[i]:
+            top, bot = float(seg[i]["h"]), float(seg[i]["l"])
+            broken = any(float(b["c"]) > top for b in seg[i + 1:])
+            if not broken:
+                out.append({"dir": "SELL", "top": top, "bot": bot, "age": age})
+    # tapis yang jauh dari harga (>3 ATR) supaya senarai relevan
+    near = [o for o in out
+            if abs(price - (o["top"] + o["bot"]) / 2) <= 3.0 * atr]
+    near.sort(key=lambda o: o["age"])
+    return near[:3]
+
+
 def premium_discount(bars, price):
     """Kedudukan harga dalam range 50-bar: >0.7 premium, <0.3 discount."""
     if not bars:
@@ -118,10 +169,13 @@ def ict_verdict(pair, side, entry, h1, m15):
     price = float(entry)
     fvgs = unfilled_fvg(m15, price)
     sup = [f for f in fvgs if f["dir"] == side]
+    obs = order_blocks(m15, price)
+    ob_sup = [o for o in obs if o["dir"] == side]
     sw = sweep(m15)
     pd = premium_discount(h1, price)
     reasons = [f"H1:{t_h1} M15:{t_m15}", f"pos:{pd:.2f}",
-               f"FVG sokong:{len(sup)}/{len(fvgs)}"]
+               f"FVG sokong:{len(sup)}/{len(fvgs)}",
+               f"OB sokong:{len(ob_sup)}/{len(obs)}"]
     if sw:
         reasons.append(f"sweep:{sw['dir']}@{sw['level']}")
     # HARD_VETO: kedua-dua timeframe sehala lawan side.
@@ -139,14 +193,20 @@ def ict_verdict(pair, side, entry, h1, m15):
         reasons.append("jual di discount dalam uptrend")
         return {"verdict": "HARD_VETO", "trend": t_h1, "reasons": reasons,
                 "fvg_near": len(sup), "swept": sw}
-    # SOFT_VETO: sweep fresh lawan arah, atau tiada FVG sokong langsung.
+    # SOFT_VETO: sweep fresh lawan arah, tiada FVG sokong, atau tiada OB sokong
+    # sedangkan OB lawan arah wujud berhampiran.
     if sw and sw["dir"] != side:
         reasons.append("sweep fresh lawan arah")
         return {"verdict": "SOFT_VETO", "trend": t_m15, "reasons": reasons,
-                "fvg_near": len(sup), "swept": sw}
+                "fvg_near": len(sup), "ob_near": len(ob_sup), "swept": sw}
     if not sup and fvgs:
         reasons.append("tiada FVG sokong arah")
         return {"verdict": "SOFT_VETO", "trend": t_m15, "reasons": reasons,
-                "fvg_near": 0, "swept": sw}
+                "fvg_near": 0, "ob_near": len(ob_sup), "swept": sw}
+    ob_opp = [o for o in obs if o["dir"] != side]
+    if not ob_sup and ob_opp:
+        reasons.append(f"OB lawan arah berhampiran ({len(ob_opp)})")
+        return {"verdict": "SOFT_VETO", "trend": t_m15, "reasons": reasons,
+                "fvg_near": len(sup), "ob_near": 0, "swept": sw}
     return {"verdict": "PASS", "trend": t_m15, "reasons": reasons,
-            "fvg_near": len(sup), "swept": sw}
+            "fvg_near": len(sup), "ob_near": len(ob_sup), "swept": sw}
