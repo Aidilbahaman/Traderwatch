@@ -828,7 +828,8 @@
    "status": "pending"
   },
   "GBPUSD_20261102_095900": {
-   "status": "pending"
+   "status": "active",
+   "entry_at": "2026-11-02T10:14:00+08:00"
   },
   "USDCAD_20261102_095728": {
    "status": "pending"
@@ -840,5 +841,5 @@
    "status": "pending"
   }
  },
- "updated": "2026-11-02T10:10:02+08:00"
+ "updated": "2026-11-02T10:15:02+08:00"
 }
