@@ -12,6 +12,10 @@ import xml.etree.ElementTree as ET
 import sys
 import sys as _sys
 import time
+try:
+    from ict_filter import ict_verdict as _ict_verdict
+except Exception:
+    _ict_verdict = None
 _sys.path.insert(0, "/home/ubuntu/web/Traderwatch-repo")
 from engine.sq_collector import candles_from_bars as candles_swissquote  # noqa: E402
 from datetime import datetime, timedelta, timezone
@@ -1779,6 +1783,16 @@ async def screener_analyse_pair(pair):
                   + ". Betulkan level supaya urutan arah konsisten dan RR1 >= 1.5. Balas JSON sahaja.")
         j = extract_json(await ask_agent(repair, True))
         v = validate(pair, j)
+    # Phase 2 (terhad): ICT filter deterministik sebagai lapisan veto.
+    # HARD_VETO -> tolak calon. SOFT_VETO -> catat nota, kekal calon.
+    try:
+        from ict_filter import ict_verdict as _iv2
+        _iv = _iv2(pair, j.get("bias", j.get("side", "")), float(v.get("entry", price)), h1, m15)
+        j["ict"] = _iv
+        if _iv.get("verdict") == "HARD_VETO":
+            return {"pair": pair, "skip": "ict-veto", "j": j, "v": v}
+    except Exception:
+        pass
     return {"pair": pair, "j": j, "v": v, "h1": h1, "m15": m15}
 
 
@@ -1939,7 +1953,7 @@ async def run_auto_screener(chat, tg):
                 parse_mode=ParseMode.HTML)
             r = await screener_analyse_pair(pair)
             if r.get("skip"):
-                skipped.append(pair)
+                skipped.append(pair + (" [ict]" if str(r.get("skip")) == "ict-veto" else ""))
             elif screener_is_candidate(r["j"], r["v"]):
                 found.append(r)
         except Exception as ex:
@@ -1950,10 +1964,15 @@ async def run_auto_screener(chat, tg):
         int(r["j"].get("confidence", 0) or 0), float(r["v"]["rr1"])), reverse=True)
 
     if not found:
+        news_n = sum(1 for p in skipped if p in ("gated", "news"))
+        ict_n = sum(1 for p in skipped if "ict" in p)
+        extra = ("\n🛡️ ICT veto: " + ", ".join(e(p) for p in skipped if "ict" in p)
+                 if ict_n else "")
         await status.edit_text(
             "🔍 <b>Auto Screener selesai</b>\n\n"
             "No high-probability A+/A setup found right now.\n\n"
-            f"Scan: {total} pair · News lock: {len(skipped)} · Gagal: {len(failed)}",
+            f"📊 Scan: {total} pair · News/Gated: {news_n} · ICT veto: {ict_n} · Gagal: {len(failed)}"
+            f"{extra}",
             parse_mode=ParseMode.HTML)
         return
 
