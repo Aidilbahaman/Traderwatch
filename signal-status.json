@@ -838,8 +838,9 @@
    "status": "pending"
   },
   "AUDUSD_20261102_095629": {
-   "status": "pending"
+   "status": "active",
+   "entry_at": "2026-11-02T10:20:00+08:00"
   }
  },
- "updated": "2026-11-02T10:20:03+08:00"
+ "updated": "2026-11-02T10:25:02+08:00"
 }
