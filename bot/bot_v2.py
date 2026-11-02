@@ -1826,6 +1826,29 @@ async def active_profit_snapshot(t):
     return price, snap, context
 
 
+def _mt5_broker_positions(timeout=120):
+    """Read-only broker positions via the wine bridge. Never writes."""
+    try:
+        r = subprocess.run(
+            ["sudo", "-n", "-u", "mt5", "env", "DISPLAY=:99",
+             "WINEPREFIX=/home/mt5/.mt5", "/opt/wine-staging/bin/wine",
+             "python", r"C:\mt5work\mt5_pending.py",
+             json.dumps({"action": "state"})],
+            capture_output=True, text=True, timeout=timeout, cwd="/tmp")
+        for line in (r.stdout or "").splitlines():
+            line = line.strip()
+            if line.startswith("{"):
+                try:
+                    d = json.loads(line)
+                    if d.get("ok"):
+                        return d.get("positions", [])
+                except Exception:
+                    pass
+    except Exception:
+        pass
+    return []
+
+
 def profit_guard_text(t, price, snap, context=""):
     decision = "✅ COLLECT PROFITS NOW" if snap["collect"] else "⏳ HOLD / MONITOR"
     movement = (f"${snap['pips']:+.2f}" if t["pair"] == "BTCUSD"
@@ -1842,13 +1865,47 @@ def profit_guard_text(t, price, snap, context=""):
 
 
 async def run_profit_guard(chat, tg):
-    """List active positions first; admin chooses one to review."""
+    """List active positions first; admin chooses one to review.
+
+    Sumber: rekod bot dahulu; jika kosong, fallback ke posisi broker MT5
+    (tanpa mengira asal — LLM/AI/manual) supaya Profit Guard tidak kosong
+    semasa ada trade berjalan.
+    """
     rows = db.execute(
         "SELECT * FROM trades WHERE tg_id=? AND status IN ('ACTIVE','TP1') "
         "AND COALESCE(publish_status,'DRAFT')='PUBLISHED' ORDER BY id DESC",
         (tg.id,)).fetchall()
     if not rows:
-        return await say(chat, "💰 <b>Profit Guard</b>\n\nTiada posisi LIVE aktif untuk diaudit sekarang.")
+        broker = await asyncio.to_thread(_mt5_broker_positions)
+        if not broker:
+            return await say(chat, "💰 <b>Profit Guard</b>\n\nTiada posisi LIVE aktif untuk diaudit sekarang.")
+        lines = []
+        for p in broker:
+            side = "BUY" if p.get("type") == 0 else "SELL"
+            sym = str(p.get("symbol", ""))
+            pair = sym.replace("/", "")
+            try:
+                pip = PAIRS[pair][2]
+            except Exception:
+                pip = 0.0001 if "JPY" in sym or "JPY" in pair else (0.1 if "XAU" in sym or "XAU" in pair else 0.0001)
+            try:
+                px = float(p.get("price_current") or 0) or None
+            except Exception:
+                px = None
+            try:
+                move = (px - float(p["price_open"])) if side == "BUY" else (float(p["price_open"]) - px) if px else 0.0
+                rpips = move / pip if pip else 0.0
+            except Exception:
+                rpips = 0.0
+            src = "bot" if (p.get("magic") or 0) else "manual/broker"
+            lines.append(
+                f"• <b>{e(sym)}</b> {side} {float(p.get('volume', 0))} lot @ <code>{e(str(p.get('price_open')))}</code> "
+                f"· running <code>{p.get('profit', 0):+.2f}$</code> ({rpips:+.1f} pips) · ticket <code>{p.get('ticket')}</code> · {src}")
+        return await say(chat,
+            "💰 <b>Profit Guard · Broker Positions</b>\n\n"
+            "Rekod bot kosong — paparan dari MT5 terus (read-only, tiada auto-tutup):\n\n"
+            + "\n".join(lines) +
+            "\n\n<i>Admin decision support only — tutup manual di MT5.</i>")
 
     buttons = []
     for t in rows:
