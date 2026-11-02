@@ -875,7 +875,13 @@
   },
   "GBPUSD_20261102_231310": {
    "status": "pending"
+  },
+  "XAUUSD_20261102_231823": {
+   "status": "pending"
+  },
+  "USDCAD_20261102_231556": {
+   "status": "pending"
   }
  },
- "updated": "2026-11-02T23:15:02+08:00"
+ "updated": "2026-11-02T23:20:02+08:00"
 }
