@@ -93,8 +93,8 @@ def sweep(bars, lookback=20):
 
 def premium_discount(bars, price):
     """Kedudukan harga dalam range 50-bar: >0.7 premium, <0.3 discount."""
-    if len(bars) < 50:
-        bars = bars
+    if not bars:
+        return 0.5
     hh = max(float(b["h"]) for b in bars[-50:])
     ll = min(float(b["l"]) for b in bars[-50:])
     if hh <= ll:
@@ -102,7 +102,16 @@ def premium_discount(bars, price):
     return (float(price) - ll) / (hh - ll)
 
 
+def _ok(bars):
+    return isinstance(bars, list) and len(bars) >= 10 and all(
+        isinstance(b, dict) and all(k in b for k in ("o", "h", "l", "c")) for b in bars[-10:])
+
+
 def ict_verdict(pair, side, entry, h1, m15):
+    # Data tidak cukup -> PASS neutral (jangan veto buta).
+    if not _ok(h1) or not _ok(m15):
+        return {"verdict": "PASS", "trend": "UNKNOWN", "reasons": ["data tidak cukup"],
+                "fvg_near": 0, "swept": None}
     side = str(side).upper()
     t_h1 = swing_trend(h1)
     t_m15 = swing_trend(m15)
