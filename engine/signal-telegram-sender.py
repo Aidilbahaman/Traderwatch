@@ -141,7 +141,7 @@ def tg_send_photo(chat_id, png, caption, reply_markup=None):
 
 
 def render_signal_chart(s):
-    """Render dark M15 chart for one signal. None if unavailable."""
+    """Render dark M15 chart dengan overlay ICT (FVG+OB+sweep). None jika gagal."""
     try:
         # bot_v2.py requires BOT_TOKEN during import even though chart rendering
         # itself does not use it. Supply the admin bot token from our loaded env.
@@ -153,9 +153,18 @@ def render_signal_chart(s):
         if not m15 or len(m15) < 10:
             log(f"CHART-SKIP {pair}: {len(m15 or [])} bars")
             return None
+        ict = None
+        try:
+            from ict_filter import ict_verdict
+            h1 = bv2.get_candles(pair, "H1", 70)
+            ict = ict_verdict(pair, s.get("side", s.get("direction", "")),
+                              float(s["entry"]), h1, m15[-96:])
+            ict = dict(ict, side=s.get("side", s.get("direction", "")))
+        except Exception as ex:
+            log(f"CHART-ICT-SKIP {pair}: {type(ex).__name__}")
         png = bv2.render_chart(pair, m15[-96:], None,
                                (float(s["entry"]), float(s["sl"]), float(s["tp"])),
-                               ("ENTRY", "SL", "TP"))
+                               ("ENTRY", "SL", "TP"), 0.43, ict)
         return png
     except Exception as ex:
         log(f"CHART-ERR {s.get('pair')}: {type(ex).__name__} {ex}")
@@ -471,11 +480,11 @@ def _run():
     log(f"{len(signals)} new signal(s) -> {len(targets)} member(s)")
     count = nudged = 0
     for s in signals:
-        # Wallet Ticket MP4 (format baharu yang diluluskan). Jika gagal,
-        # jatuh ke chart PNG, kemudian teks — signal tidak boleh hilang.
-        mp4 = render_ticket_mp4(s)
-        caption = ticket_caption(s) if mp4 else fmt(s)
-        png = None if mp4 else render_signal_chart(s)
+        # Chart PNG dengan overlay ICT (FVG+OB+sweep) — format utama.
+        # MP4 ticket dimatikan (owner 2026-11-02): gambar statik lebih jelas.
+        png = render_signal_chart(s)
+        caption = fmt(s)
+        mp4 = None
         ok_all = True
         for t in targets:
             if count >= MAX_MSGS:

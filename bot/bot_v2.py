@@ -1444,11 +1444,17 @@ def headlines(n=3):
 
 # ---------------- gambar chart ----------------
 def render_chart(pair, cs, zone=None, levels=(), labels=("Entry", "SL", "TP"),
-                 right_pad=0.43):
-    """Render dark M15 chart. right_pad meletak candle terakhir ~3/4 lebar."""
+                 right_pad=0.43, ict=None):
+    """Render dark M15 chart. right_pad meletak candle terakhir ~3/4 lebar.
+
+    ict (pilihan): dict dari ict_filter.ict_verdict() — FVG + OB dilukis
+    sebagai zon lut-cahaya: FVG sokong arah (hijau/merah muda), OB (biru).
+    Hanya 1 zon setiap jenis supaya chart bersih.
+    """
     try:
         import pandas as pd, mplfinance as mpf
         import matplotlib.pyplot as plt
+        from matplotlib.patches import Rectangle
     except ImportError:
         return None
     if len(cs) < 10:
@@ -1479,6 +1485,38 @@ def render_chart(pair, cs, zone=None, levels=(), labels=("Entry", "SL", "TP"),
     fig, axes = mpf.plot(df, **kw)
     ax = axes[0]
     ax.set_ylim(lo_p - span * 0.07, hi_p + span * 0.07)
+    # --- zon ICT: FVG + OB dari ict_filter (maks 2 setiap jenis) ---
+    if isinstance(ict, dict):
+        try:
+            from ict_filter import unfilled_fvg as _fvg, order_blocks as _ob
+            _px = float(cs[-1]["c"])
+            _side = str((ict.get("side") or "")).upper()
+            for f in _fvg(cs, _px)[:1]:
+                _col = "#4dd0a5" if f["dir"] == "BUY" else "#ff6b6b"
+                ax.axhspan(f["bot"], f["top"], color=_col, alpha=0.13, zorder=1)
+                ax.text(0.994, f["top"], f" FVG {f['dir']} ",
+                        transform=ax.get_yaxis_transform(), va="top", ha="right",
+                        fontsize=7, color="#0f0f0f",
+                        bbox=dict(boxstyle="round,pad=0.15", fc=_col, ec="none", alpha=0.9),
+                        zorder=6, clip_on=True)
+            for o in _ob(cs, _px)[:1]:
+                ax.axhspan(o["bot"], o["top"], color="#8ab4ff", alpha=0.16, zorder=1)
+                ax.text(0.994, o["bot"], f" OB {o['dir']} ",
+                        transform=ax.get_yaxis_transform(), va="bottom", ha="right",
+                        fontsize=7, color="#0f0f0f",
+                        bbox=dict(boxstyle="round,pad=0.15", fc="#8ab4ff", ec="none", alpha=0.9),
+                        zorder=6, clip_on=True)
+            _sw = ict.get("swept")
+            if isinstance(_sw, dict) and _sw.get("level"):
+                ax.axhline(float(_sw["level"]), color="#ffd54f", linestyle=":",
+                           linewidth=1.4, alpha=0.9, zorder=5)
+                ax.text(0.994, float(_sw["level"]), f" SWEEP {_sw.get('dir', '')} ",
+                        transform=ax.get_yaxis_transform(), va="bottom", ha="right",
+                        fontsize=7, color="#0f0f0f",
+                        bbox=dict(boxstyle="round,pad=0.15", fc="#ffd54f", ec="none", alpha=0.9),
+                        zorder=6, clip_on=True)
+        except Exception:
+            pass
     ax.set_title(f"{pair} · M15 · {DATA_SOURCE.upper()} · {len(cs)} bar · "
                  f"terakhir {fmt(pair, cs[-1]['c'])}",
                  fontsize=12, color="#e6e6e6", pad=8)
@@ -1606,9 +1644,18 @@ def card_text(pair, tid, v, ts, status="DRAFT"):
              "PUBLISHED": "🟢 LIVE — dihantar ke member"}.get(status, status)
     src = {"swissquote": "Swissquote", "twelvedata": "Twelve Data",
            "yahoo": "Yahoo", "mt5": "MT5", "oanda": "OANDA"}.get(DATA_SOURCE, DATA_SOURCE)
+    ict = v.get("ict") if isinstance(v, dict) else None
+    if isinstance(ict, dict) and ict.get("verdict"):
+        _iv = str(ict.get("verdict", ""))
+        _mark = {"PASS": "✅", "SOFT_VETO": "⚠️", "HARD_VETO": "🛡️"}.get(_iv, "•")
+        _rs = "; ".join(str(x) for x in (ict.get("reasons") or [])[:3])
+        ict_line = f"🧭 <b>ICT filter:</b> {_mark} <code>{e(_iv)}</code> ({e(_rs)})\n"
+    else:
+        ict_line = ""
     return (f"⚡ <b>[TRADERWATCH // SMC STRUCTURE AUDIT]</b>\n{LINE}\n"
             f"📊 <b>Instrumen:</b> <code>{pair} [M15] (Trade #{tid})</code>\n"
             f"🔍 <b>Metode:</b> <code>OHLC H1+M15 + AI review</code>\n"
+            f"{ict_line}"
             f"📡 <b>Sumber data:</b> <code>{src}</code>\n"
             f"⚡ <b>Rekomendasi:</b> {icon}\n"
             f"📍 <b>Optimal Entry:</b> <code>{f(v['entry'])}</code>\n"
@@ -1707,6 +1754,13 @@ async def do_analysis(chat, tg, ctx, pair):
                            + ". Betulkan level supaya urutan arah konsisten dan RR1 >= 1.5. Balas JSON sahaja.")
             j = extract_json(await ask_agent(repair_prompt, True))
             v = validate(pair, j)
+        # Phase 2 (terhad): ICT verdict dipaparkan pada kad manual juga.
+        try:
+            from ict_filter import ict_verdict as _ivm
+            j["ict"] = _ivm(pair, j.get("bias", j.get("side", "")),
+                            float(v.get("entry", price)), h1, m15)
+        except Exception:
+            pass
     except Exception as ex:
         return await st.edit_text(f"⚠️ Tiada setup layak sekarang ({e(str(ex))[:150]}). Kuota tidak ditolak.")
     ts = now()
@@ -1719,8 +1773,11 @@ async def do_analysis(chat, tg, ctx, pair):
     db.commit()
     tid = cur.lastrowid
     spend(tg.id, vision=1)
+    _ict = j.get("ict") if isinstance(j, dict) else None
+    if isinstance(_ict, dict): _ict = dict(_ict, side=j.get("bias", j.get("side", "")))
     png = await asyncio.to_thread(render_chart, pair, m15[-96:],
-                                  (v["poi_low"], v["poi_high"]), (v["entry"], v["sl"], v["tp1"]))
+                                  (v["poi_low"], v["poi_high"]), (v["entry"], v["sl"], v["tp1"]),
+                                  ("Entry", "SL", "TP"), 0.43, _ict)
     await st.delete()
     rows = [[IB("📋 Rincian Sniper", callback_data=f"detail:{tid}")]]
     if tg.id in ADMIN_IDS:
@@ -2430,9 +2487,12 @@ async def on_callback(update: Update, ctx):
                 except Exception as ex:
                     reject_trade(tid, tg.id)
                     return await say(chat, f"⚠️ Publish gagal — {e(str(ex))[:220]}")
+            _ict2 = j.get("ict") if isinstance(j, dict) else None
+            if isinstance(_ict2, dict): _ict2 = dict(_ict2, side=j.get("bias", j.get("side", "")))
             png = await asyncio.to_thread(render_chart, pair, m15[-96:],
                                            (v["poi_low"], v["poi_high"]),
-                                           (v["entry"], v["sl"], v["tp1"]))
+                                           (v["entry"], v["sl"], v["tp1"]),
+                                           ("Entry", "SL", "TP"), 0.43, _ict2)
             kb = IM([[IB("📋 Rincian Sniper", callback_data=f"detail:{tid}")],
                      [IB("✅ Post Signal", callback_data=f"admin:post:{tid}"),
                       IB("❌ Tolak", callback_data=f"admin:reject:{tid}")]])
