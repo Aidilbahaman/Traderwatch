@@ -880,8 +880,9 @@
    "status": "pending"
   },
   "USDCAD_20261102_231556": {
-   "status": "pending"
+   "status": "active",
+   "entry_at": "2026-11-02T23:33:00+08:00"
   }
  },
- "updated": "2026-11-02T23:30:01+08:00"
+ "updated": "2026-11-02T23:35:03+08:00"
 }
