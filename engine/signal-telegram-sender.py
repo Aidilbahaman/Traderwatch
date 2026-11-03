@@ -358,6 +358,10 @@ def fetch_targets():
 
 
 def fetch_new_signals(sent):
+    try:
+        from engine.private_signals import is_private
+    except Exception:
+        from private_signals import is_private
     st, rows = http_json(
         f"{SB_URL}/rest/v1/signals"
         "?select=id,pair,timeframe,side,entry,sl,tp,posted_at"
@@ -365,7 +369,13 @@ def fetch_new_signals(sent):
         headers={"apikey": SB_KEY, "Authorization": f"Bearer {SB_KEY}"})
     if st != 200:
         raise RuntimeError(f"signals fetch {st}")
-    fresh = [s for s in (rows or []) if s["id"] not in sent]
+    fresh = [s for s in (rows or [])
+             if s["id"] not in sent and not is_private(s.get("id"))]
+    # Private AI signals are delivered by lifecycle to owner only, never
+    # through the member broadcast sender. Manual signals remain unchanged.
+    skipped_private = sum(1 for s in (rows or []) if is_private(s.get("id")))
+    if skipped_private:
+        log(f"PRIVATE-SKIP {skipped_private} signal(s) — lifecycle owner-only")
     # oldest first so a flood of new signals keeps chronological order
     return sorted(fresh, key=lambda s: s["posted_at"])
 

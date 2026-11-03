@@ -316,8 +316,9 @@ def active_signals():
     st = _status_map()
     out = []
     for s in rows:
-        if not is_private(s.get("id")):
-            continue
+        # Manual signals (NOT in private registry) continue as before:
+        # they are a normal operation, executed with the fixed LOT.
+        # Private AI signals (in registry) also pass — they use risk lot.
         if not all(s.get(k) is not None for k in ("entry", "sl", "tp")):
             continue
         key = _myt_key(s["pair"], s["posted_at"])
@@ -523,14 +524,14 @@ def main():
                 f"count={len(existing_positions) + len(existing_orders)} — no duplicate order")
             continue
 
-        lot_use, lot_note = LOT, "fixed"
-        if RISK_PCT > 0 and eq > 0:
+        lot_use, lot_note = LOT, "fixed-manual"
+        if RISK_PCT > 0 and eq > 0 and is_private(sid):
             calc, note = size_lot(pair, entry, sl, eq)
             if calc is None:
                 log(f"LOT-SKIP #{sid} {pair} {side}: {note} — tiada order "
                     f"(risiko akan melebihi {RISK_PCT}% atau spec tiada)")
                 continue
-            lot_use, lot_note = calc, note
+            lot_use, lot_note = calc, "risk-" + note
 
         if MODE != "live":
             log(f"PLAN #{sid} {pair} {side} LIMIT entry={entry} sl={sl} tp={tp} "
