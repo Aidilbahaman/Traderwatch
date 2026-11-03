@@ -83,7 +83,7 @@
 <div class="card metric"><div class="metric-top">Active setups <span class="metric-icon">↗</span></div><div class="metric-value positive" id="netprofit">—</div><div class="metric-foot" id="netprofitNote">Live setup feed</div></div>
 <div class="card metric"><div class="metric-top">Win rate <span class="metric-icon">◎</span></div><div class="metric-value" id="winrate">—</div><div class="metric-foot"><strong id="winCount">—</strong> <span>of closed setups</span></div></div>
 <div class="card metric"><div class="metric-top">Closed setups <span class="metric-icon">⇄</span></div><div class="metric-value" id="tradecount">—</div><div class="metric-foot" id="tradecountNote">TP / SL / collected only</div></div>
-<div class="card chartcard" id="performance"><div class="section-head"><div><h2>Performance</h2><p id="chartSub">Cumulative pips · published results</p></div><div class="charttools" aria-label="Chart period"><button class="active" data-period="ALL">ALL</button><button data-period="1M">1M</button><button data-period="3M">3M</button></div></div><div class="chartwrap"><svg id="chart" viewBox="0 0 600 210" preserveAspectRatio="none" role="img" aria-label="Cumulative pips chart from published results"><defs><linearGradient id="fill" x1="0" x2="0" y1="0" y2="1"><stop offset="0%" stop-color="#b7f36b" stop-opacity=".2"/><stop offset="100%" stop-color="#b7f36b" stop-opacity="0"/></linearGradient></defs><g stroke="#ffffff0b" stroke-width="1"><path d="M0 25H600 M0 70H600 M0 115H600 M0 160H600 M0 205H600"/></g><path id="area" fill="url(#fill)" d=""/><path id="line" fill="none" stroke="#b7f36b" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" d=""/><circle id="dot" r="4" fill="#b7f36b" stroke="#12151a" stroke-width="2" cx="0" cy="0"/></svg></div><div class="chartlabels" id="chartlabels"></div><div class="charttip"><span>Cumulative pips</span><span class="positive" id="chartreturn">—</span></div></div>
+<div class="card chartcard" id="performance"><div class="section-head"><div><h2>Performance</h2><p id="chartSub">Cumulative pips · published results</p></div><div class="charttools" aria-label="Chart period"><button class="active" data-period="ALL">ALL</button><button data-period="1M">1M</button><button data-period="3M">3M</button></div><div class="charttools" aria-label="Chart view" style="margin-top:6px"><button class="active" data-mode="CUM">Cum</button><button data-mode="DAILY">Daily</button><button data-mode="TRADE">Trades</button></div></div><div class="chartwrap"><svg id="chart" viewBox="0 0 600 210" preserveAspectRatio="none" role="img" aria-label="Cumulative pips chart from published results"><defs><linearGradient id="fill" x1="0" x2="0" y1="0" y2="1"><stop offset="0%" stop-color="#b7f36b" stop-opacity=".2"/><stop offset="100%" stop-color="#b7f36b" stop-opacity="0"/></linearGradient></defs><g stroke="#ffffff0b" stroke-width="1"><path d="M0 25H600 M0 70H600 M0 115H600 M0 160H600 M0 205H600"/></g><path id="area" fill="url(#fill)" d=""/><path id="line" fill="none" stroke="#b7f36b" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" d=""/><circle id="dot" r="4" fill="#b7f36b" stroke="#12151a" stroke-width="2" cx="0" cy="0"/></svg></div><div class="chartlabels" id="chartlabels"></div><div class="charttip"><span>Cumulative pips</span><span class="positive" id="chartreturn">—</span></div></div>
 <div class="card watchcard" id="markets"><div class="section-head"><div><h2>Signal watch</h2><p>Published setups · live status</p></div><button class="viewall" id="editMarkets" type="button">Refresh ↗</button></div>
 <div class="watchrow"><div class="pair"><div class="coin">·</div><div><div class="pairname">Loading signal</div><div class="pairsub">Waiting for account data</div></div></div><div class="price">—<small>—</small></div></div>
 <div class="watchrow"><div class="pair"><div class="coin blue">·</div><div><div class="pairname">Loading signal</div><div class="pairsub">Waiting for account data</div></div></div><div class="price">—<small>—</small></div></div>
@@ -196,26 +196,69 @@ function render(rows,statuses,member){
 }
 
 function drawChart(period){window._perfPeriod=period||'ALL';
+ var mode=window._perfMode||'CUM';
  var perf=(window._perfAll||[]).slice();
  if(period==='1W'){var c=new Date();c.setDate(c.getDate()-7);var cut=c.toISOString().slice(0,10);perf=perf.filter(function(x){return x.d>=cut})}
  if(period==='1M'){var c2=new Date();c2.setMonth(c2.getMonth()-1);var cut2=c2.toISOString().slice(0,10);perf=perf.filter(function(x){return x.d>=cut2})}
  if(period==='3M'){var c3=new Date();c3.setMonth(c3.getMonth()-3);var cut3=c3.toISOString().slice(0,10);perf=perf.filter(function(x){return x.d>=cut3})}
- var lbl=period==='1M'?'last 30 days':period==='3M'?'last 3 months':period==='1W'?'last 7 days':'since '+PERF_LABEL;
- $("chartSub").textContent='Cumulative pips · '+lbl;
- 
- var run=0,vals=perf.map(function(x){run+=x.pips;return run});
- if(!perf.length){$('line').setAttribute('d','');$('area').setAttribute('d','');$('dot').setAttribute('cx',0);$('dot').setAttribute('cy',0);$('chartreturn').textContent='—';$('chartreturn').className='';$('chartlabels').innerHTML='';return}
- var min=Math.min.apply(null,vals.concat([0])),max=Math.max.apply(null,vals.concat([0])),pad=(max-min)*0.10||10;
- if(min<0)min-=pad;max+=pad;var range=max-min||1;
- var pts=vals.map(function(v,i){return [i*600/(vals.length-1||1),198-(v-min)/range*170]}),d=pts.map(function(p,i){return(i?'L':'M')+p[0].toFixed(1)+' '+p[1].toFixed(1)}).join(' ');
- var zeroY=198-(0-min)/range*170,g=$('chart').querySelector('g');
- if(g&&!$('zeroline')){var zl=document.createElementNS('http://www.w3.org/2000/svg','path');zl.setAttribute('id','zeroline');zl.setAttribute('stroke','#8a93a0');zl.setAttribute('stroke-width','1');zl.setAttribute('stroke-dasharray','4 4');zl.setAttribute('opacity','.55');g.appendChild(zl)}
- var zl2=$('zeroline');if(zl2)zl2.setAttribute('d','M0 '+zeroY.toFixed(1)+'H600');
- $('line').setAttribute('d',d);$('area').setAttribute('d',d+' L600 210 L0 210 Z');$('dot').setAttribute('cx',pts[pts.length-1][0]);$('dot').setAttribute('cy',pts[pts.length-1][1]);
- $('line').setAttribute('stroke',run>=0?'#b7f36b':'#ff777d');$('dot').setAttribute('fill',run>=0?'#b7f36b':'#ff777d');
- $('chartreturn').textContent=(run>=0?'+':'−')+Math.abs(run).toFixed(1)+' pips';$('chartreturn').className=run>=0?'positive':'negative';
- var step=Math.max(1,Math.ceil(perf.length/7));
- $('chartlabels').innerHTML=perf.filter(function(_,i){return i%step===0}).slice(0,7).map(function(x){return '<span>'+x.d.slice(8)+'/'+x.d.slice(5,7)+'</span>'}).join('');
+ var plbl=period==='1M'?'last 30 days':period==='3M'?'last 3 months':period==='1W'?'last 7 days':'since '+PERF_LABEL;
+ var lbl='Cumulative pips · '+plbl;
+ var tot=0;
+ if(mode==='TRADE'){
+  // Individual trade pips — flat bar (1=pip, -1=pip)
+  lbl='Pips per trade · '+plbl;
+  var maxAbs=Math.max.apply(null,perf.map(function(x){return Math.abs(x.pips)}));
+  if(!perf.length){$('chartreturn').textContent='—';$('chartSub').textContent=lbl;$('line').setAttribute('d','');$('area').setAttribute('d','');$('dot').setAttribute('cx',0);$('dot').setAttribute('cy',0);$('chartlabels').innerHTML='';return}
+  var pts=perf.map(function(x,i){return [i*600/(perf.length-1||1),170-x.pips/maxAbs*150+15]});var d=pts.map(function(p,i){return(i?'L':'M')+p[0].toFixed(1)+' '+p[1].toFixed(1)}).join(' ');
+  var zeroY=170+15;var g=$('chart').querySelector('g');
+  if(g&&!$('zeroline')){var zl=document.createElementNS('http://www.w3.org/2000/svg','path');zl.setAttribute('id','zeroline');zl.setAttribute('stroke','#8a93a0');zl.setAttribute('stroke-width','1');zl.setAttribute('stroke-dasharray','4 4');zl.setAttribute('opacity','.55');g.appendChild(zl)}
+  var zl2=$('zeroline');if(zl2)zl2.setAttribute('d','M0 '+zeroY.toFixed(1)+'H600');
+  $('line').setAttribute('d',d);$('area').setAttribute('d',d+' L600 210 L0 210 Z');$('dot').setAttribute('cx',pts[pts.length-1][0]);$('dot').setAttribute('cy',pts[pts.length-1][1]);
+  var last=perf[perf.length-1];$('line').setAttribute('stroke',last.pips>=0?'#b7f36b':'#ff777d');$('dot').setAttribute('fill',last.pips>=0?'#b7f36b':'#ff777d');
+  tot=perf.reduce(function(a,x){return a+x.pips},0);$('chartreturn').textContent=(tot>=0?'+':'−')+Math.abs(tot).toFixed(1)+' pips';$('chartreturn').className=tot>=0?'positive':'negative';
+  var step=Math.max(1,Math.ceil(perf.length/7));$('chartlabels').innerHTML=perf.filter(function(_,i){return i%step===0}).slice(0,7).map(function(x){return'<span>'+x.d.slice(8)+'/'+x.d.slice(5,7)+'</span>'}).join('');
+ } else if(mode==='DAILY'){
+  // Net pips per calendar day — bar chart
+  lbl='Net pips per day · '+plbl;
+  var byDay={};perf.forEach(function(x){byDay[x.d]=(byDay[x.d]||0)+x.pips});
+  var days=Object.keys(byDay).sort();if(!days.length){$('chartreturn').textContent='—';$('chartSub').textContent=lbl;$('line').setAttribute('d','');$('area').setAttribute('d','');$('dot').setAttribute('cx',0);$('dot').setAttribute('cy',0);$('chartlabels').innerHTML='';return}
+  var vals=days.map(function(d){return byDay[d]});
+  var maxAbs=Math.max.apply(null,vals.map(Math.abs));maxAbs=maxAbs||10;
+  var bw=Math.max(2,540/days.length*0.6);var W=600,L=30,R=30;
+  var T=10,B=10;var ph=190;
+  var mx=Math.max.apply(null,vals.concat([0])),mn=Math.min(0,Math.min.apply(null,vals));
+  var zeroY=T+mx/(mx-mn||1)*ph;
+  var pts=days.map(function(d,i){return[L+(i/(days.length-1||1))*(W-L-R),T+mx/(mx-mn||1)*(mx-byDay[d])]});
+  var d=pts.map(function(p,i){return(i?'L':'M')+p[0].toFixed(1)+' '+p[1].toFixed(1)}).join(' ');
+  var g=$('chart').querySelector('g');if(g&&!$('zeroline')){var zl=document.createElementNS('http://www.w3.org/2000/svg','path');zl.setAttribute('id','zeroline');zl.setAttribute('stroke','#8a93a0');zl.setAttribute('stroke-width','1');zl.setAttribute('stroke-dasharray','4 4');zl.setAttribute('opacity','.55');g.appendChild(zl)}
+  var zl2=$('zeroline');if(zl2)zl2.setAttribute('d','M0 '+zeroY.toFixed(1)+'H600');
+  var bars=days.map(function(d,i){var v=byDay[d];var x=pts[i][0]-bw/2;var yv=T+(mx-Math.max(0,v))/(mx-mn||1)*ph;var y=Math.min(zeroY,yv);var h=Math.abs(zeroY-yv);return'<rect x="'+(x).toFixed(1)+'" y="'+y.toFixed(1)+'" width="'+bw.toFixed(1)+'" height="'+Math.max(1,h).toFixed(1)+'" rx="2" fill="'+(v>=0?'#b7f36b':'#ff777d')+'" fill-opacity=".8"/>'}).join('');
+  $('chart').innerHTML=$('chart').innerHTML; // reset
+  // rebuild SVG cleanly
+  var svg=$('chart');svg.innerHTML='<defs><linearGradient id="fill" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#b7f36b" stop-opacity=".2"/><stop offset="100%" stop-color="#b7f36b" stop-opacity="0"/></linearGradient></defs><path id="area" fill="url(#fill)" d=""/><path id="line" fill="none" stroke="#b7f36b" stroke-width="2" stroke-linecap="round" d=""/><circle id="dot" r="4" fill="#b7f36b" stroke="#12151a" stroke-width="2" cx="0" cy="0"/>';
+  tot=vals.reduce(function(a,v){return a+v},0);var lastV=vals[vals.length-1];
+  svg.innerHTML+='<g id="bars">'+bars+'</g>';
+  $('line').setAttribute('d',d);$('dot').setAttribute('cx',pts[pts.length-1][0]);$('dot').setAttribute('cy',pts[pts.length-1][1]);
+  $('line').setAttribute('stroke',lastV>=0?'#b7f36b':'#ff777d');$('dot').setAttribute('fill',lastV>=0?'#b7f36b':'#ff777d');
+  $('chartreturn').textContent=(tot>=0?'+':'−')+Math.abs(tot).toFixed(1)+' pips';$('chartreturn').className=tot>=0?'positive':'negative';
+  $('chartlabels').innerHTML='<span>'+days[0].slice(5).replace('-','/')+'</span><span>'+days[Math.floor(days.length/2)].slice(5).replace('-','/')+'</span><span>'+days[days.length-1].slice(5).replace('-','/')+'</span>';
+ } else {
+  // CUMULATIVE — existing line chart
+  lbl='Cumulative pips · '+plbl;
+  var run=0,vals=perf.map(function(x){run+=x.pips;return run});
+  if(!perf.length){$('chartreturn').textContent='—';$('chartSub').textContent=lbl;$('line').setAttribute('d','');$('area').setAttribute('d','');$('dot').setAttribute('cx',0);$('dot').setAttribute('cy',0);$('chartlabels').innerHTML='';return}
+  var min=Math.min.apply(null,vals.concat([0])),max=Math.max.apply(null,vals.concat([0])),pad=(max-min)*0.10||10;
+  if(min<0)min-=pad;max+=pad;var range=max-min||1;
+  var pts=vals.map(function(v,i){return[i*600/(vals.length-1||1),198-(v-min)/range*170]});var d=pts.map(function(p,i){return(i?'L':'M')+p[0].toFixed(1)+' '+p[1].toFixed(1)}).join(' ');
+  var zeroY=198-(0-min)/range*170;var g=$('chart').querySelector('g');
+  if(g&&!$('zeroline')){var zl=document.createElementNS('http://www.w3.org/2000/svg','path');zl.setAttribute('id','zeroline');zl.setAttribute('stroke','#8a93a0');zl.setAttribute('stroke-width','1');zl.setAttribute('stroke-dasharray','4 4');zl.setAttribute('opacity','.55');g.appendChild(zl)}
+  var zl2=$('zeroline');if(zl2)zl2.setAttribute('d','M0 '+zeroY.toFixed(1)+'H600');
+  $('line').setAttribute('d',d);$('area').setAttribute('d',d+' L600 210 L0 210 Z');$('dot').setAttribute('cx',pts[pts.length-1][0]);$('dot').setAttribute('cy',pts[pts.length-1][1]);
+  $('line').setAttribute('stroke',run>=0?'#b7f36b':'#ff777d');$('dot').setAttribute('fill',run>=0?'#b7f36b':'#ff777d');
+  tot=run;$('chartreturn').textContent=(run>=0?'+':'−')+Math.abs(run).toFixed(1)+' pips';$('chartreturn').className=run>=0?'positive':'negative';
+  var step=Math.max(1,Math.ceil(perf.length/7));$('chartlabels').innerHTML=perf.filter(function(_,i){return i%step===0}).slice(0,7).map(function(x){return'<span>'+x.d.slice(8)+'/'+x.d.slice(5,7)+'</span>'}).join('');
+ }
+ $('chartSub').textContent=lbl;
 }
 var TG_BOT='https://t.me/Traderwatchmembershipbot',tgTok=null,tgAt=0;
 function tgTap(ev){
@@ -251,15 +294,21 @@ $('signOutBtn').onclick=function(){
 $('addTrade').onclick=function(){location.reload()};
 $('liveSound').onclick=function(){liveSoundOn();try{localStorage.setItem('tw-live-sound','1')}catch(e){}};
 document.addEventListener('pointerdown',liveFirstGesture,{once:true});
-document.querySelectorAll(".charttools button").forEach(function(btn){ 
+document.querySelectorAll('.charttools [data-period]').forEach(function(btn){
   btn.addEventListener("click", function(){
-    var period = btn.getAttribute("data-period");
-    window._perfPeriod = period; 
-    drawChart(period); 
-    // Update button states
-    document.querySelectorAll(".charttools button").forEach(function(btn2){
-      var isActive = btn2.getAttribute("data-period") === period;
-      btn2.classList.toggle("active", isActive);
+    window._perfPeriod = btn.getAttribute("data-period");
+    drawChart(window._perfPeriod);
+    document.querySelectorAll('.charttools [data-period]').forEach(function(b2){
+      b2.classList.toggle("active", b2===btn);
+    });
+  });
+});
+document.querySelectorAll('.charttools [data-mode]').forEach(function(btn){
+  btn.addEventListener("click", function(){
+    window._perfMode = btn.getAttribute("data-mode");
+    drawChart(window._perfPeriod||'ALL');
+    document.querySelectorAll('.charttools [data-mode]').forEach(function(b2){
+      b2.classList.toggle("active", b2===btn);
     });
   });
 });
