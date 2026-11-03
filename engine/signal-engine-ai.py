@@ -49,7 +49,9 @@ LOCK = Path("/tmp/signal-engine-ai.lock")
 # hantar owner sahaja dan MT5 execute dengan lot risiko 1%.
 PRIVATE_MODE = os.environ.get("AI_PRIVATE", "1") == "1"
 THRESHOLD = 0.55
-SCALP_MIN_SL_PIPS = 12.0
+# Lantai SL 15 pip: spread RoboForex besar (EURUSD 1.3, USDJPY 1.9,
+# XAUUSD 2.1 pip). 15 pip hadkan drag spread bawah ~13% SL.
+SCALP_MIN_SL_PIPS = 15.0
 SCALP_RR = 2.0
 TIMEFRAME = "M15"
 TD_INTERVAL = "15min"

@@ -100,11 +100,20 @@ elif act == "symbol":
     info = mt5.symbol_info(sym)
     if info is None:
         out({"ok": False, "error": "no symbol_info " + sym}); sys.exit(0)
+    ask = bid = 0.0
+    try:
+        _t = mt5.symbol_info_tick(sym)
+        if _t is not None:
+            ask, bid = float(_t.ask), float(_t.bid)
+    except Exception:
+        pass
     out({"ok": True, "symbol": sym, "point": info.point, "digits": info.digits,
          "tick_size": info.trade_tick_size, "tick_value": info.trade_tick_value,
          "contract": info.trade_contract_size, "vol_min": info.volume_min,
          "vol_max": info.volume_max, "vol_step": info.volume_step,
-         "stops_level": info.trade_stops_level})
+         "stops_level": info.trade_stops_level,
+         "spread_pt": getattr(info, "spread", 0),
+         "spread_price": max(0.0, ask - bid)})
 
 elif act == "place_limit":
     sym   = req["symbol"]
@@ -365,6 +374,11 @@ def size_lot(pair, entry, sl, equity):
     dist = abs(float(entry) - float(sl))
     if dist <= 0:
         return None, "zero-sl"
+    # Guard spread: SL mesti > 3x spread live. Kalau tidak, spread sahaja
+    # boleh makan edge (RoboForex spread besar). Skip, bukan kecilkan lot.
+    sp = float(spec.get("spread_price") or 0) or float(spec.get("spread_pt") or 0) * float(spec.get("point") or 0)
+    if sp > 0 and dist < 3 * sp:
+        return None, f"sl<{3*sp:g} (3x spread {sp:g})"
     loss_per_lot = (dist / tick_size) * tick_value
     if loss_per_lot <= 0:
         return None, "bad-loss"
