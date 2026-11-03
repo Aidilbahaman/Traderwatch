@@ -51,8 +51,16 @@ KILL_STATE = REPO / "state" / "mt5-kill.json"
 # ---------- lot sizing ikut risiko ----------
 # RISK_PCT > 0 -> lot dikira dari equity live + jarak entry->SL.
 # RISK_PCT = 0 -> guna LOT tetap (lama).
-RISK_PCT = float(os.environ.get("MT5_RISK_PCT", "1.0"))      # % equity per trade
+RISK_PCT = float(os.environ.get("MT5_RISK_PCT", "1.0"))      # % per trade
 LOT_MIN_ALLOW = os.environ.get("MT5_LOT_MIN_ALLOW", "1") == "1"
+
+# ---------- compounding ----------
+# Asas saiz lot naik/turun ikut modal. "balance" = untung REALIZED sahaja
+# (compounding sebenar: lot naik hanya selepas profit banked). "equity"
+# termasuk floating P/L, jadi lot membesar semasa posisi masih terbuka —
+# risiko terkumpul bila ada beberapa posisi searah.
+COMPOUND_BASE = os.environ.get("MT5_COMPOUND_BASE", "balance").lower()
+COMPOUND_FILE = REPO / "state" / "ai-compound.json"
 
 PREFIX = "/home/mt5/.mt5"
 PY = r"C:\Python311\python.exe"
@@ -402,6 +410,45 @@ def size_lot(pair, entry, sl, equity):
                  f"sl_dist={dist:g} loss/lot={loss_per_lot:.2f} lot={lot:g}")
 
 
+def sizing_base(acc):
+    """Modal asas untuk kira lot.
+
+    balance = untung realized sahaja (default, compounding konservatif).
+    equity  = termasuk floating P/L (agresif, lot naik walaupun belum bank).
+    """
+    bal = float(acc.get("balance") or 0)
+    eq = float(acc.get("equity") or 0)
+    if COMPOUND_BASE == "equity":
+        return eq or bal
+    return bal or eq
+
+
+def compound_track(base):
+    """Rekod modal asas -> {start, base, peak, growth_pct, trades}. 
+    
+    Ditulis setiap loop; dipakai untuk log kemajuan compounding dan untuk
+    kira berapa kali lot sudah naik berbanding modal mula.
+    """
+    try:
+        d = json.loads(COMPOUND_FILE.read_text())
+    except Exception:
+        d = {}
+    if not d.get("start") or float(d.get("start") or 0) <= 0:
+        d = {"start": round(base, 2), "started_at": datetime.now(MYT).isoformat(timespec="seconds")}
+    d["base"] = round(base, 2)
+    d["peak"] = round(max(float(d.get("peak") or 0), base), 2)
+    start = float(d["start"])
+    d["growth_pct"] = round((base - start) / start * 100, 2) if start else 0.0
+    d["multiplier"] = round(base / start, 4) if start else 1.0
+    d["updated"] = datetime.now(MYT).isoformat(timespec="seconds")
+    try:
+        COMPOUND_FILE.parent.mkdir(parents=True, exist_ok=True)
+        COMPOUND_FILE.write_text(json.dumps(d, indent=1, sort_keys=True))
+    except Exception:
+        pass
+    return d
+
+
 def _today():
     return datetime.now(MYT).strftime("%Y-%m-%d")
 
@@ -474,6 +521,16 @@ def main():
     else:
         log("AMARAN: tidak dapat baca equity — kill switch dilangkau")
 
+    # ---------- compounding ----------
+    base = sizing_base(acc)
+    comp = compound_track(base) if base > 0 else {}
+    if comp:
+        log(f"COMPOUND base={COMPOUND_BASE} modal={base:.2f} "
+            f"mula={comp.get('start')} puncak={comp.get('peak')} "
+            f"pertumbuhan={comp.get('growth_pct')}% x{comp.get('multiplier')}")
+    if RISK_PCT > 0 and base <= 0:
+        log("AMARAN: modal asas 0 — lot risiko dilangkau (guna LOT tetap)")
+
     st = load_state()
     seen = st.get("signals", {})
 
@@ -539,8 +596,8 @@ def main():
             continue
 
         lot_use, lot_note = LOT, "fixed-manual"
-        if RISK_PCT > 0 and eq > 0 and is_private(sid):
-            calc, note = size_lot(pair, entry, sl, eq)
+        if RISK_PCT > 0 and base > 0 and is_private(sid):
+            calc, note = size_lot(pair, entry, sl, base)
             if calc is None:
                 log(f"LOT-SKIP #{sid} {pair} {side}: {note} — tiada order "
                     f"(risiko akan melebihi {RISK_PCT}% atau spec tiada)")
