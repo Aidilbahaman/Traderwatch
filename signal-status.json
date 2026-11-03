@@ -915,10 +915,13 @@
    "entry_at": "2026-11-03T10:51:00+08:00"
   },
   "AUDUSD_20261103_195412": {
-   "status": "pending"
+   "status": "expired",
+   "closed": "2026-11-03T21:30:02+08:00",
+   "note": "lifecycle:expired"
   },
   "GBPUSD_20261103_202200": {
-   "status": "pending"
+   "status": "active",
+   "entry_at": "2026-11-03T21:29:00+08:00"
   },
   "XAUUSD_20261103_203619": {
    "status": "sl",
@@ -929,5 +932,5 @@
    "entry_at": "2026-11-03T20:37:00+08:00"
   }
  },
- "updated": "2026-11-03T21:25:02+08:00"
+ "updated": "2026-11-03T21:30:02+08:00"
 }
