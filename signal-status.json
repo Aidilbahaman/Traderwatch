@@ -497,7 +497,9 @@
    "closed": "2026-10-27T09:24:08+08:00"
   },
   "XAUUSD_20261029_143322": {
-   "status": "pending"
+   "status": "expired",
+   "closed": "2026-11-03T14:30:02+08:00",
+   "note": "lifecycle:expired"
   },
   "XAUUSD_20261029_111315": {
    "status": "sl",
@@ -863,7 +865,9 @@
    "entry_at": "2026-11-02T16:34:00+08:00"
   },
   "EURUSD_20261102_095654": {
-   "status": "pending"
+   "status": "expired",
+   "closed": "2026-11-03T14:30:02+08:00",
+   "note": "lifecycle:expired"
   },
   "AUDUSD_20261102_095629": {
    "status": "sl",
@@ -882,12 +886,9 @@
    "entry_at": "2026-11-03T00:05:00+08:00"
   },
   "XAUUSD_20261102_231823": {
-   "status": "sl",
-   "pips": -127.4,
-   "r": -1,
-   "unit": "pips",
-   "closed": "2026-11-03T11:40:02+08:00",
-   "entry_at": "2026-11-03T03:49:00+08:00"
+   "status": "expired",
+   "closed": "2026-11-03T14:29:34+08:00",
+   "note": "lifecycle:expired (fix #207 — entry tak kena sebelum expiry, SL -127.4 pips palsu dibuang)"
   },
   "USDCAD_20261102_231556": {
    "status": "sl",
@@ -914,5 +915,5 @@
    "entry_at": "2026-11-03T10:51:00+08:00"
   }
  },
- "updated": "2026-11-03T14:25:02+08:00"
+ "updated": "2026-11-03T14:30:02+08:00"
 }
