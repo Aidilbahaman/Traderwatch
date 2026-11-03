@@ -2599,6 +2599,27 @@ async def on_callback(update: Update, ctx):
                 except Exception:
                     pass
                 return await say(chat, f"\u274c Draft #{sid} ditolak.")
+            elif action == "void":
+                # Private AI signal dibatalkan owner: verified=false supaya
+                # MT5 tidak execute/re-execute, buang dari private registry
+                # supaya sender/lifecycle/static feed abaikan sepenuhnya.
+                upd = sb_patch(f"signals?id=eq.{int(sid)}", {"verified": False})
+                try:
+                    import sys as _sys
+                    _sys.path.insert(0, "/home/ubuntu/web/Traderwatch-repo")
+                    from engine.private_signals import remove as _priv_remove
+                    _priv_remove(sid)
+                except Exception:
+                    pass
+                try:
+                    await q.edit_message_text(
+                        f"\U0001f6e1\ufe0f <b>AI private #{sid} DIBATALKAN</b>\n"
+                        f"{e(str(r0['pair']))} \u00b7 {e(str(r0['side']))} — "
+                        f"tidak masuk broker/member.",
+                        parse_mode=ParseMode.HTML)
+                except Exception:
+                    pass
+                return await say(chat, f"\U0001f6e1\ufe0f Private #{sid} dibatalkan.")
             else:
                 return await say(chat, "\u26a0\ufe0f Aksi tidak dikenali.")
         except Exception as ex:

@@ -44,6 +44,10 @@ MODEL_FILE = REPO / "state" / "ai-m15-model.json"
 MEMO_FILE = REPO / "state" / "learning-memo.json"
 LOCK = Path("/tmp/signal-engine-ai.lock")
 
+# Mod private: AI terus publish ke akaun OWNER sahaja (bukan member).
+# Signal didaftarkan dalam state/private-signals.json supaya lifecycle
+# hantar owner sahaja dan MT5 execute dengan lot risiko 1%.
+PRIVATE_MODE = os.environ.get("AI_PRIVATE", "1") == "1"
 THRESHOLD = 0.55
 SCALP_MIN_SL_PIPS = 12.0
 SCALP_RR = 2.0
@@ -76,13 +80,13 @@ SB_KEY = SB["SUPABASE_SERVICE_KEY"]
 TD_KEY = ""
 
 
-def sb(path, method="GET", body=None):
+def sb(path, method="GET", body=None, prefer="return=minimal"):
     data = json.dumps(body).encode() if body is not None else None
     req = urllib.request.Request(
         f"{SB_URL}/rest/v1/{path}", data=data, method=method,
         headers={"apikey": SB_KEY, "Authorization": f"Bearer {SB_KEY}",
                  "Content-Type": "application/json",
-                 "Prefer": "return=minimal"})
+                 "Prefer": prefer})
     try:
         with urllib.request.urlopen(req, timeout=25) as r:
             return r.status, r.read().decode()
@@ -360,13 +364,21 @@ def build_levels(pair, side, price, atr):
 OWNER_CHAT_ID = "7696607055"
 
 
-def notify_owner(pair, side, row, conf, txt, news_line=""):
-    """Hantar cadangan draft kepada owner secara private (Telegram).
+def notify_owner(pair, side, row, conf, txt, news_line="", executed=False):
+    """Hantar signal AI kepada owner secara private (Telegram).
+
+    Mod private (executed=True): signal sudah publish + didaftarkan private.
+    Mesej kepada owner ialah "SUDAH LIVE — MT5 akan execute / posisi
+    dibina", bukan cadangan. Tiada butang Post — tak perlu approve.
+    Risiko SL sudah ditulis supaya owner tahu dollar at risk.
+
+    Mod cadangan (executed=False): draft verified=False. Mesej lama kekal:
+    butang Post ke member / Tolak.
 
     Sender: @CCSTWbot (BOT_TOKEN dalam /home/ubuntu/tw-bot/.env) supaya
     nampak sebagai chat dengan bot admin, bukan sender member.
     Fail-safe: sebarang kegagalan hantar TIDAK menggagalkan engine run;
-    draft kekal dalam Supabase verified=false untuk review manual.
+    private signal tetap live di DB + private registry.
     """
     try:
         bot_tok = ""
@@ -397,18 +409,36 @@ def notify_owner(pair, side, row, conf, txt, news_line=""):
                      f"Reward ~<b>${reward_usd:.0f}</b> ({tp_pips:.1f} pips) pada 0.01 lot"
                      + (" - akaun bawah $100, pertimbang skip atau lot lebih kecil" if risk_usd > 5 else ""))
         arrow = "\u2b06\ufe0f" if str(side).upper() == "BUY" else "\u2b07\ufe0f"
-        msg = (f"\U0001f916 <b>AI CADANGAN (draft #{sid})</b>\n"
-               f"\U0001f4ca <b>{pair}</b> \u00b7 M15\n"
-               f"{icon}\n"
-               f"\U0001f3af Entry <code>{row['entry']}</code>\n"
-               f"\U0001f6e1\ufe0f SL <code>{row['sl']}</code> ({sl_pips:.1f} pips) | "
-               f"\U0001f3af TP <code>{row['tp']}</code> ({tp_pips:.1f} pips, RR 1:{rr:.1f})\n"
-               f"\U0001f9e0 Confidence {conf:.3f}{acct_note}{news_line}\n\n"
-               f"Balas di bot: <b>Post</b> untuk hantar ke member, "
-               f"<b>Tolak</b> untuk buang draft ini.")
-        kb = {"inline_keyboard": [[
-            {"text": "\u2705 Post ke member", "callback_data": f"ai:post:{sid}"},
-            {"text": "\u274c Tolak", "callback_data": f"ai:reject:{sid}"}]]}
+        if executed:
+            # Mod private: signal sudah publish + private. Mesej maklumkan
+            # sudah live, MT5 akan execute dengan lot risiko 1%. TANPA butang
+            # Post ke member (elak bocor private signal ke member).
+            msg = (f"\U0001f916 <b>AI SIGNAL PRIVATE (live #{sid})</b>\n"
+                   f"\U0001f4ca <b>{pair}</b> \u00b7 M15\n"
+                   f"\U0001f4e2 SUDUH DIPUBLISH \u2014 MT5 auto-execute, member tidak melihat\n"
+                   f"{icon}\n"
+                   f"\U0001f3af Entry <code>{row['entry']}</code>\n"
+                   f"\U0001f6e1\ufe0f SL <code>{row['sl']}</code> ({sl_pips:.1f} pips) | "
+                   f"\U0001f3af TP <code>{row['tp']}</code> ({tp_pips:.1f} pips, RR 1:{rr:.1f})\n"
+                   f"\U0001f9e0 Confidence {conf:.3f}{acct_note}{news_line}\n\n"
+                   f"\U0001f4a1 Ini signal private anda \u2014 lot 1% risiko ikut equity. "
+                   f"Bila entry/sl/tp terjejas, anda akan dimaklumkan.")
+            kb = {"inline_keyboard": [[
+                {"text": "\U0001f6e1\ufe0f Batal signal ini",
+                 "callback_data": f"ai:void:{sid}"}]]}
+        else:
+            msg = (f"\U0001f916 <b>AI CADANGAN (draft #{sid})</b>\n"
+                   f"\U0001f4ca <b>{pair}</b> \u00b7 M15\n"
+                   f"{icon}\n"
+                   f"\U0001f3af Entry <code>{row['entry']}</code>\n"
+                   f"\U0001f6e1\ufe0f SL <code>{row['sl']}</code> ({sl_pips:.1f} pips) | "
+                   f"\U0001f3af TP <code>{row['tp']}</code> ({tp_pips:.1f} pips, RR 1:{rr:.1f})\n"
+                   f"\U0001f9e0 Confidence {conf:.3f}{acct_note}{news_line}\n\n"
+                   f"Balas di bot: <b>Post</b> untuk hantar ke member, "
+                   f"<b>Tolak</b> untuk buang draft ini.")
+            kb = {"inline_keyboard": [[
+                {"text": "\u2705 Post ke member", "callback_data": f"ai:post:{sid}"},
+                {"text": "\u274c Tolak", "callback_data": f"ai:reject:{sid}"}]]}
         data = urllib.parse.urlencode(
             {"chat_id": OWNER_CHAT_ID, "text": msg,
              "parse_mode": "HTML",
@@ -417,7 +447,7 @@ def notify_owner(pair, side, row, conf, txt, news_line=""):
             "https://api.telegram.org/bot" + bot_tok + "/sendMessage", data=data)
         with urllib.request.urlopen(req, timeout=20) as r:
             r.read()
-        log(f"NOTIFY owner draft #{sid} {pair} {side}")
+        log(f"NOTIFY owner #{sid} {pair} {side} executed={executed}")
     except Exception as e:
         detail = ""
         try:
@@ -646,24 +676,59 @@ def main():
             entry = closes[-1]
             sl, tp = build_levels(pair, side, entry, atr)
             dp = DP.get(pair, DEFAULT_DP)
-            # Mod cadangan (owner-approved): AI tidak publish sendiri.
-            # Draft disimpan verified=False (member tidak nampak), dan
-            # cadangan dihantar ke owner secara private untuk Approve/Reject.
+            # Mod private (default): AI publish TERUS ke akaun owner sahaja.
+            # verified=True supaya MT5 + lifecycle + status tracker memproses,
+            # TETAPI id didaftarkan private -> member tak nampak, lifecycle
+            # hantar owner sahaja, MT5 execute dengan lot risiko 1%.
+            # Untuk jatuh balik kepada mod cadangan (Post/Tolak), set
+            # AI_PRIVATE=0.
+            # PRIVATE_MODE: insert verified=False DULU (tiada siapa nampak,
+            # MT5 tidak execute) -> daftar id ke private registry -> barulah
+            # flip verified=True. Ini tutup race: sender/lifecycle/MT5 yang
+            # membaca antara insert dan add() masih nampak verified=False.
+            # Untuk jatuh balik kepada mod cadangan (Post/Tolak), set
+            # AI_PRIVATE=0.
             row = {"pair": pair, "timeframe": TIMEFRAME, "side": side,
                    "entry": f"{entry:.{dp}f}", "sl": f"{sl:.{dp}f}",
                    "tp": f"{tp:.{dp}f}", "verified": False}
             if dry:
                 inserted += 1
                 log(f"DRY {pair} {TIMEFRAME} {side} E={row['entry']} "
-                    f"SL={row['sl']} TP={row['tp']} conf={conf:.3f}")
+                    f"SL={row['sl']} TP={row['tp']} conf={conf:.3f} "
+                    f"private={PRIVATE_MODE}")
                 time.sleep(1)
                 continue
-            code, txt = sb("signals", "POST", row)
+            code, txt = sb("signals", "POST", row,
+                           prefer="return=representation")
             if code in (200, 201):
                 inserted += 1
-                log(f"DRAFT {pair} {TIMEFRAME} {side} E={row['entry']} "
-                    f"SL={row['sl']} TP={row['tp']} conf={conf:.3f} (verified=false, menunggu owner)")
-                notify_owner(pair, side, row, conf, txt, news_line)
+                sid = None
+                try:
+                    sid = (json.loads(txt) or [{}])[0].get("id")
+                except Exception:
+                    pass
+                if PRIVATE_MODE and sid is not None:
+                    from engine.private_signals import add
+                    add(sid)
+                    # SIAP daftar private -> barulah buka kepada MT5/lifecycle.
+                    # Verified false selama private registry belum siap.
+                    code2, txt2 = sb(f"signals?id=eq.{int(sid)}", "PATCH",
+                                     {"verified": True})
+                    if code2 not in (200, 204):
+                        log(f"AI #{sid} FAIL activate verified=true "
+                            f"(code {code2}): kekal draft, semak owner")
+                    else:
+                        log(f"AI #{sid} {pair} {TIMEFRAME} {side} E={row['entry']} "
+                            f"SL={row['sl']} TP={row['tp']} conf={conf:.3f} "
+                            f"(PRIVATE owner sahaja + MT5 lot risiko)")
+                        notify_owner(pair, side, row, conf,
+                                     json.dumps([{"id": sid}]),
+                                     news_line, executed=True)
+                else:
+                    log(f"DRAFT {pair} {TIMEFRAME} {side} E={row['entry']} "
+                        f"SL={row['sl']} TP={row['tp']} conf={conf:.3f} "
+                        f"(verified=false, menunggu owner)")
+                    notify_owner(pair, side, row, conf, txt, news_line)
             else:
                 errors += 1
                 log(f"INSERT-FAIL {pair}: {code} {txt[:120]}")
