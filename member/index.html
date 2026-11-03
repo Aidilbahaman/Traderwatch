@@ -207,10 +207,11 @@ function drawChart(period){window._perfPeriod=period||'ALL';
  if(mode==='TRADE'){
   // Individual trade pips — flat bar (1=pip, -1=pip)
   lbl='Pips per trade · '+plbl;
-  var maxAbs=Math.max.apply(null,perf.map(function(x){return Math.abs(x.pips)}));
+  var maxAbs=Math.max.apply(null,perf.map(function(x){return Math.abs(x.pips)}));maxAbs=maxAbs||10;
   if(!perf.length){$('chartreturn').textContent='—';$('chartSub').textContent=lbl;$('line').setAttribute('d','');$('area').setAttribute('d','');$('dot').setAttribute('cx',0);$('dot').setAttribute('cy',0);$('chartlabels').innerHTML='';return}
-  var pts=perf.map(function(x,i){return [i*600/(perf.length-1||1),170-x.pips/maxAbs*150+15]});var d=pts.map(function(p,i){return(i?'L':'M')+p[0].toFixed(1)+' '+p[1].toFixed(1)}).join(' ');
-  var zeroY=170+15;var g=$('chart').querySelector('g');
+  var amp=Math.max(100,maxAbs),zeroY=105;
+  var pts=perf.map(function(x,i){return [i*600/(perf.length-1||1),zeroY-(x.pips/amp)*85]});var d=pts.map(function(p,i){return(i?'L':'M')+p[0].toFixed(1)+' '+p[1].toFixed(1)}).join(' ');
+  var g=$('chart').querySelector('g');
   if(g&&!$('zeroline')){var zl=document.createElementNS('http://www.w3.org/2000/svg','path');zl.setAttribute('id','zeroline');zl.setAttribute('stroke','#8a93a0');zl.setAttribute('stroke-width','1');zl.setAttribute('stroke-dasharray','4 4');zl.setAttribute('opacity','.55');g.appendChild(zl)}
   var zl2=$('zeroline');if(zl2)zl2.setAttribute('d','M0 '+zeroY.toFixed(1)+'H600');
   $('line').setAttribute('d',d);$('area').setAttribute('d',d+' L600 210 L0 210 Z');$('dot').setAttribute('cx',pts[pts.length-1][0]);$('dot').setAttribute('cy',pts[pts.length-1][1]);
@@ -234,9 +235,33 @@ function drawChart(period){window._perfPeriod=period||'ALL';
   var zl2=$('zeroline');if(zl2)zl2.setAttribute('d','M0 '+zeroY.toFixed(1)+'H600');
   var bars=days.map(function(d,i){var v=byDay[d];var x=pts[i][0]-bw/2;var yv=T+(mx-Math.max(0,v))/(mx-mn||1)*ph;var y=Math.min(zeroY,yv);var h=Math.abs(zeroY-yv);return'<rect x="'+(x).toFixed(1)+'" y="'+y.toFixed(1)+'" width="'+bw.toFixed(1)+'" height="'+Math.max(1,h).toFixed(1)+'" rx="2" fill="'+(v>=0?'#b7f36b':'#ff777d')+'" fill-opacity=".8"/>'}).join('');
   $('chart').innerHTML=$('chart').innerHTML; // reset
-  // rebuild SVG cleanly
-  var svg=$('chart');svg.innerHTML='<defs><linearGradient id="fill" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#b7f36b" stop-opacity=".2"/><stop offset="100%" stop-color="#b7f36b" stop-opacity="0"/></linearGradient></defs><path id="area" fill="url(#fill)" d=""/><path id="line" fill="none" stroke="#b7f36b" stroke-width="2" stroke-linecap="round" d=""/><circle id="dot" r="4" fill="#b7f36b" stroke="#12151a" stroke-width="2" cx="0" cy="0"/>';
-  tot=vals.reduce(function(a,v){return a+v},0);var lastV=vals[vals.length-1];
+  // rebuild SVG: strim original (keep defs/line/area/dot/group) then inject bars + zero line
+  var svg=$('chart');
+  var orig = svg.innerHTML;
+  // Keep grid group, remove old bars (none yet) and rebuild area/line/dot
+  svg.innerHTML = '<defs><linearGradient id="fill" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#b7f36b" stop-opacity=".2"/><stop offset="100%" stop-color="#b7f36b" stop-opacity="0"/></linearGradient></defs><g stroke="#ffffff0b" stroke-width="1"><path d="M0 25H600 M0 70H600 M0 115H600 M0 160H600 M0 205H600"/></g><path id="area" fill="url(#fill)" d=""/><path id="line" fill="none" stroke="#b7f36b" stroke-width="2.2" stroke-linecap="round" d=""/><circle id="dot" r="4" fill="#b7f36b" stroke="#12151a" stroke-width="2" cx="0" cy="0"/>';
+  // inject zeroline + bars + restore line path + dot
+  var zeroLineEl = document.createElementNS('http://www.w3.org/2000/svg','path');
+  zeroLineEl.setAttribute('id','zeroline');zeroLineEl.setAttribute('stroke','#8a93a0');zeroLineEl.setAttribute('stroke-width','1');
+  zeroLineEl.setAttribute('stroke-dasharray','4 4');zeroLineEl.setAttribute('opacity','.55');
+  var g = svg.querySelector('g:last-of-type') || svg;
+  // add zeroline after grid group (before bars)
+  var gridG = Array.from(svg.querySelectorAll('g')).find(function(el){return el.querySelector('path[d^="M0 25"]');});
+  if(gridG) gridG.insertAdjacentElement('afterend', zeroLineEl);
+  else { var zg = document.createElementNS('http://www.w3.org/2000/svg','g'); zg.appendChild(zeroLineEl); svg.insertBefore(zg, svg.children[svg.children.length-1]);}
+  // bars group
+  var barsG = document.createElementNS('http://www.w3.org/2000/svg','g');
+  barsG.setAttribute('id','bars');
+  days.forEach(function(d,i){
+    var v=byDay[d];
+    var x=pts[i][0]-bw/2;var yv=T+(mx-Math.max(0,v))/(mx-mn||1)*ph;var y=Math.min(zeroY,yv);var h=Math.abs(zeroY-yv);
+    var rect=document.createElementNS('http://www.w3.org/2000/svg','rect');
+    rect.setAttribute('x',x.toFixed(1));rect.setAttribute('y',y.toFixed(1));
+    rect.setAttribute('width',bw.toFixed(1));rect.setAttribute('height',Math.max(1,h).toFixed(1));
+    rect.setAttribute('rx','2');rect.setAttribute('fill',v>=0?'#b7f36b':'#ff777d');rect.setAttribute('fill-opacity','.85');
+    barsG.appendChild(rect);
+  });
+  svg.appendChild(barsG);
   svg.innerHTML+='<g id="bars">'+bars+'</g>';
   $('line').setAttribute('d',d);$('dot').setAttribute('cx',pts[pts.length-1][0]);$('dot').setAttribute('cy',pts[pts.length-1][1]);
   $('line').setAttribute('stroke',lastV>=0?'#b7f36b':'#ff777d');$('dot').setAttribute('fill',lastV>=0?'#b7f36b':'#ff777d');
