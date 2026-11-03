@@ -18,6 +18,7 @@ Kunci anti-duplicate:
 Mod: MT5_MODE=plan (default, log sahaja) | live (hantar order)
 """
 import json
+import math
 import os
 import subprocess
 import sys
@@ -46,6 +47,12 @@ ALLOW = [x.strip().upper() for x in os.environ.get("MT5_ALLOW", "").split(",") i
 # TIDAK ditutup (biar TP/SL uruskan) — hanya tiada order baru.
 KILL_PCT = float(os.environ.get("MT5_KILL_PCT", "3.0"))     # % equity sehari
 KILL_STATE = REPO / "state" / "mt5-kill.json"
+
+# ---------- lot sizing ikut risiko ----------
+# RISK_PCT > 0 -> lot dikira dari equity live + jarak entry->SL.
+# RISK_PCT = 0 -> guna LOT tetap (lama).
+RISK_PCT = float(os.environ.get("MT5_RISK_PCT", "1.0"))      # % equity per trade
+LOT_MIN_ALLOW = os.environ.get("MT5_LOT_MIN_ALLOW", "1") == "1"
 
 PREFIX = "/home/mt5/.mt5"
 PY = r"C:\Python311\python.exe"
@@ -85,6 +92,19 @@ if act == "state":
                         "volume": p.volume, "price_open": p.price_open,
                         "sl": p.sl, "tp": p.tp, "magic": p.magic,
                         "comment": p.comment, "profit": p.profit} for p in pos]})
+
+elif act == "symbol":
+    sym = req["symbol"]
+    if not mt5.symbol_select(sym, True):
+        out({"ok": False, "error": "symbol_select " + sym}); sys.exit(0)
+    info = mt5.symbol_info(sym)
+    if info is None:
+        out({"ok": False, "error": "no symbol_info " + sym}); sys.exit(0)
+    out({"ok": True, "symbol": sym, "point": info.point, "digits": info.digits,
+         "tick_size": info.trade_tick_size, "tick_value": info.trade_tick_value,
+         "contract": info.trade_contract_size, "vol_min": info.volume_min,
+         "vol_max": info.volume_max, "vol_step": info.volume_step,
+         "stops_level": info.trade_stops_level})
 
 elif act == "place_limit":
     sym   = req["symbol"]
@@ -153,6 +173,28 @@ elif act == "cancel":
              "comment": getattr(res, "comment", "")})
     else:
         out({"ok": True, "ticket": ticket})
+
+elif act == "close_position":
+    ticket = int(req["ticket"])
+    pos = mt5.positions_get(ticket=ticket)
+    if not pos:
+        out({"ok": False, "error": "position not found (mungkin sudah tutup)"})
+    else:
+        p = pos[0]
+        close_type = mt5.ORDER_TYPE_SELL if p.type == mt5.POSITION_TYPE_BUY else mt5.ORDER_TYPE_BUY
+        tick = mt5.symbol_info_tick(p.symbol)
+        price = tick.bid if close_type == mt5.ORDER_TYPE_SELL else tick.ask
+        res = mt5.order_send({"action": mt5.TRADE_ACTION_DEAL, "position": ticket,
+            "symbol": p.symbol, "volume": p.volume, "type": close_type,
+            "price": price, "deviation": 20, "magic": p.magic,
+            "comment": "TW-CLOSE", "type_time": mt5.ORDER_TIME_GTC,
+            "type_filling": mt5.ORDER_FILLING_RETURN})
+        if res is None or res.retcode != mt5.TRADE_RETCODE_DONE:
+            out({"ok": False, "retcode": getattr(res, "retcode", None),
+                 "comment": getattr(res, "comment", "")})
+        else:
+            out({"ok": True, "ticket": ticket, "deal": res.deal,
+                 "profit": getattr(res, "profit", None)})
 
 mt5.shutdown()
 '''
@@ -249,11 +291,19 @@ def _myt_key(pair, iso):
 
 
 def active_signals():
-    """Signal yang BELUM entry (tiada dalam status atau status=pending).
+    """Signal owner-only yang BELUM entry (verified + private registry).
+
+    MT5 private engine hanya mengambil signal yang didaftarkan dalam
+    state/private-signals.json. Ini mengelakkan signal member masuk broker.
 
     Hanya signal yang belum kena entry layak jadi pending limit order.
     Signal yang sudah entry/tp/sl/expired TIDAK boleh di-order semula.
     """
+    try:
+        from engine.private_signals import is_private
+    except Exception:
+        from private_signals import is_private
+
     try:
         # Hanya signal verified=true (diluluskan owner) layak jadi pending order.
         # Draft verified=false (cadangan AI menunggu keputusan) MESTI diabaikan.
@@ -266,6 +316,8 @@ def active_signals():
     st = _status_map()
     out = []
     for s in rows:
+        if not is_private(s.get("id")):
+            continue
         if not all(s.get(k) is not None for k in ("entry", "sl", "tp")):
             continue
         key = _myt_key(s["pair"], s["posted_at"])
@@ -279,6 +331,60 @@ def active_signals():
         out.append(s)
     log(f"calon: {len(out)}/{len(rows)} (selepas tapis status)")
     return out
+
+
+_SPEC_CACHE = {}
+
+
+def symbol_spec(pair):
+    """Cache spec simbol (tick value, volume step) dari broker."""
+    if pair in _SPEC_CACHE:
+        return _SPEC_CACHE[pair]
+    r = mt5({"action": "symbol", "symbol": pair})
+    _SPEC_CACHE[pair] = r if r.get("ok") else None
+    return _SPEC_CACHE[pair]
+
+
+def size_lot(pair, entry, sl, equity):
+    """Kira lot dari risiko % equity pada jarak entry->SL.
+
+    trade_tick_value dari MT5 sudah dalam MATA WANG AKAUN (akaun ini EUR),
+    jadi tiada conversion manual diperlukan. Bulat ke BAWAH ke volume_step
+    supaya risiko sebenar tidak melebihi had.
+
+    Return (lot, nota). lot None bermakna tidak boleh dikira.
+    """
+    spec = symbol_spec(pair)
+    if not spec:
+        return None, "no-spec"
+    tick_size = float(spec.get("tick_size") or 0) or float(spec.get("point") or 0)
+    tick_value = float(spec.get("tick_value") or 0)
+    if tick_size <= 0 or tick_value <= 0:
+        return None, "bad-spec"
+    dist = abs(float(entry) - float(sl))
+    if dist <= 0:
+        return None, "zero-sl"
+    loss_per_lot = (dist / tick_size) * tick_value
+    if loss_per_lot <= 0:
+        return None, "bad-loss"
+    risk_money = float(equity) * RISK_PCT / 100.0
+    raw = risk_money / loss_per_lot
+    step = float(spec.get("vol_step") or 0.01) or 0.01
+    vmin = float(spec.get("vol_min") or 0.01) or 0.01
+    vmax = float(spec.get("vol_max") or 100.0) or 100.0
+    lot = math.floor(raw / step) * step
+    lot = round(lot, 8)
+    if lot < vmin:
+        # lot dikira di bawah minimum broker: samada langkau (default) atau
+        # clamp ke vmin bila owner benarkan risiko lebih.
+        if not LOT_MIN_ALLOW:
+            return None, (f"lot<min raw={raw:.4f} min={vmin} "
+                          f"risk_needed={loss_per_lot * vmin:.2f}")
+        lot = vmin
+    if lot > vmax:
+        lot = vmax
+    return lot, (f"eq={float(equity):.2f} risk={RISK_PCT}% money={risk_money:.2f} "
+                 f"sl_dist={dist:g} loss/lot={loss_per_lot:.2f} lot={lot:g}")
 
 
 def _today():
@@ -336,7 +442,8 @@ def equity_now():
 
 
 def main():
-    log(f"START mode={MODE} lot={LOT} max_pending={MAX_PENDING} allow={ALLOW or 'semua'} kill={KILL_PCT}%")
+    log(f"START mode={MODE} lot={LOT if RISK_PCT<=0 else 'RISK'+str(RISK_PCT)+'%'} "
+        f"max_pending={MAX_PENDING} allow={ALLOW or 'semua'} kill={KILL_PCT}%")
 
     # ---------- kill switch check ----------
     acc = equity_now()
@@ -416,23 +523,35 @@ def main():
                 f"count={len(existing_positions) + len(existing_orders)} — no duplicate order")
             continue
 
+        lot_use, lot_note = LOT, "fixed"
+        if RISK_PCT > 0 and eq > 0:
+            calc, note = size_lot(pair, entry, sl, eq)
+            if calc is None:
+                log(f"LOT-SKIP #{sid} {pair} {side}: {note} — tiada order "
+                    f"(risiko akan melebihi {RISK_PCT}% atau spec tiada)")
+                continue
+            lot_use, lot_note = calc, note
+
         if MODE != "live":
-            log(f"PLAN #{sid} {pair} {side} LIMIT entry={entry} sl={sl} tp={tp} lot={LOT}")
+            log(f"PLAN #{sid} {pair} {side} LIMIT entry={entry} sl={sl} tp={tp} "
+                f"lot={lot_use} [{lot_note}]")
             seen[sid] = {"status": "planned", "pair": pair, "side": side,
                          "entry": entry, "sl": sl, "tp": tp, "magic": magic}
             placed += 1
             continue
 
         r = mt5({"action": "place_limit", "symbol": pair, "side": side,
-                 "entry": entry, "sl": sl, "tp": tp, "lot": LOT,
+                 "entry": entry, "sl": sl, "tp": tp, "lot": lot_use,
                  "magic": magic, "deviation": DEVIATION,
                  "comment": f"TW#{s['id']}"})
         if r.get("ok"):
             seen[sid] = {"status": "pending", "ticket": r["ticket"],
                          "type": r.get("type"), "pair": pair, "side": side,
                          "entry": entry, "sl": sl, "tp": tp, "magic": magic,
+                         "lot": lot_use, "lot_note": lot_note,
                          "placed_at": datetime.now(MYT).isoformat()}
-            log(f"OK #{sid} {pair} {side} {r.get('type')} ticket={r['ticket']} entry={entry}")
+            log(f"OK #{sid} {pair} {side} {r.get('type')} ticket={r['ticket']} "
+                f"entry={entry} lot={lot_use}")
             placed += 1
         else:
             log(f"FAIL #{sid} {pair} {side}: {r.get('error') or r.get('comment')} retcode={r.get('retcode')}")

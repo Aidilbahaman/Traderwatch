@@ -980,13 +980,18 @@ def dispatch(text, targets, dry_run=False, png=None, event=None, sig_key=None):
 
 # ---------------------------------------------------------------- utama
 def _run(dry_run=False):
+    try:
+        from engine.private_signals import is_private, ids as private_ids
+    except Exception:
+        from private_signals import is_private, ids as private_ids
     signals = fetch_signals()
     if not signals:
         log("no verified signals in window")
         return 0
     state = load_state()
-    targets = fetch_targets()
-    log(f"signals={len(signals)} targets={len(targets)} dry_run={dry_run}")
+    target_all = fetch_targets()
+    priv = private_ids()
+    log(f"signals={len(signals)} targets={len(target_all)} private={len(priv)} dry_run={dry_run}")
 
     seen = set()
     events = 0
@@ -994,6 +999,14 @@ def _run(dry_run=False):
     for sig in signals:
         sid = str(sig["id"])
         seen.add(sid)
+        # Signal private: hantar owner sahaja. targets disempitkan setiap
+        # iterasi (reset) supaya signal member seterusnya tidak terkesan.
+        if is_private(sid):
+            targets = [t for t in target_all
+                       if str(t.get("telegram_chat_id")) == str(ADMIN_CHAT)]
+            log(f"PRIVATE #{sid} {sig['pair']} — owner sahaja")
+        else:
+            targets = target_all
         try:
             entry = float(sig["entry"])
             sl = float(sig["sl"])
