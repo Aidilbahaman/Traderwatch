@@ -41,6 +41,25 @@ USD_UNIT = {"BTCUSD"}
 MAX_CHECKS = 40
 
 
+LIFECYCLE_FILE = Path("/home/ubuntu/web/.signal-lifecycle.json")
+
+def lifecycle_closed_by_id():
+    """Map Supabase signal id -> closed status dari lifecycle-alert.
+
+    Lifecycle-alert ialah sumber kebenaran untuk expiry: dia yang hantar
+    notifikasi EXPIRED ke member. signal-status.py MESTI hormat verdict
+    itu — jangan overwrite expired jadi tp/sl kemudian (bug #207:
+    lifecycle kata expired, website tunjuk SL -127.4 pips palsu).
+    Keyed by Supabase id (str); lifecycle file keyed by sid.
+    """
+    try:
+        return {str(k): str(v.get("closed") or "") for k, v in
+                json.loads(LIFECYCLE_FILE.read_text()).items()
+                if isinstance(v, dict) and v.get("closed")}
+    except Exception:
+        return {}
+
+
 def log(msg):
     print(f"{datetime.now(timezone.utc).isoformat()} {msg}", flush=True)
 
@@ -258,7 +277,7 @@ def main():
     now = datetime.now(timezone.utc)
     since = now - timedelta(days=LOOKBACK_DAYS)
     history_since = now - MAX_AGE
-    rows = sb_get("signals?select=pair,side,entry,sl,tp,timeframe,posted_at,verified"
+    rows = sb_get("signals?select=id,pair,side,entry,sl,tp,timeframe,posted_at,verified"
                   f"&verified=is.true&posted_at=gte.{since.strftime('%Y-%m-%dT%H:%M:%SZ')}"
                   "&order=posted_at.desc&limit=200")
     history = sb_get("signals?select=pair,posted_at,verified"
@@ -272,6 +291,7 @@ def main():
             continue
 
     checked = changed = errors = 0
+    _lc_map = lifecycle_closed_by_id()
     for row in rows:
         try:
             sig = {
@@ -290,6 +310,23 @@ def main():
         # seterusnya dan hantar notifikasi palsu lagi (bug trade #110).
         if prev.get("status") in ("tp", "sl", "expired", "cancelled", "collected",
                                   "void_unfilled"):
+            continue
+        # GATE LIFECYCLE (bug #207): lifecycle-alert ialah sumber kebenaran
+        # untuk expiry — dia yang hantar notifikasi EXPIRED ke member.
+        # Kalau lifecycle dah tutup (expired/ignored/void), jangan tulis
+        # tp/sl atas key yang sama. Contoh: id 207 expired (entry tak kena)
+        # tapi bar kemudian sentuh entry+SL → tanpa gate ini website
+        # tunjuk SL -127.4 pips palsu walhal member terima EXPIRED.
+        lc_closed = _lc_map.get(str(row.get("id") or ""))
+        if lc_closed and lc_closed not in ("tp", "sl", "collected"):
+            if prev.get("status") != lc_closed:
+                state["signals"][key] = {
+                    "status": "expired",
+                    "closed": now.astimezone(TZ_KL).isoformat(timespec="seconds"),
+                    "note": "lifecycle:" + lc_closed}
+                changed += 1
+                log(f"LIFECYCLE {sig['pair']} #{row.get('id')} -> expired "
+                    f"(lifecycle:{lc_closed})")
             continue
 
         posted = parse_ts(sig["posted_at"])
