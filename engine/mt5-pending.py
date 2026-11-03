@@ -62,6 +62,11 @@ LOT_MIN_ALLOW = os.environ.get("MT5_LOT_MIN_ALLOW", "1") == "1"
 COMPOUND_BASE = os.environ.get("MT5_COMPOUND_BASE", "balance").lower()
 COMPOUND_FILE = REPO / "state" / "ai-compound.json"
 
+# ---------- milestone compounding (notifikasi owner sahaja) ----------
+# Dihantar sekali bila modal asas cecah setiap tahap. Lepas cecah, counter
+# lot naik ~20% berbanding €500.
+COMPOUND_MILESTONES = (600.0, 750.0, 1000.0)
+
 PREFIX = "/home/mt5/.mt5"
 PY = r"C:\Python311\python.exe"
 WIN_SCRIPT_HOST = "/home/mt5/.mt5/drive_c/mt5work/mt5_pending.py"
@@ -423,6 +428,61 @@ def sizing_base(acc):
     return bal or eq
 
 
+def _notify_owner(text):
+    """Hantar mesej ke owner sahaja. Gagal senyap — jangan ganggu loop MT5."""
+    try:
+        from pathlib import Path as _P
+        sec = {}
+        for _ln in (_P.home() / ".secrets" / "telegram.env").read_text().splitlines():
+            _ln = _ln.strip()
+            if _ln and not _ln.startswith("#") and "=" in _ln:
+                _k, _v = _ln.split("=", 1)
+                sec[_k.strip()] = _v.strip().strip('"').strip("'")
+        # Prefer token bot admin (@CCSTWbot) yang sama dengan AI signal.
+        # TELEGRAM_ADMIN_BOT_TOKEN dalam telegram.env Cuma 28 aksara (bukan
+        # token sah) — jangan guna ia dahulu.
+        tok = ""
+        try:
+            _raw = _P("/home/ubuntu/tw-bot/.env").read_text()
+            for _ln in _raw.splitlines():
+                if _ln.strip().startswith("BOT_TOKEN="):
+                    tok = _ln.split("=", 1)[1].strip().strip('"').strip("'")
+                    break
+        except Exception:
+            tok = ""
+        if not tok:
+            for _k in ("TELEGRAM_SIGNALS_BOT_TOKEN", "TELEGRAM_BOT_TOKEN"):
+                if len(sec.get(_k) or "") >= 40:
+                    tok = sec[_k]
+                    break
+        admin = sec.get("TELEGRAM_ADMIN_CHAT_ID", "")
+        if not tok or not admin:
+            return
+        import urllib.parse as _up, urllib.request as _ur
+        _ur.urlopen(_ur.Request(
+            "https://api.telegram.org/bot" + tok + "/sendMessage",
+            data=_up.urlencode({"chat_id": admin, "text": text,
+                                "parse_mode": "HTML"}).encode()), timeout=20)
+    except Exception as ex:
+        log(f"MILESTONE-NOTIFY-FAIL {type(ex).__name__}")
+
+
+def _milestone_lot(base, ref_risk_money):
+    """Ref lot EURUSD SL 20pip (0.002) pada modal base — ilustrasi saiz baru."""
+    try:
+        spec = symbol_spec("EURUSD")
+        step = float(spec.get("vol_step") or 0.01) or 0.01
+        tick_size = float(spec.get("tick_size") or 1e-5)
+        tick_value = float(spec.get("tick_value") or 0)
+        if tick_size <= 0 or tick_value <= 0:
+            return None
+        raw = ref_risk_money / ((0.002 / tick_size) * tick_value)
+        import math as _m
+        return max(0.01, round(_m.floor(raw / step) * step, 8))
+    except Exception:
+        return None
+
+
 def compound_track(base):
     """Rekod modal asas -> {start, base, peak, growth_pct, trades}. 
     
@@ -440,6 +500,27 @@ def compound_track(base):
     start = float(d["start"])
     d["growth_pct"] = round((base - start) / start * 100, 2) if start else 0.0
     d["multiplier"] = round(base / start, 4) if start else 1.0
+    # ---------- milestone owner-only ----------
+    # Hantar sekali bila modal asas melepasi setiap tahap. Simpan dalam
+    # "milestones" supaya restart tidak menghantar semula.
+    try:
+        seen = set(d.get("milestones") or [])
+        for m in COMPOUND_MILESTONES:
+            if base >= m and str(m) not in {str(x) for x in seen}:
+                rm = base * RISK_PCT / 100.0
+                nl = _milestone_lot(base, rm)
+                lot_txt = f"Contoh lot EURUSD SL 20pip: <b>{nl:g}</b>" if nl else ""
+                _notify_owner(
+                    f"🎯 <b>Compounding milestone: €{m:,.0f} tercapai</b>\n"
+                    f"Modal AI kini <b>€{base:,.2f}</b> "
+                    f"(mula €{start:,.2f}, +{d['growth_pct']:.1f}%, x{d['multiplier']:.2f}).\n"
+                    f"Risiko {RISK_PCT:g}% = <b>€{rm:,.2f}</b> per trade. {lot_txt}\n"
+                    f"Lot akan terus naik otomatik selagi profit terkumpul.")
+                log(f"MILESTONE {m:,.0f} tercapai — notifikasi owner dihantar")
+                seen.add(m)
+        d["milestones"] = sorted(seen)
+    except Exception as ex:
+        log(f"MILESTONE-ERR {type(ex).__name__}")
     d["updated"] = datetime.now(MYT).isoformat(timespec="seconds")
     try:
         COMPOUND_FILE.parent.mkdir(parents=True, exist_ok=True)
