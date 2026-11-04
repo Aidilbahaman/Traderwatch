@@ -1508,7 +1508,28 @@ function loadChart(sym){
   function set(k,v){ try{ localStorage.setItem(k,v) }catch(e){} }
   var first = get("tw_first"); if(!first){ first = String(Date.now()); set("tw_first", first) }
   var days = (Date.now()-Number(first))/86400000;
-  var box = $("onboard"); $("tgLink").href = TELEGRAM_URL;
+  var box = $("onboard");
+  (function tglink(){
+    var a = $("tgLink"); if(!a) return;
+    a.removeAttribute("onclick");
+    a.onclick = function(ev){
+      ev.preventDefault();
+      var w = window.open("", "_blank");
+      (async function(){
+        var t = null;
+        try{
+          if(window.SB && ME.id){
+            var g = await SB.rpc("create_link_token", {p_user_id: ME.id});
+            if(!g.error && g.data) t = g.data;
+          }
+        }catch(e){}
+        var u = t ? (TELEGRAM_URL + "?start=" + encodeURIComponent(t)) : TELEGRAM_URL;
+        if(w && !w.closed) w.location.href = u; else window.open(u, "_blank", "noopener");
+      })();
+      return false;
+    };
+    a.href = TELEGRAM_URL;
+  })();
   function paint(){
     var n = 0;
     box.querySelectorAll("li").forEach(function(li){
