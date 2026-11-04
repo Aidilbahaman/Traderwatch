@@ -309,7 +309,7 @@ def h1_trend(bars_m15):
 
 # Pair yang wajib ikut arah H1 (peraturan owner 30 Okt 2026):
 # XAU/USD dilarang counter-trend selepas BUY #185 dalam downtrend.
-TREND_FOLLOW_PAIRS = set()  # dibuang untuk XAUUSD - counter-trend dibenarkan
+TREND_FOLLOW_PAIRS = {"XAU/USD"}
 
 
 def decide(model, bars):
