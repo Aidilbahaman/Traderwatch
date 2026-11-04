@@ -718,8 +718,14 @@ def build_message(event, sig, price, st=None):
     direction = "Long" if side == "BUY" else "Short"
     arrow = "🟢 BUY" if side == "BUY" else "🔴 SELL"
     head = "━━━━━━━━━━━━━━━━━━━━"
+    try:
+        from engine.private_signals import is_private
+        label = ("🔒 <b>[PRIVATE AI · OWNER ONLY]</b>\n"
+                 "━━━━━━━━━━━━━━━━━━━━\n") if (sig.get("id") is not None and is_private(str(sig.get("id")))) else ""
+    except Exception:
+        label = ""
     if event == "entry":
-        return (f"🎯 <b>ENTRY TRIGGERED</b>\n{head}\n"
+        return (label + f"🎯 <b>ENTRY TRIGGERED</b>\n{head}\n"
                 f"{arrow} <b>{sig['pair']}</b> · {sig.get('timeframe') or 'M15'}\n\n"
                 f"<pre>Entry   {fmt_price(sig['pair'], sig['entry'])}\n"
                 f"SL      {fmt_price(sig['pair'], sig['sl'])}   -{fmt_move(sig, sig['sl'])}\n"
