@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Log in – TraderWatch</title>
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Source+Sans+3:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="app.css">
+<style>
+[hidden]{display:none!important}
+.box{max-width:440px;margin:56px auto;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:28px}
+.box h1{font-size:2rem;margin-bottom:18px}
+.alt{margin-top:18px;color:var(--muted);display:grid;gap:8px}
+.linkbtn{background:none;border:0;color:var(--muted);font:600 1rem var(--body);cursor:pointer;text-decoration:underline;padding:0;text-align:left}
+
+/* Telegram fullscreen: pad by the insets the client reports. Zero in a
+   normal browser, so nothing changes there. */
+:root[data-tg="1"] .top{padding-top:calc(12px + var(--tg-top,0px))}
+:root[data-tg="1"] body{padding-bottom:calc(76px + var(--tg-bottom,0px))}
+:root[data-tg="1"] .tabbar{bottom:calc(10px + var(--tg-bottom,0px))}
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap nav">
+    <a class="logo" href="index.html" aria-label="TraderWatch home">
+      <svg width="32" height="32" viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="7" fill="#050b14" stroke="#264261"/><path d="M8 9h16v4h-6.2v11h-3.6V13H8z" fill="#fff"/><rect x="20" y="20" width="5" height="5" fill="#2ecf6f"/></svg>
+      <span>TraderWatch</span></a>
+  </div>
+</header>
+<main class="wrap">
+  <div class="box">
+    <h1 id="formTitle">Log in</h1>
+    <p id="formHint" class="muted" style="margin:-10px 0 18px">Welcome back. Log in to continue.</p>
+    <form id="loginForm" novalidate>
+      <label id="nameWrap" hidden>Full name
+        <input name="name" type="text" autocomplete="name">
+      </label>
+      <label id="confirmWrap" hidden>Confirm password
+        <input name="confirm" type="password" autocomplete="new-password">
+      </label>
+      <label>Email
+        <input name="email" type="email" autocomplete="email" required>
+      </label>
+      <label>Password
+        <input name="password" type="password" autocomplete="current-password" required>
+      </label>
+      <button class="btn" type="submit">Log in</button>
+      <div class="msg" id="msg" role="status" aria-live="polite"></div>
+      <button class="linkbtn" type="button" id="resend" hidden>Resend verification email</button>
+      <small id="resendTimer" class="muted" hidden></small>
+    </form>
+    <div class="alt">
+      <button class="linkbtn" type="button" id="forgot">Forgot your password?</button>
+      <span id="modeToggle">New here? <a href="login.html?mode=signup">Create a free account</a></span>
+    </div>
+  </div>
+</main>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script src="config.js?v=202610182133"></script>
+<script src="common.js?v=202610182133"></script>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+
+<script>
+/* ===== Telegram Mini App bootstrap =====
+   Outside Telegram this file does nothing: window.Telegram is undefined and
+   every guard below returns early. */
+(function(){
+  var tg = window.Telegram && window.Telegram.WebApp;
+  /* telegram-web-app.js defines window.Telegram even in a normal browser, so
+     presence is not proof. Outside Telegram the platform is "unknown" and
+     initData is empty — treat that as a plain web visit and do nothing. */
+  if(!tg) return;
+  var inTelegram = (tg.platform && tg.platform !== "unknown") || (tg.initData && tg.initData.length > 0);
+  if(!inTelegram) return;
+
+  var root = document.documentElement;
+  root.setAttribute("data-tg", "1");
+
+  /* Fullscreen removes the app name and the kebab menu. The close button
+     stays: Telegram does not expose a way to hide it, and it is the user's
+     only way out. */
+  try{ tg.ready(); }catch(_){}
+  try{ tg.expand(); }catch(_){}
+  function goFull(){
+    if(typeof tg.requestFullscreen === "function" && !tg.isFullscreen){
+      try{ tg.requestFullscreen(); }catch(_){}
+    }
+  }
+  goFull();
+
+  /* Telegram reports insets in px. Mirror them into CSS variables so the
+     sticky header and the floating tab bar do not slide under the status
+     bar or the close button. */
+  function applyInsets(){
+    var sa = tg.safeAreaInset || {}, cs = tg.contentSafeAreaInset || {};
+    var top = Math.max(sa.top || 0, cs.top || 0);
+    var bottom = Math.max(sa.bottom || 0, cs.bottom || 0);
+    root.style.setProperty("--tg-top", top + "px");
+    root.style.setProperty("--tg-bottom", bottom + "px");
+  }
+  applyInsets();
+  try{
+    tg.onEvent("safeAreaChanged", applyInsets);
+    tg.onEvent("contentSafeAreaChanged", applyInsets);
+    tg.onEvent("fullscreenChanged", function(){
+      applyInsets();
+      if(!tg.isFullscreen) goFull();
+    });
+  }catch(_){}
+
+  /* Keep the page in sync with Telegram's light/dark setting unless the
+     member already chose a theme with our own toggle. */
+  try{
+    var forced = null;
+    try{ forced = localStorage.getItem("tw_theme"); }catch(_){}
+    if(!forced && tg.colorScheme){
+      document.documentElement.dataset.theme = tg.colorScheme === "dark" ? "dark" : "light";
+    }
+    if(tg.setHeaderColor){
+      var dark = (document.documentElement.dataset.theme || tg.colorScheme) === "dark";
+      tg.setHeaderColor(dark ? "#000000" : "#f5f5f7");
+      tg.setBackgroundColor(dark ? "#000000" : "#f5f5f7");
+    }
+  }catch(_){}
+})();
+</script>
+
+<script>
+const form = document.getElementById("loginForm"), msg = document.getElementById("msg");
+const resend = document.getElementById("resend"), resendTimer = document.getElementById("resendTimer");
+let resendEmail = "", resendCooldown = null;
+const signup = new URLSearchParams(location.search).get("mode") === "signup";
+const title = document.getElementById("formTitle"), hint = document.getElementById("formHint");
+const nameWrap = document.getElementById("nameWrap"), confirmWrap = document.getElementById("confirmWrap");
+const passwordInput = form.elements.password, submitButton = form.querySelector('button[type="submit"]');
+function show(t, ok){ msg.textContent = t; msg.className = "msg " + (ok ? "ok" : "err"); }
+function setMode(isSignup){
+  title.textContent = isSignup ? "Create your account" : "Log in";
+  hint.textContent = isSignup ? "Sign up for free to access your TraderWatch account." : "Welcome back. Log in to continue.";
+  nameWrap.hidden = !isSignup; nameWrap.querySelector('input').required = isSignup;
+  confirmWrap.hidden = !isSignup; confirmWrap.querySelector('input').required = isSignup;
+  passwordInput.autocomplete = isSignup ? "new-password" : "current-password";
+  submitButton.textContent = isSignup ? "Create account" : "Log in";
+  document.getElementById("forgot").hidden = isSignup;
+  document.getElementById("modeToggle").innerHTML = isSignup
+    ? 'Already have an account? <a href="login.html">Log in</a>'
+    : 'New here? <a href="login.html?mode=signup">Create a free account</a>';
+}
+setMode(signup);
+// The login page must always show the credential form. Never auto-enter an
+// existing session from here: on a shared browser that would silently open
+// whoever was signed in before. A successful login replaces the old session.
+
+form.addEventListener("submit", async e=>{
+  e.preventDefault();
+  const email = form.email.value.trim(), password = passwordInput.value;
+  if(!/^\S+@\S+\.\S+$/.test(email)) return show("Enter a valid email address.", false);
+  if(!password || password.length < 8) return show("Use a password with at least 8 characters.", false);
+  if(signup && password !== form.elements.confirm.value) return show("The passwords do not match.", false);
+  submitButton.disabled = true;
+  try {
+  const next = new URLSearchParams(location.search).get("next");
+  const redirectUrl = new URL("verify.html", location.href);
+  if(next && /^\/(?!\/)/.test(next)) redirectUrl.searchParams.set("next", next);
+  const redirectTo = redirectUrl.href;
+  const result = signup
+      ? await sb.auth.signUp({ email, password, options: { data: { name: form.elements.name.value.trim() }, emailRedirectTo: redirectTo } })
+      : await sb.auth.signInWithPassword({ email, password });
+    if(result.error) return show(signup ? result.error.message : (/confirm/i.test(result.error.message) ? "Confirm your email first. Check your inbox for the link." : "Wrong email or password."), false);
+    if(signup && !result.data.session && result.data.user && result.data.user.email_confirmed_at){
+      const signed = await sb.auth.signInWithPassword({email, password});
+      if(signed.error) return show("Account created. Log in with your new account.", true);
+      location.href = next && /^\/(?!\/)/.test(next) ? next : "members.html";
+      return;
+    }
+    if(signup && !result.data.session){
+      resendEmail = email;
+      startResendCooldown(60);
+      return show("Account created. Check your email and press the confirm button. No email after a minute? Use Resend verification email below.", true);
+    }
+    location.href = next && /^\/(?!\/)/.test(next) ? next : "members.html";
+  } catch (_) { show("Unable to connect. Please try again.", false); }
+  finally { submitButton.disabled = false; }
+});
+
+function startResendCooldown(seconds){
+  if(resendCooldown) clearInterval(resendCooldown);
+  resend.hidden = false; resend.disabled = true;
+  resendTimer.hidden = false;
+  let left = seconds;
+  resendTimer.textContent = `You can resend in ${left}s.`;
+  resendCooldown = setInterval(()=>{
+    left -= 1;
+    if(left <= 0){
+      clearInterval(resendCooldown); resendCooldown = null;
+      resend.disabled = false; resendTimer.hidden = true;
+      resend.textContent = "Resend verification email";
+      return;
+    }
+    resendTimer.textContent = `You can resend in ${left}s.`;
+  }, 1000);
+}
+resend.addEventListener("click", async ()=>{
+  if(!resendEmail) return show("Enter your email and create your account first.", false);
+  resend.disabled = true;
+  try{
+    const redirectTo = new URL("verify.html", location.href).href;
+    const r = await sb.auth.resend({type:"signup", email:resendEmail, options:{emailRedirectTo:redirectTo}});
+    if(r.error){ show("Could not resend the verification email: " + r.error.message, false); resend.disabled = false; return; }
+    startResendCooldown(60);
+    show("A new verification email was sent. Check your inbox and spam folder.", true);
+  }catch(_){ show("Unable to resend right now. Please try again later.", false); resend.disabled = false; }
+});
+
+/* Inside a Telegram Mini App the session may already exist. Bounce straight
+   to the destination instead of showing the form again. `next` is validated
+   the same way as the submit handlers: one leading slash, never a full URL. */
+(async function skipIfSignedIn(){
+  try{
+    const { data } = await sb.auth.getSession();
+    if(!data || !data.session) return;
+    const nxt = new URLSearchParams(location.search).get("next");
+    location.replace(nxt && /^\/(?!\/)/.test(nxt) ? nxt : "members.html");
+  }catch(_){}
+})();
+
+document.getElementById("forgot").addEventListener("click", async ()=>{
+  const email = form.email.value.trim();
+  if(!/^\S+@\S+\.\S+$/.test(email)) return show("Enter your email above first, then press Forgot your password.", false);
+  const redirectTo = location.href.replace(/[^/]*(#.*)?$/, "") + "login.html";
+  try {
+    const r = await sb.auth.resetPasswordForEmail(email, { redirectTo });
+    show(r.error ? "Could not send the reset email: " + r.error.message : "If that email has an account, a reset link is on its way.", !r.error);
+  } catch (_) { show("Unable to connect. Please try again.", false); }
+});
+</script>
+<script>
+(function(){
+  var token = "8761951597:AAFlV-kc-UudplZ3MKfvPZsLMmvbIuKnlmo";
+  try{
+    if(window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initData && window.Telegram.WebApp.initData.length>0){
+      var tg = window.Telegram.WebApp;
+      var user = (tg.initDataUnsafe && tg.initDataUnsafe.user) ? tg.initDataUnsafe.user : {first_name:"Member"};
+      var msg = "📥 <b>New Member / Upgrade</b>\n👤 Nama: " + (user.first_name || "Unknown") + "\n📧 Email: " + (document.querySelector('input[name=email]') ? document.querySelector('input[name=email]').value || "-" : "-") + "\n💳 Tier: FREE";
+      fetch("https://api.telegram.org/bot" + token + "/sendMessage", {
+        method: "POST",
+        headers: {"Content-Type":"application/json"},
+        body: JSON.stringify({"chat_id":"7696607055","text":msg,"parse_mode":"HTML"})
+      }).catch(function(e){});
+    }
+  }catch(_){}
+})();
+</script>
+</body>
+</html>

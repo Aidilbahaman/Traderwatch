@@ -1,0 +1,55 @@
+#!/usr/bin/env python3
+# notify_new_members.py — notify admin (7696607055) when new members registered
+import sqlite3, urllib.request, json, os
+
+db = sqlite3.connect('/home/ubuntu/tw-bot/bot.db', timeout=30)
+db.row_factory = sqlite3.Row
+rows = db.execute("SELECT tg_id, name, tier FROM users WHERE created_at > datetime('now', '-1 hour')").fetchall()
+if not rows:
+    exit(0)
+
+with open('/home/ubuntu/.secrets/telegram.env') as f:
+    env = dict(line.strip().split('=',1) for line in f if '=' in line and not line.startswith('#'))
+TOKEN = env.get('TELEGRAM_SIGNALS_BOT_TOKEN', '').strip()
+if not TOKEN:
+    exit(1)
+
+# --- Check for tier upgrades (PRO / MAX) ---
+rows_tier = db.execute("SELECT tg_id, name, tier FROM users WHERE tier IN ('PRO', 'MAX') AND created_at > datetime('now', '-1 hour')").fetchall()
+# Check for Telegram link events (from signal-tg-bot link_tokens or users table link info)
+# We use bot.db (same DB) — link events not directly tracked, so check users who have tg_id set but no previous link (simplified)
+rows_link = db.execute("SELECT tg_id, name FROM users WHERE tg_id IS NOT NULL AND tier = 'FREE' AND (created_at > datetime('now', '-1 hour') OR name IS NOT NULL)").fetchall()
+
+# Combine results
+if rows:
+    msg_members = "📥 <b>New Member Registration</b>\n"
+    for r in rows:
+        msg_members += f"👤 {r['name'] or 'Unknown'} | Tier: {r['tier'] or 'FREE'} | Chat ID: {r['tg_id']}\n"
+    # Send members
+
+if rows_tier:
+    msg_tier = "💎 <b>Tier Upgrade Alert</b>\n"
+    for r in rows_tier:
+        msg_tier += f"👤 {r['name'] or 'Unknown'} | Tier: <b>{r['tier']}</b> | Chat ID: {r['tg_id']}\n"
+    # Send tier upgrade
+
+if rows_link:
+    msg_link = "🔗 <b>Telegram Link Confirmed</b>\n"
+    for r in rows_link:
+        msg_link += f"👤 {r['name'] or 'Unknown'} | Linked to Telegram | Chat ID: {r['tg_id']}\n"
+    # Send link
+
+url = f"https://api.telegram.org/bot{TOKEN}/sendMessage"
+data = json.dumps({"chat_id":"7696607055","text":msg,"parse_mode":"HTML"}).encode()
+if rows:
+    data_m = json.dumps({"chat_id":"7696607055","text":msg_members,"parse_mode":"HTML"}).encode()
+    try: urllib.request.urlopen(urllib.request.Request(url, data=data_m, headers={"Content-Type":"application/json"}), timeout=15); print("Notified admin of new members:", len(rows))
+    except Exception as e: print("Notify members error:", e)
+if rows_tier:
+    data_t = json.dumps({"chat_id":"7696607055","text":msg_tier,"parse_mode":"HTML"}).encode()
+    try: urllib.request.urlopen(urllib.request.Request(url, data=data_t, headers={"Content-Type":"application/json"}), timeout=15); print("Notified admin of tier upgrades:", len(rows_tier))
+    except Exception as e: print("Notify tier error:", e)
+if rows_link:
+    data_l = json.dumps({"chat_id":"7696607055","text":msg_link,"parse_mode":"HTML"}).encode()
+    try: urllib.request.urlopen(urllib.request.Request(url, data=data_l, headers={"Content-Type":"application/json"}), timeout=15); print("Notified admin of linked members:", len(rows_link))
+    except Exception as e: print("Notify link error:", e)

@@ -32,6 +32,10 @@ def fetch_latest():
     )
     with urllib.request.urlopen(req, timeout=25) as r:
         rows = json.loads(r.read())
+    # Tapis signal private daripada landing page
+    from engine.private_signals import is_private
+    if rows and is_private(rows[0].get("id")):
+        return None  # Sembunyikan signal private daripada landing page
     return rows[0] if rows else None
 
 def status_of(pair, sid, posted_at):

@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TraderWatch — Member Area</title>
+<link rel="stylesheet" href="app.css">
+<style>body{font-family:system-ui,sans-serif;background:#050b14;color:#fff;padding:60px 0;margin:0}.wrap{max-width:900px;margin:0 auto;padding:0 24px}h1{font-size:2.4rem;margin-bottom:8px}.sub{color:#8896a8;margin-bottom:40px}.cards{display:grid;gap:18px;grid-template-columns:repeat(auto-fill,minmax(260px,1fr))}.card{background:#0a1525;border:1px solid #1a2e4a;border-radius:14px;padding:28px;text-decoration:none;color:inherit;transition:box-shadow .15s}.card:hover{box-shadow:0 8px 30px rgba(46,207,111,.08);border-color:#2ecf6f}.card h2{font-size:1.15rem;margin-bottom:6px;color:#2ecf6f}.card p{color:#8896a8;margin:0;font-size:.95rem}</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>TraderWatch Member</h1>
+  <p class="sub">Access your dashboard, education, and tools.</p>
+  <div class="cards">
+    <a class="card" href="admin.html"><h2>Admin Dashboard</h2><p>Payment approvals, subscriptions, and access control.</p>
+    <a class="card" href="education.html"><h2>Education</h2><p>Lessons and trading guides.</p></a>
+    <a class="card" href="games.html"><h2>Games & Practice</h2><p>Trading practice tools.</p></a>
+  </div>
+</div>
+</body>
+</html>

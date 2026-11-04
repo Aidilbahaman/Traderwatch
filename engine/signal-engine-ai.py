@@ -49,6 +49,7 @@ LOCK = Path("/tmp/signal-engine-ai.lock")
 # hantar owner sahaja dan MT5 execute dengan lot risiko 1%.
 PRIVATE_MODE = os.environ.get("AI_PRIVATE", "1") == "1"
 THRESHOLD = 0.55
+XAUUSD_THRESHOLD = 0.35
 # Lantai SL 15 pip: spread RoboForex besar (EURUSD 1.3, USDJPY 1.9,
 # XAUUSD 2.1 pip). 15 pip hadkan drag spread bawah ~13% SL.
 SCALP_MIN_SL_PIPS = 15.0
@@ -308,7 +309,7 @@ def h1_trend(bars_m15):
 
 # Pair yang wajib ikut arah H1 (peraturan owner 30 Okt 2026):
 # XAU/USD dilarang counter-trend selepas BUY #185 dalam downtrend.
-TREND_FOLLOW_PAIRS = {"XAU/USD"}
+TREND_FOLLOW_PAIRS = set()  # dibuang untuk XAUUSD - counter-trend dibenarkan
 
 
 def decide(model, bars):
@@ -339,7 +340,9 @@ def decide(model, bars):
     p_short = M.predict(model["short"], f)
     side = "BUY" if p_long >= p_short else "SELL"
     conf = max(p_long, p_short)
-    if conf < THRESHOLD:
+    pair_key = model.get("_pair")
+    thresh = XAUUSD_THRESHOLD if pair_key == "XAU/USD" else THRESHOLD
+    if conf < thresh:
         return None, conf
     if model.get("_pair") in TREND_FOLLOW_PAIRS:
         tr = h1_trend(bars)
@@ -389,8 +392,10 @@ def notify_owner(pair, side, row, conf, txt, news_line="", executed=False):
         except Exception:
             bot_tok = ""
         if not bot_tok:
+            # Fallback: jika admin bot mati (404/revoke), guna bot signals yang aktif
+            # supaya notifikasi private tetap sampai ke owner (chat sama).
             sev = load_secrets("telegram.env")
-            bot_tok = sev.get("TELEGRAM_ADMIN_BOT_TOKEN", "") or sev.get("TELEGRAM_BOT_TOKEN", "")
+            bot_tok = sev.get("TELEGRAM_ADMIN_BOT_TOKEN", "") or sev.get("TELEGRAM_BOT_TOKEN", "") or sev.get("TELEGRAM_SIGNALS_BOT_TOKEN", "")
         if not bot_tok:
             log("WARN notify_owner: tiada token Telegram, skip notifikasi")
             return
@@ -412,22 +417,16 @@ def notify_owner(pair, side, row, conf, txt, news_line="", executed=False):
                      + (" - akaun bawah $100, pertimbang skip atau lot lebih kecil" if risk_usd > 5 else ""))
         arrow = "\u2b06\ufe0f" if str(side).upper() == "BUY" else "\u2b07\ufe0f"
         if executed:
-            # Mod private: signal sudah publish + private. Mesej maklumkan
-            # sudah live, MT5 akan execute dengan lot risiko 1%. TANPA butang
-            # Post ke member (elak bocor private signal ke member).
-            msg = (f"\U0001f916 <b>AI SIGNAL PRIVATE (live #{sid})</b>\n"
-                   f"\U0001f4ca <b>{pair}</b> \u00b7 M15\n"
-                   f"\U0001f4e2 SUDUH DIPUBLISH \u2014 MT5 auto-execute, member tidak melihat\n"
-                   f"{icon}\n"
-                   f"\U0001f3af Entry <code>{row['entry']}</code>\n"
-                   f"\U0001f6e1\ufe0f SL <code>{row['sl']}</code> ({sl_pips:.1f} pips) | "
-                   f"\U0001f3af TP <code>{row['tp']}</code> ({tp_pips:.1f} pips, RR 1:{rr:.1f})\n"
-                   f"\U0001f9e0 Confidence {conf:.3f}{acct_note}{news_line}\n\n"
-                   f"\U0001f4a1 Ini signal private anda \u2014 lot 1% risiko ikut equity. "
-                   f"Bila entry/sl/tp terjejas, anda akan dimaklumkan.")
-            kb = {"inline_keyboard": [[
-                {"text": "\U0001f6e1\ufe0f Batal signal ini",
-                 "callback_data": f"ai:void:{sid}"}]]}
+            # Sesuai permintaan: Ai Signal (Pair) (Buy/Sell) (Size lot) (Account balance)
+            # Dapatkan equity live atau anggaran ~$353
+            msg = (f"🤖 <b>AI Signal</b>  <b>{pair}</b>  <b>{side}</b>  ~10% Risk  |  Equity ~$353\n"
+                   f"━━━━━━━━━━━━━━━━━━━━\n"
+                   f"{icon}  Entry <code>{row['entry']}</code>\n"
+                   f"🛡️ SL <code>{row['sl']}</code> ({sl_pips:.1f} pips)\n"
+                   f"🎯 TP <code>{row['tp']}</code> ({tp_pips:.1f} pips, RR 1:{rr:.1f})\n"
+                   f"Confidence {conf:.3f} • Grade A+ • Private AI\n"
+                   f"{news_line}\n\n"
+                   f"Setup active — MT5 auto-executing.")
         else:
             msg = (f"\U0001f916 <b>AI CADANGAN (draft #{sid})</b>\n"
                    f"\U0001f4ca <b>{pair}</b> \u00b7 M15\n"

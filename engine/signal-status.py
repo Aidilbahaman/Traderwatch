@@ -277,9 +277,13 @@ def main():
     now = datetime.now(timezone.utc)
     since = now - timedelta(days=LOOKBACK_DAYS)
     history_since = now - MAX_AGE
-    rows = sb_get("signals?select=id,pair,side,entry,sl,tp,timeframe,posted_at,verified"
+    rows_raw = sb_get("signals?select=id,pair,side,entry,sl,tp,timeframe,posted_at,verified"
                   f"&verified=is.true&posted_at=gte.{since.strftime('%Y-%m-%dT%H:%M:%SZ')}"
                   "&order=posted_at.desc&limit=200")
+    # Tapis private signal daripada status web
+    from engine.private_signals import is_private
+    rows = [r for r in (json.loads(rows_raw or "[]") if isinstance(rows_raw,str) else (rows_raw or []))
+            if not is_private(r.get("id"))]
     history = sb_get("signals?select=pair,posted_at,verified"
                      f"&verified=is.true&posted_at=gte.{history_since.strftime('%Y-%m-%dT%H:%M:%SZ')}"
                      "&order=posted_at.desc&limit=1000")
