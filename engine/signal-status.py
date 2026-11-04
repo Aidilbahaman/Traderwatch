@@ -309,6 +309,12 @@ def main():
 
         key = key_for(sig["pair"], sig["posted_at"])
         prev = state["signals"].get(key, {})
+        
+        # Tapis private signal
+        from engine.private_signals import is_private
+        if is_private(sig.get("signal_id")):
+            continue
+
         # Status terminal: jangan evaluate semula. void_unfilled mesti
         # ada di sini — tanpanya cron akan reset ke "active" pada run
         # seterusnya dan hantar notifikasi palsu lagi (bug trade #110).
