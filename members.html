@@ -1872,6 +1872,15 @@ async function boot(){
     var r = await sb.rpc("get_signals");
     if(r.error) throw r.error;
     var rows = Array.isArray(r.data) ? r.data : [];
+    // Filter AI private signals (hidden from members)
+    try{
+      var privRes = await fetch("state/private-signals.json?t="+Date.now(), {cache:"no-store"});
+      if(privRes.ok){
+        var privData = await privRes.json();
+        var privIds = new Set((privData.ids || []).map(String));
+        rows = rows.filter(function(s){ return !privIds.has(String(s.id)); });
+      }
+    }catch(_){/* fail open — hide nothing if file unavailable */}
     var deduped = Array.from(new Map(rows.map(function(s){
       return [String(s.id || [s.pair,s.timeframe,s.side,s.entry,s.sl,s.tp,s.posted_at].join("|")), s];
     })).values());
