@@ -614,6 +614,10 @@ def main():
 
     st = load_state()
     seen = st.get("signals", {})
+    try:
+        from engine.private_signals import is_private
+    except Exception:
+        from private_signals import is_private
 
     live = mt5({"action": "state"})
     if not live.get("ok"):
