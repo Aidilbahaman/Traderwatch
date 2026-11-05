@@ -1,152 +1,201 @@
-"""Validasi Elliot Wave — 8 gelombang penuh + ratio Fibonacci.
+"""Validasi Elliot Wave — 8 gelombang + Fibonacci + bentuk koreksi.
 
 Reka bentuk:
-  - _impulse_ok()   : 3 peraturan wajib (hard rules) + skor Fibonacci
-  - _corrective_ok(): sahkan koreksi A-B-C
-  - score_cycle()   : markah 0-100 untuk kitaran 8 gelombang
-  - label_waves()   : cari kitaran TERBAIK (skor tertinggi), bukan pertama
+  - _hard_rules()    : 4 peraturan WAJIB Elliot
+  - fib_score()      : guideline Fibonacci (0-100)
+  - classify_abc()   : kenal bentuk koreksi (zigzag / flat / triangle)
+  - score_cycle()    : markah penuh satu kitaran 8 gelombang
+  - label_waves()    : cari kitaran TERBAIK, bukan pertama
+
+Nota penting:
+  Wave 6/7/8 dalam senarai pivot ialah A/B/C bagi koreksi selepas impulse.
+  Koreksi TIDAK semestinya bertentangan arah sepenuhnya — flat & triangle
+  boleh retrace cetek atau menyamping. Jangan tolak kerana sebab itu.
 """
 
-# Rujukan ratio Fibonacci yang biasa dilihat dalam kitaran Elliot
-FIB_W2 = (0.382, 0.618, 0.786)      # retrace Wave 2 dari Wave 1
-FIB_W3 = (1.618, 2.618)             # sambungan Wave 3 dari Wave 1
-FIB_W4 = (0.236, 0.382, 0.5)        # retrace Wave 4 dari Wave 3
-FIB_ABC = (0.382, 0.618, 1.0)       # retrace Wave B dari Wave A
+# Ratio Fibonacci rujukan
+FIB_W2 = (0.382, 0.5, 0.618, 0.786)     # retrace Wave 2 dari Wave 1
+FIB_W4 = (0.236, 0.382, 0.5)            # retrace Wave 4 dari Wave 3
+FIB_W5 = (0.618, 1.0, 1.272, 1.618)     # Wave 5 vs Wave 1
+FIB_B = (0.382, 0.5, 0.618, 0.786, 1.0)  # retrace Wave B dari Wave A
+FIB_C = (0.618, 1.0, 1.236, 1.618)      # Wave C vs Wave A
 
 
 def _near(x, targets, tol=0.12):
-    """True kalau x dekat mana-mana target Fibonacci (±tol relatif)."""
+    """True kalau x hampir mana-mana target Fibonacci (±tol absolut)."""
     return any(abs(x - t) <= tol for t in targets)
 
 
 def _hard_rules(p, up):
-    """3 peraturan WAJIB Elliot. Return (ok, sebab)."""
+    """4 peraturan WAJIB Elliot. Return (ok, sebab).
+
+    Rasional setiap peraturan dinyatakan supaya kegagalan mudah difahami.
+    """
+    if len(p) < 6:
+        return False, "pivot tidak cukup"
     p0, p1, p2, p3, p4, p5 = [x[1] for x in p[:6]]
     if up:
+        # R1: Wave 2 tak boleh retrace >100% Wave 1
         if p2 <= p0:
-            return False, "R1: Wave 2 jatuh bawah mula Wave 1"
+            return False, "R1: Wave 2 retrace penuh Wave 1"
+        # R2: Wave 3 mesti melebihi hujung Wave 1
         if p3 <= p1:
-            return False, "R2: Wave 3 tidak melebihi hujung Wave 1"
+            return False, "R2: Wave 3 tak capai hujung Wave 1"
+        # R3: Wave 4 tak boleh bertindih wilayah Wave 1
         if p4 <= p1:
-            return False, "R3: Wave 4 masuk wilayah Wave 1"
+            return False, "R3: Wave 4 bertindih wilayah Wave 1"
         l1, l3, l5 = p1 - p0, p3 - p2, p5 - p4
     else:
         if p2 >= p0:
-            return False, "R1: Wave 2 melebihi mula Wave 1"
+            return False, "R1: Wave 2 retrace penuh Wave 1"
         if p3 >= p1:
-            return False, "R2: Wave 3 tidak melebihi hujung Wave 1"
+            return False, "R2: Wave 3 tak capai hujung Wave 1"
         if p4 >= p1:
-            return False, "R3: Wave 4 masuk wilayah Wave 1"
+            return False, "R3: Wave 4 bertindih wilayah Wave 1"
         l1, l3, l5 = p0 - p1, p2 - p3, p4 - p5
-    if l3 <= l1 and l3 <= l5:
+    # R4: Wave 3 tak boleh jadi terpendek antara 1,3,5
+    if l1 <= 0 or l3 <= 0 or l5 <= 0:
+        return False, "R4: panjang gelombang tidak sah"
+    if l3 < l1 and l3 < l5:
         return False, "R4: Wave 3 gelombang terpendek"
-    return True, "3 peraturan wajib lulus"
+    return True, "4 peraturan wajib lulus"
 
 
 def fib_score(p, up):
-    """Markah Fibonacci 0-100 + senarai nota. Guideline, bukan wajib."""
+    """Markah Fibonacci 0-100. Return (skor, nota, senarai ratio)."""
     p0, p1, p2, p3, p4, p5 = [x[1] for x in p[:6]]
-    w1 = abs(p1 - p0)
-    w3 = abs(p3 - p2)
+    w1, w3 = abs(p1 - p0), abs(p3 - p2)
     if w1 <= 0 or w3 <= 0:
-        return 0, ["panjang gelombang sifar"]
+        return 0, ["panjang gelombang sifar"], {}
 
-    score, notes = 0, []
-    # Wave 2 retrace dari Wave 1
+    score, notes, ratios = 0, [], {}
     r2 = abs(p2 - p1) / w1
+    ratios["r2"] = r2
     if _near(r2, FIB_W2):
         score += 25
-        notes.append(f"W2 retrace {r2:.3f} ✓ fib")
+        notes.append(f"W2 retrace {r2:.3f} ✓")
     else:
-        notes.append(f"W2 retrace {r2:.3f} (luar fib)")
-    # Wave 3 vs Wave 1
+        notes.append(f"W2 retrace {r2:.3f} ✗")
+
     r3 = w3 / w1
-    if r3 >= FIB_W3[0]:
+    ratios["r3"] = r3
+    if r3 >= 1.618:
         score += 25
-        notes.append(f"W3 = {r3:.3f}x W1 ✓ fib")
+        notes.append(f"W3 {r3:.3f}x W1 ✓ extended")
     elif r3 >= 1.0:
-        score += 12
-        notes.append(f"W3 = {r3:.3f}x W1 (sekadar >1)")
+        score += 14
+        notes.append(f"W3 {r3:.3f}x W1 ~ cukup")
     else:
-        notes.append(f"W3 = {r3:.3f}x W1 (lemah)")
-    # Wave 4 retrace dari Wave 3, tidak bertindih Wave 1
+        notes.append(f"W3 {r3:.3f}x W1 ✗ lemah")
+
     r4 = abs(p4 - p3) / w3
+    ratios["r4"] = r4
     if _near(r4, FIB_W4):
         score += 25
-        notes.append(f"W4 retrace {r4:.3f} ✓ fib")
+        notes.append(f"W4 retrace {r4:.3f} ✓")
     else:
-        notes.append(f"W4 retrace {r4:.3f} (luar fib)")
-    # Wave 5 vs Wave 1 (sering sama panjang atau 0.618/1.618)
-    w5 = abs(p5 - p4)
-    r5 = w5 / w1
-    if _near(r5, (0.618, 1.0, 1.618), 0.15):
+        notes.append(f"W4 retrace {r4:.3f} ✗")
+
+    r5 = abs(p5 - p4) / w1
+    ratios["r5"] = r5
+    if _near(r5, FIB_W5, 0.15):
         score += 25
-        notes.append(f"W5 = {r5:.3f}x W1 ✓ fib")
+        notes.append(f"W5 {r5:.3f}x W1 ✓")
     else:
-        notes.append(f"W5 = {r5:.3f}x W1 (luar fib)")
-    return score, notes
+        notes.append(f"W5 {r5:.3f}x W1 ✗")
+    return score, notes, ratios
 
 
-def _abc_ok(p, up):
-    """Sahkan koreksi A-B-C selepas impulse. p = pivot 5,6,7."""
-    if len(p) < 3:
-        return False, "koreksi tidak lengkap", 0
-    a, b, c = [x[1] for x in p[:3]]
-    p5 = None
-    score, notes = 0, []
-    # Untuk impulse naik, koreksi turun: A < W5, B < mula A, C < B
-    if up:
-        if not (a < b and c < b):
-            return False, "bentuk A-B-C tidak konsisten", 0
-    else:
-        if not (a > b and c > b):
-            return False, "bentuk A-B-C tidak konsisten", 0
-    rb = abs(b - a) / max(abs(a), 1e-9) if False else None
-    return True, "koreksi A-B-C sah", score
+def classify_abc(w5, a, b, c, up):
+    """Kenal bentuk koreksi selepas impulse.
+
+    Pulangan: (nama_bentuk, skor 0-25, nota)
+
+    Bentuk yang sah dalam teori Elliot:
+      - ZigZag   : B retrace cetek (0.382-0.618 A), C > A
+      - Flat     : B retrace hampir penuh (>=0.9 A), C ~ saiz A
+      - Triangle : B retrace sederhana, C < A (menyempit)
+
+    Koreksi TIDAK semestinya melebihi harga Wave 5. Yang penting bentuk
+    dalaman A-B-C konsisten, bukan arah mutlak.
+    """
+    la = abs(a - w5)      # panjang Wave A
+    lb = abs(b - a)       # panjang Wave B
+    lc = abs(c - b)       # panjang Wave C
+    if la <= 0:
+        return "tidak sah", 0, "panjang Wave A sifar"
+
+    rb = lb / la
+    rc = lc / la
+    note = f"A={la:.5g} B/A={rb:.3f} C/A={rc:.3f}"
+
+    # Semakan bentuk: nombor mesti masuk akal dulu
+    if not (0.15 <= rb <= 1.5):
+        return "tidak sah", 0, f"B retrace luar julat ({note})"
+
+    # ZigZag: B cetek, C lanjut melebihi A
+    if 0.3 <= rb <= 0.7 and rc >= 0.9:
+        return "ZigZag", 22, f"bentuk ZigZag ({note})"
+    # Flat: B hampir penuh
+    if rb >= 0.85 and 0.7 <= rc <= 1.4:
+        return "Flat", 22, f"bentuk Flat ({note})"
+    # Triangle: menyempit
+    if rb >= 0.4 and rc < 0.75:
+        return "Triangle", 18, f"bentuk Triangle ({note})"
+    # Kombinasi longgar — masih koreksi, cuma kurang kemas
+    if 0.2 <= rb <= 1.0 and 0.4 <= rc <= 1.8:
+        return "Koreksi longgar", 12, f"koreksi longgar ({note})"
+    return "tidak sah", 0, f"bentuk koreksi tidak dikenali ({note})"
 
 
 def score_cycle(pivots, start):
-    """Nilai kitaran 8 gelombang dari indeks start. Return (skor, sebab, up)."""
-    if len(pivots) < start + 8:
-        return -1, "pivot tidak cukup untuk 8 gelombang", None
-    win = pivots[start:start + 8]
+    """Nilai kitaran 8 gelombang dari indeks start.
+
+    Kitaran = 6 pivot impulse (0-5) + 2 pivot koreksi (A, B) + 1 penutup (C).
+    Return (skor, sebab, up, butiran).
+    """
+    if len(pivots) < start + 9:
+        return -1, "pivot tidak cukup untuk 8 gelombang", None, {}
+    win = pivots[start:start + 9]
     up = win[0][2] == "L"
     ok, why = _hard_rules(win, up)
     if not ok:
-        return -1, why, up
-    fs, notes = fib_score(win, up)
-    # Bonus bentuk koreksi
-    ok_abc, abc_why, _ = _abc_ok(win[5:8], up)
-    abc_bonus = 15 if ok_abc else 0
-    total = fs + abc_bonus
-    reason = (f"{why} · fib {fs}/100"
-              + (" · A-B-C sah" if ok_abc else " · A-B-C lemah"))
-    return total, reason, up
+        return -1, why, up, {}
+
+    fs, notes, ratios = fib_score(win, up)
+    w5 = win[5][1]
+    a, b, c = win[6][1], win[7][1], win[8][1]
+    shape, csc, cnote = classify_abc(w5, a, b, c, up)
+
+    # Skor mentah: fib (maks 100) + bentuk koreksi (maks 22) -> normalisasi ke 100
+    total = round((fs + csc) / 122 * 100)
+    reason = (f"peraturan lulus · fib {fs}/100 · {shape} ({cnote.split('(')[0].strip()})")
+    detail = {"fib": notes, "ratios": ratios, "shape": shape, "shape_note": cnote}
+    return total, reason, up, detail
 
 
 def label_waves(pivots, validate=True, min_score=50):
-    """Label kitaran Elliot TERBAIK (8 gelombang), bukan yang pertama jumpa."""
-    empty = ([(p[0], p[1], p[2], "?") for p in pivots],
-             "TIDAK SAH — tiada kitaran 8-gelombang")
-    if not validate or len(pivots) < 8:
+    """Label kitaran Elliot TERBAIK (8 gelombang), bukan yang pertama."""
+    if not validate or len(pivots) < 9:
         LABELS = ["0", "1", "2", "3", "4", "5", "A", "B", "C", "D", "E"]
         return ([(p[0], p[1], p[2], LABELS[i % len(LABELS)])
-                 for i, p in enumerate(pivots)], None)
+                 for i, p in enumerate(pivots)],
+                "TIDAK SAH — pivot tidak cukup untuk 8 gelombang (perlu 9)", {})
 
-    best = (-1, None, None)   # (skor, start, sebab)
-    for start in range(len(pivots) - 8, -1, -1):
-        sc, why, up = score_cycle(pivots, start)
+    best = (-1, None, None, {})
+    for start in range(len(pivots) - 9, -1, -1):
+        sc, why, up, detail = score_cycle(pivots, start)
         if sc > best[0]:
-            best = (sc, start, why)
-    sc, start, why = best
+            best = (sc, start, why, detail)
+    sc, start, why, detail = best
 
     if start is None or sc < min_score:
-        detail = why or "skor terlalu rendah"
-        return empty[0], f"TIDAK SAH — {detail} (skor {sc if sc >= 0 else 0})"
+        return ([(p[0], p[1], p[2], "?") for p in pivots],
+                f"TIDAK SAH — {why or 'tiada kitaran lulus'} (skor maks {max(sc, 0)})",
+                detail)
 
-    # Label 8 gelombang: 0-5 impulse, A-B-C koreksi
     LABELS = ["0", "1", "2", "3", "4", "5", "A", "B", "C"]
     out = [(p[0], p[1], p[2], LABELS[i])
            for i, p in enumerate(pivots[start:start + 9])]
     grade = "A" if sc >= 85 else ("B" if sc >= 70 else "C")
-    return out, f"SAH (grade {grade}, skor {sc}/100) · {why}"
+    return out, f"SAH (grade {grade}, {sc}/100) · {why}", detail

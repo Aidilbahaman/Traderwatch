@@ -101,7 +101,7 @@ def render(pair="XAUUSD", tf="M15", limit=300):
         return None
 
     piv = zigzag(bars, pct=0.2)
-    marked, verdict = label_waves(piv, validate=True)
+    marked, verdict, detail = label_waves(piv, validate=True)
     valid = bool(verdict) and verdict.startswith("SAH")
 
     xs = list(range(len(bars)))
@@ -154,6 +154,15 @@ def render(pair="XAUUSD", tf="M15", limit=300):
     ax.text(0.995, 1.012, badge_txt, transform=ax.transAxes,
             color=badge_col, fontsize=10.5, fontweight="bold", ha="right")
 
+    # Panel ratio Fibonacci (bila kitaran sah)
+    if valid and detail.get("ratios"):
+        r = detail["ratios"]
+        shp = detail.get("shape", "-")
+        info = (f"W2 {r.get('r2', 0):.3f}  ·  W3 {r.get('r3', 0):.3f}x  ·  "
+                f"W4 {r.get('r4', 0):.3f}  ·  W5 {r.get('r5', 0):.3f}x  ·  {shp}")
+        ax.text(0, -0.075, info, transform=ax.transAxes, color=GOLD,
+                fontsize=9.5, family="monospace")
+
     ax.tick_params(colors=MUTED, labelsize=9)
     from matplotlib.ticker import FuncFormatter
     ax.yaxis.set_major_formatter(FuncFormatter(lambda v, _: px(pair, v)))
@@ -174,6 +183,9 @@ def render(pair="XAUUSD", tf="M15", limit=300):
     print("SAVED:", out)
     print("Pivots detected:", len(piv))
     print("Verdict:", verdict)
+    if detail:
+        print("  Fib:", " | ".join(detail.get("fib", [])))
+        print("  Bentuk:", detail.get("shape_note", "-"))
     for (ix, iy, kind, lab) in marked:
         print(f"  Wave {lab}: {kind} @ {iy:,.2f} (bar {ix})")
     return out
