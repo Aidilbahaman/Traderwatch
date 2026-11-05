@@ -76,8 +76,19 @@ def build_trigger(groups, bars, i):
     return {"confirmed": len(codes) > 0, "reason_codes": sorted(set(codes))}
 
 
-def analyze(symbol, bars=None, i=None, spread_points=None, news_block=False):
-    """Analysis lengkap satu symbol. Pulangkan analysis run dict."""
+def build_tf_cache(bars):
+    """Resample sekali untuk analisis berulang (jimat ~20ms/titik)."""
+    return {"M15": bars, "H1": mt.resample(bars, 4),
+            "H4": mt.resample(bars, 16), "D1": mt.resample(bars, 96)}
+
+
+def analyze(symbol, bars=None, i=None, spread_points=None, news_block=False,
+            tf_cache=None):
+    """Analysis lengkap satu symbol. Pulangkan analysis run dict.
+
+    tf_cache: dari build_tf_cache() — beri bila menganalisis banyak bar
+    pada symbol sama supaya resample tidak diulang setiap kali.
+    """
     symbol = ins.canonical(symbol)
     bars = bars if bars is not None else md.dedupe(md.load_bars(symbol, "M15"))
     if not bars:
@@ -86,10 +97,14 @@ def analyze(symbol, bars=None, i=None, spread_points=None, news_block=False):
     i = i if i is not None else len(bars) - 1
     atr = qt.atr(bars, i)
     pivots = st.swings(bars, i)
-    by_tf = {"M15": bars, "H1": mt.resample(bars, 4),
-             "H4": mt.resample(bars, 16), "D1": mt.resample(bars, 96)}
+    # Guna cache bila ada; kalau tidak, resample (tetap causal kerana
+    # resample() hanya gabung bar SEBELUM titik potong).
+    by_tf = tf_cache or build_tf_cache(bars)
+    # Potong timeframe lebih tinggi supaya tiada bar masa depan yang terbaca
+    cut = {tf: [b for b in arr if b["open_time"] <= bars[i]["open_time"]]
+           for tf, arr in by_tf.items()}
 
-    groups = build_groups(bars, i, atr, pivots, by_tf)
+    groups = build_groups(bars, i, atr, pivots, cut)
     reg = rg.classify(bars, i, atr, mtf_result=groups["mtf"],
                       quant_result=groups["quant"], news_block=news_block)
     conf = sc.aggregate(groups)
@@ -107,11 +122,13 @@ def analyze(symbol, bars=None, i=None, spread_points=None, news_block=False):
     trigger = build_trigger(groups, bars, i)
     dec = dc.decide(conf, setup, trigger, gates_ok, gate_codes, reg["regime"])
 
-    # Kualiti data: staleness + gap
-    h = md.health(symbol)
-    data_quality = {"data_status": h["status"], "bars": h["bars"],
-                    "staleness_s": h["staleness_seconds"],
-                    "gaps_abnormal": h["gaps_non_weekend"],
+    # Kualiti data: kira dari bar yang SUDAH dimuat (jangan baca disk semula).
+    # md.health() membaca 20000 bar + kira gap setiap panggilan = pembaziran
+    # besar bila menganalisis banyak bar berturutan.
+    stale = md.staleness_seconds(bars)
+    data_quality = {"data_status": "OK" if len(bars) > 300 else "DEGRADED",
+                    "bars": len(bars),
+                    "staleness_s": stale,
                     "instrument_estimated": meta["is_estimated"],
                     "spread_proxy_median": round(prox, 8) if prox else None}
 
