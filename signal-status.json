@@ -1069,7 +1069,8 @@
    "status": "pending"
   },
   "EURUSD_20261105_145834": {
-   "status": "pending"
+   "status": "active",
+   "entry_at": "2026-11-05T15:11:00+08:00"
   },
   "USDJPY_20261105_145815": {
    "status": "pending"
@@ -1078,5 +1079,5 @@
    "status": "pending"
   }
  },
- "updated": "2026-11-05T15:10:02+08:00"
+ "updated": "2026-11-05T15:15:02+08:00"
 }
