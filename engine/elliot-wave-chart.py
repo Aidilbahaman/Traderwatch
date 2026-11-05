@@ -16,6 +16,15 @@ from matplotlib.patches import Rectangle
 REPO = Path("/home/ubuntu/web/Traderwatch-repo")
 DB = REPO / "state" / "sq-bars.db"
 
+# Ketepatan harga ikut instrumen (pips vs dolar)
+DP = {"XAUUSD": 2, "XAGUSD": 3, "BTCUSD": 0}
+DP_DEFAULT = 5
+
+
+def px(pair, v):
+    d = DP.get(pair, DP_DEFAULT)
+    return f"{v:,.{d}f}"
+
 BG = "#0b0d10"
 PANEL = "#12151a"
 TEXT = "#f0f3f6"
@@ -166,13 +175,13 @@ def label_waves(pivots, validate=True):
              for i, p in enumerate(pivots)], "TIDAK SAH — tiada impulse 5-gelombang yang lulus peraturan")
 
 
-def render(pair="XAUUSD", tf="M15", limit=200):
+def render(pair="XAUUSD", tf="M15", limit=300):
     bars = load_bars(pair, tf, limit)
     if not bars:
         print(f"Tiada bar untuk {pair} {tf}")
         return None
 
-    piv = zigzag(bars, pct=0.6)
+    piv = zigzag(bars, pct=0.2)
     marked, verdict = label_waves(piv, validate=True)
     valid = bool(marked) and verdict in ("impulse sah",)
 
@@ -213,7 +222,7 @@ def render(pair="XAUUSD", tf="M15", limit=200):
 
     last = c[-1]
     ax.axhline(last, color=MUTED, linewidth=0.8, linestyle="--", alpha=0.6)
-    ax.annotate(f"{last:,.2f}", (len(bars) - 1, last), textcoords="offset points",
+    ax.annotate(px(pair, last), (len(bars) - 1, last), textcoords="offset points",
                 xytext=(8, 0), color=MUTED, fontsize=10, va="center")
 
     ax.set_title(f"{pair} · {tf} · Elliot Wave structure (ZigZag auto)",
@@ -227,6 +236,8 @@ def render(pair="XAUUSD", tf="M15", limit=200):
             color=badge_col, fontsize=10.5, fontweight="bold", ha="right")
 
     ax.tick_params(colors=MUTED, labelsize=9)
+    from matplotlib.ticker import FuncFormatter
+    ax.yaxis.set_major_formatter(FuncFormatter(lambda v, _: px(pair, v)))
     for s in ax.spines.values():
         s.set_color("#252b33")
     ax.grid(color="#ffffff0a", linewidth=0.7)
