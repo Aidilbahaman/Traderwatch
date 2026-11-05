@@ -1033,7 +1033,35 @@
   "XAUUSD_20261104_143002": {
    "status": "active",
    "entry_at": "2026-11-04T14:32:00+08:00"
+  },
+  "XAUUSD_20261105_121723": {
+   "status": "sl",
+   "pips": -64.5,
+   "r": -1,
+   "unit": "pips",
+   "closed": "2026-11-05T14:41:45+08:00",
+   "entry_at": "2026-11-05T12:25:00+08:00"
+  },
+  "EURUSD_20261105_121641": {
+   "status": "expired",
+   "closed": "2026-11-05T14:41:45+08:00",
+   "note": "lifecycle:expired"
+  },
+  "USDCAD_20261105_121622": {
+   "status": "expired",
+   "closed": "2026-11-05T14:41:45+08:00",
+   "note": "lifecycle:expired"
+  },
+  "AUDUSD_20261105_121602": {
+   "status": "expired",
+   "closed": "2026-11-05T14:41:45+08:00",
+   "note": "lifecycle:expired"
+  },
+  "XAUUSD_20261105_010431": {
+   "status": "expired",
+   "closed": "2026-11-05T14:41:45+08:00",
+   "note": "lifecycle:expired"
   }
  },
- "updated": "2026-11-04T14:35:02+08:00"
+ "updated": "2026-11-05T14:41:45+08:00"
 }
