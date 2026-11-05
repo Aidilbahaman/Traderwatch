@@ -20,6 +20,7 @@ Secrets: ~/.secrets/twelve.env, ~/.secrets/supabase.env
 import importlib.util
 import json
 import os
+import pathlib
 import sys
 import time
 import urllib.error
@@ -48,7 +49,7 @@ LOCK = Path("/tmp/signal-engine-ai.lock")
 # Signal didaftarkan dalam state/private-signals.json supaya lifecycle
 # hantar owner sahaja dan MT5 execute dengan lot risiko 1%.
 PRIVATE_MODE = os.environ.get("AI_PRIVATE", "1") == "1"
-THRESHOLD = 0.55
+THRESHOLD = 0.50  # diturunkan owner 5 Nov 2026 (dari 0.55) supaya calon 0.50-0.54 lulus
 XAUUSD_THRESHOLD = 0.35
 # Lantai SL 15 pip: spread RoboForex besar (EURUSD 1.3, USDJPY 1.9,
 # XAUUSD 2.1 pip). 15 pip hadkan drag spread bawah ~13% SL.
@@ -344,16 +345,32 @@ def decide(model, bars):
     thresh = XAUUSD_THRESHOLD if pair_key == "XAU/USD" else THRESHOLD
     if conf < thresh:
         return None, conf
+    HIGH_CONF_FADE = 0.85   # partial-exception owner 5 Nov 2026
+    FADE_ATR = 0.5          # SELL counter-trend dibenarkan hanya bila conf >= 0.85
+    FADE_LOOKBACK = 96      # DAN harga <= 0.5 ATR dari high 24 jam (96x M15).
     if model.get("_pair") in TREND_FOLLOW_PAIRS:
         tr = h1_trend(bars)
         want = "BUY" if tr > 0 else ("SELL" if tr < 0 else None)
-        if want is None:
+        if want is None and conf < HIGH_CONF_FADE:
             log(f"TREND-SKIP {model.get('_pair')}: H1 tidak jelas, counter-trend dilarang")
             return None, conf
         if side != want:
-            log(f"TREND-SKIP {model.get('_pair')}: model {side} lawan H1 "
-                f"({'UP' if tr > 0 else 'DOWN'}), disekat")
-            return None, conf
+            _atr = M.atr_s(bars)[-1] or 0.0
+            _hh = max(b[1] for b in bars[-FADE_LOOKBACK:])
+            _ll = min(b[2] for b in bars[-FADE_LOOKBACK:])
+            _px = bars[-1][3]
+            if side == "SELL" and tr > 0 and (conf >= HIGH_CONF_FADE
+                                               and _px >= _hh - FADE_ATR * _atr):
+                log(f"FADE-OK {model.get('_pair')}: SELL conf {conf:.3f} >= {HIGH_CONF_FADE} "
+                    f"dekat high 24j ({_px:.2f} vs {_hh:.2f}) - fade top dibenarkan")
+            elif side == "BUY" and tr < 0 and (conf >= HIGH_CONF_FADE
+                                               and _px <= _ll + FADE_ATR * _atr):
+                log(f"FADE-OK {model.get('_pair')}: BUY conf {conf:.3f} >= {HIGH_CONF_FADE} "
+                    f"dekat low 24j ({_px:.2f} vs {_ll:.2f}) - fade bottom dibenarkan")
+            else:
+                log(f"TREND-SKIP {model.get('_pair')}: model {side} lawan H1 "
+                    f"({'UP' if tr > 0 else 'DOWN'}), disekat")
+                return None, conf
     return side, conf
 
 
@@ -416,6 +433,8 @@ def notify_owner(pair, side, row, conf, txt, news_line="", executed=False):
                      f"Reward ~<b>${reward_usd:.0f}</b> ({tp_pips:.1f} pips) pada 0.01 lot"
                      + (" - akaun bawah $100, pertimbang skip atau lot lebih kecil" if risk_usd > 5 else ""))
         arrow = "\u2b06\ufe0f" if str(side).upper() == "BUY" else "\u2b07\ufe0f"
+        kb = None      # mod private tiada butang; ditakrif di sini supaya
+                       # cabang `executed` tidak UnboundLocalError.
         if executed:
             # Sesuai permintaan: Ai Signal (Pair) (Buy/Sell) (Size lot) (Account balance)
             # Dapatkan equity live atau anggaran ~$353
@@ -440,10 +459,10 @@ def notify_owner(pair, side, row, conf, txt, news_line="", executed=False):
             kb = {"inline_keyboard": [[
                 {"text": "\u2705 Post ke member", "callback_data": f"ai:post:{sid}"},
                 {"text": "\u274c Tolak", "callback_data": f"ai:reject:{sid}"}]]}
-        data = urllib.parse.urlencode(
-            {"chat_id": OWNER_CHAT_ID, "text": msg,
-             "parse_mode": "HTML",
-             "reply_markup": json.dumps(kb)}).encode()
+        payload = {"chat_id": OWNER_CHAT_ID, "text": msg, "parse_mode": "HTML"}
+        if kb:
+            payload["reply_markup"] = json.dumps(kb)
+        data = urllib.parse.urlencode(payload).encode()
         req = urllib.request.Request(
             "https://api.telegram.org/bot" + bot_tok + "/sendMessage", data=data)
         with urllib.request.urlopen(req, timeout=20) as r:
@@ -609,10 +628,12 @@ def main():
                 log(f"GATE {pair}: disekat learning-memo (prestasi lemah)")
                 skipped += 1
                 continue
-            if pair_blocked(pair, state, life):
-                log(f"SKIP {pair}: existing active setup")
-                skipped += 1
-                continue
+            # Owner (5 Nov 2026): active position — pair sama ATAU pair lain —
+            # tidak lagi menyekat signal baru. Guard pair_blocked dimatikan.
+            # if pair_blocked(pair, state, life):
+            #     log(f"SKIP {pair}: existing active setup")
+            #     skipped += 1
+            #     continue
             # No daily dedupe: the AI is the only producer now, so a pair may
             # post again as soon as its previous setup resolves. The pair
             # lifecycle guard above is what prevents duplicates.
@@ -643,7 +664,9 @@ def main():
             model["_pair"] = pair
             side, conf = decide(model, bars)
             if side is None:
-                log(f"HOLD {pair} {TIMEFRAME}: conf {conf:.3f} < {THRESHOLD}")
+                # conf boleh tinggi tetapi tetap ditolak guard (trend-follow /
+                # fade). Jangan tulis "< THRESHOLD" — itu mengelirukan.
+                log(f"HOLD {pair} {TIMEFRAME}: tiada setup lulus guard (conf {conf:.3f})")
                 time.sleep(CALL_GAP)
                 continue
 
@@ -692,6 +715,10 @@ def main():
             row = {"pair": pair, "timeframe": TIMEFRAME, "side": side,
                    "entry": f"{entry:.{dp}f}", "sl": f"{sl:.{dp}f}",
                    "tp": f"{tp:.{dp}f}", "verified": False}
+            # is_private ditetapkan dari awal supaya signal AI TIDAK PERNAH
+            # muncul dalam RPC/RLS member walaupun verified=true selepas ini.
+            if PRIVATE_MODE:
+                row["is_private"] = True
             if dry:
                 inserted += 1
                 log(f"DRY {pair} {TIMEFRAME} {side} E={row['entry']} "
