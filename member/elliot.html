@@ -91,7 +91,7 @@ function grade(v){
   return {cls:g.toLowerCase(), txt:"GRED "+g};
 }
 function score(v){
-  var m = /\(grade [ABC], (\d+)\/100\)/.exec(v.verdict||"") || /(\d+)\/100/.exec(v.verdict||"");
+  var m = /\(grade [ABC], ([\d.]+)\/100\)/.exec(v.verdict||"") || /([\d.]+)\/100/.exec(v.verdict||"");
   return m ? m[1] : "—";
 }
 function render(){
