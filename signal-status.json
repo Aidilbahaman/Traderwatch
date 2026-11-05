@@ -1063,7 +1063,8 @@
    "note": "lifecycle:expired"
   },
   "USDCAD_20261105_145926": {
-   "status": "pending"
+   "status": "active",
+   "entry_at": "2026-11-05T15:22:00+08:00"
   },
   "XAUUSD_20261105_145853": {
    "status": "pending"
@@ -1077,11 +1078,12 @@
    "entry_at": "2026-11-05T15:11:00+08:00"
   },
   "USDJPY_20261105_145815": {
-   "status": "pending"
+   "status": "active",
+   "entry_at": "2026-11-05T15:21:00+08:00"
   },
   "AUDUSD_20261105_145945": {
    "status": "pending"
   }
  },
- "updated": "2026-11-05T15:20:02+08:00"
+ "updated": "2026-11-05T15:25:02+08:00"
 }
