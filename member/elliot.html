@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="ms">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0b0d10">
+<title>Elliot Wave Analysis — Trader Watch</title>
+<style>
+:root{--bg:#0b0d10;--panel:#12151a;--panel2:#171b21;--line:#252b33;--text:#f0f3f6;--muted:#89939f;--green:#b7f36b;--red:#ff777d;--blue:#8ab4ff;--gold:#f3cb75;--r:16px}
+*{box-sizing:border-box}
+body{margin:0;background:radial-gradient(ellipse at 80% -20%,#1d2a1b 0,transparent 38%),var(--bg);color:var(--text);font:14px/1.6 Inter,ui-sans-serif,system-ui,-apple-system,sans-serif;letter-spacing:-.015em}
+.wrap{max-width:1100px;margin:auto;padding:28px 20px 70px}
+header{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:26px;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:11px;font-weight:800;font-size:17px;letter-spacing:-.05em}
+.logo{width:38px;height:38px;border-radius:12px;background:var(--gold);color:#1a1408;display:grid;place-items:center;font-weight:950;font-size:19px}
+.brand small{display:block;color:var(--muted);font-size:10px;font-weight:500;letter-spacing:.08em;text-transform:uppercase}
+.back{border:1px solid var(--line);background:var(--panel);color:var(--text);padding:9px 14px;border-radius:11px;text-decoration:none;font-size:12px;font-weight:700}
+h1{font-size:clamp(24px,4vw,34px);letter-spacing:-.055em;margin:6px 0 8px}
+.lead{color:var(--muted);margin:0 0 30px;font-size:14px;max-width:70ch}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:16px}
+.card{background:linear-gradient(145deg,#171b21,#111419 75%);border:1px solid var(--line);border-radius:var(--r);padding:20px}
+.card.ok{border-color:#b7f36b44}
+.card.no{border-color:#ff777d33}
+.chead{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:14px}
+.pair{font-size:19px;font-weight:800;letter-spacing:-.03em}
+.name{font-size:11px;color:var(--muted);margin-top:2px}
+.grade{font-size:11px;font-weight:800;padding:5px 10px;border-radius:8px;letter-spacing:.06em;white-space:nowrap}
+.grade.a{background:#b7f36b18;color:var(--green);border:1px solid #b7f36b44}
+.grade.b{background:#8ab4ff18;color:var(--blue);border:1px solid #8ab4ff44}
+.grade.c{background:#f3cb7518;color:var(--gold);border:1px solid #f3cb7544}
+.grade.x{background:#ff777d14;color:var(--red);border:1px solid #ff777d33}
+.row{display:flex;justify-content:space-between;gap:10px;padding:7px 0;border-bottom:1px solid #ffffff0a;font-size:12.5px}
+.row:last-child{border-bottom:0}
+.row span{color:var(--muted)}
+.row b{font-variant-numeric:tabular-nums;font-weight:700}
+.trend-up{color:var(--green)}.trend-down{color:var(--red)}
+.waves{display:flex;flex-wrap:wrap;gap:5px;margin:12px 0 6px}
+.w{font-size:10.5px;font-weight:800;padding:4px 8px;border-radius:7px;background:#ffffff0a;border:1px solid var(--line)}
+.w.imp{background:#b7f36b14;color:var(--green);border-color:#b7f36b33}
+.w.cor{background:#ff777d12;color:var(--red);border-color:#ff777d33}
+.note{font-size:11px;color:var(--muted);margin-top:10px;padding-top:10px;border-top:1px solid #ffffff0a}
+.badge{display:inline-flex;align-items:center;gap:5px;font-size:10.5px;font-weight:800;padding:4px 9px;border-radius:7px}
+.badge.live{background:#b7f36b15;color:var(--green)}
+.badge.wait{background:#8a93a022;color:#8a93a0}
+.legend{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:20px;margin-top:26px}
+.legend h2{font-size:15px;margin:0 0 14px}
+.legend ul{margin:0;padding-left:20px;color:var(--muted);font-size:12.5px}
+.legend li{margin-bottom:7px}
+.legend strong{color:var(--text)}
+footer{margin-top:30px;color:#626c77;font-size:10.5px;border-top:1px solid var(--line);padding-top:16px}
+@media(max-width:620px){.grid{grid-template-columns:1fr}.wrap{padding:20px 14px 60px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+<div class="brand"><div class="logo">E</div><div>TRADER WATCH<small>Elliot Wave desk</small></div></div>
+<a class="back" href="index.html">← Dashboard</a>
+</header>
+
+<h1>Elliot Wave Analysis · H1</h1>
+<p class="lead">Setiap pair dinilai dengan <b>8 gelombang</b> (5 impulse + 3 koreksi) dan <b>ratio Fibonacci</b>. Gred A = struktur bersih, B = baik, C = longgar, ✕ = belum sah. Analisis pada H1 kerana ujian menunjukkan struktur paling jelas pada timeframe ini.</p>
+
+<div class="grid" id="cards"></div>
+
+<div class="legend">
+<h2>Cara baca kad ini</h2>
+<ul>
+<li><strong>Gred</strong> — A (≥85/100), B (≥70), C (≥50), ✕ (&lt;50 atau tiada kitaran sah)</li>
+<li><strong>Struktur</strong> — bentuk koreksi A-B-C: ZigZag (B cetek, C panjang), Flat (B hampir penuh), Triangle (menyempit)</li>
+<li><strong>W2/W4</strong> — retrace: sepatutnya 0.382–0.618 (W2) dan 0.236–0.5 (W4)</li>
+<li><strong>W3</strong> — sambungan: ≥1.618× W1 bermakna gelombang 3 extended (paling kuat)</li>
+<li><strong>W5</strong> — biasanya 0.618× atau 1.0× W1</li>
+<li><strong>3 peraturan wajib</strong> — W2 tak melebihi mula W1 · W3 bukan terpendek · W4 tak masuk wilayah W1</li>
+</ul>
+</div>
+
+<footer>
+Analisis ini alat pendidikan, bukan nasihat kewangan. Elliot Wave bersifat subjektif — angka dan gred menunjukkan keyakinan struktur, bukan jaminan. Trade dengan risiko anda sendiri.
+</footer>
+</div>
+
+<script>
+var DATA = {"XAUUSD":{"valid":true,"verdict":"SAH (grade A, 100/100) \u00b7 peraturan lulus \u00b7 fib 100/100 \u00b7 Flat (bentuk Flat)","pivots":28,"last":4099.08,"trend":"NAIK","change_pct":2.53,"waves":[{"w":"0","k":"L","px":3870.49},{"w":"1","k":"H","px":3918.72},{"w":"2","k":"L","px":3891.31},{"w":"3","k":"H","px":3969.96},{"w":"4","k":"L","px":3937.88},{"w":"5","k":"H","px":3964.43},{"w":"A","k":"L","px":3895.76},{"w":"B","k":"H","px":3969.83},{"w":"C","k":"L","px":3917.68}],"shape":"Flat","ratios":{"r2":0.568,"r3":1.631,"r4":0.408,"r5":0.55}},"XAGUSD":{"valid":true,"verdict":"SAH (grade B, 80/100) \u00b7 peraturan lulus \u00b7 fib 75/100 \u00b7 ZigZag (bentuk ZigZag)","pivots":21,"last":52.242,"trend":"TURUN","change_pct":-3.14,"waves":[{"w":"0","k":"H","px":54.322},{"w":"1","k":"L","px":52.495},{"w":"2","k":"H","px":53.08},{"w":"3","k":"L","px":48.867},{"w":"4","k":"H","px":51.256},{"w":"5","k":"L","px":48.625},{"w":"A","k":"H","px":50.561},{"w":"B","k":"L","px":49.396},{"w":"C","k":"H","px":52.242}],"shape":"ZigZag","ratios":{"r2":0.32,"r3":2.306,"r4":0.567,"r5":1.44}},"BTCUSD":{"valid":true,"verdict":"SAH (grade B, 73/100) \u00b7 peraturan lulus \u00b7 fib 89/100 \u00b7 tidak sah (B retrace luar julat)","pivots":41,"last":75915.0,"trend":"TURUN","change_pct":-5.82,"waves":[{"w":"0","k":"L","px":76973.0},{"w":"1","k":"H","px":77582.0},{"w":"2","k":"L","px":77222.0},{"w":"3","k":"H","px":78124.0},{"w":"4","k":"L","px":77611.0},{"w":"5","k":"H","px":78046.0},{"w":"A","k":"L","px":77525.0},{"w":"B","k":"H","px":78713.0},{"w":"C","k":"L","px":77811.0}],"shape":"tidak sah","ratios":{"r2":0.59,"r3":1.479,"r4":0.569,"r5":0.714}},"EURUSD":{"valid":false,"verdict":"TIDAK SAH \u2014 tiada kitaran lulus (skor maks 0)","pivots":15,"last":1.12221,"trend":"NAIK","change_pct":0.19,"waves":[{"w":"?","k":"H","px":1.12267},{"w":"?","k":"L","px":1.11131},{"w":"?","k":"H","px":1.11691},{"w":"?","k":"L","px":1.11069},{"w":"?","k":"H","px":1.12146},{"w":"?","k":"L","px":1.11366},{"w":"?","k":"H","px":1.12369},{"w":"?","k":"L","px":1.11752},{"w":"?","k":"H","px":1.12621},{"w":"?","k":"L","px":1.12227},{"w":"?","k":"H","px":1.12728},{"w":"?","k":"L","px":1.12135},{"w":"?","k":"H","px":1.12682},{"w":"?","k":"L","px":1.12041},{"w":"?","k":"H","px":1.1244}],"shape":"-","ratios":{}},"GBPUSD":{"valid":false,"verdict":"TIDAK SAH \u2014 tiada kitaran lulus (skor maks 0)","pivots":10,"last":1.34533,"trend":"NAIK","change_pct":0.62,"waves":[{"w":"?","k":"H","px":1.33874},{"w":"?","k":"L","px":1.32727},{"w":"?","k":"H","px":1.34339},{"w":"?","k":"L","px":1.33742},{"w":"?","k":"H","px":1.34481},{"w":"?","k":"L","px":1.33967},{"w":"?","k":"H","px":1.3503},{"w":"?","k":"L","px":1.34549},{"w":"?","k":"H","px":1.35006},{"w":"?","k":"L","px":1.34482}],"shape":"-","ratios":{}},"USDJPY":{"valid":false,"verdict":"TIDAK SAH \u2014 tiada kitaran lulus (skor maks 0)","pivots":12,"last":157.787,"trend":"NAIK","change_pct":0.61,"waves":[{"w":"?","k":"H","px":158.346},{"w":"?","k":"L","px":157.605},{"w":"?","k":"H","px":158.125},{"w":"?","k":"L","px":157.122},{"w":"?","k":"H","px":157.745},{"w":"?","k":"L","px":156.966},{"w":"?","k":"H","px":158.767},{"w":"?","k":"L","px":157.415},{"w":"?","k":"H","px":158.673},{"w":"?","k":"L","px":157.79},{"w":"?","k":"H","px":158.498},{"w":"?","k":"L","px":157.542}],"shape":"-","ratios":{}},"AUDUSD":{"valid":false,"verdict":"TIDAK SAH \u2014 tiada kitaran lulus (skor maks 0)","pivots":11,"last":0.69413,"trend":"TURUN","change_pct":-1.36,"waves":[{"w":"?","k":"H","px":0.70398},{"w":"?","k":"L","px":0.70096},{"w":"?","k":"H","px":0.70517},{"w":"?","k":"L","px":0.70236},{"w":"?","k":"H","px":0.7068},{"w":"?","k":"L","px":0.7015},{"w":"?","k":"H","px":0.70431},{"w":"?","k":"L","px":0.69622},{"w":"?","k":"H","px":0.69975},{"w":"?","k":"L","px":0.69542},{"w":"?","k":"H","px":0.70246}],"shape":"-","ratios":{}},"USDCAD":{"valid":false,"verdict":"TIDAK SAH \u2014 tiada kitaran lulus (skor maks 0)","pivots":13,"last":1.39974,"trend":"TURUN","change_pct":-0.1,"waves":[{"w":"?","k":"H","px":1.40452},{"w":"?","k":"L","px":1.39991},{"w":"?","k":"H","px":1.40554},{"w":"?","k":"L","px":1.40062},{"w":"?","k":"H","px":1.40686},{"w":"?","k":"L","px":1.39706},{"w":"?","k":"H","px":1.40147},{"w":"?","k":"L","px":1.39421},{"w":"?","k":"H","px":1.39968},{"w":"?","k":"L","px":1.39504},{"w":"?","k":"H","px":1.40143},{"w":"?","k":"L","px":1.39299},{"w":"?","k":"H","px":1.40056}],"shape":"-","ratios":{}},"NZDUSD":{"valid":false,"verdict":"TIDAK SAH \u2014 tiada kitaran lulus (skor maks 0)","pivots":20,"last":0.5601,"trend":"TURUN","change_pct":-1.75,"waves":[{"w":"?","k":"H","px":0.57071},{"w":"?","k":"L","px":0.567},{"w":"?","k":"H","px":0.57045},{"w":"?","k":"L","px":0.56847},{"w":"?","k":"H","px":0.57076},{"w":"?","k":"L","px":0.55854},{"w":"?","k":"H","px":0.5618},{"w":"?","k":"L","px":0.55955},{"w":"?","k":"H","px":0.56382},{"w":"?","k":"L","px":0.56071},{"w":"?","k":"H","px":0.56515},{"w":"?","k":"L","px":0.56088},{"w":"?","k":"H","px":0.56454},{"w":"?","k":"L","px":0.56027},{"w":"?","k":"H","px":0.56316},{"w":"?","k":"L","px":0.55818},{"w":"?","k":"H","px":0.56456},{"w":"?","k":"L","px":0.56164},{"w":"?","k":"H","px":0.56576},{"w":"?","k":"L","px":0.56029}],"shape":"-","ratios":{}}};
+var NAMES = {XAUUSD:"Emas / Gold",XAGUSD:"Perak / Silver",BTCUSD:"Bitcoin",EURUSD:"Euro / Dolar",GBPUSD:"Pound / Dolar",USDJPY:"Dolar / Yen",AUDUSD:"Aussie / Dolar",USDCAD:"Dolar / Loonie",NZDUSD:"Kiwi / Dolar"};
+var IMPULSE = ["0","1","2","3","4","5"];
+
+function grade(v){
+  if(!v.valid) return {cls:"x", txt:"✕ BELUM SAH"};
+  var m = /grade ([ABC])/.exec(v.verdict||"");
+  var g = m ? m[1] : "C";
+  return {cls:g.toLowerCase(), txt:"GRED "+g};
+}
+function score(v){
+  var m = /\(grade [ABC], (\d+)\/100\)/.exec(v.verdict||"") || /(\d+)\/100/.exec(v.verdict||"");
+  return m ? m[1] : "—";
+}
+function render(){
+  var host = document.getElementById("cards");
+  var order = ["XAUUSD","XAGUSD","BTCUSD","EURUSD","GBPUSD","USDJPY","AUDUSD","USDCAD","NZDUSD"];
+  order.forEach(function(p){
+    var v = DATA[p]; if(!v) return;
+    var g = grade(v);
+    var dirCls = v.trend === "NAIK" ? "trend-up" : "trend-down";
+    var waveHtml = (v.waves||[]).map(function(w){
+      var isImp = IMPULSE.indexOf(w.w) >= 0;
+      return '<span class="w '+(isImp?'imp':'cor')+'">'+w.w+' '+w.k+' '+w.px+'</span>';
+    }).join("") || '<span class="w">tiada kitaran berlabel</span>';
+    var r = v.ratios || {};
+    var ratioRow = (r.r2 !== undefined) ? '<div class="row"><span>Ratio Fibonacci</span><b>W2 '+r.r2+' · W3 '+r.r3+'x · W4 '+r.r4+' · W5 '+r.r5+'x</b></div>' : "";
+    var shapeRow = (v.shape && v.shape !== "-") ? '<div class="row"><span>Bentuk koreksi</span><b>'+v.shape+'</b></div>' : "";
+    var gradeRow = v.valid ? '<div class="row"><span>Skor struktur</span><b>'+score(v)+'/100</b></div>' : "";
+    var noteTxt = v.valid
+      ? "Kitaran 8 gelombang sah. Guna untuk tahu fasa trend — entry tetap guna SMC/ICT (OB, FVG, sweep)."
+      : "Belum membentuk kitaran 8 gelombang yang sah pada H1. Tunggu struktur matang sebelum rujuk Elliot. Guna SMC/ICT untuk bacaan semasa.";
+    host.insertAdjacentHTML("beforeend",
+      '<div class="card '+(v.valid?"ok":"no")+'">'
+      +'<div class="chead"><div><div class="pair">'+p+'</div><div class="name">'+(NAMES[p]||"")+'</div></div>'
+      +'<span class="grade '+g.cls+'">'+g.txt+'</span></div>'
+      +'<div class="row"><span>Harga terkini</span><b>'+v.last+'</b></div>'
+      +'<div class="row"><span>Arah 300 bar</span><b class="'+dirCls+'">'+v.trend+' '+(v.change_pct>0?"+":"")+v.change_pct+'%</b></div>'
+      +'<div class="row"><span>Status struktur</span><b>'+(v.valid?'<span class="badge live">● SAH</span>':'<span class="badge wait">● MENUNGGU</span>')+'</b></div>'
+      + gradeRow + shapeRow + ratioRow
+      +'<div class="waves">'+waveHtml+'</div>'
+      +'<div class="note">'+noteTxt+'</div>'
+      +'</div>');
+  });
+}
+render();
+</script>
+</body>
+</html>
