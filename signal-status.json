@@ -1089,8 +1089,10 @@
    "entry_at": "2026-11-05T15:21:00+08:00"
   },
   "AUDUSD_20261105_145945": {
-   "status": "pending"
+   "status": "expired",
+   "closed": "2026-11-05T16:35:03+08:00",
+   "note": "lifecycle:expired"
   }
  },
- "updated": "2026-11-05T16:30:02+08:00"
+ "updated": "2026-11-05T16:35:03+08:00"
 }
