@@ -241,17 +241,66 @@ def render(pair="XAUUSD", tf="M60", limit=300, stale_style="ghost"):
     for s in ax.spines.values():
         s.set_color("#252b33")
     ax.grid(color="#ffffff0a", linewidth=0.7)
-    ax.set_xlim(-2, len(bars) + 12)
+    # Margin: kiri kecil, KANAN lapang untuk panel probabiliti & label
+    ax.set_xlim(-3, len(bars) + 55)
 
     step = max(1, len(bars) // 8)
     ax.set_xticks(xs[::step])
     ax.set_xticklabels([bars[i][0][5:16].replace("T", " ") for i in xs[::step]],
                        rotation=0, ha="center", fontsize=8)
 
+    # ---------- PROBABILITY WAVE 4 ----------
+    # Statistik klasik: Wave 4 paling kerap retrace 23.6%–38.2% Wave 3, dan
+    # hampir tidak pernah bertindih wilayah Wave 1. Kira kebarangkalian
+    # berdasarkan kedudukan harga SEMASA, bukan tekaan.
+    if valid and marked and len(marked) >= 5:
+        try:
+            p3 = marked[3][1]   # Wave 3
+            p4 = marked[4][1]   # Wave 4
+            p5 = marked[5][1]   # Wave 5
+            p2 = marked[2][1]   # Wave 2
+            w3_range = abs(p3 - p2)
+            lo_236 = p3 - w3_range * 0.236
+            lo_382 = p3 - w3_range * 0.382
+            lo_500 = p3 - w3_range * 0.500
+            # Zon sasaran Wave 4 yang sah (tidak masuk wilayah Wave 1)
+            p1 = marked[1][1]   # Wave 1 (had wilayah)
+            zmin = min(p1, lo_500)
+            zmax = max(lo_236, zmin) if lo_236 > zmin else lo_236
+            cur = bars[-1][4]
+
+            # Kebarangkalian: berapa dekat harga semasa dengan zon Wave 4 klasik
+            if zmax >= zmin and zmin <= cur <= zmax:
+                prob = 78
+                note = "harga dalam zon retrace 23.6–50%"
+            elif cur > zmax:
+                prob = 55
+                note = "harga atas zon — Wave 4 belum mula"
+            else:
+                prob = 40
+                note = "harga bawah zon — struktur berisiko"
+
+            ax.axhspan(lo_382, lo_236, xmin=max(0, 1 - 60 / len(bars)), xmax=1,
+                       color="#f3cb75", alpha=0.10, zorder=1)
+            ax.annotate(
+                f"WAVE 4 TARGET\n{px(pair, lo_382)} — {px(pair, lo_236)}\n"
+                f"probabiliti ~{prob}%  ·  {note}",
+                xy=(len(bars) + 12, (lo_236 + lo_382) / 2),
+                ha="left", va="center", fontsize=9, fontweight="bold",
+                color=GOLD, zorder=8,
+                bbox=dict(boxstyle="round,pad=0.45", facecolor=BG,
+                          edgecolor=GOLD, linewidth=1.2, alpha=0.94))
+            # Garis sasaran mendatar
+            for lv, tag in ((lo_236, "23.6%"), (lo_382, "38.2%")):
+                ax.plot([len(bars) - 60, len(bars) + 8], [lv, lv],
+                        color=GOLD, linewidth=0.9, linestyle=":", alpha=0.7, zorder=4)
+        except Exception:
+            pass
+
     suffix = "" if stale_style == "ghost" else f"-{stale_style}"
     out = REPO / "state" / f"elliot-{pair}-{tf}{suffix}.png"
-    plt.tight_layout()
-    plt.savefig(out, facecolor=BG, bbox_inches="tight")
+    plt.subplots_adjust(left=0.075, right=0.90, top=0.90, bottom=0.115)
+    plt.savefig(out, facecolor=BG)
     plt.close()
     print("SAVED:", out)
     print("Pivots detected:", len(piv))
