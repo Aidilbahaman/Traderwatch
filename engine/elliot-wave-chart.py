@@ -80,7 +80,27 @@ def zigzag(bars, pct=0.6):
             move = abs(c[1] - last[1]) / last[1] * 100
             if move >= pct:
                 cleaned.append(c)
-    return cleaned
+    # Penapis akhir: pastikan GILIRAN H/L (setiap pivot bertukar jenis) dan
+    # setiap gelombang ada jarak bar minimum. ZigZag naif sering hasilkan
+    # H-H atau L-L berturutan, yang menjadikan "gelombang" palsu.
+    min_gap = 3
+    out = []
+    for c in cleaned:
+        if not out:
+            out.append(c)
+            continue
+        last = out[-1]
+        if c[2] == last[2]:
+            # Jenis sama: kekalkan yang lebih ekstrem sahaja
+            if (c[2] == "H" and c[1] > last[1]) or (c[2] == "L" and c[1] < last[1]):
+                out[-1] = c
+            continue
+        # Jenis berbeza: terima hanya kalau jarak bar cukup
+        if (c[0] - last[0]) >= min_gap:
+            out.append(c)
+        # Kalau terlalu rapat, abaikan pivot ini sepenuhnya (jangan ganti)
+        # supaya giliran H/L kekal betul.
+    return out
 
 
 # Validasi Elliot Wave (8 gelombang + Fibonacci) dari modul elliot_rules
@@ -101,7 +121,7 @@ def render(pair="XAUUSD", tf="M60", limit=300):
         print(f"Tiada bar untuk {pair} {tf}")
         return None
 
-    piv = zigzag(bars, pct=0.2)
+    piv = zigzag(bars, pct=0.3)
     marked, verdict, detail = label_waves(piv, validate=True)
     valid = bool(verdict) and verdict.startswith("SAH")
 

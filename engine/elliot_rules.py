@@ -26,6 +26,35 @@ def _near(x, targets, tol=0.12):
     return any(abs(x - t) <= tol for t in targets)
 
 
+# Jarak bar minimum antara pivot supaya "gelombang" ada masa sebenar.
+# H1: 1 bar = 1 jam. Gelombang Elliot tidak boleh selesai dalam 1-2 bar
+# apabila gelombang lain ambil 50 bar — itu bunyi (noise), bukan struktur.
+# Jarak bar minimum. Gelombang utama (0->1, 2->3, 4->5) perlu masa;
+# sub-gelombang kecil (1->2, 3->4) boleh lebih pendek. Kajian teori:
+# gelombang 1 dan 3 biasanya paling memakan masa dalam kitaran impulse.
+MIN_BARS_MAIN = 3     # gelombang 1, 3, 5
+MIN_BARS_SUB = 2      # gelombang 2, 4, dan B
+
+
+def _time_ok(p):
+    """True kalau setiap gelombang ada jarak masa munasabah.
+
+    Tanpa semakan ini, ZigZag pada H1 boleh tanda gelombang "1 jam" sebagai
+    struktur Elliot — mustahil kerana gelombang lain mengambil berpuluh bar.
+    Gelombang impulse utama perlu >= MIN_BARS_MAIN bar; sub-gelombang >= MIN_BARS_SUB.
+    """
+    idx = [x[0] for x in p[:9]]
+    # (gelombang, minimum bar): 0->1 (W1), 1->2 (W2), 2->3 (W3), 3->4 (W4), 4->5 (W5), 5->6 (A), 6->7 (B), 7->8 (C)
+    req = [MIN_BARS_MAIN, MIN_BARS_SUB, MIN_BARS_MAIN, MIN_BARS_SUB,
+           MIN_BARS_MAIN, MIN_BARS_SUB, MIN_BARS_SUB, MIN_BARS_SUB]
+    for i in range(1, len(idx)):
+        gap = idx[i] - idx[i - 1]
+        need = req[i - 1]
+        if gap < need:
+            return False, f"gelombang {i-1}->{i} hanya {gap} bar (perlu {need})"
+    return True, "jarak masa munasabah"
+
+
 def _hard_rules(p, up):
     """4 peraturan WAJIB Elliot. Return (ok, sebab).
 
@@ -158,6 +187,9 @@ def score_cycle(pivots, start):
         return -1, "pivot tidak cukup untuk 8 gelombang", None, {}
     win = pivots[start:start + 9]
     up = win[0][2] == "L"
+    ok, why = _time_ok(win)
+    if not ok:
+        return -1, f"masa: {why}", up, {}
     ok, why = _hard_rules(win, up)
     if not ok:
         return -1, why, up, {}
