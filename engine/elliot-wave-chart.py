@@ -180,7 +180,7 @@ def render(pair="XAUUSD", tf="M60", limit=300):
         zhi = max(b[2] for b in bars[-40:])
         ax.axhspan(zlo, zhi, xmin=max(0, 1 - 40 / len(bars)), xmax=1,
                    color=BLUE, alpha=0.07, zorder=1)
-        ax.annotate(f"ZON PEMBENTUKAN\n{zlo:,.2f} — {zhi:,.2f}",
+        ax.annotate(f"ZON PEMBENTUKAN\n{px(pair, zlo)} — {px(pair, zhi)}",
                     xy=(len(bars) - 20, zhi), xytext=(len(bars) - 20, zhi),
                     ha="center", va="bottom", fontsize=9.5, fontweight="bold",
                     color=BLUE, zorder=7,
@@ -241,8 +241,12 @@ def render(pair="XAUUSD", tf="M60", limit=300):
     if detail:
         print("  Fib:", " | ".join(detail.get("fib", [])))
         print("  Bentuk:", detail.get("shape_note", "-"))
-    for (ix, iy, kind, lab) in marked:
-        print(f"  Wave {lab}: {kind} @ {iy:,.2f} (bar {ix})")
+    if show_formation:
+        zlo = min(b[3] for b in bars[-40:]); zhi = max(b[2] for b in bars[-40:])
+        print(f"  [FASA PEMBENTUKAN] zon {px(pair, zlo)} — {px(pair, zhi)} · harga {px(pair, bars[-1][4])}")
+    else:
+        for (ix, iy, kind, lab) in marked:
+            print(f"  Wave {lab}: {kind} @ {iy:,.2f} (bar {ix})")
     return out
 
 
