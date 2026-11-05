@@ -114,7 +114,9 @@ _impulse_ok = None  # digantikan oleh _er
 label_waves = _er.label_waves
 
 
-def render(pair="XAUUSD", tf="M60", limit=300):
+def render(pair="XAUUSD", tf="M60", limit=300, stale_style="ghost"):
+    """stale_style: "none" (zon sahaja) · "ghost" (label pudar + masa) ·
+    "extend" (label penuh + garis sambung ke harga semasa)."""
     """tf lalai M60 (H1): ujian empirik 9 pair -> 78% kitaran sah, tertinggi."""
     bars = load_bars(pair, tf, limit)
     if not bars:
@@ -150,37 +152,52 @@ def render(pair="XAUUSD", tf="M60", limit=300):
     stale = (detail or {}).get("staleness_bars", 0) if valid else 999
     show_formation = (not valid) or stale > 12
 
-    # Wave zigzag line + labels
-    if marked and not show_formation:
+    # MOD D (stale_style="ghost"): tunjuk label gelombang tetapi dipudarkan
+    # dengan tanda masa, supaya struktur sejarah nampak tanpa mengelirukan.
+    # MOD E (stale_style="extend"): tunjuk label penuh + sambungan garis ke harga semasa.
+    if marked and (not show_formation or stale_style in ("ghost", "extend")):
+        ghost = show_formation and stale_style == "ghost"
+        line_col = "#6b6250" if ghost else GOLD
+        lab_col = "#8a7f66" if ghost else GOLD
+        lw = 1.4 if ghost else 2.0
+        alpha = 0.55 if ghost else 1.0
         wx = [p[0] for p in marked]
         wy = [p[1] for p in marked]
-        ax.plot(wx, wy, color=GOLD, linewidth=2.0, marker="o",
-                markersize=7, markerfacecolor=GOLD, markeredgecolor=BG,
-                markeredgewidth=1.5, zorder=5, label="Elliot Wave structure")
+
+        # MOD E: sambung garis dari pivot terakhir ke harga semasa
+        if show_formation and stale_style == "extend":
+            wx = wx + [len(bars) - 1]
+            wy = wy + [c[-1]]
+
+        ax.plot(wx, wy, color=line_col, linewidth=lw, linestyle="--" if ghost else "-",
+                marker="o", markersize=6 if ghost else 7, markerfacecolor=BG,
+                markeredgecolor=line_col, markeredgewidth=1.4, zorder=5, alpha=alpha)
         for (ix, iy, kind, lab) in marked:
-            color = GOLD
             ax.annotate(lab, (ix, iy), textcoords="offset points",
                         xytext=(0, 14 if kind == "H" else -20),
-                        ha="center", fontsize=13, fontweight="bold",
-                        color=color, zorder=6,
-                        bbox=dict(boxstyle="round,pad=0.28", facecolor=BG,
-                                  edgecolor=GOLD, linewidth=1.1, alpha=0.92))
+                        ha="center", fontsize=12 if ghost else 13, fontweight="bold",
+                        color=lab_col, zorder=6, alpha=alpha,
+                        bbox=dict(boxstyle="round,pad=0.26", facecolor=BG,
+                                  edgecolor=lab_col, linewidth=1.0, alpha=0.9))
+        if ghost:
+            ax.annotate(f"struktur {stale} jam lalu",
+                        xy=(wx[-1], wy[-1]), xytext=(6, -26),
+                        textcoords="offset points", fontsize=9,
+                        color="#8a7f66", style="italic", zorder=7)
 
-    # FASA PEMBENTUKAN: plot swing line tanpa nombor gelombang + zon
+    # Zon harga semasa (dipapar untuk semua mod bila stale)
     if show_formation and piv:
-        # Garis swing terkini (30 bar terakhir) tanpa label gelombang
         recent = [p for p in piv if p[0] >= len(bars) - 40]
-        if len(recent) >= 2:
+        if len(recent) >= 2 and stale_style != "extend":
             ax.plot([p[0] for p in recent], [p[1] for p in recent],
                     color=BLUE, linewidth=1.8, linestyle="--", alpha=0.75,
                     marker="o", markersize=5, markerfacecolor=BG,
                     markeredgecolor=BLUE, markeredgewidth=1.6, zorder=5)
-        # Zon harga terkini (40 bar)
         zlo = min(b[3] for b in bars[-40:])
         zhi = max(b[2] for b in bars[-40:])
         ax.axhspan(zlo, zhi, xmin=max(0, 1 - 40 / len(bars)), xmax=1,
                    color=BLUE, alpha=0.07, zorder=1)
-        ax.annotate(f"ZON PEMBENTUKAN\n{px(pair, zlo)} — {px(pair, zhi)}",
+        ax.annotate(f"ZON SEMASA\n{px(pair, zlo)} — {px(pair, zhi)}",
                     xy=(len(bars) - 20, zhi), xytext=(len(bars) - 20, zhi),
                     ha="center", va="bottom", fontsize=9.5, fontweight="bold",
                     color=BLUE, zorder=7,
@@ -231,7 +248,8 @@ def render(pair="XAUUSD", tf="M60", limit=300):
     ax.set_xticklabels([bars[i][0][5:16].replace("T", " ") for i in xs[::step]],
                        rotation=0, ha="center", fontsize=8)
 
-    out = REPO / "state" / f"elliot-{pair}-{tf}.png"
+    suffix = "" if stale_style == "ghost" else f"-{stale_style}"
+    out = REPO / "state" / f"elliot-{pair}-{tf}{suffix}.png"
     plt.tight_layout()
     plt.savefig(out, facecolor=BG, bbox_inches="tight")
     plt.close()
