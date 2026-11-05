@@ -249,51 +249,102 @@ def render(pair="XAUUSD", tf="M60", limit=300, stale_style="ghost"):
     ax.set_xticklabels([bars[i][0][5:16].replace("T", " ") for i in xs[::step]],
                        rotation=0, ha="center", fontsize=8)
 
-    # ---------- PROBABILITY WAVE 4 ----------
-    # Statistik klasik: Wave 4 paling kerap retrace 23.6%–38.2% Wave 3, dan
-    # hampir tidak pernah bertindih wilayah Wave 1. Kira kebarangkalian
-    # berdasarkan kedudukan harga SEMASA, bukan tekaan.
-    if valid and marked and len(marked) >= 5:
+    # ---------- PROBABILITY GELOMBANG SETERUSNYA ----------
+    # Kira sasaran Fibonacci untuk gelombang YANG SEDANG DIDAGANGKAN,
+    # bukan hanya Wave 4. Setiap pair ada fasa berbeza:
+    #   - Dalam impulse (0-5)   -> sasaran gelombang seterusnya
+    #   - Selepas Wave 5        -> sasaran koreksi A/B/C
+    #   - Fasa pembentukan      -> sasaran dari swing terakhir
+    if marked and len(marked) >= 3:
         try:
-            p3 = marked[3][1]   # Wave 3
-            p4 = marked[4][1]   # Wave 4
-            p5 = marked[5][1]   # Wave 5
-            p2 = marked[2][1]   # Wave 2
-            w3_range = abs(p3 - p2)
-            lo_236 = p3 - w3_range * 0.236
-            lo_382 = p3 - w3_range * 0.382
-            lo_500 = p3 - w3_range * 0.500
-            # Zon sasaran Wave 4 yang sah (tidak masuk wilayah Wave 1)
-            p1 = marked[1][1]   # Wave 1 (had wilayah)
-            zmin = min(p1, lo_500)
-            zmax = max(lo_236, zmin) if lo_236 > zmin else lo_236
             cur = bars[-1][4]
+            piv_pts = [m[1] for m in marked]
+            labs = [m[3] for m in marked]
+            panel = None
 
-            # Kebarangkalian: berapa dekat harga semasa dengan zon Wave 4 klasik
-            if zmax >= zmin and zmin <= cur <= zmax:
-                prob = 78
-                note = "harga dalam zon retrace 23.6–50%"
-            elif cur > zmax:
-                prob = 55
-                note = "harga atas zon — Wave 4 belum mula"
-            else:
-                prob = 40
-                note = "harga bawah zon — struktur berisiko"
+            # Fasa impulse: label berakhir 0-5 -> sasaran Wave 4/5
+            if labs[-1] in ("2", "3", "4") and len(piv_pts) >= 4:
+                # Gelombang semasa = index terakhir
+                p1, p2, p3 = piv_pts[1], piv_pts[2], piv_pts[3]
+                w1 = abs(p1 - piv_pts[0])
+                w3 = abs(p3 - p2)
+                if labs[-1] == "2":
+                    # Sasaran Wave 3
+                    t1, t2 = p2 + w1 * 1.618, p2 + w1 * 2.618
+                    title = "SASARAN WAVE 3"
+                    base = 72
+                    note = "Wave 3 sambungan 1.618-2.618x W1"
+                elif labs[-1] == "3":
+                    # Sasaran Wave 4 (retrace W3)
+                    t1, t2 = p3 - w3 * 0.382, p3 - w3 * 0.236
+                    title = "SASARAN WAVE 4"
+                    base = 78
+                    note = "retrace 23.6-38.2% Wave 3"
+                else:
+                    # Sasaran Wave 5
+                    t1, t2 = p3 + w1 * 0.618, p3 + w1 * 1.0
+                    title = "SASARAN WAVE 5"
+                    base = 65
+                    note = "0.618-1.0x W1"
+                panel = (title, t1, t2, base, note)
 
-            ax.axhspan(lo_382, lo_236, xmin=max(0, 1 - 60 / len(bars)), xmax=1,
-                       color="#f3cb75", alpha=0.10, zorder=1)
-            ax.annotate(
-                f"WAVE 4 TARGET\n{px(pair, lo_382)} — {px(pair, lo_236)}\n"
-                f"probabiliti ~{prob}%  ·  {note}",
-                xy=(len(bars) + 12, (lo_236 + lo_382) / 2),
-                ha="left", va="center", fontsize=9, fontweight="bold",
-                color=GOLD, zorder=8,
-                bbox=dict(boxstyle="round,pad=0.45", facecolor=BG,
-                          edgecolor=GOLD, linewidth=1.2, alpha=0.94))
-            # Garis sasaran mendatar
-            for lv, tag in ((lo_236, "23.6%"), (lo_382, "38.2%")):
-                ax.plot([len(bars) - 60, len(bars) + 8], [lv, lv],
-                        color=GOLD, linewidth=0.9, linestyle=":", alpha=0.7, zorder=4)
+            # Fasa koreksi A-B-C
+            elif labs[-1] in ("A", "B", "C") and len(piv_pts) >= 2:
+                p5 = piv_pts[-2] if labs[-1] == "A" else piv_pts[0]
+                last_lab = labs[-1]
+                lw = abs(piv_pts[-1] - piv_pts[-2])
+                if last_lab == "A":
+                    t1, t2 = piv_pts[-1] + lw * 0.382, piv_pts[-1] + lw * 0.618
+                    title = "SASARAN WAVE B"
+                elif last_lab == "B":
+                    t1, t2 = piv_pts[-1] - lw * 0.618, piv_pts[-1] - lw * 1.0
+                    title = "SASARAN WAVE C"
+                else:
+                    # C tamat -> kitaran baharu
+                    t1, t2 = piv_pts[-1], piv_pts[-1] * 1.0
+                    title = "SASARAN KITARAN BAHARU"
+                panel = (title, min(t1, t2), max(t1, t2), 60, "Fibonacci koreksi")
+
+            # Fasa pembentukan (label pudar) -> sasaran dari swing terakhir
+            if panel is None and show_formation:
+                recent = [p for p in piv if p[0] >= len(bars) - 60]
+                if len(recent) >= 2:
+                    sw_lo = recent[-1][1]
+                    sw_hi = max(p[1] for p in recent)
+                    rng = abs(sw_hi - sw_lo) or 1e-9
+                    t1, t2 = sw_hi - rng * 0.382, sw_hi - rng * 0.236
+                    panel = ("SASARAN RETRACE", min(t1, t2), max(t1, t2), 55,
+                             "dari swing terkini")
+
+            if panel:
+                title, t1, t2, base, note = panel
+                lo, hi = min(t1, t2), max(t1, t2)
+                # Laraskan kebarangkalian ikut jarak harga semasa ke zon
+                span = (hi - lo) or 1e-9
+                if lo <= cur <= hi:
+                    prob = base + 10
+                    pos = "harga DALAM zon"
+                elif abs(cur - lo) < span:
+                    prob = base
+                    pos = "harga hampir zon"
+                else:
+                    prob = max(30, base - 20)
+                    pos = "harga jauh dari zon"
+
+                ax.axhspan(lo, hi, xmin=max(0, 1 - 60 / len(bars)), xmax=1,
+                           color=GOLD, alpha=0.10, zorder=1)
+                ax.annotate(
+                    f"{title}\n{px(pair, lo)} — {px(pair, hi)}\n"
+                    f"probabiliti ~{prob}%  ·  {note}\n{pos}",
+                    xy=(len(bars) + 12, (lo + hi) / 2),
+                    ha="left", va="center", fontsize=8.5, fontweight="bold",
+                    color=GOLD, zorder=8,
+                    bbox=dict(boxstyle="round,pad=0.45", facecolor=BG,
+                              edgecolor=GOLD, linewidth=1.2, alpha=0.94))
+                for lv in (lo, hi):
+                    ax.plot([len(bars) - 60, len(bars) + 8], [lv, lv],
+                            color=GOLD, linewidth=0.9, linestyle=":", alpha=0.7,
+                            zorder=4)
         except Exception:
             pass
 
