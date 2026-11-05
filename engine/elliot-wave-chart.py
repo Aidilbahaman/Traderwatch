@@ -83,96 +83,15 @@ def zigzag(bars, pct=0.6):
     return cleaned
 
 
-def _impulse_ok(p):
-    """Sahkan 5 gelombang impulse (0,1,2,3,4,5).
+# Validasi Elliot Wave (8 gelombang + Fibonacci) dari modul elliot_rules
+import importlib.util as _ilu
+from pathlib import Path as _P
+_spec = _ilu.spec_from_file_location("elliot_rules", "/home/ubuntu/web/Traderwatch-repo/engine/elliot_rules.py")
+_er = _ilu.module_from_spec(_spec)
+_spec.loader.exec_module(_er)
 
-    Peraturan Elliot yang diuji:
-      R1: Wave 2 tidak boleh melebihi permulaan Wave 1 (retrace < 100%)
-      R2: Wave 3 mesti melebihi hujung Wave 1 (bukan terpendek)
-      R3: Wave 4 tidak boleh masuk wilayah Wave 1
-      R4: Wave 3 tidak boleh jadi gelombang terpendek antara 1,3,5
-      R5: Selang-seli — Wave 2 dan Wave 4 berbeza jenis (zigzag vs flat)
-    """
-    if len(p) < 6:
-        return False, "pivot tidak cukup"
-    prices = [x[1] for x in p[:6]]
-    kinds = [x[2] for x in p[:6]]
-    # Arah: naik jika 0 High -> 1 Low, atau turun jika 0 Low -> 1 High
-    up = kinds[0] == "H"
-    w0, w1, w2, w3, w4, w5 = prices
-
-    if up:
-        # impulse naik: 0 H(top awal) -> 1 L -> 2 H -> 3 L -> 4 H -> 5 L? 
-        # Sebenarnya untuk impulse naik: 0=L(rendah),1=H,2=L,3=H,4=L,5=H
-        pass
-
-    # Guna pendekatan arah-agnostik: tentukan dari jenis pivot
-    if kinds[0] == "L":
-        # Impulse NAIK: 0=L,1=H,2=L,3=H,4=L,5=H
-        p0, p1, p2, p3, p4, p5 = prices
-        # R1: Wave 2 low tidak jatuh bawah Wave 0 low
-        if p2 <= p0:
-            return False, "R1: Wave 2 melebihi permulaan Wave 1"
-        # R2: Wave 3 high mesti atas Wave 1 high
-        if p3 <= p1:
-            return False, "R2: Wave 3 tidak melebihi hujung Wave 1"
-        # R3: Wave 4 low tidak masuk wilayah Wave 1 (p1)
-        if p4 <= p1:
-            return False, "R3: Wave 4 masuk wilayah Wave 1"
-        # R4: Wave 3 bukan terpendek antara 1,3,5
-        l1, l3, l5 = p1 - p0, p3 - p2, p5 - p4
-        if l3 <= l1 and l3 <= l5:
-            return False, "R4: Wave 3 gelombang terpendek"
-    else:
-        # Impulse TURUN: 0=H,1=L,2=H,3=L,4=H,5=L
-        p0, p1, p2, p3, p4, p5 = prices
-        if p2 >= p0:
-            return False, "R1: Wave 2 melebihi permulaan Wave 1"
-        if p3 >= p1:
-            return False, "R2: Wave 3 tidak melebihi hujung Wave 1"
-        if p4 >= p1:
-            return False, "R3: Wave 4 masuk wilayah Wave 1"
-        l1, l3, l5 = p0 - p1, p2 - p3, p4 - p5
-        if l3 <= l1 and l3 <= l5:
-            return False, "R4: Wave 3 gelombang terpendek"
-    return True, "impulse sah"
-
-
-def label_waves(pivots, validate=True):
-    """Label gelombang dengan validasi peraturan Elliot.
-
-    Cari tetingkap 6-pivot TERAKHIR yang lulus peraturan impulse.
-    Kalau tiada yang lulus, label dengan amaran "TIDAK SAH".
-    """
-    if not validate or len(pivots) < 6:
-        LABELS = ["0", "1", "2", "3", "4", "5", "A", "B", "C", "D", "E"]
-        return [(p[0], p[1], p[2], LABELS[i % len(LABELS)])
-                for i, p in enumerate(pivots)], None
-
-    # Cari tetingkap 6-pivot terakhir yang lulus
-    chosen, reason = None, None
-    for start in range(len(pivots) - 6, -1, -1):
-        win = pivots[start:start + 6]
-        ok, why = _impulse_ok(win)
-        if ok:
-            chosen, reason = win, why
-            break
-
-    out = []
-    if chosen:
-        LABELS = ["0", "1", "2", "3", "4", "5"]
-        for i, p in enumerate(chosen):
-            out.append((p[0], p[1], p[2], LABELS[i]))
-        # Pivot selepas impulse -> corrective A,B,C
-        tail = pivots[pivots.index(chosen[-1]) + 1:]
-        for i, p in enumerate(tail[:3]):
-            out.append((p[0], p[1], p[2], ["A", "B", "C"][i]))
-        return out, reason
-
-    # Tiada window sah: label semua dengan tanda amaran
-    LABELS = ["0", "1", "2", "3", "4", "5", "A", "B", "C", "D", "E"]
-    return ([(p[0], p[1], p[2], LABELS[i % len(LABELS)])
-             for i, p in enumerate(pivots)], "TIDAK SAH — tiada impulse 5-gelombang yang lulus peraturan")
+_impulse_ok = None  # digantikan oleh _er
+label_waves = _er.label_waves
 
 
 def render(pair="XAUUSD", tf="M15", limit=300):
@@ -183,7 +102,7 @@ def render(pair="XAUUSD", tf="M15", limit=300):
 
     piv = zigzag(bars, pct=0.2)
     marked, verdict = label_waves(piv, validate=True)
-    valid = bool(marked) and verdict in ("impulse sah",)
+    valid = bool(verdict) and verdict.startswith("SAH")
 
     xs = list(range(len(bars)))
     o = [b[1] for b in bars]
@@ -225,7 +144,7 @@ def render(pair="XAUUSD", tf="M15", limit=300):
     ax.annotate(px(pair, last), (len(bars) - 1, last), textcoords="offset points",
                 xytext=(8, 0), color=MUTED, fontsize=10, va="center")
 
-    ax.set_title(f"{pair} · {tf} · Elliot Wave structure (ZigZag auto)",
+    ax.set_title(f"{pair} · {tf} · Elliot Wave 8-gelombang (Fibonacci)",
                  color=TEXT, fontsize=17, fontweight="bold", pad=14, loc="left")
     ax.text(0, 1.012, f"{len(bars)} bar · {bars[0][0][:16]} → {bars[-1][0][:16]}",
             transform=ax.transAxes, color=MUTED, fontsize=10)
