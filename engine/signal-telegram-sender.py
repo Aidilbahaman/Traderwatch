@@ -440,7 +440,7 @@ def fmt(s):
               f"TP      {price_text(s, s['tp'])}   +{move_text(s, tp_p)}\n"
               f"R:R     1 : {rr:.1f}"
               "</pre>")
-    return (f"📡 <b>TRADERWATCH · MANUAL / MEMBER BROADCAST</b>\n"
+    return (f"📡 <b>TRADERWATCH {s['pair'].upper()} {('BUY' if s['side'] == 'BUY' else 'SELL')} — R:R 1:{rr:.1f}</b>\n"
             f"━━━━━━━━━━━━━━━━━━━━\n"
             f"{arrow} <b>{s['pair']}</b> · {s['timeframe']}\n\n"
             f"{levels}\n"
