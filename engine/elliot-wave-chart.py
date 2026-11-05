@@ -94,7 +94,8 @@ _impulse_ok = None  # digantikan oleh _er
 label_waves = _er.label_waves
 
 
-def render(pair="XAUUSD", tf="M15", limit=300):
+def render(pair="XAUUSD", tf="M60", limit=300):
+    """tf lalai M60 (H1): ujian empirik 9 pair -> 78% kitaran sah, tertinggi."""
     bars = load_bars(pair, tf, limit)
     if not bars:
         print(f"Tiada bar untuk {pair} {tf}")
@@ -193,5 +194,5 @@ def render(pair="XAUUSD", tf="M15", limit=300):
 
 if __name__ == "__main__":
     pair = sys.argv[1] if len(sys.argv) > 1 else "XAUUSD"
-    tf = sys.argv[2] if len(sys.argv) > 2 else "M15"
+    tf = sys.argv[2] if len(sys.argv) > 2 else "M60"
     render(pair, tf)
