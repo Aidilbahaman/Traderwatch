@@ -214,14 +214,42 @@ def label_waves(pivots, validate=True, min_score=50):
                  for i, p in enumerate(pivots)],
                 "TIDAK SAH — pivot tidak cukup untuk 8 gelombang (perlu 9)", {})
 
+    # Pilih kitaran TERBAIK, tetapi beri penalti pada kitaran purba:
+    # kitaran yang tamat jauh dari harga terkini kurang berguna untuk dagang.
+    # Penalty 0.4 mata setiap bar jarak (kitaran tamat 47 bar lalu = -19 mata).
+    newest_bar = pivots[-1][0]
     best = (-1, None, None, {})
     for start in range(len(pivots) - 9, -1, -1):
         sc, why, up, detail = score_cycle(pivots, start)
-        if sc > best[0]:
-            best = (sc, start, why, detail)
+        if sc < 0:
+            continue
+        end_bar = pivots[start + 8][0]
+        staleness = newest_bar - end_bar
+        adj = sc - min(30, staleness * 0.4)
+        if adj > best[0]:
+            best = (adj, start, why, detail)
     sc, start, why, detail = best
+    if start is not None:
+        end_bar = pivots[start + 8][0]
+        detail = dict(detail or {})
+        detail["staleness_bars"] = newest_bar - end_bar
 
     if start is None or sc < min_score:
+        # Jatuh balik: label kitaran SEPARA dari 6 pivot TERAKHIR (impulse sahaja)
+        # supaya chart tetap berkaitan harga semasa, bukan kosong.
+        for st in range(len(pivots) - 6, -1, -1):
+            win = pivots[st:st + 6]
+            ok_h, _ = _hard_rules(win, win[0][2] == "L")
+            ok_t, _ = _time_ok(win)
+            if ok_h and ok_t:
+                out2 = [(p[0], p[1], p[2], ["0", "1", "2", "3", "4", "5"][i])
+                        for i, p in enumerate(win)]
+                tail = pivots[st + 6:st + 9]
+                for i, p in enumerate(tail):
+                    out2.append((p[0], p[1], p[2], ["A", "B", "C"][i]))
+                gap = pivots[-1][0] - win[-1][0]
+                return out2, (f"SEPARA — impulse 0-5 sah (koreksi belum lengkap), "
+                              f"tamat {gap} bar di belakang"), {"partial": True}
         return ([(p[0], p[1], p[2], "?") for p in pivots],
                 f"TIDAK SAH — {why or 'tiada kitaran lulus'} (skor maks {max(sc, 0)})",
                 detail)

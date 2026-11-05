@@ -144,8 +144,14 @@ def render(pair="XAUUSD", tf="M60", limit=300):
                                max(0.7, 0.7), max(abs(c[i] - o[i]), 1e-9),
                                facecolor=col, edgecolor=col, linewidth=0.3, alpha=0.85))
 
+    # Jika kitaran berlabel tamat jauh dari harga semasa, label gelombang
+    # mengelirukan. Ganti dengan paparan "FASA PEMBENTUKAN": tiada nombor
+    # gelombang, hanya zon harga terkini + arah belum selesai.
+    stale = (detail or {}).get("staleness_bars", 0) if valid else 999
+    show_formation = (not valid) or stale > 12
+
     # Wave zigzag line + labels
-    if marked:
+    if marked and not show_formation:
         wx = [p[0] for p in marked]
         wy = [p[1] for p in marked]
         ax.plot(wx, wy, color=GOLD, linewidth=2.0, marker="o",
@@ -160,23 +166,51 @@ def render(pair="XAUUSD", tf="M60", limit=300):
                         bbox=dict(boxstyle="round,pad=0.28", facecolor=BG,
                                   edgecolor=GOLD, linewidth=1.1, alpha=0.92))
 
+    # FASA PEMBENTUKAN: plot swing line tanpa nombor gelombang + zon
+    if show_formation and piv:
+        # Garis swing terkini (30 bar terakhir) tanpa label gelombang
+        recent = [p for p in piv if p[0] >= len(bars) - 40]
+        if len(recent) >= 2:
+            ax.plot([p[0] for p in recent], [p[1] for p in recent],
+                    color=BLUE, linewidth=1.8, linestyle="--", alpha=0.75,
+                    marker="o", markersize=5, markerfacecolor=BG,
+                    markeredgecolor=BLUE, markeredgewidth=1.6, zorder=5)
+        # Zon harga terkini (40 bar)
+        zlo = min(b[3] for b in bars[-40:])
+        zhi = max(b[2] for b in bars[-40:])
+        ax.axhspan(zlo, zhi, xmin=max(0, 1 - 40 / len(bars)), xmax=1,
+                   color=BLUE, alpha=0.07, zorder=1)
+        ax.annotate(f"ZON PEMBENTUKAN\n{zlo:,.2f} — {zhi:,.2f}",
+                    xy=(len(bars) - 20, zhi), xytext=(len(bars) - 20, zhi),
+                    ha="center", va="bottom", fontsize=9.5, fontweight="bold",
+                    color=BLUE, zorder=7,
+                    bbox=dict(boxstyle="round,pad=0.4", facecolor=BG,
+                              edgecolor=BLUE, linewidth=1.2, alpha=0.92))
+
     last = c[-1]
     ax.axhline(last, color=MUTED, linewidth=0.8, linestyle="--", alpha=0.6)
     ax.annotate(px(pair, last), (len(bars) - 1, last), textcoords="offset points",
                 xytext=(8, 0), color=MUTED, fontsize=10, va="center")
 
-    ax.set_title(f"{pair} · {tf} · Elliot Wave 8-gelombang (Fibonacci)",
+    ax.set_title(f"{pair} · {tf} · "
+                 + ("Fasa Pembentukan (kitaran baru)" if show_formation
+                    else "Elliot Wave 8-gelombang (Fibonacci)"),
                  color=TEXT, fontsize=17, fontweight="bold", pad=14, loc="left")
     ax.text(0, 1.012, f"{len(bars)} bar · {bars[0][0][:16]} → {bars[-1][0][:16]}",
             transform=ax.transAxes, color=MUTED, fontsize=10)
 
-    badge_col = GOLD if valid else RED
-    badge_txt = f"✔ {verdict}" if valid else f"⚠ {verdict}"
+    if show_formation:
+        badge_col = BLUE
+        badge_txt = ("[..] FASA PEMBENTUKAN - gelombang baru belum selesai"
+                     if valid else f"⚠ {verdict}")
+    else:
+        badge_col = GOLD
+        badge_txt = f"[OK] {verdict}"
     ax.text(0.995, 1.012, badge_txt, transform=ax.transAxes,
             color=badge_col, fontsize=10.5, fontweight="bold", ha="right")
 
     # Panel ratio Fibonacci (bila kitaran sah)
-    if valid and detail.get("ratios"):
+    if valid and not show_formation and detail.get("ratios"):
         r = detail["ratios"]
         shp = detail.get("shape", "-")
         info = (f"W2 {r.get('r2', 0):.3f}  ·  W3 {r.get('r3', 0):.3f}x  ·  "
