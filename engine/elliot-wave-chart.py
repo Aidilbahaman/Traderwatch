@@ -157,8 +157,11 @@ def render(pair="XAUUSD", tf="M60", limit=300, stale_style="ghost"):
     # MOD E (stale_style="extend"): tunjuk label penuh + sambungan garis ke harga semasa.
     if marked and (not show_formation or stale_style in ("ghost", "extend")):
         ghost = show_formation and stale_style == "ghost"
-        line_col = "#6b6250" if ghost else GOLD
-        lab_col = "#8a7f66" if ghost else GOLD
+        # Warna ikut JENIS gelombang (padan dengan caption mesej):
+        #   impulse 0-5 -> HIJAU (gelombang dorongan)
+        #   koreksi A-C -> MERAH (gelombang pembetulan)
+        # Mod ghost: pudarkan warna tetapi kekal hue yang betul.
+        line_col = GOLD
         lw = 1.4 if ghost else 2.0
         alpha = 0.55 if ghost else 1.0
         wx = [p[0] for p in marked]
@@ -173,12 +176,14 @@ def render(pair="XAUUSD", tf="M60", limit=300, stale_style="ghost"):
                 marker="o", markersize=6 if ghost else 7, markerfacecolor=BG,
                 markeredgecolor=line_col, markeredgewidth=1.4, zorder=5, alpha=alpha)
         for (ix, iy, kind, lab) in marked:
+            is_impulse = lab in ("0", "1", "2", "3", "4", "5")
+            base_col = GREEN if is_impulse else RED
             ax.annotate(lab, (ix, iy), textcoords="offset points",
                         xytext=(0, 14 if kind == "H" else -20),
                         ha="center", fontsize=12 if ghost else 13, fontweight="bold",
-                        color=lab_col, zorder=6, alpha=alpha,
+                        color=base_col, zorder=6, alpha=alpha,
                         bbox=dict(boxstyle="round,pad=0.26", facecolor=BG,
-                                  edgecolor=lab_col, linewidth=1.0, alpha=0.9))
+                                  edgecolor=base_col, linewidth=1.0, alpha=0.9))
         if ghost:
             ax.annotate(f"struktur {stale} jam lalu",
                         xy=(wx[-1], wy[-1]), xytext=(6, -26),
