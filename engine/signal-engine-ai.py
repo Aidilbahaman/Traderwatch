@@ -398,7 +398,7 @@ def decide(model, bars):
 
 def build_levels(pair, side, price, atr):
     pip = M.pip_of(pair)
-    # Get spread for symbol from smc_filter
+    # Dapatkan spread untuk rujukan
     try:
         import importlib.util as _il
         spec = _il.spec_from_file_location("smc", HERE / "smc_filter.py")
@@ -408,10 +408,10 @@ def build_levels(pair, side, price, atr):
     except Exception:
         spread_pips = 2.0
 
-    # SL floor: min(15 pip, 3x spread) atau 1.5 * ATR (mana lebih besar)
-    # Ini cegah EURUSD/JPY terlalu over-conservative
-    sl_min_pips = min(SCALP_MIN_SL_PIPS, spread_pips * SCALP_MIN_SL_SPREAD_MULT)
-    sl_dist = max(1.5 * atr, sl_min_pips * pip)
+    # Jarak SL dibesarkan: 2.5x ATR (sebelum ini 1.5x) supaya tidak cepat kena hit SL.
+    # Lantai minimum juga dikurangkan dari 15 pip kepada 8 pip (atau 3x spread).
+    sl_min_pips = min(8.0, spread_pips * SCALP_MIN_SL_SPREAD_MULT)
+    sl_dist = max(2.5 * atr, sl_min_pips * pip)
     tp_dist = sl_dist * SCALP_RR
     if side == "BUY":
         return price - sl_dist, price + tp_dist
