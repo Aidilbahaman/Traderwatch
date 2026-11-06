@@ -1098,7 +1098,9 @@
    "note": "lifecycle:expired"
   },
   "XAUUSD_20261106_173230": {
-   "status": "pending"
+   "status": "expired",
+   "closed": "2026-11-06T19:05:02+08:00",
+   "note": "lifecycle:expired"
   },
   "XAUUSD_20261106_173056": {
    "status": "tp",
@@ -1133,5 +1135,5 @@
    "entry_at": "2026-11-06T18:21:00+08:00"
   }
  },
- "updated": "2026-11-06T19:00:03+08:00"
+ "updated": "2026-11-06T19:05:02+08:00"
 }
