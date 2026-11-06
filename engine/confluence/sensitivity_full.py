@@ -34,14 +34,14 @@ from engine.confluence import pipeline as pl, backtest as bt           # noqa: E
 REPO = Path(__file__).resolve().parents[2]
 
 PAIRS = ["XAUUSD", "EURUSD", "GBPUSD", "USDJPY", "AUDUSD", "USDCAD", "NZDUSD"]
-THRESHOLDS = [0.15, 0.20, 0.25, 0.30, 0.35, 0.40]
+THRESHOLDS = [0.05, 0.10, 0.15, 0.20, 0.25, 0.30]
 STEPS = [10, 20, 30]
 IS_FRAC = 0.70
 EXPIRY_BARS = 16
 SLIPPAGE_POINTS = 1.0
 MIN_HISTORY = 300
 
-CONFIG_VERSION = "cf-sens-v1.0"
+CONFIG_VERSION = "cf-sens-v2.0-band"
 STRATEGY_VERSION = pl.STRATEGY_VERSION
 FEATURE_VERSION = pl.FEATURE_VERSION
 
@@ -61,9 +61,13 @@ def collect_pair(symbol, step):
     i = MIN_HISTORY
     last_exit_bar = -1
     coverage_seen = None
+    # Jalur = threshold terendah supaya SEMUA setup berarah dikumpul sekali;
+    # threshold lain ditapis kemudian atas pool yang sama.
+    band = min(THRESHOLDS)
     while i < len(bars) - EXPIRY_BARS - 1:
         try:
-            res = pl.analyze(symbol, bars=bars, i=i, tf_cache=cache)
+            res = pl.analyze(symbol, bars=bars, i=i, tf_cache=cache,
+                             direction_band=band)
         except Exception:
             i += step
             continue
@@ -131,7 +135,7 @@ def main():
 
     # Cache pool: pengumpulan ambil ~12 minit. Simpan supaya boleh ulang
     # penilaian tanpa kumpul semula.
-    cache_file = REPO / "state" / "cf_sensitivity_pool.json"
+    cache_file = REPO / "state" / "cf_sensitivity_pool_v2.json"
     fp = dataset_fingerprint()
     pools, coverage = {}, {}
     if cache_file.exists():

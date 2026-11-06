@@ -52,11 +52,20 @@ def build_setup(groups, bars, i, atr, direction):
         sl = rng.get("high", close + atr * 2) + atr * 0.25
         risk = max(sl - close, atr * 0.5)
         tp = close - risk * 2
-    valid = bool(g_ict["reason_codes"]) or g_st["score"] != 0
-    return {"valid": valid, "side": side if valid else None,
+    # Setup sentiasa disediakan bila ada arah — BIARKAN skor yang menentukan
+    # sama ada ia layak didagang (spec §1.5). Sebelum ini `valid` bergantung
+    # pada bukti ICT/structure, yang menyebabkan selection bias: hanya titik
+    # berskor tinggi ditandakan valid, jadi ujian threshold jadi tak bermakna.
+    #
+    # Kekalkan `has_zone_evidence` sebagai maklumat (bukan penapis keras) supaya
+    # gate dan analisis masih tahu berapa banyak bukti zon wujud.
+    has_zone = bool(g_ict["reason_codes"]) or g_st["score"] != 0
+    return {"valid": True, "side": side,
+            "has_zone_evidence": has_zone,
+            "zone_evidence_codes": list(g_ict["reason_codes"]),
             "entry": round(close, 8), "sl": round(sl, 8), "tp": round(tp, 8),
             "risk_reward": round(abs(tp - close) / max(abs(close - sl), 1e-9), 3),
-            "reason": "ICT/structure evidence" if valid else "tiada bukti zon"}
+            "reason": "zon ICT/structure" if has_zone else "tiada bukti zon (skor sahaja)"}
 
 
 def build_trigger(groups, bars, i):
@@ -83,7 +92,7 @@ def build_tf_cache(bars):
 
 
 def analyze(symbol, bars=None, i=None, spread_points=None, news_block=False,
-            tf_cache=None):
+            tf_cache=None, direction_band=None):
     """Analysis lengkap satu symbol. Pulangkan analysis run dict.
 
     tf_cache: dari build_tf_cache() — beri bila menganalisis banyak bar
@@ -107,7 +116,7 @@ def analyze(symbol, bars=None, i=None, spread_points=None, news_block=False,
     groups = build_groups(bars, i, atr, pivots, cut)
     reg = rg.classify(bars, i, atr, mtf_result=groups["mtf"],
                       quant_result=groups["quant"], news_block=news_block)
-    conf = sc.aggregate(groups)
+    conf = sc.aggregate(groups, band=direction_band)
 
     meta = ins.meta(symbol)
     prox = dc._median_spread(bars, i)

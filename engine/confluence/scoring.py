@@ -36,12 +36,15 @@ CORRELATED_PAIRS = [
 BANDS = {"bullish": 0.35, "bearish": -0.35}   # cadangan awal spec §1.5
 
 
-def aggregate(group_results):
+def aggregate(group_results, band=None):
     """Gabung hasil kumpulan jadi skor confluence.
 
     group_results: {"structure": {...}, "liquidity": {...}, ...}
     Setiap kumpulan: {score, direction, coverage, quality, evidence, reason_codes}
+    band: jalur arah (default BANDS["bullish"]). Boleh diturunkan untuk
+    kajian sensitiviti — JANGAN ubah default tanpa ujian.
     """
+    bull_band = BANDS["bullish"] if band is None else abs(band)
     active, missing = {}, []
     for name, w in WEIGHTS.items():
         g = group_results.get(name)
@@ -91,8 +94,8 @@ def aggregate(group_results):
     if conflict_score >= 0.4:
         codes.append("EVIDENCE_CONFLICT")
 
-    direction = ("BULLISH" if normalized >= BANDS["bullish"]
-                 else ("BEARISH" if normalized <= BANDS["bearish"] else "NEUTRAL"))
+    direction = ("BULLISH" if normalized >= bull_band
+                 else ("BEARISH" if normalized <= -bull_band else "NEUTRAL"))
 
     return {
         "normalized_score": normalized,
