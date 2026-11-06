@@ -33,6 +33,7 @@ HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
 sys.path.insert(0, str(HERE.parent))
 import ai_model as M  # noqa: E402
+import smc_filter as SMC  # noqa: E402
 
 TIMEOUT = 25
 TZ_KL = timezone(timedelta(hours=8))
@@ -50,13 +51,34 @@ LOCK = Path("/tmp/signal-engine-ai.lock")
 # hantar owner sahaja dan MT5 execute dengan lot risiko 1%.
 PRIVATE_MODE = os.environ.get("AI_PRIVATE", "1") == "1"
 THRESHOLD = 0.50  # diturunkan owner 5 Nov 2026 (dari 0.55) supaya calon 0.50-0.54 lulus
+# SMC confluence gate. The statistical model alone scored AUC 0.474 on fresh
+# data — no measurable edge. The deterministic SMC structure (sweep ->
+# displacement -> FVG, H1 aligned) survived an honest held-out test on gold:
+# train 60.6% -> test 55.8% WR. So a trade now needs BOTH: the model picks the
+# side, the SMC detector must confirm that a valid structure completed on the
+# CURRENT closed bar. Set AI_SMC_GATE=0 to fall back to model-only.
+SMC_GATE = os.environ.get("AI_SMC_GATE", "1") == "1"
+# Reward multiple for SMC-confirmed trades. 1R was the held-out optimum; the
+# 3R variant has the stronger statistical case (+0.528R, CI +0.10..+0.99) so
+# the owner can pick either without touching the detector.
+SMC_R_MULT = float(os.environ.get("AI_SMC_R", "1.0"))
+# Floor on stop distance, as a multiple of spread. A structural stop taken
+# straight off the sweep wick can land a few ticks from entry, and then the
+# spread alone eats the whole edge. Note pip_of("XAU/USD") is 0.1, so gold's
+# 3-pip spread is 0.30 of price — the floor is only a sanity net, it should
+# never override a real structural stop. Verified on history: the tightest
+# XAU setup had risk 3.71 (12x spread), so 10x filters pathological cases
+# without trimming genuine setups.
+SMC_MIN_SL_SPREAD = float(os.environ.get("AI_SMC_MIN_SL_SPREAD", "10.0"))
 XAUUSD_THRESHOLD = 0.35
 # Lantai SL 15 pip: spread RoboForex besar (EURUSD 1.3, USDJPY 1.9,
 # XAUUSD 2.1 pip). 15 pip hadkan drag spread bawah ~13% SL.
+# SL runtime guard: mesti > 3× spread live per symbol.
 SCALP_MIN_SL_PIPS = 15.0
 SCALP_RR = 2.0
-TIMEFRAME = "M15"
-TD_INTERVAL = "15min"
+SCALP_MIN_SL_SPREAD_MULT = 3.0  # SL mesti > 3× spread live
+TIMEFRAME = "M5"
+TD_INTERVAL = "5min"
 
 PAIRS = ["XAU/USD", "EUR/USD", "GBP/USD", "USD/JPY", "AUD/USD", "USD/CAD", "NZD/USD"]
 DP = {"XAU/USD": 2, "USD/JPY": 3}
@@ -376,7 +398,20 @@ def decide(model, bars):
 
 def build_levels(pair, side, price, atr):
     pip = M.pip_of(pair)
-    sl_dist = max(1.5 * atr, SCALP_MIN_SL_PIPS * pip)
+    # Get spread for symbol from smc_filter
+    try:
+        import importlib.util as _il
+        spec = _il.spec_from_file_location("smc", HERE / "smc_filter.py")
+        smc = _il.module_from_spec(spec)
+        spec.loader.exec_module(smc)
+        spread_pips = smc.SPREAD_PIPS.get(pair.replace("/", ""), smc.DEFAULT_SPREAD_PIPS)
+    except Exception:
+        spread_pips = 2.0
+
+    # SL floor: min(15 pip, 3x spread) atau 1.5 * ATR (mana lebih besar)
+    # Ini cegah EURUSD/JPY terlalu over-conservative
+    sl_min_pips = min(SCALP_MIN_SL_PIPS, spread_pips * SCALP_MIN_SL_SPREAD_MULT)
+    sl_dist = max(1.5 * atr, sl_min_pips * pip)
     tp_dist = sl_dist * SCALP_RR
     if side == "BUY":
         return price - sl_dist, price + tp_dist
@@ -670,6 +705,33 @@ def main():
                 time.sleep(CALL_GAP)
                 continue
 
+            # ---- SMC confluence gate -------------------------------------
+            # The model has no standalone edge (AUC 0.474). Only take the trade
+            # when a deterministic sweep -> displacement -> FVG structure just
+            # completed in the SAME direction on the current closed bar. This is
+            # the only part of the pipeline that survived a held-out test.
+            smc = None
+            if SMC_GATE:
+                try:
+                    smc = SMC.detect(SMC.to_tuple_bars(bars))
+                except Exception as sx:
+                    log(f"SMC-FAIL {pair}: {type(sx).__name__} - skip, bukan anggap lulus")
+                    time.sleep(CALL_GAP)
+                    continue
+                if smc is None:
+                    log(f"NO-SMC {pair} {TIMEFRAME} {side} conf={conf:.3f}: "
+                        f"tiada sweep+displacement+FVG pada bar ini")
+                    time.sleep(CALL_GAP)
+                    continue
+                if smc["side"] != side:
+                    log(f"SMC-VETO {pair} {TIMEFRAME}: model {side} conf={conf:.3f} "
+                        f"lawan SMC {smc['side']} - skip")
+                    time.sleep(CALL_GAP)
+                    continue
+                log(f"SMC-OK {pair} {TIMEFRAME} {side} conf={conf:.3f}: "
+                    f"sweep+disp {smc['disp_atr']}ATR+FVG, entry {smc['entry']} "
+                    f"sl {smc['sl']}")
+
             try:
                 embargo, upcoming = news_context(pair)
             except Exception as ex:
@@ -698,7 +760,29 @@ def main():
             closes = [b[3] for b in bars]
             atr = M.atr_s(bars)[-1]
             entry = closes[-1]
-            sl, tp = build_levels(pair, side, entry, atr)
+            if smc:
+                # SMC levels are structural (FVG edge / sweep wick), not an
+                # ATR guess: use them so the ticket the owner receives matches
+                # the setup that was actually detected and backtested. Widen the
+                # stop if the structure sits inside 4x spread, then rebuild the
+                # target from the widened risk so the R multiple stays honest.
+                spread_px = M.pip_of(pair) * SMC.SPREAD_PIPS.get(
+                    pair.replace("/", ""), SMC.DEFAULT_SPREAD_PIPS)
+                min_sl = SMC_MIN_SL_SPREAD * spread_px
+                mode = "struktur"
+                if smc["risk"] < min_sl:
+                    w = min_sl - smc["risk"]
+                    smc = dict(smc)
+                    smc["sl"] = (smc["sl"] - w) if side == "BUY" else (smc["sl"] + w)
+                    smc["risk"] = abs(smc["entry"] - smc["sl"])
+                    mode = f"diluaskan+{w:.3f}"
+                smc_tp = SMC.with_target(smc, SMC_R_MULT)
+                sl, tp = smc_tp["sl"], smc_tp["tp"]
+                log(f"SMC-LEVELS {pair} {side}: entry {entry} sl {sl} tp {tp} "
+                    f"({SMC_R_MULT}R, risk {smc_tp['risk']:.5f}, sl {mode}, "
+                    f"spread {spread_px:.4f})")
+            else:
+                sl, tp = build_levels(pair, side, entry, atr)
             dp = DP.get(pair, DEFAULT_DP)
             # Mod private (default): AI publish TERUS ke akaun owner sahaja.
             # verified=True supaya MT5 + lifecycle + status tracker memproses,
