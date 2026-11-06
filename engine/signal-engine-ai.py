@@ -70,7 +70,7 @@ SMC_R_MULT = float(os.environ.get("AI_SMC_R", "1.0"))
 # XAU setup had risk 3.71 (12x spread), so 10x filters pathological cases
 # without trimming genuine setups.
 SMC_MIN_SL_SPREAD = float(os.environ.get("AI_SMC_MIN_SL_SPREAD", "10.0"))
-XAUUSD_THRESHOLD = 0.35
+XAUUSD_THRESHOLD = 0.30
 # Lantai SL 15 pip: spread RoboForex besar (EURUSD 1.3, USDJPY 1.9,
 # XAUUSD 2.1 pip). 15 pip hadkan drag spread bawah ~13% SL.
 # SL runtime guard: mesti > 3× spread live per symbol.
