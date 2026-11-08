@@ -888,7 +888,7 @@
   "XAUUSD_20261102_231823": {
    "status": "expired",
    "closed": "2026-11-03T14:29:34+08:00",
-   "note": "lifecycle:expired (fix #207 — entry tak kena sebelum expiry, SL -127.4 pips palsu dibuang)"
+   "note": "lifecycle:expired (fix #207 \u2014 entry tak kena sebelum expiry, SL -127.4 pips palsu dibuang)"
   },
   "USDCAD_20261102_231556": {
    "status": "sl",
@@ -952,16 +952,22 @@
    "entry_at": "2026-11-04T08:01:00+08:00"
   },
   "GBPUSD_20261104_091521": {
-   "status": "active",
-   "entry_at": "2026-11-04T09:17:00+08:00"
+   "status": "expired",
+   "entry_at": "2026-11-04T09:17:00+08:00",
+   "closed": "2026-11-06T20:11:56.064713+08:00",
+   "note": "manual_reset_stale_active"
   },
   "EURUSD_20261104_091511": {
-   "status": "active",
-   "entry_at": "2026-11-04T09:51:00+08:00"
+   "status": "expired",
+   "entry_at": "2026-11-04T09:51:00+08:00",
+   "closed": "2026-11-06T20:11:56.064713+08:00",
+   "note": "manual_reset_stale_active"
   },
   "USDCAD_20261104_093031": {
-   "status": "active",
-   "entry_at": "2026-11-04T09:31:00+08:00"
+   "status": "expired",
+   "entry_at": "2026-11-04T09:31:00+08:00",
+   "closed": "2026-11-06T20:11:56.064713+08:00",
+   "note": "manual_reset_stale_active"
   },
   "AUDUSD_20261104_093021": {
    "status": "sl",
@@ -1017,22 +1023,22 @@
    "entry_at": "2026-11-04T12:48:00+08:00"
   },
   "AUDUSD_20261104_131503": {
-   "status": "active",
-   "entry_at": "2026-11-04T13:16:00+08:00"
-  },
-  "XAUUSD_20261104_134001": {
-   "status": "pending"
+   "status": "expired",
+   "entry_at": "2026-11-04T13:16:00+08:00",
+   "closed": "2026-11-06T20:11:56.064713+08:00",
+   "note": "manual_reset_stale_active"
   },
   "USDJPY_20261104_140012": {
-   "status": "active",
-   "entry_at": "2026-11-04T14:01:00+08:00"
-  },
-  "XAUUSD_20261104_140002": {
-   "status": "pending"
+   "status": "expired",
+   "entry_at": "2026-11-04T14:01:00+08:00",
+   "closed": "2026-11-06T20:11:56.064713+08:00",
+   "note": "manual_reset_stale_active"
   },
   "XAUUSD_20261104_143002": {
-   "status": "active",
-   "entry_at": "2026-11-04T14:32:00+08:00"
+   "status": "expired",
+   "entry_at": "2026-11-04T14:32:00+08:00",
+   "closed": "2026-11-06T20:11:56.064713+08:00",
+   "note": "manual_reset_stale_active"
   },
   "XAUUSD_20261105_121723": {
    "status": "sl",
@@ -1135,5 +1141,5 @@
    "entry_at": "2026-11-06T18:21:00+08:00"
   }
  },
- "updated": "2026-11-06T19:10:02+08:00"
+ "updated": "2026-11-08T05:30:00+08:00"
 }
