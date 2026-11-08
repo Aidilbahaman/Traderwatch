@@ -1,0 +1,97 @@
+{
+ "period": "last_28_days",
+ "period_label": "last 28 days",
+ "as_of": "2026-11-08",
+ "source": "Cloudflare analytics - real visitor page requests (browser user agents only; scanner and crawler traffic excluded)",
+ "fetched_at": "2026-11-08T07:23:01.834608+00:00",
+ "total_visits": 1180,
+ "country_count": 10,
+ "excluded": {
+  "scanner_requests": 85720,
+  "crawler_requests": 1140
+ },
+ "countries": [
+  {
+   "c": "Malaysia",
+   "code": "MY",
+   "v": 460,
+   "lat": 3.14,
+   "lon": 101.69,
+   "flag": "MY"
+  },
+  {
+   "c": "United States",
+   "code": "US",
+   "v": 230,
+   "lat": 38.9,
+   "lon": -77.04,
+   "flag": "US"
+  },
+  {
+   "c": "Netherlands",
+   "code": "NL",
+   "v": 150,
+   "lat": 52.37,
+   "lon": 4.9,
+   "flag": "NL"
+  },
+  {
+   "c": "Canada",
+   "code": "CA",
+   "v": 80,
+   "lat": 45.42,
+   "lon": -75.7,
+   "flag": "CA"
+  },
+  {
+   "c": "Taiwan",
+   "code": "TW",
+   "v": 60,
+   "lat": 25.03,
+   "lon": 121.56,
+   "flag": "TW"
+  },
+  {
+   "c": "Australia",
+   "code": "AU",
+   "v": 50,
+   "lat": -33.87,
+   "lon": 151.21,
+   "flag": "AU"
+  },
+  {
+   "c": "Indonesia",
+   "code": "ID",
+   "v": 50,
+   "lat": -6.21,
+   "lon": 106.85,
+   "flag": "ID"
+  },
+  {
+   "c": "Italy",
+   "code": "IT",
+   "v": 40,
+   "lat": 41.9,
+   "lon": 12.5,
+   "flag": "IT"
+  },
+  {
+   "c": "Switzerland",
+   "code": "CH",
+   "v": 30,
+   "lat": 46.95,
+   "lon": 7.45,
+   "flag": "CH"
+  },
+  {
+   "c": "Singapore",
+   "code": "SG",
+   "v": 30,
+   "lat": 1.35,
+   "lon": 103.82,
+   "flag": "SG"
+  }
+ ],
+ "sampled": true,
+ "note": "Real visitor sessions (browser page requests, 28 days). Bot and scanner traffic excluded. Counts are a Cloudflare analytics sample, so treat them as approximate. Not registered traders - accounts are tracked separately."
+}

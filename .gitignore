@@ -9,3 +9,5 @@ __pycache__/
 state/
 engine/bot.db
 *.db
+venv/
+backups/

@@ -112,6 +112,25 @@ def test_chat():
         return None
 
 
+# ---------------------------------------------------------------- pasaran
+FX_CLOSE_UTC = {"Fri": [21, None], "Sat": [None, None], "Sun": [None, 21]}
+
+
+def market_closed(now=None):
+    """True bila pasaran forex tutup. Sabtu/Ahad penuh, Jumaat dari 21:00 UTC
+    hingga Ahad 21:00 UTC. Tiada signal/notifikasi dihantar padamasa ini.
+    """
+    now = now or datetime.now(timezone.utc)
+    d = now.weekday()
+    if d == 4:            # Jumaat
+        return now.hour >= 21
+    if d == 5:            # Sabtu
+        return True
+    if d == 6:            # Ahad
+        return now.hour < 21
+    return False
+
+
 # ---------------------------------------------------------------- logik teras
 def evaluate(sig, price, st, bootstrap=False):
     """Nilai satu signal pada harga semasa. Mutasi `st`, pulangkan event.
@@ -217,6 +236,19 @@ def is_expired(sig, st, now_dt, expiry_min=None, price=None, bars=None):
         expiry_min = EXPIRY_MIN
     if st.get("closed") or st.get("entry"):
         return False
+    # Market tutup (Jumaat 21:00 UTC – Ahad 21:00 UTC): jeda timer expiry.
+    # Tanpa gate ini, setup Jumaat akan expire masa hujung minggu dan hantar
+    # mesej "SETUP EXPIRED" kepada semua member walaupun market tutup.
+    # Bila reject dibuka semula, timer restart (reshapkan out_of_zone_since).
+    if market_closed(now_dt):
+        st["mkt_paused"] = True
+        return False
+    if st.pop("mkt_paused", False):
+        st["out_of_zone_since"] = None
+        st["in_zone_since"] = None
+        st.pop("expiry_strikes", None)
+        log(f"MARKET-REOPEN {sig.get('id')} {sig.get('pair')} "
+            f"— timer expiry restart")
     first_touch = st.get("first_touch")
     if not first_touch:
         # Harga belum pernah sentuh zon POI. Timer expiry bermula dari
@@ -931,6 +963,14 @@ def dispatch(text, targets, dry_run=False, png=None, event=None, sig_key=None):
     """
     sent = failed = 0
     ok_chats = []
+
+    # Gate pasaran: market tutup => TIADA notification dihantar kepada
+    # sesiapa (members + admin). State tidak ditanda notified, jadi bila
+    # market re-open event yang sah masih boleh dihantar. Ini mematuhi
+    # peraturan owner: "pada market close jangan send apa-apa signal".
+    if market_closed():
+        log(f"MARKET-CLOSED suppress event={event} sig={sig_key} — tiada send")
+        return sent, failed, ok_chats
 
     # Peta chat_id -> profil (untuk semak plan/quota Free).
     by_chat = {}
