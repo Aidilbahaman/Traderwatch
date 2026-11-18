@@ -23,6 +23,10 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 REPO = Path("/home/ubuntu/web/Traderwatch-repo")
+# The engine package lives one level up: `from engine.private_signals import ...`
+# needs the repo root on sys.path, not this directory.
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+
 STATUS_FILE = REPO / "signal-status.json"
 SECRETS = Path.home() / ".secrets"
 TZ_KL = timezone(timedelta(hours=8))
@@ -413,7 +417,13 @@ def main():
             ts = datetime.strptime(parts[1] + parts[2], "%Y%m%d%H%M%S").replace(tzinfo=TZ_KL)
         except ValueError:
             continue
-        if ts < cutoff or key not in valid_keys:
+        # Prune by age only. A key must NOT be dropped just because its
+        # Supabase row is gone: the signals table has its own retention and
+        # old rows get deleted, but signal-status.json is the historical
+        # record the dashboard's win-rate/pip stats are computed from.
+        # Dropping them here wiped 151 closed setups in one run and reset the
+        # member performance stats to zero.
+        if ts < cutoff:
             del state["signals"][key]
             changed += 1
 

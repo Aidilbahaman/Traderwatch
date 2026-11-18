@@ -8,9 +8,14 @@ Never includes member data, chat ids, or broker state.
 """
 import json
 import pathlib
+import sys
 import urllib.request
 
 REPO = pathlib.Path("/home/ubuntu/web/Traderwatch-repo")
+# The engine package lives one level up: `from engine.private_signals import ...`
+# needs the repo root on sys.path, not this directory.
+sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent.parent))
+
 OUT = REPO / "landing-signal.json"
 ENV = pathlib.Path("/home/ubuntu/.secrets/supabase.env")
 

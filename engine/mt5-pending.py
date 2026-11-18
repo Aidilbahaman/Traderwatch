@@ -26,6 +26,7 @@ from datetime import datetime, timezone, timedelta
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
+sys.path.insert(0, str(HERE.parent))
 REPO = HERE.parent
 STATE = REPO / "state" / "mt5-orders.json"
 MYT = timezone(timedelta(hours=8))
@@ -96,7 +97,12 @@ act = req.get("action")
 if act == "state":
     orders = mt5.orders_get() or []
     pos = mt5.positions_get() or []
+    acc = mt5.account_info()
     out({"ok": True,
+         "balance": acc.balance if acc else 0,
+         "equity": acc.equity if acc else 0,
+         "free_margin": getattr(acc, "margin_free", 0) or getattr(acc, "free_margin", 0) or 0,
+         "margin_level": getattr(acc, "margin_level", 0) or 0,
          "orders": [{"ticket": o.ticket, "symbol": o.symbol, "type": o.type,
                      "volume": o.volume_current, "price_open": o.price_open,
                      "sl": o.sl, "tp": o.tp, "magic": o.magic,
@@ -126,7 +132,69 @@ elif act == "symbol":
          "vol_max": info.volume_max, "vol_step": info.volume_step,
          "stops_level": info.trade_stops_level,
          "spread_pt": getattr(info, "spread", 0),
-         "spread_price": max(0.0, ask - bid)})
+         "spread_price": max(0.0, ask - bid),
+         "bid": bid, "ask": ask})
+
+elif act == "candles":
+    sym = req["symbol"]
+    count = int(req.get("count", 300))
+    timeframe = getattr(mt5, "TIMEFRAME_M1", 1)
+    rates = mt5.copy_rates_from_pos(sym, timeframe, 0, count)
+    if rates is None or len(rates) < 50:
+        out({"ok": False, "error": "insufficient candles", "count": len(rates) if rates is not None else 0}); sys.exit(0)
+    out({"ok": True, "bars": [{"t": int(r["time"]), "o": float(r["open"]), "h": float(r["high"]), "l": float(r["low"]), "c": float(r["close"]), "v": int(r["tick_volume"])} for r in rates]})
+
+elif act == "market":
+    sym = req["symbol"]
+    side = req["side"]
+    lot = float(req["lot"])
+    sl = float(req.get("sl", 0) or 0)
+    tp = float(req.get("tp", 0) or 0)
+    magic = int(req.get("magic", 0))
+    comment = str(req.get("comment", "TW"))[:26]
+    if not mt5.symbol_select(sym, True):
+        out({"ok": False, "error": "symbol_select " + sym}); sys.exit(0)
+    tick = mt5.symbol_info_tick(sym)
+    info = mt5.symbol_info(sym)
+    if tick is None or info is None:
+        out({"ok": False, "error": "no tick/info"}); sys.exit(0)
+    price = float(tick.ask if side == "BUY" else tick.bid)
+    otype = mt5.ORDER_TYPE_BUY if side == "BUY" else mt5.ORDER_TYPE_SELL
+    if side == "BUY":
+        if (sl == 0 and tp == 0) or sl < price < tp:
+            pass
+        else:
+            out({"ok": False, "error": "SL/TP invalid BUY", "price": price}); sys.exit(0)
+    if side == "SELL":
+        if (sl == 0 and tp == 0) or (tp < price < sl):
+            pass
+        else:
+            out({"ok": False, "error": "SL/TP invalid SELL", "price": price}); sys.exit(0)
+    step = float(info.volume_step or 0.01)
+    vmin = float(info.volume_min or step)
+    vmax = float(info.volume_max or lot)
+    lot = max(vmin, min(vmax, (int(lot / step) * step)))
+    request = {"action": mt5.TRADE_ACTION_DEAL, "symbol": sym, "volume": lot,
+               "type": otype, "price": price, "sl": sl, "tp": tp,
+               "deviation": int(req.get("deviation", 20)), "magic": magic,
+               "comment": comment, "type_time": mt5.ORDER_TIME_GTC,
+               "type_filling": mt5.ORDER_FILLING_IOC}
+    res = mt5.order_send(request)
+    if res is None or res.retcode != mt5.TRADE_RETCODE_DONE:
+        out({"ok": False, "retcode": getattr(res, "retcode", None),
+             "comment": getattr(res, "comment", ""), "price": price, "lot": lot})
+    else:
+        out({"ok": True, "ticket": res.order, "deal": res.deal,
+             "price": res.price, "volume": res.volume, "retcode": res.retcode})
+
+elif act == "tick":
+    sym = req["symbol"]
+    if not mt5.symbol_select(sym, True):
+        out({"ok": False, "error": "symbol_select " + sym}); sys.exit(0)
+    t = mt5.symbol_info_tick(sym)
+    if t is None:
+        out({"ok": False, "error": "no tick"}); sys.exit(0)
+    out({"ok": True, "bid": t.bid, "ask": t.ask, "time": t.time})
 
 elif act == "place_limit":
     sym   = req["symbol"]
@@ -151,14 +219,14 @@ elif act == "place_limit":
             otype, tname = mt5.ORDER_TYPE_BUY_LIMIT, "BUY_LIMIT"
         else:
             otype, tname = mt5.ORDER_TYPE_BUY_STOP, "BUY_STOP"
-        if not (sl < entry < tp):
+        if not (sl < entry) or (tp > 0 and not (entry < tp)):
             out({"ok": False, "error": "SL/TP invalid BUY"}); sys.exit(0)
     else:
         if entry > tick.bid:
             otype, tname = mt5.ORDER_TYPE_SELL_LIMIT, "SELL_LIMIT"
         else:
             otype, tname = mt5.ORDER_TYPE_SELL_STOP, "SELL_STOP"
-        if not (tp < entry < sl):
+        if not (tp < entry < sl) if tp > 0 else not (entry < sl):
             out({"ok": False, "error": "SL/TP invalid SELL"}); sys.exit(0)
 
     stops_level = info.trade_stops_level * info.point
@@ -187,6 +255,23 @@ elif act == "place_limit":
         out({"ok": True, "ticket": res.order, "type": tname,
              "price": entry, "sl": sl, "tp": tp, "lot": lot, "magic": magic})
 
+elif act == "modify_position":
+    ticket = int(req["ticket"])
+    sl = float(req.get("sl", 0) or 0)
+    tp = float(req.get("tp", 0) or 0)
+    pos = mt5.positions_get(ticket=ticket)
+    if not pos:
+        out({"ok": False, "error": "position not found"}); sys.exit(0)
+    p = pos[0]
+    res = mt5.order_send({"action": mt5.TRADE_ACTION_SLTP, "symbol": p.symbol,
+                          "position": ticket, "sl": sl, "tp": tp,
+                          "magic": p.magic})
+    if res is None or res.retcode != mt5.TRADE_RETCODE_DONE:
+        out({"ok": False, "retcode": getattr(res, "retcode", None),
+             "comment": getattr(res, "comment", "")})
+    else:
+        out({"ok": True, "ticket": ticket, "sl": sl, "tp": tp})
+
 elif act == "cancel":
     ticket = int(req["ticket"])
     res = mt5.order_send({"action": mt5.TRADE_ACTION_REMOVE, "order": ticket})
@@ -206,11 +291,19 @@ elif act == "close_position":
         close_type = mt5.ORDER_TYPE_SELL if p.type == mt5.POSITION_TYPE_BUY else mt5.ORDER_TYPE_BUY
         tick = mt5.symbol_info_tick(p.symbol)
         price = tick.bid if close_type == mt5.ORDER_TYPE_SELL else tick.ask
-        res = mt5.order_send({"action": mt5.TRADE_ACTION_DEAL, "position": ticket,
+        filling = mt5.ORDER_FILLING_IOC
+        req_close = {"action": mt5.TRADE_ACTION_DEAL, "position": ticket,
             "symbol": p.symbol, "volume": p.volume, "type": close_type,
             "price": price, "deviation": 20, "magic": p.magic,
             "comment": "TW-CLOSE", "type_time": mt5.ORDER_TIME_GTC,
-            "type_filling": mt5.ORDER_FILLING_RETURN})
+            "type_filling": filling}
+        res = mt5.order_send(req_close)
+        if res is not None and res.retcode == 10030:
+            req_close["type_filling"] = mt5.ORDER_FILLING_RETURN
+            res = mt5.order_send(req_close)
+        if res is not None and res.retcode == 10030:
+            req_close["type_filling"] = mt5.ORDER_FILLING_FOK
+            res = mt5.order_send(req_close)
         if res is None or res.retcode != mt5.TRADE_RETCODE_DONE:
             out({"ok": False, "retcode": getattr(res, "retcode", None),
                  "comment": getattr(res, "comment", "")})
@@ -681,7 +774,7 @@ def main():
             continue
 
         lot_use, lot_note = LOT, "fixed-manual"
-        if RISK_PCT > 0 and base > 0 and is_private(sid):
+        if RISK_PCT > 0 and base > 0:
             calc, note = size_lot(pair, entry, sl, base)
             if calc is None:
                 log(f"LOT-SKIP #{sid} {pair} {side}: {note} — tiada order "

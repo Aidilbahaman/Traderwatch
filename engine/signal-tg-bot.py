@@ -353,6 +353,10 @@ def status(chat_id):
 
 
 REPO = Path("/home/ubuntu/web/Traderwatch-repo")
+# The engine package lives one level up: `from engine.private_signals import ...`
+# needs the repo root on sys.path, not this directory.
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+
 STATUS_FILE = REPO / "signal-status.json"
 MUTES_FILE = Path("/home/ubuntu/web/.tw-signal-mutes.json")
 PIP = {"XAU/USD": 0.1, "USD/JPY": 0.01}

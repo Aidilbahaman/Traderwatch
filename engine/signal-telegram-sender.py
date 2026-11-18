@@ -18,6 +18,10 @@ from pathlib import Path
 
 TIMEOUT = 25
 SENT_FILE = Path("/home/ubuntu/web/.tg-sent-ids.json")
+# The engine package lives one level up: `from engine.private_signals import ...`
+# needs the repo root on sys.path, not this directory.
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+
 # Ujian pada diri sendiri: kalau fail ini wujud, sender HANYA hantar ke chat
 # itu dan guna fail sent berasingan supaya state production tidak tercemar.
 TEST_CHAT_FILE = Path("/home/ubuntu/web/.sender-test-chat")
@@ -430,14 +434,19 @@ def price_text(s, value):
 def fmt(s):
     arrow = "🟢 BUY" if s["side"] == "BUY" else "🔴 SELL"
     pip = PIP.get(s["pair"], DEFAULT_PIP)
-    entry, sl, tp = float(s["entry"]), float(s["sl"]), float(s["tp"])
-    sl_p = abs(entry - sl) / pip
-    tp_p = abs(tp - entry) / pip
-    rr = tp_p / sl_p if sl_p else 0.0
+    entry, sl, tp2 = float(s["entry"]), float(s["sl"]), float(s["tp"])
+    risk = abs(entry - sl)
+    tp1 = entry + risk if s["side"] == "BUY" else entry - risk
+    sl_p = risk / pip
+    tp1_p = abs(tp1 - entry) / pip
+    tp2_p = abs(tp2 - entry) / pip
+    rr = tp2_p / sl_p if sl_p else 0.0
+    
     levels = ("<pre>"
               f"Entry   {price_text(s, s['entry'])}\n"
               f"SL      {price_text(s, s['sl'])}   -{move_text(s, sl_p)}\n"
-              f"TP      {price_text(s, s['tp'])}   +{move_text(s, tp_p)}\n"
+              f"TP1     {price_text(s, tp1)}   +{move_text(s, tp1_p)} (50% Close, BE)\n"
+              f"TP2     {price_text(s, s['tp'])}   +{move_text(s, tp2_p)}\n"
               f"R:R     1 : {rr:.1f}"
               "</pre>")
     return (f"📡 <b>TRADERWATCH {s['pair'].upper()} {('BUY' if s['side'] == 'BUY' else 'SELL')} — R:R 1:{rr:.1f}</b>\n"
