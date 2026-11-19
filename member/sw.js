@@ -6,17 +6,17 @@
  *  - Pihak ketiga (CDN supabase, TradingView): network sahaja, JANGAN cache
  *  - Push: sedia untuk VAPID (payload JSON {title, body, url, tag})
  */
-const VERSION = 'tw-member-v1';
+const VERSION = 'tw-member-v2';
 const SHELL_CACHE = VERSION + '-shell';
 const DATA_CACHE = VERSION + '-data';
 
 const SHELL_ASSETS = [
   './',
   './index.html',
-  './app.css?v=20261120m',
-  './app.js?v=20261120m',
-  './chart.js?v=20261120m',
-  './auth.js?v=20261120m',
+  './app.css?v=20261120m2',
+  './app.js?v=20261120m2',
+  './chart.js?v=20261120m2',
+  './auth.js?v=20261120m2',
   './manifest.webmanifest',
   './icons/icon-192.png',
   './icons/icon-512.png',
@@ -64,7 +64,10 @@ async function staleWhileRevalidate(request) {
 async function networkFirstNavigation(request) {
   try {
     const response = await fetch(request);
-    if (response && response.ok) {
+    // Hanya navigasi shell member disimpan sebagai fallback offline.
+    // Halaman lain dalam scope (cth. elliot.html) JANGAN mencemari shell.
+    const p = new URL(request.url).pathname;
+    if (response && response.ok && (p === '/member/' || p === '/member/index.html')) {
       const cache = await caches.open(SHELL_CACHE);
       cache.put('./index.html', response.clone());
     }
