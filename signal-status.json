@@ -1232,12 +1232,13 @@
    "status": "pending"
   },
   "XAGUSD_20261120_001019": {
-   "status": "pending"
+   "status": "active",
+   "entry_at": "2026-11-20T00:15:00+08:00"
   },
   "XAUUSD_20261120_001007": {
    "status": "active",
    "entry_at": "2026-11-20T00:12:00+08:00"
   }
  },
- "updated": "2026-11-20T00:15:03+08:00"
+ "updated": "2026-11-20T00:20:03+08:00"
 }
