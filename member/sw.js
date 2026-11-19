@@ -6,17 +6,17 @@
  *  - Pihak ketiga (CDN supabase, TradingView): network sahaja, JANGAN cache
  *  - Push: sedia untuk VAPID (payload JSON {title, body, url, tag})
  */
-const VERSION = 'tw-member-v2';
+const VERSION = 'tw-member-v3';
 const SHELL_CACHE = VERSION + '-shell';
 const DATA_CACHE = VERSION + '-data';
 
 const SHELL_ASSETS = [
   './',
   './index.html',
-  './app.css?v=20261120m2',
-  './app.js?v=20261120m2',
-  './chart.js?v=20261120m2',
-  './auth.js?v=20261120m2',
+  './app.css?v=20261120m3',
+  './app.js?v=20261120m3',
+  './chart.js?v=20261120m3',
+  './auth.js?v=20261120m3',
   './manifest.webmanifest',
   './icons/icon-192.png',
   './icons/icon-512.png',
