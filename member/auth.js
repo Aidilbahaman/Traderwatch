@@ -42,6 +42,49 @@
     location.replace(LOGIN_URL + '&bounce=1&why=' + encodeURIComponent(why || 'nosession') + '&ref=' + ref + '&app=' + app);
   }
 
+  // Beacon diagnostik (fire-and-forget, keepalive supaya sempat hantar
+  // sebelum redirect). Tiada credential dihantar — metadata sahaja.
+  function beacon(event, detail) {
+    try {
+      fetch(SUPABASE_URL + '/rest/v1/auth_diag', {
+        method: 'POST',
+        keepalive: true,
+        headers: { 'Content-Type': 'application/json', apikey: SUPABASE_KEY, Authorization: 'Bearer ' + SUPABASE_KEY, Prefer: 'return=minimal' },
+        body: JSON.stringify({ event: event, detail: detail || {} })
+      }).catch(function () { /* abaikan */ });
+    } catch (e) { /* abaikan */ }
+  }
+
+  function diagDetail(why) {
+    var stored = storedSession();
+    var ref = /login\.html/.test(document.referrer || '') ? 'login' : (document.referrer ? 'other' : 'none');
+    var app = 0, dm = 'browser';
+    try {
+      app = (navigator.standalone === true || window.matchMedia('(display-mode: standalone)').matches) ? 1 : 0;
+      dm = window.matchMedia('(display-mode: standalone)').matches ? 'standalone' : (window.matchMedia('(display-mode: minimal-ui)').matches ? 'minimal-ui' : 'browser');
+    } catch (e) { /* abaikan */ }
+    return {
+      why: why, ref: ref, app: app, dm: dm,
+      inApp: inAppBrowser(),
+      storageOK: storageOK(),
+      token: stored ? { exp: stored.expires_at } : null,
+      now: Math.floor(Date.now() / 1000),
+      ua: (navigator.userAgent || '').slice(0, 220),
+      uid: (stored && stored.user && stored.user.id) || null
+    };
+  }
+
+  // Browser dalam aplikasi (Telegram/WhatsApp/IG/chat) = storage sementara,
+  // session hilang setiap kali dibuka → loop login. iOS WebView generik
+  // dikesan melalui ketiadaan token Safari/CriOS/FxiOS pada UA iPhone.
+  function inAppBrowser() {
+    var ua = navigator.userAgent || '';
+    if (/Telegram|WhatsApp|Instagram|FBAN|FBAV|Line\/|Twitter|MicroMessenger|Snapchat/i.test(ua)) return true;
+    if (/; wv\)/.test(ua)) return true; // Android WebView
+    if (/iPhone|iPad|iPod/.test(ua) && /AppleWebKit/.test(ua) && !/Safari\/|CriOS|FxiOS|EdgiOS/.test(ua)) return true;
+    return false;
+  }
+
   // Probe: pelayar menyekat localStorage (Block All Cookies / private /
   // WebView terasing)? Supabase fallback ke memory → session hilang setiap
   // navigasi → loop login tanpa henti. Ini punca utama "tak boleh login".
@@ -60,11 +103,16 @@
   function showAuthDiag() {
     var blocked = !storageOK();
     var stored = storedSession();
+    beacon('diag_shown', diagDetail('panel'));
+    var inApp = inAppBrowser();
     var punca = blocked
       ? 'Pelayar anda menyekat data laman (cookies / localStorage). Session login tidak dapat disimpan, jadi setiap halaman melantun balik ke login.'
       : (stored
         ? 'Session lama dijumpai tetapi tidak sah (expired / refresh gagal). Log masuk semula diperlukan.'
         : 'Session tidak dijumpai selepas login. Ini biasanya berlaku dalam mod private / incognito, dalam app installed yang berasingan daripada browser, atau pelayar yang memadam data laman.');
+    var inAppWarn = inApp
+      ? '<p style="margin:0 0 14px;background:rgba(255,212,121,.12);border:1px solid rgba(255,212,121,.4);border-radius:12px;padding:12px;color:#ffd479;font-size:13.5px"><b>Browser aplikasi dikesan</b> (Telegram / WhatsApp / chat). Session tidak kekal dalam browser ini — setiap kali dibuka, ia mula kosong. Ketik <b>⋯</b> → <b>&quot;Open in Safari / Chrome&quot;</b>, kemudian log masuk di browser biasa untuk akses kekal.</p>'
+      : '';
     var div = document.createElement('div');
     div.id = 'twAuthDiag';
     div.style.cssText = 'position:fixed;inset:0;z-index:9999;background:#0a0e0b;color:#f2f5ef;padding:28px 22px calc(28px + env(safe-area-inset-bottom,0px));overflow:auto;font:15px/1.55 Inter,system-ui,-apple-system,sans-serif';
@@ -72,6 +120,7 @@
       '<div style="max-width:430px;margin:0 auto">' +
       '<div style="width:44px;height:44px;border-radius:14px;background:#c6f36b;color:#10170b;display:grid;place-items:center;font-weight:900;font-size:22px;margin-bottom:16px">T</div>' +
       '<h2 style="margin:0 0 8px;font-size:22px;letter-spacing:-.02em">Login tidak dapat diteruskan</h2>' +
+      inAppWarn +
       '<p style="margin:0 0 14px;color:#ffd479;font-size:14px">' + punca + '</p>' +
       '<ol style="margin:0 0 18px;padding-left:20px;color:#93a096;font-size:13.5px;display:grid;gap:8px">' +
       '<li>Buka <b style="color:#f2f5ef">traderwatch.org/login.html</b> terus dalam tetingkap <b style="color:#f2f5ef">Safari / Chrome biasa</b> — bukan mod private, bukan app installed.</li>' +
@@ -169,6 +218,7 @@
       auth.plan = String(auth.profile.plan || 'free').toLowerCase();
     auth.isPaid = auth.plan !== 'free';
       if (p || s) writeCache();
+      beacon('member_ok', { plan: auth.plan, inApp: inAppBrowser(), ua: (navigator.userAgent || '').slice(0, 220) });
       ready();
     });
   }
@@ -190,6 +240,7 @@
     // login (atau storage disekat), papar diagnostik — jangan loop.
     function noSession() {
       if (!navigator.onLine) { guest(); return; }
+      beacon('bounce_nosession', diagDetail('nosession'));
       var fromLogin = /login\.html/.test(document.referrer || '');
       if (fromLogin || !storageOK()) { showAuthDiag(); return; }
       toLogin('nosession');
@@ -198,6 +249,7 @@
     sb.auth.onAuthStateChange(function (event) {
       if (event === 'SIGNED_OUT') {
         if (!navigator.onLine) { guest(); return; } // offline: kekal dalam app
+        beacon('signed_out', diagDetail('signedout'));
         var fromLogin = /login\.html/.test(document.referrer || '');
         if (fromLogin || !storageOK()) { showAuthDiag(); return; }
         toLogin('signedout');

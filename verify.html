@@ -34,6 +34,15 @@
 (function(){
   const msg = document.getElementById("msg");
   function show(t, cls){ msg.textContent = t; msg.className = "msg " + cls; }
+  function twBeacon(event, detail){
+    try {
+      fetch(CONFIG.supabaseUrl + "/rest/v1/auth_diag", {
+        method: "POST", keepalive: true,
+        headers: { "Content-Type": "application/json", apikey: CONFIG.supabaseKey, Authorization: "Bearer " + CONFIG.supabaseKey, Prefer: "return=minimal" },
+        body: JSON.stringify({ event: event, detail: detail || {} })
+      }).catch(()=>{});
+    } catch(_){}
+  }
   const params = new URLSearchParams(location.search);
   const hash = new URLSearchParams((location.hash || "").replace(/^#/, ""));
   const code = params.get("code");
@@ -42,13 +51,15 @@
   const err = params.get("error") || params.get("error_code") || hash.get("error") || hash.get("error_code");
   const errDesc = params.get("error_description") || hash.get("error_description");
   if(err){
+    twBeacon('verify_err', { msg: decodeURIComponent(errDesc || err).replace(/\+/g, " ").slice(0,150) });
     show("This confirmation link did not work: " + decodeURIComponent(errDesc || err).replace(/\+/g, " ") + ". Please request a new one from the login page.", "err");
     return;
   }
   const next = params.get("next");
   const safe = next && /^\/(?!\/)/.test(next) ? next : "/member/";
   const finish = (result)=>{
-    if(result && result.error){ show("Confirmation failed: " + result.error.message + ". Please request a new link from the login page.", "err"); return; }
+    if(result && result.error){ twBeacon('verify_err', { msg: String(result.error.message).slice(0,150) }); show("Confirmation failed: " + result.error.message + ". Please request a new link from the login page.", "err"); return; }
+    twBeacon('verify_ok', {});
     show("Email confirmed. Opening your member dashboard…", "ok");
     setTimeout(()=>{ location.href = safe.replace(/^\//, ""); }, 800);
   };

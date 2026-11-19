@@ -139,6 +139,24 @@ const title = document.getElementById("formTitle"), hint = document.getElementBy
 const nameWrap = document.getElementById("nameWrap"), confirmWrap = document.getElementById("confirmWrap");
 const passwordInput = form.elements.password, submitButton = form.querySelector('button[type="submit"]');
 function show(t, ok){ msg.textContent = t; msg.className = "msg " + (ok ? "ok" : "err"); }
+// Beacon diagnostik (metadata sahaja, TIADA credential) + pengesanan browser
+// dalam aplikasi (Telegram/WhatsApp/chat = storage sementara → loop login).
+function twBeacon(event, detail){
+  try {
+    fetch(CONFIG.supabaseUrl + "/rest/v1/auth_diag", {
+      method: "POST", keepalive: true,
+      headers: { "Content-Type": "application/json", apikey: CONFIG.supabaseKey, Authorization: "Bearer " + CONFIG.supabaseKey, Prefer: "return=minimal" },
+      body: JSON.stringify({ event: event, detail: detail || {} })
+    }).catch(()=>{});
+  } catch(_){}
+}
+function twInApp(){
+  const ua = navigator.userAgent || "";
+  if(/Telegram|WhatsApp|Instagram|FBAN|FBAV|Line\/|Twitter|MicroMessenger|Snapchat/i.test(ua)) return true;
+  if(/; wv\)/.test(ua)) return true;
+  if(/iPhone|iPad|iPod/.test(ua) && /AppleWebKit/.test(ua) && !/Safari\/|CriOS|FxiOS|EdgiOS/.test(ua)) return true;
+  return false;
+}
 function setMode(isSignup){
   title.textContent = isSignup ? "Create your account" : "Log in";
   hint.textContent = isSignup ? "Sign up for free to access your TraderWatch account." : "Welcome back. Log in to continue.";
@@ -156,17 +174,23 @@ setMode(signup);
 (function(){
   const p = new URLSearchParams(location.search);
   const why = p.get('why') || (p.get('err') === 'storage' ? 'storage' : '');
-  if (p.get('bounce') !== '1' && !why) return;
-  let t;
-  if (why === 'storage') t = '<b>Pelayar menyekat data laman.</b> Matikan "Block All Cookies" (iPhone: Settings → Safari) atau guna tetingkap biasa (bukan private), kemudian log masuk semula.';
-  else if (why === 'signedout') t = '<b>Session anda tamat / dilog keluar.</b> Log masuk semula di bawah untuk teruskan ke halaman member.';
-  else t = '<b>Halaman member memerlukan login.</b> Log masuk di bawah untuk teruskan.';
-  if (p.get('app') === '1') t += ' <b>Anda berada dalam app installed.</b> Jika login asyik melantun: buka traderwatch.org/login.html dalam Safari/Chrome biasa (bukan app), log masuk di situ, kemudian buka semula app.';
+  const bounced = p.get('bounce') === '1' || !!why;
+  const inApp = twInApp();
+  if (!bounced && !inApp) return;
+  let t = '';
+  if (inApp) t += '<b>Browser aplikasi dikesan</b> (Telegram/WhatsApp/chat). Session login tidak kekal dalam browser ini. Ketik <b>⋯</b> → <b>"Open in Safari/Chrome"</b> dan log masuk di browser biasa untuk akses kekal.<br>';
+  if (bounced) {
+    if (why === 'storage') t += '<b>Pelayar menyekat data laman.</b> Matikan "Block All Cookies" (iPhone: Settings → Safari) atau guna tetingkap biasa (bukan private), kemudian log masuk semula.';
+    else if (why === 'signedout') t += '<b>Session anda tamat / dilog keluar.</b> Log masuk semula di bawah untuk teruskan ke halaman member.';
+    else t += '<b>Halaman member memerlukan login.</b> Log masuk di bawah untuk teruskan.';
+    if (p.get('app') === '1') t += ' <b>Anda berada dalam app installed.</b> Jika login asyik melantun: buka traderwatch.org/login.html dalam Safari/Chrome biasa (bukan app), log masuk di situ, kemudian buka semula app.';
+  }
   const warn = document.createElement('div');
   warn.className = 'msg err';
   warn.style.cssText = 'margin:0 0 16px;text-align:left';
   warn.innerHTML = t;
   document.querySelector('.box').insertBefore(warn, document.getElementById('loginForm'));
+  if (inApp) twBeacon('login_inapp_seen', { ua: (navigator.userAgent||'').slice(0,220), bounced: bounced });
 })();
 // The login page must always show the credential form. Never auto-enter an
 // existing session from here: on a shared browser that would silently open
@@ -185,9 +209,11 @@ function sessionSaved(){
 }
 function goToMember(next, session){
   if(!sessionSaved()){
+    twBeacon('login_storage_fail', { inApp: twInApp(), ua: (navigator.userAgent||'').slice(0,220) });
     show('Login berjaya tetapi pelayar tidak menyimpan session. Matikan "Block All Cookies" / guna tetingkap Safari/Chrome biasa (bukan private atau app installed), kemudian cuba lagi.', false);
     return;
   }
+  twBeacon('login_ok', { exp: session && session.expires_at, inApp: twInApp(), ua: (navigator.userAgent||'').slice(0,220) });
   const path = next && /^\/member(?:\/|$)/.test(next) ? next : "/member/";
   // Same origin as login (traderwatch.org): Supabase keeps the session in
   // localStorage here, so no cross-domain token handoff is needed. Sending the
@@ -213,7 +239,7 @@ form.addEventListener("submit", async e=>{
   const result = signup
       ? await sb.auth.signUp({ email, password, options: { data: { name: form.elements.name.value.trim() }, emailRedirectTo: redirectTo } })
       : await sb.auth.signInWithPassword({ email, password });
-    if(result.error) return show(signup ? result.error.message : (/confirm/i.test(result.error.message) ? "Confirm your email first. Check your inbox for the link." : "Wrong email or password."), false);
+    if(result.error) { twBeacon('login_err', { msg: result.error.message, signup: signup, inApp: twInApp(), ua: (navigator.userAgent||'').slice(0,220) }); return show(signup ? result.error.message : (/confirm/i.test(result.error.message) ? "Confirm your email first. Check your inbox for the link." : "Wrong email or password."), false); }
     if(signup && !result.data.session && result.data.user && result.data.user.email_confirmed_at){
       const signed = await sb.auth.signInWithPassword({email, password});
       if(signed.error) return show("Account created. Log in with your new account.", true);
@@ -226,7 +252,7 @@ form.addEventListener("submit", async e=>{
       return show("Account created. Check your email and press the confirm button. No email after a minute? Use Resend verification email below.", true);
     }
     goToMember(next,result.data.session);
-  } catch (_) { show("Unable to connect. Please try again.", false); }
+  } catch (_) { twBeacon('login_exc', { msg: String(_).slice(0,150), inApp: twInApp() }); show("Unable to connect. Please try again.", false); }
   finally { submitButton.disabled = false; }
 });
 
