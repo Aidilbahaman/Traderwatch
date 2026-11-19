@@ -33,7 +33,7 @@
     signalQuery: {},
     marketChart: null,
     signalChart: null,
-    perfDays: 30,
+    perfDays: 0,
     perfChart: null
   };
 
@@ -160,12 +160,14 @@
       var st = String(s.status || '').toLowerCase();
       // Status semasa (tiada tarikh tutup) sentiasa dikira — ia masih berjalan.
       if (st === 'active' || st === 'pending') { out[st]++; return; }
-      var closedTs = s.closed || s.expired_at || null;
-      var t = closedTs ? Date.parse(closedTs) : NaN;
-      // Status bertutup tanpa timestamp (cth. expired lama): guna masa ciptaan dari key.
-      if (!isFinite(t) && (st === 'expired' || st === 'collected' || st === 'cancelled')) {
-        var km = /^([A-Z]{6})_(\d{4})(\d{2})(\d{2})_(\d{2})(\d{2})(\d{2})$/.exec(id);
-        if (km) t = Date.UTC(+km[2], +km[3] - 1, +km[4], +km[5], +km[6], +km[7]) - 8 * 3600000;
+      // Tarikh signal = masa siaran dari key (PAIR_YYYYMMDD_HHMMSS, MYT).
+      // Prestasi dikira dari AWAL signal diterbitkan — bukan tarikh tutup
+      // batch (signal lama 19-25 Okt ditutup serentak pada 26 Okt).
+      var km = /^([A-Z]{6})_(\d{4})(\d{2})(\d{2})_(\d{2})(\d{2})(\d{2})$/.exec(id);
+      var t = km ? Date.UTC(+km[2], +km[3] - 1, +km[4], +km[5], +km[6], +km[7]) - 8 * 3600000 : NaN;
+      if (!isFinite(t)) {
+        var closedTs = s.entry_at || s.closed || s.expired_at || null;
+        t = closedTs ? Date.parse(closedTs) : NaN;
       }
       if (!isFinite(t) || t < since) return; // rekod legacy diabaikan
       // Mula rekod decided global (untuk label tempoh jujur) — bebas window dipilih.
@@ -236,7 +238,7 @@
   function registerSW() {
     if (!('serviceWorker' in navigator)) return;
     window.addEventListener('load', function () {
-      navigator.serviceWorker.register('./sw.js?v=20261120d', { scope: './' })
+      navigator.serviceWorker.register('./sw.js?v=20261120e', { scope: './' })
         .then(function (reg) { state.swReg = reg; })
         .catch(function () { /* SW gagal daftar — app masih berfungsi online */ });
     });
@@ -963,6 +965,7 @@
         '<li>Agregat guna R kerana unit berbeza antara pair (BTC dalam USD, lain dalam pips).</li>' +
         '<li>Collected (exit manual) dan expired diasingkan — bukan kemenangan atau kekalahan automatik.</li>' +
         '<li>Rekod legacy sebelum 19 Okt 2026 diabaikan; enjin disahkan bermula tarikh itu.</li>' +
+        '<li>Graf prestasi mengikut tarikh signal diterbitkan — dipapar dari awal rekod, bukan tarikh tutup batch.</li>' +
         '<li>Masa dipapar dalam waktu Malaysia (MYT). Keputusan lepas bukan jaminan keputusan akan datang.</li>' +
       '</ul>' +
     '</section>';
@@ -994,7 +997,7 @@
       html += '<section class="card"><div class="empty-state">' +
         ICONS.radar +
         '<h4>Belum ada signal diputuskan dalam tempoh ini</h4>' +
-        '<p>Cuba tempoh lebih panjang — rekod penuh enjin bermula 26 Okt 2026.</p>' +
+        '<p>Cuba tempoh lebih panjang — rekod penuh enjin bermula 19 Okt 2026.</p>' +
       '</div></section>';
       html += perfBarsHTML(perf) + perfMethodHTML();
       html += '<p class="disclaimer">Educational only. Trading involves substantial risk.</p>';
@@ -1113,8 +1116,8 @@
       subEl.textContent = 'Memuatkan rekod…';
       return;
     }
-    var perf = computePerformance(signals, { days: 30 });
-    periodEl.textContent = perfPeriodLabel(perf, 30);
+    var perf = computePerformance(signals, { days: 0 });
+    periodEl.textContent = perfPeriodLabel(perf, 0);
     if (!perf.decided) {
       wrEl.textContent = '—';
       netEl.textContent = '—';

@@ -15,11 +15,11 @@
   <link rel="manifest" href="./manifest.webmanifest">
   <link rel="icon" type="image/png" sizes="192x192" href="./icons/icon-192.png">
   <link rel="apple-touch-icon" href="./icons/icon-180.png">
-  <link rel="stylesheet" href="./app.css?v=20261120m10">
+  <link rel="stylesheet" href="./app.css?v=20261120m11">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js" defer></script>
-  <script src="./auth.js?v=20261120m10" defer></script>
-  <script src="./chart.js?v=20261120m10" defer></script>
-  <script src="./app.js?v=20261120m10" defer></script>
+  <script src="./auth.js?v=20261120m11" defer></script>
+  <script src="./chart.js?v=20261120m11" defer></script>
+  <script src="./app.js?v=20261120m11" defer></script>
 </head>
 <body>
   <div class="shell">
@@ -126,7 +126,7 @@
           <a class="card perf-card" id="homePerfCard" href="#/performance" aria-label="Prestasi signal — lihat prestasi penuh">
             <div class="perf-card-top">
               <div class="perf-card-main">
-                <span class="stat-label">Prestasi · <span id="homePerfPeriod">30 hari</span></span>
+                <span class="stat-label">Prestasi · <span id="homePerfPeriod">Semua</span></span>
                 <div class="perf-card-nums">
                   <span class="perf-wr" id="homePerfWR">–</span>
                   <span class="perf-netr" id="homePerfNetR">–</span>
@@ -231,8 +231,8 @@
           </div>
           <div class="chip-row" id="perfPeriodChips" role="group" aria-label="Tempoh prestasi">
             <button class="chip chip-select" type="button" data-days="7" aria-pressed="false">7 hari</button>
-            <button class="chip chip-select active" type="button" data-days="30" aria-pressed="true">30 hari</button>
-            <button class="chip chip-select" type="button" data-days="all" aria-pressed="false">Semua</button>
+            <button class="chip chip-select" type="button" data-days="30" aria-pressed="false">30 hari</button>
+            <button class="chip chip-select active" type="button" data-days="all" aria-pressed="true">Semua</button>
           </div>
           <div id="perfBody">
             <div class="skeleton sk-line w40"></div>
