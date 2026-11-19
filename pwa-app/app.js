@@ -1,7 +1,7 @@
 /* TraderWatch PWA — app.js
- * Vanilla JS, tiada framework. Routing hash (termasuk #/signal?demo=1),
+ * Vanilla JS, tiada framework. Routing hash,
  * data offline-first (SW), install flow, chart TWChart + TradingView lazy-mount,
- * signal-first home, mod tetamu/ahli, kalkulator risiko, converter, notifikasi demo,
+ * signal-first home (laman awam), kalkulator saiz posisi,
  * skrin prestasi (#/performance) — kiraan R client-side dari signal-status.json.
  */
 (function () {
@@ -14,13 +14,11 @@
   var MYT = 'Asia/Kuala_Lumpur';
   var LOGIN_URL = 'https://traderwatch.org/login.html';
   var SIGNUP_URL = 'https://traderwatch.org/login.html?mode=signup';
-  var REPLAY_ROW_ID = 'XAUUSD_20261026_134403';
 
   var state = {
     route: 'home',
     online: navigator.onLine,
     signal: null,
-    stats: null,
     status: null,
     dataFromCache: false,
     chartSymbol: 'OANDA:XAUUSD',
@@ -28,12 +26,10 @@
     deferredPrompt: null,
     swReg: null,
     toastTimer: null,
-    viewmode: 'ahli',
     marketMode: 'app',
     barsCache: {},
     detail: null,
     detailBars: null,
-    detailIsDemo: false,
     signalQuery: {},
     marketChart: null,
     signalChart: null,
@@ -240,13 +236,13 @@
   function registerSW() {
     if (!('serviceWorker' in navigator)) return;
     window.addEventListener('load', function () {
-      navigator.serviceWorker.register('./sw.js?v=20261120c', { scope: './' })
+      navigator.serviceWorker.register('./sw.js?v=20261120d', { scope: './' })
         .then(function (reg) { state.swReg = reg; })
         .catch(function () { /* SW gagal daftar — app masih berfungsi online */ });
     });
   }
 
-  /* ---------- Routing (hash + query, cth. #/signal?demo=1) ---------- */
+  /* ---------- Routing (hash + query) ---------- */
 
   function parseHash() {
     var h = location.hash || '';
@@ -329,7 +325,7 @@
   // SW fallback boleh pulangkan JSON null — sahkan bentuk data.
   function fetchBars(slug) {
     if (state.barsCache[slug]) return Promise.resolve(state.barsCache[slug]);
-    var file = slug === 'replay' ? 'data/replay-bars.json' : 'data/bars-' + slug + '.json';
+    var file = 'data/bars-' + slug + '.json';
     return fetchJSON(file)
       .then(function (data) {
         if (!data || !Array.isArray(data.bars) || !data.bars.length) return null;
@@ -350,7 +346,6 @@
   }
 
   function cacheTimestamp() {
-    if (state.stats && state.stats.generated_at) return state.stats.generated_at;
     if (state.status && state.status.updated) return state.status.updated;
     return latestClosedISO();
   }
@@ -370,12 +365,10 @@
     state.dataFromCache = !state.online;
     return Promise.all([
       fetchJSON('data/landing-signal.json').catch(function () { return null; }),
-      fetchJSON('data/landing-stats.json').catch(function () { return null; }),
       fetchJSON('data/signal-status.json').catch(function () { return null; })
     ]).then(function (results) {
       state.signal = results[0];
-      state.stats = results[1];
-      state.status = results[2];
+      state.status = results[1];
       renderStats();
       renderSignal();
       renderResults();
@@ -385,52 +378,25 @@
     });
   }
 
-  /* ---------- Mod paparan (tetamu / ahli demo) ---------- */
+  /* ---------- Laman awam (sentiasa blur + lock) ---------- */
 
-  function initViewMode() {
-    try {
-      var stored = localStorage.getItem('tw-viewmode');
-      if (stored === 'tetamu' || stored === 'ahli') state.viewmode = stored;
-    } catch (e) { /* storage disekat — default ahli */ }
-    syncViewModeUI();
-    $$('#viewModeToggle .seg-btn').forEach(function (btn) {
-      btn.addEventListener('click', function () {
-        var mode = btn.getAttribute('data-viewmode');
-        if (mode === state.viewmode) return;
-        state.viewmode = mode;
-        try { localStorage.setItem('tw-viewmode', mode); } catch (e) { /* abaikan */ }
-        syncViewModeUI();
-        renderSignal();
-        if (state.route === 'signal' && state.detail) {
-          renderSignalDetail(state.detail, state.detailBars, state.detailIsDemo);
-        }
-      });
-    });
-  }
-
-  function syncViewModeUI() {
-    $$('#viewModeToggle .seg-btn').forEach(function (btn) {
-      var active = btn.getAttribute('data-viewmode') === state.viewmode;
-      btn.classList.toggle('active', active);
-      btn.setAttribute('aria-pressed', active ? 'true' : 'false');
-    });
-  }
-
-  function isGuest() { return state.viewmode === 'tetamu'; }
+  function isGuest() { return true; }
 
   /* ---------- Home: stats ---------- */
 
   function renderStats() {
     var signals = (state.status && state.status.signals) || {};
-    var closedCount = Object.keys(signals).filter(function (k) {
+    var keys = Object.keys(signals);
+    var closedCount = keys.filter(function (k) {
       var s = signals[k].status;
       return ['tp', 'sl', 'expired', 'cancelled', 'collected'].indexOf(s) !== -1;
     }).length;
+    var activeCount = keys.filter(function (k) {
+      var s = String(signals[k].status || '').toLowerCase();
+      return s === 'active' || s === 'pending';
+    }).length;
 
-    $('#statMembers').textContent = state.stats && typeof state.stats.members === 'number'
-      ? state.stats.members : '–';
-    $('#statActive').textContent = state.stats && typeof state.stats.active === 'number'
-      ? state.stats.active : '–';
+    $('#statActive').textContent = state.status ? activeCount : '–';
     $('#statClosed').textContent = state.status ? closedCount : '–';
   }
 
@@ -461,9 +427,8 @@
       box.innerHTML =
         '<div class="empty-state">' +
           ICONS.radar +
-          '<h4>Tiada setup aktif sekarang</h4>' +
-          '<p>Enjin AI mengimbas pasaran. Setup baru akan muncul di sini dan dihantar melalui notifikasi.</p>' +
-          '<a class="btn btn-primary btn-sm" href="#/signal?demo=1">Tonton demo replay</a>' +
+          '<h4>Tiada signal aktif sekarang</h4>' +
+          '<p>Enjin AI mengimbas pasaran. Signal baru akan dipaparkan di sini sebaik diterbitkan.</p>' +
           '<button class="btn btn-ghost btn-sm" type="button" data-action="refresh">' + ICONS.refresh + ' Refresh</button>' +
         '</div>';
       return;
@@ -473,7 +438,7 @@
     var guest = isGuest();
     var d = priceDigits(sig.entry || sig.sl || 0);
 
-    // Mod tetamu: level di-blur + overlay lock. Mod ahli (demo): penuh.
+    // Laman awam: level di-blur + overlay lock → CTA daftar percuma.
     box.innerHTML =
       '<div class="signal-top">' +
         '<span class="signal-pair">' + esc(fmtPair(sig.pair)) + '</span>' +
@@ -515,12 +480,6 @@
       .sort(function (a, b) { return new Date(closedOf(b.data)) - new Date(closedOf(a.data)); })
       .slice(0, 6);
 
-    // Pin row replay demo jika ia bukan dalam 6 terbaru (data lebih baru wujud).
-    if (signals[REPLAY_ROW_ID] && closedOf(signals[REPLAY_ROW_ID]) &&
-        !rows.some(function (r) { return r.id === REPLAY_ROW_ID; })) {
-      rows.push({ id: REPLAY_ROW_ID, pair: REPLAY_ROW_ID.split('_')[0], data: signals[REPLAY_ROW_ID] });
-    }
-
     if (!rows.length) {
       list.innerHTML = '<li class="results-empty">Belum ada keputusan direkodkan.</li>';
       return;
@@ -549,14 +508,6 @@
         pipsHtml +
         '<span class="result-date">' + esc(fmtDateShort(closedOf(d))) + '</span>';
 
-      // Row replay demo boleh ketik → skrin signal demo; row lain tidak.
-      if (r.id === REPLAY_ROW_ID) {
-        return '<li class="result-row clickable">' +
-          '<a class="result-link" href="#/signal?demo=1" title="Tonton demo replay signal ini">' +
-            inner + '<span class="chip chip-demo chip-xs">REPLAY</span>' +
-          '</a>' +
-        '</li>';
-      }
       return '<li class="result-row">' + inner + '</li>';
     }).join('');
   }
@@ -724,7 +675,8 @@
 
   function openSignal(query) {
     state.signalQuery = query || {};
-    var demo = state.signalQuery.demo === '1';
+    // Skrin signal hanya untuk signal live; query legacy → kembali ke home.
+    if (Object.keys(state.signalQuery).length) { location.replace('#/home'); return; }
     var box = $('#signalDetail');
     destroySignalChart();
     box.innerHTML =
@@ -732,29 +684,23 @@
       '<div class="skeleton sk-block"></div>' +
       '<div class="skeleton sk-line w40"></div>';
 
-    var sigP = demo
-      ? fetchJSON('data/replay-signal.json').catch(function () { return null; })
-      : fetchJSON('data/landing-signal.json').catch(function () { return null; });
-
-    sigP.then(function (sig) {
+    fetchJSON('data/landing-signal.json').catch(function () { return null; }).then(function (sig) {
       if (state.route !== 'signal') return;
       if (!sig || typeof sig !== 'object' || !sig.pair) {
         box.innerHTML =
           '<div class="card"><div class="empty-state">' +
             ICONS.radar +
             '<h4>Tiada signal aktif sekarang</h4>' +
-            '<p>Enjin AI mengimbas pasaran. Sementara itu, tonton demo replay dengan data sebenar.</p>' +
-            '<a class="btn btn-primary btn-sm" href="#/signal?demo=1">Tonton demo replay</a>' +
+            '<p>Enjin AI mengimbas pasaran. Signal baru akan dipaparkan di sini sebaik diterbitkan.</p>' +
+            '<a class="btn btn-primary btn-sm" href="#/home">Kembali ke Signals</a>' +
           '</div></div>';
         return;
       }
-      var slug = demo ? 'replay' : pairSlug(sig.pair);
-      return fetchBars(slug).then(function (data) {
+      return fetchBars(pairSlug(sig.pair)).then(function (data) {
         if (state.route !== 'signal') return;
         state.detail = sig;
-        state.detailIsDemo = demo;
         state.detailBars = data ? data.bars : null;
-        renderSignalDetail(sig, state.detailBars, demo);
+        renderSignalDetail(sig, state.detailBars);
       });
     });
   }
@@ -801,7 +747,7 @@
     return mk;
   }
 
-  function levelsGridHTML(sig, demo) {
+  function levelsGridHTML(sig) {
     var d = priceDigits(sig.entry || sig.sl || 0);
     var hasPoi = isNum(sig.poi_low) && isNum(sig.poi_high);
     var entryVal = hasPoi
@@ -821,8 +767,8 @@
         : '') +
       '<div class="level"><span class="level-label">RISK : REWARD</span><span class="level-value big">' + (typeof rr === 'number' && isFinite(rr) ? fmtNum(rr, 2) : '—') + '</span></div>';
 
-    // Demo replay SENTIASA penuh (bahan pendidikan). Live + tetamu = blur + lock.
-    var gate = !demo && isGuest();
+    // Laman awam: level di-blur + overlay lock → CTA daftar percuma.
+    var gate = isGuest();
     return '<div class="levels-wrap">' +
       '<div class="level-grid' + (gate ? ' blurred' : '') + '"' + (gate ? ' aria-hidden="true"' : '') + '>' + tiles + '</div>' +
       (gate
@@ -836,13 +782,15 @@
   }
 
   function reasonCardHTML(sig) {
-    var summary = sig.summary_ms || sig.summary || sig.reason ||
-      'Sebab penuh akan dipaparkan apabila enjin menerbitkan analisis.';
+    var summary = sig.summary_ms || sig.summary || '';
+    var hasConf = Array.isArray(sig.confluence) && sig.confluence.length;
+    // Kad sebab entry hanya dipaparkan bila ada analisis sebenar dari enjin.
+    if (!summary && !hasConf && !sig.reason) return '';
     var html = '<section class="card" aria-label="Sebab entry">' +
       '<div class="card-head"><h3>Sebab entry</h3></div>' +
       '<p class="reason-summary">' + esc(summary) + '</p>';
 
-    if (Array.isArray(sig.confluence) && sig.confluence.length) {
+    if (hasConf) {
       html += '<ul class="conf-list">' + sig.confluence.map(function (c) {
         var pass = !!c.pass;
         return '<li class="conf-item">' +
@@ -880,7 +828,7 @@
     '</section>';
   }
 
-  function renderSignalDetail(sig, bars, demo) {
+  function renderSignalDetail(sig, bars) {
     var box = $('#signalDetail');
     destroySignalChart();
 
@@ -889,7 +837,6 @@
         '<span class="sig-pair">' + esc(fmtPair(sig.pair)) + '</span>' +
         (sig.timeframe ? '<span class="signal-tf">' + esc(sig.timeframe) + '</span>' : '') +
         sideChip(sig.side) + statusChip(sig.status) +
-        (demo ? '<span class="chip chip-demo">DEMO REPLAY</span>' : '') +
       '</div>';
 
     // Kad chart beranotasi
@@ -906,14 +853,12 @@
         '<span class="legend-chip"><span class="dot dot-lime"></span>TP</span>' +
         '<span class="legend-chip"><span class="dot dot-poi"></span>Zon POI</span>' +
       '</div>' +
-      (demo ? '<p class="chart-note">Zon POI ilustrasi · bar &amp; level sebenar (Swissquote)</p>' : '') +
     '</section>';
 
     // Grid level
     html += '<section class="card" aria-label="Level signal">' +
       '<div class="card-head"><h3>Level</h3>' + (sig.timeframe ? '<span class="chip chip-muted">' + esc(sig.timeframe) + '</span>' : '') + '</div>' +
-      levelsGridHTML(sig, demo) +
-      (demo && sig.poi_note ? '<p class="signal-note">' + esc(sig.poi_note) + '</p>' : '') +
+      levelsGridHTML(sig) +
     '</section>';
 
     // Sebab entry + confluence
@@ -1214,34 +1159,11 @@
     lotEl.textContent = fmtNum(lot, 2);
   }
 
-  /* ---------- Tools: currency converter (demo) ---------- */
-
-  // Kadar demo disebut kepada USD
-  var RATES_USD = { USD: 1, MYR: 1 / 4.25, EUR: 1.08, GBP: 1.27 };
-
-  function convert() {
-    var amount = parseFloat($('#convAmount').value);
-    var from = $('#convFrom').value;
-    var to = $('#convTo').value;
-    var out = $('#convResult');
-    if (!(amount >= 0) || !RATES_USD[from] || !RATES_USD[to]) {
-      out.textContent = '–';
-      return;
-    }
-    var result = amount * RATES_USD[from] / RATES_USD[to];
-    out.textContent = to + ' ' + fmtNum(result, 2);
-  }
-
   function initTools() {
     ['calcBalance', 'calcRisk', 'calcEntry', 'calcSl'].forEach(function (id) {
       $('#' + id).addEventListener('input', calcPosition);
     });
-    ['convAmount', 'convFrom', 'convTo'].forEach(function (id) {
-      $('#' + id).addEventListener('input', convert);
-      $('#' + id).addEventListener('change', convert);
-    });
     calcPosition();
-    convert();
   }
 
   /* ---------- Online / offline ---------- */
@@ -1347,82 +1269,6 @@
     if (isIOS() && !isStandalone()) showInstallBanner();
   }
 
-  /* ---------- Notifikasi (demo) ---------- */
-
-  function notifySupported() {
-    return 'Notification' in window;
-  }
-
-  function setNotifyUI(on) {
-    $('#notifyToggle').setAttribute('aria-checked', on ? 'true' : 'false');
-  }
-
-  function showDemoNotification() {
-    var title = 'TraderWatch';
-    var options = {
-      body: 'Notifikasi diaktifkan. Signal baru akan dihantar ke peranti ini.',
-      icon: './icons/icon-192.png',
-      tag: 'tw-demo'
-    };
-    if (state.swReg && state.swReg.showNotification) {
-      state.swReg.showNotification(title, options);
-    } else {
-      try { new Notification(title, options); } catch (e) { /* abaikan */ }
-    }
-  }
-
-  function initNotifications() {
-    var toggle = $('#notifyToggle');
-    var status = $('#notifyStatus');
-    var demoNote = 'Demo sahaja — push sebenar perlukan backend.';
-
-    if (!notifySupported()) {
-      status.textContent = 'Pelayar ini tidak menyokong notifikasi.';
-      toggle.disabled = true;
-      return;
-    }
-
-    var stored = null;
-    try { stored = localStorage.getItem('tw-notify'); } catch (e) { /* abaikan */ }
-    setNotifyUI(stored === '1' && Notification.permission === 'granted');
-
-    toggle.addEventListener('click', function () {
-      var on = toggle.getAttribute('aria-checked') === 'true';
-      if (on) {
-        setNotifyUI(false);
-        try { localStorage.setItem('tw-notify', '0'); } catch (e) { /* abaikan */ }
-        status.textContent = 'Notifikasi dimatikan. ' + demoNote;
-        return;
-      }
-      if (Notification.permission === 'granted') {
-        setNotifyUI(true);
-        try { localStorage.setItem('tw-notify', '1'); } catch (e) { /* abaikan */ }
-        status.textContent = demoNote;
-        showDemoNotification();
-        return;
-      }
-      if (Notification.permission === 'denied') {
-        status.textContent = 'Notifikasi disekat oleh pelayar — benarkan dalam tetapan tapak.';
-        return;
-      }
-      Notification.requestPermission().then(function (perm) {
-        if (perm === 'granted') {
-          setNotifyUI(true);
-          try { localStorage.setItem('tw-notify', '1'); } catch (e) { /* abaikan */ }
-          status.textContent = demoNote;
-          showDemoNotification();
-        } else {
-          setNotifyUI(false);
-          status.textContent = 'Kebenaran tidak diberikan. ' + demoNote;
-        }
-      });
-    });
-
-    $('#bellBtn').addEventListener('click', function () {
-      location.hash = '#/account';
-    });
-  }
-
   /* ---------- Init ---------- */
 
   function init() {
@@ -1441,7 +1287,6 @@
     }
     $('#year').textContent = String(new Date().getFullYear());
 
-    initViewMode();
     initRouting();
     initMarkets();
     initSignal();
@@ -1449,7 +1294,6 @@
     initTools();
     initNetwork();
     initInstall();
-    initNotifications();
 
     // Refresh (delegated — butang dalam empty state dijana dinamik)
     $('#signalCard').addEventListener('click', function (e) {

@@ -6,16 +6,16 @@
  *  - Pihak ketiga (TradingView): network sahaja, jangan cache
  *  - Push: sedia untuk VAPID (payload JSON {title, body, url, tag})
  */
-const VERSION = 'tw-pwa-v5';
+const VERSION = 'tw-pwa-v6';
 const SHELL_CACHE = VERSION + '-shell';
 const DATA_CACHE = VERSION + '-data';
 
 const SHELL_ASSETS = [
   './',
   './index.html',
-  './app.css?v=20261120c',
-  './app.js?v=20261120c',
-  './chart.js?v=20261120c',
+  './app.css?v=20261120d',
+  './app.js?v=20261120d',
+  './chart.js?v=20261120d',
   './manifest.webmanifest',
   './icons/icon-192.png',
   './icons/icon-512.png',

@@ -14,9 +14,9 @@
   <link rel="manifest" href="./manifest.webmanifest">
   <link rel="icon" type="image/png" sizes="192x192" href="./icons/icon-192.png">
   <link rel="apple-touch-icon" href="./icons/icon-180.png">
-  <link rel="stylesheet" href="./app.css?v=20261120c">
-  <script src="./chart.js?v=20261120c" defer></script>
-  <script src="./app.js?v=20261120c" defer></script>
+  <link rel="stylesheet" href="./app.css?v=20261120d">
+  <script src="./chart.js?v=20261120d" defer></script>
+  <script src="./app.js?v=20261120d" defer></script>
 </head>
 <body>
   <div class="shell">
@@ -67,9 +67,6 @@
         </a>
         <div class="appbar-actions">
           <span class="net-pill" id="netPill" role="status"><span class="net-dot" aria-hidden="true"></span><span id="netLabel">LIVE</span></span>
-          <button class="icon-btn" id="bellBtn" type="button" aria-label="Notifikasi signal">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9a6 6 0 0 1 12 0c0 5 2 6 2 6H4s2-1 2-6"/><path d="M10 19a2 2 0 0 0 4 0"/></svg>
-          </button>
         </div>
       </header>
 
@@ -95,10 +92,6 @@
               <h2>Signals</h2>
               <p class="greet-date">Signal AI · XAU/USD · XAG/USD · BTC</p>
             </div>
-            <div class="seg-toggle" id="viewModeToggle" role="group" aria-label="Mod paparan">
-              <button class="seg-btn" type="button" data-viewmode="tetamu" aria-pressed="false">Tetamu</button>
-              <button class="seg-btn active" type="button" data-viewmode="ahli" aria-pressed="true">Ahli (demo)</button>
-            </div>
           </div>
 
           <section class="card hero-card" id="heroCard" aria-label="Signal semasa">
@@ -112,17 +105,6 @@
               <div class="skeleton sk-line w40"></div>
             </div>
           </section>
-
-          <a class="card demo-card" href="#/signal?demo=1" aria-label="Demo replay — signal sebenar XAUUSD 26 Oktober 2026">
-            <span class="chip chip-demo">DEMO REPLAY · data sebenar 26 Okt</span>
-            <div class="demo-row">
-              <span class="signal-pair">XAU/USD</span>
-              <span class="chip chip-buy">BUY</span>
-              <span class="demo-meta">RR 1.89 · EXPIRED</span>
-              <svg class="demo-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>
-            </div>
-            <p class="demo-sub">Chart beranotasi + sebab entry · bahan pendidikan</p>
-          </a>
 
           <a class="card perf-card" id="homePerfCard" href="#/performance" aria-label="Prestasi signal — lihat prestasi penuh">
             <div class="perf-card-top">
@@ -153,8 +135,8 @@
 
           <div class="stat-grid stat-grid-sm" aria-label="Statistik platform">
             <div class="stat-tile">
-              <span class="stat-value" id="statMembers">–</span>
-              <span class="stat-label">Ahli</span>
+              <span class="stat-value" id="statPairs">3</span>
+              <span class="stat-label">Pair dipantau</span>
             </div>
             <div class="stat-tile">
               <span class="stat-value" id="statActive">–</span>
@@ -247,7 +229,7 @@
         <section class="screen" id="screen-tools" data-route="tools" aria-label="Tools" hidden>
           <div class="greeting">
             <h2>Tools</h2>
-            <p class="greet-date">Alat risiko &amp; penukar mata wang</p>
+            <p class="greet-date">Alat pengurusan risiko</p>
           </div>
 
           <section class="card" aria-label="Kalkulator saiz posisi">
@@ -263,11 +245,11 @@
               </label>
               <label class="field">
                 <span>Entry</span>
-                <input type="number" id="calcEntry" inputmode="decimal" min="0" step="any" placeholder="cth. 4010.50">
+                <input type="number" id="calcEntry" inputmode="decimal" min="0" step="any" placeholder="4010.50">
               </label>
               <label class="field">
                 <span>Stop Loss</span>
-                <input type="number" id="calcSl" inputmode="decimal" min="0" step="any" placeholder="cth. 4003.20">
+                <input type="number" id="calcSl" inputmode="decimal" min="0" step="any" placeholder="4003.20">
               </label>
             </div>
             <div class="calc-output">
@@ -287,41 +269,6 @@
             </p>
           </section>
 
-          <section class="card" aria-label="Penukar mata wang">
-            <div class="card-head">
-              <h3>Currency converter</h3>
-              <span class="chip chip-muted">demo rates</span>
-            </div>
-            <div class="conv-row">
-              <label class="field">
-                <span>Jumlah</span>
-                <input type="number" id="convAmount" inputmode="decimal" min="0" step="any" value="100">
-              </label>
-              <label class="field">
-                <span>Dari</span>
-                <select id="convFrom">
-                  <option value="USD" selected>USD</option>
-                  <option value="MYR">MYR</option>
-                  <option value="EUR">EUR</option>
-                  <option value="GBP">GBP</option>
-                </select>
-              </label>
-              <label class="field">
-                <span>Ke</span>
-                <select id="convTo">
-                  <option value="USD">USD</option>
-                  <option value="MYR" selected>MYR</option>
-                  <option value="EUR">EUR</option>
-                  <option value="GBP">GBP</option>
-                </select>
-              </label>
-            </div>
-            <div class="conv-result">
-              <span class="stat-label">Hasil</span>
-              <span class="stat-value lime" id="convResult">–</span>
-            </div>
-            <p class="formula">Kadar demo: USD→MYR 4.25 · EUR→USD 1.08 · GBP→USD 1.27</p>
-          </section>
         </section>
 
         <!-- ================= LEARN ================= -->
@@ -399,8 +346,8 @@
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 5-5.5 8-5.5s6.5 1.5 8 5.5"/></svg>
             </div>
             <div class="profile-body">
-              <h3>Mod tetamu</h3>
-              <p>Log masuk untuk lihat level penuh signal &amp; dashboard.</p>
+              <h3>Log masuk ke akaun anda</h3>
+              <p>Daftar percuma untuk akses penuh signal, chart beranotasi dan dashboard.</p>
               <div class="btn-row">
                 <a class="btn btn-primary btn-sm" href="https://traderwatch.org/login.html">Log masuk</a>
                 <a class="btn btn-ghost btn-sm" href="https://traderwatch.org/login.html?mode=signup">Daftar percuma</a>
@@ -418,7 +365,7 @@
               <li>Dashboard penuh &amp; rekod keputusan</li>
             </ul>
             <a class="btn btn-primary btn-block" href="https://traderwatch.org/login.html?mode=signup">Daftar percuma</a>
-            <p class="plan-note">Satu tier untuk semua ahli — tiada langganan, tiada naik taraf.</p>
+            <p class="plan-note">Satu tier untuk semua ahli — akses penuh, tanpa langganan.</p>
           </section>
 
           <section class="card" aria-label="Tetapan app">
@@ -436,15 +383,6 @@
                 <span>Pasang di skrin utama untuk akses pantas.</span>
               </div>
               <button class="btn btn-ghost btn-sm" id="accountInstall" type="button">Install</button>
-            </div>
-            <div class="setting-row">
-              <div class="setting-text">
-                <strong id="notifyLabel">Notifikasi signal</strong>
-                <span id="notifyStatus">Demo sahaja — push sebenar perlukan backend.</span>
-              </div>
-              <button class="switch" id="notifyToggle" type="button" role="switch" aria-checked="false" aria-labelledby="notifyLabel">
-                <span class="knob" aria-hidden="true"></span>
-              </button>
             </div>
           </section>
 
@@ -470,7 +408,7 @@
 
           <section class="card disclosure-card" aria-label="Penafian risiko">
             <h3>Penafian risiko</h3>
-            <p>Trading forex, logam dan kripto melibatkan risiko kerugian yang besar dan mungkin tidak sesuai untuk semua pelabur. Anda boleh kehilangan sebahagian atau keseluruhan modal. Prestasi lepas bukan jaminan keputusan akan datang. Signal dijana secara automatik oleh enjin AI dan boleh lewat, tersilap atau tidak_triggered. Gunakan wang yang anda sanggup hilang dan dapatkan nasihat kewangan bebas jika perlu.</p>
+            <p>Trading forex, logam dan kripto melibatkan risiko kerugian yang besar dan mungkin tidak sesuai untuk semua pelabur. Anda boleh kehilangan sebahagian atau keseluruhan modal. Prestasi lepas bukan jaminan keputusan akan datang. Signal dijana secara automatik oleh enjin AI dan mungkin lewat atau tersilap. Gunakan wang yang anda sanggup hilang dan dapatkan nasihat kewangan bebas jika perlu.</p>
             <p class="partner-note">Partner disclosure: TraderWatch mungkin menerima komisen daripada pautan partner broker. Ini tidak mengubah harga yang anda bayar dan tidak mempengaruhi keputusan enjin signal.</p>
           </section>
 

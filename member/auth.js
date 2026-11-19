@@ -1,13 +1,13 @@
 /* TraderWatch Member — auth.js
  * Auth Supabase SEBENAR (corak rasmi dashboard lama: supabase-js 2.45.4 CDN,
  * getSession(), profiles.select('name,plan'), RPC get_signals()).
- * Dimuat sebelum app.js.Expose window.TWAuth + event 'tw-auth-ready'.
+ * Dimuat sebelum app.js. Expose window.TWAuth + event 'tw-auth-ready'.
  *
  * Guard:
  *  - Tiada session + ONLINE  → redirect ../login.html?next=%2Fmember%2F
- *  - Tiada session + OFFLINE → mod tetamu cache + banner offline (app mesti buka offline)
+ *  - Tiada session + OFFLINE → mod cache + banner offline (app mesti buka offline)
  *  - Ada session (localStorage supabase) → mod ahli, walaupun offline
- *  - CDN supabase gagal load → app shell tetap jalan, mod tetamu, jangan halaman kosong
+ *  - CDN supabase gagal load → app shell tetap jalan, tanpa sesi, jangan halaman kosong
  */
 (function () {
   'use strict';
@@ -108,12 +108,12 @@
     beacon('diag_shown', diagDetail('panel'));
     var inApp = inAppBrowser();
     var punca = blocked
-      ? 'Pelayar anda menyekat data laman (cookies / localStorage). Session login tidak dapat disimpan, jadi setiap halaman melantun balik ke login.'
+      ? 'Pelayar anda menyekat penyimpanan data laman, jadi sesi login tidak dapat dikekalkan. Sila benarkan cookies untuk traderwatch.org dan cuba lagi.'
       : (stored
-        ? 'Session lama dijumpai tetapi tidak sah (expired / refresh gagal). Log masuk semula diperlukan.'
-        : 'Session tidak dijumpai selepas login. Ini biasanya berlaku dalam mod private / incognito, dalam app installed yang berasingan daripada browser, atau pelayar yang memadam data laman.');
+        ? 'Sesi login anda telah tamat tempoh. Sila log masuk semula untuk meneruskan.'
+        : 'Sesi login tidak dijumpai. Ini biasanya berlaku dalam mod private / incognito atau apabila pelayar memadam data laman. Sila log masuk semula melalui pelayar biasa.');
     var inAppWarn = inApp
-      ? '<p style="margin:0 0 14px;background:rgba(255,212,121,.12);border:1px solid rgba(255,212,121,.4);border-radius:12px;padding:12px;color:#ffd479;font-size:13.5px"><b>Browser aplikasi dikesan</b> (Telegram / WhatsApp / chat). Session tidak kekal dalam browser ini — setiap kali dibuka, ia mula kosong. Ketik <b>⋯</b> → <b>&quot;Open in Safari / Chrome&quot;</b>, kemudian log masuk di browser biasa untuk akses kekal.</p>'
+      ? '<p style="margin:0 0 14px;background:rgba(255,212,121,.12);border:1px solid rgba(255,212,121,.4);border-radius:12px;padding:12px;color:#ffd479;font-size:13.5px"><b>Pelayar dalam aplikasi dikesan</b> (Telegram / WhatsApp / chat). Sesi login tidak kekal dalam pelayar ini. Ketik <b>⋯</b> → <b>&quot;Open in Safari / Chrome&quot;</b>, kemudian log masuk di pelayar biasa untuk akses kekal.</p>'
       : '';
     var div = document.createElement('div');
     div.id = 'twAuthDiag';
@@ -127,26 +127,18 @@
       '<ol style="margin:0 0 18px;padding-left:20px;color:#93a096;font-size:13.5px;display:grid;gap:8px">' +
       '<li>Buka <b style="color:#f2f5ef">traderwatch.org/login.html</b> terus dalam tetingkap <b style="color:#f2f5ef">Safari / Chrome biasa</b> — bukan mod private, bukan app installed.</li>' +
       '<li>iPhone: Settings → Safari → pastikan <b style="color:#f2f5ef">Block All Cookies</b> dimatikan.</li>' +
-      '<li>Akaun baru: klik link pengesahan dalam emel dahulu (check spam), kemudian log masuk.</li>' +
-      '<li>Jika guna app installed: log masuk melalui pelayar biasa dahulu, atau install semula app dari traderwatch.org.</li>' +
+      '<li>Akaun baru: klik pautan pengesahan dalam emel dahulu (semak folder spam), kemudian log masuk.</li>' +
+      '<li>Jika guna app yang dipasang: log masuk melalui pelayar biasa dahulu, atau pasang semula app dari traderwatch.org.</li>' +
       '</ol>' +
       '<div style="display:flex;gap:10px;margin-bottom:16px">' +
       '<button id="twDiagRetry" type="button" style="flex:1;background:#c6f36b;color:#10170b;border:0;border-radius:14px;padding:13px;font-weight:750;font-size:14px;cursor:pointer">Cuba lagi</button>' +
       '<button id="twDiagLogin" type="button" style="flex:1;background:transparent;color:#f2f5ef;border:1px solid #26332a;border-radius:14px;padding:13px;font-weight:750;font-size:14px;cursor:pointer">Halaman login</button>' +
       '</div>' +
-      '<details style="color:#93a096;font-size:11.5px"><summary style="cursor:pointer">Butiran teknikal (untuk admin)</summary>' +
-      '<pre style="white-space:pre-wrap;background:#121813;border:1px solid #26332a;border-radius:12px;padding:12px;margin-top:8px;font-size:11px">' +
-      'storageOK: ' + !blocked + '\n' +
-      'storedToken: ' + (stored ? 'ada (expires_at ' + stored.expires_at + ')' : 'tiada') + '\n' +
-      'online: ' + navigator.onLine + '\n' +
-      'referrer: ' + (document.referrer || '(tiada)') + '\n' +
-      'ua: ' + navigator.userAgent.slice(0, 160) +
-      '</pre></details>' +
       '</div>';
     document.body.appendChild(div);
     document.getElementById('twDiagRetry').addEventListener('click', function () { location.href = './'; });
     document.getElementById('twDiagLogin').addEventListener('click', function () { location.href = LOGIN_URL; });
-    guest(); // app di belakang tetap render (mod tetamu), panel di atas
+    guest(); // app di belakang tetap render, panel di atas
   }
 
   function guest() {
@@ -226,7 +218,7 @@
   }
 
   function boot() {
-    // CDN gagal load (offline pertama kali) → shell tetap jalan, mod tetamu.
+    // CDN gagal load (offline pertama kali) → shell tetap jalan, tanpa sesi.
     if (!window.supabase || !window.supabase.createClient) { guest(); return; }
 
     var sb;
