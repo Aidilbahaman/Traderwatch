@@ -24,6 +24,7 @@
     signals: [],
     isMember: false,
     plan: 'free',
+    isPaid: false,
     signOut: function () { return Promise.resolve(); }
   };
   window.TWAuth = auth;
@@ -103,6 +104,7 @@
     auth.signals = [];
     auth.isMember = false;
     auth.plan = 'free';
+    auth.isPaid = false;
     ready();
   }
 
@@ -146,7 +148,8 @@
     var cached = readCache();
     auth.profile = (cached && cached.profile) || { name: fallbackName(session), plan: 'free' };
     auth.signals = (cached && Array.isArray(cached.signals)) ? cached.signals : [];
-    auth.plan = auth.profile.plan === 'pro' ? 'pro' : 'free';
+    auth.plan = String(auth.profile.plan || 'free').toLowerCase();
+    auth.isPaid = auth.plan !== 'free';
     ready(); // render segera (cache/offline), kemudian segar semula di bawah
 
     var uid = session.user && session.user.id;
@@ -161,9 +164,10 @@
 
     return Promise.all([pP, sP]).then(function (res) {
       var p = res[0], s = res[1];
-      if (p) auth.profile = { name: p.name || fallbackName(session), plan: p.plan === 'pro' ? 'pro' : 'free' };
+      if (p) auth.profile = { name: p.name || fallbackName(session), plan: String(p.plan || 'free').toLowerCase() };
       if (s) auth.signals = s;
-      auth.plan = auth.profile.plan === 'pro' ? 'pro' : 'free';
+      auth.plan = String(auth.profile.plan || 'free').toLowerCase();
+    auth.isPaid = auth.plan !== 'free';
       if (p || s) writeCache();
       ready();
     });
