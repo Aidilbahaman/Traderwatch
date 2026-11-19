@@ -1,71 +1,542 @@
 <!doctype html>
-<html lang="en">
+<html lang="ms">
 <head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#090c0a">
-<meta name="description" content="Trader Watch — market context, structured forex setups and practical risk tools.">
-<title>Trader Watch — Trade with clarity</title>
-<style>
-:root{--bg:#090c0a;--surface:#111713;--surface2:#151e18;--line:#28352c;--ink:#f2f5ef;--muted:#9aa69b;--lime:#c6f36b;--lime2:#a8d94d;--red:#ff817d;--max:1180px;--radius:22px}
-*{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:85px}body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.55 Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;letter-spacing:-.018em}a{color:inherit;text-decoration:none}button,input,select{font:inherit}button{cursor:pointer}a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--lime);outline-offset:3px}.wrap{width:min(var(--max),calc(100% - 44px));margin:auto}.announce{background:#c6f36b;color:#11190b;text-align:center;padding:8px 14px;font-size:11px;font-weight:750;letter-spacing:.045em}.nav{height:76px;position:sticky;top:0;z-index:30;background:#090c0ae8;backdrop-filter:blur(18px);border-bottom:1px solid #ffffff10}.navin{height:100%;display:flex;align-items:center;justify-content:space-between;gap:25px}.brand{display:flex;align-items:center;gap:10px;font-weight:900;font-size:17px;letter-spacing:-.055em}.mark{width:35px;height:35px;border-radius:11px;background:var(--lime);color:#0c1308;display:grid;place-items:center;font-size:19px;font-weight:950}.brand small{display:block;color:#839084;font-size:9px;letter-spacing:.14em;font-weight:700}.links{display:flex;align-items:center;gap:26px;color:#b5beb5;font-size:12px}.links a:hover{color:var(--lime)}.actions{display:flex;align-items:center;gap:10px}.btn{border:1px solid var(--line);border-radius:12px;padding:11px 16px;background:transparent;color:var(--ink);font-size:12px;font-weight:750;display:inline-flex;align-items:center;justify-content:center;gap:9px;transition:.2s}.btn:hover{transform:translateY(-2px);border-color:#7c995b}.btn.primary{background:var(--lime);border-color:var(--lime);color:#10170b}.btn.primary:hover{background:#d5ff82}.menu{display:none;background:none;color:white;border:0;font-size:23px}.hero{padding:85px 0 70px;position:relative;overflow:hidden}.hero:before{content:"";position:absolute;width:620px;height:620px;border-radius:50%;background:radial-gradient(circle,#9bda4221,transparent 68%);right:-190px;top:-240px;pointer-events:none}.herogrid{display:grid;grid-template-columns:1.05fr .95fr;gap:55px;align-items:center;position:relative}.eyebrow{display:inline-flex;align-items:center;gap:9px;color:var(--lime);font-size:10px;font-weight:850;letter-spacing:.17em;text-transform:uppercase}.eyebrow:before{content:"";width:20px;height:1px;background:var(--lime)}h1{font-size:clamp(46px,6vw,76px);line-height:.99;letter-spacing:-.075em;margin:22px 0 22px;max-width:680px}h1 span{color:var(--lime)}.hero-copy{font-size:16px;color:#aab5aa;max-width:520px;line-height:1.75}.herobuttons{display:flex;gap:11px;flex-wrap:wrap;margin:29px 0 21px}.disclaimer{color:#7e8a80;font-size:10px;max-width:490px}.visual{position:relative;min-width:0}.chartbox{border:1px solid #354237;background:linear-gradient(145deg,#172119,#0d120e);border-radius:25px;padding:19px;box-shadow:0 28px 100px #0008;transform:perspective(900px) rotateY(-5deg) rotateX(2deg)}.charttop{display:flex;align-items:center;justify-content:space-between;gap:10px}.charttitle{font-weight:800;font-size:13px}.chartsub{font-size:10px;color:var(--muted)}.live{font-size:9px;color:var(--lime);border:1px solid #c6f36b40;background:#c6f36b10;padding:5px 8px;border-radius:20px}.chartprice{font-size:28px;font-weight:800;letter-spacing:-.05em;margin-top:20px}.chartprice small{font-size:11px;color:var(--lime);letter-spacing:0}.chartsvg{width:100%;height:220px;margin-top:10px}.chartfoot{display:flex;justify-content:space-between;color:#758176;font-size:9px}.floatcard{position:absolute;bottom:-28px;left:-35px;background:#18221a;border:1px solid #39493b;border-radius:16px;padding:13px 16px;box-shadow:0 15px 40px #0008}.floatcard small{display:block;color:var(--muted);font-size:9px}.floatcard strong{font-size:18px;color:var(--lime)}.trust{border-top:1px solid #ffffff10;border-bottom:1px solid #ffffff10;padding:21px 0}.trustin{display:flex;align-items:center;justify-content:space-between;gap:15px;flex-wrap:wrap}.trustlabel{font-size:10px;color:#778378;text-transform:uppercase;letter-spacing:.12em}.trustitem{font-size:12px;color:#b5c0b5;font-weight:700;display:flex;align-items:center;gap:8px}.trustitem b{color:var(--lime);font-size:16px}.section{padding:95px 0}.sectionhead{max-width:640px;margin-bottom:36px}.kicker{color:var(--lime);font-size:10px;font-weight:850;letter-spacing:.16em;text-transform:uppercase}.section h2{font-size:clamp(31px,4vw,48px);letter-spacing:-.065em;line-height:1.05;margin:12px 0}.sectionhead p{color:var(--muted);font-size:14px;max-width:570px}.steps{display:grid;grid-template-columns:repeat(4,1fr);gap:13px}.step{padding:23px;border:1px solid var(--line);border-radius:var(--radius);background:linear-gradient(145deg,#151d17,#0e130f);min-height:205px}.stepno{font-size:11px;color:var(--lime);letter-spacing:.1em}.stepicon{font-size:23px;margin:20px 0 12px}.step h3{font-size:15px;margin:0 0 8px}.step p{font-size:12px;color:var(--muted);margin:0}.signals{background:linear-gradient(180deg,#101710,#0b100c);border-top:1px solid #ffffff0b;border-bottom:1px solid #ffffff0b}.signalgrid{display:grid;grid-template-columns:.8fr 1.2fr;gap:45px;align-items:center}.signalintro p{color:var(--muted);font-size:13px}.signalcard{border:1px solid #344234;border-radius:22px;background:#111a13;padding:22px}.signalhead{display:flex;justify-content:space-between;align-items:center;gap:10px}.tag{font-size:9px;border:1px solid #c6f36b40;color:var(--lime);border-radius:20px;padding:5px 9px}.signalpair{display:flex;align-items:center;gap:11px;margin:20px 0}.goldicon{width:42px;height:42px;border-radius:14px;background:#40351c;color:#f1c96c;display:grid;place-items:center;font-weight:900}.signalpair strong{display:block;font-size:17px}.signalpair small{color:var(--muted);font-size:10px}.levels{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}.level{background:#ffffff07;border:1px solid #ffffff0b;padding:13px;border-radius:12px}.level small{display:block;color:#89968a;font-size:9px}.level strong{font-size:13px}.signalnote{font-size:10px;color:#89968a;margin:14px 0 0}.toolsgrid{display:grid;grid-template-columns:1fr 1fr;gap:15px}.tool{border:1px solid var(--line);border-radius:var(--radius);background:var(--surface);padding:25px}.tool h3{margin:8px 0;font-size:18px}.tool p{color:var(--muted);font-size:12px}.toolicon{font-size:21px;color:var(--lime)}.converter{display:flex;gap:8px;margin-top:20px}.converter input,.converter select{min-width:0;width:50%;padding:12px;border-radius:10px;border:1px solid #354238;background:#0b100c;color:white}.result{color:var(--lime);font-size:20px;font-weight:800;margin-top:12px}.plans{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}.plan{border:1px solid var(--line);background:var(--surface);border-radius:20px;padding:24px;position:relative}.plan.featured{border-color:#9fce58;background:linear-gradient(160deg,#1b281a,#111713);box-shadow:0 15px 50px #a6e4540c}.planname{font-size:12px;color:#aeb9ad;font-weight:700}.price{font-size:36px;font-weight:850;letter-spacing:-.07em;margin:12px 0 2px}.price small{font-size:11px;color:var(--muted);letter-spacing:0;font-weight:500}.plan p{color:var(--muted);font-size:11px;min-height:38px}.plan ul{list-style:none;padding:0;margin:20px 0 22px;display:grid;gap:10px;color:#c3cdc2;font-size:11px}.plan li:before{content:"✓";color:var(--lime);margin-right:9px}.plan .btn{width:100%}.popular{position:absolute;right:15px;top:15px;color:#11190b;background:var(--lime);padding:4px 8px;border-radius:20px;font-size:8px;font-weight:900;text-transform:uppercase;letter-spacing:.08em}.partner{padding:0 0 90px}.partnerbox{border:1px solid #3c4a37;border-radius:24px;background:radial-gradient(ellipse at 90% 50%,#b4e85a17,transparent 45%),#121a13;padding:34px;display:flex;align-items:center;justify-content:space-between;gap:25px}.partnerbox h2{font-size:clamp(25px,3vw,38px);letter-spacing:-.06em;margin:8px 0}.partnerbox p{color:var(--muted);font-size:12px;max-width:620px}.faq{max-width:820px}.faq details{border-bottom:1px solid var(--line);padding:18px 0}.faq summary{font-size:13px;font-weight:750;cursor:pointer;list-style:none;display:flex;justify-content:space-between;gap:15px}.faq summary:after{content:"＋";color:var(--lime);font-size:17px}.faq details[open] summary:after{content:"−"}.faq details p{color:var(--muted);font-size:12px;max-width:720px}.footer{border-top:1px solid #ffffff12;padding:35px 0 95px}.footergrid{display:flex;justify-content:space-between;gap:25px;align-items:flex-start}.footer p{font-size:10px;color:#849084;max-width:700px}.footlinks{display:flex;gap:17px;font-size:11px;color:#b5beb5;white-space:nowrap}.mobilecta{display:none}
-@media(max-width:850px){.links{gap:15px}.herogrid{gap:28px}.steps{grid-template-columns:repeat(2,1fr)}.signalgrid{gap:25px}.trustin{justify-content:center}.trustlabel{width:100%;text-align:center}.plans{gap:9px}.plan{padding:19px}}
-@media(max-width:650px){.wrap{width:min(100% - 32px,var(--max))}.announce{font-size:9px}.nav{height:64px}.brand{font-size:15px}.mark{width:32px;height:32px}.links,.actions .login{display:none}.menu{display:block}.actions .btn{padding:9px 12px;font-size:10px}.nav.open .links{display:flex;position:absolute;top:64px;left:0;right:0;background:#0c110d;border-bottom:1px solid var(--line);padding:18px 22px;flex-direction:column;align-items:flex-start;gap:18px}.hero{padding:55px 0 58px}.herogrid{grid-template-columns:1fr;gap:40px}.hero-copy{font-size:14px}.hero h1{font-size:clamp(45px,13vw,64px)}.chartbox{transform:none;padding:15px}.chartsvg{height:175px}.floatcard{left:10px;bottom:-24px}.trust{padding:18px 0}.trustin{gap:14px 20px}.trustitem{font-size:10px}.section{padding:68px 0}.sectionhead{margin-bottom:25px}.steps{gap:9px}.step{padding:16px;min-height:190px}.stepicon{margin:15px 0 10px}.signalgrid{grid-template-columns:1fr;gap:25px}.signalcard{padding:17px}.toolsgrid{grid-template-columns:1fr}.tool{padding:20px}.plans{grid-template-columns:1fr;gap:12px}.plan p{min-height:0}.plan.featured{order:-1}.partner{padding-bottom:65px}.partnerbox{padding:24px;display:block}.partnerbox .btn{margin-top:10px;width:100%}.footergrid{display:block}.footlinks{margin-top:20px;flex-wrap:wrap}.footer{padding-bottom:100px}.mobilecta{display:flex;position:fixed;z-index:25;bottom:0;left:0;right:0;padding:10px 15px calc(10px + env(safe-area-inset-bottom));background:#0b100df0;border-top:1px solid #ffffff16;backdrop-filter:blur(18px);gap:10px}.mobilecta .btn{flex:1}.mobilecta .btn.primary{flex:1.5}}
-@media(prefers-reduced-motion:reduce){*,*:before,*:after{scroll-behavior:auto!important;transition:none!important}}
-</style>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>TraderWatch — Read the Market</title>
+  <meta name="description" content="Signal AI automatik untuk XAU/USD, XAG/USD dan BTC. Chart, alat risiko dan pendidikan — satu app, boleh pasang, boleh offline.">
+  <meta name="theme-color" content="#0a0e0b">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="TraderWatch">
+  <meta name="application-name" content="TraderWatch">
+  <link rel="manifest" href="./app.webmanifest">
+  <link rel="icon" type="image/png" sizes="192x192" href="./icons/icon-192.png">
+  <link rel="apple-touch-icon" href="./icons/icon-180.png">
+  <link rel="stylesheet" href="./pwa.css?v=20261120r">
+  <script src="./chart.js?v=20261120r" defer></script>
+  <script src="./pwa.js?v=20261120r" defer></script>
 </head>
 <body>
-<div class="announce">MARKET EDUCATION · STRUCTURED SETUPS · PRACTICAL TRADING TOOLS</div>
-<header class="nav" id="navbar"><div class="wrap navin"><a class="brand" href="#"><span class="mark">T</span><span>TRADER WATCH<small>READ THE MARKET</small></span></a><nav class="links"><a href="#process">How it works</a><a href="#setups">Market setups</a><a href="#tools">Tools</a><a href="#membership">Membership</a><a href="#faq">FAQ</a></nav><div class="actions"><a class="btn login" href="https://traderwatch.org/login.html">Member login ↗</a><a class="btn primary" href="https://traderwatch.org/login.html?mode=signup">Get started <span>↗</span></a><button class="menu" id="menu" aria-label="Open navigation">☰</button></div></div></header>
-<main>
-<section class="hero"><div class="wrap herogrid"><div><div class="eyebrow">A smarter trading routine starts here</div><h1>Read the market.<br><span>Trade with a plan.</span></h1><p class="hero-copy">A focused space for forex traders to understand market context, review structured setups and make risk-aware decisions — without the noise.</p><div class="herobuttons"><a class="btn primary" href="#setups">Explore market setups <span>↗</span></a><a class="btn" href="#process">Discover the process <span>↓</span></a></div><p class="disclaimer">Educational information only. Trading leveraged products involves substantial risk. No signal guarantees a result.</p></div>
-<div class="visual"><div class="chartbox" style="padding:0;overflow:hidden"><div class="charttop" style="padding:19px 19px 6px"><div><div class="charttitle">XAU / USD <span style="color:#89968a;font-weight:500">· Gold</span></div><div class="chartsub">Live market chart · TradingView</div></div><span class="live">● LIVE</span></div><div id="heroChart" style="height:420px;width:100%"></div><div class="chartfoot" style="padding:6px 19px 16px"><span>LIVE PRICE</span><span>REAL MARKET DATA</span><span>TRADINGVIEW</span></div></div><div class="floatcard"><small>TRADING PRINCIPLE</small><strong>Risk first. Always.</strong></div></div></div></section>
-<div class="trust"><div class="wrap trustin"><span class="trustlabel">A clearer process for every decision</span><span class="trustitem"><b>01</b> Market context</span><span class="trustitem"><b>02</b> Structured setups</span><span class="trustitem"><b>03</b> Risk awareness</span><span class="trustitem"><b>04</b> Your decision</span></div></div>
-<section class="section" id="process"><div class="wrap"><div class="sectionhead"><div class="kicker">The Trader Watch approach</div><h2>Less noise.<br>More understanding.</h2><p>Good trading is a process, not a prediction. Use the platform to organise your thinking before you make a decision.</p></div><div class="steps"><article class="step"><div class="stepno">01 / LEARN</div><div class="stepicon">⌁</div><h3>Understand the context</h3><p>Explore market structure and the ideas behind a potential setup. Build your own reading skills.</p></article><article class="step"><div class="stepno">02 / REVIEW</div><div class="stepicon">⌖</div><h3>Review the levels</h3><p>See entry areas, invalidation and targets presented together for independent review.</p></article><article class="step"><div class="stepno">03 / PROTECT</div><div class="stepicon">◈</div><h3>Plan your risk</h3><p>Estimate position size and potential exposure before you consider placing an order.</p></article><article class="step"><div class="stepno">04 / DECIDE</div><div class="stepicon">↗</div><h3>Stay in control</h3><p>Verify prices with your broker. Decide whether an idea fits your own trading plan.</p></article></div></div></section>
-<style>
-.livecard{position:relative;overflow:hidden}
-.livecard .levels strong{filter:blur(6px);user-select:none}
-.livecard .signalnote{filter:blur(4px);user-select:none}
-.siglock{position:absolute;inset:0;display:flex;align-items:flex-end;justify-content:center;padding:0 0 18px;background:linear-gradient(180deg,rgba(9,12,10,0) 0%,rgba(9,12,10,.55) 32%,rgba(9,12,10,.94) 62%)}
-.siglockbox{position:relative;width:calc(100% - 26px);max-width:420px;text-align:center;border:1px solid #3d5142;border-radius:18px;padding:20px 18px;background:rgba(18,26,20,.92);backdrop-filter:blur(10px);box-shadow:0 22px 60px #000a}
-.siglockicon{display:inline-grid;place-items:center;width:38px;height:38px;border-radius:50%;background:#c6f36b;color:#0c1308;font-size:17px;margin-bottom:10px}
-.siglockbox strong{display:block;font-size:16px;letter-spacing:-.03em;margin-bottom:5px}
-.siglockbox p{margin:0 0 13px;color:#a9b6aa;font-size:11.5px;line-height:1.55}
-.siglockbox .btn{width:100%;justify-content:center}
-.sigstate{display:inline-flex;align-items:center;gap:5px;font-size:9px;font-weight:800;letter-spacing:.1em;padding:4px 9px;border-radius:999px;background:#c6f36b1f;color:#c6f36b;border:1px solid #c6f36b3d}
-.sigstate.closed{background:#ffffff12;color:#9aa69b;border-color:#ffffff1f}
-@media(max-width:620px){.siglock{padding-bottom:12px}.siglockbox{padding:16px 14px}}
-</style>
-<section class="section signals" id="setups"><div class="wrap signalgrid"><div class="signalintro"><div class="kicker">Market setups</div><h2>See the idea.<br>Understand the risk.</h2><p>Review structured market scenarios with clearly presented levels and context. Use them as a starting point for your own analysis — never as an instruction to enter a trade.</p><a class="btn primary" href="https://traderwatch.org/login.html">Explore member area ↗</a></div><div class="signalcard livecard"><div class="signalhead"><span class="eyebrow">Latest published setup</span><span class="sigstate" id="lsState">● LIVE</span></div><div class="signalpair"><div class="goldicon" id="lsIcon">Au</div><div><strong id="lsPair">XAU / USD</strong><small id="lsMeta">Loading latest setup…</small></div></div><div class="levels"><div class="level"><small>ENTRY</small><strong id="lsEntry">—</strong></div><div class="level"><small>STOP LOSS</small><strong id="lsSl">—</strong></div><div class="level"><small>TAKE PROFIT</small><strong id="lsTp">—</strong></div></div><p class="signalnote">Levels shown to members. Always confirm with your broker.</p><div class="siglock"><div class="siglockbox"><span class="siglockicon">🔒</span><strong>Register now for free</strong><p>Unlock 3 free signals every day — entry, stop loss and target included. No card required.</p><a class="btn primary" href="https://traderwatch.org/login.html?mode=signup">Create free account ↗</a></div></div></div></div></section>
-<section class="section" id="tools"><div class="wrap"><div class="sectionhead"><div class="kicker">Practical tools</div><h2>Useful utilities.<br>One trading workspace.</h2><p>Small tools to support your preparation and understanding. Reference calculations are not executable broker quotes.</p></div><div class="toolsgrid"><article class="tool"><div class="toolicon">⇄</div><h3>Currency converter</h3><p>Make a quick indicative conversion between common currencies. Reference rates may differ from your bank or broker.</p><div class="converter"><input id="amount" type="number" value="100" min="0" aria-label="Amount to convert"><select id="currency" aria-label="Currency pair"><option value="4.25">USD → MYR (demo)</option><option value="1.08">EUR → USD (demo)</option><option value="1.27">GBP → USD (demo)</option></select></div><div class="result" id="conversion">≈ RM 425.00</div><small style="color:#829083;font-size:9px">Illustrative rate for interface preview only.</small></article><article class="tool"><div class="toolicon">◎</div><h3>Ask Trader Watch</h3><p>Find quick answers about membership, platform access, signal terminology and risk concepts.</p><a class="btn" href="#faq" style="margin-top:13px">Browse common questions ↗</a></article></div></div></section>
-<section class="section" id="membership"><div class="wrap"><div class="sectionhead"><div class="kicker">Membership</div><h2>Choose your access.</h2><p>Start with the essentials. Upgrade when you need more room to explore. Confirm current billing terms and benefits before payment.</p></div><div class="plans"><article class="plan"><div class="planname">FREE MEMBER</div><div class="price">$0 <small>/ free</small></div><p>A simple way to get started with Trader Watch.</p><ul><li>Up to 3 signals daily</li><li>Member dashboard</li><li>Charts access</li></ul><a class="btn" href="https://traderwatch.org/login.html?mode=signup">Join free ↗</a></article><article class="plan featured"><span class="popular">More access</span><div class="planname">PRO MEMBER</div><div class="price">$20 <small>/ billing period TBC</small></div><p>For traders who want additional setup access.</p><ul><li>Additional signal access</li><li>Member dashboard</li><li>Clearly presented risk levels</li></ul><a class="btn primary" href="https://traderwatch.org/login.html?mode=signup">Choose Pro ↗</a></article><article class="plan"><div class="planname">MAX MEMBER</div><div class="price">$50 <small>/ billing period TBC</small></div><p>Expanded access for active members.</p><ul><li>Everything in Pro</li><li>Maximum available signal access</li><li>Member dashboard</li></ul><a class="btn" href="https://traderwatch.org/login.html?mode=signup">Choose Max ↗</a></article></div></div></section>
-<section class="partner"><div class="wrap"><div class="partnerbox"><div><div class="kicker">Broker welcome offer · Rinfinity</div><h2>Explore the $30 deposit bonus.</h2><p>Check eligibility, current promotion terms, trading-volume requirements and withdrawal conditions directly with the broker before depositing. A bonus is never a reason to take extra risk.</p><small style="color:#7f8c80;font-size:9px">Partner disclosure: Trader Watch may receive compensation through this link. Offer conditions are set by the broker.</small></div><a class="btn primary" href="https://rinfinity.com" target="_blank" rel="noopener noreferrer">Check broker offer ↗</a></div></div></section>
-<section class="section" id="faq" style="padding-top:15px"><div class="wrap faq"><div class="sectionhead"><div class="kicker">Good to know</div><h2>Before you get started.</h2><p>Clear expectations help you use the platform responsibly.</p></div><details><summary>Are the signals guaranteed to make money?</summary><p>No. Market setups are educational ideas for independent review, not guarantees or personal financial advice. Trading can result in the loss of some or all of your capital.</p></details><details><summary>Will my broker's price match a setup?</summary><p>Not always. Prices can differ by provider, spread, account type and timing. Verify current quotes and contract details with your own broker.</p></details><details><summary>Is the currency converter rate what my broker will use?</summary><p>No. Any reference conversion is indicative only. Banks and brokers may apply different rates, spreads, fees and conversion times.</p></details><details><summary>Is a broker bonus automatic?</summary><p>No. Eligibility and conditions are determined by the broker. Read the current deposit, trading-volume and withdrawal rules before registering or depositing.</p></details><details><summary>Is Trader Watch financial advice?</summary><p>No. The content is educational and informational. It does not consider your personal financial circumstances and should not be treated as investment advice or a recommendation to trade.</p></details></div></section>
-</main>
-<footer class="footer"><div class="wrap"><div class="footergrid"><div><a class="brand" href="#"><span class="mark">T</span><span>TRADER WATCH<small>READ THE MARKET</small></span></a><p>Risk disclosure: Forex and leveraged products carry substantial risk and may not be suitable for all investors. You may lose some or all of your capital. Past results do not indicate future results. Content and setups are educational and informational only, not investment advice. Trader Watch may receive compensation through partner links.</p><p>© <span id="year"></span> Trader Watch. All rights reserved.</p></div><div class="footlinks"><a href="#process">How it works</a><a href="#membership">Membership</a><a href="https://traderwatch.org/login.html">Member login</a></div></div></div></footer>
-<div class="mobilecta"><a class="btn" href="https://traderwatch.org/login.html">Login</a><a class="btn primary" href="https://traderwatch.org/login.html?mode=signup">Get started ↗</a></div>
-<script>
-const nav=document.getElementById('navbar');document.getElementById('menu').addEventListener('click',()=>nav.classList.toggle('open'));document.querySelectorAll('.links a').forEach(a=>a.addEventListener('click',()=>nav.classList.remove('open')));document.getElementById('year').textContent=new Date().getFullYear();function convert(){const n=Math.max(0,Number(document.getElementById('amount').value)||0),r=Number(document.getElementById('currency').value),myr=document.getElementById('currency').selectedIndex===0;document.getElementById('conversion').textContent='≈ '+(myr?'RM ':'$')+(n*r).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});}document.getElementById('amount').addEventListener('input',convert);document.getElementById('currency').addEventListener('change',convert);
-function mountHeroChart(){var host=document.getElementById('heroChart');if(!host||host.dataset.mounted)return;host.dataset.mounted='1';host.innerHTML='';var d=document.createElement('div');d.className='tradingview-widget-container';d.style.height='100%';var w=document.createElement('div');w.className='tradingview-widget-container__widget';w.style.height='100%';d.appendChild(w);var s=document.createElement('script');s.type='text/javascript';s.async=true;s.src='https://s3.tradingview.com/external-embedding/embed-widget-advanced-chart.js';s.innerHTML=JSON.stringify({symbol:'OANDA:XAUUSD',interval:'15',timezone:'Asia/Kuala_Lumpur',theme:'dark',style:'1',locale:'en',hide_side_toolbar:true,allow_symbol_change:false,save_image:false,withdateranges:false,hide_legend:false,autosize:true,backgroundColor:'rgba(17,23,19,1)',gridColor:'rgba(255,255,255,0.06)'});d.appendChild(s);host.appendChild(d)}
-if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',mountHeroChart)}else{mountHeroChart()}
-function fillLiveCard(){
- var card=document.getElementById('liveSetupCard'),st=document.getElementById('lsState'),pair=document.getElementById('lsPair'),meta=document.getElementById('lsMeta'),entry=document.getElementById('lsEntry'),sl=document.getElementById('lsSl'),tp=document.getElementById('lsTp'),icon=document.getElementById('lsIcon');
- if(!card||!pair)return;
- fetch('landing-signal.json?cb='+Date.now()).then(function(r){return r.ok?r.json():null}).then(function(s){
-   if(!s){meta.textContent='Setup tiada untuk masa ini.';st.classList.add('closed');st.textContent='● NO SETUP';return;}
-   var nm=s.pair.replace('/', ' / ');pair.textContent=nm;icon.textContent=s.pair.split('/')[0];
-   var status=s.status||'active';var side=s.side||'';
-   meta.textContent=s.timeframe+' · '+status.toUpperCase()+' ('+side+') · '+(s.posted_at||'').slice(0,16).replace('T',' ');
-   // Hanya setup yang masih benar-benar aktif dipaparkan LIVE.
-   // tp/sl/expired/cancelled/closed/void = TUTUP (bug: XAU #182 status 'tp'
-   // sebelum ini dipaparkan LIVE kepada pelawat).
-   var active=['active','live','pending'];
-   if(active.indexOf(status)>=0){st.textContent='● LIVE';}
-   else{st.classList.add('closed');st.textContent='● CLOSED';document.getElementById('liveSetupCard').querySelector('.siglock').style.display='none';}
-   entry.textContent=(typeof s.entry==='number'?s.entry.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}):s.entry||'—');
-   sl.textContent=(typeof s.sl==='number'?s.sl.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}):s.sl||'—');
-   tp.textContent=(typeof s.tp==='number'?s.tp.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}):s.tp||'—');
- }).catch(function(){});
-}
-if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',fillLiveCard)}else{fillLiveCard()}
-</script>
-</body></html>
+  <div class="shell">
+
+    <!-- Panel pitch (desktop sahaja) -->
+    <aside class="pitch" aria-label="Tentang app TraderWatch">
+      <div class="pitch-brand">
+        <span class="brand-mark" aria-hidden="true">T</span>
+        <span class="brand-name">TRADERWATCH</span>
+      </div>
+      <h1 class="pitch-title">Signals,<br>annotated.</h1>
+      <p class="pitch-sub">Signal AI untuk XAU/USD, XAG/USD dan BTC — chart beranotasi, terus di skrin utama telefon anda.</p>
+      <ul class="pitch-list">
+        <li>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 4v3"/><path d="M7 15v5"/><rect x="4.5" y="7" width="5" height="8" rx="1"/><path d="M17 3v4"/><path d="M17 17v4"/><rect x="14.5" y="7" width="5" height="10" rx="1"/></svg>
+          <div><strong>Lukisan entry/SL/TP pada chart</strong><span>Zon POI, risiko &amp; ganjaran dilukis terus pada candlestick.</span></div>
+        </li>
+        <li>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6h11"/><path d="M9 12h11"/><path d="M9 18h11"/><path d="m3.5 6 1 1 2-2"/><path d="m3.5 12 1 1 2-2"/><path d="m3.5 18 1 1 2-2"/></svg>
+          <div><strong>Sebab entry + checklist confluence</strong><span>Ringkasan Bahasa Melayu dan gate enjin bagi setiap signal.</span></div>
+        </li>
+        <li>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 8.5a15 15 0 0 1 20 0"/><path d="M5.5 12.5a10 10 0 0 1 13 0"/><path d="M9 16.5a5 5 0 0 1 6 0"/><circle cx="12" cy="20" r="1" fill="currentColor"/><path d="m3 3 18 18"/></svg>
+          <div><strong>Chart berfungsi offline</strong><span>Data bar dicache — chart tetap dipaparkan tanpa internet.</span></div>
+        </li>
+      </ul>
+      <button class="btn btn-primary btn-lg" id="pitchInstall" type="button">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M4 19h16"/></svg>
+        Install app
+      </button>
+      <p class="pitch-note">Educational only. Trading involves substantial risk.</p>
+    </aside>
+
+    <!-- App column -->
+    <div class="app-frame">
+
+      <!-- Banner offline -->
+      <div class="offline-banner" id="offlineBanner" role="status" hidden>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 8.5a15 15 0 0 1 20 0"/><path d="M5.5 12.5a10 10 0 0 1 13 0"/><path d="M9 16.5a5 5 0 0 1 6 0"/><circle cx="12" cy="20" r="1" fill="currentColor"/><path d="m3 3 18 18"/></svg>
+        Anda di luar talian — memaparkan data cache terakhir.
+      </div>
+
+      <!-- Top app bar -->
+      <header class="appbar">
+        <a class="appbar-brand" href="#/home" aria-label="TraderWatch — Home">
+          <span class="brand-mark" aria-hidden="true">T</span>
+          <span class="brand-name">TRADERWATCH</span>
+        </a>
+        <div class="appbar-actions">
+          <span class="net-pill" id="netPill" role="status"><span class="net-dot" aria-hidden="true"></span><span id="netLabel">LIVE</span></span>
+          <button class="icon-btn" id="bellBtn" type="button" aria-label="Notifikasi signal">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9a6 6 0 0 1 12 0c0 5 2 6 2 6H4s2-1 2-6"/><path d="M10 19a2 2 0 0 0 4 0"/></svg>
+          </button>
+        </div>
+      </header>
+
+      <!-- Banner install (boleh dismiss) -->
+      <div class="install-banner" id="installBanner" hidden>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M4 19h16"/></svg>
+        <div class="install-banner-text">
+          <strong>Pasang TraderWatch</strong>
+          <span>Akses pantas + offline di skrin utama.</span>
+        </div>
+        <button class="btn btn-primary btn-sm" id="installBannerBtn" type="button">Install</button>
+        <button class="icon-btn" id="installDismiss" type="button" aria-label="Tutup banner install">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 6 12 12"/><path d="m18 6-12 12"/></svg>
+        </button>
+      </div>
+
+      <main id="main">
+
+        <!-- ================= HOME (SIGNAL-FIRST) ================= -->
+        <section class="screen" id="screen-home" data-route="home" aria-label="Home" hidden>
+          <div class="home-head">
+            <div class="greeting">
+              <h2>Signals</h2>
+              <p class="greet-date">Signal AI · XAU/USD · XAG/USD · BTC</p>
+            </div>
+            <div class="seg-toggle" id="viewModeToggle" role="group" aria-label="Mod paparan">
+              <button class="seg-btn active" type="button" data-viewmode="tetamu" aria-pressed="true">Tetamu</button>
+              <button class="seg-btn" type="button" data-viewmode="ahli" aria-pressed="false">Ahli (demo)</button>
+            </div>
+          </div>
+
+          <section class="card hero-card" id="heroCard" aria-label="Signal semasa">
+            <div class="card-head">
+              <h3>Signal semasa</h3>
+              <span class="cache-badge" id="signalCacheBadge" hidden></span>
+            </div>
+            <div id="signalCard">
+              <div class="skeleton sk-line w60"></div>
+              <div class="skeleton sk-block"></div>
+              <div class="skeleton sk-line w40"></div>
+            </div>
+          </section>
+
+          <a class="card demo-card" href="#/signal?demo=1" aria-label="Demo replay — signal sebenar XAUUSD 26 Oktober 2026">
+            <span class="chip chip-demo">DEMO REPLAY · data sebenar 26 Okt</span>
+            <div class="demo-row">
+              <span class="signal-pair">XAU/USD</span>
+              <span class="chip chip-buy">BUY</span>
+              <span class="demo-meta">RR 1.89 · EXPIRED</span>
+              <svg class="demo-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>
+            </div>
+            <p class="demo-sub">Chart beranotasi + sebab entry · bahan pendidikan</p>
+          </a>
+
+          <a class="card perf-card" id="homePerfCard" href="#/performance" aria-label="Prestasi signal — lihat prestasi penuh">
+            <div class="perf-card-top">
+              <div class="perf-card-main">
+                <span class="stat-label">Prestasi · <span id="homePerfPeriod">30 hari</span></span>
+                <div class="perf-card-nums">
+                  <span class="perf-wr" id="homePerfWR">–</span>
+                  <span class="perf-netr" id="homePerfNetR">–</span>
+                </div>
+                <span class="perf-card-sub" id="homePerfSub">Memuatkan rekod…</span>
+              </div>
+              <span class="perf-spark-wrap" id="homePerfSpark" aria-hidden="true"></span>
+            </div>
+            <span class="perf-card-cta">Lihat prestasi penuh →</span>
+          </a>
+
+          <section class="card" aria-label="Keputusan terkini">
+            <div class="card-head">
+              <h3>Keputusan terkini</h3>
+              <span class="cache-badge" id="resultsCacheBadge" hidden></span>
+            </div>
+            <ul class="results-list" id="resultsList">
+              <li class="skeleton sk-row"></li>
+              <li class="skeleton sk-row"></li>
+              <li class="skeleton sk-row"></li>
+            </ul>
+          </section>
+
+          <div class="stat-grid stat-grid-sm" aria-label="Statistik platform">
+            <div class="stat-tile">
+              <span class="stat-value" id="statMembers">–</span>
+              <span class="stat-label">Ahli</span>
+            </div>
+            <div class="stat-tile">
+              <span class="stat-value" id="statActive">–</span>
+              <span class="stat-label">Signal aktif</span>
+            </div>
+            <div class="stat-tile">
+              <span class="stat-value" id="statClosed">–</span>
+              <span class="stat-label">Setup ditutup</span>
+            </div>
+          </div>
+
+          <p class="disclaimer">Educational only. Trading involves substantial risk.</p>
+        </section>
+
+        <!-- ================= MARKETS ================= -->
+        <section class="screen" id="screen-markets" data-route="markets" aria-label="Markets" hidden>
+          <div class="greeting">
+            <h2>Markets</h2>
+            <p class="greet-date">Chart langsung · timeframe M15</p>
+          </div>
+
+          <div class="chip-row" role="group" aria-label="Pilih pair">
+            <button class="chip chip-select active" type="button" data-symbol="OANDA:XAUUSD" aria-pressed="true">XAU/USD</button>
+            <button class="chip chip-select" type="button" data-symbol="OANDA:XAGUSD" aria-pressed="false">XAG/USD</button>
+            <button class="chip chip-select" type="button" data-symbol="FX:BTCUSD" aria-pressed="false">BTC/USD</button>
+          </div>
+
+          <div class="markets-mode-row">
+            <div class="seg-toggle" id="marketModeToggle" role="group" aria-label="Jenis chart">
+              <button class="seg-btn active" type="button" data-chartmode="app" aria-pressed="true">Chart app</button>
+              <button class="seg-btn" type="button" data-chartmode="tv" aria-pressed="false">TradingView live</button>
+            </div>
+          </div>
+
+          <div class="card chart-card">
+            <div id="appChartWrap">
+              <div class="chart-meta">
+                <span class="chip chip-muted" id="marketPairChip">XAU/USD · M15</span>
+                <span class="chart-badge" id="marketDataBadge" hidden></span>
+              </div>
+              <canvas id="marketCanvas" class="tw-canvas" aria-label="Chart candlestick M15"></canvas>
+              <div class="chart-offline chart-empty" id="marketChartEmpty" hidden>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 8.5a15 15 0 0 1 20 0"/><path d="M5.5 12.5a10 10 0 0 1 13 0"/><path d="M9 16.5a5 5 0 0 1 6 0"/><circle cx="12" cy="20" r="1" fill="currentColor"/><path d="m3 3 18 18"/></svg>
+                <strong>Chart perlukan data bar</strong>
+                <span>Sambung internet untuk memuatkan data bar terkini.</span>
+              </div>
+            </div>
+            <div id="chartBox" class="chart-box" aria-label="Chart TradingView" hidden></div>
+          </div>
+          <p class="disclaimer" id="marketDisclaimer">Data: Swissquote/Coinbase · bukan quote broker anda.</p>
+        </section>
+
+        <!-- ================= SIGNAL (detail, bukan tab) ================= -->
+        <section class="screen" id="screen-signal" data-route="signal" aria-label="Signal" hidden>
+          <a class="back-btn" href="#/home">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 6-6 6 6 6"/></svg>
+            Signals
+          </a>
+          <div id="signalDetail">
+            <div class="skeleton sk-line w60"></div>
+            <div class="skeleton sk-block"></div>
+            <div class="skeleton sk-line w40"></div>
+          </div>
+        </section>
+
+        <!-- ================= PERFORMANCE (detail, bukan tab) ================= -->
+        <section class="screen" id="screen-performance" data-route="performance" aria-label="Prestasi" hidden>
+          <a class="back-btn" href="#/home">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 6-6 6 6 6"/></svg>
+            Signals
+          </a>
+          <div class="greeting">
+            <h2>Prestasi</h2>
+            <p class="greet-date">Rekod sebenar enjin AI · sejak 19 Okt 2026</p>
+          </div>
+          <div class="chip-row" id="perfPeriodChips" role="group" aria-label="Tempoh prestasi">
+            <button class="chip chip-select" type="button" data-days="7" aria-pressed="false">7 hari</button>
+            <button class="chip chip-select active" type="button" data-days="30" aria-pressed="true">30 hari</button>
+            <button class="chip chip-select" type="button" data-days="all" aria-pressed="false">Semua</button>
+          </div>
+          <div id="perfBody">
+            <div class="skeleton sk-line w40"></div>
+            <div class="skeleton sk-block"></div>
+            <div class="skeleton sk-block"></div>
+            <div class="skeleton sk-line w60"></div>
+          </div>
+        </section>
+
+        <!-- ================= TOOLS ================= -->
+        <section class="screen" id="screen-tools" data-route="tools" aria-label="Tools" hidden>
+          <div class="greeting">
+            <h2>Tools</h2>
+            <p class="greet-date">Alat risiko &amp; penukar mata wang</p>
+          </div>
+
+          <section class="card" aria-label="Kalkulator saiz posisi">
+            <div class="card-head"><h3>Kalkulator saiz posisi · XAUUSD</h3></div>
+            <div class="field-grid">
+              <label class="field">
+                <span>Balance (USD)</span>
+                <input type="number" id="calcBalance" inputmode="decimal" min="0" step="any" value="1000">
+              </label>
+              <label class="field">
+                <span>Risk %</span>
+                <input type="number" id="calcRisk" inputmode="decimal" min="0" max="100" step="any" value="1">
+              </label>
+              <label class="field">
+                <span>Entry</span>
+                <input type="number" id="calcEntry" inputmode="decimal" min="0" step="any" placeholder="cth. 4010.50">
+              </label>
+              <label class="field">
+                <span>Stop Loss</span>
+                <input type="number" id="calcSl" inputmode="decimal" min="0" step="any" placeholder="cth. 4003.20">
+              </label>
+            </div>
+            <div class="calc-output">
+              <div class="calc-out-tile">
+                <span class="stat-label">Risk USD</span>
+                <span class="stat-value lime" id="calcRiskUsd">–</span>
+              </div>
+              <div class="calc-out-tile">
+                <span class="stat-label">Lot size</span>
+                <span class="stat-value lime" id="calcLot">–</span>
+              </div>
+            </div>
+            <p class="formula">lot = riskUSD ÷ (|entry − SL| × 100) · 1 lot XAU = 100 oz</p>
+            <p class="warn-note">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 2.5 20h19L12 3z"/><path d="M12 10v4"/><circle cx="12" cy="17" r="0.5" fill="currentColor"/></svg>
+              Reference calculation only — sahkan dengan broker.
+            </p>
+          </section>
+
+          <section class="card" aria-label="Penukar mata wang">
+            <div class="card-head">
+              <h3>Currency converter</h3>
+              <span class="chip chip-muted">demo rates</span>
+            </div>
+            <div class="conv-row">
+              <label class="field">
+                <span>Jumlah</span>
+                <input type="number" id="convAmount" inputmode="decimal" min="0" step="any" value="100">
+              </label>
+              <label class="field">
+                <span>Dari</span>
+                <select id="convFrom">
+                  <option value="USD" selected>USD</option>
+                  <option value="MYR">MYR</option>
+                  <option value="EUR">EUR</option>
+                  <option value="GBP">GBP</option>
+                </select>
+              </label>
+              <label class="field">
+                <span>Ke</span>
+                <select id="convTo">
+                  <option value="USD">USD</option>
+                  <option value="MYR" selected>MYR</option>
+                  <option value="EUR">EUR</option>
+                  <option value="GBP">GBP</option>
+                </select>
+              </label>
+            </div>
+            <div class="conv-result">
+              <span class="stat-label">Hasil</span>
+              <span class="stat-value lime" id="convResult">–</span>
+            </div>
+            <p class="formula">Kadar demo: USD→MYR 4.25 · EUR→USD 1.08 · GBP→USD 1.27</p>
+          </section>
+        </section>
+
+        <!-- ================= LEARN ================= -->
+        <section class="screen" id="screen-learn" data-route="learn" aria-label="Learn" hidden>
+          <div class="greeting">
+            <h2>Learn</h2>
+            <p class="greet-date">Modul pendidikan TraderWatch</p>
+          </div>
+
+          <div class="learn-list">
+            <article class="card learn-card">
+              <div class="learn-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 20h18"/><path d="M5 20V9l4-3v14"/><path d="M13 20V4l6 4v12"/></svg>
+              </div>
+              <div class="learn-body">
+                <h3>Market Structure / SMC</h3>
+                <p>Fahami swing high/low, break of structure dan order block — asas cara enjin AI membaca pasaran.</p>
+                <a class="learn-link" href="https://traderwatch.org/education.html">Buka modul
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7"/><path d="M9 7h8v8"/></svg>
+                </a>
+              </div>
+            </article>
+
+            <article class="card learn-card">
+              <div class="learn-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 4 6v6c0 4.5 3.4 7.6 8 9 4.6-1.4 8-4.5 8-9V6l-8-3z"/><path d="m9 12 2 2 4-4"/></svg>
+              </div>
+              <div class="learn-body">
+                <h3>Risk Management</h3>
+                <p>Belajar saiz posisi, nisbah risk-reward dan had kerugian harian supaya akaun bertahan jangka panjang.</p>
+                <a class="learn-link" href="https://traderwatch.org/education.html">Buka modul
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7"/><path d="M9 7h8v8"/></svg>
+                </a>
+              </div>
+            </article>
+
+            <article class="card learn-card">
+              <div class="learn-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>
+              </div>
+              <div class="learn-body">
+                <h3>Trading Sessions</h3>
+                <p>Kenali sesi Asia, London dan New York — bila kecairan tinggi dan bila setup paling kerap muncul.</p>
+                <a class="learn-link" href="https://traderwatch.org/education.html">Buka modul
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7"/><path d="M9 7h8v8"/></svg>
+                </a>
+              </div>
+            </article>
+
+            <article class="card learn-card">
+              <div class="learn-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4a5 5 0 0 1 5 5c0 2-1 3-1 5h-8c0-2-1-3-1-5a5 5 0 0 1 5-5z"/><path d="M9 17h6"/><path d="M10 20h4"/></svg>
+              </div>
+              <div class="learn-body">
+                <h3>Psychology</h3>
+                <p>Kawal FOMO, revenge trading dan disiplin eksekusi — faktor yang membezakan trader konsisten.</p>
+                <a class="learn-link" href="https://traderwatch.org/education.html">Buka modul
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7"/><path d="M9 7h8v8"/></svg>
+                </a>
+              </div>
+            </article>
+          </div>
+          <p class="disclaimer">Educational only. Trading involves substantial risk.</p>
+        </section>
+
+        <!-- ================= ACCOUNT ================= -->
+        <section class="screen" id="screen-account" data-route="account" aria-label="Account" hidden>
+          <div class="greeting">
+            <h2>Account</h2>
+            <p class="greet-date">Profil, pelan &amp; tetapan app</p>
+          </div>
+
+          <section class="card profile-card" aria-label="Profil">
+            <div class="avatar" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 5-5.5 8-5.5s6.5 1.5 8 5.5"/></svg>
+            </div>
+            <div class="profile-body">
+              <h3>Mod tetamu</h3>
+              <p>Log masuk untuk lihat level penuh signal &amp; dashboard.</p>
+              <div class="btn-row">
+                <a class="btn btn-primary btn-sm" href="https://traderwatch.org/login.html">Log masuk</a>
+                <a class="btn btn-ghost btn-sm" href="https://traderwatch.org/login.html?mode=signup">Daftar percuma</a>
+              </div>
+            </div>
+          </section>
+
+          <section class="card plan-card" aria-label="Pelan Automation Trade">
+            <span class="chip chip-lime">AUTOMATION TRADE</span>
+            <div class="plan-price"><span class="plan-amount">RM150</span><span class="plan-period">/ sekali sahaja</span></div>
+            <ul class="plan-list">
+              <li>Signal AI harian — XAU/USD, XAG/USD &amp; BTC</li>
+              <li>Entry + Stop Loss + Take Profit lengkap</li>
+              <li>Dashboard penuh &amp; rekod keputusan</li>
+              <li>Tiada langganan bulanan</li>
+            </ul>
+            <a class="btn btn-primary btn-block" href="https://traderwatch.org/login.html?mode=signup">Daftar sekarang</a>
+            <p class="plan-note">Ahli berdaftar: 3 signal percuma setiap hari.</p>
+          </section>
+
+          <section class="card" aria-label="Tetapan app">
+            <div class="card-head"><h3>App settings</h3></div>
+            <div class="setting-row">
+              <div class="setting-text">
+                <strong>Prestasi signal</strong>
+                <span>Win rate, Net R &amp; equity curve enjin AI.</span>
+              </div>
+              <a class="btn btn-ghost btn-sm" href="#/performance">Buka</a>
+            </div>
+            <div class="setting-row">
+              <div class="setting-text">
+                <strong>Install app</strong>
+                <span>Pasang di skrin utama untuk akses pantas.</span>
+              </div>
+              <button class="btn btn-ghost btn-sm" id="accountInstall" type="button">Install</button>
+            </div>
+            <div class="setting-row">
+              <div class="setting-text">
+                <strong id="notifyLabel">Notifikasi signal</strong>
+                <span id="notifyStatus">Demo sahaja — push sebenar perlukan backend.</span>
+              </div>
+              <button class="switch" id="notifyToggle" type="button" role="switch" aria-checked="false" aria-labelledby="notifyLabel">
+                <span class="knob" aria-hidden="true"></span>
+              </button>
+            </div>
+          </section>
+
+          <section class="card" aria-label="Soalan lazim">
+            <div class="card-head"><h3>FAQ</h3></div>
+            <details class="faq">
+              <summary>Adakah signal dijamin untung?</summary>
+              <p>Tidak. Tiada signal yang dijamin untung. Setiap setup membawa risiko kerugian dan keputusan lepas bukan jaminan keputusan akan datang.</p>
+            </details>
+            <details class="faq">
+              <summary>Adakah harga sama dengan broker saya?</summary>
+              <p>Harga mungkin berbeza sedikit antara broker (spread, feed dan waktu server). Sentiasa sahkan entry, SL dan TP dengan platform broker anda sendiri.</p>
+            </details>
+            <details class="faq">
+              <summary>Adakah ini nasihat kewangan?</summary>
+              <p>Bukan. TraderWatch ialah platform pendidikan dan signal automatik untuk tujuan pembelajaran sahaja — bukan nasihat kewangan peribadi.</p>
+            </details>
+            <details class="faq">
+              <summary>Ada bonus broker atau rebate?</summary>
+              <p>TraderWatch mempunyai pautan partner broker (cth. Rinfinity) dan mungkin menerima komisen. Sebarang bonus tertakluk kepada syarat broker — semak kelayakan, keperluan volume dan syarat pengeluaran sebelum deposit. Bonus bukan alasan untuk mengambil risiko tambahan.</p>
+            </details>
+          </section>
+
+          <section class="card disclosure-card" aria-label="Penafian risiko">
+            <h3>Penafian risiko</h3>
+            <p>Trading forex, logam dan kripto melibatkan risiko kerugian yang besar dan mungkin tidak sesuai untuk semua pelabur. Anda boleh kehilangan sebahagian atau keseluruhan modal. Prestasi lepas bukan jaminan keputusan akan datang. Signal dijana secara automatik oleh enjin AI dan boleh lewat, tersilap atau tidak_triggered. Gunakan wang yang anda sanggup hilang dan dapatkan nasihat kewangan bebas jika perlu.</p>
+            <p class="partner-note">Partner disclosure: TraderWatch mungkin menerima komisen daripada pautan partner broker. Ini tidak mengubah harga yang anda bayar dan tidak mempengaruhi keputusan enjin signal.</p>
+          </section>
+
+          <footer class="app-footer">
+            <p>© <span id="year"></span> TraderWatch · traderwatch.org</p>
+            <p class="disclaimer">Educational only. Trading involves substantial risk.</p>
+          </footer>
+        </section>
+
+      </main>
+
+      <!-- Bottom navigation -->
+      <nav class="tabbar" aria-label="Navigasi utama">
+        <button class="tab active" type="button" data-route="home" aria-current="page">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 11 9-8 9 8"/><path d="M5 10v10h5v-6h4v6h5V10"/></svg>
+          <span>Home</span>
+        </button>
+        <button class="tab" type="button" data-route="markets">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 4v3"/><path d="M7 15v5"/><rect x="4.5" y="7" width="5" height="8" rx="1"/><path d="M17 3v4"/><path d="M17 17v4"/><rect x="14.5" y="7" width="5" height="10" rx="1"/></svg>
+          <span>Markets</span>
+        </button>
+        <button class="tab" type="button" data-route="tools">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M8.5 7h7"/><path d="M8.5 12h.01"/><path d="M12 12h.01"/><path d="M15.5 12h.01"/><path d="M8.5 16h.01"/><path d="M12 16h.01"/><path d="M15.5 16h.01"/></svg>
+          <span>Tools</span>
+        </button>
+        <button class="tab" type="button" data-route="learn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 6c-2-1.5-5-1.5-8 0v13c3-1.5 6-1.5 8 0 2-1.5 5-1.5 8 0V6c-3-1.5-6-1.5-8 0z"/><path d="M12 6v13"/></svg>
+          <span>Learn</span>
+        </button>
+        <button class="tab" type="button" data-route="account">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 5-5.5 8-5.5s6.5 1.5 8 5.5"/></svg>
+          <span>Account</span>
+        </button>
+      </nav>
+
+    </div><!-- /.app-frame -->
+  </div><!-- /.shell -->
+
+  <!-- Modal arahan iOS -->
+  <div class="modal-overlay" id="iosModal" hidden>
+    <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="iosModalTitle">
+      <div class="modal-head">
+        <h3 id="iosModalTitle">Pasang di iPhone / iPad</h3>
+        <button class="icon-btn" id="iosModalClose" type="button" aria-label="Tutup">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 6 12 12"/><path d="m18 6-12 12"/></svg>
+        </button>
+      </div>
+      <ol class="ios-steps">
+        <li>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"/><path d="m8 7 4-4 4 4"/><path d="M5 12v8h14v-8"/></svg>
+          Ketik butang <strong>Share</strong> di bar Safari.
+        </li>
+        <li>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="4"/><path d="M12 8v8"/><path d="M8 12h8"/></svg>
+          Pilih <strong>Add to Home Screen</strong>.
+        </li>
+        <li>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 5 5 9-10"/></svg>
+          Ketik <strong>Add</strong> — TraderWatch muncul di skrin utama.
+        </li>
+      </ol>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div class="toast" id="toast" role="status" hidden></div>
+
+</body>
+</html>

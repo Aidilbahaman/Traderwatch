@@ -1,16 +1,17 @@
 #!/usr/bin/env python3
-"""PWA data sync (pwa-app/ prototype + member/ app).
+"""PWA data sync (pwa-app/ prototype + member/ app + root/ public app).
 
 Every 5 min (cron, flock):
   1. Copy the live public feeds (signal-status.json, landing-signal.json)
-      from the repo root into BOTH pwa-app/data/ and member/data/ so both
-      apps show the same numbers. Atomic write (tmp + os.replace).
+      from the repo root into pwa-app/data/, member/data/ AND data/ (root
+      app) so all three apps show the same numbers. Atomic write (tmp +
+      os.replace).
   2. Re-export the latest 120 M15 bars for XAUUSD / XAGUSD / BTCUSD from
-      state/sq-bars.db (read-only) into both data/ dirs as bars-*.json.
+      state/sq-bars.db (read-only) into all three data/ dirs as bars-*.json.
 
 Deliberately NOT synced:
   - landing-stats.json  -> internal feed, blocked by Caddy (stays private;
-                           never written to member/data/).
+                           never written to any data/ dir).
   - replay-*.json       -> historical demo snapshot, must stay frozen.
 
 Stdlib only; safe to run manually: python3 engine/pwa-data-sync.py
@@ -24,6 +25,7 @@ REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 TARGETS = [
     os.path.join(REPO, "pwa-app", "data"),
     os.path.join(REPO, "member", "data"),
+    os.path.join(REPO, "data"),
 ]
 BARS_DB = os.path.join(REPO, "state", "sq-bars.db")
 FEEDS = ["signal-status.json", "landing-signal.json"]
