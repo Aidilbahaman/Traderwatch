@@ -1,406 +1,550 @@
 <!doctype html>
-<html lang="en">
+<html lang="ms">
 <head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#0b0d10"><meta name="description" content="Trader Watch — a mobile-first trading journal and market workspace.">
-<title>Trader Watch — Trading Workspace</title>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
-<style>
-:root{--bg:#0b0d10;--panel:#12151a;--panel2:#171b21;--line:#252b33;--text:#f0f3f6;--muted:#89939f;--green:#b7f36b;--red:#ff777d;--blue:#8ab4ff;--r:18px;--nav:72px}
-*{box-sizing:border-box}html{background:var(--bg);scroll-behavior:smooth}body{margin:0;background:radial-gradient(ellipse at 80% -20%,#1d2a1b 0,transparent 38%),var(--bg);color:var(--text);font:14px/1.5 Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;letter-spacing:-.015em}button,input,select{font:inherit}button{cursor:pointer}button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--green);outline-offset:3px}.app{max-width:1440px;margin:auto;min-height:100vh}.topbar{height:76px;padding:0 24px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #ffffff0d;position:sticky;top:0;z-index:10;background:#0b0d10eF;backdrop-filter:blur(18px)}.brand{display:flex;align-items:center;gap:11px;font-weight:800;font-size:17px;letter-spacing:-.05em}.logo{width:36px;height:36px;border-radius:12px;background:var(--green);color:#10150b;display:grid;place-items:center;font-weight:950;font-size:18px;box-shadow:0 0 24px #b7f36b22}.brand small{display:block;color:var(--muted);font-size:10px;font-weight:500;letter-spacing:.08em;text-transform:uppercase}.top-actions{display:flex;align-items:center;gap:10px}.iconbtn,.avatar,.pillbtn{border:1px solid var(--line);background:var(--panel);color:var(--text);border-radius:12px;padding:10px 12px}.avatar{width:36px;height:36px;border-radius:50%;padding:0;background:#283326;color:var(--green);font-weight:800}.layout{display:grid;grid-template-columns:220px minmax(0,1fr);gap:28px;padding:28px 24px 60px}.sidebar{position:sticky;top:100px;height:calc(100vh - 125px);display:flex;flex-direction:column;gap:7px}.navlabel{font-size:10px;text-transform:uppercase;letter-spacing:.13em;color:#67717c;padding:12px 12px 7px}.navitem{display:flex;align-items:center;gap:12px;padding:12px;border-radius:12px;color:#9da6b0;text-decoration:none;border:1px solid transparent;transition:.2s}.navitem:hover,.navitem.active{background:#b7f36b12;border-color:#b7f36b22;color:var(--green)}.navitem .ni{width:20px;text-align:center;font-size:17px}.sidebottom{margin-top:auto;padding:15px;background:var(--panel);border:1px solid var(--line);border-radius:15px;color:var(--muted);font-size:12px}.sidebottom strong{color:var(--text);display:block;margin-bottom:5px}.main{min-width:0;max-width:1060px;width:100%;margin:auto}.eyebrow{font-size:11px;color:var(--green);letter-spacing:.14em;text-transform:uppercase;font-weight:750}.heading{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin:3px 0 23px}.heading h1{font-size:clamp(26px,4vw,35px);line-height:1.1;letter-spacing:-.055em;margin:8px 0}.heading p{margin:0;color:var(--muted)}.date{font-size:12px;color:var(--muted);border:1px solid var(--line);padding:9px 12px;border-radius:11px;white-space:nowrap}.grid{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:14px}.card{background:linear-gradient(145deg,#171b21,#111419 75%);border:1px solid var(--line);border-radius:var(--r);padding:20px;min-width:0;box-shadow:0 12px 40px #0000000a}.metric{grid-column:span 3;min-height:146px}.metric-top{display:flex;align-items:center;justify-content:space-between;color:var(--muted);font-size:12px}.metric-icon{width:29px;height:29px;border-radius:9px;display:grid;place-items:center;background:#ffffff09;color:#d9e0e6}.metric-value{font-size:clamp(24px,3vw,32px);font-weight:750;letter-spacing:-.055em;margin:13px 0 6px;font-variant-numeric:tabular-nums}.positive{color:var(--green)}.negative{color:var(--red)}.metric-foot{font-size:11px;color:var(--muted)}.metric-foot strong{font-weight:650}.section-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:18px}.section-head h2{font-size:15px;letter-spacing:-.025em;margin:0}.section-head p{font-size:12px;color:var(--muted);margin:4px 0 0}.chartcard{grid-column:span 8}.charttools{display:flex;gap:5px}.charttools button{border:0;color:var(--muted);background:transparent;padding:6px 9px;border-radius:8px;font-size:11px}.charttools button.active{background:#b7f36b18;color:var(--green)}.chartwrap{height:225px;position:relative}.chartwrap svg{width:100%;height:100%;overflow:visible}.chartlabels{display:flex;justify-content:space-between;color:#626c77;font-size:10px;margin-top:4px}.charttip{font-size:11px;color:var(--muted);display:flex;justify-content:space-between;margin-top:12px}.watchcard{grid-column:span 4}.pair{display:flex;align-items:center;gap:10px;min-width:0}.coin{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;font-size:10px;font-weight:800;background:#29271c;color:#f3cb75;flex-shrink:0}.coin.blue{background:#1c2a42;color:#8ab4ff}.coin.purple{background:#2a2140;color:#c6a5ff}.pairname{font-weight:700;font-size:12px}.pairsub{font-size:10px;color:var(--muted);margin-top:2px}.price{text-align:right;font-variant-numeric:tabular-nums;font-weight:650;font-size:12px}.price small{display:block;font-size:10px;font-weight:550;margin-top:2px}.watchrow{display:flex;align-items:center;justify-content:space-between;padding:13px 0;border-bottom:1px solid #ffffff0a}.watchrow:last-child{border-bottom:0}.mini-line{width:48px;height:23px}.tradecard{grid-column:span 7}.riskcard{grid-column:span 5}.tablewrap{overflow-x:auto}table{border-collapse:collapse;width:100%;white-space:nowrap}th{text-align:left;font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:#77818c;font-weight:600;padding:10px 9px;border-bottom:1px solid var(--line)}td{padding:14px 9px;border-bottom:1px solid #ffffff0a;font-size:12px}tbody tr:last-child td{border-bottom:0}.badge{display:inline-flex;align-items:center;gap:5px;padding:5px 8px;border-radius:7px;font-size:10px;font-weight:700}.badge.win{background:#b7f36b15;color:var(--green)}.badge.loss{background:#ff777d15;color:var(--red)}.badge.open{background:#8ab4ff15;color:var(--blue)}.badge.muted{background:#8a93a022;color:#8a93a0}.viewall{background:none;border:0;color:var(--green);font-size:11px;font-weight:700}.riskbig{font-size:31px;font-weight:750;letter-spacing:-.06em;margin:9px 0 4px}.progress{height:6px;background:#292e35;border-radius:99px;overflow:hidden;margin:15px 0 8px}.progress span{display:block;height:100%;width:64%;background:var(--green);border-radius:99px;transition:width .3s}.riskstats{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:20px}.riskstats div{padding:13px;background:#ffffff05;border-radius:12px}.riskstats small{display:block;color:var(--muted);font-size:10px}.riskstats strong{display:block;margin-top:5px;font-size:15px}.bottomnav{display:none}.modalback{position:fixed;inset:0;z-index:30;background:#000a;display:none;align-items:center;justify-content:center;padding:18px;backdrop-filter:blur(8px)}.modalback.show{display:flex}.modal{width:min(480px,100%);padding:24px;border:1px solid #303741;border-radius:20px;background:#14181e;box-shadow:0 30px 100px #0008}.modal h2{margin:0 0 6px;font-size:22px}.modal p{color:var(--muted);font-size:12px;margin:0 0 20px}.formgrid{display:grid;grid-template-columns:1fr 1fr;gap:13px}.field{display:flex;flex-direction:column;gap:7px}.field.full{grid-column:1/-1}.field label{font-size:11px;color:#aab3bd}.field input,.field select{width:100%;border:1px solid #303741;background:#0d1014;color:var(--text);padding:12px;border-radius:10px;min-width:0}.formactions{display:flex;justify-content:flex-end;gap:8px;margin-top:20px}.btn{border:1px solid var(--line);background:#20252c;color:var(--text);padding:11px 15px;border-radius:11px;font-weight:650;font-size:12px}.btn.primary{background:var(--green);border-color:var(--green);color:#10150b}.toast{position:fixed;z-index:50;bottom:28px;left:50%;transform:translate(-50%,20px);opacity:0;pointer-events:none;background:#e6f9d1;color:#17200d;padding:11px 17px;border-radius:12px;font-weight:700;font-size:12px;transition:.25s}.toast.show{opacity:1;transform:translate(-50%,0)}.empty{text-align:center;color:var(--muted);padding:24px;font-size:12px}.mobileonly{display:none}
-@media(min-width:1400px){.layout{gap:34px;padding-left:32px;padding-right:32px}.card{padding:22px}}
-@media(max-width:900px){.layout{grid-template-columns:185px minmax(0,1fr);gap:18px;padding:22px 18px 40px}.metric{grid-column:span 6}.chartcard{grid-column:span 12}.watchcard{grid-column:span 12}.watchcard .watchrow{display:inline-flex;width:49%;padding-right:10px}.tradecard,.riskcard{grid-column:span 12}}
-@media(max-width:620px){:root{--nav:66px}.topbar{height:62px;padding:0 16px}.brand{font-size:15px}.logo{width:32px;height:32px;border-radius:10px}.brand small{font-size:9px}.top-actions{gap:7px}.top-actions .iconbtn{padding:8px 10px}.top-actions .avatar{width:32px;height:32px}.layout{display:block;padding:23px 14px calc(var(--nav) + 25px)}.sidebar{display:none}.heading{margin-bottom:19px;align-items:center}.heading h1{font-size:28px}.heading p{font-size:12px}.date{display:none}.grid{gap:10px}.card{border-radius:16px;padding:16px}.metric{min-height:127px;padding:15px;grid-column:span 6}.metric-top{font-size:11px}.metric-icon{width:25px;height:25px}.metric-value{font-size:26px;margin:11px 0 5px}.metric-foot{font-size:10px}.chartcard{grid-column:span 12;padding:16px 13px}.chartwrap{height:190px}.watchcard{grid-column:span 12}.watchcard .watchrow{width:100%;padding:12px 0}.watchcard .watchrow:nth-last-child(2){border-bottom:1px solid #ffffff0a}.tradecard,.riskcard{grid-column:span 12}.section-head h2{font-size:14px}.section-head p{font-size:11px}.mobileonly{display:block}.bottomnav{display:flex;position:fixed;z-index:20;bottom:0;left:0;right:0;height:calc(var(--nav) + env(safe-area-inset-bottom));padding:7px 5px calc(7px + env(safe-area-inset-bottom));justify-content:space-around;align-items:center;background:#101318f2;border-top:1px solid #ffffff12;backdrop-filter:blur(18px)}.bottomnav a{width:20%;display:flex;flex-direction:column;align-items:center;gap:3px;text-decoration:none;color:#77818c;font-size:9px}.bottomnav a span:first-child{font-size:19px;line-height:1.2}.bottomnav a.active{color:var(--green)}.bottomnav .navadd{width:43px;height:43px;border-radius:15px;display:grid;place-items:center;background:var(--green);color:#11170b;font-size:24px;margin-top:-21px;box-shadow:0 4px 18px #b7f36b25}.riskstats{gap:8px}.riskstats div{padding:12px}.formgrid{grid-template-columns:1fr}.field.full{grid-column:auto}.modal{padding:20px}.formactions .btn{flex:1}.charttools button{padding:6px 7px}.tablewrap{margin:0 -5px}td{padding:13px 8px}}
-@media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;transition:none!important;animation:none!important}}
-</style>
-<style>
-.gate{position:fixed;inset:0;z-index:80;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;background:#0b0d10;color:#89939f;font:13px/1.5 Inter,ui-sans-serif,system-ui,sans-serif;text-align:center;padding:24px}
-.gate[hidden]{display:none}
-.gatespin{width:34px;height:34px;border-radius:50%;border:2px solid #252b33;border-top-color:#b7f36b;animation:gspin .9s linear infinite}
-@keyframes gspin{to{transform:rotate(360deg)}}
-.gate a{color:#b7f36b;font-weight:700;text-decoration:none;border-bottom:1px solid #b7f36b55}
-.app[hidden]{display:none}
-.note{font-size:10px;color:#626c77}
-.watchrow .price .badge{display:block;margin-top:3px}
-@media(prefers-reduced-motion:reduce){.gatespin{animation:none;border-top-color:#252b33}}
-</style>
-<style>
-.tvbox{width:100%;border-radius:14px;overflow:hidden;background:#0e1116}
-.tvbox-chart{height:460px}
-.tvbox-list{height:430px}
-:root[data-theme="light"] .tvbox{background:#f7f9fb}
-.tierpill{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);background:var(--panel);color:var(--muted);border-radius:11px;padding:8px 12px;font-size:11px;font-weight:800;letter-spacing:.09em;text-transform:uppercase;white-space:nowrap}
-.tierpill.free{color:var(--muted);border-color:var(--line)}
-.tierpill.pro{color:#8ab4ff;border-color:#8ab4ff55;background:#8ab4ff12}
-.tierpill.max{color:var(--green);border-color:#b7f36b55;background:#b7f36b12}
-.tw-modal{position:fixed;inset:0;z-index:90;display:flex;align-items:center;justify-content:center;padding:20px;background:#05070ad9;backdrop-filter:blur(6px)}
-.tw-modal[hidden]{display:none}
-.tw-modal-card{width:min(430px,100%);background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:20px;box-shadow:0 24px 70px #00000080}
-.tw-modal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
-.tw-modal-head h2{margin:0;font-size:17px;letter-spacing:-.02em}
-.tw-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:11px 0;border-bottom:1px solid var(--line);font-size:12px;color:var(--muted)}
-.tw-row strong{color:var(--text);font-weight:700;text-align:right;word-break:break-all}
-.tw-actions{display:flex;flex-direction:column;gap:9px;margin-top:16px}
-.tbtn{border:1px solid var(--line);background:var(--panel2);color:var(--text);border-radius:11px;padding:11px 14px;font-size:13px;font-weight:700;cursor:pointer;text-align:center;text-decoration:none}
-.tbtn:hover{border-color:var(--green)}
-.tbtn.primary{background:#0088cc;border-color:#0088cc;color:#fff}
-.tbtn.danger{color:var(--red);border-color:#ff777d55}
-:root[data-theme="light"]{--bg:#f4f6f8;--panel:#ffffff;--panel2:#f7f9fb;--line:#e2e7ee;--text:#121821;--muted:#5c6875;--green:#3f9d1f;--red:#cf3f4b;--blue:#2f6fd0}
-:root[data-theme="light"] body{background:radial-gradient(ellipse at 80% -20%,#e6f2df 0,transparent 38%),var(--bg);color:var(--text)}
-:root[data-theme="light"] .topbar{background:#fffffff0;border-bottom-color:#00000012}
-:root[data-theme="light"] .card{background:linear-gradient(145deg,#ffffff,#f7f9fb 75%);border-color:var(--line)}
-:root[data-theme="light"] .bottomnav{background:#fffffff5;border-top-color:#00000012}
-:root[data-theme="light"] .iconbtn,:root[data-theme="light"] .avatar,:root[data-theme="light"] .pillbtn{background:#fff;border-color:var(--line);color:var(--text)}
-:root[data-theme="light"] .avatar{background:#e8f2e2;color:#2f7d16}
-:root[data-theme="light"] .navitem{color:#4b5563}
-:root[data-theme="light"] .navitem:hover,:root[data-theme="light"] .navitem.active{background:#3f9d1f12;border-color:#3f9d1f33;color:#2f7d16}
-:root[data-theme="light"] .navlabel{color:#8a939e}
-:root[data-theme="light"] .sidebottom{background:#fff;border-color:var(--line)}
-:root[data-theme="light"] table th{color:var(--muted);border-bottom-color:var(--line)}
-:root[data-theme="light"] table td,:root[data-theme="light"] .watchrow{border-bottom-color:#eef2f7}
-:root[data-theme="light"] .note,:root[data-theme="light"] #tradeFoot{color:#7b8794}
-:root[data-theme="light"] .gate{background:var(--bg);color:var(--muted)}
-:root[data-theme="light"] .tw-modal{background:#0f172a66}
-:root[data-theme="light"] .tbtn{background:#fff;border-color:var(--line);color:var(--text)}
-.notify-btn{position:relative;min-width:40px;padding:8px 10px;font-size:17px}
-.notify-badge{position:absolute;top:-5px;right:-5px;min-width:18px;height:18px;padding:0 5px;border-radius:99px;background:var(--red);color:#fff;font-size:10px;line-height:18px;text-align:center;font-weight:800;border:2px solid var(--bg)}
-.notify-badge[hidden]{display:none}
-.notify-section{margin-top:16px;padding-top:14px;border-top:1px solid var(--line)}
-.notify-section h3{margin:0 0 10px;font-size:12px}
-.notify-options{display:flex;flex-wrap:wrap;gap:8px}
-.notify-options label{display:inline-flex;align-items:center;gap:7px;padding:9px 10px;border:1px solid var(--line);border-radius:10px;color:var(--muted);font-size:11px;cursor:pointer}
-.notify-options label:has(input:checked){border-color:#b7f36b66;background:#b7f36b12;color:var(--text)}
-.notify-options input{accent-color:var(--green)}
-.market-chips{display:flex;flex-wrap:wrap;gap:7px}
-.market-chip{border:1px solid var(--line);background:var(--panel2);color:var(--muted);border-radius:999px;padding:7px 10px;font-size:11px;font-weight:700}
-.market-chip.active{border-color:#b7f36b66;background:#b7f36b12;color:var(--green)}
-.notify-feed{display:flex;flex-direction:column;gap:7px;max-height:230px;overflow:auto}
-.notify-item{display:block;width:100%;border:1px solid var(--line);background:var(--panel2);color:var(--text);border-radius:11px;padding:10px;text-align:left;cursor:pointer}
-.notify-item:hover{border-color:var(--green)}
-.notify-item strong{display:block;font-size:12px}
-.notify-item small{display:block;margin-top:3px;color:var(--muted);font-size:10px}
-.notify-empty{color:var(--muted);font-size:11px;padding:8px 0}
-.tvbox-live{height:420px;background:#000}
-.tvbox-live iframe{width:100%;height:100%;border:0;display:block}
-.livedot{display:inline-block;width:8px;height:8px;border-radius:50%;background:#ff4d4f;margin-right:7px;vertical-align:middle;box-shadow:0 0 0 0 #ff4d4f88;animation:livepulse 1.9s infinite}
-@keyframes livepulse{0%{box-shadow:0 0 0 0 #ff4d4f88}70%{box-shadow:0 0 0 9px #ff4d4f00}100%{box-shadow:0 0 0 0 #ff4d4f00}}
-@media(prefers-reduced-motion:reduce){.livedot{animation:none}}
-@media(max-width:620px){.tvbox-chart{height:340px}.tvbox-live{height:230px}.tvbox-list{height:380px}.tierpill{padding:7px 9px;font-size:10px}}
-</style>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>TraderWatch Member — Signal anda</title>
+  <meta name="description" content="Dashboard ahli TraderWatch — signal AI rasmi XAU/USD, XAG/USD dan BTC, chart beranotasi, prestasi enjin. Boleh pasang, boleh offline.">
+  <meta name="theme-color" content="#0a0e0b">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="TW Member">
+  <meta name="application-name" content="TW Member">
+  <meta name="robots" content="noindex">
+  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="icon" type="image/png" sizes="192x192" href="./icons/icon-192.png">
+  <link rel="apple-touch-icon" href="./icons/icon-180.png">
+  <link rel="stylesheet" href="./app.css?v=20261120m">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js" defer></script>
+  <script src="./auth.js?v=20261120m" defer></script>
+  <script src="./chart.js?v=20261120m" defer></script>
+  <script src="./app.js?v=20261120m" defer></script>
 </head>
 <body>
-<div class="gate" id="gate"><div class="gatespin"></div><p id="gateMsg">Checking your session…</p></div>
-<div class="app" id="app" hidden>
-<header class="topbar"><div class="brand"><div class="logo">T</div><div>TRADER WATCH<small>Trading workspace</small></div></div><div class="top-actions"><button class="iconbtn notify-btn" id="notifyBtn" type="button" aria-label="Notifikasi" title="Notifikasi">🔔<span class="notify-badge" id="notifyBadge" hidden>0</span></button><button class="iconbtn" id="themeBtn" aria-label="Toggle light or dark theme" title="Switch theme">🌙</button><span class="tierpill free" id="tierBadge" title="Your membership tier">FREE</span><button class="avatar" id="avatarBtn" aria-label="Open account settings" title="Settings">A</button></div></header>
-<div class="layout">
-<aside class="sidebar"><div class="navlabel">Workspace</div><a href="#overview" class="navitem active"><span class="ni">◫</span>Overview</a><a href="#markets" class="navitem"><span class="ni">⌁</span>Markets</a><a href="#trades" class="navitem"><span class="ni">⇄</span>Signals</a><a href="#risk" class="navitem"><span class="ni">◈</span>Signal status</a><a href="#performance" class="navitem"><span class="ni">▥</span>Performance</a><div class="navlabel">Personal</div><a href="#portfolio" class="navitem"><span class="ni">▤</span>Portfolio</a><div class="sidebottom"><strong>Trade with a plan.</strong>Signals here are published by TraderWatch. Confirmations are delivered through @Traderwatchmembershipbot.</div></aside>
-<main class="main" id="overview">
-<div class="heading"><div><div class="eyebrow" id="today">MEMBER DESK</div><h1 id="greet">Your trading desk<span style="color:var(--green)">.</span></h1><p>Live signals and published results — nothing estimated.</p></div><div class="date" id="planPill">◷ &nbsp; —</div></div>
-<section class="grid" aria-label="Trading account summary">
-<div class="card metric"><div class="metric-top">Net result <span class="metric-icon">◈</span></div><div class="metric-value" id="balance">—</div><div class="metric-foot"><strong id="balanceChange">—</strong> <span id="balanceNote">published results</span></div></div>
-<div class="card metric"><div class="metric-top">Active setups <span class="metric-icon">↗</span></div><div class="metric-value positive" id="netprofit">—</div><div class="metric-foot" id="netprofitNote">Live setup feed</div></div>
-<div class="card metric"><div class="metric-top">Win rate <span class="metric-icon">◎</span></div><div class="metric-value" id="winrate">—</div><div class="metric-foot"><strong id="winCount">—</strong> <span>of closed setups</span></div></div>
-<div class="card metric"><div class="metric-top">Closed setups <span class="metric-icon">⇄</span></div><div class="metric-value" id="tradecount">—</div><div class="metric-foot" id="tradecountNote">TP / SL / collected only</div></div>
-<div class="card chartcard" id="performance"><div class="section-head"><div><h2>Performance</h2><p id="chartSub">Cumulative pips · published results</p></div><div class="charttools" aria-label="Chart period"><button class="active" data-period="ALL">ALL</button><button data-period="1M">1M</button><button data-period="3M">3M</button></div><div class="charttools" aria-label="Chart view" style="margin-top:6px"><button class="active" data-mode="CUM">Cum</button><button data-mode="DAILY">Daily</button><button data-mode="TRADE">Trades</button></div></div><div class="chartwrap"><svg id="chart" viewBox="0 0 600 210" preserveAspectRatio="none" role="img" aria-label="Cumulative pips chart from published results"><defs><linearGradient id="fill" x1="0" x2="0" y1="0" y2="1"><stop offset="0%" stop-color="#b7f36b" stop-opacity=".2"/><stop offset="100%" stop-color="#b7f36b" stop-opacity="0"/></linearGradient></defs><g stroke="#ffffff0b" stroke-width="1"><path d="M0 25H600 M0 70H600 M0 115H600 M0 160H600 M0 205H600"/></g><path id="area" fill="url(#fill)" d=""/><path id="line" fill="none" stroke="#b7f36b" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" d=""/><circle id="dot" r="4" fill="#b7f36b" stroke="#12151a" stroke-width="2" cx="0" cy="0"/></svg></div><div class="chartlabels" id="chartlabels"></div><div class="charttip"><span>Cumulative pips</span><span class="positive" id="chartreturn">—</span></div></div>
-<div class="card watchcard" id="markets"><div class="section-head"><div><h2>Signal watch</h2><p>Published setups · live status</p></div><button class="viewall" id="editMarkets" type="button">Refresh ↗</button></div>
-<div class="watchrow"><div class="pair"><div class="coin">·</div><div><div class="pairname">Loading signal</div><div class="pairsub">Waiting for account data</div></div></div><div class="price">—<small>—</small></div></div>
-<div class="watchrow"><div class="pair"><div class="coin blue">·</div><div><div class="pairname">Loading signal</div><div class="pairsub">Waiting for account data</div></div></div><div class="price">—<small>—</small></div></div>
-<div class="watchrow"><div class="pair"><div class="coin purple">·</div><div><div class="pairname">Loading signal</div><div class="pairsub">Waiting for account data</div></div></div><div class="price">—<small>—</small></div></div>
-<div class="watchrow"><div class="pair"><div class="coin">·</div><div><div class="pairname">Loading signal</div><div class="pairsub">Waiting for account data</div></div></div><div class="price">—<small>—</small></div></div>
-</div>
-<div class="card tradecard" id="trades"><div class="section-head"><div><h2>Published signals</h2><p>Verified setups from your TraderWatch account</p></div><button class="viewall" id="addTrade" type="button">Refresh</button></div><div class="tablewrap"><table><thead><tr><th>Instrument</th><th>Direction</th><th>Result</th><th>Outcome</th></tr></thead><tbody id="tradeRows"><tr><td colspan="4" class="empty">Loading published signals…</td></tr></tbody></table></div><div class="empty" id="tradeEmpty" hidden>No published signals for this account yet.</div><div style="display:flex;justify-content:space-between;align-items:center;margin-top:12px"><span id="tradeFoot" style="font-size:10px;color:var(--muted)">Source: TraderWatch Supabase · verified signals only</span><button class="viewall" id="allTrades" type="button" hidden>View all →</button></div></div>
-<div class="card riskcard" id="risk"><div class="section-head"><div><h2>Signal status</h2><p>Published setup breakdown</p></div><span class="metric-icon">◈</span></div><div style="color:var(--muted);font-size:12px">Setups currently running</div><div class="riskbig"><span id="riskused">—</span><span style="font-size:14px;color:var(--muted);font-weight:500"> active</span></div><div class="progress"><span id="riskbar"></span></div><div style="display:flex;justify-content:space-between;font-size:10px;color:var(--muted)"><span id="riskpct">—</span><span id="riskremain">—</span></div><div class="riskstats"><div><small>Data source</small><strong id="riskSrc">—</strong></div><div><small>Status feed</small><strong id="riskFeed">—</strong></div></div><div class="note" style="margin-top:14px">TP/SL results are confirmed from Swissquote M1 data and delivered through <b>@Traderwatchmembershipbot</b>.</div></div>
-</section>
-<div class="card livecard" id="liveCard"><div class="section-head"><div><h2><span class="livedot"></span>Market live</h2><p id="liveSub">Bloomberg Business News Live · autoplay with sound</p></div><button class="viewall" id="liveSound" type="button">🔊 Enable sound</button></div><div class="tvbox tvbox-live" id="ytLive"></div><div class="note" id="liveNote" style="margin-top:10px">Autoplay with audio is requested. If your browser or Telegram blocks it, tap <b>Enable sound</b> once — the stream keeps playing.</div></div>
-<div class="card" id="tgcard" class="card" style="margin-top:14px"><div class="section-head"><div><h2>Telegram Link</h2><p id="tgSub">Alert notifications delivered via @Traderwatchmembershipbot</p></div><span class="metric-icon">✉</span></div><div id="tgBody" class="tg-body"><div id="tgStatus">—</div><a id="tgCta" href="https://t.me/Traderwatchmembershipbot" target="_blank" style="display:inline-block;padding:10px 17px;background:#0088cc;color:#fff;text-decoration:none;border-radius:10px;font-size:13px;font-weight:700">Connect Telegram →</a></div></div>
-<div class="card tvcard" id="tvChartCard"><div class="section-head"><div><h2>Live market chart</h2><p>TradingView · 12M · symbol changeable</p></div><span class="metric-icon">▥</span></div><div class="tvbox tvbox-chart" id="tvChart"></div></div>
-<div class="card tvcard" id="tvNewsCard"><div class="section-head"><div><h2>Market news</h2><p>TradingView news feed · all symbols</p></div><span class="metric-icon">✉</span></div><div class="tvbox tvbox-list" id="tvNews"></div></div>
-<div class="card tvcard" id="tvCalCard"><div class="section-head"><div><h2>Economic calendar</h2><p>TradingView · high &amp; medium impact</p></div><span class="metric-icon">◷</span></div><div class="tvbox tvbox-list" id="tvCal"></div></div>
-<div class="tw-modal" id="settingsModal" hidden><div class="tw-modal-card" role="dialog" aria-modal="true" aria-labelledby="settingsTitle">
-<div class="tw-modal-head"><h2 id="settingsTitle">Account settings</h2><button class="iconbtn" id="settingsClose" aria-label="Close settings">✕</button></div>
-<div class="tw-row"><span>Name</span><strong id="setName">—</strong></div>
-<div class="tw-row"><span>Email</span><strong id="setEmail">—</strong></div>
-<div class="tw-row"><span>Membership</span><strong id="setPlan">—</strong></div>
-<div class="tw-row"><span>Telegram alerts</span><strong id="setTg">—</strong></div>
-<div class="tw-row"><span>MT5/MT4 login</span><strong id="setMt5">—</strong></div>
-<div id="mt5Edit" hidden style="padding:11px 0;border-bottom:1px solid var(--line)"><label for="mt5Input" style="display:block;font-size:11px;color:var(--muted);margin-bottom:7px">MT5/MT4 login (koma-separated jika lebih dari satu)</label><input id="mt5Input" type="text" inputmode="text" autocomplete="off" placeholder="cth: 12345678, 87654321" style="width:100%;border:1px solid var(--line);background:var(--panel2);color:var(--text);border-radius:11px;padding:10px 12px;font-size:13px"><div style="display:flex;gap:8px;margin-top:8px;align-items:center"><button class="tbtn" id="mt5SaveBtn" type="button" style="flex:1">Simpan</button><button class="tbtn" id="mt5CancelBtn" type="button">Batal</button></div><div id="mt5Msg" style="font-size:11px;color:var(--muted);margin-top:7px" role="status"></div></div>
-<div class="tw-actions">
-<button class="tbtn" id="mt5EditBtn" type="button">Edit MT5/MT4 login</button>
-<button class="tbtn" id="setThemeBtn" type="button">Switch to light mode</button>
-<a class="tbtn primary" id="setTgBtn" href="https://t.me/Traderwatchmembershipbot" target="_blank" rel="noopener">Link Telegram</a>
-<button class="tbtn danger" id="signOutBtn" type="button">Sign out</button>
-</div>
-</div></div>
-<div class="tw-modal" id="notifyModal" hidden><div class="tw-modal-card" role="dialog" aria-modal="true" aria-labelledby="notifyTitle">
-<div class="tw-modal-head"><h2 id="notifyTitle">🔔 Notifikasi</h2><button class="iconbtn" id="notifyClose" aria-label="Tutup notifikasi">✕</button></div>
-<div class="notify-section" style="margin-top:0;padding-top:0;border-top:0"><h3>Pilihan</h3><div class="notify-options"><label><input type="checkbox" data-notify-type="new"> Setup baru</label><label><input type="checkbox" data-notify-type="result"> Keputusan setup</label><label><input type="checkbox" data-notify-type="news"> Berita pasaran</label></div></div>
-<div class="notify-section"><h3>Market</h3><div class="market-chips" id="notifyMarkets"></div></div>
-<div class="tw-actions"><button class="tbtn primary" id="notifyTestBtn" type="button">Hantar Ujian</button></div>
-<div class="notify-section"><h3>Terkini 3 hari</h3><div class="notify-feed" id="notifyFeed"><div class="notify-empty">Tiada aktiviti terkini.</div></div></div>
-</div></div>
-<div class="toast" id="toast" role="status" aria-live="polite"></div>
-<footer style="padding:24px 0 0;color:#626c77;font-size:10px;display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap"><span>TRADER WATCH · Built for disciplined trading.</span><span id="footNote">Member dashboard · Published TraderWatch signals and results. Not financial advice.</span></footer>
-</main></div>
-<nav class="bottomnav" aria-label="Main navigation"><a class="active" href="#overview"><span>◫</span><span>Home</span></a><a href="#markets"><span>⌁</span><span>Markets</span></a><a href="#trades" aria-label="Signals"><span class="navadd">◆</span><span>Signals</span></a><a href="#performance"><span>▥</span><span>Stats</span></a><a href="#risk"><span>◈</span><span>Status</span></a></nav>
-</div>
-<script>
-(function(){
-'use strict';
-var SUPABASE_URL='https://vicfiftvhxemuhxxmkxk.supabase.co';
-var SUPABASE_KEY='sb_publishable_4LzgHiCMUXmXUOkPtvIHVw_F7ks9otV';
-var gate=document.getElementById('gate'),app=document.getElementById('app'),msg=document.getElementById('gateMsg');
-var $=function(id){return document.getElementById(id)};
-var esc=function(v){return String(v==null?'':v).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})};
-var code=function(v){return String(v||'').replace(/[^A-Za-z0-9]/g,'').toUpperCase()};
-var price=function(v,p){var n=Number(v);if(!Number.isFinite(n))return '—';var d=code(p)==='XAUUSD'?2:code(p)==='USDJPY'?3:5;return n.toFixed(d).replace(/0+$/,'').replace(/\.$/,'')};
-var parseISO=function(iso){var s=String(iso==null?'':iso).trim();if(!s)return null;if(!/([zZ]|[+-]\d{2}:?\d{2})$/.test(s))s=s.replace(' ','T')+'Z';var d=new Date(s);return isNaN(d.getTime())?null:d};
-var statusKey=function(pair,iso){try{var d=parseISO(iso);if(!d)return '';var q=new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Kuala_Lumpur',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',second:'2-digit',hourCycle:'h23'}).formatToParts(d).reduce(function(a,x){a[x.type]=x.value;return a},{});return code(pair)+'_'+q.year+q.month+q.day+'_'+q.hour+q.minute+q.second}catch(e){return ''}};
-var PERF_FROM='2026-10-18',PERF_LABEL='18 Oct 2026';
-var keyDate=function(k){var m=String(k==null?'':k).match(/_(\d{4})(\d{2})(\d{2})_(\d{2})(\d{2})(\d{2})$/);return m?m[1]+'-'+m[2]+'-'+m[3]:null};
-function perfSet(statuses){var out=[];Object.keys(statuses||{}).forEach(function(k){var v=statuses[k]||{},st=String(v.status||'').toLowerCase();if(st!=='tp'&&st!=='sl'&&st!=='collected')return;if(typeof v.pips!=='number')return;if(String(v.unit||'pips').toLowerCase()==='usd')return;var d=keyDate(k);if(!d||d<PERF_FROM)return;var mk=String(k).match(/_(\d{4})(\d{2})(\d{2})_(\d{2})(\d{2})(\d{2})$/),ts=mk?mk[1]+mk[2]+mk[3]+mk[4]+mk[5]+mk[6]:'';var cl=String(v.closed||'').replace(/[^0-9]/g,'').slice(0,14);out.push({k:k,d:d,pips:Number(v.pips),ts:ts||cl})});out.sort(function(a,b){return a.ts<b.ts?-1:(a.ts>b.ts?1:(a.k<b.k?-1:1))});return out}
-var SB=null;
-var TV='https://s3.tradingview.com/external-embedding/embed-widget-';
-function themeNow(){return document.documentElement.getAttribute('data-theme')||'dark'}
-function mountTv(el,src,cfg){if(!el)return;el.innerHTML='';var d=document.createElement('div');d.className='tradingview-widget-container';var i=document.createElement('div');i.className='tradingview-widget-container__widget';d.appendChild(i);var s=document.createElement('script');s.type='text/javascript';s.src=src;s.async=true;s.innerHTML=JSON.stringify(cfg);d.appendChild(s);el.appendChild(d)}
-function mountAllTv(){var t=themeNow();
- mountTv($('tvChart'),TV+'advanced-chart.js',{autosize:true,symbol:'OANDA:XAUUSD',interval:'D',range:'12M',timezone:'Asia/Kuala_Lumpur',theme:t,style:'1',locale:'en',allow_symbol_change:true,withdateranges:true,hide_side_toolbar:false,support_host:'https://www.tradingview.com'});
- mountTv($('tvNews'),TV+'timeline.js',{feedMode:'all_symbols',isTransparent:true,displayMode:'regular',width:'100%',height:'100%',colorTheme:t,locale:'en'});
- mountTv($('tvCal'),TV+'events.js',{colorTheme:t,isTransparent:true,width:'100%',height:'100%',locale:'en',importanceFilter:'-1,0,1',countryFilter:'us,eu,gb,jp,au,ca,ch,cn,nz'})}
-function applyTheme(t,remount){document.documentElement.setAttribute('data-theme',t);try{localStorage.setItem('tw-theme',t)}catch(e){}
- var b=$('themeBtn');if(b){b.textContent=t==='light'?'\u2600':'\u{1F319}';b.title=t==='light'?'Switch to dark mode':'Switch to light mode'}
- var s=$('setThemeBtn');if(s)s.textContent=t==='light'?'Switch to dark mode':'Switch to light mode';
- var m=document.querySelector('meta[name="theme-color"]');if(m)m.setAttribute('content',t==='light'?'#f4f6f8':'#0b0d10');
- if(remount)mountAllTv()}
-var LIVE_ID='QB5BNdBFujE',liveReady=false;
-function ytFrame(){var el=$('ytLive');return el?el.querySelector('iframe'):null}
-function ytCmd(func,args){var f=ytFrame();if(!f||!f.contentWindow)return false;try{f.contentWindow.postMessage(JSON.stringify({event:'command',func:func,args:args||[]}),'*');return true}catch(e){return false}}
-function liveSoundOn(){ytCmd('unMute');ytCmd('setVolume',[100]);ytCmd('playVideo');var b=$('liveSound');if(b){b.textContent='\u{1F50A} Sound on \u2713';setTimeout(function(){if(b)b.hidden=true},1500)}}
-function mountLive(){var el=$('ytLive');if(!el||el.querySelector('iframe'))return;
- var src='https://www.youtube.com/embed/'+LIVE_ID+'?autoplay=1&mute=0&playsinline=1&rel=0&modestbranding=1&enablejsapi=1&origin='+encodeURIComponent(location.origin);
- var f=document.createElement('iframe');f.id='ytFrame';f.title='TraderWatch live market stream';
- f.setAttribute('allow','autoplay; encrypted-media; picture-in-picture; fullscreen; clipboard-write');
- f.setAttribute('allowfullscreen','');f.setAttribute('referrerpolicy','origin');
- f.src=src;el.appendChild(f);
- try{if(localStorage.getItem('tw-live-sound')==='1')setTimeout(liveSoundOn,1200)}catch(e){}}
-window.addEventListener('message',function(e){try{var d=typeof e.data==='string'?JSON.parse(e.data):e.data;if(!d||!d.event)return;
- if(d.event==='onReady'){liveReady=true;ytCmd('playVideo');ytCmd('unMute');ytCmd('setVolume',[100])}
- if(d.event==='onStateChange'&&Number(d.info)===1){var b=$('liveSound');if(b)b.hidden=true}}catch(x){}});
-var _soundTried=false;function liveFirstGesture(){if(_soundTried)return;_soundTried=true;liveSoundOn();try{localStorage.setItem('tw-live-sound','1')}catch(e){}}
-function openSettings(){var m=$('settingsModal');if(m)m.hidden=false}
-function closeSettings(){var m=$('settingsModal');if(m)m.hidden=true;mt5Close()}
-var notifyState={types:{new:true,result:true,news:true},markets:['ALL']};
-function notifyKey(){return 'tw-notify-'+String(window.TWUID||'guest')}
-function notifyLoad(){var d={types:{new:true,result:true,news:true},markets:['ALL']};try{var x=JSON.parse(localStorage.getItem(notifyKey())||'null');if(x&&x.types)d.types=Object.assign(d.types,x.types);if(x&&Array.isArray(x.markets)&&x.markets.length)d.markets=x.markets}catch(e){}notifyState=d;return d}
-function notifySave(){try{localStorage.setItem(notifyKey(),JSON.stringify(notifyState))}catch(e){}}
-function toast(t){var el=$('toast');if(!el)return;el.textContent=t;el.classList.add('show');clearTimeout(window._toastTimer);window._toastTimer=setTimeout(function(){el.classList.remove('show')},2600)}
-function notifyMarkets(){var el=$('notifyMarkets');if(!el)return;var pairs=[];(_perfRows||[]).forEach(function(r){var p=code(r.pair);if(p&&pairs.indexOf(p)<0)pairs.push(p)});pairs.sort();if(!pairs.length)pairs=['XAUUSD','EURUSD','GBPUSD'];var all=['ALL'].concat(pairs),selected=notifyState.markets||['ALL'];el.innerHTML='';all.forEach(function(p){var b=document.createElement('button');b.type='button';b.className='market-chip'+(selected.indexOf(p)>=0?' active':'');b.textContent=p==='ALL'?'Semua':p;b.setAttribute('data-market',p);b.onclick=function(){var cur=notifyState.markets||['ALL'];if(p==='ALL'){notifyState.markets=['ALL']}else{cur=cur.filter(function(x){return x!=='ALL'});if(cur.indexOf(p)>=0)cur=cur.filter(function(x){return x!==p});else cur.push(p);notifyState.markets=cur.length?cur:['ALL']}notifySave();notifyMarkets()};el.appendChild(b)})}
-function notifyDate(row){return parseISO(row&& (row.posted_at||row.created_at||row.date))}
-function notifyFeed(){var el=$('notifyFeed'),now=Date.now(),cut=now-3*24*60*60*1000,items=[];(_perfRows||[]).forEach(function(s){var d=notifyDate(s);if(!d||d.getTime()<cut)return;var v=(_signalStatuses||{})[statusKey(s.pair,s.posted_at)]||{};var st=String(v.status||'active').toLowerCase();items.push({s:s,v:v,status:st,date:d})});items.sort(function(a,b){return b.date-a.date});var badge=$('notifyBadge');if(badge){badge.textContent=String(items.length);badge.hidden=!items.length}if(!el)return;if(!items.length){el.innerHTML='<div class="notify-empty">Tiada aktiviti terkini dalam 3 hari.</div>';return}el.innerHTML='';items.forEach(function(x){var s=x.s,v=x.v,b=document.createElement('button');b.type='button';b.className='notify-item';var outcome=x.status==='active'?'AKTIF':x.status.toUpperCase();var pips=typeof v.pips==='number'?' · '+(v.pips>=0?'+':'')+Number(v.pips).toFixed(1)+' pips':'';b.innerHTML='<strong>'+esc(s.pair||'Setup')+' · '+esc(s.side||'BUY')+' — '+esc(outcome)+'</strong><small>'+esc(x.date.toLocaleString('ms-MY',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'}))+esc(pips)+'</small>';b.onclick=function(){closeNotify();var target=$('trades');if(target)target.scrollIntoView({behavior:'smooth',block:'start'})};el.appendChild(b)})}
-function notifyOpen(){notifyLoad();var m=$('notifyModal');if(m)m.hidden=false;document.querySelectorAll('[data-notify-type]').forEach(function(i){i.checked=!!notifyState.types[i.getAttribute('data-notify-type')];i.onchange=function(){notifyState.types[i.getAttribute('data-notify-type')]=i.checked;notifySave()}});notifyMarkets();notifyFeed()}
-function closeNotify(){var m=$('notifyModal');if(m)m.hidden=true}
-function notifyTest(){if(!('Notification' in window)){toast('Browser ini tidak menyokong notifikasi.');return}var send=function(){try{new Notification('TraderWatch — Ujian notifikasi',{body:'Notifikasi TraderWatch telah diaktifkan.'});toast('Notifikasi ujian dihantar.')}catch(e){toast('Ujian notifikasi gagal.')}};if(Notification.permission==='granted'){send();return}if(Notification.permission==='denied'){toast('Kebenaran notifikasi telah disekat dalam browser.');return}Notification.requestPermission().then(function(p){if(p==='granted')send();else toast('Kebenaran notifikasi tidak diberikan.')}).catch(function(){toast('Kebenaran notifikasi gagal diminta.')})}
-var _signalStatuses={};
-var LOGIN_URL='https://traderwatch.org/login.html';
-function takeHandoff(){try{
- var raw=location.hash&&location.hash.length>1?location.hash.slice(1):'';
- if(!raw)return null;
- var q=new URLSearchParams(raw);
- var at=q.get('access_token'),rt=q.get('refresh_token');
- if(!at||!rt)return null;
- var s={access_token:at,refresh_token:rt};
- var ex=q.get('expires_at');if(ex)s.expires_at=Number(ex);
- history.replaceState(null,'',location.pathname+location.search); // token out of URL/history
- return s}catch(e){return null}}
-function setGate(t){if(msg)msg.textContent=t}
-function show(){gate.hidden=true;app.hidden=false;mountAllTv();mountLive()}
-function redirect(){location.replace(LOGIN_URL+'?next='+encodeURIComponent(location.pathname+location.search))}
-function render(rows,statuses,member){
- window._perfAll=perfSet(statuses);window._perfRows=rows;_signalStatuses=statuses||{};try{notifyFeed()}catch(e){}
- var xs=(rows||[]).map(function(s){var v=(statuses||{})[statusKey(s.pair,s.posted_at)]||{};return {s:s,v:v,status:v.status||'active'}});
- var active=xs.filter(function(x){return x.status==='active'}),closed=xs.filter(function(x){return x.status!=='active'}),withPips=closed.filter(function(x){return typeof x.v.pips==='number'}),wins=withPips.filter(function(x){return Number(x.v.pips)>0}).length,total=withPips.reduce(function(a,x){return a+Number(x.v.pips||0)},0);
- $('today').textContent=String(member.name||member.email||'MEMBER').toUpperCase();$('planPill').textContent='◷  '+String(member.plan||'free').toUpperCase()+' MEMBER';
- var plan=String(member.plan||'free').toLowerCase(),planUp=plan.toUpperCase();
- var tb=$('tierBadge');if(tb){tb.textContent=planUp;tb.className='tierpill '+plan;tb.title=planUp+' membership'}
- $('setName').textContent=member.name||'\u2014';$('setEmail').textContent=member.email||'\u2014';$('setPlan').textContent=planUp;
- $('setTg').textContent=member.telegram_chat_id?'Linked':'Not linked';$('setTgBtn').textContent=member.telegram_chat_id?'Open @Traderwatchmembershipbot':'Link Telegram';
- var ml=mt5List(member);$('setMt5').textContent=ml.length?ml.join(', '):'\u2014';
- // stats (all-time by default; period buttons filter chart only, stats stay)
- var perf=perfSet(statuses),pWin=perf.filter(function(x){return x.pips>0}).length,pNet=perf.reduce(function(a,x){return a+x.pips},0),pSign=pNet>=0?'+':'−';
- $('netprofit').textContent=String(active.length);$('netprofitNote').textContent='active published setups';
- $('tradecount').textContent=perf.length?String(perf.length):'—';$('tradecountNote').textContent='closed results since '+PERF_LABEL;
- $('winrate').textContent=perf.length?(pWin/perf.length*100).toFixed(1)+'%':'—';$('winCount').textContent=perf.length?(pWin+' wins of '+perf.length):'—';
- $('balance').textContent=perf.length?(pSign+Math.abs(pNet).toFixed(1)+' pips'):'—';$('balanceChange').textContent=perf.length?'since '+PERF_LABEL:'—';$('balanceNote').textContent='published results since '+PERF_LABEL;
- var wc=$('markets');wc.querySelector('.section-head h2').textContent='Signal watch';wc.querySelector('.section-head p').textContent='Published setups · live status';
- wc.querySelectorAll('.watchrow').forEach(function(el,i){var x=xs[i];if(!x){el.remove();return}var s=x.s;el.innerHTML='<div class="pair"><div class="coin">'+(x.status==='active'?'•':'✓')+'</div><div><div class="pairname">'+esc(s.pair)+' · '+esc(s.side||'BUY')+'</div><div class="pairsub">E '+price(s.entry,s.pair)+' · '+esc(x.status.toUpperCase())+'</div></div></div><div class="price">'+price(s.entry,s.pair)+'<small class="'+(s.side==='SELL'?'negative':'positive')+'">SL '+price(s.sl,s.pair)+'</small></div>'});
- var body=$('tradeRows');body.innerHTML='';xs.slice(0,10).forEach(function(x){var s=x.s,tr=document.createElement('tr');var label=x.status==='active'?'Active':String(x.status).toUpperCase();var bc=x.status==='active'?'open':(x.status==='expired'?'muted':(Number(x.v.pips)>0?'win':'loss'));tr.innerHTML='<td><strong>'+esc(s.pair)+'</strong></td><td>'+esc(s.side||'—')+'</td><td>'+esc('E '+price(s.entry,s.pair)+' · TP '+price(s.tp,s.pair))+'</td><td><span class="badge '+bc+'">● '+esc(label)+'</span></td>';body.appendChild(tr)});if(!xs.length)body.innerHTML='<tr><td colspan="4" class="empty">No verified signals available.</td></tr>';
- $('riskused').textContent=String(active.length);$('riskpct').textContent=active.length+' active';$('riskremain').textContent=closed.length+' closed';$('riskSrc').textContent='Supabase';$('riskFeed').textContent='Published';$('riskbar').style.width=rows.length?Math.min(100,active.length/rows.length*100)+'%':'0%';
- drawChart(window._perfPeriod||'ALL');
-}
+  <div class="shell">
 
-function drawChart(period){window._perfPeriod=period||'ALL';
- var mode=window._perfMode||'CUM';
- var perf=(window._perfAll||[]).slice();
- if(period==='1W'){var c=new Date();c.setDate(c.getDate()-7);var cut=c.toISOString().slice(0,10);perf=perf.filter(function(x){return x.d>=cut})}
- if(period==='1M'){var c2=new Date();c2.setMonth(c2.getMonth()-1);var cut2=c2.toISOString().slice(0,10);perf=perf.filter(function(x){return x.d>=cut2})}
- if(period==='3M'){var c3=new Date();c3.setMonth(c3.getMonth()-3);var cut3=c3.toISOString().slice(0,10);perf=perf.filter(function(x){return x.d>=cut3})}
- var plbl=period==='1M'?'last 30 days':period==='3M'?'last 3 months':period==='1W'?'last 7 days':'since '+PERF_LABEL;
- var lbl='Cumulative pips · '+plbl;
- var tot=0;
- if(mode==='TRADE'){
-  // Individual trade pips — flat bar (1=pip, -1=pip)
-  lbl='Pips per trade · '+plbl;
-  var maxAbs=Math.max.apply(null,perf.map(function(x){return Math.abs(x.pips)}));maxAbs=maxAbs||10;
-  if(!perf.length){$('chartreturn').textContent='—';$('chartSub').textContent=lbl;$('line').setAttribute('d','');$('area').setAttribute('d','');$('dot').setAttribute('cx',0);$('dot').setAttribute('cy',0);$('chartlabels').innerHTML='';return}
-  var amp=Math.max(100,maxAbs),zeroY=105;
-  var pts=perf.map(function(x,i){return [i*600/(perf.length-1||1),zeroY-(x.pips/amp)*85]});var d=pts.map(function(p,i){return(i?'L':'M')+p[0].toFixed(1)+' '+p[1].toFixed(1)}).join(' ');
-  var g=$('chart').querySelector('g');
-  if(g&&!$('zeroline')){var zl=document.createElementNS('http://www.w3.org/2000/svg','path');zl.setAttribute('id','zeroline');zl.setAttribute('stroke','#8a93a0');zl.setAttribute('stroke-width','1');zl.setAttribute('stroke-dasharray','4 4');zl.setAttribute('opacity','.55');g.appendChild(zl)}
-  var zl2=$('zeroline');if(zl2)zl2.setAttribute('d','M0 '+zeroY.toFixed(1)+'H600');
-  $('line').setAttribute('d',d);$('area').setAttribute('d',d+' L600 210 L0 210 Z');$('dot').setAttribute('cx',pts[pts.length-1][0]);$('dot').setAttribute('cy',pts[pts.length-1][1]);
-  var last=perf[perf.length-1];$('line').setAttribute('stroke',last.pips>=0?'#b7f36b':'#ff777d');$('dot').setAttribute('fill',last.pips>=0?'#b7f36b':'#ff777d');
-  tot=perf.reduce(function(a,x){return a+x.pips},0);$('chartreturn').textContent=(tot>=0?'+':'−')+Math.abs(tot).toFixed(1)+' pips';$('chartreturn').className=tot>=0?'positive':'negative';
-  var step=Math.max(1,Math.ceil(perf.length/7));$('chartlabels').innerHTML=perf.filter(function(_,i){return i%step===0}).slice(0,7).map(function(x){return'<span>'+x.d.slice(8)+'/'+x.d.slice(5,7)+'</span>'}).join('');
- } else if(mode==='DAILY'){
-  // Net pips per calendar day — bar chart
-  lbl='Net pips per day · '+plbl;
-  var byDay={};perf.forEach(function(x){byDay[x.d]=(byDay[x.d]||0)+x.pips});
-  var days=Object.keys(byDay).sort();if(!days.length){$('chartreturn').textContent='—';$('chartSub').textContent=lbl;$('line').setAttribute('d','');$('area').setAttribute('d','');$('dot').setAttribute('cx',0);$('dot').setAttribute('cy',0);$('chartlabels').innerHTML='';return}
-  var vals=days.map(function(d){return byDay[d]});
-  var maxAbs=Math.max.apply(null,vals.map(Math.abs));maxAbs=maxAbs||10;
-  var bw=Math.max(2,540/days.length*0.6);var W=600,L=30,R=30;
-  var T=10,B=10;var ph=190;
-  var mx=Math.max.apply(null,vals.concat([0])),mn=Math.min(0,Math.min.apply(null,vals));
-  var zeroY=T+mx/(mx-mn||1)*ph;
-  var pts=days.map(function(d,i){return[L+(i/(days.length-1||1))*(W-L-R),T+mx/(mx-mn||1)*(mx-byDay[d])]});
-  var d=pts.map(function(p,i){return(i?'L':'M')+p[0].toFixed(1)+' '+p[1].toFixed(1)}).join(' ');
-  var g=$('chart').querySelector('g');if(g&&!$('zeroline')){var zl=document.createElementNS('http://www.w3.org/2000/svg','path');zl.setAttribute('id','zeroline');zl.setAttribute('stroke','#8a93a0');zl.setAttribute('stroke-width','1');zl.setAttribute('stroke-dasharray','4 4');zl.setAttribute('opacity','.55');g.appendChild(zl)}
-  var zl2=$('zeroline');if(zl2)zl2.setAttribute('d','M0 '+zeroY.toFixed(1)+'H600');
-  var bars=days.map(function(d,i){var v=byDay[d];var x=pts[i][0]-bw/2;var yv=T+(mx-Math.max(0,v))/(mx-mn||1)*ph;var y=Math.min(zeroY,yv);var h=Math.abs(zeroY-yv);return'<rect x="'+(x).toFixed(1)+'" y="'+y.toFixed(1)+'" width="'+bw.toFixed(1)+'" height="'+Math.max(1,h).toFixed(1)+'" rx="2" fill="'+(v>=0?'#b7f36b':'#ff777d')+'" fill-opacity=".8"/>'}).join('');
-  $('chart').innerHTML=$('chart').innerHTML; // reset
-  // rebuild SVG: strim original (keep defs/line/area/dot/group) then inject bars + zero line
-  var svg=$('chart');
-  var orig = svg.innerHTML;
-  // Keep grid group, remove old bars (none yet) and rebuild area/line/dot
-  svg.innerHTML = '<defs><linearGradient id="fill" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#b7f36b" stop-opacity=".2"/><stop offset="100%" stop-color="#b7f36b" stop-opacity="0"/></linearGradient></defs><g stroke="#ffffff0b" stroke-width="1"><path d="M0 25H600 M0 70H600 M0 115H600 M0 160H600 M0 205H600"/></g><path id="area" fill="url(#fill)" d=""/><path id="line" fill="none" stroke="#b7f36b" stroke-width="2.2" stroke-linecap="round" d=""/><circle id="dot" r="4" fill="#b7f36b" stroke="#12151a" stroke-width="2" cx="0" cy="0"/>';
-  // inject zeroline + bars + restore line path + dot
-  var zeroLineEl = document.createElementNS('http://www.w3.org/2000/svg','path');
-  zeroLineEl.setAttribute('id','zeroline');zeroLineEl.setAttribute('stroke','#8a93a0');zeroLineEl.setAttribute('stroke-width','1');
-  zeroLineEl.setAttribute('stroke-dasharray','4 4');zeroLineEl.setAttribute('opacity','.55');
-  var g = svg.querySelector('g:last-of-type') || svg;
-  // add zeroline after grid group (before bars)
-  var gridG = Array.from(svg.querySelectorAll('g')).find(function(el){return el.querySelector('path[d^="M0 25"]');});
-  if(gridG) gridG.insertAdjacentElement('afterend', zeroLineEl);
-  else { var zg = document.createElementNS('http://www.w3.org/2000/svg','g'); zg.appendChild(zeroLineEl); svg.insertBefore(zg, svg.children[svg.children.length-1]);}
-  // bars group
-  var barsG = document.createElementNS('http://www.w3.org/2000/svg','g');
-  barsG.setAttribute('id','bars');
-  days.forEach(function(d,i){
-    var v=byDay[d];
-    var x=pts[i][0]-bw/2;var yv=T+(mx-Math.max(0,v))/(mx-mn||1)*ph;var y=Math.min(zeroY,yv);var h=Math.abs(zeroY-yv);
-    var rect=document.createElementNS('http://www.w3.org/2000/svg','rect');
-    rect.setAttribute('x',x.toFixed(1));rect.setAttribute('y',y.toFixed(1));
-    rect.setAttribute('width',bw.toFixed(1));rect.setAttribute('height',Math.max(1,h).toFixed(1));
-    rect.setAttribute('rx','2');rect.setAttribute('fill',v>=0?'#b7f36b':'#ff777d');rect.setAttribute('fill-opacity','.85');
-    barsG.appendChild(rect);
-  });
-  svg.appendChild(barsG);
-  svg.innerHTML+='<g id="bars">'+bars+'</g>';
-  $('line').setAttribute('d',d);$('dot').setAttribute('cx',pts[pts.length-1][0]);$('dot').setAttribute('cy',pts[pts.length-1][1]);
-  $('line').setAttribute('stroke',lastV>=0?'#b7f36b':'#ff777d');$('dot').setAttribute('fill',lastV>=0?'#b7f36b':'#ff777d');
-  $('chartreturn').textContent=(tot>=0?'+':'−')+Math.abs(tot).toFixed(1)+' pips';$('chartreturn').className=tot>=0?'positive':'negative';
-  $('chartlabels').innerHTML='<span>'+days[0].slice(5).replace('-','/')+'</span><span>'+days[Math.floor(days.length/2)].slice(5).replace('-','/')+'</span><span>'+days[days.length-1].slice(5).replace('-','/')+'</span>';
- } else {
-  // CUMULATIVE — existing line chart
-  lbl='Cumulative pips · '+plbl;
-  var run=0,vals=perf.map(function(x){run+=x.pips;return run});
-  if(!perf.length){$('chartreturn').textContent='—';$('chartSub').textContent=lbl;$('line').setAttribute('d','');$('area').setAttribute('d','');$('dot').setAttribute('cx',0);$('dot').setAttribute('cy',0);$('chartlabels').innerHTML='';return}
-  var min=Math.min.apply(null,vals.concat([0])),max=Math.max.apply(null,vals.concat([0])),pad=(max-min)*0.10||10;
-  if(min<0)min-=pad;max+=pad;var range=max-min||1;
-  var pts=vals.map(function(v,i){return[i*600/(vals.length-1||1),198-(v-min)/range*170]});var d=pts.map(function(p,i){return(i?'L':'M')+p[0].toFixed(1)+' '+p[1].toFixed(1)}).join(' ');
-  var zeroY=198-(0-min)/range*170;var g=$('chart').querySelector('g');
-  if(g&&!$('zeroline')){var zl=document.createElementNS('http://www.w3.org/2000/svg','path');zl.setAttribute('id','zeroline');zl.setAttribute('stroke','#8a93a0');zl.setAttribute('stroke-width','1');zl.setAttribute('stroke-dasharray','4 4');zl.setAttribute('opacity','.55');g.appendChild(zl)}
-  var zl2=$('zeroline');if(zl2)zl2.setAttribute('d','M0 '+zeroY.toFixed(1)+'H600');
-  $('line').setAttribute('d',d);$('area').setAttribute('d',d+' L600 210 L0 210 Z');$('dot').setAttribute('cx',pts[pts.length-1][0]);$('dot').setAttribute('cy',pts[pts.length-1][1]);
-  $('line').setAttribute('stroke',run>=0?'#b7f36b':'#ff777d');$('dot').setAttribute('fill',run>=0?'#b7f36b':'#ff777d');
-  tot=run;$('chartreturn').textContent=(run>=0?'+':'−')+Math.abs(run).toFixed(1)+' pips';$('chartreturn').className=run>=0?'positive':'negative';
-  var step=Math.max(1,Math.ceil(perf.length/7));$('chartlabels').innerHTML=perf.filter(function(_,i){return i%step===0}).slice(0,7).map(function(x){return'<span>'+x.d.slice(8)+'/'+x.d.slice(5,7)+'</span>'}).join('');
- }
- $('chartSub').textContent=lbl;
-}
-var TG_BOT='https://t.me/Traderwatchmembershipbot',tgTok=null,tgAt=0;
-function tgTap(ev){
- ev.preventDefault();
- var w=window.open('','_blank');
- (async function(){
-  try{ if(!tgTok||Date.now()-tgAt>600000){ var g=await SB.rpc('create_link_token',{p_user_id:window.TWUID}); if(!g.error&&g.data){tgTok=g.data;tgAt=Date.now()} } }catch(e){}
-  var u=tgTok?(TG_BOT+'?start='+encodeURIComponent(tgTok)):TG_BOT;
-  if(w&&!w.closed){w.location.href=u}else{window.open(u,'_blank','noopener')}
- })();
- return false;
-}
-function tgWire(member){
- var linked=!!member.telegram_chat_id,a=$('tgCta'),b=$('setTgBtn');
- if(!a||!b)return;
- if(linked){a.href=TG_BOT;b.href=TG_BOT;a.onclick=null;b.onclick=null;a.removeAttribute('target');b.removeAttribute('target');}
- else{a.href='#';b.href='#';a.setAttribute('target','_blank');b.setAttribute('target','_blank');a.onclick=tgTap;b.onclick=tgTap;}
-}
-function mt5Meta(){var m=window.TW_META||{};var v=m.mt5_login!=null&&m.mt5_login!==''?m.mt5_login:m.mt4_login;return v==null?'':v}
-function mt5List(member){var raw=(member&&member.mt5_login)||mt5Meta()||'';if(Array.isArray(raw))raw=raw.join(',');return String(raw).split(',').map(function(s){return s.trim()}).filter(Boolean)}
-function mt5Msg(t,ok){var el=$('mt5Msg');if(!el)return;el.textContent=t||'';el.style.color=ok?'var(--green)':'var(--muted)'}
-function mt5Open(){var i=$('mt5Input'),e=$('mt5Edit');if(!i||!e)return;i.value=mt5List(window.TWMEMBER||{}).join(', ');mt5Msg('');e.hidden=false;try{i.focus()}catch(x){}}
-function mt5Close(){var e=$('mt5Edit');if(e)e.hidden=true;mt5Msg('')}
-function mt5Norm(v){var arr=String(v==null?'':v).split(',').map(function(s){return s.trim()}).filter(Boolean),out=[];arr.forEach(function(s){if(out.indexOf(s)<0)out.push(s)});return out.join(', ')}
-function mt5Save(){var i=$('mt5Input');if(!i)return;
- var val=mt5Norm(i.value),b=$('mt5SaveBtn');
- if(b){b.disabled=true;b.textContent='Menyimpan…'}mt5Msg('');
- return Promise.resolve().then(function(){if(!SB)throw Error('Supabase client unavailable');return SB.auth.updateUser({data:{mt5_login:val}})}).then(function(r){
-  if(!r||r.error)throw (r&&r.error)||Error('update failed');
-  var u=r.data&&r.data.user;if(u)window.TW_META=u.user_metadata||window.TW_META||{};
-  if(window.TWMEMBER)window.TWMEMBER.mt5_login=val;
-  var s=$('setMt5');if(s)s.textContent=val||'\u2014';
-  mt5Msg('Saved ✓',true);setTimeout(mt5Close,900)
- }).catch(function(e){mt5Msg('Could not save: '+((e&&e.message)||'error'),false)}).then(function(){if(b){b.disabled=false;b.textContent='Simpan'}})
-}
-async function boot(){try{if(!window.supabase||!window.supabase.createClient)throw Error('Supabase client unavailable');var sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);SB=sb;var hand=takeHandoff();
- if(hand){var set=await sb.auth.setSession(hand);if(set.error)console.warn('handoff rejected:',set.error.message)}
- var r=await sb.auth.getSession(),session=r.data&&r.data.session;if(!session){setGate('Please sign in to open your member dashboard.');setTimeout(redirect,500);return}var p=await sb.from('profiles').select('name,plan,telegram_chat_id').eq('id',session.user.id).single(),member=p.data||{name:session.user.email,plan:'free',telegram_chat_id:null};member.email=member.email||session.user.email;window.TWUID=session.user.id;window.TWMEMBER=member;window.TW_META=(session.user&&session.user.user_metadata)||{};setGate('Loading published signals…');var st=await fetch('../signal-status.json?t='+Date.now(),{cache:'no-store'}),sj=st.ok?await st.json():{};var q=await sb.rpc('get_signals');if(q.error)throw q.error;var privIds = ["214", "215", "216", "217", "218", "219", "220", "223", "224", "225", "226", "227", "228", "229", "230", "231", "232", "233", "235", "245", "246", "247", "248", "249", "250", "251", "252", "253", "254", "255", "256", "257"]; var cleanRows = (q.data||[]).filter(function(s){ return !privIds.includes(String(s.id)); }); render(cleanRows,sj.signals||{},member);show()}catch(e){setGate('Dashboard data is temporarily unavailable. Please try again.');console.error('TraderWatch dashboard:',e)}}
-var savedTheme='dark';try{savedTheme=localStorage.getItem('tw-theme')||'dark'}catch(e){}
-applyTheme(savedTheme,false);
-$('themeBtn').onclick=function(){applyTheme(themeNow()==='light'?'dark':'light',true)};
-$('setThemeBtn').onclick=function(){applyTheme(themeNow()==='light'?'dark':'light',true)};
-$('avatarBtn').onclick=openSettings;$('settingsClose').onclick=closeSettings;
-$('notifyBtn').onclick=notifyOpen;$('notifyClose').onclick=closeNotify;$('notifyTestBtn').onclick=notifyTest;
-$('notifyModal').addEventListener('click',function(e){if(e.target===$('notifyModal'))closeNotify()});
-$('mt5EditBtn').onclick=mt5Open;$('mt5SaveBtn').onclick=mt5Save;$('mt5CancelBtn').onclick=mt5Close;
-$('settingsModal').addEventListener('click',function(e){if(e.target===$('settingsModal'))closeSettings()});
-document.addEventListener('keydown',function(e){if(e.key==='Escape'){closeSettings();closeNotify()}});
-var HOME_URL='https://traderwatch.org/';
-$('signOutBtn').onclick=function(){
- var done=function(){try{localStorage.removeItem('tw-live-sound')}catch(e){}location.replace(HOME_URL)};
- if(SB){SB.auth.signOut().then(done).catch(done)}else{done()}};
-$('addTrade').onclick=function(){location.reload()};
-$('liveSound').onclick=function(){liveSoundOn();try{localStorage.setItem('tw-live-sound','1')}catch(e){}};
-document.addEventListener('pointerdown',liveFirstGesture,{once:true});
-document.querySelectorAll('.charttools [data-period]').forEach(function(btn){
-  btn.addEventListener("click", function(){
-    window._perfPeriod = btn.getAttribute("data-period");
-    drawChart(window._perfPeriod);
-    document.querySelectorAll('.charttools [data-period]').forEach(function(b2){
-      b2.classList.toggle("active", b2===btn);
-    });
-  });
-});
-document.querySelectorAll('.charttools [data-mode]').forEach(function(btn){
-  btn.addEventListener("click", function(){
-    window._perfMode = btn.getAttribute("data-mode");
-    drawChart(window._perfPeriod||'ALL');
-    document.querySelectorAll('.charttools [data-mode]').forEach(function(b2){
-      b2.classList.toggle("active", b2===btn);
-    });
-  });
-});
-boot();
-})();
+    <!-- Panel pitch (desktop sahaja) -->
+    <aside class="pitch" aria-label="Tentang app TraderWatch">
+      <div class="pitch-brand">
+        <span class="brand-mark" aria-hidden="true">T</span>
+        <span class="brand-name">TRADERWATCH</span>
+      </div>
+      <h1 class="pitch-title">Signals,<br>annotated.</h1>
+      <p class="pitch-sub">Signal AI untuk XAU/USD, XAG/USD dan BTC — chart beranotasi, terus di skrin utama telefon anda.</p>
+      <ul class="pitch-list">
+        <li>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 4v3"/><path d="M7 15v5"/><rect x="4.5" y="7" width="5" height="8" rx="1"/><path d="M17 3v4"/><path d="M17 17v4"/><rect x="14.5" y="7" width="5" height="10" rx="1"/></svg>
+          <div><strong>Lukisan entry/SL/TP pada chart</strong><span>Zon POI, risiko &amp; ganjaran dilukis terus pada candlestick.</span></div>
+        </li>
+        <li>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6h11"/><path d="M9 12h11"/><path d="M9 18h11"/><path d="m3.5 6 1 1 2-2"/><path d="m3.5 12 1 1 2-2"/><path d="m3.5 18 1 1 2-2"/></svg>
+          <div><strong>Sebab entry + checklist confluence</strong><span>Ringkasan Bahasa Melayu dan gate enjin bagi setiap signal.</span></div>
+        </li>
+        <li>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 8.5a15 15 0 0 1 20 0"/><path d="M5.5 12.5a10 10 0 0 1 13 0"/><path d="M9 16.5a5 5 0 0 1 6 0"/><circle cx="12" cy="20" r="1" fill="currentColor"/><path d="m3 3 18 18"/></svg>
+          <div><strong>Chart berfungsi offline</strong><span>Data bar dicache — chart tetap dipaparkan tanpa internet.</span></div>
+        </li>
+      </ul>
+      <button class="btn btn-primary btn-lg" id="pitchInstall" type="button">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M4 19h16"/></svg>
+        Install app
+      </button>
+      <p class="pitch-note">Educational only. Trading involves substantial risk.</p>
+    </aside>
 
-</script>
-</body></html>
+    <!-- App column -->
+    <div class="app-frame">
+
+      <!-- Banner offline -->
+      <div class="offline-banner" id="offlineBanner" role="status" hidden>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 8.5a15 15 0 0 1 20 0"/><path d="M5.5 12.5a10 10 0 0 1 13 0"/><path d="M9 16.5a5 5 0 0 1 6 0"/><circle cx="12" cy="20" r="1" fill="currentColor"/><path d="m3 3 18 18"/></svg>
+        Anda di luar talian — memaparkan data cache terakhir.
+      </div>
+
+      <!-- Top app bar -->
+      <header class="appbar">
+        <a class="appbar-brand" href="#/home" aria-label="TraderWatch — Home">
+          <span class="brand-mark" aria-hidden="true">T</span>
+          <span class="brand-name">TRADERWATCH</span>
+        </a>
+        <div class="appbar-actions">
+          <span class="net-pill" id="netPill" role="status"><span class="net-dot" aria-hidden="true"></span><span id="netLabel">LIVE</span></span>
+          <button class="avatar-btn" id="avatarBtn" type="button" aria-label="Akaun saya" hidden></button>
+          <button class="icon-btn" id="bellBtn" type="button" aria-label="Notifikasi signal">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9a6 6 0 0 1 12 0c0 5 2 6 2 6H4s2-1 2-6"/><path d="M10 19a2 2 0 0 0 4 0"/></svg>
+          </button>
+        </div>
+      </header>
+
+      <!-- Banner install (boleh dismiss) -->
+      <div class="install-banner" id="installBanner" hidden>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M4 19h16"/></svg>
+        <div class="install-banner-text">
+          <strong>Pasang TraderWatch</strong>
+          <span>Akses pantas + offline di skrin utama.</span>
+        </div>
+        <button class="btn btn-primary btn-sm" id="installBannerBtn" type="button">Install</button>
+        <button class="icon-btn" id="installDismiss" type="button" aria-label="Tutup banner install">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 6 12 12"/><path d="m18 6-12 12"/></svg>
+        </button>
+      </div>
+
+      <main id="main">
+
+        <!-- ================= HOME (SIGNAL-FIRST) ================= -->
+        <section class="screen" id="screen-home" data-route="home" aria-label="Home" hidden>
+          <div class="home-head">
+            <div class="greeting">
+              <h2>Signals</h2>
+              <p class="greet-date">Signal AI · XAU/USD · XAG/USD · BTC</p>
+            </div>
+            <span class="chip chip-muted" id="modeChip" role="status">…</span>
+          </div>
+
+          <section class="card hero-card" id="heroCard" aria-label="Signal semasa">
+            <div class="card-head">
+              <h3>Signal semasa</h3>
+              <span class="cache-badge" id="signalCacheBadge" hidden></span>
+            </div>
+            <div id="signalCard">
+              <div class="skeleton sk-line w60"></div>
+              <div class="skeleton sk-block"></div>
+              <div class="skeleton sk-line w40"></div>
+            </div>
+          </section>
+
+          <section class="card mysig-card" id="mySignalsCard" aria-label="Signal anda" hidden>
+            <div class="card-head">
+              <h3>Signal anda</h3>
+              <span class="chip chip-muted" id="mySignalsPlanChip">FREE</span>
+            </div>
+            <ul class="results-list mysig-list" id="mySignalsList">
+              <li class="skeleton sk-row"></li>
+              <li class="skeleton sk-row"></li>
+            </ul>
+            <p class="mysig-note" id="mySignalsNote" hidden>Signal terkini sahaja dibuka untuk pelan FREE — naik taraf untuk semua level.</p>
+          </section>
+
+          <a class="card demo-card" href="#/signal?demo=1" aria-label="Demo replay — signal sebenar XAUUSD 26 Oktober 2026">
+            <span class="chip chip-demo">DEMO REPLAY · data sebenar 26 Okt</span>
+            <div class="demo-row">
+              <span class="signal-pair">XAU/USD</span>
+              <span class="chip chip-buy">BUY</span>
+              <span class="demo-meta">RR 1.89 · EXPIRED</span>
+              <svg class="demo-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>
+            </div>
+            <p class="demo-sub">Chart beranotasi + sebab entry · bahan pendidikan</p>
+          </a>
+
+          <a class="card perf-card" id="homePerfCard" href="#/performance" aria-label="Prestasi signal — lihat prestasi penuh">
+            <div class="perf-card-top">
+              <div class="perf-card-main">
+                <span class="stat-label">Prestasi · <span id="homePerfPeriod">30 hari</span></span>
+                <div class="perf-card-nums">
+                  <span class="perf-wr" id="homePerfWR">–</span>
+                  <span class="perf-netr" id="homePerfNetR">–</span>
+                </div>
+                <span class="perf-card-sub" id="homePerfSub">Memuatkan rekod…</span>
+              </div>
+              <span class="perf-spark-wrap" id="homePerfSpark" aria-hidden="true"></span>
+            </div>
+            <span class="perf-card-cta">Lihat prestasi penuh →</span>
+          </a>
+
+          <section class="card" aria-label="Keputusan terkini">
+            <div class="card-head">
+              <h3>Keputusan terkini</h3>
+              <span class="cache-badge" id="resultsCacheBadge" hidden></span>
+            </div>
+            <ul class="results-list" id="resultsList">
+              <li class="skeleton sk-row"></li>
+              <li class="skeleton sk-row"></li>
+              <li class="skeleton sk-row"></li>
+            </ul>
+          </section>
+
+          <div class="stat-grid stat-grid-sm" aria-label="Statistik platform">
+            <div class="stat-tile">
+              <span class="stat-value" id="statMySignals">–</span>
+              <span class="stat-label">Signal anda</span>
+            </div>
+            <div class="stat-tile">
+              <span class="stat-value" id="statActive">–</span>
+              <span class="stat-label">Signal aktif</span>
+            </div>
+            <div class="stat-tile">
+              <span class="stat-value" id="statClosed">–</span>
+              <span class="stat-label">Setup ditutup</span>
+            </div>
+          </div>
+
+          <p class="disclaimer">Educational only. Trading involves substantial risk.</p>
+        </section>
+
+        <!-- ================= MARKETS ================= -->
+        <section class="screen" id="screen-markets" data-route="markets" aria-label="Markets" hidden>
+          <div class="greeting">
+            <h2>Markets</h2>
+            <p class="greet-date">Chart langsung · timeframe M15</p>
+          </div>
+
+          <div class="chip-row" role="group" aria-label="Pilih pair">
+            <button class="chip chip-select active" type="button" data-symbol="OANDA:XAUUSD" aria-pressed="true">XAU/USD</button>
+            <button class="chip chip-select" type="button" data-symbol="OANDA:XAGUSD" aria-pressed="false">XAG/USD</button>
+            <button class="chip chip-select" type="button" data-symbol="FX:BTCUSD" aria-pressed="false">BTC/USD</button>
+          </div>
+
+          <div class="markets-mode-row">
+            <div class="seg-toggle" id="marketModeToggle" role="group" aria-label="Jenis chart">
+              <button class="seg-btn active" type="button" data-chartmode="app" aria-pressed="true">Chart app</button>
+              <button class="seg-btn" type="button" data-chartmode="tv" aria-pressed="false">TradingView live</button>
+            </div>
+          </div>
+
+          <div class="card chart-card">
+            <div id="appChartWrap">
+              <div class="chart-meta">
+                <span class="chip chip-muted" id="marketPairChip">XAU/USD · M15</span>
+                <span class="chart-badge" id="marketDataBadge" hidden></span>
+              </div>
+              <canvas id="marketCanvas" class="tw-canvas" aria-label="Chart candlestick M15"></canvas>
+              <div class="chart-offline chart-empty" id="marketChartEmpty" hidden>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 8.5a15 15 0 0 1 20 0"/><path d="M5.5 12.5a10 10 0 0 1 13 0"/><path d="M9 16.5a5 5 0 0 1 6 0"/><circle cx="12" cy="20" r="1" fill="currentColor"/><path d="m3 3 18 18"/></svg>
+                <strong>Chart perlukan data bar</strong>
+                <span>Sambung internet untuk memuatkan data bar terkini.</span>
+              </div>
+            </div>
+            <div id="chartBox" class="chart-box" aria-label="Chart TradingView" hidden></div>
+          </div>
+          <p class="disclaimer" id="marketDisclaimer">Data: Swissquote/Coinbase · bukan quote broker anda.</p>
+        </section>
+
+        <!-- ================= SIGNAL (detail, bukan tab) ================= -->
+        <section class="screen" id="screen-signal" data-route="signal" aria-label="Signal" hidden>
+          <a class="back-btn" href="#/home">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 6-6 6 6 6"/></svg>
+            Signals
+          </a>
+          <div id="signalDetail">
+            <div class="skeleton sk-line w60"></div>
+            <div class="skeleton sk-block"></div>
+            <div class="skeleton sk-line w40"></div>
+          </div>
+        </section>
+
+        <!-- ================= PERFORMANCE (detail, bukan tab) ================= -->
+        <section class="screen" id="screen-performance" data-route="performance" aria-label="Prestasi" hidden>
+          <a class="back-btn" href="#/home">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 6-6 6 6 6"/></svg>
+            Signals
+          </a>
+          <div class="greeting">
+            <h2>Prestasi</h2>
+            <p class="greet-date">Rekod sebenar enjin AI · sejak 19 Okt 2026</p>
+          </div>
+          <div class="chip-row" id="perfPeriodChips" role="group" aria-label="Tempoh prestasi">
+            <button class="chip chip-select" type="button" data-days="7" aria-pressed="false">7 hari</button>
+            <button class="chip chip-select active" type="button" data-days="30" aria-pressed="true">30 hari</button>
+            <button class="chip chip-select" type="button" data-days="all" aria-pressed="false">Semua</button>
+          </div>
+          <div id="perfBody">
+            <div class="skeleton sk-line w40"></div>
+            <div class="skeleton sk-block"></div>
+            <div class="skeleton sk-block"></div>
+            <div class="skeleton sk-line w60"></div>
+          </div>
+        </section>
+
+        <!-- ================= TOOLS ================= -->
+        <section class="screen" id="screen-tools" data-route="tools" aria-label="Tools" hidden>
+          <div class="greeting">
+            <h2>Tools</h2>
+            <p class="greet-date">Alat risiko &amp; penukar mata wang</p>
+          </div>
+
+          <section class="card" aria-label="Kalkulator saiz posisi">
+            <div class="card-head"><h3>Kalkulator saiz posisi · XAUUSD</h3></div>
+            <div class="field-grid">
+              <label class="field">
+                <span>Balance (USD)</span>
+                <input type="number" id="calcBalance" inputmode="decimal" min="0" step="any" value="1000">
+              </label>
+              <label class="field">
+                <span>Risk %</span>
+                <input type="number" id="calcRisk" inputmode="decimal" min="0" max="100" step="any" value="1">
+              </label>
+              <label class="field">
+                <span>Entry</span>
+                <input type="number" id="calcEntry" inputmode="decimal" min="0" step="any" placeholder="cth. 4010.50">
+              </label>
+              <label class="field">
+                <span>Stop Loss</span>
+                <input type="number" id="calcSl" inputmode="decimal" min="0" step="any" placeholder="cth. 4003.20">
+              </label>
+            </div>
+            <div class="calc-output">
+              <div class="calc-out-tile">
+                <span class="stat-label">Risk USD</span>
+                <span class="stat-value lime" id="calcRiskUsd">–</span>
+              </div>
+              <div class="calc-out-tile">
+                <span class="stat-label">Lot size</span>
+                <span class="stat-value lime" id="calcLot">–</span>
+              </div>
+            </div>
+            <p class="formula">lot = riskUSD ÷ (|entry − SL| × 100) · 1 lot XAU = 100 oz</p>
+            <p class="warn-note">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 2.5 20h19L12 3z"/><path d="M12 10v4"/><circle cx="12" cy="17" r="0.5" fill="currentColor"/></svg>
+              Reference calculation only — sahkan dengan broker.
+            </p>
+          </section>
+
+          <section class="card" aria-label="Penukar mata wang">
+            <div class="card-head">
+              <h3>Currency converter</h3>
+              <span class="chip chip-muted">demo rates</span>
+            </div>
+            <div class="conv-row">
+              <label class="field">
+                <span>Jumlah</span>
+                <input type="number" id="convAmount" inputmode="decimal" min="0" step="any" value="100">
+              </label>
+              <label class="field">
+                <span>Dari</span>
+                <select id="convFrom">
+                  <option value="USD" selected>USD</option>
+                  <option value="MYR">MYR</option>
+                  <option value="EUR">EUR</option>
+                  <option value="GBP">GBP</option>
+                </select>
+              </label>
+              <label class="field">
+                <span>Ke</span>
+                <select id="convTo">
+                  <option value="USD">USD</option>
+                  <option value="MYR" selected>MYR</option>
+                  <option value="EUR">EUR</option>
+                  <option value="GBP">GBP</option>
+                </select>
+              </label>
+            </div>
+            <div class="conv-result">
+              <span class="stat-label">Hasil</span>
+              <span class="stat-value lime" id="convResult">–</span>
+            </div>
+            <p class="formula">Kadar demo: USD→MYR 4.25 · EUR→USD 1.08 · GBP→USD 1.27</p>
+          </section>
+        </section>
+
+        <!-- ================= LEARN ================= -->
+        <section class="screen" id="screen-learn" data-route="learn" aria-label="Learn" hidden>
+          <div class="greeting">
+            <h2>Learn</h2>
+            <p class="greet-date">Modul pendidikan TraderWatch</p>
+          </div>
+
+          <div class="learn-list">
+            <article class="card learn-card">
+              <div class="learn-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 20h18"/><path d="M5 20V9l4-3v14"/><path d="M13 20V4l6 4v12"/></svg>
+              </div>
+              <div class="learn-body">
+                <h3>Market Structure / SMC</h3>
+                <p>Fahami swing high/low, break of structure dan order block — asas cara enjin AI membaca pasaran.</p>
+                <a class="learn-link" href="https://traderwatch.org/education.html">Buka modul
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7"/><path d="M9 7h8v8"/></svg>
+                </a>
+              </div>
+            </article>
+
+            <article class="card learn-card">
+              <div class="learn-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 4 6v6c0 4.5 3.4 7.6 8 9 4.6-1.4 8-4.5 8-9V6l-8-3z"/><path d="m9 12 2 2 4-4"/></svg>
+              </div>
+              <div class="learn-body">
+                <h3>Risk Management</h3>
+                <p>Belajar saiz posisi, nisbah risk-reward dan had kerugian harian supaya akaun bertahan jangka panjang.</p>
+                <a class="learn-link" href="https://traderwatch.org/education.html">Buka modul
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7"/><path d="M9 7h8v8"/></svg>
+                </a>
+              </div>
+            </article>
+
+            <article class="card learn-card">
+              <div class="learn-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>
+              </div>
+              <div class="learn-body">
+                <h3>Trading Sessions</h3>
+                <p>Kenali sesi Asia, London dan New York — bila kecairan tinggi dan bila setup paling kerap muncul.</p>
+                <a class="learn-link" href="https://traderwatch.org/education.html">Buka modul
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7"/><path d="M9 7h8v8"/></svg>
+                </a>
+              </div>
+            </article>
+
+            <article class="card learn-card">
+              <div class="learn-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4a5 5 0 0 1 5 5c0 2-1 3-1 5h-8c0-2-1-3-1-5a5 5 0 0 1 5-5z"/><path d="M9 17h6"/><path d="M10 20h4"/></svg>
+              </div>
+              <div class="learn-body">
+                <h3>Psychology</h3>
+                <p>Kawal FOMO, revenge trading dan disiplin eksekusi — faktor yang membezakan trader konsisten.</p>
+                <a class="learn-link" href="https://traderwatch.org/education.html">Buka modul
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7"/><path d="M9 7h8v8"/></svg>
+                </a>
+              </div>
+            </article>
+          </div>
+          <p class="disclaimer">Educational only. Trading involves substantial risk.</p>
+        </section>
+
+        <!-- ================= ACCOUNT ================= -->
+        <section class="screen" id="screen-account" data-route="account" aria-label="Account" hidden>
+          <div class="greeting">
+            <h2>Account</h2>
+            <p class="greet-date">Profil, pelan &amp; tetapan app</p>
+          </div>
+
+          <section class="card profile-card" id="profileCard" aria-label="Profil">
+            <div class="avatar" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 5-5.5 8-5.5s6.5 1.5 8 5.5"/></svg>
+            </div>
+            <div class="profile-body">
+              <h3>Memuatkan profil…</h3>
+            </div>
+          </section>
+
+          <section class="card plan-card" id="planCard" aria-label="Pelan Automation Trade">
+            <span class="chip chip-lime">AUTOMATION TRADE</span>
+            <div class="plan-price"><span class="plan-amount">RM150</span><span class="plan-period">/ sekali sahaja</span></div>
+            <ul class="plan-list">
+              <li>Signal AI harian — XAU/USD, XAG/USD &amp; BTC</li>
+              <li>Entry + Stop Loss + Take Profit lengkap</li>
+              <li>Dashboard penuh &amp; rekod keputusan</li>
+              <li>Tiada langganan bulanan</li>
+            </ul>
+            <a class="btn btn-primary btn-block" href="../subscribe.html">Naik taraf sekarang</a>
+            <p class="plan-note">Pelan FREE: signal terkini sahaja dibuka. PRO: semua level signal.</p>
+          </section>
+
+          <section class="card" aria-label="Tetapan app">
+            <div class="card-head"><h3>App settings</h3></div>
+            <div class="setting-row">
+              <div class="setting-text">
+                <strong>Prestasi signal</strong>
+                <span>Win rate, Net R &amp; equity curve enjin AI.</span>
+              </div>
+              <a class="btn btn-ghost btn-sm" href="#/performance">Buka</a>
+            </div>
+            <div class="setting-row">
+              <div class="setting-text">
+                <strong>Install app</strong>
+                <span>Pasang di skrin utama untuk akses pantas.</span>
+              </div>
+              <button class="btn btn-ghost btn-sm" id="accountInstall" type="button">Install</button>
+            </div>
+            <div class="setting-row">
+              <div class="setting-text">
+                <strong id="notifyLabel">Notifikasi signal</strong>
+                <span id="notifyStatus">Demo sahaja — push sebenar perlukan backend.</span>
+              </div>
+              <button class="switch" id="notifyToggle" type="button" role="switch" aria-checked="false" aria-labelledby="notifyLabel">
+                <span class="knob" aria-hidden="true"></span>
+              </button>
+            </div>
+          </section>
+
+          <section class="card" aria-label="Soalan lazim">
+            <div class="card-head"><h3>FAQ</h3></div>
+            <details class="faq">
+              <summary>Adakah signal dijamin untung?</summary>
+              <p>Tidak. Tiada signal yang dijamin untung. Setiap setup membawa risiko kerugian dan keputusan lepas bukan jaminan keputusan akan datang.</p>
+            </details>
+            <details class="faq">
+              <summary>Adakah harga sama dengan broker saya?</summary>
+              <p>Harga mungkin berbeza sedikit antara broker (spread, feed dan waktu server). Sentiasa sahkan entry, SL dan TP dengan platform broker anda sendiri.</p>
+            </details>
+            <details class="faq">
+              <summary>Adakah ini nasihat kewangan?</summary>
+              <p>Bukan. TraderWatch ialah platform pendidikan dan signal automatik untuk tujuan pembelajaran sahaja — bukan nasihat kewangan peribadi.</p>
+            </details>
+            <details class="faq">
+              <summary>Ada bonus broker atau rebate?</summary>
+              <p>TraderWatch mempunyai pautan partner broker (cth. Rinfinity) dan mungkin menerima komisen. Sebarang bonus tertakluk kepada syarat broker — semak kelayakan, keperluan volume dan syarat pengeluaran sebelum deposit. Bonus bukan alasan untuk mengambil risiko tambahan.</p>
+            </details>
+          </section>
+
+          <section class="card disclosure-card" aria-label="Penafian risiko">
+            <h3>Penafian risiko</h3>
+            <p>Trading forex, logam dan kripto melibatkan risiko kerugian yang besar dan mungkin tidak sesuai untuk semua pelabur. Anda boleh kehilangan sebahagian atau keseluruhan modal. Prestasi lepas bukan jaminan keputusan akan datang. Signal dijana secara automatik oleh enjin AI dan boleh lewat, tersilap atau tidak_triggered. Gunakan wang yang anda sanggup hilang dan dapatkan nasihat kewangan bebas jika perlu.</p>
+            <p class="partner-note">Partner disclosure: TraderWatch mungkin menerima komisen daripada pautan partner broker. Ini tidak mengubah harga yang anda bayar dan tidak mempengaruhi keputusan enjin signal.</p>
+          </section>
+
+          <footer class="app-footer">
+            <p>© <span id="year"></span> TraderWatch · traderwatch.org</p>
+            <p class="disclaimer">Educational only. Trading involves substantial risk.</p>
+          </footer>
+        </section>
+
+      </main>
+
+      <!-- Bottom navigation -->
+      <nav class="tabbar" aria-label="Navigasi utama">
+        <button class="tab active" type="button" data-route="home" aria-current="page">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 11 9-8 9 8"/><path d="M5 10v10h5v-6h4v6h5V10"/></svg>
+          <span>Home</span>
+        </button>
+        <button class="tab" type="button" data-route="markets">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 4v3"/><path d="M7 15v5"/><rect x="4.5" y="7" width="5" height="8" rx="1"/><path d="M17 3v4"/><path d="M17 17v4"/><rect x="14.5" y="7" width="5" height="10" rx="1"/></svg>
+          <span>Markets</span>
+        </button>
+        <button class="tab" type="button" data-route="tools">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M8.5 7h7"/><path d="M8.5 12h.01"/><path d="M12 12h.01"/><path d="M15.5 12h.01"/><path d="M8.5 16h.01"/><path d="M12 16h.01"/><path d="M15.5 16h.01"/></svg>
+          <span>Tools</span>
+        </button>
+        <button class="tab" type="button" data-route="learn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 6c-2-1.5-5-1.5-8 0v13c3-1.5 6-1.5 8 0 2-1.5 5-1.5 8 0V6c-3-1.5-6-1.5-8 0z"/><path d="M12 6v13"/></svg>
+          <span>Learn</span>
+        </button>
+        <button class="tab" type="button" data-route="account">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 5-5.5 8-5.5s6.5 1.5 8 5.5"/></svg>
+          <span>Account</span>
+        </button>
+      </nav>
+
+    </div><!-- /.app-frame -->
+  </div><!-- /.shell -->
+
+  <!-- Modal arahan iOS -->
+  <div class="modal-overlay" id="iosModal" hidden>
+    <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="iosModalTitle">
+      <div class="modal-head">
+        <h3 id="iosModalTitle">Pasang di iPhone / iPad</h3>
+        <button class="icon-btn" id="iosModalClose" type="button" aria-label="Tutup">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 6 12 12"/><path d="m18 6-12 12"/></svg>
+        </button>
+      </div>
+      <ol class="ios-steps">
+        <li>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"/><path d="m8 7 4-4 4 4"/><path d="M5 12v8h14v-8"/></svg>
+          Ketik butang <strong>Share</strong> di bar Safari.
+        </li>
+        <li>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="4"/><path d="M12 8v8"/><path d="M8 12h8"/></svg>
+          Pilih <strong>Add to Home Screen</strong>.
+        </li>
+        <li>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 5 5 9-10"/></svg>
+          Ketik <strong>Add</strong> — TraderWatch muncul di skrin utama.
+        </li>
+      </ol>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div class="toast" id="toast" role="status" hidden></div>
+
+</body>
+</html>

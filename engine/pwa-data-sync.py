@@ -1,15 +1,16 @@
 #!/usr/bin/env python3
-"""PWA prototype data sync (pwa-app/).
+"""PWA data sync (pwa-app/ prototype + member/ app).
 
 Every 5 min (cron, flock):
   1. Copy the live public feeds (signal-status.json, landing-signal.json)
-     from the repo root into pwa-app/data/ so the prototype shows the same
-     numbers as the member dashboard. Atomic write (tmp + os.replace).
+      from the repo root into BOTH pwa-app/data/ and member/data/ so both
+      apps show the same numbers. Atomic write (tmp + os.replace).
   2. Re-export the latest 120 M15 bars for XAUUSD / XAGUSD / BTCUSD from
-     state/sq-bars.db (read-only) into pwa-app/data/bars-*.json.
+      state/sq-bars.db (read-only) into both data/ dirs as bars-*.json.
 
 Deliberately NOT synced:
-  - landing-stats.json  -> internal feed, blocked by Caddy (stays private).
+  - landing-stats.json  -> internal feed, blocked by Caddy (stays private;
+                           never written to member/data/).
   - replay-*.json       -> historical demo snapshot, must stay frozen.
 
 Stdlib only; safe to run manually: python3 engine/pwa-data-sync.py
@@ -20,7 +21,10 @@ import sqlite3
 import sys
 
 REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-DATA = os.path.join(REPO, "pwa-app", "data")
+TARGETS = [
+    os.path.join(REPO, "pwa-app", "data"),
+    os.path.join(REPO, "member", "data"),
+]
 BARS_DB = os.path.join(REPO, "state", "sq-bars.db")
 FEEDS = ["signal-status.json", "landing-signal.json"]
 CHART_PAIRS = [("XAUUSD", "xauusd"), ("XAGUSD", "xagusd"), ("BTCUSD", "btcusd")]
@@ -37,14 +41,14 @@ def atomic_write_json(path, obj):
 def sync_feeds():
     for name in FEEDS:
         src = os.path.join(REPO, name)
-        dst = os.path.join(DATA, name)
         if not os.path.exists(src):
             print(f"skip {name}: source missing")
             continue
         with open(src) as f:
             obj = json.load(f)  # validate JSON before publishing
-        atomic_write_json(dst, obj)
-        print(f"synced {name}")
+        for data_dir in TARGETS:
+            atomic_write_json(os.path.join(data_dir, name), obj)
+            print(f"synced {os.path.relpath(os.path.join(data_dir, name), REPO)}")
 
 
 def export_bars():
@@ -64,18 +68,22 @@ def export_bars():
             updated = db.execute(
                 "SELECT MAX(ts) FROM bars WHERE pair=? AND gran='M15'", (pair,)
             ).fetchone()[0]
-            atomic_write_json(os.path.join(DATA, f"bars-{slug}.json"), {
+            payload = {
                 "pair": pair, "gran": "M15", "updated": updated,
                 "source": "Swissquote/Coinbase collector (sq-bars.db)",
                 "bars": [list(r) for r in rows],
-            })
-            print(f"exported bars-{slug}.json ({len(rows)} bars, updated {updated})")
+            }
+            for data_dir in TARGETS:
+                dst = os.path.join(data_dir, f"bars-{slug}.json")
+                atomic_write_json(dst, payload)
+                print(f"exported {os.path.relpath(dst, REPO)} ({len(rows)} bars, updated {updated})")
     finally:
         db.close()
 
 
 def main():
-    os.makedirs(DATA, exist_ok=True)
+    for data_dir in TARGETS:
+        os.makedirs(data_dir, exist_ok=True)
     sync_feeds()
     export_bars()
     print("pwa-data-sync: done")
