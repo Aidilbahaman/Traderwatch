@@ -184,6 +184,7 @@ setMode(signup);
     else if (why === 'signedout') t += '<b>Session anda tamat / dilog keluar.</b> Log masuk semula di bawah untuk teruskan ke halaman member.';
     else t += '<b>Halaman member memerlukan login.</b> Log masuk di bawah untuk teruskan.';
     if (p.get('app') === '1') t += ' <b>Anda berada dalam app installed.</b> Jika login asyik melantun: buka traderwatch.org/login.html dalam Safari/Chrome biasa (bukan app), log masuk di situ, kemudian buka semula app.';
+    t += '<br><br><b>Perlu login SEMULA setiap kali?</b> Data laman tidak kekal di peranti anda. Semak: (1) pastikan bukan tab <b>Incognito</b> (Chrome: tema gelap / ikon topi+cermin mata); (2) Chrome → <b>Settings → Site settings → Cookies</b> → matikan <b>"Clear cookies and site data when you close all tabs"</b>; (3) cara paling kekal: <b>install app</b> — menu Chrome ⋮ → "Add to Home screen" / "Install app", kemudian login sekali sahaja.';
   }
   const warn = document.createElement('div');
   warn.className = 'msg err';
