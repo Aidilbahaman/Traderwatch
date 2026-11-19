@@ -32,8 +32,13 @@
     try { window.dispatchEvent(new CustomEvent('tw-auth-ready')); } catch (e) { /* abaikan */ }
   }
 
-  function toLogin(reason) {
-    location.replace(LOGIN_URL + '&bounce=1' + (reason ? '&err=' + encodeURIComponent(reason) : ''));
+  function toLogin(why) {
+    // URL redirect membawa diagnosis: why (punca), ref (datang dari mana),
+    // app (1 = dalam installed PWA). supaya punca boleh dibaca dari URL sahaja.
+    var ref = /login\.html/.test(document.referrer || '') ? 'login' : (document.referrer ? 'other' : 'none');
+    var app = 0;
+    try { app = (navigator.standalone === true || window.matchMedia('(display-mode: standalone)').matches) ? 1 : 0; } catch (e) { /* abaikan */ }
+    location.replace(LOGIN_URL + '&bounce=1&why=' + encodeURIComponent(why || 'nosession') + '&ref=' + ref + '&app=' + app);
   }
 
   // Probe: pelayar menyekat localStorage (Block All Cookies / private /
@@ -183,7 +188,7 @@
       if (!navigator.onLine) { guest(); return; }
       var fromLogin = /login\.html/.test(document.referrer || '');
       if (fromLogin || !storageOK()) { showAuthDiag(); return; }
-      toLogin('');
+      toLogin('nosession');
     }
 
     sb.auth.onAuthStateChange(function (event) {
@@ -191,7 +196,7 @@
         if (!navigator.onLine) { guest(); return; } // offline: kekal dalam app
         var fromLogin = /login\.html/.test(document.referrer || '');
         if (fromLogin || !storageOK()) { showAuthDiag(); return; }
-        toLogin('');
+        toLogin('signedout');
       }
     });
 

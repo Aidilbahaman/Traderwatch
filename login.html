@@ -55,6 +55,7 @@
     </form>
     <div class="alt">
       <button class="linkbtn" type="button" id="forgot">Forgot your password?</button>
+      <button class="linkbtn" type="button" id="otpBtn">Log masuk tanpa password — hantar link ke emel</button>
       <span id="modeToggle">New here? <a href="login.html?mode=signup">Create a free account</a></span>
     </div>
   </div>
@@ -151,17 +152,20 @@ function setMode(isSignup){
     : 'New here? <a href="login.html?mode=signup">Create a free account</a>';
 }
 setMode(signup);
-// Bantuan konteks: pengguna yang dilantun balik dari /member/ (bounce=1)
-// atau storage disekat (err=storage) nampak panduan, bukan form kosong.
+// Bantuan konteks: URL lantunan dari /member/ membawa diagnosis (why/ref/app).
 (function(){
   const p = new URLSearchParams(location.search);
-  if (p.get('bounce') !== '1' && p.get('err') !== 'storage') return;
+  const why = p.get('why') || (p.get('err') === 'storage' ? 'storage' : '');
+  if (p.get('bounce') !== '1' && !why) return;
+  let t;
+  if (why === 'storage') t = '<b>Pelayar menyekat data laman.</b> Matikan "Block All Cookies" (iPhone: Settings → Safari) atau guna tetingkap biasa (bukan private), kemudian log masuk semula.';
+  else if (why === 'signedout') t = '<b>Session anda tamat / dilog keluar.</b> Log masuk semula di bawah untuk teruskan ke halaman member.';
+  else t = '<b>Halaman member memerlukan login.</b> Log masuk di bawah untuk teruskan.';
+  if (p.get('app') === '1') t += ' <b>Anda berada dalam app installed.</b> Jika login asyik melantun: buka traderwatch.org/login.html dalam Safari/Chrome biasa (bukan app), log masuk di situ, kemudian buka semula app.';
   const warn = document.createElement('div');
   warn.className = 'msg err';
   warn.style.cssText = 'margin:0 0 16px;text-align:left';
-  warn.innerHTML = p.get('err') === 'storage'
-    ? '<b>Pelayar menyekat data laman.</b> Matikan "Block All Cookies" (iPhone: Settings → Safari) atau guna tetingkap biasa (bukan private), kemudian log masuk semula.'
-    : '<b>Dikembalikan dari halaman member?</b> Jika anda baru log masuk tetapi dilantun ke sini: guna tetingkap Safari/Chrome biasa (bukan private / app installed), pastikan cookies tidak disekat, dan akaun baru mesti klik link pengesahan emel dahulu.';
+  warn.innerHTML = t;
   document.querySelector('.box').insertBefore(warn, document.getElementById('loginForm'));
 })();
 // The login page must always show the credential form. Never auto-enter an
@@ -170,7 +174,20 @@ setMode(signup);
 // The custom domain and member portal are separate origins, so pass the
 // short-lived Supabase session in the URL fragment; the member app consumes it
 // client-side and the fragment is never sent to Caddy.
+function sessionSaved(){
+  // Sahkan session BETUL-BETUL tersimpan sebelum navigasi. Jika pelayar
+  // menyekat storage, supabase fallback ke memory → session hilang semasa
+  // navigasi → loop login. Tangkap di sini dengan mesej jelas.
+  try {
+    const k = 'sb-' + new URL(CONFIG.supabaseUrl).hostname.split('.')[0] + '-auth-token';
+    return !!localStorage.getItem(k);
+  } catch(_) { return false; }
+}
 function goToMember(next, session){
+  if(!sessionSaved()){
+    show('Login berjaya tetapi pelayar tidak menyimpan session. Matikan "Block All Cookies" / guna tetingkap Safari/Chrome biasa (bukan private atau app installed), kemudian cuba lagi.', false);
+    return;
+  }
   const path = next && /^\/member(?:\/|$)/.test(next) ? next : "/member/";
   // Same origin as login (traderwatch.org): Supabase keeps the session in
   // localStorage here, so no cross-domain token handoff is needed. Sending the
@@ -247,6 +264,18 @@ resend.addEventListener("click", async ()=>{
    created a redirect loop with the member page's own redirect-to-login when
    the two origins disagreed on session state. Members now always see the
    form and explicitly sign in; a successful submit still calls goToMember. */
+
+document.getElementById('otpBtn').addEventListener('click', async ()=>{
+  const email = form.email.value.trim();
+  if(!/^\S+@\S+\.\S+$/.test(email)) return show('Enter your email above first, then press the magic link button.', false);
+  const next = new URLSearchParams(location.search).get("next");
+  const redirectUrl = new URL("verify.html", location.href);
+  if(next && /^\/(?!\/)/.test(next)) redirectUrl.searchParams.set("next", next);
+  try {
+    const r = await sb.auth.signInWithOtp({ email, options: { emailRedirectTo: redirectUrl.href } });
+    show(r.error ? 'Could not send link: ' + r.error.message : 'Magic link dihantar ke ' + email + ' — klik link dalam emel untuk log masuk (check spam).', !r.error);
+  } catch(_) { show('Unable to connect. Please try again.', false); }
+});
 
 document.getElementById("forgot").addEventListener("click", async ()=>{
   const email = form.email.value.trim();

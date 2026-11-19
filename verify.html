@@ -46,7 +46,7 @@
     return;
   }
   const next = params.get("next");
-  const safe = next && /^\/(?!\/)/.test(next) ? next : "members.html";
+  const safe = next && /^\/(?!\/)/.test(next) ? next : "/member/";
   const finish = (result)=>{
     if(result && result.error){ show("Confirmation failed: " + result.error.message + ". Please request a new link from the login page.", "err"); return; }
     show("Email confirmed. Opening your member dashboard…", "ok");

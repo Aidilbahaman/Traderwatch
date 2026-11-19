@@ -4,7 +4,7 @@
   "description": "Dashboard ahli TraderWatch — signal AI rasmi XAU/USD, XAG/USD dan BTC, chart beranotasi dan prestasi enjin. Boleh pasang, boleh offline.",
   "id": "./index.html",
   "start_url": "./index.html",
-  "scope": "./",
+  "scope": "/",
   "display": "standalone",
   "display_override": ["standalone", "minimal-ui"],
   "orientation": "portrait",

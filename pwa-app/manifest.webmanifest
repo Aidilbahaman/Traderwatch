@@ -4,7 +4,7 @@
   "description": "Signal AI automatik untuk XAU/USD, XAG/USD dan BTC. Chart, alat risiko dan pendidikan — satu app, boleh pasang, boleh offline.",
   "id": "./index.html",
   "start_url": "./index.html",
-  "scope": "./",
+  "scope": "/",
   "display": "standalone",
   "display_override": ["standalone", "minimal-ui"],
   "orientation": "portrait",
