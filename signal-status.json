@@ -1173,15 +1173,20 @@
    "entry_at": "2026-11-19T23:22:00+08:00"
   },
   "BTCUSD_20261119_232931": {
-   "status": "cancelled",
-   "closed": "2026-11-20T05:23:56+08:00",
-   "note": "owner: close all"
+   "status": "sl",
+   "pips": -592.2,
+   "r": -1,
+   "unit": "pips",
+   "closed": "2026-11-19T23:30:00+08:00",
+   "entry_at": "2026-11-19T15:15:00"
   },
   "XAUUSD_20261119_232909": {
-   "status": "cancelled",
-   "entry_at": "2026-11-19T23:43:00+08:00",
-   "closed": "2026-11-20T05:23:56+08:00",
-   "note": "owner: close all"
+   "status": "tp",
+   "pips": 466.2,
+   "r": 2.0,
+   "unit": "pips",
+   "closed": "2026-11-20T05:15:00+08:00",
+   "entry_at": "2026-11-19T23:15:00+08:00"
   },
   "BTCUSD_20261119_233026": {
    "status": "sl",
@@ -1192,22 +1197,28 @@
    "entry_at": "2026-11-20T00:40:00+08:00"
   },
   "XAGUSD_20261119_233015": {
-   "status": "cancelled",
-   "entry_at": "2026-11-19T23:32:00+08:00",
-   "closed": "2026-11-20T05:23:56+08:00",
-   "note": "owner: close all"
+   "status": "tp",
+   "pips": 1118.0,
+   "r": 2.0,
+   "unit": "pips",
+   "closed": "2026-11-20T05:15:00+08:00",
+   "entry_at": "2026-11-19T23:30:00+08:00"
   },
   "XAUUSD_20261119_233005": {
-   "status": "cancelled",
-   "entry_at": "2026-11-19T23:32:00+08:00",
-   "closed": "2026-11-20T05:23:56+08:00",
-   "note": "owner: close all"
+   "status": "tp",
+   "pips": 460.1,
+   "r": 2.0,
+   "unit": "pips",
+   "closed": "2026-11-20T05:15:00+08:00",
+   "entry_at": "2026-11-19T23:30:00+08:00"
   },
   "XAGUSD_20261119_232920": {
-   "status": "cancelled",
-   "entry_at": "2026-11-19T23:43:00+08:00",
-   "closed": "2026-11-20T05:23:56+08:00",
-   "note": "owner: close all"
+   "status": "tp",
+   "pips": 1156.0,
+   "r": 2.0,
+   "unit": "pips",
+   "closed": "2026-11-20T05:15:00+08:00",
+   "entry_at": "2026-11-19T23:15:00+08:00"
   },
   "BTCUSD_20261119_234026": {
    "status": "sl",
@@ -1218,16 +1229,20 @@
    "entry_at": "2026-11-19T23:42:00+08:00"
   },
   "XAGUSD_20261119_234016": {
-   "status": "cancelled",
-   "entry_at": "2026-11-19T23:41:00+08:00",
-   "closed": "2026-11-20T05:23:56+08:00",
-   "note": "owner: close all"
+   "status": "tp",
+   "pips": 1175.0,
+   "r": 2.0,
+   "unit": "pips",
+   "closed": "2026-11-20T05:15:00+08:00",
+   "entry_at": "2026-11-19T23:30:00+08:00"
   },
   "XAUUSD_20261119_234006": {
-   "status": "cancelled",
-   "entry_at": "2026-11-19T23:49:00+08:00",
-   "closed": "2026-11-20T05:23:56+08:00",
-   "note": "owner: close all"
+   "status": "tp",
+   "pips": 482.5,
+   "r": 2.0,
+   "unit": "pips",
+   "closed": "2026-11-20T05:15:00+08:00",
+   "entry_at": "2026-11-19T23:30:00+08:00"
   },
   "BTCUSD_20261119_235028": {
    "status": "sl",
@@ -1238,16 +1253,20 @@
    "entry_at": "2026-11-20T00:53:00+08:00"
   },
   "XAGUSD_20261119_235016": {
-   "status": "cancelled",
-   "entry_at": "2026-11-19T23:52:00+08:00",
-   "closed": "2026-11-20T05:23:56+08:00",
-   "note": "owner: close all"
+   "status": "tp",
+   "pips": 1202.0,
+   "r": 2.0,
+   "unit": "pips",
+   "closed": "2026-11-20T05:15:00+08:00",
+   "entry_at": "2026-11-19T23:45:00+08:00"
   },
   "XAUUSD_20261119_235006": {
-   "status": "cancelled",
-   "entry_at": "2026-11-19T23:51:00+08:00",
-   "closed": "2026-11-20T05:23:56+08:00",
-   "note": "owner: close all"
+   "status": "tp",
+   "pips": 488.5,
+   "r": 2.0,
+   "unit": "pips",
+   "closed": "2026-11-20T05:15:00+08:00",
+   "entry_at": "2026-11-19T23:45:00+08:00"
   },
   "BTCUSD_20261120_000028": {
    "status": "sl",
@@ -1258,71 +1277,98 @@
    "entry_at": "2026-11-20T00:01:00+08:00"
   },
   "XAGUSD_20261120_000017": {
-   "status": "cancelled",
-   "entry_at": "2026-11-20T00:01:00+08:00",
-   "closed": "2026-11-20T05:23:56+08:00",
-   "note": "owner: close all"
+   "status": "tp",
+   "pips": 1163.0,
+   "r": 2.0,
+   "unit": "pips",
+   "closed": "2026-11-20T05:15:00+08:00",
+   "entry_at": "2026-11-20T00:00:00+08:00"
   },
   "XAUUSD_20261120_000006": {
-   "status": "cancelled",
-   "entry_at": "2026-11-20T00:01:00+08:00",
-   "closed": "2026-11-20T05:23:56+08:00",
-   "note": "owner: close all"
+   "status": "collected",
+   "pips": 376.2,
+   "r": 1.49,
+   "unit": "pips",
+   "closed": "2026-11-20T05:32:06+08:00",
+   "note": "owner: close in profit",
+   "entry_at": "2026-11-20T00:00:00+08:00"
   },
   "XAGUSD_20261120_000847": {
-   "status": "cancelled",
-   "entry_at": "2026-11-20T01:01:00+08:00",
-   "closed": "2026-11-20T05:23:56+08:00",
-   "note": "owner: close all"
+   "status": "tp",
+   "pips": 1219.0,
+   "r": 2.0,
+   "unit": "pips",
+   "closed": "2026-11-20T05:15:00+08:00",
+   "entry_at": "2026-11-20T00:00:00+08:00"
   },
   "XAUUSD_20261120_000833": {
-   "status": "cancelled",
-   "entry_at": "2026-11-20T01:03:00+08:00",
-   "closed": "2026-11-20T05:23:56+08:00",
-   "note": "owner: close all"
+   "status": "collected",
+   "pips": 409.3,
+   "r": 1.53,
+   "unit": "pips",
+   "closed": "2026-11-20T05:32:06+08:00",
+   "note": "owner: close in profit",
+   "entry_at": "2026-11-20T00:00:00+08:00"
   },
   "XAGUSD_20261120_001019": {
-   "status": "cancelled",
-   "entry_at": "2026-11-20T00:15:00+08:00",
-   "closed": "2026-11-20T05:23:56+08:00",
-   "note": "owner: close all"
+   "status": "tp",
+   "pips": 1219.0,
+   "r": 2.0,
+   "unit": "pips",
+   "closed": "2026-11-20T05:15:00+08:00",
+   "entry_at": "2026-11-20T00:00:00+08:00"
   },
   "XAUUSD_20261120_001007": {
-   "status": "cancelled",
-   "entry_at": "2026-11-20T00:12:00+08:00",
-   "closed": "2026-11-20T05:23:56+08:00",
-   "note": "owner: close all"
+   "status": "collected",
+   "pips": 437.7,
+   "r": 1.63,
+   "unit": "pips",
+   "closed": "2026-11-20T05:32:06+08:00",
+   "note": "owner: close in profit",
+   "entry_at": "2026-11-20T00:00:00+08:00"
   },
   "XAGUSD_20261120_002015": {
-   "status": "cancelled",
-   "entry_at": "2026-11-20T00:25:00+08:00",
-   "closed": "2026-11-20T05:23:56+08:00",
-   "note": "owner: close all"
+   "status": "tp",
+   "pips": 1225.0,
+   "r": 2.0,
+   "unit": "pips",
+   "closed": "2026-11-20T05:15:00+08:00",
+   "entry_at": "2026-11-20T00:15:00+08:00"
   },
   "XAUUSD_20261120_002005": {
-   "status": "cancelled",
-   "entry_at": "2026-11-20T00:22:00+08:00",
-   "closed": "2026-11-20T05:23:56+08:00",
-   "note": "owner: close all"
+   "status": "collected",
+   "pips": 438.7,
+   "r": 1.69,
+   "unit": "pips",
+   "closed": "2026-11-20T05:32:06+08:00",
+   "note": "owner: close in profit",
+   "entry_at": "2026-11-20T00:15:00+08:00"
   },
   "XAUUSD_20261120_003007": {
-   "status": "cancelled",
-   "entry_at": "2026-11-20T01:02:00+08:00",
-   "closed": "2026-11-20T05:23:56+08:00",
-   "note": "owner: close all"
+   "status": "collected",
+   "pips": 442.3,
+   "r": 1.79,
+   "unit": "pips",
+   "closed": "2026-11-20T05:32:06+08:00",
+   "note": "owner: close in profit",
+   "entry_at": "2026-11-20T00:30:00+08:00"
   },
   "XAUUSD_20261120_004005": {
-   "status": "cancelled",
-   "entry_at": "2026-11-20T00:53:00+08:00",
-   "closed": "2026-11-20T05:23:56+08:00",
-   "note": "owner: close all"
+   "status": "tp",
+   "pips": 530.8,
+   "r": 2.0,
+   "unit": "pips",
+   "closed": "2026-11-20T05:15:00+08:00",
+   "entry_at": "2026-11-20T00:30:00+08:00"
   },
   "XAUUSD_20261120_005006": {
-   "status": "cancelled",
-   "entry_at": "2026-11-20T00:51:00+08:00",
-   "closed": "2026-11-20T05:23:56+08:00",
-   "note": "owner: close all"
+   "status": "tp",
+   "pips": 509.1,
+   "r": 2.0,
+   "unit": "pips",
+   "closed": "2026-11-20T05:15:00+08:00",
+   "entry_at": "2026-11-20T00:45:00+08:00"
   }
  },
- "updated": "2026-11-20T05:30:03+08:00"
+ "updated": "2026-11-20T05:35:03+08:00"
 }
