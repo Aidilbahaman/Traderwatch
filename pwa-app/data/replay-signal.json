@@ -1,0 +1,44 @@
+{
+ "demo": true,
+ "label": "DEMO REPLAY · signal sebenar 26 Okt 2026",
+ "pair": "XAUUSD",
+ "timeframe": "M15",
+ "side": "buy",
+ "status": "expired",
+ "entry": 4008.81,
+ "sl": 4003.26,
+ "tp": 4019.28,
+ "tp2": null,
+ "poi_low": 4007.9,
+ "poi_high": 4009.7,
+ "poi_note": "Zon POI ilustrasi (demo) — entry = CE 50% zon",
+ "rr": 1.89,
+ "posted_at": "2026-10-26T13:44:03+08:00",
+ "expired_at": "2026-10-26T17:52:06+08:00",
+ "reason": "outside POI zone >30min (entry 4008.81 not triggered)",
+ "summary_ms": "BUY limit di CE 50% zon POI selepas sweep low sesi Asia. Harga tidak kembali ke zon POI dalam 30 minit selepas siaran — setup luput mengikut peraturan enjin. Tiada entry berlaku, tiada risiko diambil.",
+ "confluence": [
+  {
+   "gate": "Sweep low sesi Asia",
+   "pass": true
+  },
+  {
+   "gate": "POI / order block M15",
+   "pass": true
+  },
+  {
+   "gate": "RR >= 1.5",
+   "pass": true
+  },
+  {
+   "gate": "Tiada news high-impact",
+   "pass": true
+  },
+  {
+   "gate": "Entry dalam zon POI",
+   "pass": false,
+   "note": "Harga di luar zon >30 min → EXPIRED"
+  }
+ ],
+ "source": "signal-status.json (XAUUSD_20261026_134403) + sq-bars.db"
+}

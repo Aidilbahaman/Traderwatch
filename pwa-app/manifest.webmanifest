@@ -1,0 +1,41 @@
+{
+  "name": "TraderWatch — Read the Market",
+  "short_name": "TraderWatch",
+  "description": "Signal AI automatik untuk XAU/USD, XAG/USD dan BTC. Chart, alat risiko dan pendidikan — satu app, boleh pasang, boleh offline.",
+  "id": "./index.html",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "display_override": ["standalone", "minimal-ui"],
+  "orientation": "portrait",
+  "background_color": "#0a0e0b",
+  "theme_color": "#0a0e0b",
+  "lang": "ms",
+  "dir": "ltr",
+  "categories": ["finance", "education"],
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "shortcuts": [
+    {
+      "name": "Signal terkini",
+      "short_name": "Signal",
+      "url": "./index.html#/home",
+      "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Chart pasaran",
+      "short_name": "Markets",
+      "url": "./index.html#/markets",
+      "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Kalkulator risiko",
+      "short_name": "Tools",
+      "url": "./index.html#/tools",
+      "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }]
+    }
+  ]
+}
