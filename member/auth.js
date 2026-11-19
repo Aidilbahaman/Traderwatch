@@ -65,6 +65,8 @@
     } catch (e) { /* abaikan */ }
     return {
       why: why, ref: ref, app: app, dm: dm,
+      refUrl: (document.referrer || '').slice(0, 200),
+      sbKeys: (function () { try { return Object.keys(localStorage).filter(function (k) { return k.indexOf('sb-') === 0; }); } catch (e) { return []; } })(),
       inApp: inAppBrowser(),
       storageOK: storageOK(),
       token: stored ? { exp: stored.expires_at } : null,
