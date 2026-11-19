@@ -240,7 +240,7 @@
   function registerSW() {
     if (!('serviceWorker' in navigator)) return;
     window.addEventListener('load', function () {
-      navigator.serviceWorker.register('./sw.js?v=20261120r', { scope: './' })
+      navigator.serviceWorker.register('./sw.js?v=20261120r2', { scope: './' })
         .then(function (reg) { state.swReg = reg; })
         .catch(function () { /* SW gagal daftar — app masih berfungsi online */ });
     });
@@ -489,7 +489,7 @@
         (guest
           ? '<div class="lock-overlay">' +
               ICONS.lock +
-              '<p>Daftar percuma — 3 signal setiap hari</p>' +
+              '<p>Daftar percuma — akses penuh signal</p>' +
               '<a class="btn btn-primary btn-sm" href="' + SIGNUP_URL + '">Daftar percuma</a>' +
             '</div>'
           : '') +
@@ -828,7 +828,7 @@
       (gate
         ? '<div class="lock-overlay">' +
             ICONS.lock +
-            '<p>Daftar percuma — 3 signal setiap hari</p>' +
+            '<p>Daftar percuma — akses penuh signal</p>' +
             '<a class="btn btn-primary btn-sm" href="' + SIGNUP_URL + '">Daftar percuma</a>' +
           '</div>'
         : '') +

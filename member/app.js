@@ -14,7 +14,6 @@
   var ROUTES = ['home', 'markets', 'tools', 'learn', 'account', 'signal', 'performance'];
   var MYT = 'Asia/Kuala_Lumpur';
   var LOGIN_URL = '../login.html?next=' + encodeURIComponent('/member/');
-  var SUBSCRIBE_URL = '../subscribe.html';
   var REPLAY_ROW_ID = 'XAUUSD_20261026_134403';
 
   var state = {
@@ -240,7 +239,7 @@
   function registerSW() {
     if (!('serviceWorker' in navigator)) return;
     window.addEventListener('load', function () {
-      navigator.serviceWorker.register('./sw.js?v=20261120m8', { scope: './' })
+      navigator.serviceWorker.register('./sw.js?v=20261120m9', { scope: './' })
         .then(function (reg) { state.swReg = reg; })
         .catch(function () { /* SW gagal daftar — app masih berfungsi online */ });
     });
@@ -391,8 +390,6 @@
 
   function twAuth() { return window.TWAuth || null; }
   function isGuest() { var a = twAuth(); return !(a && a.isMember); }
-  // Plan berbayar = apa-apa selain 'free' (pro, max, ...). Jangan map max→free.
-  function isPaidPlan(a) { return !!(a && (a.isPaid || (a.plan && a.plan !== 'free'))); }
 
   function initials(name) {
     var parts = String(name || '').trim().split(/\s+/).filter(Boolean);
@@ -434,13 +431,10 @@
     if (a && a.isMember) {
       var name = (a.profile && a.profile.name) || 'Ahli';
       var email = (a.session && a.session.user && a.session.user.email) || '';
-      var paid = isPaidPlan(a);
-      var plan = paid ? 'pro' : 'free'; // kelas CSS: gaya berbayar vs free
-      var planLabel = String(a.plan || 'free').toUpperCase();
       card.innerHTML =
         '<div class="avatar avatar-member" aria-hidden="true">' + esc(initials(name)) + '</div>' +
         '<div class="profile-body">' +
-          '<h3>' + esc(name) + ' <span class="chip chip-plan-' + plan + '">' + esc(planLabel) + '</span></h3>' +
+          '<h3>' + esc(name) + ' <span class="chip chip-plan-free">FREE</span></h3>' +
           (email ? '<p class="profile-email">' + esc(email) + '</p>' : '') +
           '<div class="btn-row">' +
             '<button class="btn btn-ghost btn-sm" id="signOutBtn" type="button">Log keluar</button>' +
@@ -460,7 +454,7 @@
         '</div>';
     }
     var planCard = $('#planCard');
-    if (planCard) planCard.hidden = !!(a && a.isMember && isPaidPlan(a));
+    if (planCard) planCard.hidden = !(a && a.isMember);
   }
 
   /* ---------- Home: "Signal anda" (RPC get_signals, mod ahli sahaja) ---------- */
@@ -474,35 +468,37 @@
     card.hidden = false;
 
     var planChip = $('#mySignalsPlanChip');
-    if (planChip) {
-      planChip.textContent = String(a.plan || 'free').toUpperCase();
-      planChip.className = 'chip ' + (isPaidPlan(a) ? 'chip-plan-pro' : 'chip-muted');
-    }
+    if (planChip) { planChip.textContent = 'TERKINI'; planChip.className = 'chip chip-muted'; }
 
-    var rows = (a.signals || []).slice().sort(function (x, y) {
-      return (toDate(y.posted_at) || 0) - (toDate(x.posted_at) || 0);
-    }).slice(0, 30);
+    // Semua ahli FREE (tiada tiering). Papar signal TERKINI sahaja untuk setiap
+    // pair; signal dah tutup (SL/TP/expired/cancelled) diarkibkan — tidak dipapar
+    // di sini (ada dalam "Keputusan terkini" / Prestasi).
+    var CLOSED = ['tp', 'sl', 'expired', 'cancelled', 'collected', 'closed', 'void'];
+    var statusMap = (state.status && state.status.signals) || {};
+    var byPair = {};
+    (a.signals || []).forEach(function (s) {
+      var key = statusKeyFor(s.pair, s.posted_at);
+      var st = key && statusMap[key] ? String(statusMap[key].status || '').toLowerCase() : '';
+      if (CLOSED.indexOf(st) !== -1) return; // arkib: signal dah tutup
+      var p = String(s.pair || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
+      if (!p) return;
+      var t = toDate(s.posted_at);
+      var ms = t ? t.getTime() : 0;
+      if (!byPair[p] || ms > byPair[p].ms) byPair[p] = { s: s, ms: ms };
+    });
+    var rows = Object.keys(byPair).map(function (p) { return byPair[p].s; })
+      .sort(function (x, y) { return (toDate(y.posted_at) || 0) - (toDate(x.posted_at) || 0); });
 
     var note = $('#mySignalsNote');
-    if (note) note.hidden = isPaidPlan(a) || !rows.some(function (s) { return s.locked; });
+    if (note) note.hidden = false;
 
     if (!rows.length) {
-      list.innerHTML = '<li class="results-empty">Belum ada signal diterbitkan untuk akaun anda.</li>';
+      list.innerHTML = '<li class="results-empty">Tiada signal aktif sekarang. Signal terkini akan muncul di sini.</li>';
       return;
     }
 
     list.innerHTML = rows.map(function (s) {
       var date = '<span class="result-date">' + esc(fmtDateShort(s.posted_at)) + '</span>';
-      if (s.locked) {
-        // Teaser PRO: level disembunyikan (RPC pulangkan NULL) — jangan reka data.
-        return '<li class="mysig-row locked">' +
-          '<span class="result-pair">' + esc(fmtPair(s.pair)) + '</span>' +
-          '<span class="mysig-levels blurred" aria-hidden="true">•••• · •••• · ••••</span>' +
-          '<span class="chip chip-pro">PRO</span>' +
-          '<a class="btn btn-ghost btn-xs" href="' + SUBSCRIBE_URL + '">Naik taraf</a>' +
-          date +
-        '</li>';
-      }
       return '<li class="mysig-row clickable">' +
         '<a class="result-link" href="#/signal?id=' + encodeURIComponent(s.id) + '" title="Buka detail signal">' +
           '<span class="result-pair">' + esc(fmtPair(s.pair)) + '</span>' +
@@ -891,17 +887,6 @@
         '</div></div>';
       return;
     }
-    if (row.locked) {
-      box.innerHTML =
-        '<div class="card"><div class="empty-state">' +
-          ICONS.lock +
-          '<h4>Signal PRO — level dikunci</h4>' +
-          '<p>Naik taraf ke PRO untuk membuka entry, Stop Loss dan Take Profit signal ini.</p>' +
-          '<a class="btn btn-primary btn-sm" href="' + SUBSCRIBE_URL + '">Naik taraf ke PRO</a>' +
-        '</div></div>';
-      return;
-    }
-
     var sig = {
       pair: row.pair,
       side: row.side,

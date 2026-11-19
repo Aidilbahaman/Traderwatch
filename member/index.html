@@ -15,11 +15,11 @@
   <link rel="manifest" href="./manifest.webmanifest">
   <link rel="icon" type="image/png" sizes="192x192" href="./icons/icon-192.png">
   <link rel="apple-touch-icon" href="./icons/icon-180.png">
-  <link rel="stylesheet" href="./app.css?v=20261120m8">
+  <link rel="stylesheet" href="./app.css?v=20261120m9">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js" defer></script>
-  <script src="./auth.js?v=20261120m8" defer></script>
-  <script src="./chart.js?v=20261120m8" defer></script>
-  <script src="./app.js?v=20261120m8" defer></script>
+  <script src="./auth.js?v=20261120m9" defer></script>
+  <script src="./chart.js?v=20261120m9" defer></script>
+  <script src="./app.js?v=20261120m9" defer></script>
 </head>
 <body>
   <div class="shell">
@@ -117,13 +117,13 @@
           <section class="card mysig-card" id="mySignalsCard" aria-label="Signal anda" hidden>
             <div class="card-head">
               <h3>Signal anda</h3>
-              <span class="chip chip-muted" id="mySignalsPlanChip">FREE</span>
+              <span class="chip chip-muted" id="mySignalsPlanChip">TERKINI</span>
             </div>
             <ul class="results-list mysig-list" id="mySignalsList">
               <li class="skeleton sk-row"></li>
               <li class="skeleton sk-row"></li>
             </ul>
-            <p class="mysig-note" id="mySignalsNote" hidden>Signal terkini sahaja dibuka untuk pelan FREE — naik taraf untuk semua level.</p>
+            <p class="mysig-note" id="mySignalsNote" hidden>Signal terkini untuk setiap pair. Signal dah tutup (SL/TP) diarkibkan di Keputusan terkini.</p>
           </section>
 
           <a class="card demo-card" href="#/signal?demo=1" aria-label="Demo replay — signal sebenar XAUUSD 26 Oktober 2026">
@@ -416,17 +416,16 @@
             </div>
           </section>
 
-          <section class="card plan-card" id="planCard" aria-label="Pelan Automation Trade">
-            <span class="chip chip-lime">AUTOMATION TRADE</span>
-            <div class="plan-price"><span class="plan-amount">RM150</span><span class="plan-period">/ sekali sahaja</span></div>
+          <section class="card plan-card" id="planCard" aria-label="Kad ahli Free">
+            <span class="chip chip-lime">FREE CARD</span>
+            <div class="plan-price"><span class="plan-amount">Percuma</span><span class="plan-period">/ semua ahli</span></div>
             <ul class="plan-list">
-              <li>Signal AI harian — XAU/USD, XAG/USD &amp; BTC</li>
+              <li>Signal AI terkini — XAU/USD, XAG/USD &amp; BTC</li>
               <li>Entry + Stop Loss + Take Profit lengkap</li>
+              <li>Chart beranotasi + sebab entry</li>
               <li>Dashboard penuh &amp; rekod keputusan</li>
-              <li>Tiada langganan bulanan</li>
             </ul>
-            <a class="btn btn-primary btn-block" href="../subscribe.html">Naik taraf sekarang</a>
-            <p class="plan-note">Pelan FREE: signal terkini sahaja dibuka. PRO: semua level signal.</p>
+            <p class="plan-note">Satu tier untuk semua ahli — tiada langganan, tiada naik taraf.</p>
           </section>
 
           <section class="card" aria-label="Tetapan app">
