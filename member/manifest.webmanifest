@@ -10,7 +10,7 @@
   "orientation": "portrait",
   "background_color": "#0a0e0b",
   "theme_color": "#0a0e0b",
-  "lang": "ms",
+  "lang": "en",
   "dir": "ltr",
   "categories": ["finance", "education"],
   "icons": [
@@ -30,6 +30,12 @@
       "name": "Komuniti",
       "short_name": "Komuniti",
       "url": "./index.html?view=community",
+      "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "League",
+      "short_name": "League",
+      "url": "./index.html?view=liga",
       "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }]
     },
     {

@@ -1,11 +1,11 @@
-/* TraderWatch AI Analyst — service worker app ahli 4-area (member/).
+/* TraderWatch AI Analyst — service worker app ahli 5-area (member/).
  * Strategi:
  *  - App shell (index.html + manifest + ikon): precache, cache-first
  *  - Navigasi: network-first, fallback ke index.html bila offline
  *  - /api/* dan /auth/*: NETWORK SAHAJA — jangan cache data pasaran/user
  *  - Data user (Supabase REST, chat, profil): tidak dicache sama sekali
  */
-const VERSION = 'tw-member-full-v1';
+const VERSION = 'tw-member-full-v2';
 const SHELL_CACHE = VERSION + '-shell';
 
 const SHELL_ASSETS = [

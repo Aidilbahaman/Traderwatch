@@ -1,0 +1,227 @@
+#!/usr/bin/env python3
+"""TraderWatch Paper Trading League API.
+
+Member-triggered paper trading + leaderboard. Virtual $10,000 balance;
+outcomes are resolved by engine/paper-league-resolver.py from real prices,
+so results cannot be self-reported.
+
+Endpoints (Caddy proxies /api/league* here):
+  GET  /api/league/me          -> balance, net_r, win_rate, open count, rank
+  GET  /api/league/trades      -> my trades (newest first)
+  GET  /api/league/leaderboard -> aggregated standings (RPC, no private data)
+  POST /api/league/trade       -> open a paper trade {pair,side,entry,sl,tp,risk_pct}
+
+Auth: Supabase member Bearer token on every call.
+"""
+import json
+import os
+import pathlib
+import urllib.error
+import urllib.parse
+import urllib.request
+from datetime import datetime, timezone
+from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+
+HERE = pathlib.Path(__file__).resolve().parent
+ENV = pathlib.Path("/home/ubuntu/.secrets/supabase.env")
+PORT = int(os.environ.get("LEAGUE_PORT", "8103"))
+SEASON = int(os.environ.get("LEAGUE_SEASON", "1"))
+START_BALANCE = 10000.0
+ALLOWED_PAIRS = {"XAUUSD", "XAGUSD", "BTCUSD", "EURUSD", "GBPUSD",
+                 "USDJPY", "AUDUSD", "USDCAD", "NZDUSD"}
+MAX_OPEN_PER_PAIR = 1
+MAX_OPEN_TOTAL = 5
+RISK_CHOICES = (1.0, 2.0)
+
+
+def load_env():
+    sec = {}
+    for line in ENV.read_text().splitlines():
+        if "=" in line and not line.strip().startswith("#"):
+            k, v = line.split("=", 1)
+            sec[k.strip()] = v.strip().strip('"').strip("'")
+    return sec
+
+
+SEC = load_env()
+SB_URL = SEC["SUPABASE_URL"].rstrip("/")
+SB_KEY = SEC["SUPABASE_SERVICE_KEY"]
+
+
+def log(msg):
+    print(f"{datetime.now(timezone.utc).isoformat()} LEAGUE-API {msg}", flush=True)
+
+
+def sb(method, path, body=None, params=None, token=None):
+    url = SB_URL + path
+    if params:
+        url += "?" + urllib.parse.urlencode(params)
+    data = json.dumps(body).encode() if body is not None else None
+    req = urllib.request.Request(url, data=data, method=method)
+    req.add_header("apikey", SB_KEY)
+    req.add_header("Authorization", "Bearer " + (token or SB_KEY))
+    req.add_header("Content-Type", "application/json")
+    if method == "POST":
+        req.add_header("Prefer", "return=representation")
+    with urllib.request.urlopen(req, timeout=25) as r:
+        raw = r.read().decode()
+        return json.loads(raw) if raw.strip() else None
+
+
+def verify_user(token):
+    if not token:
+        return None
+    try:
+        req = urllib.request.Request(SB_URL + "/auth/v1/user")
+        req.add_header("apikey", SB_KEY)
+        req.add_header("Authorization", "Bearer " + token)
+        with urllib.request.urlopen(req, timeout=20) as r:
+            return json.loads(r.read().decode())
+    except (urllib.error.HTTPError, urllib.error.URLError, ValueError):
+        return None
+
+
+def display_name(user):
+    meta = user.get("user_metadata") or {}
+    return (meta.get("name") or (user.get("email") or "trader").split("@")[0])[:40]
+
+
+def my_trades(uid, limit=100):
+    return sb("GET", "/rest/v1/paper_trades", params={
+        "select": "*", "user_id": f"eq.{uid}", "season": f"eq.{SEASON}",
+        "order": "opened_at.desc", "limit": str(limit)}) or []
+
+
+def balance_of(trades):
+    closed = [t for t in trades if t["status"] in ("tp", "sl", "be") and t.get("r_result") is not None]
+    profit = sum(float(t["r_result"]) * float(t["risk_usd"]) for t in closed)
+    return round(START_BALANCE + profit, 2), closed
+
+
+class Handler(BaseHTTPRequestHandler):
+    def log_message(self, fmt, *args):
+        pass
+
+    def _send(self, code, payload):
+        body = json.dumps(payload, ensure_ascii=False).encode()
+        self.send_response(code)
+        self.send_header("Content-Type", "application/json; charset=utf-8")
+        self.send_header("Content-Length", str(len(body)))
+        self.send_header("Cache-Control", "no-store")
+        self.end_headers()
+        self.wfile.write(body)
+
+    def _token(self):
+        h = self.headers.get("Authorization", "")
+        return h[7:].strip() if h.lower().startswith("bearer ") else ""
+
+    def _user(self):
+        u = verify_user(self._token())
+        return u if u and u.get("id") else None
+
+    def do_GET(self):
+        parsed = urllib.parse.urlparse(self.path)
+        path = parsed.path
+        if path == "/api/league/health":
+            return self._send(200, {"ok": True, "season": SEASON})
+        user = self._user()
+        if not user:
+            return self._send(401, {"error": "Please sign in as a member."})
+        uid = user["id"]
+        try:
+            if path == "/api/league/trades":
+                return self._send(200, {"trades": my_trades(uid), "season": SEASON})
+            if path == "/api/league/leaderboard":
+                rows = sb("POST", "/rest/v1/rpc/get_leaderboard", body={"p_season": SEASON}) or []
+                me = display_name(user)
+                for i, r in enumerate(rows):
+                    r["rank"] = i + 1
+                    r["is_me"] = (r["username"] == me)
+                return self._send(200, {"leaderboard": rows, "season": SEASON})
+            if path == "/api/league/me":
+                trades = my_trades(uid)
+                bal, closed = balance_of(trades)
+                wins = sum(1 for t in closed if t["status"] == "tp")
+                dec = sum(1 for t in closed if t["status"] in ("tp", "sl"))
+                net_r = round(sum(float(t["r_result"]) for t in closed), 2)
+                open_n = sum(1 for t in trades if t["status"] == "open")
+                board = sb("POST", "/rest/v1/rpc/get_leaderboard", body={"p_season": SEASON}) or []
+                me = display_name(user)
+                rank = next((i + 1 for i, r in enumerate(board) if r["username"] == me), None)
+                return self._send(200, {
+                    "balance": bal, "start_balance": START_BALANCE, "net_r": net_r,
+                    "win_rate": round(100.0 * wins / dec, 1) if dec else None,
+                    "trades_closed": len(closed), "trades_open": open_n,
+                    "rank": rank, "season": SEASON, "username": me})
+        except urllib.error.HTTPError as e:
+            log(f"GET {path} sb HTTP {e.code}")
+            return self._send(502, {"error": "Could not load league data. Try again."})
+        except Exception as e:
+            log(f"GET {path} error {type(e).__name__}: {str(e)[:140]}")
+            return self._send(500, {"error": "Something went wrong. Try again."})
+        return self._send(404, {"error": "not found"})
+
+    def do_POST(self):
+        path = urllib.parse.urlparse(self.path).path
+        if path != "/api/league/trade":
+            return self._send(404, {"error": "not found"})
+        user = self._user()
+        if not user:
+            return self._send(401, {"error": "Please sign in as a member."})
+        uid = user["id"]
+        try:
+            n = int(self.headers.get("Content-Length") or 0)
+            req = json.loads(self.rfile.read(n).decode() or "{}")
+        except ValueError:
+            return self._send(400, {"error": "Invalid request."})
+        pair = str(req.get("pair", "")).upper().replace("/", "").replace(" ", "")
+        side = str(req.get("side", "")).upper()
+        if pair not in ALLOWED_PAIRS:
+            return self._send(400, {"error": "This pair is not open for the league yet."})
+        if side not in ("BUY", "SELL"):
+            return self._send(400, {"error": "Side must be BUY or SELL."})
+        try:
+            entry, sl, tp = float(req["entry"]), float(req["sl"]), float(req["tp"])
+            risk_pct = float(req.get("risk_pct", 1))
+        except (KeyError, TypeError, ValueError):
+            return self._send(400, {"error": "Missing entry / SL / TP."})
+        if risk_pct not in RISK_CHOICES:
+            return self._send(400, {"error": "Risk must be 1% or 2%."})
+        if side == "BUY" and not (sl < entry < tp):
+            return self._send(400, {"error": "Invalid levels for BUY."})
+        if side == "SELL" and not (sl > entry > tp):
+            return self._send(400, {"error": "Invalid levels for SELL."})
+        try:
+            trades = my_trades(uid)
+            open_tr = [t for t in trades if t["status"] == "open"]
+            if sum(1 for t in open_tr if t["pair"] == pair) >= MAX_OPEN_PER_PAIR:
+                return self._send(409, {"error": f"You already have an open {pair} trade."})
+            if len(open_tr) >= MAX_OPEN_TOTAL:
+                return self._send(409, {"error": "Max 5 open trades. Close one first."})
+            bal, _ = balance_of(trades)
+            if bal <= 0:
+                return self._send(409, {"error": "Virtual balance depleted. New season resets it."})
+            risk_usd = round(bal * risk_pct / 100.0, 2)
+            row = sb("POST", "/rest/v1/paper_trades", body={
+                "user_id": uid, "username": display_name(user), "pair": pair,
+                "side": side, "entry": entry, "sl": sl, "tp": tp,
+                "risk_pct": risk_pct, "risk_usd": risk_usd, "season": SEASON})
+            tr = (row or [{}])[0]
+            log(f"{uid[:8]} opened {pair} {side} risk {risk_pct}%")
+            return self._send(201, {"trade": tr, "balance": bal})
+        except urllib.error.HTTPError as e:
+            log(f"POST trade sb HTTP {e.code}: {e.read().decode()[:160]}")
+            return self._send(502, {"error": "Could not open trade. Try again."})
+        except Exception as e:
+            log(f"POST trade error {type(e).__name__}: {str(e)[:140]}")
+            return self._send(500, {"error": "Something went wrong. Try again."})
+
+
+def main():
+    srv = ThreadingHTTPServer(("127.0.0.1", PORT), Handler)
+    log(f"listening on 127.0.0.1:{PORT} season={SEASON}")
+    srv.serve_forever()
+
+
+if __name__ == "__main__":
+    main()
