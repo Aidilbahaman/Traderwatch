@@ -37,7 +37,8 @@ import sq_collector as SQC      # noqa: E402
 
 ENV = pathlib.Path("/home/ubuntu/.secrets/supabase.env")
 PORT = int(os.environ.get("ANALYZE_PORT", "8102"))
-ALLOWED_PAIRS = {"XAUUSD"}          # owner: XAUUSD sahaja buat masa ini
+ALLOWED_PAIRS = {"XAUUSD", "XAGUSD", "BTCUSD", "EURUSD", "GBPUSD",
+                 "USDJPY", "AUDUSD", "USDCAD", "NZDUSD"}   # pairs dengan data bar live
 MIN_GAP_S = 20                      # min seconds between analyses per user
 HOURLY_CAP = 12                     # max analyses per user per hour
 BARS_COUNT = 300                    # M15 bars fed to the analyst
@@ -116,6 +117,36 @@ def fetch_bars(pair):
     return out
 
 
+TF_MINUTES = {"M5": 5, "M15": 15, "H1": 60, "H4": 240, "D1": 1440}
+
+
+def fetch_ohlc(pair, tf, limit=200):
+    """Real OHLC candles for the chart, resampled to the requested timeframe."""
+    tf = tf if tf in TF_MINUTES else "M15"
+    base_gran = "M5" if tf == "M5" else "M15"
+    base_min = 5 if tf == "M5" else 15
+    rows = SQC.candles_from_bars(pair, base_gran, 2000)
+    bars = []
+    for c in rows:
+        try:
+            d = datetime.fromisoformat(str(c["t"]).replace("Z", "+00:00"))
+            if d.tzinfo is None:
+                d = d.replace(tzinfo=timezone.utc)
+            bars.append((int(d.timestamp() * 1000), float(c["o"]), float(c["h"]),
+                         float(c["l"]), float(c["c"])))
+        except (KeyError, TypeError, ValueError):
+            continue
+    factor = max(1, TF_MINUTES[tf] // base_min)
+    if factor > 1:
+        res = []
+        for i in range(0, len(bars) - factor + 1, factor):
+            g = bars[i:i + factor]
+            res.append((g[0][0], g[0][1], max(x[2] for x in g),
+                        min(x[3] for x in g), g[-1][4]))
+        bars = res
+    return [{"t": t, "o": o, "h": h, "l": l, "c": c} for t, o, h, l, c in bars[-limit:]]
+
+
 def run_analysis(pair):
     bars = fetch_bars(pair)
     if len(bars) < 100:
@@ -152,9 +183,27 @@ class Handler(BaseHTTPRequestHandler):
         return h[7:].strip() if h.lower().startswith("bearer ") else ""
 
     def do_GET(self):
-        path = urllib.parse.urlparse(self.path).path
+        parsed = urllib.parse.urlparse(self.path)
+        path = parsed.path
         if path == "/api/analyze/health":
             return self._send(200, {"ok": True, "pairs": sorted(ALLOWED_PAIRS)})
+        if path == "/api/bars":
+            user = verify_user(self._token())
+            if not user or not user.get("id"):
+                return self._send(401, {"error": "Sila log masuk sebagai ahli."})
+            q = urllib.parse.parse_qs(parsed.query)
+            pair = str(q.get("pair", [""])[0]).upper().replace("/", "").replace(" ", "")
+            tf = str(q.get("tf", ["M15"])[0]).upper()
+            if pair not in ALLOWED_PAIRS:
+                return self._send(400, {"error": "Pair ini belum dibuka untuk analisis AI."})
+            try:
+                candles = fetch_ohlc(pair, tf)
+            except Exception as e:
+                log(f"bars {pair} error {type(e).__name__}: {str(e)[:120]}")
+                return self._send(500, {"error": "Gagal memuatkan data chart."})
+            if not candles:
+                return self._send(404, {"error": "Tiada data bar untuk pair ini."})
+            return self._send(200, {"pair": pair, "tf": tf, "candles": candles})
         return self._send(404, {"error": "not found"})
 
     def do_POST(self):

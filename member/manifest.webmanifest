@@ -1,10 +1,10 @@
 {
-  "name": "TraderWatch Member",
-  "short_name": "TW Member",
-  "description": "Dashboard ahli TraderWatch — signal AI rasmi XAU/USD, XAG/USD dan BTC, chart beranotasi dan prestasi enjin. Boleh pasang, boleh offline.",
+  "name": "TraderWatch AI Analyst",
+  "short_name": "TW Analyst",
+  "description": "Pilih pair — AI TraderWatch baca chart M15 dan lukis Entry, SL & TP untuk anda. Chart OHLC sebenar, analisis AI masa sebenar. Boleh pasang, boleh offline.",
   "id": "./index.html",
   "start_url": "./index.html",
-  "scope": "/",
+  "scope": "./",
   "display": "standalone",
   "display_override": ["standalone", "minimal-ui"],
   "orientation": "portrait",
@@ -20,21 +20,9 @@
   ],
   "shortcuts": [
     {
-      "name": "Signal terkini",
-      "short_name": "Home",
-      "url": "./index.html#/home",
-      "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }]
-    },
-    {
-      "name": "Prestasi signal",
-      "short_name": "Prestasi",
-      "url": "./index.html#/performance",
-      "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }]
-    },
-    {
-      "name": "Chart pasaran",
-      "short_name": "Markets",
-      "url": "./index.html#/markets",
+      "name": "Analisis AI",
+      "short_name": "Analisis",
+      "url": "./index.html",
       "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }]
     }
   ]
