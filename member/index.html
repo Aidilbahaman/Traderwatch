@@ -212,6 +212,7 @@ html[data-theme="light"] .pcard{background:linear-gradient(145deg,#eaf3e2,var(--
 .stat{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px 6px;text-align:center}
 .stat b{display:block;font-size:20px;font-weight:850;font-variant-numeric:tabular-nums;letter-spacing:-.04em}
 .stat small{display:block;color:var(--muted);font-size:10px;margin-top:3px;line-height:1.3}
+.stat b.pos{color:var(--green)}.stat b.neg{color:var(--red)}
 .sec{font-size:10px;color:var(--muted);font-weight:800;letter-spacing:.12em;text-transform:uppercase;margin:18px 0 8px}
 .menu{background:var(--card);border:1px solid var(--line);border-radius:18px;overflow:hidden}
 .mrow{width:100%;display:flex;align-items:center;gap:12px;padding:14px 15px;text-align:left;color:var(--text);border-bottom:1px solid var(--line);font-size:14px;font-weight:650;transition:.15s}
@@ -458,9 +459,9 @@ html[data-theme="light"] .riskopt.on{background:#eaf5db;color:#4c7a17}
           <span class="member" id="pSince">—</span>
         </div>
         <div class="stats">
-          <div class="stat"><b id="s1v">—</b><small id="s1">Analisis dibuat</small></div>
-          <div class="stat"><b id="s2v">—</b><small id="s2">Signal diambil</small></div>
-          <div class="stat"><b id="s3v">—</b><small id="s3">Prestasi enjin</small></div>
+          <div class="stat"><b id="s1v">—</b><small id="s1">Analyses made</small></div>
+          <div class="stat"><b id="s2v">—</b><small id="s2">Paper trades</small></div>
+          <div class="stat"><b id="s3v">—</b><small id="s3">Your Net R</small></div>
         </div>
         <div class="sec" id="menuSec">Akaun</div>
         <div class="menu" id="menu"></div>
@@ -577,8 +578,8 @@ var DICT={
   comTitle:'Komuniti',comSub:'Berbincang dengan trader lain.',online:'Komuniti aktif',membersToday:'ahli hari ini',writeMsg:'Tulis mesej…',
   emptyChat:'Belum ada mesej hari ini. Jadilah yang pertama.',resetAt:'Mesej dikosongkan setiap tengah malam (MYT). Pautan, telefon & emel ditapis automatik.',
   sendErr:'Mesej gagal dihantar. Cuba lagi.',slow:'Sila tunggu beberapa saat sebelum hantar lagi.',emptyMsg:'Tulis mesej dahulu.',longMsg:'Mesej terlalu panjang (maks 500 aksara).',filtered:'Mesej disekat oleh penapis komuniti.',someFiltered:'Sebahagian kandungan disekat penapis.',
-  since:'Ahli sejak',pName:'Ahli TraderWatch',s1:'Analisis dibuat',s2:'Signal diambil',s3:'Prestasi enjin',menuSec:'Akaun',
-  mAccount:'Butiran akaun',mPerf:'Prestasi enjin',mDevice:'Peranti & notifikasi',mLogout:'Log keluar',freeT:'Free Card',
+  since:'Ahli sejak',pName:'Ahli TraderWatch',s1:'Analisis dibuat',s2:'Trade paper',s3:'Net R anda',menuSec:'Akaun',
+  mAccount:'Butiran akaun',mPerf:'Prestasi Saya',mDevice:'Peranti & notifikasi',mLogout:'Log keluar',freeT:'Free Card',
   free1:'Analisis AI tanpa had pada semua pair',free2:'Akses penuh komuniti & signal',free3:'Kemas kini pasaran masa sebenar',freeN:'Tiada tiering — semua ahli akses penuh.',
   setTitle:'Tetapan',setSub:'Bahasa, tema dan app.',langSec:'Bahasa / Language',langSub:'Pilih bahasa paparan',themeSec:'Tema / Theme',dark:'Gelap',light:'Terang',system:'Sistem',
   instT:'Pasang app',instS:'Offline-ready · App shell dicache',install:'Pasang',setNote:'Pilihan disimpan di peranti ini.',installHint:'Guna menu browser → Tambah ke skrin utama.',
@@ -586,7 +587,7 @@ var DICT={
   chartFail:'Gagal memuatkan chart.',retry:'Cuba lagi',waitMsg:'Tiada setup jelas sekarang — AI cadangkan menunggu.',
   noAnalysis:'Analisis gagal buat masa ini. Cuba lagi sebentar.',limit:'Analisis dalam cooldown. Cuba lagi sebentar.',
   account:'Butiran akaun',uid:'ID ahli',name:'Nama',email:'Emel',plan:'Plan',close:'Tutup',
-  perfTitle:'Prestasi enjin',perfSub:'Keputusan global semua signal enjin (bukan prestasi peribadi).',perfWin:'Kadar menang',perfTp:'TP dicapai',perfSl:'SL terkena',perfClosed:'Signal ditutup',perfMine:'Analisis anda dibuat',perfNote:'Sumber: signal-status.json enjin. Angka global, bukan akaun anda.',
+  perfTitle:'Prestasi Saya',perfSub:'Keputusan paper trading anda dalam Liga.',perfWin:'Kadar menang',perfClosed:'Trade paper ditutup',perfMine:'Analisis anda dibuat',perfBalance:'Baki maya',perfRank:'Rank',perfOpen:'Trade dibuka',viewLeague:'Lihat Liga',perfEmpty:'Belum ada paper trade. Analisis satu pair dan ambil trade untuk bermula.',perfNote:'Paper trading sahaja — modal maya. Outcome dari harga sebenar.',
   notifTitle:'Notifikasi komuniti',notifSub:'Tahap peringatan mesej komuniti disimpan pada akaun anda.',notifOff:'Matikan',notifOffS:'Tiada peringatan mesej.',notifTeam:'Ahli sahaja',notifTeamS:'Peringatan apabila ahli menghantar mesej.',notifAll:'Semua',notifAllS:'Semua peringatan komuniti.',notifSaved:'Tahap notifikasi disimpan.',notifErr:'Gagal menyimpan. Cuba lagi.',
   navLiga:'Liga',ligaTitle:'Liga Kertas',ligaSub:'Modal maya $10,000. Disiplin menang, bukan judi.',
   subLb:'Leaderboard',subTrades:'Trade Saya',subBadges:'Badge',
@@ -614,8 +615,8 @@ var DICT={
   comTitle:'Community',comSub:'Talk with other traders.',online:'Community active',membersToday:'members today',writeMsg:'Write a message…',
   emptyChat:'No messages today. Be the first.',resetAt:'Messages reset at midnight (MYT). Links, phone numbers & emails are filtered automatically.',
   sendErr:'Message could not be sent. Try again.',slow:'Please wait a few seconds before sending again.',emptyMsg:'Write a message first.',longMsg:'Message too long (max 500 characters).',filtered:'Message blocked by the community filter.',someFiltered:'Some content was blocked by the filter.',
-  since:'Member since',pName:'TraderWatch Member',s1:'Analyses made',s2:'Signals taken',s3:'Engine performance',menuSec:'Account',
-  mAccount:'Account details',mPerf:'Engine performance',mDevice:'Devices & notifications',mLogout:'Log out',freeT:'Free Card',
+  since:'Member since',pName:'TraderWatch Member',s1:'Analyses made',s2:'Paper trades',s3:'Your Net R',menuSec:'Account',
+  mAccount:'Account details',mPerf:'My Performance',mDevice:'Devices & notifications',mLogout:'Log out',freeT:'Free Card',
   free1:'Unlimited AI analysis on all pairs',free2:'Full access to community & signals',free3:'Real-time market updates',freeN:'No tiering — all members have full access.',
   setTitle:'Settings',setSub:'Language, theme and app.',langSec:'Bahasa / Language',langSub:'Choose display language',themeSec:'Tema / Theme',dark:'Dark',light:'Light',system:'System',
   instT:'Install app',instS:'Offline-ready · App shell cached',install:'Install',setNote:'Preferences are saved on this device.',installHint:'Use your browser menu → Add to Home screen.',
@@ -623,7 +624,7 @@ var DICT={
   chartFail:'Failed to load chart.',retry:'Retry',waitMsg:'No clear setup right now — AI suggests waiting.',
   noAnalysis:'Analysis failed for now. Please try again shortly.',limit:'Analysis is in cooldown. Try again shortly.',
   account:'Account details',uid:'Member ID',name:'Name',email:'Email',plan:'Plan',close:'Close',
-  perfTitle:'Engine performance',perfSub:'Global results across all engine signals (not personal performance).',perfWin:'Win rate',perfTp:'TP hit',perfSl:'SL hit',perfClosed:'Signals closed',perfMine:'Your analyses made',perfNote:'Source: engine signal-status.json. Global figures, not your account.',
+  perfTitle:'My Performance',perfSub:'Your paper trading results in the League.',perfWin:'Win rate',perfClosed:'Paper trades closed',perfMine:'Analyses made',perfBalance:'Virtual balance',perfRank:'Rank',perfOpen:'Open trades',viewLeague:'View League',perfEmpty:'No paper trades yet. Analyze a pair and take a trade to start.',perfNote:'Paper trading only — virtual capital. Outcomes resolved from live prices.',
   notifTitle:'Community notifications',notifSub:'Your community message alert level is stored on your account.',notifOff:'Off',notifOffS:'No message alerts.',notifTeam:'Members only',notifTeamS:'Alert when a member posts a message.',notifAll:'All',notifAllS:'All community alerts.',notifSaved:'Notification level saved.',notifErr:'Could not save. Try again.',
   navLiga:'League',ligaTitle:'Paper League',ligaSub:'Virtual $10,000 capital. Discipline wins, not gambling.',
   subLb:'Leaderboard',subTrades:'My Trades',subBadges:'Badges',
@@ -651,15 +652,15 @@ var DICT={
   comTitle:'社区',comSub:'与其他交易者交流。',online:'社区活跃',membersToday:'位成员今日',writeMsg:'写消息…',
   emptyChat:'今天还没有消息。成为第一个吧。',resetAt:'消息于午夜（马来西亚时间）重置。链接、电话与邮箱自动过滤。',
   sendErr:'发送失败，请重试。',slow:'请稍等几秒再发送。',emptyMsg:'请先写消息。',longMsg:'消息过长（最多 500 字）。',filtered:'消息被社区过滤器拦截。',someFiltered:'部分内容被过滤。',
-  since:'自',pName:'TraderWatch 会员',s1:'已分析次数',s2:'已采用信号',s3:'引擎表现',menuSec:'账户',
-  mAccount:'账户详情',mPerf:'引擎表现',mDevice:'设备与通知',mLogout:'退出登录',freeT:'Free Card',
+  since:'自',pName:'TraderWatch 会员',s1:'已分析次数',s2:'模拟交易',s3:'您的净 R',menuSec:'账户',
+  mAccount:'账户详情',mPerf:'我的表现',mDevice:'设备与通知',mLogout:'退出登录',freeT:'Free Card',
   free1:'所有货币对无限 AI 分析',free2:'完全访问社区与信号',free3:'实时市场更新',freeN:'无分级——所有会员均可完整访问。',
   setTitle:'设置',setSub:'语言、主题和应用。',langSec:'Bahasa / 语言',langSub:'选择显示语言',themeSec:'Tema / 主题',dark:'深色',light:'浅色',system:'系统',
   instT:'安装应用',instS:'可离线 · 应用外壳已缓存',install:'安装',setNote:'偏好设置保存在此设备上。',installHint:'使用浏览器菜单 → 添加到主屏幕。',
   goAI:'用 AI 分析',loading:'加载中…',aiLabel:'AI 观点',conf:'置信度',entry:'入场',tp:'止盈',sl:'止损',checklist:'共振检查表',reasons:'分析理由',risk:'风险',again:'← 分析其他货币对 / 周期',
   chartFail:'图表加载失败。',retry:'重试',waitMsg:'目前没有清晰设置——AI 建议等待。',noAnalysis:'分析暂时失败，请稍后再试。',limit:'分析冷却中，请稍后再试。',
   account:'账户详情',uid:'会员 ID',name:'姓名',email:'邮箱',plan:'方案',close:'关闭',
-  perfTitle:'引擎表现',perfSub:'所有引擎信号的全球结果（非个人表现）。',perfWin:'胜率',perfTp:'止盈',perfSl:'止损',perfClosed:'已平仓',perfMine:'您的分析次数',perfNote:'来源：引擎 signal-status.json。全球数据，非您的账户。',
+  perfTitle:'我的表现',perfSub:'您在联赛中的模拟交易结果。',perfWin:'胜率',perfClosed:'已平仓模拟交易',perfMine:'您的分析次数',perfNote:'仅模拟交易——虚拟资金。结果由实时价格结算。',
   notifTitle:'社区通知',notifSub:'社区消息提醒级别保存在您的账户。',notifOff:'关闭',notifOffS:'无消息提醒。',notifTeam:'仅成员',notifTeamS:'成员发消息时提醒。',notifAll:'全部',notifAllS:'所有社区提醒。',notifSaved:'通知级别已保存。',notifErr:'保存失败，请重试。',
   navLiga:'联赛',ligaTitle:'模拟交易联赛',ligaSub:'虚拟资金 $10,000。纪律取胜，而非赌博。',
   subLb:'排行榜',subTrades:'我的交易',subBadges:'徽章',
@@ -687,15 +688,15 @@ var DICT={
   comTitle:'Komunitas',comSub:'Berkunjung dengan trader lain.',online:'Komunitas aktif',membersToday:'anggota hari ini',writeMsg:'Tulis pesan…',
   emptyChat:'Belum ada pesan hari ini. Jadilah yang pertama.',resetAt:'Pesan direset tengah malam (MYT). Tautan, telepon & email disaring otomatis.',
   sendErr:'Pesan gagal dikirim. Coba lagi.',slow:'Tunggu beberapa detik sebelum mengirim lagi.',emptyMsg:'Tulis pesan dahulu.',longMsg:'Pesan terlalu panjang (maks 500 karakter).',filtered:'Pesan diblokir filter komunitas.',someFiltered:'Sebagian konten disaring.',
-  since:'Anggota sejak',pName:'Anggota TraderWatch',s1:'Analisis dibuat',s2:'Sinyal diambil',s3:'Kinerja enjin',menuSec:'Akun',
-  mAccount:'Detail akun',mPerf:'Kinerja enjin',mDevice:'Perangkat & notifikasi',mLogout:'Keluar',freeT:'Free Card',
+  since:'Anggota sejak',pName:'Anggota TraderWatch',s1:'Analisis dibuat',s2:'Trade paper',s3:'Net R Anda',menuSec:'Akun',
+  mAccount:'Detail akun',mPerf:'Performa Saya',mDevice:'Perangkat & notifikasi',mLogout:'Keluar',freeT:'Free Card',
   free1:'Analisis AI tanpa batas di semua pair',free2:'Akses penuh komunitas & sinyal',free3:'Pembaruan pasar waktu nyata',freeN:'Tanpa tingkatan — semua anggota akses penuh.',
   setTitle:'Pengaturan',setSub:'Bahasa, tema dan aplikasi.',langSec:'Bahasa / Language',langSub:'Pilih bahasa tampilan',themeSec:'Tema / Theme',dark:'Gelap',light:'Terang',system:'Sistem',
   instT:'Pasang aplikasi',instS:'Siap offline · Shell aplikasi di-cache',install:'Pasang',setNote:'Preferensi disimpan di perangkat ini.',installHint:'Gunakan menu browser → Tambah ke layar utama.',
   goAI:'Analisis dengan AI',loading:'Memuat…',aiLabel:'Pandangan AI',conf:'KEYAKINAN',entry:'Entry',tp:'Take Profit',sl:'Stop Loss',checklist:'Checklist konfluensi',reasons:'Alasan analisis',risk:'Risiko',again:'← Analisis pair / timeframe lain',
   chartFail:'Gagal memuat chart.',retry:'Coba lagi',waitMsg:'Belum ada setup jelas — AI menyarankan menunggu.',noAnalysis:'Analisis gagal. Coba lagi sebentar.',limit:'Analisis sedang cooldown. Coba lagi sebentar.',
   account:'Detail akun',uid:'ID anggota',name:'Nama',email:'Email',plan:'Paket',close:'Tutup',
-  perfTitle:'Kinerja enjin',perfSub:'Hasil global semua sinyal enjin (bukan kinerja pribadi).',perfWin:'Tingkat menang',perfTp:'TP tercapai',perfSl:'SL terkena',perfClosed:'Sinyal ditutup',perfMine:'Analisis Anda dibuat',perfNote:'Sumber: signal-status.json enjin. Angka global, bukan akun Anda.',
+  perfTitle:'Performa Saya',perfSub:'Hasil paper trading Anda di Liga.',perfWin:'Tingkat menang',perfClosed:'Trade paper ditutup',perfMine:'Analisis Anda dibuat',perfNote:'Hanya paper trading — modal virtual. Hasil diselesaikan dari harga live.',
   notifTitle:'Notifikasi komunitas',notifSub:'Tingkat peringatan pesan komunitas disimpan di akun Anda.',notifOff:'Matikan',notifOffS:'Tanpa peringatan pesan.',notifTeam:'Anggota saja',notifTeamS:'Peringatan saat anggota mengirim pesan.',notifAll:'Semua',notifAllS:'Semua peringatan komunitas.',notifSaved:'Tingkat notifikasi disimpan.',notifErr:'Gagal menyimpan. Coba lagi.',
   navLiga:'Liga',ligaTitle:'Liga Paper',ligaSub:'Modal virtual $10.000. Disiplin menang, bukan judi.',
   subLb:'Papan peringkat',subTrades:'Trade Saya',subBadges:'Lencana',
@@ -723,15 +724,15 @@ var DICT={
   comTitle:'சமூகம்',comSub:'மற்ற வர்த்தகர்களுடன் பேசுங்கள்.',online:'சமூகம் செயலில்',membersToday:'உறுப்பினர்கள் இன்று',writeMsg:'செய்தி எழுதுங்கள்…',
   emptyChat:'இன்று செய்திகள் இல்லை. முதல்வராக இருங்கள்.',resetAt:'செய்திகள் நள்ளிரவில் (MYT) அழிக்கப்படும். இணைப்புகள், தொலைபேசி & மின்னஞ்சல் தானாக வடிகட்டப்படும்.',
   sendErr:'அனுப்ப முடியவில்லை. மீண்டும் முயற்சிக்கவும்.',slow:'அனுப்புவதற்கு முன் சில வினாடிகள் காத்திருக்கவும்.',emptyMsg:'முதலில் செய்தி எழுதவும்.',longMsg:'செய்தி மிக நீளம் (அதிகபட்சம் 500).',filtered:'சமூக வடிகட்டியால் தடுக்கப்பட்டது.',someFiltered:'சில உள்ளடக்கம் வடிகட்டப்பட்டது.',
-  since:'உறுப்பினர்',pName:'TraderWatch உறுப்பினர்',s1:'பகுப்பாய்வுகள்',s2:'சிக்னல்கள்',s3:'இஞ்சின் செயல்திறன்',menuSec:'கணக்கு',
-  mAccount:'கணக்கு விவரங்கள்',mPerf:'இஞ்சின் செயல்திறன்',mDevice:'சாதனங்கள் & அறிவிப்புகள்',mLogout:'வெளியேறு',freeT:'Free Card',
+  since:'உறுப்பினர்',pName:'TraderWatch உறுப்பினர்',s1:'பகுப்பாய்வுகள்',s2:'பேப்பர் வர்த்தகங்கள்',s3:'உங்கள் நிகர R',menuSec:'கணக்கு',
+  mAccount:'கணக்கு விவரங்கள்',mPerf:'என் செயல்திறன்',mDevice:'சாதனங்கள் & அறிவிப்புகள்',mLogout:'வெளியேறு',freeT:'Free Card',
   free1:'அனைத்து ஜோடிகளிலும் வரம்பற்ற AI பகுப்பாய்வு',free2:'சமூகம் & சிக்னல்கள் முழு அணுகல்',free3:'நேரடி சந்தை புதுப்பிப்புகள்',freeN:'இல்லை tiering — அனைத்து உறுப்பினர்களும் முழு அணுகல்.',
   setTitle:'அமைப்புகள்',setSub:'மொழி, தீம் மற்றும் ஆப்.',langSec:'Bahasa / மொழி',langSub:'காட்சி மொழியைத் தேர்ந்தெடுக்கவும்',themeSec:'Tema / தீம்',dark:'இருண்ட',light:'ஒளி',system:'கணினி',
   instT:'ஆப் நிறுவு',instS:'ஆஃப்லைன் தயார் · ஆப் ஷெல் கேச்',install:'நிறுவு',setNote:'விருப்பங்கள் இந்த சாதனத்தில் சேமிக்கப்படும்.',installHint:'உலாவி மெனு → முகப்புத் திரையில் சேர்.',
   goAI:'AI உடன் பகுப்பாய்வு',loading:'ஏற்றுகிறது…',aiLabel:'AI கருத்து',conf:'நம்பிக்கை',entry:'Entry',tp:'Take Profit',sl:'Stop Loss',checklist:'ஒற்றுமை பட்டியல்',reasons:'பகுப்பாய்வு காரணங்கள்',risk:'இடர்',again:'← மற்ற ஜோடி / காலத்தை பகுப்பாய்வு செய்',
   chartFail:'கிராபை ஏற்ற முடியவில்லை.',retry:'மீண்டும் முயற்சி',waitMsg:'தற்போது தெளிவான அமைப்பு இல்லை — AI காத்திருக்க பரிந்துரைக்கிறது.',noAnalysis:'பகுப்பாய்வு தோல்வியடைந்தது. மீண்டும் முயற்சிக்கவும்.',limit:'பகுப்பாய்வு குளிரூட்டலில் உள்ளது.',
   account:'கணக்கு விவரங்கள்',uid:'உறுப்பினர் ID',name:'பெயர்',email:'மின்னஞ்சல்',plan:'திட்டம்',close:'மூடு',
-  perfTitle:'இஞ்சின் செயல்திறன்',perfSub:'அனைத்து இஞ்சின் சிக்னல்களின் உலகளாவிய முடிவுகள் (தனிப்பட்ட செயல்திறன் அல்ல).',perfWin:'வெற்றி விகிதம்',perfTp:'TP அடைந்தது',perfSl:'SL அடைந்தது',perfClosed:'மூடிய சிக்னல்கள்',perfMine:'உங்கள் பகுப்பாய்வுகள்',perfNote:'ஆதாரம்: இஞ்சின் signal-status.json. உலகளாவிய எண்கள், உங்கள் கணக்கு அல்ல.',
+  perfTitle:'என் செயல்திறன்',perfSub:'லீக்கில் உங்கள் பேப்பர் வர்த்தக முடிவுகள்.',perfWin:'வெற்றி விகிதம்',perfClosed:'மூடிய பேப்பர் வர்த்தகங்கள்',perfMine:'உங்கள் பகுப்பாய்வுகள்',perfNote:'பேப்பர் வர்த்தகம் மட்டும் — மெய்நிகர் மூலதனம். முடிவுகள் நேரடி விலைகளிலிருந்து.',
   notifTitle:'சமூக அறிவிப்புகள்',notifSub:'சமூக செய்தி எச்சரிக்கை நிலை உங்கள் கணக்கில் சேமிக்கப்படும்.',notifOff:'அணை',notifOffS:'செய்தி எச்சரிக்கை இல்லை.',notifTeam:'உறுப்பினர்கள் மட்டும்',notifTeamS:'உறுப்பினர் செய்தி அனுப்பும்போது எச்சரிக்கை.',notifAll:'அனைத்தும்',notifAllS:'அனைத்து சமூக எச்சரிக்கைகள்.',notifSaved:'அறிவிப்பு நிலை சேமிக்கப்பட்டது.',notifErr:'சேமிக்க முடியவில்லை. மீண்டும் முயற்சிக்கவும்.',
   navLiga:'லீக்',ligaTitle:'பேப்பர் லீக்',ligaSub:'மெய்நிகர் மூலதனம் $10,000. ஒழுக்கமே வெல்லும், சூதாட்டம் அல்ல.',
   subLb:'தரவரிசை',subTrades:'என் வர்த்தகங்கள்',subBadges:'பதக்கங்கள்',
@@ -797,7 +798,7 @@ function showView(v){
  if(v==='analyst'){drawPairs(true);maybePrices()}
  if(v==='community')loadMessages();
  if(v==='liga')renderLiga();
- if(v==='profile'&&!profileLoaded)loadProfile();
+ if(v==='profile'){if(!profileLoaded)loadProfile();else loadPerf()}
 }
 
 /* ---------------- toast ---------------- */
@@ -1396,7 +1397,7 @@ function submitTrade(){
 $('rGo').onclick=submitTrade;
 
 /* ---------------- profile (Supabase REST sebenar) ---------------- */
-var profileLoaded=false,ME=null,PLAN='free',PERF=null;
+var profileLoaded=false,ME=null,PLAN='free',MYPERF=null;
 function dateMY(iso){var d=new Date(iso);if(isNaN(d.getTime()))return '—';return new Intl.DateTimeFormat(lang==='en'?'en-GB':'ms-MY',{timeZone:'Asia/Kuala_Lumpur',day:'numeric',month:'short',year:'numeric'}).format(d)}
 function loadProfile(){
  profileLoaded=true;
@@ -1412,20 +1413,24 @@ function loadProfile(){
  }).catch(function(){profileLoaded=false});
  loadPerf();
 }
-/* Prestasi GLOBAL enjin dari signal-status.json (bukan prestasi peribadi). */
+/* Prestasi PERIBADI ahli dari Paper Trading League (/api/league/me).
+ * Data prestasi global enjin tidak dipaparkan lagi. */
 function loadPerf(){
- fetch('../signal-status.json').then(function(r){return r.ok?r.json():null}).then(function(d){
-  if(!d||!d.signals)return;
-  var tp=0,sl=0;Object.keys(d.signals).forEach(function(k){var s=d.signals[k]&&d.signals[k].status;if(s==='tp')tp++;else if(s==='sl')sl++});
-  PERF={tp:tp,sl:sl,closed:tp+sl,win:(tp+sl)?(tp/(tp+sl)*100):null};
+ apiFetch('/api/league/me').then(function(r){
+  var d=r.ok?r.data:null;
+  MYPERF=(d&&d.balance!=null)?{net_r:+d.net_r||0,win_rate:(d.win_rate!=null&&isFinite(+d.win_rate))?+d.win_rate:null,balance:+d.balance,rank:(d.rank!=null)?+d.rank:null,trades_closed:+d.trades_closed||0,trades_open:+d.trades_open||0}:null;
   renderStats();
- }).catch(function(){});
+ }).catch(function(){MYPERF=null;renderStats()});
 }
 function renderStats(){
  var cnt=null;try{var v=localStorage.getItem('tw-analysis-count');cnt=v?parseInt(v,10):null}catch(e){}
  $('s1v').textContent=cnt!=null&&isFinite(cnt)?String(cnt):'—';
- $('s2v').textContent='—';
- $('s3v').textContent=PERF&&PERF.win!=null?PERF.win.toFixed(1)+'%':'—';
+ $('s2v').textContent=MYPERF?String(MYPERF.trades_closed):'—';
+ var nr=MYPERF?MYPERF.net_r:null,has=MYPERF&&MYPERF.trades_closed>0&&nr!=null&&isFinite(nr);
+ var s3=$('s3v');
+ s3.textContent=has?(nr===0?'0R':fmtR(nr)):'—';
+ s3.className=has?(nr>0?'pos':nr<0?'neg':''):'';
+ $('s2').textContent=t('s2');
  $('s3').textContent=t('s3');
 }
 function renderProfile(){
@@ -1461,10 +1466,25 @@ function showAccount(){
  $('altClose').onclick=closeSheet;
 }
 function showPerf(){
- var has=!!PERF,p=PERF||{tp:0,sl:0,closed:0,win:null};
  var cnt='—';try{var v=localStorage.getItem('tw-analysis-count');if(v)cnt=String(parseInt(v,10))}catch(e){}
- var h='<div class="stats" style="margin-bottom:10px"><div class="stat"><b>'+(has&&p.win!=null?p.win.toFixed(1)+'%':'—')+'</b><small>'+esc(t('perfWin'))+'</small></div><div class="stat"><b>'+(has?p.tp:'—')+'</b><small>'+esc(t('perfTp'))+'</small></div><div class="stat"><b>'+(has?p.sl:'—')+'</b><small>'+esc(t('perfSl'))+'</small></div></div><div class="kv"><b>'+esc(t('perfClosed'))+'</b><span>'+(has?p.closed:'—')+'</span><b>'+esc(t('perfMine'))+'</b><span>'+esc(cnt)+'</span></div><div class="note">'+esc(t('perfNote'))+'</div><button class="again" id="altClose">'+esc(t('close'))+'</button>';
+ /* Tiada data peribadi / tiada trade langsung → empty state mesra. */
+ if(!MYPERF||(MYPERF.trades_closed===0&&MYPERF.trades_open===0)){
+  var he='<div class="empty">'+esc(t('perfEmpty'))+'</div><button class="again" id="perfAnalyst">'+esc(t('navAnalyst'))+'</button><button class="again" id="altClose">'+esc(t('close'))+'</button>';
+  openAlt('▲',t('perfTitle'),t('perfSub'),he);
+  $('perfAnalyst').onclick=function(){closeSheet();showView('analyst')};
+  $('altClose').onclick=closeSheet;
+  return;
+ }
+ var p=MYPERF,nr=p.net_r,hasClosed=p.trades_closed>0;
+ var rTxt=nr===0?'0R':fmtR(nr),rCls=nr>0?'pos':nr<0?'neg':'';
+ var h='<div class="stats" style="grid-template-columns:repeat(2,1fr);margin-bottom:10px">'+
+  '<div class="stat"><b class="'+rCls+'">'+esc(hasClosed?rTxt:'—')+'</b><small>'+esc(t('netR'))+'</small></div>'+
+  '<div class="stat"><b>'+esc(hasClosed?wrTxt(p.win_rate):'—')+'</b><small>'+esc(t('perfWin'))+'</small></div>'+
+  '<div class="stat"><b>'+esc(money(p.balance))+'</b><small>'+esc(t('perfBalance'))+'</small></div>'+
+  '<div class="stat"><b>'+(p.rank!=null?'#'+p.rank:'—')+'</b><small>'+esc(t('perfRank'))+'</small></div>'+
+  '</div><div class="kv"><b>'+esc(t('perfClosed'))+'</b><span>'+p.trades_closed+'</span><b>'+esc(t('perfOpen'))+'</b><span>'+p.trades_open+'</span><b>'+esc(t('perfMine'))+'</b><span>'+esc(cnt)+'</span></div><div class="note">'+esc(t('perfNote'))+'</div><button class="again" id="perfLeague">'+esc(t('viewLeague'))+'</button><button class="again" id="altClose">'+esc(t('close'))+'</button>';
  openAlt('▲',t('perfTitle'),t('perfSub'),h);
+ $('perfLeague').onclick=function(){closeSheet();showView('liga')};
  $('altClose').onclick=closeSheet;
 }
 function showNotif(){

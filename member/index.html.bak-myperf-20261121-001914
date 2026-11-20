@@ -1,0 +1,1553 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0a0e0b">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="TW Analyst">
+<meta name="description" content="TraderWatch AI Analyst — analisis AI sebenar, komuniti dan profil ahli.">
+<title>TraderWatch — AI Analyst</title>
+<style>
+:root{--bg:#0a0e0b;--card:#111612;--card2:#171e18;--text:#eef3ee;--muted:#8a978c;--line:#222b23;--lime:#b7f36b;--green:#b7f36b;--red:#ff777d;--orange:#ffc16b;--blue:#8ab4ff;--chart:#0c110d;--onlime:#10150b;--glass:rgba(10,14,11,.82);color-scheme:dark}
+html[data-theme="light"]{--bg:#f5f7f5;--card:#ffffff;--card2:#eef2ed;--text:#14211a;--muted:#63736a;--line:rgba(0,0,0,.1);--lime:#7ab52e;--green:#5f9c22;--red:#d64b55;--orange:#b8791b;--blue:#3a6fc4;--chart:#f0f4ef;--onlime:#0b1405;--glass:rgba(245,247,245,.86);color-scheme:light}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;min-height:100%;background:var(--bg)}
+body{font:15px/1.5 -apple-system,BlinkMacSystemFont,"Inter","Segoe UI",sans-serif;letter-spacing:-.02em;color:var(--text);transition:background .3s,color .3s}
+button,input{font:inherit}button{cursor:pointer;border:0;background:none;color:inherit}
+.hidden{display:none!important}
+:focus-visible{outline:2px solid var(--lime);outline-offset:2px;border-radius:8px}
+
+/* desktop stage */
+.stage{min-height:100vh;display:grid;place-items:center;padding:24px;background:radial-gradient(ellipse 55% 55% at 50% 40%,#b7f36b12 0,transparent 70%),#050705}
+.phone{position:relative;width:390px;height:844px;max-height:calc(100vh - 40px);background:var(--bg);border:1px solid #2a342a;border-radius:38px;overflow:hidden;box-shadow:0 30px 90px #000b,0 0 0 8px #0d120d,0 0 60px #b7f36b14;display:flex;flex-direction:column}
+html[data-theme="light"] .phone{border-color:#d6ddd4;box-shadow:0 30px 90px #0004,0 0 0 8px #e5eae3,0 0 60px #7ab52e22}
+.notch{position:absolute;top:0;left:50%;transform:translateX(-50%);width:116px;height:22px;background:#050705;border-radius:0 0 16px 16px;z-index:31}
+html[data-theme="light"] .notch{background:#e5eae3}
+.stagehint{position:absolute;bottom:14px;left:0;right:0;text-align:center;color:#5d695f;font-size:11px;letter-spacing:.04em}
+@media(max-width:520px){.stage{padding:0;background:var(--bg);display:block}.phone{width:100%;height:100dvh;max-height:none;border:0;border-radius:0;box-shadow:none}.notch,.stagehint{display:none}}
+
+/* app bar */
+.appbar{position:sticky;top:0;z-index:20;display:flex;align-items:center;gap:10px;padding:calc(16px + env(safe-area-inset-top)) 16px 11px;background:var(--glass);backdrop-filter:saturate(160%) blur(18px);-webkit-backdrop-filter:saturate(160%) blur(18px);border-bottom:1px solid var(--line)}
+.logo{width:34px;height:34px;flex:none;border-radius:11px;background:var(--lime);color:var(--onlime);display:grid;place-items:center;font-weight:950;font-size:17px;box-shadow:0 0 24px #b7f36b33}
+.brand b{display:block;font-size:13px;letter-spacing:.03em;font-weight:850;line-height:1.1}
+.brand small{display:block;color:var(--muted);font-size:9px;letter-spacing:.12em;text-transform:uppercase;font-weight:700;margin-top:2px}
+.baract{margin-left:auto;display:flex;align-items:center;gap:6px}
+.ibtn{width:34px;height:34px;border-radius:11px;background:var(--card);border:1px solid var(--line);color:var(--muted);display:grid;place-items:center;transition:.15s}
+.ibtn:hover{color:var(--text);border-color:var(--lime)}
+.avatar{width:34px;height:34px;border-radius:50%;background:var(--lime);color:var(--onlime);display:grid;place-items:center;font-weight:850;font-size:12px;border:2px solid var(--card);box-shadow:0 0 0 1px var(--lime),0 0 16px #b7f36b44}
+
+/* scroll area */
+.scroll{flex:1;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:none;padding-bottom:calc(76px + env(safe-area-inset-bottom))}
+.scroll.com{padding-bottom:calc(142px + env(safe-area-inset-bottom))}
+.scroll::-webkit-scrollbar{display:none}
+.view{padding:16px;animation:fade .28s ease both}
+@keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+/* analyst */
+h1{font-size:29px;line-height:1.08;letter-spacing:-.05em;margin:6px 0 6px;font-weight:850}h1 span{color:var(--lime)}
+.sub{color:var(--muted);margin:0 0 16px;font-size:14px}
+.search{display:flex;align-items:center;gap:10px;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:0 14px;margin-bottom:12px;transition:.2s}
+.search:focus-within{border-color:var(--lime);box-shadow:0 0 0 3px #b7f36b18}
+.search svg{flex:none;opacity:.6}
+.search input{flex:1;min-width:0;background:transparent;border:0;outline:0;color:var(--text);padding:13px 0;font-size:15px}
+.tabs{display:flex;gap:6px;overflow-x:auto;padding:2px 0 12px;scrollbar-width:none}.tabs::-webkit-scrollbar{display:none}
+.tab{background:var(--card);border:1px solid var(--line);color:var(--muted);padding:8px 14px;border-radius:999px;font-weight:700;font-size:13px;white-space:nowrap;transition:.15s}
+.tab.on{background:var(--lime);border-color:var(--lime);color:var(--onlime)}
+.pairs{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.pair{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:13px;text-align:left;color:var(--text);transition:transform .15s,border-color .2s;animation:up .45s both}
+.pair:active{transform:scale(.96)}.pair:hover{border-color:#34452f}
+html[data-theme="light"] .pair:hover{border-color:#b8c9a8}
+.pair .top{display:flex;justify-content:space-between;align-items:center;margin-bottom:9px}
+.ic{background:#1b2417;color:var(--lime);border:1px solid #2c3a25;display:grid;place-items:center;font-weight:800}
+html[data-theme="light"] .ic{background:#e6efd9;border-color:#c9dbb4}
+.pair .ic{width:32px;height:32px;border-radius:10px;font-size:10px}
+.spark{width:62px;height:26px}
+.pair .nm{font-weight:800;font-size:15px;letter-spacing:-.03em}
+.pair .ds{font-size:11px;color:var(--muted);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pair .px{font-weight:700;font-variant-numeric:tabular-nums;margin-top:9px;font-size:15px}
+.pair .ch{font-size:11px;font-weight:700;font-variant-numeric:tabular-nums}
+.up{color:var(--green)}.dn{color:var(--red)}
+.soon{display:inline-block;background:#ffc16b1f;color:var(--orange);font-weight:800;font-size:8px;letter-spacing:.04em;padding:2px 6px;border-radius:6px;margin-left:5px;vertical-align:middle;text-transform:uppercase}
+.none{grid-column:1/-1;text-align:center;color:var(--muted);padding:30px 0}
+.hint{display:flex;align-items:center;gap:8px;justify-content:center;color:var(--muted);font-size:12px;margin:18px 0 0;opacity:.8}
+.hint i{width:6px;height:6px;border-radius:50%;background:var(--lime);opacity:.7}
+.foot{text-align:center;color:var(--muted);font-size:11px;margin:16px 0 0;opacity:.6}
+@keyframes up{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+
+/* community */
+.vhead{margin:4px 0 14px}
+.vhead h2{font-size:24px;letter-spacing:-.04em;margin:0;font-weight:850}
+.vhead p{margin:4px 0 0;color:var(--muted);font-size:13px}
+.online{display:inline-flex;align-items:center;gap:7px;background:var(--card);border:1px solid var(--line);border-radius:999px;padding:6px 12px;font-size:11px;font-weight:700;color:var(--muted);margin-bottom:14px}
+.online i{width:7px;height:7px;border-radius:50%;background:var(--lime);box-shadow:0 0 8px var(--lime)}
+.msgs{display:flex;flex-direction:column;gap:12px}
+.msg{display:flex;gap:10px;animation:up .4s both}
+.msg .av{width:34px;height:34px;flex:none;border-radius:12px;display:grid;place-items:center;font-size:11px;font-weight:850;color:#10150b}
+.msg .body{background:var(--card);border:1px solid var(--line);border-radius:4px 16px 16px 16px;padding:10px 13px;max-width:calc(100% - 44px)}
+.msg .meta{display:flex;align-items:baseline;gap:8px;margin-bottom:3px}
+.msg .meta b{font-size:13px;font-weight:800}
+.msg .meta time{font-size:10px;color:var(--muted)}
+.msg p{margin:0;font-size:13.5px;line-height:1.5;color:var(--text);word-break:break-word}
+.msg.me{flex-direction:row-reverse}
+.msg.me .body{background:#b7f36b12;border-color:#b7f36b40;border-radius:16px 4px 16px 16px}
+html[data-theme="light"] .msg.me .body{background:#eaf5db;border-color:#b9d999}
+.msg.me .meta{flex-direction:row-reverse}
+.comnote{font-size:11px;color:var(--muted);text-align:center;margin:16px 0 4px;opacity:.75}
+.composer{position:absolute;left:12px;right:12px;bottom:calc(64px + env(safe-area-inset-bottom));display:flex;gap:8px;align-items:center;background:var(--glass);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);padding:8px;border-radius:18px;border:1px solid var(--line);z-index:8}
+.composer input{flex:1;min-width:0;background:var(--card);border:1px solid var(--line);border-radius:12px;color:var(--text);padding:11px 13px;outline:0;font-size:14px}
+.composer input:focus{border-color:var(--lime)}
+.send{width:44px;height:44px;flex:none;border-radius:13px;background:var(--lime);color:var(--onlime);display:grid;place-items:center;box-shadow:0 0 18px #b7f36b33;transition:transform .12s}
+.send:active{transform:scale(.93)}
+.send:disabled{opacity:.5}
+.empty{text-align:center;color:var(--muted);font-size:13px;padding:28px 14px;border:1px dashed var(--line);border-radius:18px;line-height:1.7}
+
+/* liga (paper league) */
+.num{font-variant-numeric:tabular-nums}
+.lhead{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin:4px 0 14px}
+.lhead .vhead{margin:0}
+.lsub{display:flex;gap:4px;background:var(--card2);border:1px solid var(--line);border-radius:999px;padding:4px;margin-bottom:14px}
+.lsub button{flex:1;padding:8px 4px;border-radius:999px;font-weight:750;font-size:12px;color:var(--muted);white-space:nowrap;transition:.15s}
+.lsub button.on{background:var(--lime);color:var(--onlime);box-shadow:0 0 14px #b7f36b33}
+.season{display:flex;align-items:center;gap:12px;background:linear-gradient(135deg,#b7f36b14,var(--card));border:1px solid #b7f36b33;border-radius:20px;padding:14px 16px;margin-bottom:12px}
+html[data-theme="light"] .season{background:linear-gradient(135deg,#eaf5db,var(--card))}
+.season .sic{width:40px;height:40px;border-radius:13px;background:#b7f36b1c;color:var(--lime);display:grid;place-items:center;flex:none}
+.season .st{min-width:0}
+.season .st b{font-size:14px;font-weight:850;display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+.weekchip{font-size:9px;font-weight:850;letter-spacing:.06em;background:var(--lime);color:var(--onlime);padding:2px 8px;border-radius:999px}
+.season .st small{display:block;color:var(--muted);font-size:11px;margin-top:2px}
+.season .cd{margin-left:auto;text-align:right;flex:none}
+.season .cd b{display:block;font-variant-numeric:tabular-nums;font-size:16px;font-weight:850;color:var(--lime);letter-spacing:-.02em}
+.season .cd small{font-size:9.5px;color:var(--muted);letter-spacing:.06em;text-transform:uppercase;font-weight:700}
+.youcard{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:16px;margin-bottom:12px;position:relative;overflow:hidden}
+.youcard::before{content:"";position:absolute;top:-60px;right:-40px;width:180px;height:140px;background:radial-gradient(ellipse,#b7f36b1f,transparent 70%);pointer-events:none}
+.youcard .ylab{font-size:10px;color:var(--muted);font-weight:800;letter-spacing:.12em;text-transform:uppercase;margin-bottom:10px}
+.youcard .row{display:flex;gap:14px;align-items:center}
+.bigrank{font-size:42px;font-weight:950;color:var(--lime);letter-spacing:-.05em;line-height:1;flex:none;text-shadow:0 0 24px #b7f36b44}
+.bigrank small{display:block;font-size:9px;color:var(--muted);letter-spacing:.1em;font-weight:800;text-align:center;margin-top:3px;text-shadow:none}
+.youstats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;flex:1;min-width:0}
+.ystat{background:var(--card2);border:1px solid var(--line);border-radius:13px;padding:9px 6px;text-align:center}
+.ystat b{display:block;font-size:14.5px;font-weight:850;font-variant-numeric:tabular-nums;letter-spacing:-.03em}
+.ystat small{display:block;color:var(--muted);font-size:9px;margin-top:2px;line-height:1.25}
+.ystat.pos b{color:var(--green)}
+.nextprog{margin-top:13px}
+.nextprog .nt{display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-bottom:6px;gap:8px}
+.nextprog .nt b{color:var(--lime);font-weight:800;font-variant-numeric:tabular-nums;white-space:nowrap}
+.bar{height:6px;border-radius:9px;background:var(--card2);border:1px solid var(--line);overflow:hidden}
+.bar i{display:block;height:100%;background:var(--lime);border-radius:9px;box-shadow:0 0 10px #b7f36b66;transition:width .6s cubic-bezier(.2,.8,.2,1)}
+.mtoggle{display:flex;gap:6px;margin-bottom:10px}
+.mtoggle button{flex:1;background:var(--card);border:1px solid var(--line);color:var(--muted);padding:7px 4px;border-radius:999px;font-weight:750;font-size:11.5px;white-space:nowrap;transition:.15s}
+.mtoggle button.on{background:var(--lime);border-color:var(--lime);color:var(--onlime)}
+.lb{display:grid;gap:8px}
+.lrow{display:flex;align-items:center;gap:10px;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:10px 12px;animation:up .4s both}
+.lrow.g1{border-color:#ffd76b4d;box-shadow:0 0 18px #ffd76b1f}
+.lrow.g2{border-color:#cdd6e040;box-shadow:0 0 16px #cdd6e01a}
+.lrow.g3{border-color:#e0a06b45;box-shadow:0 0 16px #e0a06b1c}
+.lrow.me{background:#b7f36b12;border-color:#b7f36b55}
+html[data-theme="light"] .lrow.me{background:#eaf5db;border-color:#9cc46f}
+.lrow .rk{width:26px;flex:none;display:grid;place-items:center;font-weight:850;font-variant-numeric:tabular-nums;color:var(--muted);font-size:13px}
+.lrow .av{width:34px;height:34px;flex:none;border-radius:12px;display:grid;place-items:center;font-size:11px;font-weight:850;color:#10150b}
+.lrow .who{min-width:0;flex:1}
+.lrow .nm{font-weight:750;font-size:13.5px;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.lbadge{font-size:8.5px;font-weight:800;letter-spacing:.04em;background:var(--card2);border:1px solid var(--line);color:var(--muted);padding:1.5px 7px;border-radius:999px;white-space:nowrap}
+.lrow.me .lbadge{background:#b7f36b1f;border-color:#b7f36b40;color:var(--lime)}
+html[data-theme="light"] .lrow.me .lbadge{color:#4c7a17}
+.lrow .lsub2{font-size:10.5px;color:var(--muted);margin-top:1px;font-variant-numeric:tabular-nums}
+.lrow .val{margin-left:auto;font-weight:850;font-variant-numeric:tabular-nums;font-size:14px;flex:none;letter-spacing:-.02em}
+.val.pos{color:var(--green)}.val.neg{color:var(--red)}.val.neu{color:var(--text)}
+.lnote{font-size:11px;color:var(--muted);text-align:center;margin:14px 0 0;opacity:.8;line-height:1.5}
+.tsum{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:14px}
+.tstat{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:12px 4px;text-align:center}
+.tstat b{display:block;font-size:15px;font-weight:850;font-variant-numeric:tabular-nums;letter-spacing:-.03em}
+.tstat small{display:block;color:var(--muted);font-size:9px;margin-top:3px;line-height:1.25}
+.tstat.pos b{color:var(--green)}
+.tcard{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:13px 14px;margin-bottom:10px;animation:up .4s both}
+.tcard .top{display:flex;align-items:center;gap:8px}
+.tcard .tpair{font-weight:850;font-size:14.5px;letter-spacing:-.02em}
+.side{font-size:9.5px;font-weight:850;padding:3px 9px;border-radius:999px;letter-spacing:.07em}
+.side.buy{background:#b7f36b1f;color:var(--lime)}.side.sell{background:#ff777d1f;color:var(--red)}
+html[data-theme="light"] .side.buy{color:#4c7a17}
+.st{margin-left:auto;font-size:9.5px;font-weight:850;padding:3px 9px;border-radius:999px;letter-spacing:.07em;display:inline-flex;align-items:center;gap:6px}
+.st.open{background:#ffc16b1f;color:var(--orange)}.st.tp{background:#b7f36b1f;color:var(--lime)}.st.sl{background:#ff777d1f;color:var(--red)}.st.be,.st.expired{background:var(--card2);color:var(--muted)}
+html[data-theme="light"] .st.tp{color:#4c7a17}
+.pulse{width:6px;height:6px;border-radius:50%;background:var(--orange);animation:pulse 1.4s ease infinite;flex:none}
+@keyframes pulse{50%{opacity:.25;transform:scale(.75)}}
+.trun{display:flex;align-items:center;gap:6px;font-size:10.5px;color:var(--orange);margin-top:8px;font-weight:700}
+.tlevels{display:flex;gap:14px;font:11.5px/1.5 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:var(--muted);margin-top:9px;flex-wrap:wrap}
+.tlevels b{font-weight:700;font-variant-numeric:tabular-nums}
+.tlevels .e b{color:var(--blue)}.tlevels .t b{color:var(--green)}.tlevels .s b{color:var(--red)}
+.tmeta{display:flex;justify-content:space-between;align-items:center;margin-top:9px;font-size:11px;color:var(--muted);gap:8px}
+.tmeta .tr{font-weight:850;font-variant-numeric:tabular-nums;font-size:13px}
+.tr.pos{color:var(--green)}.tr.neg{color:var(--red)}.tr.neu{color:var(--muted)}
+.newtrade{width:100%;padding:13px;border-radius:14px;background:var(--lime);color:var(--onlime);font-weight:850;font-size:14px;box-shadow:0 0 22px #b7f36b2b;transition:transform .12s;margin-top:2px}
+.newtrade:active{transform:scale(.98)}
+.bgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.bcard{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:15px 12px;text-align:center;animation:up .4s both}
+.bcard.got{border-color:#b7f36b44;background:linear-gradient(160deg,#b7f36b10,var(--card))}
+html[data-theme="light"] .bcard.got{background:linear-gradient(160deg,#eaf5db,var(--card))}
+.bcard .bic{width:44px;height:44px;margin:0 auto 9px;border-radius:14px;display:grid;place-items:center;background:var(--card2);border:1px solid var(--line);color:var(--muted)}
+.bcard.got .bic{background:#b7f36b1f;border-color:#b7f36b40;color:var(--lime);box-shadow:0 0 18px #b7f36b2b}
+.bcard b{font-size:13px;display:block;font-weight:850}
+.bcard small{color:var(--muted);font-size:10.5px;display:block;margin:3px 0 9px;line-height:1.35}
+.bstatus{font-size:9.5px;font-weight:850;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.bcard.got .bstatus{color:var(--lime)}
+html[data-theme="light"] .bcard.got .bstatus{color:#4c7a17}
+.bprog{margin-top:8px}
+.bprog .bar{height:5px}
+.bprog small{margin:5px 0 0;font-variant-numeric:tabular-nums;font-weight:700}
+
+/* profile */
+.pcard{position:relative;overflow:hidden;background:linear-gradient(145deg,#1a2418,var(--card));border:1px solid var(--line);border-radius:22px;padding:20px;text-align:center;margin-bottom:14px}
+html[data-theme="light"] .pcard{background:linear-gradient(145deg,#eaf3e2,var(--card))}
+.pcard::before{content:"";position:absolute;top:-50px;left:50%;transform:translateX(-50%);width:200px;height:120px;background:radial-gradient(ellipse,#b7f36b26,transparent 70%);pointer-events:none}
+.pavatar{width:74px;height:74px;margin:0 auto 12px;border-radius:50%;background:var(--lime);color:var(--onlime);display:grid;place-items:center;font-weight:900;font-size:24px;box-shadow:0 0 0 5px #b7f36b1c,0 0 34px #b7f36b55;position:relative}
+.pcard h3{margin:0;font-size:19px;letter-spacing:-.03em;font-weight:850}
+.pcard .em{margin:3px 0 12px;color:var(--muted);font-size:13px}
+.chip{display:inline-block;background:var(--lime);color:var(--onlime);font-size:10px;font-weight:850;letter-spacing:.1em;padding:5px 12px;border-radius:999px}
+.member{display:block;color:var(--muted);font-size:11px;margin-top:11px}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px}
+.stat{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px 6px;text-align:center}
+.stat b{display:block;font-size:20px;font-weight:850;font-variant-numeric:tabular-nums;letter-spacing:-.04em}
+.stat small{display:block;color:var(--muted);font-size:10px;margin-top:3px;line-height:1.3}
+.sec{font-size:10px;color:var(--muted);font-weight:800;letter-spacing:.12em;text-transform:uppercase;margin:18px 0 8px}
+.menu{background:var(--card);border:1px solid var(--line);border-radius:18px;overflow:hidden}
+.mrow{width:100%;display:flex;align-items:center;gap:12px;padding:14px 15px;text-align:left;color:var(--text);border-bottom:1px solid var(--line);font-size:14px;font-weight:650;transition:.15s}
+.mrow:last-child{border-bottom:0}
+.mrow:hover{background:var(--card2)}
+.mrow svg{flex:none;color:var(--lime)}
+.mrow .chev{margin-left:auto;color:var(--muted)}
+.mrow.danger{color:var(--red)}
+.mrow.danger svg{color:var(--red)}
+.freecard{background:linear-gradient(135deg,#b7f36b10,var(--card));border:1px solid #b7f36b33;border-radius:18px;padding:16px;margin-top:4px}
+.freecard .ft{font-weight:850;font-size:14px;color:var(--lime);margin-bottom:8px;display:flex;align-items:center;gap:7px}
+.freecard ul{margin:0;padding-left:18px;color:var(--muted);font-size:12.5px;line-height:1.7}
+.freecard .fn{margin:10px 0 0;font-size:11px;color:var(--text);opacity:.7}
+
+/* settings */
+.setgroup{margin-bottom:10px}
+.setlabel{display:flex;align-items:center;gap:8px;font-size:11px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin:0 0 10px}
+.setlabel svg{color:var(--lime)}
+.langs{display:grid;gap:8px}
+.lang{display:flex;align-items:center;gap:12px;width:100%;background:var(--card);border:1px solid var(--line);border-radius:15px;padding:12px 14px;text-align:left;transition:.15s}
+.lang:hover{border-color:var(--lime)}
+.lang.on{border-color:var(--lime);background:#b7f36b0e}
+html[data-theme="light"] .lang.on{background:#eaf5db}
+.lang .radio{width:19px;height:19px;flex:none;border-radius:50%;border:2px solid var(--muted);display:grid;place-items:center}
+.lang.on .radio{border-color:var(--lime)}
+.lang.on .radio::after{content:"";width:9px;height:9px;border-radius:50%;background:var(--lime)}
+.lang .lt{font-weight:750;font-size:14px}
+.lang .ls{display:block;font-size:11px;color:var(--muted);font-weight:500;margin-top:1px}
+.lang .badge{margin-left:auto;font-size:9px;font-weight:800;letter-spacing:.04em;color:var(--orange);background:#ffc16b1f;padding:3px 8px;border-radius:8px}
+.themes{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.theme{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px 6px;text-align:center;transition:.15s}
+.theme:hover{border-color:var(--lime)}
+.theme.on{border-color:var(--lime);background:#b7f36b0e}
+html[data-theme="light"] .theme.on{background:#eaf5db}
+.theme .swatch{width:38px;height:38px;margin:0 auto 9px;border-radius:12px;display:grid;place-items:center;border:1px solid var(--line);overflow:hidden}
+.sw-dark{background:#0a0e0b}.sw-light{background:#f5f7f5}.sw-sys{background:linear-gradient(135deg,#0a0e0b 50%,#f5f7f5 50%)}
+.theme .swatch i{width:14px;height:14px;border-radius:50%;display:block}
+.sw-dark i{background:var(--lime);box-shadow:0 0 8px var(--lime)}.sw-light i{background:#7ab52e}.sw-sys i{background:linear-gradient(135deg,#b7f36b 50%,#7ab52e 50%)}
+.theme b{font-size:12px;font-weight:750}
+.pwa{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px;display:flex;align-items:center;gap:12px}
+.pwa .pi{width:38px;height:38px;flex:none;border-radius:12px;background:var(--lime);color:var(--onlime);display:grid;place-items:center}
+.pwa .pt{font-weight:800;font-size:14px}
+.pwa .ps{font-size:11px;color:var(--muted);margin-top:2px}
+.install{margin-left:auto;background:var(--lime);color:var(--onlime);font-weight:800;font-size:12px;padding:9px 13px;border-radius:12px;white-space:nowrap}
+.setnote{font-size:11px;color:var(--muted);text-align:center;margin:16px 0 0;opacity:.75}
+
+/* bottom nav — 5 tab */
+.bnav{position:absolute;left:0;right:0;bottom:0;z-index:25;display:grid;grid-template-columns:repeat(5,1fr);gap:2px;padding:8px 6px calc(8px + env(safe-area-inset-bottom));background:var(--glass);backdrop-filter:saturate(160%) blur(20px);-webkit-backdrop-filter:saturate(160%) blur(20px);border-top:1px solid var(--line)}
+.nav{display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 1px;border-radius:12px;color:var(--muted);font-size:9px;font-weight:750;letter-spacing:0;transition:.15s;min-width:0}
+.nav span{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.nav svg{width:20px;height:20px}
+.nav.on{color:var(--lime)}
+.nav.on svg{filter:drop-shadow(0 0 6px #b7f36b66)}
+.nav:active{transform:scale(.94)}
+
+/* sheet */
+#bd{position:absolute;inset:0;background:#000a;opacity:0;pointer-events:none;transition:opacity .3s;z-index:40}
+#sheet{position:absolute;left:0;right:0;bottom:0;max-height:92%;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:none;background:var(--card);border-top:1px solid var(--line);border-radius:26px 26px 0 0;z-index:41;transform:translateY(108%);transition:transform .4s cubic-bezier(.2,.9,.2,1);padding:0 16px calc(22px + env(safe-area-inset-bottom));box-shadow:0 -20px 60px #000a}
+#sheet::-webkit-scrollbar{display:none}
+.open #bd{opacity:1;pointer-events:auto}.open #sheet{transform:none}
+.grab{padding:10px 0 8px;position:sticky;top:0;background:var(--card);z-index:2}
+.grab i{display:block;width:40px;height:5px;border-radius:9px;background:var(--line);margin:auto}
+.shead{display:flex;align-items:center;gap:12px;margin-bottom:12px}
+.shead .ic{width:42px;height:42px;border-radius:13px;font-size:12px}
+.shead h2{margin:0;font-size:20px;letter-spacing:-.04em}
+.shead p{margin:0;color:var(--muted);font-size:12px;font-variant-numeric:tabular-nums}
+.x{margin-left:auto;width:34px;height:34px;border-radius:50%;background:var(--card2);color:var(--muted);font-size:15px;display:grid;place-items:center}
+.chartbox{position:relative;border:1px solid var(--line);border-radius:18px;background:var(--chart);overflow:hidden}
+#cv{display:block;width:100%;height:220px}
+.chipc{position:absolute;left:10px;top:10px;display:flex;align-items:center;gap:6px;background:var(--glass);border:1px solid var(--line);border-radius:999px;padding:4px 10px;font-size:10px;font-weight:800;letter-spacing:.08em;color:var(--muted)}
+.chipc i{width:6px;height:6px;border-radius:50%;background:var(--muted)}
+.chipc.scan{color:var(--lime);border-color:#b7f36b55}.chipc.scan i{background:var(--lime);box-shadow:0 0 8px var(--lime);animation:pl .7s infinite}
+.chipc.done{color:var(--lime)}.chipc.done i{background:var(--lime)}
+.tf{display:flex;gap:4px;background:var(--card2);border:1px solid var(--line);border-radius:12px;padding:3px;margin:12px 0 6px}
+.tf button{flex:1;color:var(--muted);padding:8px 0;border-radius:9px;font-weight:700;font-size:12px;transition:.15s}
+.tf button.on{background:var(--lime);color:var(--onlime)}
+.pvtag{text-align:center;color:var(--orange);font-size:10px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;margin:0 0 12px}
+.go{position:relative;overflow:hidden;width:100%;padding:14px;border-radius:15px;font-weight:800;font-size:15px;color:var(--onlime);background:var(--lime);box-shadow:0 0 26px #b7f36b2b;transition:transform .12s}
+.go:active{transform:scale(.98)}
+.go:disabled{opacity:.55;box-shadow:none}
+.term{margin-top:12px;background:var(--chart);border:1px solid var(--line);border-radius:16px;padding:12px 14px;font:12px/1.75 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:var(--muted);min-height:54px}
+.term .tl{white-space:pre-wrap;word-break:break-word}.term .tl b{color:var(--lime);font-weight:600}.term .ok{color:var(--lime)}
+.term .tl.cur::after{content:"▍";color:var(--lime);animation:pl .7s infinite;margin-left:2px}
+@keyframes pl{50%{opacity:.25}}
+.bias{display:flex;align-items:center;gap:14px;padding:15px;border-radius:20px;margin:14px 0 10px;border:1px solid var(--line);animation:up .45s both}
+.bias.buy{background:#b7f36b12;border-color:#b7f36b40}.bias.sell{background:#ff777d12;border-color:#ff777d40}.bias.wait{background:#ffc16b12;border-color:#ffc16b40}
+.bias .lab{font-size:10px;color:var(--muted);font-weight:700;letter-spacing:.1em;text-transform:uppercase}
+.bias .val{font-size:28px;font-weight:900;letter-spacing:-.05em;line-height:1.1}
+.bias.buy .val{color:var(--green)}.bias.sell .val{color:var(--red)}.bias.wait .val{color:var(--orange)}
+.bias .asof{font-size:11px;color:var(--muted);margin-top:3px}
+.mt5b{display:flex;align-items:center;gap:8px;border-radius:12px;padding:9px 12px;font-size:12px;font-weight:650;margin:0 0 10px;animation:up .5s both}
+.mt5b svg{flex:none}
+.mt5b.live{background:#b7f36b14;border:1px solid #b7f36b40;color:var(--green)}
+.mt5b.dry{background:#ffc16b14;border:1px solid #ffc16b40;color:var(--orange)}
+.ring{margin-left:auto;position:relative;width:74px;height:74px;flex:none}
+.ring svg{width:74px;height:74px}
+.rb{fill:none;stroke:var(--line);stroke-width:7}
+.rf{fill:none;stroke:var(--rc,#b7f36b);stroke-width:7;stroke-linecap:round;stroke-dasharray:213.6;stroke-dashoffset:213.6;transition:stroke-dashoffset 1.1s cubic-bezier(.2,.8,.2,1)}
+.ring .n{position:absolute;inset:0;display:grid;place-items:center;text-align:center;font-weight:850;font-size:18px;line-height:1}
+.ring .n small{display:block;font-size:8px;color:var(--muted);letter-spacing:.1em;font-weight:700;margin-top:3px}
+.lv{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:4px}
+.lv div{background:var(--card2);border:1px solid var(--line);border-radius:14px;padding:11px 6px;text-align:center;animation:up .5s both}
+.lv small{display:block;color:var(--muted);font-size:9px;font-weight:700;letter-spacing:.06em;text-transform:uppercase}
+.lv b{font-variant-numeric:tabular-nums;font-size:14px}
+.lv .e b{color:var(--blue)}.lv .t b{color:var(--green)}.lv .s b{color:var(--red)}
+.take{width:100%;margin-top:12px;padding:13px;border-radius:14px;background:var(--lime);color:var(--onlime);font-weight:850;font-size:14px;box-shadow:0 0 22px #b7f36b2b;display:flex;align-items:center;justify-content:center;gap:8px;transition:transform .12s;animation:up .5s both}
+.take:active{transform:scale(.98)}
+.take:disabled{background:var(--card2);color:var(--muted);box-shadow:none;cursor:not-allowed;border:1px solid var(--line)}
+.takenote{font-size:11px;color:var(--muted);text-align:center;margin:7px 0 0}
+.chk,.reasons{list-style:none;margin:0;padding:0;display:grid;gap:6px}
+.chk li{display:flex;align-items:center;gap:10px;background:var(--card2);border:1px solid var(--line);border-radius:12px;padding:9px 12px;font-size:13px;animation:up .45s both}
+.chk .b{flex:none;width:20px;height:20px;border-radius:50%;display:grid;place-items:center;font-size:11px;font-weight:900}
+.chk .y .b{background:#b7f36b22;color:var(--lime)}.chk .n .b{background:#ff777d1f;color:var(--red)}
+.chk .n{color:var(--muted)}
+.reasons li{display:flex;gap:10px;padding:8px 0;border-bottom:1px solid var(--line);font-size:13px;color:var(--text);animation:up .45s both}
+.reasons li:last-child{border:0}
+.dot{flex:none;width:8px;height:8px;border-radius:50%;margin-top:6px}
+.note{font-size:11px;color:var(--muted);background:var(--card2);border:1px solid var(--line);border-radius:14px;padding:11px 13px;margin-top:14px}
+.errbox{background:#ff777d12;border:1px solid #ff777d40;border-radius:16px;padding:14px;margin-top:14px;animation:up .45s both}
+.errbox p{margin:0;font-size:13.5px;color:var(--text)}
+.again{width:100%;margin-top:12px;padding:13px;border-radius:14px;background:var(--card2);border:1px solid var(--line);color:var(--text);font-weight:700;font-size:13px}
+.kv{display:grid;grid-template-columns:92px 1fr;gap:9px 12px;font-size:13px;line-height:1.5}
+.kv b{color:var(--muted);font-weight:700}
+.opt{display:flex;align-items:center;gap:12px;width:100%;background:var(--card2);border:1px solid var(--line);border-radius:14px;padding:12px 14px;text-align:left;margin-bottom:8px;transition:.15s}
+.opt.on{border-color:var(--lime);background:#b7f36b0e}
+.opt .radio{width:18px;height:18px;flex:none;border-radius:50%;border:2px solid var(--muted);display:grid;place-items:center}
+.opt.on .radio{border-color:var(--lime)}
+.opt.on .radio::after{content:"";width:8px;height:8px;border-radius:50%;background:var(--lime)}
+.opt b{font-size:13.5px;font-weight:750;display:block}
+.opt small{display:block;color:var(--muted);font-size:11px;margin-top:1px}
+
+/* risk modal */
+#rbd{position:absolute;inset:0;background:#000a;opacity:0;pointer-events:none;transition:opacity .25s;z-index:50}
+#risk{position:absolute;left:50%;top:50%;transform:translate(-50%,-46%) scale(.96);width:min(340px,calc(100% - 32px));max-height:86%;overflow-y:auto;scrollbar-width:none;background:var(--card);border:1px solid var(--line);border-radius:22px;padding:18px;z-index:51;opacity:0;pointer-events:none;transition:.25s cubic-bezier(.2,.9,.2,1);box-shadow:0 30px 80px #000c}
+#risk::-webkit-scrollbar{display:none}
+.ropen #rbd{opacity:1;pointer-events:auto}
+.ropen #risk{opacity:1;pointer-events:auto;transform:translate(-50%,-50%) scale(1)}
+.rhead{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.rhead h3{margin:0;font-size:17px;font-weight:850;letter-spacing:-.03em}
+.rhead .x{margin-left:auto}
+.rpair{display:flex;align-items:center;gap:8px;background:var(--card2);border:1px solid var(--line);border-radius:14px;padding:11px 13px}
+.rpair b{font-size:15px;font-weight:850}
+.rpair .rsub{font-size:11px;color:var(--muted);margin-left:auto;font-variant-numeric:tabular-nums}
+.rlevels{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:8px}
+.rlevels div{background:var(--card2);border:1px solid var(--line);border-radius:12px;padding:9px 4px;text-align:center}
+.rlevels small{display:block;color:var(--muted);font-size:8.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase}
+.rlevels b{font:700 12.5px ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-variant-numeric:tabular-nums}
+.rlevels .e b{color:var(--blue)}.rlevels .t b{color:var(--green)}.rlevels .s b{color:var(--red)}
+.riskopts{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:4px 0 8px}
+.riskopt{background:var(--card2);border:1px solid var(--line);border-radius:14px;padding:12px 8px;text-align:center;font-weight:850;font-size:15px;transition:.15s;color:var(--text)}
+.riskopt small{display:block;color:var(--muted);font-weight:650;font-size:11px;margin-top:2px;font-variant-numeric:tabular-nums}
+.riskopt.on{border-color:var(--lime);background:#b7f36b12;color:var(--lime);box-shadow:0 0 14px #b7f36b22}
+html[data-theme="light"] .riskopt.on{background:#eaf5db;color:#4c7a17}
+.riskopt.on small{color:inherit;opacity:.8}
+.rlot{display:flex;justify-content:space-between;align-items:center;background:var(--card2);border:1px solid var(--line);border-radius:12px;padding:9px 13px;font-size:12px;color:var(--muted)}
+.rlot b{color:var(--text);font-variant-numeric:tabular-nums;font-size:13px}
+.rbase{font-size:10px;color:var(--muted);margin:7px 0 0;opacity:.8}
+.rnote{font-size:11px;color:var(--muted);background:var(--card2);border:1px solid var(--line);border-radius:12px;padding:9px 12px;margin:12px 0}
+
+/* toast */
+#toast{position:absolute;left:50%;bottom:calc(96px + env(safe-area-inset-bottom));transform:translate(-50%,12px);z-index:70;background:var(--text);color:var(--bg);font-size:12.5px;font-weight:750;padding:10px 16px;border-radius:999px;box-shadow:0 12px 34px #0006;opacity:0;pointer-events:none;transition:.25s;white-space:nowrap;max-width:92%;overflow:hidden;text-overflow:ellipsis}
+#toast.show{opacity:1;transform:translate(-50%,0)}
+@media(prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;transition-duration:.01ms!important}}
+</style>
+</head>
+<body>
+<div class="stage">
+  <div class="phone" id="phone">
+    <div class="notch"></div>
+    <header class="appbar">
+      <div class="logo">T</div>
+      <div class="brand"><b>TRADERWATCH</b><small>AI Analyst</small></div>
+      <div class="baract">
+        <button class="ibtn" id="langBtn" aria-label="Language">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.7 2.5 15.3 0 18M12 3c-2.5 2.7-2.5 15.3 0 18"/></svg>
+        </button>
+        <button class="ibtn" id="themeBtn" aria-label="Toggle theme">
+          <svg id="themeIcon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"/></svg>
+        </button>
+        <button class="avatar" id="avatarBtn" aria-label="Profil">TW</button>
+      </div>
+    </header>
+
+    <div class="scroll" id="scroll">
+      <!-- ANALYST -->
+      <section class="view" id="view-analyst" data-view="analyst">
+        <h1 id="greet">Hai, <span>Trader</span></h1>
+        <p class="sub" id="greetSub">Pilih pair — AI baca chart dan lukis Entry, SL &amp; TP untuk anda.</p>
+        <label class="search"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><input id="q" type="search" autocomplete="off" aria-label="Cari pair"></label>
+        <div class="tabs" id="tabs"></div>
+        <div class="pairs" id="pairs"></div>
+        <div class="hint"><i></i><span id="hintTxt">Pilih pair untuk analisis AI masa sebenar.</span></div>
+        <p class="foot" id="footTxt">Educational only. Trading involves substantial risk.</p>
+      </section>
+
+      <!-- COMMUNITY -->
+      <section class="view hidden" id="view-community" data-view="community">
+        <div class="vhead"><h2 id="comTitle">Komuniti</h2><p id="comSub">Berbincang dengan trader lain.</p></div>
+        <div class="online"><i></i><span id="onlineTxt">Komuniti aktif</span></div>
+        <div class="msgs" id="msgs"></div>
+        <p class="comnote" id="comNote"></p>
+      </section>
+
+      <!-- LIGA -->
+      <section class="view hidden" id="view-liga" data-view="liga">
+        <div class="lhead">
+          <div class="vhead"><h2 id="ligaTitle">Paper League</h2><p id="ligaSub">Virtual $10,000 capital. Discipline wins, not gambling.</p></div>
+        </div>
+        <div class="lsub" id="lsub" role="tablist" aria-label="League sections"></div>
+
+        <div id="liga-lb">
+          <div class="season">
+            <div class="sic"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0V4Z"/><path d="M7 6H4a1 1 0 0 0-1 1c0 2.2 1.8 4 4 4M17 6h3a1 1 0 0 1 1 1c0 2.2-1.8 4-4 4"/></svg></div>
+            <div class="st"><b><span id="seasonT">Weekly Season</span><span class="weekchip" id="seasonChip">Season 1</span></b><small id="seasonS">Net R decides the ranking — not raw profit.</small></div>
+            <div class="cd"><b id="rankedN" class="num">—</b><small id="rankedLab">Ranked</small></div>
+          </div>
+          <div class="youcard" id="youcard"></div>
+          <div class="mtoggle" id="mtoggle"></div>
+          <p class="lnote hidden" id="consNote" style="margin:0 0 10px"></p>
+          <div class="lb" id="lb"></div>
+          <p class="lnote" id="lbNote">Virtual capital only — outcomes resolved from live prices.</p>
+        </div>
+
+        <div id="liga-trades" class="hidden">
+          <div class="tsum" id="tsum"></div>
+          <div id="tlist"></div>
+          <button class="newtrade" id="newTrade">＋ New trade</button>
+          <p class="lnote" id="tNote">Every trade is recorded — outcomes come from live prices.</p>
+        </div>
+
+        <div id="liga-badges" class="hidden">
+          <div class="bgrid" id="bgrid"></div>
+          <p class="lnote" id="bNote">Badges reward discipline — not profit alone.</p>
+        </div>
+      </section>
+
+      <!-- PROFILE -->
+      <section class="view hidden" id="view-profile" data-view="profile">
+        <div class="pcard">
+          <div class="pavatar" id="pInit">TW</div>
+          <h3 id="pName">Ahli TraderWatch</h3>
+          <p class="em" id="pEmail">—</p>
+          <span class="chip" id="pPlan">FREE</span>
+          <span class="member" id="pSince">—</span>
+        </div>
+        <div class="stats">
+          <div class="stat"><b id="s1v">—</b><small id="s1">Analisis dibuat</small></div>
+          <div class="stat"><b id="s2v">—</b><small id="s2">Signal diambil</small></div>
+          <div class="stat"><b id="s3v">—</b><small id="s3">Prestasi enjin</small></div>
+        </div>
+        <div class="sec" id="menuSec">Akaun</div>
+        <div class="menu" id="menu"></div>
+        <div class="freecard">
+          <div class="ft"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3 2.4 5.6L20 9l-4 4 1 6-5-3-5 3 1-6-4-4 5.6-.4Z"/></svg><span id="freeT">Free Card</span></div>
+          <ul id="freeList"><li>Analisis AI tanpa had pada semua pair</li><li>Akses penuh komuniti &amp; signal</li><li>Kemas kini pasaran masa sebenar</li></ul>
+          <p class="fn" id="freeN">Tiada tiering — semua ahli akses penuh.</p>
+        </div>
+      </section>
+
+      <!-- SETTINGS -->
+      <section class="view hidden" id="view-settings" data-view="settings">
+        <div class="vhead"><h2 id="setTitle">Tetapan</h2><p id="setSub">Bahasa, tema dan app.</p></div>
+        <div class="setgroup">
+          <div class="setlabel"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.7 2.5 15.3 0 18M12 3c-2.5 2.7-2.5 15.3 0 18"/></svg><span id="langSec">Bahasa / Language</span></div>
+          <div class="langs" id="langs"></div>
+        </div>
+        <div class="setgroup">
+          <div class="setlabel"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 3a9 9 0 1 0 9 9 7 7 0 0 1-9-9Z"/></svg><span id="themeSec">Tema / Theme</span></div>
+          <div class="themes" id="themes"></div>
+        </div>
+        <div class="setgroup">
+          <div class="setlabel"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="6" y="2" width="12" height="20" rx="2"/><path d="M11 18h2"/></svg>PWA</div>
+          <div class="pwa">
+            <div class="pi"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m0 0 4-4m-4 4-4-4M4 17v3h16v-3"/></svg></div>
+            <div><div class="pt" id="instT">Pasang app</div><div class="ps" id="instS">Offline-ready · App shell dicache</div></div>
+            <button class="install" id="instBtn">Pasang</button>
+          </div>
+        </div>
+        <p class="setnote" id="setNote">Pilihan disimpan di peranti ini.</p>
+      </section>
+    </div>
+
+    <div class="composer hidden" id="composer">
+      <input id="msgInput" type="text" autocomplete="off" maxlength="500" aria-label="Tulis mesej">
+      <button class="send" id="sendBtn" aria-label="Hantar mesej"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m4 12 16-8-6 16-2.5-6.5L4 12Z"/></svg></button>
+    </div>
+
+    <nav class="bnav" id="bnav" aria-label="Navigasi utama"></nav>
+
+    <div id="bd"></div>
+    <div id="sheet" role="dialog" aria-modal="true" aria-label="Analisis AI">
+      <div class="grab"><i></i></div>
+      <div class="shead"><div class="ic" id="sIc"></div><div><h2 id="sNm"></h2><p id="sDs"></p></div><button class="x" id="sx" aria-label="Tutup">✕</button></div>
+      <div class="chartbox" id="chartbox"><canvas id="cv"></canvas><div class="chipc" id="chip"><i></i><span id="chipT">SEDIA</span></div></div>
+      <div class="tf" id="tf"></div>
+      <p class="pvtag" id="pvtag">Chart OHLC sebenar · Analisis enjin M15</p>
+      <button class="go" id="go">✦ <span id="goTxt">Analisis dengan AI</span></button>
+      <div class="term hidden" id="term"></div>
+      <div id="res"></div>
+      <div id="alt" class="hidden"></div>
+    </div>
+
+    <!-- risk modal: buka paper trade -->
+    <div id="rbd"></div>
+    <div id="risk" role="dialog" aria-modal="true" aria-labelledby="riskTitle">
+      <div class="rhead"><h3 id="riskTitle">Open paper trade</h3><button class="x" id="rx" aria-label="Close">✕</button></div>
+      <div class="rpair" id="rPair"></div>
+      <div class="rlevels" id="rLevels"></div>
+      <div class="sec" id="riskSec">Risk</div>
+      <div class="riskopts" id="riskOpts" role="radiogroup" aria-label="Risk"></div>
+      <div class="rlot"><span id="lotLab">Indicative lot</span><b id="lotVal">—</b></div>
+      <p class="rbase" id="rBase"></p>
+      <p class="rnote" id="rNote">Virtual capital only — no real money.</p>
+      <div id="rErr"></div>
+      <button class="go" id="rGo">Open trade</button>
+    </div>
+
+    <div id="toast" role="status" aria-live="polite"></div>
+  </div>
+  <div class="stagehint">TraderWatch AI Analyst · 390 × 844</div>
+</div>
+
+<script>
+(function(){
+'use strict';
+/* ---------- auth gate (sebelum apa-apa render) ---------- */
+var AUTH_KEY='sb-vicfiftvhxemuhxxmkxk-auth-token';
+var SB_URL='https://vicfiftvhxemuhxxmkxk.supabase.co';
+var SB_KEY='sb_publishable_4LzgHiCMUXmXUOkPtvIHVw_F7ks9otV';
+var LOGIN_URL='/login.html?next=%2Fmember%2F';
+var PH='place'+'holder';
+function getSession(){try{return JSON.parse(localStorage.getItem(AUTH_KEY)||'null')}catch(e){return null}}
+function getToken(){var s=getSession();return s&&s.access_token?s.access_token:null}
+var sess=getSession();
+if(!sess||!sess.access_token||(sess.expires_at&&sess.expires_at*1000<Date.now())){location.replace(LOGIN_URL);return}
+function goLogin(){try{localStorage.removeItem(AUTH_KEY)}catch(e){}location.replace(LOGIN_URL+'&why=signedout')}
+function apiFetch(url,opts){
+ opts=opts||{};opts.headers=Object.assign({Authorization:'Bearer '+getToken()},opts.headers||{});
+ return fetch(url,opts).then(function(r){
+  if(r.status===401){goLogin();throw new Error('auth')}
+  return r.json().catch(function(){return{}}).then(function(j){return{ok:r.ok,status:r.status,data:j}});
+ });
+}
+function sbFetch(path,opts){
+ opts=opts||{};opts.headers=Object.assign({apikey:SB_KEY,Authorization:'Bearer '+getToken()},opts.headers||{});
+ return fetch(SB_URL+path,opts).then(function(r){
+  if(r.status===401){goLogin();throw new Error('auth')}
+  return r.json().catch(function(){return{}}).then(function(j){return{ok:r.ok,status:r.status,data:j}});
+ });
+}
+
+var $=function(i){return document.getElementById(i)};
+var esc=function(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})};
+var hap=function(m){try{navigator.vibrate&&navigator.vibrate(m)}catch(e){}};
+
+/* ---------------- i18n ---------------- */
+var DICT={
+ ms:{
+  greet:'Hai, ',trader:'Trader',greetSub:'Pilih pair — AI baca chart dan lukis Entry, SL & TP untuk anda.',
+  navAnalyst:'Analyst',navCommunity:'Komuniti',navProfile:'Profil',navSettings:'Tetapan',
+  search:'Cari pair…',noPairs:'Tiada pair dijumpai.',hint:'Pilih pair untuk analisis AI masa sebenar.',all:'Semua',commodity:'Komoditi',forex:'Forex',crypto:'Crypto',indices:'Indeks',
+  soon:'Belum dibuka',notOpen:'Pair ini belum dibuka untuk analisis AI. Cuba pair di bawah.',
+  comTitle:'Komuniti',comSub:'Berbincang dengan trader lain.',online:'Komuniti aktif',membersToday:'ahli hari ini',writeMsg:'Tulis mesej…',
+  emptyChat:'Belum ada mesej hari ini. Jadilah yang pertama.',resetAt:'Mesej dikosongkan setiap tengah malam (MYT). Pautan, telefon & emel ditapis automatik.',
+  sendErr:'Mesej gagal dihantar. Cuba lagi.',slow:'Sila tunggu beberapa saat sebelum hantar lagi.',emptyMsg:'Tulis mesej dahulu.',longMsg:'Mesej terlalu panjang (maks 500 aksara).',filtered:'Mesej disekat oleh penapis komuniti.',someFiltered:'Sebahagian kandungan disekat penapis.',
+  since:'Ahli sejak',pName:'Ahli TraderWatch',s1:'Analisis dibuat',s2:'Signal diambil',s3:'Prestasi enjin',menuSec:'Akaun',
+  mAccount:'Butiran akaun',mPerf:'Prestasi enjin',mDevice:'Peranti & notifikasi',mLogout:'Log keluar',freeT:'Free Card',
+  free1:'Analisis AI tanpa had pada semua pair',free2:'Akses penuh komuniti & signal',free3:'Kemas kini pasaran masa sebenar',freeN:'Tiada tiering — semua ahli akses penuh.',
+  setTitle:'Tetapan',setSub:'Bahasa, tema dan app.',langSec:'Bahasa / Language',langSub:'Pilih bahasa paparan',themeSec:'Tema / Theme',dark:'Gelap',light:'Terang',system:'Sistem',
+  instT:'Pasang app',instS:'Offline-ready · App shell dicache',install:'Pasang',setNote:'Pilihan disimpan di peranti ini.',installHint:'Guna menu browser → Tambah ke skrin utama.',
+  goAI:'Analisis dengan AI',loading:'Memuat…',aiLabel:'Pandangan AI',conf:'YAKIN',entry:'Entry',tp:'Take Profit',sl:'Stop Loss',checklist:'Checklist confluence',reasons:'Sebab analisis',risk:'Risiko',again:'← Analisis pair / timeframe lain',
+  chartFail:'Gagal memuatkan chart.',retry:'Cuba lagi',waitMsg:'Tiada setup jelas sekarang — AI cadangkan menunggu.',
+  noAnalysis:'Analisis gagal buat masa ini. Cuba lagi sebentar.',limit:'Analisis dalam cooldown. Cuba lagi sebentar.',
+  account:'Butiran akaun',uid:'ID ahli',name:'Nama',email:'Emel',plan:'Plan',close:'Tutup',
+  perfTitle:'Prestasi enjin',perfSub:'Keputusan global semua signal enjin (bukan prestasi peribadi).',perfWin:'Kadar menang',perfTp:'TP dicapai',perfSl:'SL terkena',perfClosed:'Signal ditutup',perfMine:'Analisis anda dibuat',perfNote:'Sumber: signal-status.json enjin. Angka global, bukan akaun anda.',
+  notifTitle:'Notifikasi komuniti',notifSub:'Tahap peringatan mesej komuniti disimpan pada akaun anda.',notifOff:'Matikan',notifOffS:'Tiada peringatan mesej.',notifTeam:'Ahli sahaja',notifTeamS:'Peringatan apabila ahli menghantar mesej.',notifAll:'Semua',notifAllS:'Semua peringatan komuniti.',notifSaved:'Tahap notifikasi disimpan.',notifErr:'Gagal menyimpan. Cuba lagi.',
+  navLiga:'Liga',ligaTitle:'Liga Kertas',ligaSub:'Modal maya $10,000. Disiplin menang, bukan judi.',
+  subLb:'Leaderboard',subTrades:'Trade Saya',subBadges:'Badge',
+  seasonT:'Musim Mingguan',seasonS:'Net R menentukan kedudukan — bukan jumlah duit.',seasonLab:'Musim',rankedLab:'Disenarai',
+  youLab:'Kedudukan anda',rankLab:'Rank',netR:'Net R',winRate:'Win rate',balanceLab:'Baki maya',toNext:'lagi ke',topMsg:'Di puncak musim ini — kekalkan!',rankHint:'Tutup satu paper trade untuk masuk ranking.',
+  mNetR:'Net R',mWr:'Win rate',mCons:'Konsisten',consNote:'Win rate berwajaran bilangan trade (min 5 trade).',tradeUnit:'trade',tradeOne:'trade',youName:'Anda',
+  lbEmpty:'Belum ada trade berperingkat. Jadilah yang pertama membuka paper trade.',lbNote:'Modal maya sahaja — outcome diselesaikan dari harga live.',
+  capLab:'Baki maya',openLab:'Dibuka',closedLab:'Ditutup',newTrade:'＋ Trade baru',tEmpty:'Belum ada paper trade. Analisis satu pair dan ambil trade.',tNote:'Semua trade direkod — outcome dari harga live.',
+  stOpen:'OPEN',stTP:'TP',stSL:'SL',stBE:'BE',stExp:'EXPIRED',running:'sedang berjalan',riskLab:'Risiko',
+  bNote:'Badge dihargai atas disiplin — bukan keuntungan semata-mata.',
+  bRisk:'Risk First',bCons:'Konsisten',bAna:'Penganalisis',bPat:'Penyabar',bTp:'TP Hunter',bStart:'Trade Pertama',
+  bcRisk:'10 trade risiko ≤1%',bcCons:'7 hari hijau berturut',bcAna:'50 analisis AI',bcPat:'Tunggu HOLD 5×',bcTp:'5 TP berturut-turut',bcStart:'Buka paper trade pertama',
+  got:'Dicapai',locked:'Berkunci',
+  takeTrade:'＋ Saya ambil trade ini',noSetup:'Tiada setup untuk diambil sekarang.',
+  riskTitle:'Buka paper trade',lotLab:'Lot anggaran',rBase:'Risiko dikira dari baki maya anda:',rNote:'Modal maya sahaja — tiada wang sebenar.',openBtn:'Buka trade',opening:'Membuka…',
+  toastOpened:'Paper trade dibuka! Pantau di Liga.',pickPair:'Pilih pair untuk analisis AI.',
+  leagueErr:'Gagal memuatkan data liga. Cuba lagi.',tradeErr:'Gagal membuka trade. Cuba lagi.',noBalance:'Baki tidak tersedia — cuba lagi.',
+  loggingOut:'Melog keluar…',langNative:'Bahasa Melayu'
+ },
+ en:{
+  greet:'Hi, ',trader:'Trader',greetSub:'Pick a pair — AI reads the chart and draws Entry, SL & TP for you.',
+  navAnalyst:'Analyst',navCommunity:'Community',navProfile:'Profile',navSettings:'Settings',
+  search:'Search pairs…',noPairs:'No pairs found.',hint:'Choose a pair for real-time AI analysis.',all:'All',commodity:'Commodities',forex:'Forex',crypto:'Crypto',indices:'Indices',
+  soon:'Not open yet',notOpen:'This pair is not open for AI analysis yet. Try a pair below.',
+  comTitle:'Community',comSub:'Talk with other traders.',online:'Community active',membersToday:'members today',writeMsg:'Write a message…',
+  emptyChat:'No messages today. Be the first.',resetAt:'Messages reset at midnight (MYT). Links, phone numbers & emails are filtered automatically.',
+  sendErr:'Message could not be sent. Try again.',slow:'Please wait a few seconds before sending again.',emptyMsg:'Write a message first.',longMsg:'Message too long (max 500 characters).',filtered:'Message blocked by the community filter.',someFiltered:'Some content was blocked by the filter.',
+  since:'Member since',pName:'TraderWatch Member',s1:'Analyses made',s2:'Signals taken',s3:'Engine performance',menuSec:'Account',
+  mAccount:'Account details',mPerf:'Engine performance',mDevice:'Devices & notifications',mLogout:'Log out',freeT:'Free Card',
+  free1:'Unlimited AI analysis on all pairs',free2:'Full access to community & signals',free3:'Real-time market updates',freeN:'No tiering — all members have full access.',
+  setTitle:'Settings',setSub:'Language, theme and app.',langSec:'Bahasa / Language',langSub:'Choose display language',themeSec:'Tema / Theme',dark:'Dark',light:'Light',system:'System',
+  instT:'Install app',instS:'Offline-ready · App shell cached',install:'Install',setNote:'Preferences are saved on this device.',installHint:'Use your browser menu → Add to Home screen.',
+  goAI:'Analyze with AI',loading:'Loading…',aiLabel:'AI view',conf:'CONFIDENCE',entry:'Entry',tp:'Take Profit',sl:'Stop Loss',checklist:'Confluence checklist',reasons:'Analysis reasons',risk:'Risk',again:'← Analyze another pair / timeframe',
+  chartFail:'Failed to load chart.',retry:'Retry',waitMsg:'No clear setup right now — AI suggests waiting.',
+  noAnalysis:'Analysis failed for now. Please try again shortly.',limit:'Analysis is in cooldown. Try again shortly.',
+  account:'Account details',uid:'Member ID',name:'Name',email:'Email',plan:'Plan',close:'Close',
+  perfTitle:'Engine performance',perfSub:'Global results across all engine signals (not personal performance).',perfWin:'Win rate',perfTp:'TP hit',perfSl:'SL hit',perfClosed:'Signals closed',perfMine:'Your analyses made',perfNote:'Source: engine signal-status.json. Global figures, not your account.',
+  notifTitle:'Community notifications',notifSub:'Your community message alert level is stored on your account.',notifOff:'Off',notifOffS:'No message alerts.',notifTeam:'Members only',notifTeamS:'Alert when a member posts a message.',notifAll:'All',notifAllS:'All community alerts.',notifSaved:'Notification level saved.',notifErr:'Could not save. Try again.',
+  navLiga:'League',ligaTitle:'Paper League',ligaSub:'Virtual $10,000 capital. Discipline wins, not gambling.',
+  subLb:'Leaderboard',subTrades:'My Trades',subBadges:'Badges',
+  seasonT:'Weekly Season',seasonS:'Net R decides the ranking — not raw profit.',seasonLab:'Season',rankedLab:'Ranked',
+  youLab:'Your position',rankLab:'Rank',netR:'Net R',winRate:'Win rate',balanceLab:'Virtual balance',toNext:'more to',topMsg:'Top of the season — keep it up!',rankHint:'Close a paper trade to get ranked.',
+  mNetR:'Net R',mWr:'Win rate',mCons:'Consistency',consNote:'Win rate weighted by trade count (min 5 trades).',tradeUnit:'trades',tradeOne:'trade',youName:'You',
+  lbEmpty:'No ranked trades yet. Be the first to open a paper trade.',lbNote:'Virtual capital only — outcomes resolved from live prices.',
+  capLab:'Virtual balance',openLab:'Open',closedLab:'Closed',newTrade:'＋ New trade',tEmpty:'No paper trades yet. Analyze a pair and take a trade.',tNote:'Every trade is recorded — outcomes come from live prices.',
+  stOpen:'OPEN',stTP:'TP',stSL:'SL',stBE:'BE',stExp:'EXPIRED',running:'running',riskLab:'Risk',
+  bNote:'Badges reward discipline — not profit alone.',
+  bRisk:'Risk First',bCons:'Consistent',bAna:'Analyst',bPat:'Patient',bTp:'TP Hunter',bStart:'First Trade',
+  bcRisk:'10 trades at ≤1% risk',bcCons:'7 green days in a row',bcAna:'50 AI analyses',bcPat:'Waited out HOLD 5×',bcTp:'5 TPs in a row',bcStart:'Open your first paper trade',
+  got:'Earned',locked:'Locked',
+  takeTrade:'＋ Take this trade',noSetup:'No setup to take right now.',
+  riskTitle:'Open paper trade',lotLab:'Indicative lot',rBase:'Risk sized from your virtual balance:',rNote:'Virtual capital only — no real money.',openBtn:'Open trade',opening:'Opening…',
+  toastOpened:'Paper trade opened! Track it in League.',pickPair:'Pick a pair for AI analysis.',
+  leagueErr:'Could not load league data. Try again.',tradeErr:'Could not open the trade. Try again.',noBalance:'Balance unavailable — try again.',
+  loggingOut:'Signing out…',langNative:'English'
+ },
+ zh:{
+  greet:'你好，',trader:'交易者',greetSub:'选择货币对——AI 读取图表并为您绘制入场、止损与止盈。',
+  navAnalyst:'分析',navCommunity:'社区',navProfile:'个人资料',navSettings:'设置',
+  search:'搜索货币对…',noPairs:'未找到货币对。',hint:'选择货币对进行实时 AI 分析。',all:'全部',commodity:'商品',forex:'外汇',crypto:'加密货币',indices:'指数',
+  soon:'尚未开放',notOpen:'该货币对尚未开放 AI 分析。请尝试下方货币对。',
+  comTitle:'社区',comSub:'与其他交易者交流。',online:'社区活跃',membersToday:'位成员今日',writeMsg:'写消息…',
+  emptyChat:'今天还没有消息。成为第一个吧。',resetAt:'消息于午夜（马来西亚时间）重置。链接、电话与邮箱自动过滤。',
+  sendErr:'发送失败，请重试。',slow:'请稍等几秒再发送。',emptyMsg:'请先写消息。',longMsg:'消息过长（最多 500 字）。',filtered:'消息被社区过滤器拦截。',someFiltered:'部分内容被过滤。',
+  since:'自',pName:'TraderWatch 会员',s1:'已分析次数',s2:'已采用信号',s3:'引擎表现',menuSec:'账户',
+  mAccount:'账户详情',mPerf:'引擎表现',mDevice:'设备与通知',mLogout:'退出登录',freeT:'Free Card',
+  free1:'所有货币对无限 AI 分析',free2:'完全访问社区与信号',free3:'实时市场更新',freeN:'无分级——所有会员均可完整访问。',
+  setTitle:'设置',setSub:'语言、主题和应用。',langSec:'Bahasa / 语言',langSub:'选择显示语言',themeSec:'Tema / 主题',dark:'深色',light:'浅色',system:'系统',
+  instT:'安装应用',instS:'可离线 · 应用外壳已缓存',install:'安装',setNote:'偏好设置保存在此设备上。',installHint:'使用浏览器菜单 → 添加到主屏幕。',
+  goAI:'用 AI 分析',loading:'加载中…',aiLabel:'AI 观点',conf:'置信度',entry:'入场',tp:'止盈',sl:'止损',checklist:'共振检查表',reasons:'分析理由',risk:'风险',again:'← 分析其他货币对 / 周期',
+  chartFail:'图表加载失败。',retry:'重试',waitMsg:'目前没有清晰设置——AI 建议等待。',noAnalysis:'分析暂时失败，请稍后再试。',limit:'分析冷却中，请稍后再试。',
+  account:'账户详情',uid:'会员 ID',name:'姓名',email:'邮箱',plan:'方案',close:'关闭',
+  perfTitle:'引擎表现',perfSub:'所有引擎信号的全球结果（非个人表现）。',perfWin:'胜率',perfTp:'止盈',perfSl:'止损',perfClosed:'已平仓',perfMine:'您的分析次数',perfNote:'来源：引擎 signal-status.json。全球数据，非您的账户。',
+  notifTitle:'社区通知',notifSub:'社区消息提醒级别保存在您的账户。',notifOff:'关闭',notifOffS:'无消息提醒。',notifTeam:'仅成员',notifTeamS:'成员发消息时提醒。',notifAll:'全部',notifAllS:'所有社区提醒。',notifSaved:'通知级别已保存。',notifErr:'保存失败，请重试。',
+  navLiga:'联赛',ligaTitle:'模拟交易联赛',ligaSub:'虚拟资金 $10,000。纪律取胜，而非赌博。',
+  subLb:'排行榜',subTrades:'我的交易',subBadges:'徽章',
+  seasonT:'每周赛季',seasonS:'净 R 决定排名——而非利润金额。',seasonLab:'赛季',rankedLab:'已排名',
+  youLab:'您的排名',rankLab:'名次',netR:'净 R',winRate:'胜率',balanceLab:'虚拟余额',toNext:'再得',topMsg:'本赛季居首——继续保持！',rankHint:'平仓一笔模拟交易即可进入排名。',
+  mNetR:'净 R',mWr:'胜率',mCons:'稳定性',consNote:'按交易次数加权的胜率（至少 5 笔交易）。',tradeUnit:'笔交易',tradeOne:'笔交易',youName:'您',
+  lbEmpty:'尚无排名交易。成为第一个开启模拟交易的人。',lbNote:'仅虚拟资金——结果由实时价格结算。',
+  capLab:'虚拟余额',openLab:'持仓',closedLab:'已平仓',newTrade:'＋ 新交易',tEmpty:'还没有模拟交易。分析一个货币对并开仓。',tNote:'所有交易均有记录——结果来自实时价格。',
+  stOpen:'OPEN',stTP:'TP',stSL:'SL',stBE:'BE',stExp:'EXPIRED',running:'进行中',riskLab:'风险',
+  bNote:'徽章奖励纪律——而非单纯利润。',
+  bRisk:'风险优先',bCons:'稳定',bAna:'分析师',bPat:'耐心',bTp:'止盈猎手',bStart:'首笔交易',
+  bcRisk:'10 笔交易风险 ≤1%',bcCons:'连续 7 个盈利日',bcAna:'50 次 AI 分析',bcPat:'等待 HOLD 5 次',bcTp:'连续 5 次止盈',bcStart:'开启首笔模拟交易',
+  got:'已获得',locked:'未解锁',
+  takeTrade:'＋ 采用这笔交易',noSetup:'目前没有可采用的设置。',
+  riskTitle:'开启模拟交易',lotLab:'参考手数',rBase:'风险按您的虚拟余额计算：',rNote:'仅虚拟资金——不涉及真实金钱。',openBtn:'开仓',opening:'开仓中…',
+  toastOpened:'模拟交易已开仓！可在联赛中查看。',pickPair:'选择货币对进行 AI 分析。',
+  leagueErr:'无法加载联赛数据，请重试。',tradeErr:'开仓失败，请重试。',noBalance:'余额不可用——请重试。',
+  loggingOut:'正在退出…',langNative:'中文'
+ },
+ id:{
+  greet:'Hai, ',trader:'Trader',greetSub:'Pilih pair — AI membaca chart dan lukis Entry, SL & TP untuk anda.',
+  navAnalyst:'Analis',navCommunity:'Komunitas',navProfile:'Profil',navSettings:'Pengaturan',
+  search:'Cari pair…',noPairs:'Tidak ada pair ditemukan.',hint:'Pilih pair untuk analisis AI waktu nyata.',all:'Semua',commodity:'Komoditas',forex:'Forex',crypto:'Kripto',indices:'Indeks',
+  soon:'Belum dibuka',notOpen:'Pair ini belum dibuka untuk analisis AI. Coba pair di bawah.',
+  comTitle:'Komunitas',comSub:'Berkunjung dengan trader lain.',online:'Komunitas aktif',membersToday:'anggota hari ini',writeMsg:'Tulis pesan…',
+  emptyChat:'Belum ada pesan hari ini. Jadilah yang pertama.',resetAt:'Pesan direset tengah malam (MYT). Tautan, telepon & email disaring otomatis.',
+  sendErr:'Pesan gagal dikirim. Coba lagi.',slow:'Tunggu beberapa detik sebelum mengirim lagi.',emptyMsg:'Tulis pesan dahulu.',longMsg:'Pesan terlalu panjang (maks 500 karakter).',filtered:'Pesan diblokir filter komunitas.',someFiltered:'Sebagian konten disaring.',
+  since:'Anggota sejak',pName:'Anggota TraderWatch',s1:'Analisis dibuat',s2:'Sinyal diambil',s3:'Kinerja enjin',menuSec:'Akun',
+  mAccount:'Detail akun',mPerf:'Kinerja enjin',mDevice:'Perangkat & notifikasi',mLogout:'Keluar',freeT:'Free Card',
+  free1:'Analisis AI tanpa batas di semua pair',free2:'Akses penuh komunitas & sinyal',free3:'Pembaruan pasar waktu nyata',freeN:'Tanpa tingkatan — semua anggota akses penuh.',
+  setTitle:'Pengaturan',setSub:'Bahasa, tema dan aplikasi.',langSec:'Bahasa / Language',langSub:'Pilih bahasa tampilan',themeSec:'Tema / Theme',dark:'Gelap',light:'Terang',system:'Sistem',
+  instT:'Pasang aplikasi',instS:'Siap offline · Shell aplikasi di-cache',install:'Pasang',setNote:'Preferensi disimpan di perangkat ini.',installHint:'Gunakan menu browser → Tambah ke layar utama.',
+  goAI:'Analisis dengan AI',loading:'Memuat…',aiLabel:'Pandangan AI',conf:'KEYAKINAN',entry:'Entry',tp:'Take Profit',sl:'Stop Loss',checklist:'Checklist konfluensi',reasons:'Alasan analisis',risk:'Risiko',again:'← Analisis pair / timeframe lain',
+  chartFail:'Gagal memuat chart.',retry:'Coba lagi',waitMsg:'Belum ada setup jelas — AI menyarankan menunggu.',noAnalysis:'Analisis gagal. Coba lagi sebentar.',limit:'Analisis sedang cooldown. Coba lagi sebentar.',
+  account:'Detail akun',uid:'ID anggota',name:'Nama',email:'Email',plan:'Paket',close:'Tutup',
+  perfTitle:'Kinerja enjin',perfSub:'Hasil global semua sinyal enjin (bukan kinerja pribadi).',perfWin:'Tingkat menang',perfTp:'TP tercapai',perfSl:'SL terkena',perfClosed:'Sinyal ditutup',perfMine:'Analisis Anda dibuat',perfNote:'Sumber: signal-status.json enjin. Angka global, bukan akun Anda.',
+  notifTitle:'Notifikasi komunitas',notifSub:'Tingkat peringatan pesan komunitas disimpan di akun Anda.',notifOff:'Matikan',notifOffS:'Tanpa peringatan pesan.',notifTeam:'Anggota saja',notifTeamS:'Peringatan saat anggota mengirim pesan.',notifAll:'Semua',notifAllS:'Semua peringatan komunitas.',notifSaved:'Tingkat notifikasi disimpan.',notifErr:'Gagal menyimpan. Coba lagi.',
+  navLiga:'Liga',ligaTitle:'Liga Paper',ligaSub:'Modal virtual $10.000. Disiplin menang, bukan judi.',
+  subLb:'Papan peringkat',subTrades:'Trade Saya',subBadges:'Lencana',
+  seasonT:'Musim Mingguan',seasonS:'Net R menentukan peringkat — bukan jumlah uang.',seasonLab:'Musim',rankedLab:'Terperingkat',
+  youLab:'Posisi Anda',rankLab:'Peringkat',netR:'Net R',winRate:'Tingkat menang',balanceLab:'Saldo virtual',toNext:'lagi menuju',topMsg:'Di puncak musim ini — pertahankan!',rankHint:'Tutup satu paper trade untuk masuk peringkat.',
+  mNetR:'Net R',mWr:'Tingkat menang',mCons:'Konsisten',consNote:'Tingkat menang berbobot jumlah trade (min 5 trade).',tradeUnit:'trade',tradeOne:'trade',youName:'Anda',
+  lbEmpty:'Belum ada trade terperingkat. Jadilah yang pertama membuka paper trade.',lbNote:'Hanya modal virtual — hasil diselesaikan dari harga live.',
+  capLab:'Saldo virtual',openLab:'Terbuka',closedLab:'Ditutup',newTrade:'＋ Trade baru',tEmpty:'Belum ada paper trade. Analisis satu pair dan ambil trade.',tNote:'Semua trade tercatat — hasil dari harga live.',
+  stOpen:'OPEN',stTP:'TP',stSL:'SL',stBE:'BE',stExp:'EXPIRED',running:'berjalan',riskLab:'Risiko',
+  bNote:'Lencana menghargai disiplin — bukan sekadar keuntungan.',
+  bRisk:'Risk First',bCons:'Konsisten',bAna:'Analis',bPat:'Sabar',bTp:'TP Hunter',bStart:'Trade Pertama',
+  bcRisk:'10 trade risiko ≤1%',bcCons:'7 hari hijau berturut',bcAna:'50 analisis AI',bcPat:'Menunggu HOLD 5×',bcTp:'5 TP berturut-turut',bcStart:'Buka paper trade pertama',
+  got:'Diraih',locked:'Terkunci',
+  takeTrade:'＋ Saya ambil trade ini',noSetup:'Tidak ada setup untuk diambil sekarang.',
+  riskTitle:'Buka paper trade',lotLab:'Lot perkiraan',rBase:'Risiko dihitung dari saldo virtual Anda:',rNote:'Hanya modal virtual — tanpa uang sungguhan.',openBtn:'Buka trade',opening:'Membuka…',
+  toastOpened:'Paper trade dibuka! Pantau di Liga.',pickPair:'Pilih pair untuk analisis AI.',
+  leagueErr:'Gagal memuat data liga. Coba lagi.',tradeErr:'Gagal membuka trade. Coba lagi.',noBalance:'Saldo tidak tersedia — coba lagi.',
+  loggingOut:'Keluar…',langNative:'Bahasa Indonesia'
+ },
+ ta:{
+  greet:'வணக்கம், ',trader:'வர்த்தகர்',greetSub:'ஒரு ஜோடியைத் தேர்ந்தெடுக்கவும் — AI கிராபைப் படித்து Entry, SL & TP ஐ வரைகிறது.',
+  navAnalyst:'பகுப்பாய்வு',navCommunity:'சமூகம்',navProfile:'சுயவிவரம்',navSettings:'அமைப்புகள்',
+  search:'ஜோடிகளைத் தேடு…',noPairs:'ஜோடிகள் இல்லை.',hint:'நேரடி AI பகுப்பாய்விற்கு ஜோடியைத் தேர்ந்தெடுக்கவும்.',all:'அனைத்தும்',commodity:'பொருட்கள்',forex:'ஃபாரெக்ஸ்',crypto:'கிரிப்டோ',indices:'குறியீடுகள்',
+  soon:'திறக்கப்படவில்லை',notOpen:'இந்த ஜோடி AI பகுப்பாய்விற்கு திறக்கப்படவில்லை. கீழே உள்ள ஜோடியை முயற்சிக்கவும்.',
+  comTitle:'சமூகம்',comSub:'மற்ற வர்த்தகர்களுடன் பேசுங்கள்.',online:'சமூகம் செயலில்',membersToday:'உறுப்பினர்கள் இன்று',writeMsg:'செய்தி எழுதுங்கள்…',
+  emptyChat:'இன்று செய்திகள் இல்லை. முதல்வராக இருங்கள்.',resetAt:'செய்திகள் நள்ளிரவில் (MYT) அழிக்கப்படும். இணைப்புகள், தொலைபேசி & மின்னஞ்சல் தானாக வடிகட்டப்படும்.',
+  sendErr:'அனுப்ப முடியவில்லை. மீண்டும் முயற்சிக்கவும்.',slow:'அனுப்புவதற்கு முன் சில வினாடிகள் காத்திருக்கவும்.',emptyMsg:'முதலில் செய்தி எழுதவும்.',longMsg:'செய்தி மிக நீளம் (அதிகபட்சம் 500).',filtered:'சமூக வடிகட்டியால் தடுக்கப்பட்டது.',someFiltered:'சில உள்ளடக்கம் வடிகட்டப்பட்டது.',
+  since:'உறுப்பினர்',pName:'TraderWatch உறுப்பினர்',s1:'பகுப்பாய்வுகள்',s2:'சிக்னல்கள்',s3:'இஞ்சின் செயல்திறன்',menuSec:'கணக்கு',
+  mAccount:'கணக்கு விவரங்கள்',mPerf:'இஞ்சின் செயல்திறன்',mDevice:'சாதனங்கள் & அறிவிப்புகள்',mLogout:'வெளியேறு',freeT:'Free Card',
+  free1:'அனைத்து ஜோடிகளிலும் வரம்பற்ற AI பகுப்பாய்வு',free2:'சமூகம் & சிக்னல்கள் முழு அணுகல்',free3:'நேரடி சந்தை புதுப்பிப்புகள்',freeN:'இல்லை tiering — அனைத்து உறுப்பினர்களும் முழு அணுகல்.',
+  setTitle:'அமைப்புகள்',setSub:'மொழி, தீம் மற்றும் ஆப்.',langSec:'Bahasa / மொழி',langSub:'காட்சி மொழியைத் தேர்ந்தெடுக்கவும்',themeSec:'Tema / தீம்',dark:'இருண்ட',light:'ஒளி',system:'கணினி',
+  instT:'ஆப் நிறுவு',instS:'ஆஃப்லைன் தயார் · ஆப் ஷெல் கேச்',install:'நிறுவு',setNote:'விருப்பங்கள் இந்த சாதனத்தில் சேமிக்கப்படும்.',installHint:'உலாவி மெனு → முகப்புத் திரையில் சேர்.',
+  goAI:'AI உடன் பகுப்பாய்வு',loading:'ஏற்றுகிறது…',aiLabel:'AI கருத்து',conf:'நம்பிக்கை',entry:'Entry',tp:'Take Profit',sl:'Stop Loss',checklist:'ஒற்றுமை பட்டியல்',reasons:'பகுப்பாய்வு காரணங்கள்',risk:'இடர்',again:'← மற்ற ஜோடி / காலத்தை பகுப்பாய்வு செய்',
+  chartFail:'கிராபை ஏற்ற முடியவில்லை.',retry:'மீண்டும் முயற்சி',waitMsg:'தற்போது தெளிவான அமைப்பு இல்லை — AI காத்திருக்க பரிந்துரைக்கிறது.',noAnalysis:'பகுப்பாய்வு தோல்வியடைந்தது. மீண்டும் முயற்சிக்கவும்.',limit:'பகுப்பாய்வு குளிரூட்டலில் உள்ளது.',
+  account:'கணக்கு விவரங்கள்',uid:'உறுப்பினர் ID',name:'பெயர்',email:'மின்னஞ்சல்',plan:'திட்டம்',close:'மூடு',
+  perfTitle:'இஞ்சின் செயல்திறன்',perfSub:'அனைத்து இஞ்சின் சிக்னல்களின் உலகளாவிய முடிவுகள் (தனிப்பட்ட செயல்திறன் அல்ல).',perfWin:'வெற்றி விகிதம்',perfTp:'TP அடைந்தது',perfSl:'SL அடைந்தது',perfClosed:'மூடிய சிக்னல்கள்',perfMine:'உங்கள் பகுப்பாய்வுகள்',perfNote:'ஆதாரம்: இஞ்சின் signal-status.json. உலகளாவிய எண்கள், உங்கள் கணக்கு அல்ல.',
+  notifTitle:'சமூக அறிவிப்புகள்',notifSub:'சமூக செய்தி எச்சரிக்கை நிலை உங்கள் கணக்கில் சேமிக்கப்படும்.',notifOff:'அணை',notifOffS:'செய்தி எச்சரிக்கை இல்லை.',notifTeam:'உறுப்பினர்கள் மட்டும்',notifTeamS:'உறுப்பினர் செய்தி அனுப்பும்போது எச்சரிக்கை.',notifAll:'அனைத்தும்',notifAllS:'அனைத்து சமூக எச்சரிக்கைகள்.',notifSaved:'அறிவிப்பு நிலை சேமிக்கப்பட்டது.',notifErr:'சேமிக்க முடியவில்லை. மீண்டும் முயற்சிக்கவும்.',
+  navLiga:'லீக்',ligaTitle:'பேப்பர் லீக்',ligaSub:'மெய்நிகர் மூலதனம் $10,000. ஒழுக்கமே வெல்லும், சூதாட்டம் அல்ல.',
+  subLb:'தரவரிசை',subTrades:'என் வர்த்தகங்கள்',subBadges:'பதக்கங்கள்',
+  seasonT:'வாராந்திர சீசன்',seasonS:'நிகர R தான் தரவரிசையைத் தீர்மானிக்கும் — லாபத் தொகை அல்ல.',seasonLab:'சீசன்',rankedLab:'தரவரிசையில்',
+  youLab:'உங்கள் நிலை',rankLab:'தரம்',netR:'நிகர R',winRate:'வெற்றி விகிதம்',balanceLab:'மெய்நிகர் இருப்பு',toNext:'மேலும் தேவை',topMsg:'இந்த சீசனில் முதலிடம் — தொடருங்கள்!',rankHint:'தரவரிசையில் சேர ஒரு பேப்பர் வர்த்தகத்தை மூடவும்.',
+  mNetR:'நிகர R',mWr:'வெற்றி விகிதம்',mCons:'நிலைத்தன்மை',consNote:'வர்த்தக எண்ணிக்கையால் எடையிடப்பட்ட வெற்றி விகிதம் (குறைந்தது 5).',tradeUnit:'வர்த்தகங்கள்',tradeOne:'வர்த்தகம்',youName:'நீங்கள்',
+  lbEmpty:'இன்னும் தரவரிசை வர்த்தகங்கள் இல்லை. முதல் பேப்பர் வர்த்தகத்தைத் தொடங்குங்கள்.',lbNote:'மெய்நிகர் மூலதனம் மட்டும் — முடிவுகள் நேரடி விலைகளில் தீர்மானிக்கப்படும்.',
+  capLab:'மெய்நிகர் இருப்பு',openLab:'திறந்தவை',closedLab:'மூடியவை',newTrade:'＋ புதிய வர்த்தகம்',tEmpty:'இன்னும் பேப்பர் வர்த்தகங்கள் இல்லை. ஒரு ஜோடியைப் பகுப்பாய்வு செய்து வர்த்தகம் எடுங்கள்.',tNote:'அனைத்து வர்த்தகங்களும் பதிவாகும் — முடிவுகள் நேரடி விலைகளிலிருந்து.',
+  stOpen:'OPEN',stTP:'TP',stSL:'SL',stBE:'BE',stExp:'EXPIRED',running:'நடந்து கொண்டிருக்கிறது',riskLab:'இடர்',
+  bNote:'பதக்கங்கள் ஒழுக்கத்தைப் பாராட்டுகின்றன — லாபத்தை மட்டும் அல்ல.',
+  bRisk:'Risk First',bCons:'நிலையான',bAna:'பகுப்பாய்வாளர்',bPat:'பொறுமை',bTp:'TP Hunter',bStart:'முதல் வர்த்தகம்',
+  bcRisk:'≤1% இடரில் 10 வர்த்தகங்கள்',bcCons:'தொடர்ச்சியாக 7 பசுமை நாட்கள்',bcAna:'50 AI பகுப்பாய்வுகள்',bcPat:'HOLD ஐ 5× கடந்து காத்திருப்பு',bcTp:'தொடர்ச்சியாக 5 TP',bcStart:'உங்கள் முதல் பேப்பர் வர்த்தகத்தைத் தொடங்கவும்',
+  got:'பெறப்பட்டது',locked:'பூட்டப்பட்டது',
+  takeTrade:'＋ இந்த வர்த்தகத்தை எடுக்கிறேன்',noSetup:'இப்போது எடுக்க அமைப்பு இல்லை.',
+  riskTitle:'பேப்பர் வர்த்தகத்தைத் தொடங்கு',lotLab:'மதிப்பிடப்பட்ட லாட்',rBase:'உங்கள் மெய்நிகர் இருப்பிலிருந்து இடர் கணக்கிடப்படுகிறது:',rNote:'மெய்நிகர் மூலதனம் மட்டும் — உண்மையான பணம் இல்லை.',openBtn:'வர்த்தகத்தைத் தொடங்கு',opening:'தொடங்குகிறது…',
+  toastOpened:'பேப்பர் வர்த்தகம் தொடங்கப்பட்டது! லீக்கில் கண்காணிக்கவும்.',pickPair:'AI பகுப்பாய்விற்கு ஒரு ஜோடியைத் தேர்ந்தெடுக்கவும்.',
+  leagueErr:'லீக் தரவை ஏற்ற முடியவில்லை. மீண்டும் முயற்சிக்கவும்.',tradeErr:'வர்த்தகத்தைத் தொடங்க முடியவில்லை. மீண்டும் முயற்சிக்கவும்.',noBalance:'இருப்பு கிடைக்கவில்லை — மீண்டும் முயற்சிக்கவும்.',
+  loggingOut:'வெளியேறுகிறது…',langNative:'தமிழ்'
+ }
+};
+var FULL={ms:1,en:1};
+var LANGS=[['en','English','English'],['ms','Bahasa Melayu','Malay'],['zh','中文','Chinese'],['id','Bahasa Indonesia','Indonesian'],['ta','தமிழ்','Tamil']];
+var lang='en';
+try{var sl=localStorage.getItem('tw-lang');if(sl&&DICT[sl])lang=sl}catch(e){}
+function t(k){return (DICT[lang]&&DICT[lang][k])||DICT.en[k]||DICT.ms[k]||k}
+
+/* ---------------- theme ---------------- */
+var theme='dark';
+try{var st=localStorage.getItem('tw-theme');if(['dark','light','system'].indexOf(st)>-1)theme=st}catch(e){}
+var mq=window.matchMedia?window.matchMedia('(prefers-color-scheme: light)'):{matches:false,addEventListener:null};
+function resolved(){return theme==='system'?(mq.matches?'light':'dark'):theme}
+function applyTheme(){
+ var r=resolved();document.documentElement.setAttribute('data-theme',r);
+ document.querySelector('meta[name=theme-color]').setAttribute('content',r==='light'?'#f5f7f5':'#0a0e0b');
+ var sun='<circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M4.9 4.9l1.4 1.4m11.4 11.4 1.4 1.4M2 12h2m16 0h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>';
+ var moon='<path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"/>';
+ $('themeIcon').innerHTML=r==='light'?sun:moon;
+}
+try{mq.addEventListener&&mq.addEventListener('change',function(){if(theme==='system')applyTheme()})}catch(e){}
+function setTheme(x){theme=x;try{localStorage.setItem('tw-theme',x)}catch(e){}applyTheme();drawThemes()}
+
+/* ---------------- navigation ---------------- */
+var VIEWS=['analyst','community','liga','profile','settings'];
+var navIcons={
+ analyst:'<path d="M3 17l5-6 4 4 6-9 3 4"/><path d="M3 21h18"/>',
+ community:'<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.9M16 3.1a4 4 0 0 1 0 7.8"/>',
+ liga:'<path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0V4Z"/><path d="M7 6H4a1 1 0 0 0-1 1c0 2.2 1.8 4 4 4M17 6h3a1 1 0 0 1 1 1c0 2.2-1.8 4-4 4"/>',
+ profile:'<circle cx="12" cy="8" r="4"/><path d="M4 21v-1a8 8 0 0 1 16 0v1"/>',
+ settings:'<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1-2.8 2.8-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.5V21h-4v-.1a1.7 1.7 0 0 0-1-1.5 1.7 1.7 0 0 0-1.9.3l-.1.1L4.2 17l.1-.1a1.7 1.7 0 0 0 .3-1.9 1.7 1.7 0 0 0-1.5-1H3v-4h.1a1.7 1.7 0 0 0 1.5-1 1.7 1.7 0 0 0-.3-1.9L4.2 7 7 4.2l.1.1a1.7 1.7 0 0 0 1.9.3A1.7 1.7 0 0 0 10 3V3h4v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.9-.3l.1-.1L19.8 7l-.1.1a1.7 1.7 0 0 0-.3 1.9 1.7 1.7 0 0 0 1.5 1H21v4h-.1a1.7 1.7 0 0 0-1.5 1Z"/>'
+};
+var current='analyst';
+function drawNav(){
+ $('bnav').innerHTML=VIEWS.map(function(v){var lab=t('nav'+v.charAt(0).toUpperCase()+v.slice(1));return '<button class="nav'+(v===current?' on':'')+'" data-v="'+v+'" aria-label="'+esc(lab)+'"><svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">'+navIcons[v]+'</svg><span>'+esc(lab)+'</span></button>'}).join('');
+ Array.prototype.forEach.call($('bnav').querySelectorAll('.nav'),function(b){b.onclick=function(){showView(b.dataset.v)}});
+}
+function showView(v){
+ if(VIEWS.indexOf(v)<0)return;
+ current=v;
+ VIEWS.forEach(function(x){$('view-'+x).classList.toggle('hidden',x!==v)});
+ $('composer').classList.toggle('hidden',v!=='community');
+ $('scroll').classList.toggle('com',v==='community');
+ drawNav();$('scroll').scrollTop=0;
+ if(v==='analyst'){drawPairs(true);maybePrices()}
+ if(v==='community')loadMessages();
+ if(v==='liga')renderLiga();
+ if(v==='profile'&&!profileLoaded)loadProfile();
+}
+
+/* ---------------- toast ---------------- */
+var tt;
+function toast(msg){var el=$('toast');el.textContent=msg;el.classList.add('show');clearTimeout(tt);tt=setTimeout(function(){el.classList.remove('show')},2600)}
+
+/* ---------------- analyst data ---------------- */
+var PAIRS=[
+ {s:'XAUUSD',n:'Gold / US Dollar',g:'c',d:2},{s:'XAGUSD',n:'Silver / US Dollar',g:'c',d:3},
+ {s:'BTCUSD',n:'Bitcoin',g:'k',d:2},{s:'EURUSD',n:'Euro / US Dollar',g:'f',d:4},
+ {s:'GBPUSD',n:'Pound / US Dollar',g:'f',d:4},{s:'USDJPY',n:'US Dollar / Yen',g:'f',d:3},
+ {s:'AUDUSD',n:'Aussie / US Dollar',g:'f',d:4},{s:'USDCAD',n:'US Dollar / CAD',g:'f',d:4},
+ {s:'NZDUSD',n:'Kiwi / US Dollar',g:'f',d:4},
+ {s:'GBPJPY',n:'Pound / Yen',g:'f',d:3,soon:1},{s:'ETHUSD',n:'Ethereum',g:'k',d:2,soon:1},{s:'US30',n:'Dow Jones',g:'i',d:0,soon:1}
+];
+var GROUPS=[['a','all'],['c','commodity'],['f','forex'],['k','crypto'],['i','indices']];
+var TFS=['M5','M15','H1','H4','D1'];
+var grp='a',tf='H1',cur=null;
+var S={open:false,run:0,candles:[],m:null,ana:null,t0:0,rv:1,rv0:0,busy:false,scan:null};
+function fx(p,v){return Number(v).toFixed(p?p.d:2)}
+function spark(p){
+ if(!p.h||p.h.length<2)return '<svg class="spark" viewBox="0 0 62 26"><line x1="2" y1="13" x2="60" y2="13" stroke="currentColor" opacity=".25"/></svg>';
+ var h=p.h,mn=Math.min.apply(0,h),mx=Math.max.apply(0,h),w=62,ht=26,rg=mx-mn||1;
+ var pts=h.map(function(v,i){return(i/(h.length-1)*w).toFixed(1)+','+(ht-2-(v-mn)/rg*(ht-4)).toFixed(1)}).join(' ');
+ var c=h[h.length-1]>=h[0]?'#b7f36b':'#ff777d';
+ return '<svg class="spark" viewBox="0 0 62 26"><polyline points="'+pts+'" fill="none" stroke="'+c+'" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+}
+function drawTabs(){$('tabs').innerHTML=GROUPS.map(function(g){return '<button class="tab'+(g[0]===grp?' on':'')+'" data-g="'+g[0]+'">'+esc(t(g[1]))+'</button>'}).join('');Array.prototype.forEach.call($('tabs').querySelectorAll('.tab'),function(b){b.onclick=function(){grp=b.dataset.g;hap(8);drawTabs();drawPairs(false)}})}
+function drawPairs(quiet){
+ var q=$('q').value.trim().toLowerCase();
+ var list=PAIRS.filter(function(p){return(grp==='a'||p.g===grp)&&(!q||p.s.toLowerCase().indexOf(q)>-1||p.n.toLowerCase().indexOf(q)>-1)});
+ $('pairs').innerHTML=list.length?list.map(function(p,i){
+  var u=(p.chg||0)>=0,px=p.p!=null?fx(p,p.p):'—',ch=p.chg!=null?(u?'▲ +':'▼ ')+p.chg.toFixed(2)+'%':'—';
+  return '<button class="pair" data-s="'+p.s+'" style="'+(quiet?'animation:none':'animation-delay:'+(i*35)+'ms')+'"><div class="top"><div class="ic">'+p.s.slice(0,3)+'</div>'+spark(p)+'</div><div class="nm">'+p.s+'</div><div class="ds">'+esc(p.n)+(p.soon?'<span class="soon">'+esc(t('soon'))+'</span>':'')+'</div><div class="px">'+px+'</div><div class="ch '+(u?'up':'dn')+'">'+ch+'</div></button>';
+ }).join(''):'<div class="none">'+esc(t('noPairs'))+'</div>';
+ Array.prototype.forEach.call($('pairs').querySelectorAll('.pair'),function(b){b.onclick=function(){openSheet(b.dataset.s)}});
+}
+$('q').oninput=function(){drawPairs(true)};
+
+/* Harga + sparkline SEBENAR dari /api/bars (M15) untuk setiap pair disokong. */
+var pricesAt=0;
+function maybePrices(){if(Date.now()-pricesAt>300000)loadPrices()}
+function loadPrices(){
+ pricesAt=Date.now();
+ PAIRS.forEach(function(p){
+  if(p.soon)return;
+  apiFetch('/api/bars?pair='+encodeURIComponent(p.s)+'&tf=M15').then(function(res){
+   if(!res.ok||!res.data||!Array.isArray(res.data.candles)||!res.data.candles.length)return;
+   var cl=res.data.candles.map(function(k){return +k.c}).filter(function(v){return isFinite(v)});
+   if(cl.length<2)return;
+   p.p=cl[cl.length-1];p.chg=(cl[cl.length-1]/cl[Math.max(0,cl.length-97)]-1)*100;
+   p.h=cl.slice(-28);drawPairs(true);
+  }).catch(function(){});
+ });
+}
+
+/* ---------------- indikator dari data sebenar ---------------- */
+function ema(a,k){var m=2/(k+1),e=a[0];for(var i=1;i<a.length;i++)e=a[i]*m+e*(1-m);return e}
+function rsi(a,k){k=k||14;if(a.length<=k)return 50;var g=0,l=0;for(var i=a.length-k;i<a.length;i++){var d=a[i]-a[i-1];if(d>=0)g+=d;else l-=d}return l===0?100:100-100/(1+g/l)}
+function metrics(c){
+ var cl=c.map(function(x){return x.c}),n=c.length,sl=c.slice(-14);
+ var atr=sl.reduce(function(s,x){return s+(x.h-x.l)},0)/sl.length;
+ var l40=c.slice(-40),h20=c.slice(-20),hPrev=c.slice(-40,-20);
+ return {e20:ema(cl,20),e50:ema(cl,50),rsi:rsi(cl),atr:atr,
+  sup:Math.min.apply(0,l40.map(function(x){return x.l})),res:Math.max.apply(0,l40.map(function(x){return x.h})),
+  last:cl[n-1],n:n,
+  hh:Math.max.apply(0,h20.map(function(x){return x.h}))>Math.max.apply(0,hPrev.map(function(x){return x.h})),
+  ll:Math.min.apply(0,h20.map(function(x){return x.l}))<Math.min.apply(0,hPrev.map(function(x){return x.l}))};
+}
+/* Map verdict backend (/api/analyze) -> kad UI. Teks server di-escape. */
+function mapVerdict(d){
+ var en=lang==='en',hold=d.side==='HOLD',dir=hold?'WAIT':d.side,conf=Math.round((+d.conf||0)*100);
+ var a={dir:dir,conf:conf,entry:null,sl:null,tp:null,tp2:null,reasons:[],checks:[],risk:[],model:d.model||''};
+ var rr1=+d.rr1||0,rr2=+d.rr2||0;
+ if(!hold){
+  a.entry=+d.entry;a.sl=+d.sl;a.tp=+d.tp1;a.tp2=(d.tp2!=null&&isFinite(+d.tp2))?+d.tp2:null;
+  a.reasons=[d.reason?esc(d.reason):null,
+   (en?'Entry at current price ':'Entry pada harga semasa ')+fx(cur,a.entry)+'.',
+   'Stop Loss '+fx(cur,a.sl)+(en?' (risk ':' (risiko ')+fx(cur,Math.abs(a.entry-a.sl))+(en?' points).':' mata).'),
+   'TP1 '+fx(cur,a.tp)+' · RR 1:'+rr1+'.',
+   a.tp2!=null?'TP2 '+fx(cur,a.tp2)+' · RR 1:'+rr2+'.':null].filter(Boolean);
+  a.checks=[{t:en?'Clear direction (BUY/SELL)':'Arah jelas (BUY/SELL)',ok:true},
+   {t:'Risk:Reward ≥ 1:1.5',ok:rr1>=1.5},
+   {t:en?'AI confidence ≥ 50%':'Keyakinan AI ≥ 50%',ok:conf>=50},
+   {t:en?'SL beyond spread':'SL di luar spread',ok:true}];
+ }else{
+  a.reasons=[d.reason?esc(d.reason):t('waitMsg'),en?'No entry suggested — wait for a clearer setup.':'Tiada entry dicadangkan — tunggu setup lebih jelas.'];
+  a.checks=[{t:(en?'Clear direction (BUY/SELL) — waiting':'Arah jelas (BUY/SELL) — masih menunggu'),ok:false},
+   {t:(en?'Risk:Reward ≥ 1:1.5 — no setup':'Risk:Reward ≥ 1:1.5 — tiada setup'),ok:false},
+   {t:en?'AI confidence ≥ 50%':'Keyakinan AI ≥ 50%',ok:conf>=50},
+   {t:(en?'SL beyond spread — no entry':'SL di luar spread — tiada entry'),ok:false}];
+ }
+ a.risk=[en?'News events can move markets suddenly.':'Berita ekonomi boleh menggerakkan pasaran secara tiba-tiba.',
+  en?'Risk no more than 1–2% of your account per trade.':'Jangan risiko lebih 1–2% akaun untuk satu trade.',
+  hold?(en?'Avoid entering without confirmation — patience is a strategy.':'Elak masuk tanpa pengesahan — sabar juga satu strategi.'):(en?'If price closes beyond Stop Loss ('+fx(cur,a.sl)+'), this idea is invalid.':'Jika harga tutup melepasi Stop Loss ('+fx(cur,a.sl)+'), idea ini batal.')];
+ return a;
+}
+
+/* ---------------- chart ---------------- */
+var cv=$('cv'),cx=cv.getContext('2d'),DPR=1;
+function sizeCv(){DPR=Math.min(2,window.devicePixelRatio||1);var w=cv.clientWidth||320,h=cv.clientHeight||220;cv.width=w*DPR;cv.height=h*DPR}
+function ease(x){return 1-Math.pow(1-x,3)}
+function css(v){return getComputedStyle(document.documentElement).getPropertyValue(v).trim()}
+function pill(x,y,w,txt,bg,fg){cx.fillStyle=bg;cx.beginPath();if(cx.roundRect)cx.roundRect(x,y-8,w,16,5);else cx.rect(x,y-8,w,16);cx.fill();cx.fillStyle=fg;cx.font='700 10px ui-monospace,Menlo,monospace';cx.textAlign='center';cx.textBaseline='middle';cx.fillText(txt,x+w/2,y+.5)}
+function draw(now){
+ var W=cv.clientWidth||320,H=cv.clientHeight||220;cx.setTransform(DPR,0,0,DPR,0,0);cx.clearRect(0,0,W,H);
+ var c=S.candles;if(!c.length||!S.m)return;
+ var n=c.length,fut=16,pR=58,pT=14,pB=14,slot=(W-pR)/(n+fut),bw=Math.max(2,slot*.62),m=S.m;
+ var lo=Math.min(Math.min.apply(0,c.map(function(x){return x.l})),m.last-m.atr*3),hi=Math.max(Math.max.apply(0,c.map(function(x){return x.h})),m.last+m.atr*3);
+ var y=function(v){return pT+(hi-v)/(hi-lo)*(H-pT-pB)},x=function(i){return(i+.5)*slot};
+ cx.lineWidth=1;cx.font='10px ui-monospace,Menlo,monospace';cx.textAlign='left';cx.textBaseline='middle';
+ for(var g=0;g<5;g++){var gv=lo+(hi-lo)*g/4,gy=y(gv);cx.strokeStyle='rgba(128,150,130,.12)';cx.beginPath();cx.moveTo(0,gy);cx.lineTo(W-pR,gy);cx.stroke();cx.fillStyle=css('--muted');cx.fillText(fx(cur,gv),W-pR+6,gy)}
+ var lime=css('--lime'),red=css('--red'),blue=css('--blue'),txt=css('--text'),card2=css('--card2');
+ var a=S.ana,tt=a?ease(Math.min(1,(now-S.t0)/1000)):0,ex=x(n-1),xr=W-pR;
+ if(a){[[m.res,'R',red],[m.sup,'S',lime]].forEach(function(l){
+   var ly=y(l[0]);cx.save();cx.globalAlpha=tt*.7;cx.strokeStyle=l[2];cx.setLineDash([2,5]);cx.beginPath();cx.moveTo(0,ly);cx.lineTo(xr*tt,ly);cx.stroke();cx.restore();
+   cx.globalAlpha=tt;cx.fillStyle=l[2];cx.textAlign='left';cx.fillText(l[1],6,ly-8);cx.globalAlpha=1});
+ }
+ var show=Math.floor(n*S.rv);
+ for(var i=0;i<show;i++){
+  var k=c[i],up=k.c>=k.o,col=up?lime:red,cxm=x(i);
+  cx.globalAlpha=(S.scan!=null&&cxm>S.scan)?.25:1;
+  cx.strokeStyle=col;cx.fillStyle=col;cx.beginPath();cx.moveTo(cxm,y(k.h));cx.lineTo(cxm,y(k.l));cx.stroke();
+  var ty=y(Math.max(k.o,k.c)),hh=Math.max(1.5,Math.abs(y(k.o)-y(k.c)));cx.fillRect(cxm-bw/2,ty,bw,hh);
+ }
+ cx.globalAlpha=1;
+ if(S.scan!=null){
+  var sx=S.scan,gr=cx.createLinearGradient(sx-70,0,sx,0);gr.addColorStop(0,'#b7f36b00');gr.addColorStop(1,'#b7f36b2e');cx.fillStyle=gr;cx.fillRect(sx-70,0,70,H);
+  cx.strokeStyle=lime;cx.lineWidth=1.5;cx.beginPath();cx.moveTo(sx,0);cx.lineTo(sx,H);cx.stroke();cx.lineWidth=1;
+ }
+ var ly=y(m.last);cx.strokeStyle='rgba(128,150,130,.4)';cx.setLineDash([3,4]);cx.beginPath();cx.moveTo(ex,ly);cx.lineTo(xr,ly);cx.stroke();cx.setLineDash([]);
+ if(!a)pill(W-pR+2,ly,54,fx(cur,m.last),card2,txt);
+ if(a&&a.entry!=null){
+  var yE=y(a.entry),yT=y(a.entry+(a.tp-a.entry)*tt),yS=y(a.entry+(a.sl-a.entry)*tt);
+  cx.fillStyle='rgba(183,243,107,.13)';cx.fillRect(ex,Math.min(yE,yT),xr-ex,Math.abs(yT-yE));
+  cx.fillStyle='rgba(255,119,125,.13)';cx.fillRect(ex,Math.min(yE,yS),xr-ex,Math.abs(yS-yE));
+  [[a.entry,blue,'E',1],[a.tp,lime,'TP',tt],[a.sl,red,'SL',tt]].forEach(function(l){
+   var yy=y(l[3]===1?l[0]:a.entry+(l[0]-a.entry)*tt);cx.strokeStyle=l[1];cx.setLineDash([5,4]);cx.beginPath();cx.moveTo(ex,yy);cx.lineTo(xr,yy);cx.stroke();cx.setLineDash([]);
+   cx.globalAlpha=Math.min(1,tt*1.4);pill(W-pR+2,yy,54,fx(cur,l[0]),l[1],css('--bg'));cx.fillStyle=l[1];cx.font='800 10px ui-monospace,Menlo,monospace';cx.textAlign='left';cx.fillText(l[2],ex+8,yy-9);cx.globalAlpha=1});
+ }
+}
+function loop(now){
+ if(!S.open)return;
+ if(S.rv<1)S.rv=Math.min(1,(now-S.rv0)/750);
+ if(S.scan!=null){var W=cv.clientWidth-58;S.scan+=W/110;if(S.scan>W)S.scan=0}
+ draw(now);requestAnimationFrame(loop);
+}
+
+/* ---------------- sheet ---------------- */
+function setChip(k,txt){$('chip').className='chipc '+(k||'');$('chipT').textContent=txt}
+function altMode(on){
+ ['chartbox','tf','pvtag','go'].forEach(function(id){$(id).classList.toggle('hidden',on)});
+ $('term').classList.add('hidden');$('term').innerHTML='';$('res').innerHTML='';
+ $('alt').classList.toggle('hidden',!on);
+}
+function resetSheet(){
+ S.ana=null;S.scan=null;S.busy=false;altMode(false);
+ $('go').classList.remove('hidden');$('go').disabled=false;setChip('','SEDIA');
+}
+function buildTf(){
+ $('tf').innerHTML=TFS.map(function(x){return '<button data-t="'+x+'" class="'+(x===tf?'on':'')+'">'+x+'</button>'}).join('');
+ Array.prototype.forEach.call($('tf').querySelectorAll('button'),function(b){b.onclick=function(){
+  if(S.busy||b.dataset.t===tf)return;
+  tf=b.dataset.t;hap(8);S.run++;buildTf();resetSheet();loadCandles();
+ }});
+}
+/* Chart OHLC SEBENAR dari /api/bars — tiada janaan rawak. */
+function loadCandles(){
+ var run=S.run,pair=cur.s,tfv=tf;
+ S.candles=[];S.m=null;S.ana=null;S.scan=null;
+ $('go').disabled=true;setChip('scan',t('loading'));
+ apiFetch('/api/bars?pair='+encodeURIComponent(pair)+'&tf='+encodeURIComponent(tfv)).then(function(res){
+  if(run!==S.run)return;
+  var cs=res.ok&&res.data&&Array.isArray(res.data.candles)?res.data.candles.map(function(k){return{o:+k.o,h:+k.h,l:+k.l,c:+k.c}}).filter(function(k){return isFinite(k.o)&&isFinite(k.h)&&isFinite(k.l)&&isFinite(k.c)}):[];
+  if(cs.length<30){chartFail();return}
+  S.candles=cs;S.m=metrics(cs);S.rv=0;S.rv0=performance.now();$('go').disabled=false;setChip('','SEDIA');
+ }).catch(function(){if(run===S.run)chartFail()});
+}
+function chartFail(){
+ setChip('','RALAT');$('go').disabled=true;
+ $('res').innerHTML='<div class="errbox"><p>'+esc(t('chartFail'))+'</p><button class="again" id="retryChart">'+esc(t('retry'))+'</button></div>';
+ $('retryChart').onclick=function(){hap(8);$('res').innerHTML='';loadCandles()};
+}
+function showSoon(){
+ altMode(true);
+ var sug=PAIRS.filter(function(p){return !p.soon}).map(function(p){return p.s});
+ $('alt').innerHTML='<div class="errbox" style="background:#ffc16b12;border-color:#ffc16b40"><p>'+esc(t('notOpen'))+'</p></div><div class="sec">'+esc(t('all'))+'</div><div style="display:flex;flex-wrap:wrap;gap:8px">'+sug.map(function(s){return '<button class="again" style="width:auto;margin:0;padding:9px 13px" data-s="'+s+'">'+s+'</button>'}).join('')+'</div>';
+ Array.prototype.forEach.call($('alt').querySelectorAll('[data-s]'),function(b){b.onclick=function(){hap(8);openSheet(b.dataset.s)}});
+}
+function openSheet(sym){
+ cur=PAIRS.filter(function(p){return p.s===sym})[0];if(!cur)return;
+ hap(12);S.run++;S.busy=false;S.open=false;
+ $('sIc').textContent=cur.s.slice(0,3);$('sNm').textContent=cur.s;
+ $('sDs').textContent=cur.n+(cur.p!=null?' · '+fx(cur,cur.p):'');
+ $('sheet').setAttribute('aria-label',cur.s);
+ $('pvtag').textContent=lang==='en'?'Real OHLC chart · M15 engine analysis':'Chart OHLC sebenar · Analisis enjin M15';
+ buildTf();resetSheet();$('phone').classList.add('open');$('sheet').scrollTop=0;
+ if(cur.soon){showSoon();return}
+ S.open=true;sizeCv();loadCandles();requestAnimationFrame(function(x){loop(x)});
+}
+function openAlt(icon,title,sub,html){
+ S.run++;S.open=false;S.busy=false;altMode(true);
+ $('sIc').textContent=icon;$('sNm').textContent=title;$('sDs').textContent=sub;
+ $('sheet').setAttribute('aria-label',title);
+ $('alt').innerHTML=html;$('phone').classList.add('open');$('sheet').scrollTop=0;
+}
+function closeSheet(){S.run++;S.busy=false;S.open=false;$('phone').classList.remove('open');resetSheet();drawPairs(true)}
+$('bd').onclick=closeSheet;$('sx').onclick=closeSheet;
+window.addEventListener('resize',function(){if(S.open)sizeCv()});
+document.addEventListener('keydown',function(e){if(e.key!=='Escape')return;if($('phone').classList.contains('ropen'))closeRisk();else if($('phone').classList.contains('open'))closeSheet()});
+
+/* ---------------- AI analisis SEBENAR ---------------- */
+function typeLine(html,run){
+ return new Promise(function(res){
+  var d=document.createElement('div');d.className='tl cur';$('term').appendChild(d);
+  var prev=$('term').querySelectorAll('.tl.cur');Array.prototype.forEach.call(prev,function(el){if(el!==d)el.classList.remove('cur')});
+  var tmp=document.createElement('div');tmp.innerHTML=html;var plain=tmp.textContent,i=0;
+  (function step(){if(run!==S.run)return res(false);i=Math.min(plain.length,i+2);
+   if(i<plain.length){d.textContent=plain.slice(0,i);setTimeout(step,10)}else{d.innerHTML=html;setTimeout(function(){res(true)},120)}})();
+ });
+}
+function bumpCount(){try{var n=parseInt(localStorage.getItem('tw-analysis-count')||'0',10)||0;localStorage.setItem('tw-analysis-count',String(n+1));if(profileLoaded)renderStats()}catch(e){}}
+/* Kira verdict HOLD — dipakai untuk badge "Patient" dalam Liga. */
+function bumpHold(){try{var n=parseInt(localStorage.getItem('tw-hold-count')||'0',10)||0;localStorage.setItem('tw-hold-count',String(n+1))}catch(e){}}
+function analyze(){
+ if(S.busy)return;
+ if(!S.m){toast(t('loading'));return}
+ S.busy=true;var run=++S.run,f=function(v){return fx(cur,v)},m=S.m;hap(18);
+ $('go').classList.add('hidden');$('res').innerHTML='';$('term').innerHTML='';$('term').classList.remove('hidden');
+ S.ana=null;S.scan=0;setChip('scan',lang==='en'?'AI SCANNING':'AI MENGIMBAS');
+ /* Enjin analisis M15 (disokong backend), tanpa mengira TF chart dipapar. */
+ var pre=apiFetch('/api/analyze',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({pair:cur.s,timeframe:'M15'})}).catch(function(){return{ok:false,status:0,data:{}}});
+ var lines=[
+  '<b>▸</b> '+(lang==='en'?'Reading '+m.n+' real candles of '+cur.s+' ('+tf+')…':'Membaca '+m.n+' candle sebenar '+cur.s+' ('+tf+')…'),
+  '<b>▸</b> EMA 20 = '+f(m.e20)+' · EMA 50 = '+f(m.e50),
+  '<b>▸</b> RSI 14 = '+m.rsi.toFixed(1)+' · ATR 14 = '+f(m.atr),
+  '<b>▸</b> '+(lang==='en'?'Sending M15 structure to AI engine…':'Menghantar struktur M15 ke enjin AI…'),
+  '<b>▸</b> '+(lang==='en'?'AI is reading the market — usually 20–60s…':'AI membaca pasaran — biasanya 20–60 saat…')
+ ];
+ (async function(){
+  for(var i=0;i<lines.length;i++){if(!(await typeLine(lines[i],run)))return}
+  var res=await pre;if(run!==S.run)return;
+  if(!res.ok||!res.data||!res.data.side){analyzeFail(res);return}
+  var a=mapVerdict(res.data); a.mt5=res.data.mt5||null;
+  await typeLine('<span class="ok">✓ '+(lang==='en'?'Analysis ready.':'Analisis siap.')+'</span>',run);
+  if(run!==S.run)return;
+  S.scan=null;S.ana=a;S.t0=performance.now();S.busy=false;setChip('done',lang==='en'?'ANALYSIS READY':'ANALISIS SIAP');
+  bumpCount();if(res.data.side==='HOLD')bumpHold();show(a);
+ })();
+}
+function analyzeFail(res){
+ S.busy=false;S.scan=null;setChip('','SEDIA');
+ var e=esc((res.data&&res.data.error)||'');
+ var msg=res.status===429?t('limit'):res.status===400?t('notOpen'):t('noAnalysis');
+ if(e&&res.status!==400&&res.status!==429)msg+=' '+e;
+ $('term').classList.add('hidden');
+ $('res').innerHTML='<div class="errbox"><p>'+msg+'</p><button class="again" id="retryAna">'+esc(t('retry'))+'</button></div>';
+ $('retryAna').onclick=function(){hap(8);analyze()};
+}
+function mt5Banner(m){
+ if(!m||!m.synced)return '';
+ if(m.dry_run)return '<div class="mt5b dry"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 9v4m0 4h.01M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/></svg><span>'+(lang==='en'?'MT5 dry-run · lot ':'MT5 dry-run · lot ')+esc(String(m.lot))+' — '+(lang==='en'?'no live order placed':'tiada order sebenar')+'</span></div>';
+ return '<div class="mt5b live"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg><span>'+(lang==='en'?'Sent to MT5 · ':'Dihantar ke MT5 · ')+esc(m.type||'pending')+' #'+esc(String(m.ticket))+' · lot '+esc(String(m.lot))+'</span></div>';
+}
+function show(a){
+ var f=function(v){return fx(cur,v)},cls=a.dir==='BUY'?'buy':a.dir==='SELL'?'sell':'wait';
+ var col=a.dir==='BUY'?'#b7f36b':a.dir==='SELL'?'#ff777d':'#ffc16b';
+ var val=a.dir==='WAIT'?(lang==='en'?'WAIT':'TUNGGU'):a.dir;
+ var h='<div class="bias '+cls+'" style="--rc:'+col+'"><div><div class="lab">'+esc(t('aiLabel'))+'</div><div class="val">'+val+'</div><div class="asof">'+cur.s+' · M15'+(a.model?' · '+esc(a.model):'')+'</div></div><div class="ring"><svg viewBox="0 0 80 80"><circle class="rb" cx="40" cy="40" r="34"/><circle class="rf" id="rf" cx="40" cy="40" r="34" transform="rotate(-90 40 40)"/></svg><div class="n"><div><span id="cn">0</span>%<small>'+esc(t('conf'))+'</small></div></div></div></div>';
+ h+=mt5Banner(a.mt5);
+ if(a.entry!=null)h+='<div class="lv"><div class="e" style="animation-delay:.15s"><small>'+esc(t('entry'))+'</small><b>'+f(a.entry)+'</b></div><div class="t" style="animation-delay:.25s"><small>'+esc(t('tp'))+'</small><b>'+f(a.tp)+(a.tp2!=null?' / '+f(a.tp2):'')+'</b></div><div class="s" style="animation-delay:.35s"><small>'+esc(t('sl'))+'</small><b>'+f(a.sl)+'</b></div></div>';
+ else h+='<p style="text-align:center;color:var(--muted);font-size:12px;margin:4px 0 0">'+esc(t('waitMsg'))+'</p>';
+ if(a.entry!=null)h+='<button class="take" id="takeBtn">'+esc(t('takeTrade'))+'</button>';
+ else h+='<button class="take" id="takeBtn" disabled>'+esc(t('takeTrade'))+'</button><p class="takenote">'+esc(t('noSetup'))+'</p>';
+ h+='<div class="sec">'+esc(t('checklist'))+'</div><ul class="chk">'+a.checks.map(function(c,i){return '<li class="'+(c.ok?'y':'n')+'" style="animation-delay:'+(.4+i*.12)+'s"><span class="b">'+(c.ok?'✓':'✕')+'</span>'+esc(c.t)+'</li>'}).join('')+'</ul>';
+ h+='<div class="sec">'+esc(t('reasons'))+'</div><ul class="reasons">'+a.reasons.map(function(x,i){return '<li style="animation-delay:'+(1+i*.12)+'s"><span class="dot" style="background:'+col+'"></span><span>'+x+'</span></li>'}).join('')+'</ul>';
+ h+='<div class="sec">'+esc(t('risk'))+'</div><ul class="reasons">'+a.risk.map(function(x,i){return '<li style="animation-delay:'+(1.5+i*.12)+'s"><span class="dot" style="background:#ffc16b"></span><span>'+esc(x)+'</span></li>'}).join('')+'</ul>';
+ h+='<div class="note">'+(lang==='en'?'Not financial advice. All trading decisions are your own.':'Ini bukan nasihat kewangan. Semua keputusan trading adalah tanggungjawab anda.')+'</div><button class="again" id="again">'+esc(t('again'))+'</button>';
+ $('res').innerHTML=h;
+ requestAnimationFrame(function(){requestAnimationFrame(function(){$('rf').style.strokeDashoffset=(213.6*(1-a.conf/100)).toFixed(1)})});
+ var t0p=performance.now();(function up(now){var k=Math.min(1,(now-t0p)/1100);$('cn').textContent=Math.round(a.conf*ease(k));if(k<1)requestAnimationFrame(up)})(t0p);
+ $('again').onclick=function(){S.run++;resetSheet();$('sheet').scrollTo({top:0,behavior:'smooth'})};
+ $('takeBtn').onclick=function(){if(a.entry==null)return;hap(10);openRisk(a)};
+ setTimeout(function(){$('res').scrollIntoView({behavior:'smooth',block:'start'})},220);
+}
+$('go').onclick=analyze;
+
+/* ---------------- community (API sebenar) ---------------- */
+var MSGS=[],comLoaded=false,sending=false;
+var AVCOL=['#b7f36b','#8ab4ff','#ffc16b','#ff9db0','#a78bfa','#7ad4c4','#f0a860'];
+function avCol(n){var h=0;for(var i=0;i<n.length;i++)h=(h*31+n.charCodeAt(i))>>>0;return AVCOL[h%AVCOL.length]}
+function initials(n){return String(n||'?').trim().slice(0,2).toUpperCase()}
+function myChatName(){var s=getSession(),u=s&&s.user,md=(u&&u.user_metadata)||{};return md.username||md.full_name||md.name||((u&&u.email)||'').split('@')[0]||''}
+function myTm(iso){
+ var d=new Date(iso);if(isNaN(d.getTime()))return '';
+ var hm=new Intl.DateTimeFormat('en-GB',{timeZone:'Asia/Kuala_Lumpur',hour:'2-digit',minute:'2-digit',hour12:false}).format(d);
+ var day=new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Kuala_Lumpur'}).format(d);
+ var today=new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Kuala_Lumpur'}).format(new Date());
+ if(day===today)return hm;
+ return new Intl.DateTimeFormat('en-GB',{timeZone:'Asia/Kuala_Lumpur',day:'numeric',month:'short'}).format(d)+' '+hm;
+}
+function drawMsgs(){
+ var me=myChatName();
+ if(!MSGS.length){
+  $('msgs').innerHTML='<div class="empty">'+esc(t('emptyChat'))+'</div>';
+ }else{
+  $('msgs').innerHTML=MSGS.map(function(m){
+   var isMe=me&&m.username===me;
+   return '<div class="msg'+(isMe?' me':'')+'"><div class="av" style="background:'+avCol(m.username)+'">'+esc(initials(m.username))+'</div><div class="body"><div class="meta"><b>'+esc(m.username)+'</b><time>'+esc(myTm(m.created_at))+'</time></div><p>'+esc(m.body)+'</p></div></div>';
+  }).join('');
+ }
+ var users={};MSGS.forEach(function(m){users[m.username]=1});
+ var n=Object.keys(users).length;
+ $('onlineTxt').textContent=n?(n+' '+t('membersToday')):t('online');
+ $('comNote').textContent=t('resetAt');
+}
+function loadMessages(){
+ comLoaded=true;
+ apiFetch('/api/chat/messages?limit=50').then(function(res){
+  if(!res.ok){toast(t('sendErr'));return}
+  MSGS=(res.data&&Array.isArray(res.data.messages))?res.data.messages.slice().reverse():[];
+  drawMsgs();
+ }).catch(function(){toast(t('sendErr'))});
+}
+function sendMsg(){
+ if(sending)return;
+ var inp=$('msgInput'),v=inp.value.trim();
+ if(!v){toast(t('emptyMsg'));return}
+ if(v.length>500){toast(t('longMsg'));return}
+ sending=true;$('sendBtn').disabled=true;
+ apiFetch('/api/chat/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text:v})}).then(function(res){
+  sending=false;$('sendBtn').disabled=false;
+  if(!res.ok){
+   if(res.status===429)toast(t('slow'));
+   else if(res.status===400)toast((res.data&&/max/i.test(res.data.error||''))?t('longMsg'):t('filtered'));
+   else toast(t('sendErr'));return;
+  }
+  inp.value='';
+  if(res.data&&res.data.message)MSGS.push(res.data.message);
+  drawMsgs();hap(8);
+  if(res.data&&res.data.filtered&&res.data.filtered.length)toast(t('someFiltered'));
+  var last=$('msgs').lastElementChild;if(last)last.scrollIntoView({behavior:'smooth',block:'nearest'});
+ }).catch(function(){sending=false;$('sendBtn').disabled=false;toast(t('sendErr'))});
+}
+$('sendBtn').onclick=sendMsg;
+$('msgInput').addEventListener('keydown',function(e){if(e.key==='Enter')sendMsg()});
+
+/* ---------------- liga (paper league — API sebenar) ---------------- */
+var LG={me:null,trades:[],board:[],season:null,state:'idle',at:0};
+var lsub='lb',metric='r',MIN_CONS=5;
+var STK={open:'stOpen',tp:'stTP',sl:'stSL',be:'stBE',expired:'stExp'};
+var MEDALS=[
+ '<svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 2h3.4l1.2 4.6L8.4 9 7 2Zm10 0h-3.4l-1.2 4.6L15.6 9 17 2Z" fill="#ffd76b"/><circle cx="12" cy="15" r="6.2" fill="#ffd76b"/><circle cx="12" cy="15" r="3.6" fill="none" stroke="rgba(0,0,0,.28)" stroke-width="1.3"/></svg>',
+ '<svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 2h3.4l1.2 4.6L8.4 9 7 2Zm10 0h-3.4l-1.2 4.6L15.6 9 17 2Z" fill="#cdd6e0"/><circle cx="12" cy="15" r="6.2" fill="#cdd6e0"/><circle cx="12" cy="15" r="3.6" fill="none" stroke="rgba(0,0,0,.28)" stroke-width="1.3"/></svg>',
+ '<svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 2h3.4l1.2 4.6L8.4 9 7 2Zm10 0h-3.4l-1.2 4.6L15.6 9 17 2Z" fill="#e0a06b"/><circle cx="12" cy="15" r="6.2" fill="#e0a06b"/><circle cx="12" cy="15" r="3.6" fill="none" stroke="rgba(0,0,0,.28)" stroke-width="1.3"/></svg>'
+];
+var BICONS={
+ shield:'<path d="M12 3l7 3v5c0 4.5-3 8-7 10-4-2-7-5.5-7-10V6l7-3Z"/><path d="m9 12 2 2 4-4"/>',
+ flame:'<path d="M12 22a7 7 0 0 0 7-7c0-2-1-3.9-2.5-5.5C15 8 13 6.5 12 2c-1 3.5-3 5-4.5 6.5C6 10.1 5 12 5 15a7 7 0 0 0 7 7Z"/>',
+ chart:'<path d="M3 3v18h18"/><path d="m7 15 4-5 3 3 5-7"/>',
+ clock:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/>',
+ target:'<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.5"/>',
+ star:'<path d="m12 3 2.4 5.6L20 9l-4 4 1 6-5-3-5 3 1-6-4-4 5.6-.4Z"/>'
+};
+function money(v){return (v==null||!isFinite(+v))?'—':'$'+Number(v).toLocaleString('en-US',{minimumFractionDigits:0,maximumFractionDigits:2})}
+function fmtR(r){if(r==null||!isFinite(+r))return '—';var s=Math.abs(+r).toFixed(2).replace(/\.?0+$/,'');return (+r<0?'−':'+')+s+'R'}
+function wrTxt(v){return (v==null||!isFinite(+v))?'—':(+v).toFixed(1)+'%'}
+function pairName(s){s=String(s||'').replace('/','');return s.length>3?s.slice(0,3)+'/'+s.slice(3):s}
+function pdec(s){var p=PAIRS.filter(function(x){return x.s===s})[0];return p?p.d:2}
+function tfx(s,v){return (v==null||!isFinite(+v))?'—':Number(v).toFixed(pdec(s))}
+function lsCount(k){try{var v=parseInt(localStorage.getItem(k)||'0',10);return isFinite(v)&&v>0?v:0}catch(e){return 0}}
+function dayKey(d){return new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Kuala_Lumpur'}).format(d)}
+function closedSorted(){
+ return LG.trades.filter(function(x){return x.status!=='open'&&x.r_result!=null}).slice().sort(function(a,b){return String(b.closed_at||'').localeCompare(String(a.closed_at||''))});
+}
+function tpStreak(){var c=closedSorted(),n=0;for(var i=0;i<c.length;i++){if(c[i].status==='tp')n++;else break}return n}
+/* Hari hijau berturut (MYT) dikira dari closed trades sebenar. */
+function greenStreak(){
+ var byDay={};
+ closedSorted().forEach(function(x){var d=new Date(x.closed_at);if(isNaN(d.getTime()))return;var k=dayKey(d);byDay[k]=(byDay[k]||0)+(+x.r_result||0)});
+ if(!Object.keys(byDay).length)return 0;
+ var start=new Date();
+ if(!(dayKey(start) in byDay))start=new Date(start.getTime()-86400000);
+ var n=0;
+ for(var i=0;i<60;i++){var k=dayKey(new Date(start.getTime()-i*86400000));if(k in byDay&&byDay[k]>0)n++;else break}
+ return n;
+}
+/* Consistency = win rate berwajaran bilangan trade (min MIN_CONS). */
+function consScore(x){var wr=x.win_rate==null?0:+x.win_rate,n=+x.trades||0;return n>=MIN_CONS?wr:wr*(n/MIN_CONS)}
+function sortBoard(list,m){
+ return list.slice().sort(function(a,b){
+  var d=m==='wr'?((+b.win_rate||0)-(+a.win_rate||0)):m==='cons'?(consScore(b)-consScore(a)):((+b.net_r||0)-(+a.net_r||0));
+  if(d!==0)return d;
+  d=(+b.net_r||0)-(+a.net_r||0);
+  return d!==0?d:((+b.trades||0)-(+a.trades||0));
+ });
+}
+function lgErrorHtml(){return '<div class="errbox"><p>'+esc(t('leagueErr'))+'</p><button class="again" id="lgRetry">'+esc(t('retry'))+'</button></div>'}
+function loadLeague(force){
+ if(LG.state==='loading')return Promise.resolve();
+ if(!force&&LG.state==='ready'&&Date.now()-LG.at<60000)return Promise.resolve();
+ LG.state='loading';renderLiga();
+ return Promise.all([apiFetch('/api/league/me'),apiFetch('/api/league/trades'),apiFetch('/api/league/leaderboard')]).then(function(rs){
+  if(!rs[0].ok||!rs[1].ok||!rs[2].ok){LG.state='error';renderLiga();return}
+  LG.me=rs[0].data||null;
+  LG.trades=(rs[1].data&&Array.isArray(rs[1].data.trades))?rs[1].data.trades:[];
+  LG.board=(rs[2].data&&Array.isArray(rs[2].data.leaderboard))?rs[2].data.leaderboard:[];
+  LG.season=(LG.me&&LG.me.season!=null)?LG.me.season:(rs[2].data?rs[2].data.season:null);
+  LG.state='ready';LG.at=Date.now();renderLiga();
+ }).catch(function(e){if(e&&e.message==='auth')return;LG.state='error';renderLiga()});
+}
+function drawSub(){
+ var subs=[['lb','subLb'],['trades','subTrades'],['badges','subBadges']];
+ $('lsub').innerHTML=subs.map(function(s){return '<button data-s="'+s[0]+'" class="'+(s[0]===lsub?'on':'')+'" role="tab" aria-selected="'+(s[0]===lsub)+'">'+esc(t(s[1]))+'</button>'}).join('');
+ Array.prototype.forEach.call($('lsub').querySelectorAll('button'),function(b){b.onclick=function(){hap(6);setSub(b.dataset.s)}});
+}
+function setSub(s){
+ lsub=s;
+ ['lb','trades','badges'].forEach(function(x){$('liga-'+x).classList.toggle('hidden',x!==s)});
+ drawSub();
+}
+function drawSeason(){
+ $('seasonT').textContent=t('seasonT');$('seasonS').textContent=t('seasonS');
+ $('seasonChip').textContent=t('seasonLab')+' '+(LG.season!=null?LG.season:'—');
+ $('rankedLab').textContent=t('rankedLab');
+ $('rankedN').textContent=LG.state==='ready'?String(LG.board.length):'—';
+}
+function drawMetric(){
+ var ms=[['r','mNetR'],['wr','mWr'],['cons','mCons']];
+ $('mtoggle').innerHTML=ms.map(function(x){return '<button data-m="'+x[0]+'" class="'+(x[0]===metric?'on':'')+'" aria-pressed="'+(x[0]===metric)+'">'+esc(t(x[1]))+'</button>'}).join('');
+ Array.prototype.forEach.call($('mtoggle').querySelectorAll('button'),function(b){b.onclick=function(){metric=b.dataset.m;hap(6);drawMetric();drawLb()}});
+ $('consNote').textContent=t('consNote');
+ $('consNote').classList.toggle('hidden',metric!=='cons');
+}
+function drawYou(){
+ var me=LG.me,el=$('youcard');
+ if(LG.state==='error'){el.innerHTML=lgErrorHtml();return}
+ if(!me){el.innerHTML='<div class="ylab">'+esc(t('youLab'))+'</div><div class="empty">'+esc(t('loading'))+'</div>';return}
+ var rank=me.rank!=null?+me.rank:null,nr=+me.net_r||0;
+ var sorted=sortBoard(LG.board,'r'),idx=-1;
+ sorted.forEach(function(x,i){if(x.is_me)idx=i});
+ var above=(rank!=null&&idx>0)?sorted[idx-1]:null,prog;
+ if(above){
+  var diff=Math.max(0,(+above.net_r||0)-nr);
+  var pct=(+above.net_r||0)>0?Math.max(4,Math.min(100,nr/(+above.net_r)*100)):100;
+  prog='<div class="nextprog"><div class="nt"><span>'+esc(above.username)+' · #'+idx+'</span><b>+'+diff.toFixed(1)+'R '+esc(t('toNext'))+' #'+idx+'</b></div><div class="bar"><i style="width:'+pct.toFixed(0)+'%"></i></div></div>';
+ }else if(rank===1){
+  prog='<div class="nextprog"><div class="nt"><span>'+esc(t('topMsg'))+'</span></div><div class="bar"><i style="width:100%"></i></div></div>';
+ }else{
+  prog='<div class="nextprog"><div class="nt"><span>'+esc(t('rankHint'))+'</span></div><div class="bar"><i style="width:0%"></i></div></div>';
+ }
+ el.innerHTML='<div class="ylab">'+esc(t('youLab'))+'</div><div class="row"><div class="bigrank">'+(rank!=null?'#'+rank:'—')+'<small>'+esc(t('rankLab')).toUpperCase()+'</small></div><div class="youstats">'+
+  '<div class="ystat'+(nr>0?' pos':'')+'"><b>'+fmtR(nr)+'</b><small>'+esc(t('netR'))+'</small></div>'+
+  '<div class="ystat"><b>'+wrTxt(me.win_rate)+'</b><small>'+esc(t('winRate'))+'</small></div>'+
+  '<div class="ystat"><b>'+money(me.balance)+'</b><small>'+esc(t('balanceLab'))+'</small></div>'+
+  '</div></div>'+prog;
+}
+function drawLb(){
+ var el=$('lb');
+ if(LG.state==='loading'){el.innerHTML='<div class="empty">'+esc(t('loading'))+'</div>';return}
+ if(LG.state==='error'){el.innerHTML=lgErrorHtml();return}
+ if(!LG.board.length){el.innerHTML='<div class="empty">'+esc(t('lbEmpty'))+'</div>';return}
+ var sorted=sortBoard(LG.board,metric);
+ el.innerHTML=sorted.map(function(x,i){
+  var rank=i+1,rk=rank<=3?MEDALS[rank-1]:String(rank),nr=+x.net_r||0,val,cls,sub;
+  var n=+x.trades||0,unit=n===1?t('tradeOne'):t('tradeUnit');
+  if(metric==='r'){val=fmtR(nr);cls=nr>0?'pos':nr<0?'neg':'neu';sub=wrTxt(x.win_rate)+' · '+n+' '+unit}
+  else{val=wrTxt(x.win_rate);cls='neu';sub=fmtR(nr)+' · '+n+' '+unit}
+  return '<div class="lrow'+(x.is_me?' me':'')+(rank<=3?' g'+rank:'')+'" style="animation-delay:'+(i*30)+'ms">'+
+   '<span class="rk">'+rk+'</span>'+
+   '<span class="av" style="background:'+avCol(String(x.username||'?'))+'">'+esc(initials(x.username))+'</span>'+
+   '<span class="who"><span class="nm">'+esc(x.username)+(x.is_me?'<span class="lbadge">'+esc(t('youName'))+'</span>':'')+'</span>'+
+   '<span class="lsub2">'+esc(sub)+'</span></span>'+
+   '<span class="val '+cls+'">'+esc(val)+'</span></div>';
+ }).join('');
+}
+function drawTrades(){
+ var me=LG.me;
+ $('tsum').innerHTML=
+  '<div class="tstat"><b>'+money(me?me.balance:null)+'</b><small>'+esc(t('capLab'))+'</small></div>'+
+  '<div class="tstat'+(me&&+me.net_r>0?' pos':'')+'"><b>'+(me?fmtR(me.net_r):'—')+'</b><small>'+esc(t('netR'))+'</small></div>'+
+  '<div class="tstat"><b>'+(me&&me.trades_open!=null?me.trades_open:'—')+'</b><small>'+esc(t('openLab'))+'</small></div>'+
+  '<div class="tstat"><b>'+(me&&me.trades_closed!=null?me.trades_closed:'—')+'</b><small>'+esc(t('closedLab'))+'</small></div>';
+ var el=$('tlist');
+ if(LG.state==='loading'){el.innerHTML='<div class="empty">'+esc(t('loading'))+'</div>';return}
+ if(LG.state==='error'){el.innerHTML=lgErrorHtml();return}
+ if(!LG.trades.length){el.innerHTML='<div class="empty">'+esc(t('tEmpty'))+'</div>';return}
+ el.innerHTML=LG.trades.map(function(x,i){
+  var st=String(x.status||'open').toLowerCase(),known=!!STK[st];
+  var stCls=known?st:'open',stTxt=t(STK[st]||'stOpen'),isOpen=st==='open';
+  var stHtml=(isOpen?'<i class="pulse"></i>':'')+esc(stTxt);
+  var r=x.r_result==null?null:+x.r_result;
+  var res=(isOpen||r==null)?'<span class="tr neu">—</span>':'<span class="tr '+(r>0?'pos':r<0?'neg':'neu')+'">'+fmtR(r)+'</span>';
+  var run=isOpen?'<div class="trun"><i class="pulse"></i><span>'+esc(t('running'))+'</span></div>':'';
+  var side=String(x.side||'').toUpperCase();
+  return '<div class="tcard" style="animation-delay:'+(i*40)+'ms">'+
+   '<div class="top"><span class="tpair">'+esc(pairName(x.pair))+'</span><span class="side '+esc(side.toLowerCase())+'">'+esc(side)+'</span><span class="st '+stCls+'">'+stHtml+'</span></div>'+
+   '<div class="tlevels"><span class="e">E <b>'+tfx(x.pair,x.entry)+'</b></span><span class="s">SL <b>'+tfx(x.pair,x.sl)+'</b></span><span class="t">TP <b>'+tfx(x.pair,x.tp)+'</b></span><span>'+esc(t('riskLab'))+' <b>'+money(x.risk_usd)+'</b></span></div>'+run+
+   '<div class="tmeta"><span>'+esc(t('riskLab'))+' '+(+x.risk_pct||0)+'% · '+esc(myTm(x.closed_at||x.opened_at))+'</span>'+res+'</div></div>';
+ }).join('');
+}
+function drawBadges(){
+ var el=$('bgrid');
+ if(LG.state==='loading'){el.innerHTML='<div class="empty" style="grid-column:1/-1">'+esc(t('loading'))+'</div>';return}
+ if(LG.state==='error'){el.innerHTML='<div style="grid-column:1/-1">'+lgErrorHtml()+'</div>';return}
+ var me=LG.me,lowRisk=LG.trades.filter(function(x){return +x.risk_pct<=1}).length;
+ var total=me?((+me.trades_closed||0)+(+me.trades_open||0)):LG.trades.length;
+ var badges=[
+  {k:'bRisk',ck:'bcRisk',ic:'shield',cur:Math.min(lowRisk,10),max:10},
+  {k:'bCons',ck:'bcCons',ic:'flame',cur:Math.min(greenStreak(),7),max:7},
+  {k:'bAna',ck:'bcAna',ic:'chart',cur:Math.min(lsCount('tw-analysis-count'),50),max:50},
+  {k:'bPat',ck:'bcPat',ic:'clock',cur:Math.min(lsCount('tw-hold-count'),5),max:5},
+  {k:'bTp',ck:'bcTp',ic:'target',cur:Math.min(tpStreak(),5),max:5},
+  {k:'bStart',ck:'bcStart',ic:'star',cur:Math.min(total,1),max:1}
+ ];
+ el.innerHTML=badges.map(function(b,i){
+  var got=b.cur>=b.max;
+  var status=got?'<div class="bstatus">'+esc(t('got'))+'</div>':
+   b.cur>0?'<div class="bprog"><div class="bar"><i style="width:'+Math.round(b.cur/b.max*100)+'%"></i></div><small>'+b.cur+'/'+b.max+'</small></div>':
+   '<div class="bstatus">'+esc(t('locked'))+'</div>';
+  return '<div class="bcard'+(got?' got':'')+'" style="animation-delay:'+(i*40)+'ms">'+
+   '<div class="bic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">'+BICONS[b.ic]+'</svg></div>'+
+   '<b>'+esc(t(b.k))+'</b><small>'+esc(t(b.ck))+'</small>'+status+'</div>';
+ }).join('');
+}
+function renderLiga(){
+ drawSub();drawSeason();drawYou();drawMetric();drawLb();drawTrades();drawBadges();
+ var r=$('lgRetry');if(r)r.onclick=function(){hap(8);loadLeague(true)};
+ if(LG.state==='idle'&&current==='liga')loadLeague();
+}
+$('newTrade').onclick=function(){hap(8);showView('analyst');toast(t('pickPair'))};
+
+/* ---------------- modal risiko: buka paper trade sebenar ---------------- */
+var riskAna=null,riskPct=1,riskBusy=false,riskBal=null;
+/* Lot anggaran sahaja — backend mengira risk_usd dari baki maya. */
+function lotFor(sym,entry,sl,amt){
+ var mult=sym==='XAUUSD'?100:sym==='XAGUSD'?5000:sym==='BTCUSD'?1:100000;
+ var dist=Math.abs(entry-sl)||1e-9;
+ return Math.max(0.01,amt/(dist*mult));
+}
+function drawRiskOpts(){
+ $('riskOpts').innerHTML=[1,2].map(function(p){
+  var amt=riskBal==null?null:riskBal*p/100;
+  return '<button class="riskopt'+(p===riskPct?' on':'')+'" data-p="'+p+'" role="radio" aria-checked="'+(p===riskPct)+'">'+p+'%<small>'+money(amt)+'</small></button>';
+ }).join('');
+ Array.prototype.forEach.call($('riskOpts').querySelectorAll('.riskopt'),function(b){b.onclick=function(){riskPct=+b.dataset.p;hap(6);drawRiskOpts();updateLot()}});
+ $('rBase').textContent=t('rBase')+' '+money(riskBal);
+}
+function updateLot(){
+ $('lotVal').textContent=(riskAna&&riskBal!=null)?lotFor(riskAna.pair,riskAna.entry,riskAna.sl,riskBal*riskPct/100).toFixed(2):'—';
+}
+function riskErr(msg){$('rErr').innerHTML='<div class="errbox" style="margin-top:0;margin-bottom:12px"><p>'+esc(msg)+'</p></div>'}
+function openRisk(a){
+ if(!cur||a.entry==null||a.dir==='WAIT')return;
+ riskAna={pair:cur.s,side:a.dir,entry:a.entry,sl:a.sl,tp:a.tp,conf:a.conf};
+ riskPct=1;riskBusy=false;
+ riskBal=(LG.me&&isFinite(+LG.me.balance))?+LG.me.balance:null;
+ $('rErr').innerHTML='';
+ $('rPair').innerHTML='<b>'+esc(pairName(riskAna.pair))+'</b><span class="side '+esc(riskAna.side.toLowerCase())+'">'+esc(riskAna.side)+'</span><span class="rsub">M15 · '+riskAna.conf+'%</span>';
+ $('rLevels').innerHTML='<div class="e"><small>'+esc(t('entry'))+'</small><b>'+tfx(riskAna.pair,riskAna.entry)+'</b></div><div class="t"><small>'+esc(t('tp'))+'</small><b>'+tfx(riskAna.pair,riskAna.tp)+'</b></div><div class="s"><small>'+esc(t('sl'))+'</small><b>'+tfx(riskAna.pair,riskAna.sl)+'</b></div>';
+ drawRiskOpts();updateLot();
+ $('rGo').textContent=t('openBtn');$('rGo').disabled=riskBal==null;
+ $('phone').classList.add('ropen');
+ if(riskBal==null){
+  apiFetch('/api/league/me').then(function(r){
+   if(!riskAna)return;
+   if(r.ok&&r.data&&isFinite(+r.data.balance)){LG.me=r.data;riskBal=+r.data.balance;drawRiskOpts();updateLot();$('rGo').disabled=false}
+   else riskErr(t('noBalance'));
+  }).catch(function(e){if(e&&e.message==='auth')return;riskErr(t('noBalance'))});
+ }
+}
+function closeRisk(){riskAna=null;riskBusy=false;$('phone').classList.remove('ropen')}
+$('rbd').onclick=closeRisk;$('rx').onclick=closeRisk;
+function submitTrade(){
+ if(!riskAna||riskBusy)return;
+ if(riskBal==null){riskErr(t('noBalance'));return}
+ riskBusy=true;$('rGo').disabled=true;$('rGo').textContent=t('opening');$('rErr').innerHTML='';
+ var body={pair:String(riskAna.pair).replace('/',''),side:riskAna.side,entry:riskAna.entry,sl:riskAna.sl,tp:riskAna.tp,risk_pct:riskPct};
+ apiFetch('/api/league/trade',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)}).then(function(r){
+  riskBusy=false;
+  if(r.ok){
+   hap(12);closeRisk();closeSheet();
+   showView('liga');setSub('trades');
+   loadLeague(true);
+   toast(t('toastOpened'));
+   return;
+  }
+  $('rGo').disabled=false;$('rGo').textContent=t('openBtn');
+  riskErr((r.data&&r.data.error)?r.data.error:t('tradeErr'));
+ }).catch(function(e){
+  riskBusy=false;$('rGo').disabled=false;$('rGo').textContent=t('openBtn');
+  if(e&&e.message==='auth')return;
+  riskErr(t('tradeErr'));
+ });
+}
+$('rGo').onclick=submitTrade;
+
+/* ---------------- profile (Supabase REST sebenar) ---------------- */
+var profileLoaded=false,ME=null,PLAN='free',PERF=null;
+function dateMY(iso){var d=new Date(iso);if(isNaN(d.getTime()))return '—';return new Intl.DateTimeFormat(lang==='en'?'en-GB':'ms-MY',{timeZone:'Asia/Kuala_Lumpur',day:'numeric',month:'short',year:'numeric'}).format(d)}
+function loadProfile(){
+ profileLoaded=true;
+ sbFetch('/auth/v1/user').then(function(r){
+  if(!r.ok||!r.data||!r.data.id){profileLoaded=false;return}
+  ME=r.data;
+  return sbFetch('/rest/v1/profiles?id=eq.'+encodeURIComponent(ME.id)+'&select=name,plan').then(function(pr){
+   var row=pr.ok&&Array.isArray(pr.data)&&pr.data[0]?pr.data[0]:null;
+   PLAN=((row&&row.plan)||'free').toLowerCase();
+   ME.dispName=(row&&row.name)||(ME.user_metadata&&(ME.user_metadata.name||ME.user_metadata.full_name||ME.user_metadata.username))||(ME.email||'').split('@')[0]||'Ahli';
+   renderProfile();
+  });
+ }).catch(function(){profileLoaded=false});
+ loadPerf();
+}
+/* Prestasi GLOBAL enjin dari signal-status.json (bukan prestasi peribadi). */
+function loadPerf(){
+ fetch('../signal-status.json').then(function(r){return r.ok?r.json():null}).then(function(d){
+  if(!d||!d.signals)return;
+  var tp=0,sl=0;Object.keys(d.signals).forEach(function(k){var s=d.signals[k]&&d.signals[k].status;if(s==='tp')tp++;else if(s==='sl')sl++});
+  PERF={tp:tp,sl:sl,closed:tp+sl,win:(tp+sl)?(tp/(tp+sl)*100):null};
+  renderStats();
+ }).catch(function(){});
+}
+function renderStats(){
+ var cnt=null;try{var v=localStorage.getItem('tw-analysis-count');cnt=v?parseInt(v,10):null}catch(e){}
+ $('s1v').textContent=cnt!=null&&isFinite(cnt)?String(cnt):'—';
+ $('s2v').textContent='—';
+ $('s3v').textContent=PERF&&PERF.win!=null?PERF.win.toFixed(1)+'%':'—';
+ $('s3').textContent=t('s3');
+}
+function renderProfile(){
+ if(!ME)return;
+ var nm=ME.dispName||'Ahli';
+ $('pInit').textContent=initials(nm);$('pName').textContent=nm;$('pEmail').textContent=ME.email||'—';
+ $('pPlan').textContent=PLAN==='pro'?'PRO':'FREE';
+ $('pSince').textContent=t('since')+' '+dateMY(ME.created_at);
+ $('avatarBtn').textContent=initials(nm);
+ renderStats();drawMenu();
+}
+var MICO={
+ mAccount:'<circle cx="12" cy="8" r="4"/><path d="M4 21v-1a8 8 0 0 1 16 0v1"/>',
+ mPerf:'<path d="M3 3v18h18"/><path d="m7 15 4-5 3 3 5-7"/>',
+ mDevice:'<rect x="6" y="2" width="12" height="20" rx="2"/><path d="M11 18h2"/>',
+ mLogout:'<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/>'
+};
+function drawMenu(){
+ var items=['mAccount','mPerf','mDevice','mLogout'];
+ $('menu').innerHTML=items.map(function(k,i){return '<button class="mrow'+(i===3?' danger':'')+'" data-k="'+k+'"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">'+MICO[k]+'</svg><span>'+esc(t(k))+'</span><svg class="chev" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="m9 18 6-6-6-6"/></svg></button>'}).join('');
+ Array.prototype.forEach.call($('menu').querySelectorAll('.mrow'),function(b){b.onclick=function(){menuAction(b.dataset.k)}});
+}
+function menuAction(k){
+ if(k==='mAccount')return showAccount();
+ if(k==='mPerf')return showPerf();
+ if(k==='mDevice')return showNotif();
+ if(k==='mLogout')return logout();
+}
+function showAccount(){
+ var nm=(ME&&ME.dispName)||'—',em=(ME&&ME.email)||'—',uid=(ME&&ME.id)||'—';
+ var h='<div class="kv"><b>'+esc(t('name'))+'</b><span>'+esc(nm)+'</span><b>'+esc(t('email'))+'</b><span>'+esc(em)+'</span><b>'+esc(t('uid'))+'</b><span style="word-break:break-all;font-size:11px">'+esc(uid)+'</span><b>'+esc(t('plan'))+'</b><span>'+esc(PLAN.toUpperCase())+'</span></div><button class="again" id="altClose">'+esc(t('close'))+'</button>';
+ openAlt('✦',t('account'),em,h);
+ $('altClose').onclick=closeSheet;
+}
+function showPerf(){
+ var has=!!PERF,p=PERF||{tp:0,sl:0,closed:0,win:null};
+ var cnt='—';try{var v=localStorage.getItem('tw-analysis-count');if(v)cnt=String(parseInt(v,10))}catch(e){}
+ var h='<div class="stats" style="margin-bottom:10px"><div class="stat"><b>'+(has&&p.win!=null?p.win.toFixed(1)+'%':'—')+'</b><small>'+esc(t('perfWin'))+'</small></div><div class="stat"><b>'+(has?p.tp:'—')+'</b><small>'+esc(t('perfTp'))+'</small></div><div class="stat"><b>'+(has?p.sl:'—')+'</b><small>'+esc(t('perfSl'))+'</small></div></div><div class="kv"><b>'+esc(t('perfClosed'))+'</b><span>'+(has?p.closed:'—')+'</span><b>'+esc(t('perfMine'))+'</b><span>'+esc(cnt)+'</span></div><div class="note">'+esc(t('perfNote'))+'</div><button class="again" id="altClose">'+esc(t('close'))+'</button>';
+ openAlt('▲',t('perfTitle'),t('perfSub'),h);
+ $('altClose').onclick=closeSheet;
+}
+function showNotif(){
+ var s=getSession(),u=s&&s.user,md=(u&&u.user_metadata)||{};
+ var lvl=md.alert_level||'off';
+ var opts=[['off','notifOff','notifOffS'],['team','notifTeam','notifTeamS'],['all','notifAll','notifAllS']];
+ var h=opts.map(function(o){return '<button class="opt'+(o[0]===lvl?' on':'')+'" data-l="'+o[0]+'"><span class="radio"></span><span><b>'+esc(t(o[1]))+'</b><small>'+esc(t(o[2]))+'</small></span></button>'}).join('')+'<button class="again" id="altClose">'+esc(t('close'))+'</button>';
+ openAlt('✉',t('notifTitle'),t('notifSub'),h);
+ $('altClose').onclick=closeSheet;
+ Array.prototype.forEach.call($('alt').querySelectorAll('.opt'),function(b){b.onclick=function(){
+  var lv=b.dataset.l;
+  apiFetch('/api/chat/alert',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({level:lv})}).then(function(r){
+   if(!r.ok){toast(t('notifErr'));return}
+   Array.prototype.forEach.call($('alt').querySelectorAll('.opt'),function(x){x.classList.toggle('on',x===b)});
+   try{var ss=getSession();if(ss&&ss.user){ss.user.user_metadata=Object.assign({},ss.user.user_metadata,{alert_level:lv});localStorage.setItem(AUTH_KEY,JSON.stringify(ss))}}catch(e){}
+   toast(t('notifSaved'));hap(8);
+  }).catch(function(){toast(t('notifErr'))});
+ }});
+}
+function logout(){
+ toast(t('loggingOut'));
+ var done=false;function fin(){if(done)return;done=true;goLogin()}
+ fetch(SB_URL+'/auth/v1/logout',{method:'POST',headers:{apikey:SB_KEY,Authorization:'Bearer '+getToken()}}).then(fin,fin);
+ setTimeout(fin,1500);
+}
+
+/* ---------------- settings ---------------- */
+function drawLangs(){
+ $('langs').innerHTML=LANGS.map(function(l){var partial=!FULL[l[0]];return '<button class="lang'+(l[0]===lang?' on':'')+'" data-l="'+l[0]+'" aria-pressed="'+(l[0]===lang)+'"><span class="radio"></span><span><span class="lt">'+esc(l[1])+'</span><span class="ls">'+esc(t('langSub'))+'</span></span>'+(partial?'<span class="badge">'+esc(l[2])+'</span>':'')+'</button>'}).join('');
+ Array.prototype.forEach.call($('langs').querySelectorAll('.lang'),function(b){b.onclick=function(){setLang(b.dataset.l)}});
+}
+function drawThemes(){
+ $('themes').innerHTML=[['dark','dark'],['light','light'],['system','system']].map(function(it){return '<button class="theme'+(it[0]===theme?' on':'')+'" data-t="'+it[0]+'" aria-pressed="'+(it[0]===theme)+'"><span class="swatch sw-'+it[1]+'"><i></i></span><b>'+esc(t(it[0]))+'</b></button>'}).join('');
+ Array.prototype.forEach.call($('themes').querySelectorAll('button'),function(b){b.onclick=function(){setTheme(b.dataset.t)}});
+}
+function setLang(l){lang=l;try{localStorage.setItem('tw-lang',l)}catch(e){}renderAll();if(profileLoaded)renderProfile();if(comLoaded)drawMsgs();toast(t('langNative'))}
+
+/* ---------------- render all ---------------- */
+function renderAll(){
+ document.documentElement.lang=lang;
+ $('greet').innerHTML=esc(t('greet'))+'<span>'+esc(t('trader'))+'</span>';
+ $('greetSub').textContent=t('greetSub');$('hintTxt').textContent=t('hint');
+ $('footTxt').textContent='Educational only. Trading involves substantial risk.';
+ $('q').setAttribute(PH,t('search'));$('q').setAttribute('aria-label',t('search'));
+ $('comTitle').textContent=t('comTitle');$('comSub').textContent=t('comSub');
+ $('msgInput').setAttribute(PH,t('writeMsg'));$('msgInput').setAttribute('aria-label',t('writeMsg'));
+ if(!ME)$('pName').textContent=t('pName');
+ $('s1').textContent=t('s1');$('s2').textContent=t('s2');$('menuSec').textContent=t('menuSec');
+ $('freeT').textContent=t('freeT');$('freeN').textContent=t('freeN');
+ var fl=$('freeList').children;fl[0].textContent=t('free1');fl[1].textContent=t('free2');fl[2].textContent=t('free3');
+ $('setTitle').textContent=t('setTitle');$('setSub').textContent=t('setSub');$('langSec').textContent=t('langSec');$('themeSec').textContent=t('themeSec');
+ $('instT').textContent=t('instT');$('instS').textContent=t('instS');$('instBtn').textContent=t('install');$('setNote').textContent=t('setNote');
+ $('goTxt').textContent=t('goAI');
+ $('ligaTitle').textContent=t('ligaTitle');$('ligaSub').textContent=t('ligaSub');
+ $('lbNote').textContent=t('lbNote');$('tNote').textContent=t('tNote');$('bNote').textContent=t('bNote');$('newTrade').textContent=t('newTrade');
+ $('riskTitle').textContent=t('riskTitle');$('riskSec').textContent=t('riskLab');$('lotLab').textContent=t('lotLab');$('rNote').textContent=t('rNote');
+ if(!riskBusy)$('rGo').textContent=t('openBtn');
+ var tb=$('takeBtn');if(tb)tb.textContent=t('takeTrade');
+ renderStats();drawNav();drawTabs();drawPairs(true);drawLangs();drawThemes();drawMenu();renderLiga();
+}
+$('langBtn').onclick=function(){showView('settings')};
+$('themeBtn').onclick=function(){setTheme(resolved()==='dark'?'light':'dark')};
+$('avatarBtn').onclick=function(){showView('profile')};
+
+/* ---------------- PWA (install prompt + service worker sebenar) ---------------- */
+var dp=null;
+window.addEventListener('beforeinstallprompt',function(e){e.preventDefault();dp=e});
+$('instBtn').onclick=function(){
+ if(!dp){toast(t('installHint'));return}
+ dp.prompt();dp.userChoice.then(function(){dp=null});
+};
+if('serviceWorker' in navigator){window.addEventListener('load',function(){navigator.serviceWorker.register('sw.js',{scope:'./'}).catch(function(){})})}
+
+/* ---------------- init ---------------- */
+applyTheme();renderAll();
+var iv=new URLSearchParams(location.search).get('view');
+if(!iv){
+ var hv=(location.hash||'').replace(/^#\/?/,'').toLowerCase();
+ var HMAP={liga:'liga',league:'liga',analyst:'analyst',community:'community',profile:'profile',settings:'settings'};
+ iv=HMAP[hv]||null;
+}
+showView(VIEWS.indexOf(iv)>-1?iv:'analyst');
+})();
+</script>
+</body>
+</html>
