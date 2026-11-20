@@ -1,31 +1,25 @@
 {
-  "name": "TraderWatch",
+  "name": "TraderWatch — Read the Market",
   "short_name": "TraderWatch",
-  "description": "Member terminal for TraderWatch: signals, performance, portfolio and community ideas.",
-  "start_url": "./members.html",
-  "scope": "./",
+  "description": "Signal AI untuk XAU/USD, XAG/USD dan BTC — chart beranotasi, sebab entry dan prestasi telus. Percuma untuk semua, boleh pasang, boleh offline.",
+  "id": "./member/",
+  "start_url": "./member/",
+  "scope": "/",
   "display": "standalone",
+  "display_override": ["standalone", "minimal-ui"],
   "orientation": "portrait",
-  "background_color": "#f5f5f7",
-  "theme_color": "#09284c",
+  "background_color": "#0a0e0b",
+  "theme_color": "#0a0e0b",
+  "lang": "ms",
+  "dir": "ltr",
+  "categories": ["finance", "education"],
   "icons": [
-    {
-      "src": "assets/icon-192.png",
-      "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "any"
-    },
-    {
-      "src": "assets/icon-512.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "any"
-    },
-    {
-      "src": "assets/icon-maskable-512.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "maskable"
-    }
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "shortcuts": [
+    { "name": "AI Analyst", "short_name": "Analyst", "url": "./member/", "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }] },
+    { "name": "Log masuk", "short_name": "Log masuk", "url": "./login.html", "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }] }
   ]
 }
