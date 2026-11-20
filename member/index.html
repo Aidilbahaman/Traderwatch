@@ -293,6 +293,8 @@ html[data-theme="light"] .theme.on{background:#eaf5db}
 .go{position:relative;overflow:hidden;width:100%;padding:14px;border-radius:15px;font-weight:800;font-size:15px;color:var(--onlime);background:var(--lime);box-shadow:0 0 26px #b7f36b2b;transition:transform .12s}
 .go:active{transform:scale(.98)}
 .go:disabled{opacity:.55;box-shadow:none}
+/* Butang aksi modal trade sentiasa nampak (sticky) — tak hilang di bawah fold */
+#rGo{position:sticky;bottom:0;z-index:3;margin-top:10px;box-shadow:0 -14px 22px -10px rgba(0,0,0,.6),0 0 26px #b7f36b2b}
 .term{margin-top:12px;background:var(--chart);border:1px solid var(--line);border-radius:16px;padding:12px 14px;font:12px/1.75 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:var(--muted);min-height:54px}
 .term .tl{white-space:pre-wrap;word-break:break-word}.term .tl b{color:var(--lime);font-weight:600}.term .ok{color:var(--lime)}
 .term .tl.cur::after{content:"▍";color:var(--lime);animation:pl .7s infinite;margin-left:2px}
