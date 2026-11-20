@@ -302,6 +302,10 @@ html[data-theme="light"] .theme.on{background:#eaf5db}
 .bias .val{font-size:28px;font-weight:900;letter-spacing:-.05em;line-height:1.1}
 .bias.buy .val{color:var(--green)}.bias.sell .val{color:var(--red)}.bias.wait .val{color:var(--orange)}
 .bias .asof{font-size:11px;color:var(--muted);margin-top:3px}
+.mt5b{display:flex;align-items:center;gap:8px;border-radius:12px;padding:9px 12px;font-size:12px;font-weight:650;margin:0 0 10px;animation:up .5s both}
+.mt5b svg{flex:none}
+.mt5b.live{background:#b7f36b14;border:1px solid #b7f36b40;color:var(--green)}
+.mt5b.dry{background:#ffc16b14;border:1px solid #ffc16b40;color:var(--orange)}
 .ring{margin-left:auto;position:relative;width:74px;height:74px;flex:none}
 .ring svg{width:74px;height:74px}
 .rb{fill:none;stroke:var(--line);stroke-width:7}
@@ -1037,7 +1041,7 @@ function analyze(){
   for(var i=0;i<lines.length;i++){if(!(await typeLine(lines[i],run)))return}
   var res=await pre;if(run!==S.run)return;
   if(!res.ok||!res.data||!res.data.side){analyzeFail(res);return}
-  var a=mapVerdict(res.data);
+  var a=mapVerdict(res.data); a.mt5=res.data.mt5||null;
   await typeLine('<span class="ok">✓ '+(lang==='en'?'Analysis ready.':'Analisis siap.')+'</span>',run);
   if(run!==S.run)return;
   S.scan=null;S.ana=a;S.t0=performance.now();S.busy=false;setChip('done',lang==='en'?'ANALYSIS READY':'ANALISIS SIAP');
@@ -1053,11 +1057,17 @@ function analyzeFail(res){
  $('res').innerHTML='<div class="errbox"><p>'+msg+'</p><button class="again" id="retryAna">'+esc(t('retry'))+'</button></div>';
  $('retryAna').onclick=function(){hap(8);analyze()};
 }
+function mt5Banner(m){
+ if(!m||!m.synced)return '';
+ if(m.dry_run)return '<div class="mt5b dry"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 9v4m0 4h.01M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/></svg><span>'+(lang==='en'?'MT5 dry-run · lot ':'MT5 dry-run · lot ')+esc(String(m.lot))+' — '+(lang==='en'?'no live order placed':'tiada order sebenar')+'</span></div>';
+ return '<div class="mt5b live"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg><span>'+(lang==='en'?'Sent to MT5 · ':'Dihantar ke MT5 · ')+esc(m.type||'pending')+' #'+esc(String(m.ticket))+' · lot '+esc(String(m.lot))+'</span></div>';
+}
 function show(a){
  var f=function(v){return fx(cur,v)},cls=a.dir==='BUY'?'buy':a.dir==='SELL'?'sell':'wait';
  var col=a.dir==='BUY'?'#b7f36b':a.dir==='SELL'?'#ff777d':'#ffc16b';
  var val=a.dir==='WAIT'?(lang==='en'?'WAIT':'TUNGGU'):a.dir;
  var h='<div class="bias '+cls+'" style="--rc:'+col+'"><div><div class="lab">'+esc(t('aiLabel'))+'</div><div class="val">'+val+'</div><div class="asof">'+cur.s+' · M15'+(a.model?' · '+esc(a.model):'')+'</div></div><div class="ring"><svg viewBox="0 0 80 80"><circle class="rb" cx="40" cy="40" r="34"/><circle class="rf" id="rf" cx="40" cy="40" r="34" transform="rotate(-90 40 40)"/></svg><div class="n"><div><span id="cn">0</span>%<small>'+esc(t('conf'))+'</small></div></div></div></div>';
+ h+=mt5Banner(a.mt5);
  if(a.entry!=null)h+='<div class="lv"><div class="e" style="animation-delay:.15s"><small>'+esc(t('entry'))+'</small><b>'+f(a.entry)+'</b></div><div class="t" style="animation-delay:.25s"><small>'+esc(t('tp'))+'</small><b>'+f(a.tp)+(a.tp2!=null?' / '+f(a.tp2):'')+'</b></div><div class="s" style="animation-delay:.35s"><small>'+esc(t('sl'))+'</small><b>'+f(a.sl)+'</b></div></div>';
  else h+='<p style="text-align:center;color:var(--muted);font-size:12px;margin:4px 0 0">'+esc(t('waitMsg'))+'</p>';
  if(a.entry!=null)h+='<button class="take" id="takeBtn">'+esc(t('takeTrade'))+'</button>';
