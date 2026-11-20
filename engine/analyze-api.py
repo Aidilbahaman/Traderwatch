@@ -148,20 +148,50 @@ def fetch_ohlc(pair, tf, limit=200):
     return [{"t": t, "o": o, "h": h, "l": l, "c": c} for t, o, h, l, c in bars[-limit:]]
 
 
-def run_analysis(pair):
-    bars = fetch_bars(pair)
-    if len(bars) < 100:
-        return {"error": "Data bar tidak mencukupi untuk analisis. Cuba lagi sebentar."}
+ANALYSIS_TFS = ("M5", "M15", "H1", "H4", "D1")
+TF_MIN_BARS = {"M5": 80, "M15": 100, "H1": 60, "H4": 40, "D1": 20}
+
+
+def fetch_bars_tf(pair, tf):
+    """Base-TF bars (ts_ms,h,l,c) for the analyst. M5/M15/H1 from DB gran;
+    H4/D1 resampled from M60. Returns list of (ts_ms, high, low, close)."""
+    gran = {"M5": "M5", "M15": "M15", "H1": "M60", "H4": "M60", "D1": "M60"}.get(tf, "M15")
+    count = {"M5": 300, "M15": 300, "H1": 300, "H4": 800, "D1": 1500}.get(tf, 300)
+    rows = SQC.candles_from_bars(pair, gran, count)
+    bars = []
+    for c in rows:
+        try:
+            d = datetime.fromisoformat(str(c["t"]).replace("Z", "+00:00"))
+            if d.tzinfo is None:
+                d = d.replace(tzinfo=timezone.utc)
+            bars.append((int(d.timestamp() * 1000), float(c["h"]), float(c["l"]), float(c["c"])))
+        except (KeyError, TypeError, ValueError):
+            continue
+    factor = {"H4": 4, "D1": 24}.get(tf, 1)
+    if factor > 1:
+        res = []
+        for i in range(0, len(bars) - factor + 1, factor):
+            g = bars[i:i + factor]
+            res.append((g[0][0], max(x[1] for x in g), min(x[2] for x in g), g[-1][3]))
+        bars = res
+    return bars
+
+
+def run_analysis(pair, tf="M15"):
+    tf = tf if tf in ANALYSIS_TFS else "M15"
+    bars = fetch_bars_tf(pair, tf)
+    if len(bars) < TF_MIN_BARS.get(tf, 100):
+        return {"error": "Not enough bar data for this timeframe yet. Try another TF or pair."}
     disp = pair[:3] + "/" + pair[3:]
     pip = M.pip_of(disp)
     spread = SMC.SPREAD_PIPS.get(pair, SMC.DEFAULT_SPREAD_PIPS)
-    verdict = LA.analyze(disp, bars, pip, spread)
+    verdict = LA.analyze(disp, bars, pip, spread, tf=tf)
     price = bars[-1][3]
     if verdict is None:
-        return {"side": "HOLD", "pair": disp, "price": price,
-                "reason": "Tiada setup jelas sekarang. Enjin menunggu peluang lebih baik.",
+        return {"side": "HOLD", "pair": disp, "price": price, "tf": tf,
+                "reason": "No clear setup right now. The engine is waiting for a better opportunity.",
                 "generated_at": datetime.now(timezone.utc).isoformat()}
-    verdict.update({"pair": disp, "price": price,
+    verdict.update({"pair": disp, "price": price, "tf": tf,
                     "generated_at": datetime.now(timezone.utc).isoformat()})
     return verdict
 
@@ -221,15 +251,16 @@ class Handler(BaseHTTPRequestHandler):
         except ValueError:
             return self._send(400, {"error": "JSON tidak sah."})
         pair = str(req.get("pair", "")).upper().replace("/", "").replace(" ", "")
+        tf = str(req.get("timeframe", "M15")).upper()
         if pair not in ALLOWED_PAIRS:
-            return self._send(400, {"error": "Buat masa ini hanya XAUUSD dibuka untuk analisis."})
+            return self._send(400, {"error": "This pair is not open for analysis yet."})
         ok, msg = rate_check(uid)
         if not ok:
             return self._send(429, {"error": msg})
         rate_commit(uid)
-        log(f"{uid[:8]} request {pair}")
+        log(f"{uid[:8]} request {pair} {tf}")
         try:
-            result = run_analysis(pair)
+            result = run_analysis(pair, tf)
         except Exception as e:
             log(f"{pair} error {type(e).__name__}: {str(e)[:160]}")
             return self._send(500, {"error": "Analisis gagal buat masa ini. Cuba lagi sebentar."})

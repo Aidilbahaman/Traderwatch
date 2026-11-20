@@ -979,6 +979,7 @@ function resetSheet(){
  $('go').classList.remove('hidden');$('go').disabled=false;setChip('','SEDIA');
 }
 function buildTf(){
+ if($('pvtag'))$('pvtag').textContent=(lang==='en'?'Real OHLC chart · ':'Chart OHLC sebenar · ')+tf+' · '+tfStyle(tf)+(lang==='en'?' analysis':' analisis');
  $('tf').innerHTML=TFS.map(function(x){return '<button data-t="'+x+'" class="'+(x===tf?'on':'')+'">'+x+'</button>'}).join('');
  Array.prototype.forEach.call($('tf').querySelectorAll('button'),function(b){b.onclick=function(){
   if(S.busy||b.dataset.t===tf)return;
@@ -1014,7 +1015,7 @@ function openSheet(sym){
  $('sIc').textContent=cur.s.slice(0,3);$('sNm').textContent=cur.s;
  $('sDs').textContent=cur.n+(cur.p!=null?' · '+fx(cur,cur.p):'');
  $('sheet').setAttribute('aria-label',cur.s);
- $('pvtag').textContent=lang==='en'?'Real OHLC chart · M15 engine analysis':'Chart OHLC sebenar · Analisis enjin M15';
+ $('pvtag').textContent=(lang==='en'?'Real OHLC chart · ':'Chart OHLC sebenar · ')+tf+' · '+tfStyle(tf)+(lang==='en'?' analysis':' analisis');
  buildTf();resetSheet();$('phone').classList.add('open');$('sheet').scrollTop=0;
  if(cur.soon){showSoon();return}
  S.open=true;sizeCv();loadCandles();requestAnimationFrame(function(x){loop(x)});
@@ -1050,12 +1051,12 @@ function analyze(){
  $('go').classList.add('hidden');$('res').innerHTML='';$('term').innerHTML='';$('term').classList.remove('hidden');
  S.ana=null;S.scan=0;setChip('scan',lang==='en'?'AI SCANNING':'AI MENGIMBAS');
  /* Enjin analisis M15 (disokong backend), tanpa mengira TF chart dipapar. */
- var pre=apiFetch('/api/analyze',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({pair:cur.s,timeframe:'M15'})}).catch(function(){return{ok:false,status:0,data:{}}});
+ var pre=apiFetch('/api/analyze',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({pair:cur.s,timeframe:tf})}).catch(function(){return{ok:false,status:0,data:{}}});
  var lines=[
   '<b>▸</b> '+(lang==='en'?'Reading '+m.n+' real candles of '+cur.s+' ('+tf+')…':'Membaca '+m.n+' candle sebenar '+cur.s+' ('+tf+')…'),
   '<b>▸</b> EMA 20 = '+f(m.e20)+' · EMA 50 = '+f(m.e50),
   '<b>▸</b> RSI 14 = '+m.rsi.toFixed(1)+' · ATR 14 = '+f(m.atr),
-  '<b>▸</b> '+(lang==='en'?'Sending M15 structure to AI engine…':'Menghantar struktur M15 ke enjin AI…'),
+  '<b>▸</b> '+(lang==='en'?'Sending '+tf+' structure to AI engine…':'Menghantar struktur '+tf+' ke enjin AI…'),
   '<b>▸</b> '+(lang==='en'?'AI is reading the market — usually 20–60s…':'AI membaca pasaran — biasanya 20–60 saat…')
  ];
  (async function(){
@@ -1083,11 +1084,12 @@ function mt5Banner(m){
  if(m.dry_run)return '<div class="mt5b dry"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 9v4m0 4h.01M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/></svg><span>'+(lang==='en'?'MT5 dry-run · lot ':'MT5 dry-run · lot ')+esc(String(m.lot))+' — '+(lang==='en'?'no live order placed':'tiada order sebenar')+'</span></div>';
  return '<div class="mt5b live"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg><span>'+(lang==='en'?'Sent to MT5 · ':'Dihantar ke MT5 · ')+esc(m.type||'pending')+' #'+esc(String(m.ticket))+' · lot '+esc(String(m.lot))+'</span></div>';
 }
+function tfStyle(x){var m={M5:'Scalping',M15:'Intraday',H1:'Swing',H4:'Position',D1:'Position'};return m[x]||'Intraday';}
 function show(a){
  var f=function(v){return fx(cur,v)},cls=a.dir==='BUY'?'buy':a.dir==='SELL'?'sell':'wait';
  var col=a.dir==='BUY'?'#b7f36b':a.dir==='SELL'?'#ff777d':'#ffc16b';
  var val=a.dir==='WAIT'?(lang==='en'?'WAIT':'TUNGGU'):a.dir;
- var h='<div class="bias '+cls+'" style="--rc:'+col+'"><div><div class="lab">'+esc(t('aiLabel'))+'</div><div class="val">'+val+'</div><div class="asof">'+cur.s+' · M15'+(a.model?' · '+esc(a.model):'')+'</div></div><div class="ring"><svg viewBox="0 0 80 80"><circle class="rb" cx="40" cy="40" r="34"/><circle class="rf" id="rf" cx="40" cy="40" r="34" transform="rotate(-90 40 40)"/></svg><div class="n"><div><span id="cn">0</span>%<small>'+esc(t('conf'))+'</small></div></div></div></div>';
+ var h='<div class="bias '+cls+'" style="--rc:'+col+'"><div><div class="lab">'+esc(t('aiLabel'))+'</div><div class="val">'+val+'</div><div class="asof">'+cur.s+' · '+esc(a.tf||tf)+' · '+esc(tfStyle(a.tf||tf))+(a.model?' · '+esc(a.model):'')+'</div></div><div class="ring"><svg viewBox="0 0 80 80"><circle class="rb" cx="40" cy="40" r="34"/><circle class="rf" id="rf" cx="40" cy="40" r="34" transform="rotate(-90 40 40)"/></svg><div class="n"><div><span id="cn">0</span>%<small>'+esc(t('conf'))+'</small></div></div></div></div>';
  h+=mt5Banner(a.mt5);
  if(a.entry!=null)h+='<div class="lv"><div class="e" style="animation-delay:.15s"><small>'+esc(t('entry'))+'</small><b>'+f(a.entry)+'</b></div><div class="t" style="animation-delay:.25s"><small>'+esc(t('tp'))+'</small><b>'+f(a.tp)+(a.tp2!=null?' / '+f(a.tp2):'')+'</b></div><div class="s" style="animation-delay:.35s"><small>'+esc(t('sl'))+'</small><b>'+f(a.sl)+'</b></div></div>';
  else h+='<p style="text-align:center;color:var(--muted);font-size:12px;margin:4px 0 0">'+esc(t('waitMsg'))+'</p>';
