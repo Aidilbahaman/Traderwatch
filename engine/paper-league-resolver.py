@@ -15,6 +15,7 @@ import json
 import os
 import pathlib
 import urllib.error
+import urllib.parse
 import urllib.request
 from datetime import datetime, timezone
 
@@ -46,7 +47,6 @@ def log(msg):
 def sb(method, path, body=None, params=None):
     url = SB_URL + path
     if params:
-        import urllib.parse
         url += "?" + urllib.parse.urlencode(params)
     data = json.dumps(body).encode() if body is not None else None
     req = urllib.request.Request(url, data=data, method=method)
