@@ -174,10 +174,9 @@ class Handler(BaseHTTPRequestHandler):
                 return self._send(200, {"trades": my_trades(uid), "season": SEASON})
             if path == "/api/league/leaderboard":
                 rows = sb("POST", "/rest/v1/rpc/get_leaderboard", body={"p_season": SEASON}) or []
-                me = display_name(user)
                 for i, r in enumerate(rows):
                     r["rank"] = i + 1
-                    r["is_me"] = (r["username"] == me)
+                    r["is_me"] = (r.get("user_id") == uid)
                 return self._send(200, {"leaderboard": rows, "season": SEASON})
             if path == "/api/league/me":
                 trades = my_trades(uid)
@@ -188,7 +187,7 @@ class Handler(BaseHTTPRequestHandler):
                 open_n = sum(1 for t in trades if t["status"] == "open")
                 board = sb("POST", "/rest/v1/rpc/get_leaderboard", body={"p_season": SEASON}) or []
                 me = display_name(user)
-                rank = next((i + 1 for i, r in enumerate(board) if r["username"] == me), None)
+                rank = next((i + 1 for i, r in enumerate(board) if r.get("user_id") == uid), None)
                 return self._send(200, {
                     "balance": bal, "start_balance": START_BALANCE, "net_r": net_r,
                     "win_rate": round(100.0 * wins / dec, 1) if dec else None,
