@@ -367,6 +367,18 @@ html[data-theme="light"] .theme.on{background:#eaf5db}
 .riskopt.on{border-color:var(--lime);background:#b7f36b12;color:var(--lime);box-shadow:0 0 14px #b7f36b22}
 html[data-theme="light"] .riskopt.on{background:#eaf5db;color:#4c7a17}
 .riskopt.on small{color:inherit;opacity:.8}
+.modepills{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:4px 0 8px}
+.modepill{background:var(--card2);border:1px solid var(--line);border-radius:999px;padding:8px 10px;font-weight:800;font-size:12.5px;color:var(--muted);transition:.15s}
+.modepill.on{border-color:var(--lime);background:#b7f36b12;color:var(--lime);box-shadow:0 0 14px #b7f36b22}
+html[data-theme="light"] .modepill.on{background:#eaf5db;color:#4c7a17}
+.customlot{background:var(--card2);border:1px solid var(--line);border-radius:14px;padding:11px 13px;margin:4px 0 8px}
+.customlot label{display:block;font-size:9.5px;font-weight:750;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
+.customlot input{width:100%;box-sizing:border-box;background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:9px 11px;font:700 15px ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-variant-numeric:tabular-nums;color:var(--text)}
+.customlot input:focus{outline:none;border-color:var(--lime)}
+.riskcalc{font-size:11.5px;color:var(--muted);margin:7px 0 0;font-variant-numeric:tabular-nums}
+.riskcalc.bad{color:var(--red);font-weight:750}
+.lotbadge{color:var(--lime);font-weight:800;font-variant-numeric:tabular-nums}
+html[data-theme="light"] .lotbadge{color:#4c7a17}
 .rlot{display:flex;justify-content:space-between;align-items:center;background:var(--card2);border:1px solid var(--line);border-radius:12px;padding:9px 13px;font-size:12px;color:var(--muted)}
 .rlot b{color:var(--text);font-variant-numeric:tabular-nums;font-size:13px}
 .rbase{font-size:10px;color:var(--muted);margin:7px 0 0;opacity:.8}
@@ -522,8 +534,14 @@ html[data-theme="light"] .riskopt.on{background:#eaf5db;color:#4c7a17}
       <div class="rpair" id="rPair"></div>
       <div class="rlevels" id="rLevels"></div>
       <div class="sec" id="riskSec">Risk</div>
+      <div class="modepills" id="riskModeOpts" role="tablist" aria-label="Trade sizing mode"></div>
       <div class="riskopts" id="riskOpts" role="radiogroup" aria-label="Risk"></div>
+      <div class="customlot hidden" id="customLotBox">
+        <label for="rLotInput" id="lotSizeLab">Lot size</label>
+        <input id="rLotInput" type="number" step="0.01" min="0.01" max="100" value="0.05" inputmode="decimal" aria-label="Lot size">
+      </div>
       <div class="rlot"><span id="lotLab">Indicative lot</span><b id="lotVal">—</b></div>
+      <p class="riskcalc hidden" id="rRiskCalc"></p>
       <p class="rbase" id="rBase"></p>
       <p class="rnote" id="rNote">Virtual capital only — no real money.</p>
       <div id="rErr"></div>
@@ -603,6 +621,7 @@ var DICT={
   got:'Dicapai',locked:'Berkunci',
   takeTrade:'＋ Saya ambil trade ini',noSetup:'Tiada setup untuk diambil sekarang.',
   riskTitle:'Buka paper trade',lotLab:'Lot anggaran',rBase:'Risiko dikira dari baki maya anda:',rNote:'Modal maya sahaja — tiada wang sebenar.',openBtn:'Buka trade',opening:'Membuka…',
+  riskModePct:'Risk %',riskModeLot:'Lot sendiri',lotSize:'Saiz lot',riskAmt:'Risiko',ofBalance:'dari baki',lotTooBig:'Lot melebihi baki',lotInvalid:'Lot 0.01–100',
   toastOpened:'Paper trade dibuka! Pantau di Liga.',pickPair:'Pilih pair untuk analisis AI.',
   leagueErr:'Gagal memuatkan data liga. Cuba lagi.',tradeErr:'Gagal membuka trade. Cuba lagi.',noBalance:'Baki tidak tersedia — cuba lagi.',
   loggingOut:'Melog keluar…',langNative:'Bahasa Melayu'
@@ -640,6 +659,7 @@ var DICT={
   got:'Earned',locked:'Locked',
   takeTrade:'＋ Take this trade',noSetup:'No setup to take right now.',
   riskTitle:'Open paper trade',lotLab:'Indicative lot',rBase:'Risk sized from your virtual balance:',rNote:'Virtual capital only — no real money.',openBtn:'Open trade',opening:'Opening…',
+  riskModePct:'Risk %',riskModeLot:'Custom lot',lotSize:'Lot size',riskAmt:'Risk',ofBalance:'of balance',lotTooBig:'Lot risks more than balance',lotInvalid:'Lot 0.01–100',
   toastOpened:'Paper trade opened! Track it in League.',pickPair:'Pick a pair for AI analysis.',
   leagueErr:'Could not load league data. Try again.',tradeErr:'Could not open the trade. Try again.',noBalance:'Balance unavailable — try again.',
   loggingOut:'Signing out…',langNative:'English'
@@ -1294,10 +1314,11 @@ function drawTrades(){
   var res=(isOpen||r==null)?'<span class="tr neu">—</span>':'<span class="tr '+(r>0?'pos':r<0?'neg':'neu')+'">'+fmtR(r)+'</span>';
   var run=isOpen?'<div class="trun"><i class="pulse"></i><span>'+esc(t('running'))+'</span></div>':'';
   var side=String(x.side||'').toUpperCase();
+  var sizeTxt=(x.lot!=null&&isFinite(+x.lot))?'<b class="lotbadge">'+esc((+x.lot).toFixed(2))+' lot</b>':esc(t('riskLab'))+' '+(+x.risk_pct||0)+'%';
   return '<div class="tcard" style="animation-delay:'+(i*40)+'ms">'+
    '<div class="top"><span class="tpair">'+esc(pairName(x.pair))+'</span><span class="side '+esc(side.toLowerCase())+'">'+esc(side)+'</span><span class="st '+stCls+'">'+stHtml+'</span></div>'+
    '<div class="tlevels"><span class="e">E <b>'+tfx(x.pair,x.entry)+'</b></span><span class="s">SL <b>'+tfx(x.pair,x.sl)+'</b></span><span class="t">TP <b>'+tfx(x.pair,x.tp)+'</b></span><span>'+esc(t('riskLab'))+' <b>'+money(x.risk_usd)+'</b></span></div>'+run+
-   '<div class="tmeta"><span>'+esc(t('riskLab'))+' '+(+x.risk_pct||0)+'% · '+esc(myTm(x.closed_at||x.opened_at))+'</span>'+res+'</div></div>';
+   '<div class="tmeta"><span>'+sizeTxt+' · '+esc(myTm(x.closed_at||x.opened_at))+'</span>'+res+'</div></div>';
  }).join('');
 }
 function drawBadges(){
@@ -1332,14 +1353,29 @@ function renderLiga(){
 $('newTrade').onclick=function(){hap(8);showView('analyst');toast(t('pickPair'))};
 
 /* ---------------- modal risiko: buka paper trade sebenar ---------------- */
-var riskAna=null,riskPct=1,riskBusy=false,riskBal=null;
+var riskAna=null,riskPct=1,riskBusy=false,riskBal=null,riskMode='pct',riskLot=0.05;
 /* Lot anggaran sahaja — backend mengira risk_usd dari baki maya. */
+function lotMult(sym){return sym==='XAUUSD'?100:sym==='XAGUSD'?5000:sym==='BTCUSD'?1:100000}
 function lotFor(sym,entry,sl,amt){
- var mult=sym==='XAUUSD'?100:sym==='XAGUSD'?5000:sym==='BTCUSD'?1:100000;
  var dist=Math.abs(entry-sl)||1e-9;
- return Math.max(0.01,amt/(dist*mult));
+ return Math.max(0.01,amt/(dist*lotMult(sym)));
+}
+function lotValid(v){return isFinite(v)&&v>=0.01&&v<=100}
+function lotRiskUsd(){return riskAna?riskLot*Math.abs(riskAna.entry-riskAna.sl)*lotMult(riskAna.pair):null}
+function drawRiskModes(){
+ $('riskModeOpts').innerHTML=[['pct','riskModePct'],['lot','riskModeLot']].map(function(m){
+  return '<button class="modepill'+(riskMode===m[0]?' on':'')+'" data-m="'+m[0]+'" role="tab" aria-selected="'+(riskMode===m[0])+'">'+esc(t(m[1]))+'</button>';
+ }).join('');
+ Array.prototype.forEach.call($('riskModeOpts').querySelectorAll('.modepill'),function(b){b.onclick=function(){
+  if(riskMode===b.dataset.m)return;
+  riskMode=b.dataset.m;hap(6);drawRiskModes();drawRiskOpts();updateLot();
+ }});
 }
 function drawRiskOpts(){
+ $('riskOpts').classList.toggle('hidden',riskMode!=='pct');
+ $('customLotBox').classList.toggle('hidden',riskMode!=='lot');
+ $('rRiskCalc').classList.toggle('hidden',riskMode!=='lot');
+ if(riskMode==='lot')$('rLotInput').value=isFinite(riskLot)?String(riskLot):'';
  $('riskOpts').innerHTML=[1,2].map(function(p){
   var amt=riskBal==null?null:riskBal*p/100;
   return '<button class="riskopt'+(p===riskPct?' on':'')+'" data-p="'+p+'" role="radio" aria-checked="'+(p===riskPct)+'">'+p+'%<small>'+money(amt)+'</small></button>';
@@ -1348,24 +1384,48 @@ function drawRiskOpts(){
  $('rBase').textContent=t('rBase')+' '+money(riskBal);
 }
 function updateLot(){
- $('lotVal').textContent=(riskAna&&riskBal!=null)?lotFor(riskAna.pair,riskAna.entry,riskAna.sl,riskBal*riskPct/100).toFixed(2):'—';
+ var lotMode=riskMode==='lot';
+ $('lotLab').textContent=lotMode?t('lotSize'):t('lotLab');
+ if(!lotMode){
+  $('lotVal').textContent=(riskAna&&riskBal!=null)?lotFor(riskAna.pair,riskAna.entry,riskAna.sl,riskBal*riskPct/100).toFixed(2):'—';
+  if(!riskBusy)$('rGo').disabled=riskBal==null;
+  return;
+ }
+ $('lotVal').textContent=lotValid(riskLot)?riskLot.toFixed(2):'—';
+ var ru=lotRiskUsd(),valid=lotValid(riskLot);
+ var tooBig=valid&&riskBal!=null&&ru>riskBal;
+ var calc=$('rRiskCalc');
+ if(!riskAna){calc.textContent='';calc.classList.remove('bad');return}
+ if(!valid){calc.textContent=t('lotInvalid')}
+ else if(tooBig){calc.textContent=t('lotTooBig')}
+ else{
+  var pct=(riskBal!=null&&riskBal>0)?ru/riskBal*100:null;
+  calc.textContent=t('riskAmt')+': '+money(ru)+(pct!=null?' ('+pct.toFixed(1)+'% '+t('ofBalance')+')':'');
+ }
+ calc.classList.toggle('bad',!valid||tooBig);
+ if(!riskBusy)$('rGo').disabled=!valid||tooBig||riskBal==null;
 }
+$('rLotInput').addEventListener('input',function(){
+ var v=parseFloat(this.value);
+ riskLot=isFinite(v)?v:NaN;
+ updateLot();
+});
 function riskErr(msg){$('rErr').innerHTML='<div class="errbox" style="margin-top:0;margin-bottom:12px"><p>'+esc(msg)+'</p></div>'}
 function openRisk(a){
  if(!cur||a.entry==null||a.dir==='WAIT')return;
  riskAna={pair:cur.s,side:a.dir,entry:a.entry,sl:a.sl,tp:a.tp,conf:a.conf};
- riskPct=1;riskBusy=false;
+ riskPct=1;riskBusy=false;riskMode='pct';riskLot=0.05;
  riskBal=(LG.me&&isFinite(+LG.me.balance))?+LG.me.balance:null;
  $('rErr').innerHTML='';
  $('rPair').innerHTML='<b>'+esc(pairName(riskAna.pair))+'</b><span class="side '+esc(riskAna.side.toLowerCase())+'">'+esc(riskAna.side)+'</span><span class="rsub">M15 · '+riskAna.conf+'%</span>';
  $('rLevels').innerHTML='<div class="e"><small>'+esc(t('entry'))+'</small><b>'+tfx(riskAna.pair,riskAna.entry)+'</b></div><div class="t"><small>'+esc(t('tp'))+'</small><b>'+tfx(riskAna.pair,riskAna.tp)+'</b></div><div class="s"><small>'+esc(t('sl'))+'</small><b>'+tfx(riskAna.pair,riskAna.sl)+'</b></div>';
- drawRiskOpts();updateLot();
+ drawRiskModes();drawRiskOpts();updateLot();
  $('rGo').textContent=t('openBtn');$('rGo').disabled=riskBal==null;
  $('phone').classList.add('ropen');
  if(riskBal==null){
   apiFetch('/api/league/me').then(function(r){
    if(!riskAna)return;
-   if(r.ok&&r.data&&isFinite(+r.data.balance)){LG.me=r.data;riskBal=+r.data.balance;drawRiskOpts();updateLot();$('rGo').disabled=false}
+   if(r.ok&&r.data&&isFinite(+r.data.balance)){LG.me=r.data;riskBal=+r.data.balance;drawRiskOpts();updateLot()}
    else riskErr(t('noBalance'));
   }).catch(function(e){if(e&&e.message==='auth')return;riskErr(t('noBalance'))});
  }
@@ -1375,8 +1435,10 @@ $('rbd').onclick=closeRisk;$('rx').onclick=closeRisk;
 function submitTrade(){
  if(!riskAna||riskBusy)return;
  if(riskBal==null){riskErr(t('noBalance'));return}
+ if(riskMode==='lot'&&!lotValid(riskLot)){riskErr(t('lotInvalid'));return}
  riskBusy=true;$('rGo').disabled=true;$('rGo').textContent=t('opening');$('rErr').innerHTML='';
- var body={pair:String(riskAna.pair).replace('/',''),side:riskAna.side,entry:riskAna.entry,sl:riskAna.sl,tp:riskAna.tp,risk_pct:riskPct};
+ var body={pair:String(riskAna.pair).replace('/',''),side:riskAna.side,entry:riskAna.entry,sl:riskAna.sl,tp:riskAna.tp};
+ if(riskMode==='lot')body.lot=riskLot;else body.risk_pct=riskPct;
  apiFetch('/api/league/trade',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)}).then(function(r){
   riskBusy=false;
   if(r.ok){
@@ -1386,10 +1448,10 @@ function submitTrade(){
    toast(t('toastOpened'));
    return;
   }
-  $('rGo').disabled=false;$('rGo').textContent=t('openBtn');
+  $('rGo').textContent=t('openBtn');updateLot();
   riskErr((r.data&&r.data.error)?r.data.error:t('tradeErr'));
  }).catch(function(e){
-  riskBusy=false;$('rGo').disabled=false;$('rGo').textContent=t('openBtn');
+  riskBusy=false;$('rGo').textContent=t('openBtn');updateLot();
   if(e&&e.message==='auth')return;
   riskErr(t('tradeErr'));
  });
@@ -1540,7 +1602,9 @@ function renderAll(){
  $('goTxt').textContent=t('goAI');
  $('ligaTitle').textContent=t('ligaTitle');$('ligaSub').textContent=t('ligaSub');
  $('lbNote').textContent=t('lbNote');$('tNote').textContent=t('tNote');$('bNote').textContent=t('bNote');$('newTrade').textContent=t('newTrade');
- $('riskTitle').textContent=t('riskTitle');$('riskSec').textContent=t('riskLab');$('lotLab').textContent=t('lotLab');$('rNote').textContent=t('rNote');
+ $('riskTitle').textContent=t('riskTitle');$('riskSec').textContent=t('riskLab');$('lotLab').textContent=(riskMode==='lot')?t('lotSize'):t('lotLab');$('rNote').textContent=t('rNote');
+ $('lotSizeLab').textContent=t('lotSize');$('rLotInput').setAttribute('aria-label',t('lotSize'));
+ drawRiskModes();updateLot();
  if(!riskBusy)$('rGo').textContent=t('openBtn');
  var tb=$('takeBtn');if(tb)tb.textContent=t('takeTrade');
  renderStats();drawNav();drawTabs();drawPairs(true);drawLangs();drawThemes();drawMenu();renderLiga();

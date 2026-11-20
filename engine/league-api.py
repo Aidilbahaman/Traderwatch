@@ -32,6 +32,11 @@ ALLOWED_PAIRS = {"XAUUSD", "XAGUSD", "BTCUSD", "EURUSD", "GBPUSD",
 MAX_OPEN_PER_PAIR = 1
 MAX_OPEN_TOTAL = 5
 RISK_CHOICES = (1.0, 2.0)
+# Contract multiplier (USD per 1.0 price move per 1 lot) — matches frontend lotFor.
+CONTRACT_MULT = {"XAUUSD": 100.0, "XAGUSD": 5000.0, "BTCUSD": 1.0}
+DEFAULT_MULT = 100000.0  # standard forex lot
+MAX_LOT = 100.0
+MIN_LOT = 0.01
 
 
 def load_env():
@@ -182,11 +187,25 @@ class Handler(BaseHTTPRequestHandler):
             return self._send(400, {"error": "Side must be BUY or SELL."})
         try:
             entry, sl, tp = float(req["entry"]), float(req["sl"]), float(req["tp"])
-            risk_pct = float(req.get("risk_pct", 1))
         except (KeyError, TypeError, ValueError):
             return self._send(400, {"error": "Missing entry / SL / TP."})
-        if risk_pct not in RISK_CHOICES:
-            return self._send(400, {"error": "Risk must be 1% or 2%."})
+        # Custom lot (optional): client sets their own lot size. Otherwise risk %.
+        custom_lot = None
+        if req.get("lot") not in (None, "", 0):
+            try:
+                custom_lot = float(req["lot"])
+            except (TypeError, ValueError):
+                return self._send(400, {"error": "Invalid lot size."})
+            if not (MIN_LOT <= custom_lot <= MAX_LOT):
+                return self._send(400, {"error": f"Lot must be between {MIN_LOT} and {MAX_LOT}."})
+            custom_lot = round(custom_lot, 2)
+        else:
+            try:
+                risk_pct = float(req.get("risk_pct", 1))
+            except (TypeError, ValueError):
+                return self._send(400, {"error": "Invalid risk."})
+            if risk_pct not in RISK_CHOICES:
+                return self._send(400, {"error": "Risk must be 1% or 2%."})
         if side == "BUY" and not (sl < entry < tp):
             return self._send(400, {"error": "Invalid levels for BUY."})
         if side == "SELL" and not (sl > entry > tp):
@@ -201,13 +220,23 @@ class Handler(BaseHTTPRequestHandler):
             bal, _ = balance_of(trades)
             if bal <= 0:
                 return self._send(409, {"error": "Virtual balance depleted. New season resets it."})
-            risk_usd = round(bal * risk_pct / 100.0, 2)
-            row = sb("POST", "/rest/v1/paper_trades", body={
+            if custom_lot is not None:
+                mult = CONTRACT_MULT.get(pair, DEFAULT_MULT)
+                risk_usd = round(custom_lot * abs(entry - sl) * mult, 2)
+                if risk_usd > bal:
+                    return self._send(409, {"error": "That lot risks more than your virtual balance. Use a smaller lot."})
+                risk_pct = round(risk_usd / bal * 100.0, 2)
+            else:
+                risk_usd = round(bal * risk_pct / 100.0, 2)
+            body = {
                 "user_id": uid, "username": display_name(user), "pair": pair,
                 "side": side, "entry": entry, "sl": sl, "tp": tp,
-                "risk_pct": risk_pct, "risk_usd": risk_usd, "season": SEASON})
+                "risk_pct": risk_pct, "risk_usd": risk_usd, "season": SEASON}
+            if custom_lot is not None:
+                body["lot"] = custom_lot
+            row = sb("POST", "/rest/v1/paper_trades", body=body)
             tr = (row or [{}])[0]
-            log(f"{uid[:8]} opened {pair} {side} risk {risk_pct}%")
+            log(f"{uid[:8]} opened {pair} {side} " + (f"lot={custom_lot}" if custom_lot is not None else f"risk {risk_pct}%"))
             return self._send(201, {"trade": tr, "balance": bal})
         except urllib.error.HTTPError as e:
             log(f"POST trade sb HTTP {e.code}: {e.read().decode()[:160]}")
