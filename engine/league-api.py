@@ -9,7 +9,9 @@ Endpoints (Caddy proxies /api/league* here):
   GET  /api/league/me          -> balance, net_r, win_rate, open count, rank
   GET  /api/league/trades      -> my trades (newest first)
   GET  /api/league/leaderboard -> aggregated standings (RPC, no private data)
-  POST /api/league/trade       -> open a paper trade {pair,side,entry,sl,tp,risk_pct}
+  POST /api/league/trade       -> open a paper trade {pair,side,entry,sl,tp,risk_pct|lot}
+                                  optional mt5:true (OWNER ONLY) also places a real
+                                  MT5 pending order with the exact lot chosen.
 
 Auth: Supabase member Bearer token on every call.
 """
@@ -21,6 +23,13 @@ import urllib.parse
 import urllib.request
 from datetime import datetime, timezone
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+
+# Owner-only real-money sync ("Take this trade" -> MT5). Optional: if the MT5
+# module cannot load, the league keeps working paper-only.
+try:
+    import mt5_ondemand as MO
+except Exception:
+    MO = None
 
 HERE = pathlib.Path(__file__).resolve().parent
 ENV = pathlib.Path("/home/ubuntu/.secrets/supabase.env")
@@ -157,7 +166,8 @@ class Handler(BaseHTTPRequestHandler):
                     "balance": bal, "start_balance": START_BALANCE, "net_r": net_r,
                     "win_rate": round(100.0 * wins / dec, 1) if dec else None,
                     "trades_closed": len(closed), "trades_open": open_n,
-                    "rank": rank, "season": SEASON, "username": me})
+                    "rank": rank, "season": SEASON, "username": me,
+                    "is_owner": bool(MO and MO.is_owner(uid))})
         except urllib.error.HTTPError as e:
             log(f"GET {path} sb HTTP {e.code}")
             return self._send(502, {"error": "Could not load league data. Try again."})
@@ -237,7 +247,26 @@ class Handler(BaseHTTPRequestHandler):
             row = sb("POST", "/rest/v1/paper_trades", body=body)
             tr = (row or [{}])[0]
             log(f"{uid[:8]} opened {pair} {side} " + (f"lot={custom_lot}" if custom_lot is not None else f"risk {risk_pct}%"))
-            return self._send(201, {"trade": tr, "balance": bal})
+            # Owner-only: also place a REAL MT5 pending order with the exact lot
+            # chosen (custom lot, or the risk-% lot). Members / mt5 absent -> paper only.
+            mt5res = None
+            if req.get("mt5") and MO and MO.is_owner(uid):
+                if custom_lot is not None:
+                    use_lot = custom_lot
+                else:
+                    mult = CONTRACT_MULT.get(pair, DEFAULT_MULT)
+                    use_lot = round(risk_usd / (abs(entry - sl) * mult), 2)
+                verdict = {"pair": pair, "side": side, "entry": entry, "sl": sl, "tp1": tp}
+                try:
+                    mt5res = MO.sync_verdict(verdict, uid, lot=use_lot)
+                except Exception as e:
+                    log(f"mt5 sync error {type(e).__name__}: {str(e)[:120]}")
+                    mt5res = {"synced": False, "reason": "sync-error"}
+                log(f"{uid[:8]} mt5 {pair} {side} lot={use_lot} -> {mt5res}")
+            payload = {"trade": tr, "balance": bal}
+            if mt5res is not None:
+                payload["mt5"] = mt5res
+            return self._send(201, payload)
         except urllib.error.HTTPError as e:
             log(f"POST trade sb HTTP {e.code}: {e.read().decode()[:160]}")
             return self._send(502, {"error": "Could not open trade. Try again."})

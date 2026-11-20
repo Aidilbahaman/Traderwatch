@@ -34,7 +34,6 @@ import ai_model as M            # noqa: E402
 import smc_filter as SMC        # noqa: E402
 import llm_analyst as LA        # noqa: E402
 import sq_collector as SQC      # noqa: E402
-import mt5_ondemand as MO       # noqa: E402  (owner-only scan -> MT5 sync)
 
 ENV = pathlib.Path("/home/ubuntu/.secrets/supabase.env")
 PORT = int(os.environ.get("ANALYZE_PORT", "8102"))
@@ -294,14 +293,8 @@ class Handler(BaseHTTPRequestHandler):
             log(f"{pair} error {type(e).__name__}: {str(e)[:160]}")
             return self._send(500, {"error": "Analisis gagal buat masa ini. Cuba lagi sebentar."})
         log(f"{uid[:8]} {pair} -> {result.get('side')}")
-        # Owner-only: auto-sync BUY/SELL verdict to MT5 pending order.
-        # Members / HOLD -> no-op. Dry-run by default (see mt5_ondemand.py).
-        if result.get("side") in ("BUY", "SELL"):
-            try:
-                result["mt5"] = MO.sync_verdict(result, uid)
-            except Exception as e:
-                log(f"mt5 sync error {type(e).__name__}: {str(e)[:120]}")
-                result["mt5"] = {"synced": False, "reason": "sync-error"}
+        # MT5 sync moved to "Take this trade" (league-api) so the owner's
+        # chosen lot is used. Scans no longer place orders. See mt5_ondemand.py.
         return self._send(200, result)
 
 

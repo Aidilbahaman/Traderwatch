@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
-"""TraderWatch on-demand scan -> MT5 pending order sync (OWNER ONLY).
+"""TraderWatch "Take this trade" -> MT5 pending order sync (OWNER ONLY).
 
-Owner request (2026-11-20): when the owner finishes an on-demand AI scan in
-the app and the verdict is BUY/SELL, automatically place a pending LIMIT/STOP
-order in MT5 at the same entry/SL/TP. Members' scans stay PAPER only.
+Owner flow (updated 2026-11-21): when the owner opens a trade via the app's
+"Take this trade" modal and opts in to MT5, place a pending LIMIT/STOP order
+at the same entry/SL/TP using the EXACT lot the owner chose (custom lot or
+risk-% lot). Members' trades stay PAPER only. Scan no longer auto-syncs.
 
 SAFETY (real money — read carefully):
   * OWNER ONLY: uid must be in MT5_SYNC_UIDS allowlist. Everyone else -> no-op.
@@ -20,6 +21,7 @@ This module is imported by engine/analyze-api.py. It does NOT run on its own.
 import hashlib
 import importlib.util
 import json
+import math
 import os
 import time
 from datetime import datetime, timezone
@@ -74,9 +76,13 @@ def _audit(rec):
         pass
 
 
-def sync_verdict(verdict, uid):
-    """Place a pending order for an owner's BUY/SELL verdict. Returns a dict
-    describing the outcome; never raises. Members / HOLD -> {'synced': False}."""
+def sync_verdict(verdict, uid, lot=None):
+    """Place a pending order for an owner's BUY/SELL trade. Returns a dict
+    describing the outcome; never raises. Members / HOLD -> {'synced': False}.
+
+    lot: owner's explicit lot choice (from "Take this trade"). When given it
+    is used as-is (normalized to broker step/min/max); otherwise risk-% sizing.
+    """
     if not is_owner(uid):
         return {"synced": False, "reason": "not-owner"}
     side = str(verdict.get("side", "")).upper()
@@ -111,12 +117,39 @@ def sync_verdict(verdict, uid):
             return {"synced": False, "reason": "kill-switch"}
     except Exception:
         pass  # kill state unreadable -> proceed with other guards
-    try:
-        lot, note = MP.size_lot(pair, entry, sl, equity)
-    except Exception as e:
-        return {"synced": False, "reason": f"lot-error:{type(e).__name__}"}
-    if not lot:
-        return {"synced": False, "reason": f"no-lot:{note}"}
+    if lot is not None:
+        # Owner's explicit lot: respect it, but keep broker + spread guards.
+        try:
+            lot = float(lot)
+        except (TypeError, ValueError):
+            return {"synced": False, "reason": "bad-lot"}
+        if not (0.01 <= lot <= 100):
+            return {"synced": False, "reason": "lot-out-of-range"}
+        try:
+            spec = MP.symbol_spec(pair)
+        except Exception as e:
+            return {"synced": False, "reason": f"spec-error:{type(e).__name__}"}
+        if not spec:
+            return {"synced": False, "reason": "no-spec"}
+        sp = float(spec.get("spread_price") or 0) or float(spec.get("spread_pt") or 0) * float(spec.get("point") or 0)
+        if sp > 0 and abs(entry - sl) < 3 * sp:
+            return {"synced": False, "reason": f"sl-too-close:spread={sp:g}"}
+        step = float(spec.get("vol_step") or 0.01) or 0.01
+        vmin = float(spec.get("vol_min") or 0.01) or 0.01
+        vmax = float(spec.get("vol_max") or 100.0) or 100.0
+        lot = round(math.floor(lot / step) * step, 8)
+        if lot < vmin:
+            return {"synced": False, "reason": f"lot<min:{vmin:g}"}
+        if lot > vmax:
+            lot = vmax
+        note = f"owner-lot eq={equity:.2f}"
+    else:
+        try:
+            lot, note = MP.size_lot(pair, entry, sl, equity)
+        except Exception as e:
+            return {"synced": False, "reason": f"lot-error:{type(e).__name__}"}
+        if not lot:
+            return {"synced": False, "reason": f"no-lot:{note}"}
 
     magic = MAGIC_BASE + (int(key[:6], 16) % 100000)
     base = {"pair": pair, "side": side, "entry": entry, "sl": sl, "tp": tp,

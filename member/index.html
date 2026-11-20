@@ -375,6 +375,8 @@ html[data-theme="light"] .modepill.on{background:#eaf5db;color:#4c7a17}
 .customlot label{display:block;font-size:9.5px;font-weight:750;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
 .customlot input{width:100%;box-sizing:border-box;background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:9px 11px;font:700 15px ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-variant-numeric:tabular-nums;color:var(--text)}
 .customlot input:focus{outline:none;border-color:var(--lime)}
+.mt5opt{display:flex;align-items:flex-start;gap:9px;background:#b7f36b10;border:1px solid #b7f36b45;border-radius:12px;padding:10px 12px;margin:8px 0;font-size:12px;font-weight:650;color:var(--text);cursor:pointer;line-height:1.35}
+.mt5opt input{margin-top:1px;accent-color:var(--lime);width:15px;height:15px;flex:none}
 .riskcalc{font-size:11.5px;color:var(--muted);margin:7px 0 0;font-variant-numeric:tabular-nums}
 .riskcalc.bad{color:var(--red);font-weight:750}
 .lotbadge{color:var(--lime);font-weight:800;font-variant-numeric:tabular-nums}
@@ -540,6 +542,7 @@ html[data-theme="light"] .lotbadge{color:#4c7a17}
         <label for="rLotInput" id="lotSizeLab">Lot size</label>
         <input id="rLotInput" type="number" step="0.01" min="0.01" max="100" value="0.05" inputmode="decimal" aria-label="Lot size">
       </div>
+      <label class="mt5opt hidden" id="mt5Opt"><input type="checkbox" id="mt5Chk" checked><span id="mt5OptTxt">Also place a real MT5 order with this lot</span></label>
       <div class="rlot"><span id="lotLab">Indicative lot</span><b id="lotVal">—</b></div>
       <p class="riskcalc hidden" id="rRiskCalc"></p>
       <p class="rbase" id="rBase"></p>
@@ -622,6 +625,7 @@ var DICT={
   takeTrade:'＋ Saya ambil trade ini',noSetup:'Tiada setup untuk diambil sekarang.',
   riskTitle:'Buka paper trade',lotLab:'Lot anggaran',rBase:'Risiko dikira dari baki maya anda:',rNote:'Modal maya sahaja — tiada wang sebenar.',openBtn:'Buka trade',opening:'Membuka…',
   riskModePct:'Risk %',riskModeLot:'Lot sendiri',lotSize:'Saiz lot',riskAmt:'Risiko',ofBalance:'dari baki',lotTooBig:'Lot melebihi baki',lotInvalid:'Lot 0.01–100',
+  mt5Opt:'Juga hantar order sebenar ke MT5 dengan lot ini',mt5Note:'Paper trade + order pending MT5 sebenar pada lot di atas.',mt5Sent:'Dihantar ke MT5',mt5Dry:'MT5 dry-run (tiada order live)',mt5Fail:'Order MT5 tidak dihantar',
   toastOpened:'Paper trade dibuka! Pantau di Liga.',pickPair:'Pilih pair untuk analisis AI.',
   leagueErr:'Gagal memuatkan data liga. Cuba lagi.',tradeErr:'Gagal membuka trade. Cuba lagi.',noBalance:'Baki tidak tersedia — cuba lagi.',
   loggingOut:'Melog keluar…',langNative:'Bahasa Melayu'
@@ -661,6 +665,7 @@ var DICT={
   riskTitle:'Open paper trade',lotLab:'Indicative lot',rBase:'Risk sized from your virtual balance:',rNote:'Virtual capital only — no real money.',openBtn:'Open trade',opening:'Opening…',
   riskModePct:'Risk %',riskModeLot:'Custom lot',lotSize:'Lot size',riskAmt:'Risk',ofBalance:'of balance',lotTooBig:'Lot risks more than balance',lotInvalid:'Lot 0.01–100',
   toastOpened:'Paper trade opened! Track it in League.',pickPair:'Pick a pair for AI analysis.',
+  mt5Opt:'Also place a real MT5 order with this lot',mt5Note:'Paper trade + real MT5 pending order at the lot above.',mt5Sent:'Sent to MT5',mt5Dry:'MT5 dry-run (no live order)',mt5Fail:'MT5 order not placed',
   leagueErr:'Could not load league data. Try again.',tradeErr:'Could not open the trade. Try again.',noBalance:'Balance unavailable — try again.',
   loggingOut:'Signing out…',langNative:'English'
  },
@@ -697,6 +702,7 @@ var DICT={
   takeTrade:'＋ 采用这笔交易',noSetup:'目前没有可采用的设置。',
   riskTitle:'开启模拟交易',lotLab:'参考手数',rBase:'风险按您的虚拟余额计算：',rNote:'仅虚拟资金——不涉及真实金钱。',openBtn:'开仓',opening:'开仓中…',
   toastOpened:'模拟交易已开仓！可在联赛中查看。',pickPair:'选择货币对进行 AI 分析。',
+  mt5Opt:'同时以该手数向 MT5 下达真实订单',mt5Note:'模拟交易 + 按上述手数在 MT5 下真实挂单。',mt5Sent:'已发送至 MT5',mt5Dry:'MT5 演练（未下实单）',mt5Fail:'MT5 订单未下达',
   leagueErr:'无法加载联赛数据，请重试。',tradeErr:'开仓失败，请重试。',noBalance:'余额不可用——请重试。',
   loggingOut:'正在退出…',langNative:'中文'
  },
@@ -733,6 +739,7 @@ var DICT={
   takeTrade:'＋ Saya ambil trade ini',noSetup:'Tidak ada setup untuk diambil sekarang.',
   riskTitle:'Buka paper trade',lotLab:'Lot perkiraan',rBase:'Risiko dihitung dari saldo virtual Anda:',rNote:'Hanya modal virtual — tanpa uang sungguhan.',openBtn:'Buka trade',opening:'Membuka…',
   toastOpened:'Paper trade dibuka! Pantau di Liga.',pickPair:'Pilih pair untuk analisis AI.',
+  mt5Opt:'Juga kirim order nyata ke MT5 dengan lot ini',mt5Note:'Paper trade + order pending MT5 nyata pada lot di atas.',mt5Sent:'Terkirim ke MT5',mt5Dry:'MT5 dry-run (tanpa order live)',mt5Fail:'Order MT5 tidak terkirim',
   leagueErr:'Gagal memuat data liga. Coba lagi.',tradeErr:'Gagal membuka trade. Coba lagi.',noBalance:'Saldo tidak tersedia — coba lagi.',
   loggingOut:'Keluar…',langNative:'Bahasa Indonesia'
  },
@@ -769,6 +776,7 @@ var DICT={
   takeTrade:'＋ இந்த வர்த்தகத்தை எடுக்கிறேன்',noSetup:'இப்போது எடுக்க அமைப்பு இல்லை.',
   riskTitle:'பேப்பர் வர்த்தகத்தைத் தொடங்கு',lotLab:'மதிப்பிடப்பட்ட லாட்',rBase:'உங்கள் மெய்நிகர் இருப்பிலிருந்து இடர் கணக்கிடப்படுகிறது:',rNote:'மெய்நிகர் மூலதனம் மட்டும் — உண்மையான பணம் இல்லை.',openBtn:'வர்த்தகத்தைத் தொடங்கு',opening:'தொடங்குகிறது…',
   toastOpened:'பேப்பர் வர்த்தகம் தொடங்கப்பட்டது! லீக்கில் கண்காணிக்கவும்.',pickPair:'AI பகுப்பாய்விற்கு ஒரு ஜோடியைத் தேர்ந்தெடுக்கவும்.',
+  mt5Opt:'இந்த லாட்டுடன் MT5-க்கு உண்மையான ஆர்டரையும் அனுப்பு',mt5Note:'பேப்பர் வர்த்தகம் + மேலே உள்ள லாட்டில் உண்மையான MT5 நிலுவை ஆர்டர்.',mt5Sent:'MT5-க்கு அனுப்பப்பட்டது',mt5Dry:'MT5 dry-run (நேரடி ஆர்டர் இல்லை)',mt5Fail:'MT5 ஆர்டர் அனுப்பப்படவில்லை',
   leagueErr:'லீக் தரவை ஏற்ற முடியவில்லை. மீண்டும் முயற்சிக்கவும்.',tradeErr:'வர்த்தகத்தைத் தொடங்க முடியவில்லை. மீண்டும் முயற்சிக்கவும்.',noBalance:'இருப்பு கிடைக்கவில்லை — மீண்டும் முயற்சிக்கவும்.',
   loggingOut:'வெளியேறுகிறது…',langNative:'தமிழ்'
  }
@@ -1226,6 +1234,7 @@ function loadLeague(force){
  return Promise.all([apiFetch('/api/league/me'),apiFetch('/api/league/trades'),apiFetch('/api/league/leaderboard')]).then(function(rs){
   if(!rs[0].ok||!rs[1].ok||!rs[2].ok){LG.state='error';renderLiga();return}
   LG.me=rs[0].data||null;
+  if(riskAna)drawMt5Opt();
   LG.trades=(rs[1].data&&Array.isArray(rs[1].data.trades))?rs[1].data.trades:[];
   LG.board=(rs[2].data&&Array.isArray(rs[2].data.leaderboard))?rs[2].data.leaderboard:[];
   LG.season=(LG.me&&LG.me.season!=null)?LG.me.season:(rs[2].data?rs[2].data.season:null);
@@ -1364,6 +1373,14 @@ function lotFor(sym,entry,sl,amt){
 }
 function lotValid(v){return isFinite(v)&&v>=0.01&&v<=100}
 function lotRiskUsd(){return riskAna?riskLot*Math.abs(riskAna.entry-riskAna.sl)*lotMult(riskAna.pair):null}
+function isOwner(){return !!(LG.me&&LG.me.is_owner)}
+function drawMt5Opt(){
+ var on=isOwner();
+ $('mt5Opt').classList.toggle('hidden',!on);
+ $('mt5OptTxt').textContent=t('mt5Opt');
+ $('rNote').textContent=(on&&$('mt5Chk').checked)?t('mt5Note'):t('rNote');
+}
+$('mt5Chk').addEventListener('change',drawMt5Opt);
 function drawRiskModes(){
  $('riskModeOpts').innerHTML=[['pct','riskModePct'],['lot','riskModeLot']].map(function(m){
   return '<button class="modepill'+(riskMode===m[0]?' on':'')+'" data-m="'+m[0]+'" role="tab" aria-selected="'+(riskMode===m[0])+'">'+esc(t(m[1]))+'</button>';
@@ -1419,15 +1436,16 @@ function openRisk(a){
  riskPct=1;riskBusy=false;riskMode='pct';riskLot=0.05;
  riskBal=(LG.me&&isFinite(+LG.me.balance))?+LG.me.balance:null;
  $('rErr').innerHTML='';
- $('rPair').innerHTML='<b>'+esc(pairName(riskAna.pair))+'</b><span class="side '+esc(riskAna.side.toLowerCase())+'">'+esc(riskAna.side)+'</span><span class="rsub">M15 · '+riskAna.conf+'%</span>';
+ $('rPair').innerHTML='<b>'+esc(pairName(riskAna.pair))+'</b><span class="side '+esc(riskAna.side.toLowerCase())+'">'+esc(riskAna.side)+'</span><span class="rsub">'+esc(tf)+' · '+riskAna.conf+'%</span>';
  $('rLevels').innerHTML='<div class="e"><small>'+esc(t('entry'))+'</small><b>'+tfx(riskAna.pair,riskAna.entry)+'</b></div><div class="t"><small>'+esc(t('tp'))+'</small><b>'+tfx(riskAna.pair,riskAna.tp)+'</b></div><div class="s"><small>'+esc(t('sl'))+'</small><b>'+tfx(riskAna.pair,riskAna.sl)+'</b></div>';
  drawRiskModes();drawRiskOpts();updateLot();
+ $('mt5Chk').checked=true;drawMt5Opt();
  $('rGo').textContent=t('openBtn');$('rGo').disabled=riskBal==null;
  $('phone').classList.add('ropen');
  if(riskBal==null){
   apiFetch('/api/league/me').then(function(r){
    if(!riskAna)return;
-   if(r.ok&&r.data&&isFinite(+r.data.balance)){LG.me=r.data;riskBal=+r.data.balance;drawRiskOpts();updateLot()}
+   if(r.ok&&r.data&&isFinite(+r.data.balance)){LG.me=r.data;riskBal=+r.data.balance;drawRiskOpts();updateLot();drawMt5Opt()}
    else riskErr(t('noBalance'));
   }).catch(function(e){if(e&&e.message==='auth')return;riskErr(t('noBalance'))});
  }
@@ -1441,13 +1459,20 @@ function submitTrade(){
  riskBusy=true;$('rGo').disabled=true;$('rGo').textContent=t('opening');$('rErr').innerHTML='';
  var body={pair:String(riskAna.pair).replace('/',''),side:riskAna.side,entry:riskAna.entry,sl:riskAna.sl,tp:riskAna.tp};
  if(riskMode==='lot')body.lot=riskLot;else body.risk_pct=riskPct;
+ if(isOwner()&&$('mt5Chk').checked)body.mt5=true;
  apiFetch('/api/league/trade',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)}).then(function(r){
   riskBusy=false;
   if(r.ok){
    hap(12);closeRisk();closeSheet();
    showView('liga');setSub('trades');
    loadLeague(true);
-   toast(t('toastOpened'));
+   var msg=t('toastOpened'),m=r.data&&r.data.mt5;
+   if(m){
+    if(m.synced&&!m.dry_run)msg+=' · '+t('mt5Sent')+' #'+m.ticket+' · lot '+m.lot;
+    else if(m.synced&&m.dry_run)msg+=' · '+t('mt5Dry')+' · lot '+m.lot;
+    else msg+=' · '+t('mt5Fail')+(m.reason?' ('+m.reason+')':'');
+   }
+   toast(msg);
    return;
   }
   $('rGo').textContent=t('openBtn');updateLot();
@@ -1604,7 +1629,7 @@ function renderAll(){
  $('goTxt').textContent=t('goAI');
  $('ligaTitle').textContent=t('ligaTitle');$('ligaSub').textContent=t('ligaSub');
  $('lbNote').textContent=t('lbNote');$('tNote').textContent=t('tNote');$('bNote').textContent=t('bNote');$('newTrade').textContent=t('newTrade');
- $('riskTitle').textContent=t('riskTitle');$('riskSec').textContent=t('riskLab');$('lotLab').textContent=(riskMode==='lot')?t('lotSize'):t('lotLab');$('rNote').textContent=t('rNote');
+ $('riskTitle').textContent=t('riskTitle');$('riskSec').textContent=t('riskLab');$('lotLab').textContent=(riskMode==='lot')?t('lotSize'):t('lotLab');drawMt5Opt();
  $('lotSizeLab').textContent=t('lotSize');$('rLotInput').setAttribute('aria-label',t('lotSize'));
  drawRiskModes();updateLot();
  if(!riskBusy)$('rGo').textContent=t('openBtn');
