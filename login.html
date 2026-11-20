@@ -13,6 +13,12 @@
 [hidden]{display:none!important}
 .box{max-width:440px;margin:56px auto;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:28px}
 .box h1{font-size:2rem;margin-bottom:18px}
+.signin-note{background:var(--panel2,#f4f6f8);border:1px solid var(--line);border-radius:12px;padding:13px 15px;margin:0 0 18px;font-size:14px;color:var(--text,#17171d)}
+.signin-note p{margin:0}
+.signin-note p.sub{margin-top:6px;color:var(--muted);font-size:13px}
+.signin-note details{margin-top:9px}
+.signin-note summary{cursor:pointer;color:var(--muted);font-size:12.5px;font-weight:600}
+.signin-note ul{margin:8px 0 0;padding-left:18px;color:var(--muted);font-size:12.5px;display:grid;gap:5px}
 .alt{margin-top:18px;color:var(--muted);display:grid;gap:8px}
 .linkbtn{background:none;border:0;color:var(--muted);font:600 1rem var(--body);cursor:pointer;text-decoration:underline;padding:0;text-align:left}
 
@@ -170,27 +176,29 @@ function setMode(isSignup){
     : 'New here? <a href="login.html?mode=signup">Create a free account</a>';
 }
 setMode(signup);
-// Bantuan konteks: URL lantunan dari /member/ membawa diagnosis (why/ref/app).
+// Clean, calm sign-in notice. The verbose login-loop diagnostics were removed
+// once the cross-origin session bug was fixed; detailed help is tucked behind
+// a collapsed "Trouble signing in?" toggle so it never alarms normal users.
 (function(){
   const p = new URLSearchParams(location.search);
   const why = p.get('why') || (p.get('err') === 'storage' ? 'storage' : '');
   const bounced = p.get('bounce') === '1' || !!why;
   const inApp = twInApp();
   if (!bounced && !inApp) return;
-  let t = '';
-  if (inApp) t += '<b>In-app browser detected</b> (Telegram/WhatsApp/chat). Your login session will not persist in this browser. Tap <b>⋯</b> → <b>"Open in Safari/Chrome"</b> and sign in in a regular browser for lasting access.<br>';
-  if (bounced) {
-    if (why === 'storage') t += '<b>Your browser is blocking site data.</b> Turn off "Block All Cookies" (iPhone: Settings → Safari) or use a regular window (not private), then sign in again.';
-    else if (why === 'signedout') t += '<b>Your session has expired / ended.</b> Sign in again below to continue to the member area.';
-    else t += '<b>The member area requires a sign in.</b> Sign in below to continue.';
-    if (p.get('app') === '1') t += ' <b>You are in the installed app.</b> If sign-in keeps bouncing: open traderwatch.org/login.html in regular Safari/Chrome (not the app), sign in there, then reopen the app.';
-    t += '<br><br><b>Need to sign in AGAIN every time?</b> Site data is not persisting on your device. Check: (1) make sure you are not in an <b>Incognito</b> tab (Chrome: dark theme / hat-and-glasses icon); (2) Chrome → <b>Settings → Site settings → Cookies</b> → turn off <b>"Clear cookies and site data when you close all tabs"</b>; (3) the most lasting fix: <b>install the app</b> — Chrome menu ⋮ → "Add to Home screen" / "Install app", then sign in just once.';
-  }
-  const warn = document.createElement('div');
-  warn.className = 'msg err';
-  warn.style.cssText = 'margin:0 0 16px;text-align:left';
-  warn.innerHTML = t;
-  document.querySelector('.box').insertBefore(warn, document.getElementById('loginForm'));
+  let msg;
+  if (why === 'storage') msg = 'Your browser is blocking site data. Enable cookies for traderwatch.org, then sign in again.';
+  else if (why === 'signedout') msg = 'Your session has ended. Please sign in again to continue.';
+  else msg = 'Please sign in to continue to the member area.';
+  const extra = inApp ? 'For lasting access, open this page in your browser (tap ⋯ → "Open in Safari/Chrome").' : '';
+  const note = document.createElement('div');
+  note.className = 'signin-note';
+  note.innerHTML = '<p>' + msg + '</p>' + (extra ? '<p class="sub">' + extra + '</p>' : '') +
+    '<details><summary>Trouble signing in?</summary><ul>' +
+    '<li>Use a regular tab, not Incognito / Private.</li>' +
+    '<li>Allow cookies for traderwatch.org (turn off "clear cookies on exit").</li>' +
+    '<li>Best: install the app (Chrome ⋮ → "Install app") and sign in once.</li>' +
+    '</ul></details>';
+  document.querySelector('.box').insertBefore(note, document.getElementById('loginForm'));
   if (inApp) twBeacon('login_inapp_seen', { ua: (navigator.userAgent||'').slice(0,220), bounced: bounced });
 })();
 // The login page must always show the credential form. Never auto-enter an
