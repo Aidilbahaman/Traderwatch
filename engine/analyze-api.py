@@ -43,6 +43,10 @@ ALLOWED_PAIRS = {"XAUUSD", "XAGUSD", "BTCUSD", "EURUSD", "GBPUSD",
 MIN_GAP_S = 20                      # min seconds between analyses per user
 HOURLY_CAP = 12                     # max analyses per user per hour
 BARS_COUNT = 300                    # M15 bars fed to the analyst
+# Cloudflare Turnstile (login anti-bot). Test secret = always-pass for demo;
+# set TURNSTILE_SECRET to your real secret in the service env for production.
+TURNSTILE_SECRET = os.environ.get("TURNSTILE_SECRET", "1x0000000000000000000000000000000AA")
+TURNSTILE_VERIFY_URL = "https://challenges.cloudflare.com/turnstile/v0/siteverify"
 
 _last_call = {}                     # uid -> ts of last accepted analysis
 _hour_count = {}                    # uid -> [window_start_ts, count]
@@ -237,8 +241,33 @@ class Handler(BaseHTTPRequestHandler):
             return self._send(200, {"pair": pair, "tf": tf, "candles": candles})
         return self._send(404, {"error": "not found"})
 
+    def _turnstile(self):
+        try:
+            n = int(self.headers.get("Content-Length") or 0)
+            req = json.loads(self.rfile.read(n).decode() or "{}")
+        except ValueError:
+            return self._send(400, {"ok": False, "error": "bad json"})
+        token = str(req.get("token", ""))
+        if not token:
+            return self._send(400, {"ok": False, "error": "missing token"})
+        try:
+            data = urllib.parse.urlencode({"secret": TURNSTILE_SECRET, "response": token}).encode()
+            r = urllib.request.Request(TURNSTILE_VERIFY_URL, data=data,
+                                       headers={"Content-Type": "application/x-www-form-urlencoded"})
+            with urllib.request.urlopen(r, timeout=15) as resp:
+                out = json.loads(resp.read().decode())
+            ok = bool(out.get("success"))
+            log(f"turnstile verify ok={ok}")
+            return self._send(200, {"ok": ok})
+        except Exception as e:
+            log(f"turnstile error {type(e).__name__}: {str(e)[:120]}")
+            # Fail open on network error so legit users are not locked out.
+            return self._send(200, {"ok": True, "fallback": True})
+
     def do_POST(self):
         path = urllib.parse.urlparse(self.path).path
+        if path == "/api/turnstile/verify":
+            return self._turnstile()
         if path != "/api/analyze":
             return self._send(404, {"error": "not found"})
         user = verify_user(self._token())

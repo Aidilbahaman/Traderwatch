@@ -21,6 +21,12 @@
 .signin-note ul{margin:8px 0 0;padding-left:18px;color:var(--muted);font-size:12.5px;display:grid;gap:5px}
 .alt{margin-top:18px;color:var(--muted);display:grid;gap:8px}
 .linkbtn{background:none;border:0;color:var(--muted);font:600 1rem var(--body);cursor:pointer;text-decoration:underline;padding:0;text-align:left}
+.oauth{display:grid;gap:10px;margin-bottom:18px}
+.oauth-btn{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;padding:11px 14px;border-radius:10px;border:1px solid var(--line);background:var(--panel);color:var(--ink);font:600 1rem var(--body);cursor:pointer;transition:background .15s ease,border-color .15s ease}
+.oauth-btn:hover{background:var(--fill,#f5f5f7);border-color:var(--muted)}
+.oauth-btn svg{width:18px;height:18px;flex:0 0 auto}
+.divider{display:flex;align-items:center;gap:12px;color:var(--muted);font-size:.85rem;margin:0 0 18px}
+.divider::before,.divider::after{content:"";flex:1;height:1px;background:var(--line)}
 
 /* Telegram fullscreen: pad by the insets the client reports. Zero in a
    normal browser, so nothing changes there. */
@@ -28,6 +34,7 @@
 :root[data-tg="1"] body{padding-bottom:calc(76px + var(--tg-bottom,0px))}
 :root[data-tg="1"] .tabbar{bottom:calc(10px + var(--tg-bottom,0px))}
 </style>
+<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 </head>
 <body>
 <header>
@@ -41,6 +48,17 @@
   <div class="box">
     <h1 id="formTitle">Log in</h1>
     <p id="formHint" class="muted" style="margin:-10px 0 18px">Welcome back. Log in to continue.</p>
+    <div class="oauth">
+      <button class="oauth-btn" type="button" id="googleBtn">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.27-4.74 3.27-8.1z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84A11 11 0 0 0 12 23z"/><path fill="#FBBC05" d="M5.84 14.1a6.6 6.6 0 0 1 0-4.2V7.06H2.18a11 11 0 0 0 0 9.88l3.66-2.84z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15A11 11 0 0 0 12 1 11 11 0 0 0 2.18 7.06l3.66 2.84C6.71 7.3 9.14 5.38 12 5.38z"/></svg>
+        Continue with Google
+      </button>
+      <button class="oauth-btn" type="button" id="githubBtn">
+        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 1a11 11 0 0 0-3.48 21.44c.55.1.75-.24.75-.53v-1.85c-3.06.67-3.71-1.47-3.71-1.47-.5-1.28-1.22-1.62-1.22-1.62-1-.68.08-.67.08-.67 1.1.08 1.68 1.13 1.68 1.13.98 1.68 2.57 1.2 3.2.92.1-.71.38-1.2.7-1.47-2.44-.28-5.01-1.22-5.01-5.43 0-1.2.43-2.18 1.13-2.95-.11-.28-.49-1.4.11-2.91 0 0 .92-.3 3.02 1.13a10.5 10.5 0 0 1 5.5 0c2.1-1.42 3.02-1.13 3.02-1.13.6 1.51.22 2.63.11 2.91.7.77 1.13 1.75 1.13 2.95 0 4.22-2.58 5.15-5.03 5.42.4.34.75 1 .75 2.02v3c0 .29.2.63.76.52A11 11 0 0 0 12 1z"/></svg>
+        Continue with GitHub
+      </button>
+    </div>
+    <div class="divider"><span>or with email</span></div>
     <form id="loginForm" novalidate>
       <label id="nameWrap" hidden>Full name
         <input name="name" type="text" autocomplete="name">
@@ -54,7 +72,8 @@
       <label>Password
         <input name="password" type="password" autocomplete="current-password" required>
       </label>
-      <button class="btn" type="submit">Log in</button>
+      <div id="turnstileWrap" style="margin:6px 0 12px"><div id="cf-turnstile"></div></div>
+      <button class="btn" type="submit" id="submitBtn" disabled>Log in</button>
       <div class="msg" id="msg" role="status" aria-live="polite"></div>
       <button class="linkbtn" type="button" id="resend" hidden>Resend verification email</button>
       <small id="resendTimer" class="muted" hidden></small>
@@ -145,6 +164,44 @@ const title = document.getElementById("formTitle"), hint = document.getElementBy
 const nameWrap = document.getElementById("nameWrap"), confirmWrap = document.getElementById("confirmWrap");
 const passwordInput = form.elements.password, submitButton = form.querySelector('button[type="submit"]');
 function show(t, ok){ msg.textContent = t; msg.className = "msg " + (ok ? "ok" : "err"); }
+/* ---- Cloudflare Turnstile gate (anti-bot) ----
+   TEST site key below always passes (demo). Replace with your real site key
+   from Cloudflare dashboard → Turnstile for production protection. */
+const TURNSTILE_SITEKEY = "1x00000000000000000000AA";
+let turnstileToken = null, turnstileReady = false, turnstileWidget = null;
+function setSubmit(on){ submitButton.disabled = !on; }
+function renderTurnstile(){
+  if(!window.turnstile || turnstileWidget != null) return;
+  turnstileReady = true;
+  turnstileWidget = window.turnstile.render("#cf-turnstile", {
+    sitekey: TURNSTILE_SITEKEY,
+    theme: "auto",
+    callback: function(token){
+      fetch("/api/turnstile/verify", {method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({token})})
+        .then(function(r){return r.json()}).then(function(d){
+          if(d && d.ok){ turnstileToken = token; setSubmit(true); }
+          else { turnstileToken = null; setSubmit(false); show("Verification failed. Please try again.", false); try{window.turnstile.reset(turnstileWidget)}catch(_){} }
+        }).catch(function(){ turnstileToken = token; setSubmit(true); });
+    },
+    "expired-callback": function(){ turnstileToken = null; setSubmit(false); },
+    "error-callback": function(){ turnstileToken = null; setSubmit(false); }
+  });
+}
+(function waitTurnstile(){
+  if(window.turnstile){ renderTurnstile(); return; }
+  if(!window.__tsTries) window.__tsTries = 0;
+  if(++window.__tsTries > 30){ // ~6s: CF blocked/offline -> graceful fallback
+    setSubmit(true);
+    var w = document.getElementById("turnstileWrap");
+    if(w) w.innerHTML = '<small class="muted">Human check unavailable — you can still sign in.</small>';
+    return;
+  }
+  setTimeout(waitTurnstile, 200);
+})();
+function resetTurnstile(){
+  turnstileToken = null;
+  if(turnstileReady){ setSubmit(false); try{window.turnstile.reset(turnstileWidget)}catch(_){} }
+}
 // Beacon diagnostik (metadata sahaja, TIADA credential) + pengesanan browser
 // dalam aplikasi (Telegram/WhatsApp/chat = storage sementara → loop login).
 function twBeacon(event, detail){
@@ -235,6 +292,7 @@ function goToMember(next, session){
 
 form.addEventListener("submit", async e=>{
   e.preventDefault();
+  if(turnstileReady && !turnstileToken) return show("Please complete the human verification first.", false);
   const email = form.email.value.trim(), password = passwordInput.value;
   if(!/^\S+@\S+\.\S+$/.test(email)) return show("Enter a valid email address.", false);
   if(!password || password.length < 8) return show("Use a password with at least 8 characters.", false);
@@ -248,7 +306,7 @@ form.addEventListener("submit", async e=>{
   const result = signup
       ? await sb.auth.signUp({ email, password, options: { data: { name: form.elements.name.value.trim() }, emailRedirectTo: redirectTo } })
       : await sb.auth.signInWithPassword({ email, password });
-    if(result.error) { twBeacon('login_err', { msg: result.error.message, signup: signup, inApp: twInApp(), ua: (navigator.userAgent||'').slice(0,220) }); return show(signup ? result.error.message : (/confirm/i.test(result.error.message) ? "Confirm your email first. Check your inbox for the link." : "Wrong email or password."), false); }
+    if(result.error) { resetTurnstile(); twBeacon('login_err', { msg: result.error.message, signup: signup, inApp: twInApp(), ua: (navigator.userAgent||'').slice(0,220) }); return show(signup ? result.error.message : (/confirm/i.test(result.error.message) ? "Confirm your email first. Check your inbox for the link." : "Wrong email or password."), false); }
     if(signup && !result.data.session && result.data.user && result.data.user.email_confirmed_at){
       const signed = await sb.auth.signInWithPassword({email, password});
       if(signed.error) return show("Account created. Log in with your new account.", true);
@@ -261,8 +319,8 @@ form.addEventListener("submit", async e=>{
       return show("Account created. Check your email and press the confirm button. No email after a minute? Use Resend verification email below.", true);
     }
     goToMember(next,result.data.session);
-  } catch (_) { twBeacon('login_exc', { msg: String(_).slice(0,150), inApp: twInApp() }); show("Unable to connect. Please try again.", false); }
-  finally { submitButton.disabled = false; }
+  } catch (_) { resetTurnstile(); twBeacon('login_exc', { msg: String(_).slice(0,150), inApp: twInApp() }); show("Unable to connect. Please try again.", false); }
+  finally { submitButton.disabled = turnstileReady ? !turnstileToken : false; }
 });
 
 function startResendCooldown(seconds){
@@ -299,6 +357,23 @@ resend.addEventListener("click", async ()=>{
    created a redirect loop with the member page's own redirect-to-login when
    the two origins disagreed on session state. Members now always see the
    form and explicitly sign in; a successful submit still calls goToMember. */
+
+/* ===== Social login (OAuth): Google / GitHub =====
+   Provider mesti diaktifkan di Supabase Auth + OAuth app didaftarkan di
+   Google Cloud / GitHub. signInWithOAuth redirect ke provider, kemudian
+   kembali ke verify.html yang consumir session dan membuka member area. */
+async function oauthSignIn(provider){
+  const next = new URLSearchParams(location.search).get("next");
+  const redirectUrl = new URL("verify.html", location.href);
+  if(next && /^\/(?!\/)/.test(next)) redirectUrl.searchParams.set("next", next);
+  try {
+    const { error } = await sb.auth.signInWithOAuth({ provider, options: { redirectTo: redirectUrl.href } });
+    if(error){ twBeacon('oauth_err', { provider, msg: String(error.message).slice(0,150) });
+      show("Could not start " + provider + " sign-in: " + error.message, false); }
+  } catch(_) { twBeacon('oauth_exc', { provider }); show("Unable to connect. Please try again.", false); }
+}
+document.getElementById("googleBtn").addEventListener("click", ()=>oauthSignIn("google"));
+document.getElementById("githubBtn").addEventListener("click", ()=>oauthSignIn("github"));
 
 document.getElementById('otpBtn').addEventListener('click', async ()=>{
   const email = form.email.value.trim();
