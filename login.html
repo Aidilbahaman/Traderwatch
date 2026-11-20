@@ -55,7 +55,7 @@
     </form>
     <div class="alt">
       <button class="linkbtn" type="button" id="forgot">Forgot your password?</button>
-      <button class="linkbtn" type="button" id="otpBtn">Log masuk tanpa password — hantar link ke emel</button>
+      <button class="linkbtn" type="button" id="otpBtn">Sign in without a password — email me a link</button>
       <span id="modeToggle">New here? <a href="login.html?mode=signup">Create a free account</a></span>
     </div>
   </div>
@@ -178,13 +178,13 @@ setMode(signup);
   const inApp = twInApp();
   if (!bounced && !inApp) return;
   let t = '';
-  if (inApp) t += '<b>Browser aplikasi dikesan</b> (Telegram/WhatsApp/chat). Session login tidak kekal dalam browser ini. Ketik <b>⋯</b> → <b>"Open in Safari/Chrome"</b> dan log masuk di browser biasa untuk akses kekal.<br>';
+  if (inApp) t += '<b>In-app browser detected</b> (Telegram/WhatsApp/chat). Your login session will not persist in this browser. Tap <b>⋯</b> → <b>"Open in Safari/Chrome"</b> and sign in in a regular browser for lasting access.<br>';
   if (bounced) {
-    if (why === 'storage') t += '<b>Pelayar menyekat data laman.</b> Matikan "Block All Cookies" (iPhone: Settings → Safari) atau guna tetingkap biasa (bukan private), kemudian log masuk semula.';
-    else if (why === 'signedout') t += '<b>Session anda tamat / dilog keluar.</b> Log masuk semula di bawah untuk teruskan ke halaman member.';
-    else t += '<b>Halaman member memerlukan login.</b> Log masuk di bawah untuk teruskan.';
-    if (p.get('app') === '1') t += ' <b>Anda berada dalam app installed.</b> Jika login asyik melantun: buka traderwatch.org/login.html dalam Safari/Chrome biasa (bukan app), log masuk di situ, kemudian buka semula app.';
-    t += '<br><br><b>Perlu login SEMULA setiap kali?</b> Data laman tidak kekal di peranti anda. Semak: (1) pastikan bukan tab <b>Incognito</b> (Chrome: tema gelap / ikon topi+cermin mata); (2) Chrome → <b>Settings → Site settings → Cookies</b> → matikan <b>"Clear cookies and site data when you close all tabs"</b>; (3) cara paling kekal: <b>install app</b> — menu Chrome ⋮ → "Add to Home screen" / "Install app", kemudian login sekali sahaja.';
+    if (why === 'storage') t += '<b>Your browser is blocking site data.</b> Turn off "Block All Cookies" (iPhone: Settings → Safari) or use a regular window (not private), then sign in again.';
+    else if (why === 'signedout') t += '<b>Your session has expired / ended.</b> Sign in again below to continue to the member area.';
+    else t += '<b>The member area requires a sign in.</b> Sign in below to continue.';
+    if (p.get('app') === '1') t += ' <b>You are in the installed app.</b> If sign-in keeps bouncing: open traderwatch.org/login.html in regular Safari/Chrome (not the app), sign in there, then reopen the app.';
+    t += '<br><br><b>Need to sign in AGAIN every time?</b> Site data is not persisting on your device. Check: (1) make sure you are not in an <b>Incognito</b> tab (Chrome: dark theme / hat-and-glasses icon); (2) Chrome → <b>Settings → Site settings → Cookies</b> → turn off <b>"Clear cookies and site data when you close all tabs"</b>; (3) the most lasting fix: <b>install the app</b> — Chrome menu ⋮ → "Add to Home screen" / "Install app", then sign in just once.';
   }
   const warn = document.createElement('div');
   warn.className = 'msg err';
@@ -211,7 +211,7 @@ function sessionSaved(){
 function goToMember(next, session){
   if(!sessionSaved()){
     twBeacon('login_storage_fail', { inApp: twInApp(), ua: (navigator.userAgent||'').slice(0,220) });
-    show('Login berjaya tetapi pelayar tidak menyimpan session. Matikan "Block All Cookies" / guna tetingkap Safari/Chrome biasa (bukan private atau app installed), kemudian cuba lagi.', false);
+    show('Sign-in succeeded but your browser did not save the session. Turn off "Block All Cookies" / use a regular Safari/Chrome window (not private or the installed app), then try again.', false);
     return;
   }
   twBeacon('login_ok', { exp: session && session.expires_at, inApp: twInApp(), ua: (navigator.userAgent||'').slice(0,220) });
@@ -300,7 +300,7 @@ document.getElementById('otpBtn').addEventListener('click', async ()=>{
   if(next && /^\/(?!\/)/.test(next)) redirectUrl.searchParams.set("next", next);
   try {
     const r = await sb.auth.signInWithOtp({ email, options: { emailRedirectTo: redirectUrl.href } });
-    show(r.error ? 'Could not send link: ' + r.error.message : 'Magic link dihantar ke ' + email + ' — klik link dalam emel untuk log masuk (check spam).', !r.error);
+    show(r.error ? 'Could not send link: ' + r.error.message : 'Magic link sent to ' + email + ' — click the link in the email to sign in (check spam).', !r.error);
   } catch(_) { show('Unable to connect. Please try again.', false); }
 });
 
