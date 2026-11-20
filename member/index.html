@@ -1145,9 +1145,9 @@ function analyze(){
 }
 function analyzeFail(res){
  S.busy=false;S.scan=null;JOB=null;hideFloat();setChip('','SEDIA');
- if(window.TWSound)TWSound.play('error');
+ if(window.TWSound)TWSound.play(res.status===429?'notify':'error');
  var e=esc((res.data&&res.data.error)||'');
- var msg=res.status===429?t('limit'):res.status===400?t('notOpen'):t('noAnalysis');
+ var msg=res.status===429?(e||t('limit')):res.status===400?t('notOpen'):t('noAnalysis');
  if(e&&res.status!==400&&res.status!==429)msg+=' '+e;
  $('term').classList.add('hidden');
  $('res').innerHTML='<div class="errbox"><p>'+msg+'</p><button class="again" id="retryAna">'+esc(t('retry'))+'</button></div>';
@@ -1737,7 +1737,20 @@ $('instBtn').onclick=function(){
  if(!dp){toast(t('installHint'));return}
  dp.prompt();dp.userChoice.then(function(){dp=null});
 };
-if('serviceWorker' in navigator){window.addEventListener('load',function(){navigator.serviceWorker.register('sw.js',{scope:'./'}).catch(function(){})})}
+if('serviceWorker' in navigator){window.addEventListener('load',function(){
+ navigator.serviceWorker.register('sw.js',{scope:'./',updateViaCache:'none'}).then(function(reg){
+  /* PWA homescreen resume instance lama tanpa navigation -> check update
+     bila app kembali nampak/focus + setiap 30 min, dan reload automatik
+     bila SW versi baru mengambil alih (controllerchange). */
+  var had=!!navigator.serviceWorker.controller;
+  navigator.serviceWorker.addEventListener('controllerchange',function(){if(had)location.reload();had=true});
+  function chk(){try{reg.update()}catch(e){}}
+  document.addEventListener('visibilitychange',function(){if(document.visibilityState==='visible')chk()});
+  window.addEventListener('focus',chk);
+  setInterval(chk,1800000);
+  chk();
+ }).catch(function(){});
+})}
 
 /* ---------------- init ---------------- */
 applyTheme();renderAll();
