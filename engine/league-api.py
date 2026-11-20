@@ -31,6 +31,33 @@ try:
 except Exception:
     MO = None
 
+# Live prices from the same Swissquote feed the resolver uses — paper trades
+# fill at the CURRENT market price (instant entry), not the stale verdict entry.
+try:
+    import sq_collector as SQC
+except Exception:
+    SQC = None
+
+
+def live_price(pair):
+    """Latest M1 close from sq-bars.db, or None if feed missing/stale."""
+    if SQC is None:
+        return None
+    try:
+        rows = SQC.candles_from_bars(pair, "M1", 2)
+        if not rows:
+            return None
+        last = rows[-1]
+        t = datetime.fromisoformat(str(last["t"]).replace("Z", "+00:00"))
+        if t.tzinfo is None:
+            t = t.replace(tzinfo=timezone.utc)
+        if (datetime.now(timezone.utc) - t).total_seconds() > 240:
+            return None
+        p = float(last["c"])
+        return p if p > 0 else None
+    except Exception:
+        return None
+
 HERE = pathlib.Path(__file__).resolve().parent
 ENV = pathlib.Path("/home/ubuntu/.secrets/supabase.env")
 PORT = int(os.environ.get("LEAGUE_PORT", "8103"))
@@ -199,6 +226,17 @@ class Handler(BaseHTTPRequestHandler):
             entry, sl, tp = float(req["entry"]), float(req["sl"]), float(req["tp"])
         except (KeyError, TypeError, ValueError):
             return self._send(400, {"error": "Missing entry / SL / TP."})
+        # Instant entry: fill at the LIVE market price. The verdict entry can
+        # drift while the LLM runs — using it created unfilled "pending" trades
+        # that the resolver wrongly closed at SL/TP.
+        live = live_price(pair)
+        if live is None:
+            return self._send(503, {"error": "Live price unavailable — try again in a moment."})
+        entry = live
+        if side == "BUY" and not (sl < entry < tp):
+            return self._send(409, {"error": "Price moved beyond this setup's SL/TP — run a fresh scan."})
+        if side == "SELL" and not (sl > entry > tp):
+            return self._send(409, {"error": "Price moved beyond this setup's SL/TP — run a fresh scan."})
         # Custom lot (optional): client sets their own lot size. Otherwise risk %.
         custom_lot = None
         if req.get("lot") not in (None, "", 0):
@@ -216,10 +254,6 @@ class Handler(BaseHTTPRequestHandler):
                 return self._send(400, {"error": "Invalid risk."})
             if risk_pct not in RISK_CHOICES:
                 return self._send(400, {"error": "Risk must be 1% or 2%."})
-        if side == "BUY" and not (sl < entry < tp):
-            return self._send(400, {"error": "Invalid levels for BUY."})
-        if side == "SELL" and not (sl > entry > tp):
-            return self._send(400, {"error": "Invalid levels for SELL."})
         try:
             trades = my_trades(uid)
             open_tr = [t for t in trades if t["status"] == "open"]

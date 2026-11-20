@@ -2,9 +2,11 @@
 """TraderWatch "Take this trade" -> MT5 pending order sync (OWNER ONLY).
 
 Owner flow (updated 2026-11-21): when the owner opens a trade via the app's
-"Take this trade" modal and opts in to MT5, place a pending LIMIT/STOP order
-at the same entry/SL/TP using the EXACT lot the owner chose (custom lot or
-risk-% lot). Members' trades stay PAPER only. Scan no longer auto-syncs.
+"Take this trade" modal and opts in to MT5, execute a MARKET order (instant
+entry at the live price) with the verdict's SL/TP and the EXACT lot the owner
+chose. No more pending limit/stop orders — the verdict entry can drift while
+the LLM runs, which turned "instant" signals into unfilled buy/sell stops.
+Members' trades stay PAPER only. Scan no longer auto-syncs.
 
 SAFETY (real money — read carefully):
   * OWNER ONLY: uid must be in MT5_SYNC_UIDS allowlist. Everyone else -> no-op.
@@ -163,10 +165,11 @@ def sync_verdict(verdict, uid, lot=None):
         log(f"DRY {uid[:8]} {pair} {side} lot={lot} (no real order)")
         return {"synced": True, "dry_run": True, "lot": lot, "magic": magic, "note": note}
 
-    # LIVE: place the pending order via the same host the engine uses.
+    # LIVE: instant MARKET execution (no pending limit/stop). The host
+    # validates live price vs SL/TP and rejects if price moved past them.
     try:
-        res = MP.mt5({"action": "place_limit", "symbol": pair, "side": side,
-                      "entry": entry, "sl": sl, "tp": tp, "lot": lot,
+        res = MP.mt5({"action": "market", "symbol": pair, "side": side,
+                      "sl": sl, "tp": tp, "lot": lot,
                       "magic": magic, "comment": "TW-ondemand"})
     except Exception as e:
         _audit({"ts": datetime.now(timezone.utc).isoformat(), "uid": uid,
@@ -176,10 +179,11 @@ def sync_verdict(verdict, uid, lot=None):
         st[key] = {"ts": now, "ticket": res.get("ticket"), "lot": lot}
         _save(st)
         _audit({"ts": datetime.now(timezone.utc).isoformat(), "uid": uid,
-                "dry_run": False, **base, "ticket": res.get("ticket"), "type": res.get("type")})
-        log(f"LIVE {uid[:8]} {pair} {side} lot={lot} ticket={res.get('ticket')}")
+                "dry_run": False, **base, "ticket": res.get("ticket"),
+                "fill_price": res.get("price"), "type": "market"})
+        log(f"LIVE {uid[:8]} {pair} {side} MARKET lot={lot} fill={res.get('price')} ticket={res.get('ticket')}")
         return {"synced": True, "dry_run": False, "ticket": res.get("ticket"),
-                "type": res.get("type"), "lot": lot, "magic": magic}
+                "type": "market", "price": res.get("price"), "lot": lot, "magic": magic}
     err = res.get("error") or res.get("comment") or f"retcode {res.get('retcode')}"
     _audit({"ts": datetime.now(timezone.utc).isoformat(), "uid": uid,
             "dry_run": False, **base, "error": str(err)})

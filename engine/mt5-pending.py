@@ -56,11 +56,13 @@ RISK_PCT = float(os.environ.get("MT5_RISK_PCT", "1.0"))      # % per trade
 LOT_MIN_ALLOW = os.environ.get("MT5_LOT_MIN_ALLOW", "1") == "1"
 
 # ---------- compounding ----------
-# Asas saiz lot naik/turun ikut modal. "balance" = untung REALIZED sahaja
-# (compounding sebenar: lot naik hanya selepas profit banked). "equity"
-# termasuk floating P/L, jadi lot membesar semasa posisi masih terbuka —
-# risiko terkumpul bila ada beberapa posisi searah.
-COMPOUND_BASE = os.environ.get("MT5_COMPOUND_BASE", "balance").lower()
+# Asas saiz lot naik/turun ikut modal. "equity" (DEFAULT, owner 2026-11-20)
+# = lot ikut equity SEMASA termasuk floating P/L — lot membesar bila equity
+# naik, mengecil bila equity turun. "balance" = untung REALIZED sahaja
+# (compounding konservatif: lot naik hanya selepas profit banked).
+# Nota: equity-based bermakna risiko terkumpul bila beberapa posisi searah
+# masih terbuka; kill switch (realized balance) kekal sebagai pendinding.
+COMPOUND_BASE = os.environ.get("MT5_COMPOUND_BASE", "equity").lower()
 COMPOUND_FILE = REPO / "state" / "ai-compound.json"
 
 # ---------- milestone compounding (notifikasi owner sahaja) ----------
@@ -422,7 +424,7 @@ def active_signals():
     try:
         # Hanya signal verified=true (diluluskan owner) layak jadi pending order.
         # Draft verified=false (cadangan AI menunggu keputusan) MESTI diabaikan.
-        rows = sb_get("signals?select=id,pair,side,timeframe,entry,sl,tp,posted_at,verified"
+        rows = sb_get("signals?select=id,pair,side,timeframe,entry,sl,tp,posted_at,verified,exec_mode"
                       "&verified=is.true&order=posted_at.desc&limit=25")
     except Exception as e:
         log(f"SB-ERR {type(e).__name__}: {str(e)[:80]}")
@@ -511,8 +513,9 @@ def size_lot(pair, entry, sl, equity):
 def sizing_base(acc):
     """Modal asas untuk kira lot.
 
-    balance = untung realized sahaja (default, compounding konservatif).
-    equity  = termasuk floating P/L (agresif, lot naik walaupun belum bank).
+    equity  = equity semasa termasuk floating P/L (default, owner 2026-11-20:
+              lot menaik ikut equity semasa).
+    balance = untung realized sahaja (compounding konservatif).
     """
     bal = float(acc.get("balance") or 0)
     eq = float(acc.get("equity") or 0)
@@ -632,6 +635,10 @@ def kill_status(equity_now):
 
     Baseline = equity pada pemeriksaan PERTAMA hari itu. Jika equity jatuh
     lebih dari KILL_PCT dari baseline, kill = True sampai esok.
+
+    KILL_PCT <= 0 = kill switch DIMATIKAN (owner 2026-11-20): tiada sekat
+    kerugian harian. Perlindungan lain kekal: risiko 1% per trade, had
+    pending, guard SL > 3x spread.
     """
     try:
         d = json.loads(KILL_STATE.read_text())
@@ -648,7 +655,10 @@ def kill_status(equity_now):
     base = float(d["baseline"])
     loss_pct = (base - equity_now) / base * 100 if base else 0
 
-    if loss_pct >= KILL_PCT:
+    if KILL_PCT <= 0:
+        d["killed"] = False
+        d["disabled"] = True
+    elif loss_pct >= KILL_PCT:
         d["killed"] = True
         d["killed_at"] = datetime.now(MYT).isoformat()
         d["loss_pct"] = round(loss_pct, 2)
@@ -679,21 +689,27 @@ def equity_now():
 
 def main():
     log(f"START mode={MODE} lot={LOT if RISK_PCT<=0 else 'RISK'+str(RISK_PCT)+'%'} "
-        f"max_pending={MAX_PENDING} allow={ALLOW or 'semua'} kill={KILL_PCT}%")
+        f"max_pending={MAX_PENDING} allow={ALLOW or 'semua'} "
+        f"kill={'OFF' if KILL_PCT <= 0 else str(KILL_PCT) + '%'}")
 
     # ---------- kill switch check ----------
+    # Guna BALANCE (realized), bukan equity (floating). Equity swing liar bila
+    # banyak posisi terbuka -> baseline puncak + retrace biasa = false trigger.
+    # Balance hanya turun bila rugi direalisasi -> kill switch stabil & masih
+    # protect dari kerugian realized > KILL_PCT% sehari.
     acc = equity_now()
+    bal = float(acc.get("balance") or 0)
     eq = float(acc.get("equity") or 0)
-    if eq > 0:
-        ks, loss_pct = kill_status(eq)
-        log(f"equity={eq:.2f} baseline={ks['baseline']:.2f} "
+    if bal > 0:
+        ks, loss_pct = kill_status(bal)
+        log(f"balance={bal:.2f} equity={eq:.2f} baseline={ks['baseline']:.2f} "
             f"loss_hari_ini={loss_pct:.2f}% killed={ks.get('killed')}")
         if ks.get("killed"):
-            log(f"KILL SWITCH AKTIF — rugi {loss_pct:.2f}% >= {KILL_PCT}%. "
+            log(f"KILL SWITCH AKTIF — rugi realized {loss_pct:.2f}% >= {KILL_PCT}%. "
                 f"Tiada order baru sehingga esok.")
             return 0
     else:
-        log("AMARAN: tidak dapat baca equity — kill switch dilangkau")
+        log("AMARAN: tidak dapat baca balance — kill switch dilangkau")
 
     # ---------- compounding ----------
     base = sizing_base(acc)
@@ -782,6 +798,34 @@ def main():
                 continue
             lot_use, lot_note = calc, "risk-" + note
 
+        # Instant entry (signal LLM): MARKET order serta-merta pada harga live.
+        # Jika harga sudah lepas SL/TP setup, host tolak -> void (jangan kejar).
+        if str(s.get("exec_mode") or "pending") == "market":
+            if MODE != "live":
+                log(f"PLAN #{sid} {pair} {side} MARKET sl={sl} tp={tp} lot={lot_use} [{lot_note}]")
+                seen[sid] = {"status": "planned", "pair": pair, "side": side,
+                             "entry": entry, "sl": sl, "tp": tp, "magic": magic}
+                placed += 1
+                continue
+            r = mt5({"action": "market", "symbol": pair, "side": side,
+                     "sl": sl, "tp": tp, "lot": lot_use,
+                     "magic": magic, "deviation": DEVIATION,
+                     "comment": f"TW#{s['id']}"})
+            if r.get("ok"):
+                seen[sid] = {"status": "filled", "position_ticket": r.get("ticket"),
+                             "pair": pair, "side": side, "entry": r.get("price"),
+                             "sl": sl, "tp": tp, "magic": magic, "lot": lot_use,
+                             "lot_note": lot_note,
+                             "placed_at": datetime.now(MYT).isoformat()}
+                log(f"OK #{sid} {pair} {side} MARKET fill={r.get('price')} "
+                    f"ticket={r.get('ticket')} lot={lot_use}")
+                placed += 1
+            else:
+                reason = str(r.get("error") or r.get("comment") or r.get("retcode"))[:120]
+                seen[sid] = {"status": "void", "reason": reason}
+                log(f"VOID #{sid} {pair} {side} MARKET: {reason} — setup luput, tidak dikejar")
+            continue
+
         if MODE != "live":
             log(f"PLAN #{sid} {pair} {side} LIMIT entry={entry} sl={sl} tp={tp} "
                 f"lot={lot_use} [{lot_note}]")
@@ -824,17 +868,28 @@ def main():
 
 if __name__ == "__main__":
     import signal, time
-    # Continuous loop: check new signals every 5 seconds (instant)
+
+    # Graceful shutdown flag — systemd sends SIGTERM on stop/restart.
+    _stop = {"v": False}
+
     def sigterm_handler(signum, frame):
         log("SIGTERM — shutting down mt5-pending gracefully")
-        sys.exit(0)
+        _stop["v"] = True
+
     signal.signal(signal.SIGTERM, sigterm_handler)
     signal.signal(signal.SIGINT, sigterm_handler)
-    while True:
+
+    # Continuous loop: check new signals every SLEEP_SEC seconds (instant).
+    while not _stop["v"]:
         try:
             main()
         except SystemExit:
-            pass  # main called sys.exit intentionally; continue loop
+            pass  # main() may call sys.exit() for benign early returns
         except Exception as ex:
             log(f"FATAL {type(ex).__name__}: {ex}")
-        time.sleep(SLEEP_SEC)
+        # Sleep in short slices so SIGTERM is honoured promptly.
+        for _ in range(SLEEP_SEC * 2):
+            if _stop["v"]:
+                break
+            time.sleep(0.5)
+    log("STOPPED")

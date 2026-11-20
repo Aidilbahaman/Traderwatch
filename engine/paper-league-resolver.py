@@ -5,7 +5,12 @@ Every minute: read open paper_trades, check live Swissquote M1/M5 bars, and
 close trades when price hits TP or SL. R result is computed from risk_pct,
 so nobody can self-report a win. Everything is derived from real prices.
 
-Also tracks BE: if price reaches entry + 1R after open, SL moves to entry
+Fill-first rule (2026-11-21): a trade can only close at TP/SL AFTER its entry
+was actually touched. Market-entry trades fill on the bar they opened;
+pending-style entries that never touched expire after 6h with no R impact
+(previously an unfilled buy stop could be wrongly closed at "SL").
+
+Also tracks BE: if price reaches entry + 1R after fill, SL moves to entry
 (break-even protection). Trade then closes as 'be' when price comes back
 to entry.
 
@@ -17,7 +22,7 @@ import pathlib
 import urllib.error
 import urllib.parse
 import urllib.request
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 
 HERE = pathlib.Path(__file__).resolve().parent
 REPO = HERE.parent
@@ -91,16 +96,35 @@ def resolve(trade):
     sl = float(trade["sl"])
     tp = float(trade["tp"])
     opened = datetime.fromisoformat(trade["opened_at"].replace("Z", "+00:00"))
-    series = [b for b in bars(pair) if b["t"] >= opened]
+    now = datetime.now(timezone.utc)
+    age_min = (now - opened).total_seconds() / 60.0
+    # Look back far enough to cover the whole life of the trade (not just 30m).
+    count = min(10000, max(BAR_LIMIT, int(age_min) + 5))
+    # Include the M1 bar containing opened_at so market entries register filled.
+    series = [b for b in bars(pair, count=count)
+              if b["t"] >= opened - timedelta(seconds=60)]
     if not series:
         return None
     risk = abs(entry - sl)
     if risk <= 0:
         return None
-    be_level = entry + risk if side == "BUY" else entry - risk
-    hit_be = any((b["h"] >= be_level if side == "BUY" else b["l"] <= be_level) for b in series)
-    # Check chronological: first touch wins
+    # 1) Fill check — entry must actually be touched before TP/SL applies.
+    fill_t = None
     for b in series:
+        if (side == "BUY" and b["h"] >= entry) or (side == "SELL" and b["l"] <= entry):
+            fill_t = b["t"]
+            break
+    if fill_t is None:
+        if age_min > 360:  # never filled within 6h -> expired, no R impact
+            return ("expired", 0.0)
+        return None
+    active = [b for b in series if b["t"] >= opened and b["t"] >= fill_t]
+    if not active:
+        return None
+    be_level = entry + risk if side == "BUY" else entry - risk
+    hit_be = any((b["h"] >= be_level if side == "BUY" else b["l"] <= be_level) for b in active)
+    # Check chronological: first touch wins
+    for b in active:
         if side == "BUY":
             if b["h"] >= tp:
                 return ("tp", round(abs(tp - entry) / risk, 2))
@@ -113,7 +137,7 @@ def resolve(trade):
                 return ("sl", -1.0)
     if hit_be:
         # price reached 1R — protection active; if it came back to entry, close BE
-        for b in series:
+        for b in active:
             if side == "BUY" and b["l"] <= entry:
                 return ("be", 0.0)
             if side == "SELL" and b["h"] >= entry:
