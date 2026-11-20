@@ -156,6 +156,11 @@ html[data-theme="light"] .lrow.me{background:#eaf5db;border-color:#9cc46f}
 .lrow.me .lbadge{background:#b7f36b1f;border-color:#b7f36b40;color:var(--lime)}
 html[data-theme="light"] .lrow.me .lbadge{color:#4c7a17}
 .lrow .lsub2{font-size:10.5px;color:var(--muted);margin-top:1px;font-variant-numeric:tabular-nums}
+.lrow .lbal{display:flex;align-items:center;gap:6px;margin-top:2px;font:700 12px ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-variant-numeric:tabular-nums;color:var(--text)}
+.lrow .lbal i{font-style:normal;font-size:9.5px;font-weight:800;padding:1px 6px;border-radius:999px;letter-spacing:.02em}
+.lrow .lbal i.up{color:var(--green);background:#b7f36b1f}
+.lrow .lbal i.dn{color:var(--red);background:#ff777d1f}
+.lrow .lbal i.fl{color:var(--muted);background:var(--card2)}
 .lrow .val{margin-left:auto;font-weight:850;font-variant-numeric:tabular-nums;font-size:14px;flex:none;letter-spacing:-.02em}
 .val.pos{color:var(--green)}.val.neg{color:var(--red)}.val.neu{color:var(--text)}
 .lnote{font-size:11px;color:var(--muted);text-align:center;margin:14px 0 0;opacity:.8;line-height:1.5}
@@ -560,7 +565,7 @@ html[data-theme="light"] .lotbadge{color:#4c7a17}
   <div class="stagehint">TraderWatch AI Analyst · 390 × 844</div>
 </div>
 
-<script src="../sound.js?v=20261121s1"></script>
+<script src="../sound.js?v=20261121s3"></script>
 <script>
 (function(){
 'use strict';
@@ -619,7 +624,7 @@ var DICT={
   subLb:'Leaderboard',subTrades:'Trade Saya',subBadges:'Badge',
   seasonT:'Musim Mingguan',seasonS:'Net R menentukan kedudukan — bukan jumlah duit.',seasonLab:'Musim',rankedLab:'Disenarai',
   youLab:'Kedudukan anda',rankLab:'Rank',netR:'Net R',winRate:'Win rate',balanceLab:'Baki maya',toNext:'lagi ke',topMsg:'Di puncak musim ini — kekalkan!',rankHint:'Tutup satu paper trade untuk masuk ranking.',
-  mNetR:'Net R',mWr:'Win rate',mCons:'Konsisten',consNote:'Win rate berwajaran bilangan trade (min 5 trade).',tradeUnit:'trade',tradeOne:'trade',youName:'Anda',
+  mNetR:'Net R',mWr:'Win rate',mBal:'Baki',mCons:'Konsisten',consNote:'Win rate berwajaran bilangan trade (min 5 trade).',tradeUnit:'trade',tradeOne:'trade',youName:'Anda',
   lbEmpty:'Belum ada trade berperingkat. Jadilah yang pertama membuka paper trade.',lbNote:'Modal maya sahaja — outcome diselesaikan dari harga live.',
   capLab:'Baki maya',openLab:'Dibuka',closedLab:'Ditutup',newTrade:'＋ Trade baru',tEmpty:'Belum ada paper trade. Analisis satu pair dan ambil trade.',tNote:'Semua trade direkod — outcome dari harga live.',
   stOpen:'OPEN',stTP:'TP',stSL:'SL',stBE:'BE',stExp:'EXPIRED',running:'sedang berjalan',riskLab:'Risiko',
@@ -659,7 +664,7 @@ var DICT={
   subLb:'Leaderboard',subTrades:'My Trades',subBadges:'Badges',
   seasonT:'Weekly Season',seasonS:'Net R decides the ranking — not raw profit.',seasonLab:'Season',rankedLab:'Ranked',
   youLab:'Your position',rankLab:'Rank',netR:'Net R',winRate:'Win rate',balanceLab:'Virtual balance',toNext:'more to',topMsg:'Top of the season — keep it up!',rankHint:'Close a paper trade to get ranked.',
-  mNetR:'Net R',mWr:'Win rate',mCons:'Consistency',consNote:'Win rate weighted by trade count (min 5 trades).',tradeUnit:'trades',tradeOne:'trade',youName:'You',
+  mNetR:'Net R',mWr:'Win rate',mBal:'Balance',mCons:'Consistency',consNote:'Win rate weighted by trade count (min 5 trades).',tradeUnit:'trades',tradeOne:'trade',youName:'You',
   lbEmpty:'No ranked trades yet. Be the first to open a paper trade.',lbNote:'Virtual capital only — outcomes resolved from live prices.',
   capLab:'Virtual balance',openLab:'Open',closedLab:'Closed',newTrade:'＋ New trade',tEmpty:'No paper trades yet. Analyze a pair and take a trade.',tNote:'Every trade is recorded — outcomes come from live prices.',
   stOpen:'OPEN',stTP:'TP',stSL:'SL',stBE:'BE',stExp:'EXPIRED',running:'running',riskLab:'Risk',
@@ -698,7 +703,7 @@ var DICT={
   subLb:'排行榜',subTrades:'我的交易',subBadges:'徽章',
   seasonT:'每周赛季',seasonS:'净 R 决定排名——而非利润金额。',seasonLab:'赛季',rankedLab:'已排名',
   youLab:'您的排名',rankLab:'名次',netR:'净 R',winRate:'胜率',balanceLab:'虚拟余额',toNext:'再得',topMsg:'本赛季居首——继续保持！',rankHint:'平仓一笔模拟交易即可进入排名。',
-  mNetR:'净 R',mWr:'胜率',mCons:'稳定性',consNote:'按交易次数加权的胜率（至少 5 笔交易）。',tradeUnit:'笔交易',tradeOne:'笔交易',youName:'您',
+  mNetR:'净 R',mWr:'胜率',mBal:'余额',mCons:'稳定性',consNote:'按交易次数加权的胜率（至少 5 笔交易）。',tradeUnit:'笔交易',tradeOne:'笔交易',youName:'您',
   lbEmpty:'尚无排名交易。成为第一个开启模拟交易的人。',lbNote:'仅虚拟资金——结果由实时价格结算。',
   capLab:'虚拟余额',openLab:'持仓',closedLab:'已平仓',newTrade:'＋ 新交易',tEmpty:'还没有模拟交易。分析一个货币对并开仓。',tNote:'所有交易均有记录——结果来自实时价格。',
   stOpen:'OPEN',stTP:'TP',stSL:'SL',stBE:'BE',stExp:'EXPIRED',running:'进行中',riskLab:'风险',
@@ -736,7 +741,7 @@ var DICT={
   subLb:'Papan peringkat',subTrades:'Trade Saya',subBadges:'Lencana',
   seasonT:'Musim Mingguan',seasonS:'Net R menentukan peringkat — bukan jumlah uang.',seasonLab:'Musim',rankedLab:'Terperingkat',
   youLab:'Posisi Anda',rankLab:'Peringkat',netR:'Net R',winRate:'Tingkat menang',balanceLab:'Saldo virtual',toNext:'lagi menuju',topMsg:'Di puncak musim ini — pertahankan!',rankHint:'Tutup satu paper trade untuk masuk peringkat.',
-  mNetR:'Net R',mWr:'Tingkat menang',mCons:'Konsisten',consNote:'Tingkat menang berbobot jumlah trade (min 5 trade).',tradeUnit:'trade',tradeOne:'trade',youName:'Anda',
+  mNetR:'Net R',mWr:'Tingkat menang',mBal:'Saldo',mCons:'Konsisten',consNote:'Tingkat menang berbobot jumlah trade (min 5 trade).',tradeUnit:'trade',tradeOne:'trade',youName:'Anda',
   lbEmpty:'Belum ada trade terperingkat. Jadilah yang pertama membuka paper trade.',lbNote:'Hanya modal virtual — hasil diselesaikan dari harga live.',
   capLab:'Saldo virtual',openLab:'Terbuka',closedLab:'Ditutup',newTrade:'＋ Trade baru',tEmpty:'Belum ada paper trade. Analisis satu pair dan ambil trade.',tNote:'Semua trade tercatat — hasil dari harga live.',
   stOpen:'OPEN',stTP:'TP',stSL:'SL',stBE:'BE',stExp:'EXPIRED',running:'berjalan',riskLab:'Risiko',
@@ -774,7 +779,7 @@ var DICT={
   subLb:'தரவரிசை',subTrades:'என் வர்த்தகங்கள்',subBadges:'பதக்கங்கள்',
   seasonT:'வாராந்திர சீசன்',seasonS:'நிகர R தான் தரவரிசையைத் தீர்மானிக்கும் — லாபத் தொகை அல்ல.',seasonLab:'சீசன்',rankedLab:'தரவரிசையில்',
   youLab:'உங்கள் நிலை',rankLab:'தரம்',netR:'நிகர R',winRate:'வெற்றி விகிதம்',balanceLab:'மெய்நிகர் இருப்பு',toNext:'மேலும் தேவை',topMsg:'இந்த சீசனில் முதலிடம் — தொடருங்கள்!',rankHint:'தரவரிசையில் சேர ஒரு பேப்பர் வர்த்தகத்தை மூடவும்.',
-  mNetR:'நிகர R',mWr:'வெற்றி விகிதம்',mCons:'நிலைத்தன்மை',consNote:'வர்த்தக எண்ணிக்கையால் எடையிடப்பட்ட வெற்றி விகிதம் (குறைந்தது 5).',tradeUnit:'வர்த்தகங்கள்',tradeOne:'வர்த்தகம்',youName:'நீங்கள்',
+  mNetR:'நிகர R',mWr:'வெற்றி விகிதம்',mBal:'இருப்பு',mCons:'நிலைத்தன்மை',consNote:'வர்த்தக எண்ணிக்கையால் எடையிடப்பட்ட வெற்றி விகிதம் (குறைந்தது 5).',tradeUnit:'வர்த்தகங்கள்',tradeOne:'வர்த்தகம்',youName:'நீங்கள்',
   lbEmpty:'இன்னும் தரவரிசை வர்த்தகங்கள் இல்லை. முதல் பேப்பர் வர்த்தகத்தைத் தொடங்குங்கள்.',lbNote:'மெய்நிகர் மூலதனம் மட்டும் — முடிவுகள் நேரடி விலைகளில் தீர்மானிக்கப்படும்.',
   capLab:'மெய்நிகர் இருப்பு',openLab:'திறந்தவை',closedLab:'மூடியவை',newTrade:'＋ புதிய வர்த்தகம்',tEmpty:'இன்னும் பேப்பர் வர்த்தகங்கள் இல்லை. ஒரு ஜோடியைப் பகுப்பாய்வு செய்து வர்த்தகம் எடுங்கள்.',tNote:'அனைத்து வர்த்தகங்களும் பதிவாகும் — முடிவுகள் நேரடி விலைகளிலிருந்து.',
   stOpen:'OPEN',stTP:'TP',stSL:'SL',stBE:'BE',stExp:'EXPIRED',running:'நடந்து கொண்டிருக்கிறது',riskLab:'இடர்',
@@ -1085,11 +1090,13 @@ function analyze(){
   await typeLine('<span class="ok">✓ '+(lang==='en'?'Analysis ready.':'Analisis siap.')+'</span>',run);
   if(run!==S.run)return;
   S.scan=null;S.ana=a;S.t0=performance.now();S.busy=false;setChip('done',lang==='en'?'ANALYSIS READY':'ANALISIS SIAP');
+  if(window.TWSound)TWSound.play(res.data.side==='HOLD'?'notify':'success');
   bumpCount();if(res.data.side==='HOLD')bumpHold();show(a);
  })();
 }
 function analyzeFail(res){
  S.busy=false;S.scan=null;setChip('','SEDIA');
+ if(window.TWSound)TWSound.play('error');
  var e=esc((res.data&&res.data.error)||'');
  var msg=res.status===429?t('limit'):res.status===400?t('notOpen'):t('noAnalysis');
  if(e&&res.status!==400&&res.status!==429)msg+=' '+e;
@@ -1246,7 +1253,7 @@ function greenStreak(){
 function consScore(x){var wr=x.win_rate==null?0:+x.win_rate,n=+x.trades||0;return n>=MIN_CONS?wr:wr*(n/MIN_CONS)}
 function sortBoard(list,m){
  return list.slice().sort(function(a,b){
-  var d=m==='wr'?((+b.win_rate||0)-(+a.win_rate||0)):m==='cons'?(consScore(b)-consScore(a)):((+b.net_r||0)-(+a.net_r||0));
+  var d=m==='wr'?((+b.win_rate||0)-(+a.win_rate||0)):m==='cons'?(consScore(b)-consScore(a)):m==='bal'?((+b.profit_usd||0)-(+a.profit_usd||0)):((+b.net_r||0)-(+a.net_r||0));
   if(d!==0)return d;
   d=(+b.net_r||0)-(+a.net_r||0);
   return d!==0?d:((+b.trades||0)-(+a.trades||0));
@@ -1263,6 +1270,7 @@ function loadLeague(force){
   if(riskAna)drawMt5Opt();
   LG.trades=(rs[1].data&&Array.isArray(rs[1].data.trades))?rs[1].data.trades:[];
   LG.board=(rs[2].data&&Array.isArray(rs[2].data.leaderboard))?rs[2].data.leaderboard:[];
+  LG.start=(rs[2].data&&isFinite(+rs[2].data.start_balance))?+rs[2].data.start_balance:10000;
   LG.season=(LG.me&&LG.me.season!=null)?LG.me.season:(rs[2].data?rs[2].data.season:null);
   LG.state='ready';LG.at=Date.now();renderLiga();
  }).catch(function(e){if(e&&e.message==='auth')return;LG.state='error';renderLiga()});
@@ -1284,7 +1292,7 @@ function drawSeason(){
  $('rankedN').textContent=LG.state==='ready'?String(LG.board.length):'—';
 }
 function drawMetric(){
- var ms=[['r','mNetR'],['wr','mWr'],['cons','mCons']];
+ var ms=[['r','mNetR'],['wr','mWr'],['bal','mBal'],['cons','mCons']];
  $('mtoggle').innerHTML=ms.map(function(x){return '<button data-m="'+x[0]+'" class="'+(x[0]===metric?'on':'')+'" aria-pressed="'+(x[0]===metric)+'">'+esc(t(x[1]))+'</button>'}).join('');
  Array.prototype.forEach.call($('mtoggle').querySelectorAll('button'),function(b){b.onclick=function(){metric=b.dataset.m;hap(6);drawMetric();drawLb()}});
  $('consNote').textContent=t('consNote');
@@ -1322,12 +1330,16 @@ function drawLb(){
  el.innerHTML=sorted.map(function(x,i){
   var rank=i+1,rk=rank<=3?MEDALS[rank-1]:String(rank),nr=+x.net_r||0,val,cls,sub;
   var n=+x.trades||0,unit=n===1?t('tradeOne'):t('tradeUnit');
+  var start=LG.start||10000,bal=start+(+x.profit_usd||0),gr=(+x.profit_usd||0)/start*100;
+  var gcls=gr>0.005?'up':gr<-0.005?'dn':'fl',gtxt=(gr>0?'+':'')+gr.toFixed(1)+'%';
   if(metric==='r'){val=fmtR(nr);cls=nr>0?'pos':nr<0?'neg':'neu';sub=wrTxt(x.win_rate)+' · '+n+' '+unit}
+  else if(metric==='bal'){val=money(bal);cls=gr>0.005?'pos':gr<-0.005?'neg':'neu';sub=fmtR(nr)+' · '+wrTxt(x.win_rate)}
   else{val=wrTxt(x.win_rate);cls='neu';sub=fmtR(nr)+' · '+n+' '+unit}
   return '<div class="lrow'+(x.is_me?' me':'')+(rank<=3?' g'+rank:'')+'" style="animation-delay:'+(i*30)+'ms">'+
    '<span class="rk">'+rk+'</span>'+
    '<span class="av" style="background:'+avCol(String(x.username||'?'))+'">'+esc(initials(x.username))+'</span>'+
    '<span class="who"><span class="nm">'+esc(x.username)+(x.is_me?'<span class="lbadge">'+esc(t('youName'))+'</span>':'')+'</span>'+
+   '<span class="lbal" title="'+esc(t('balanceLab'))+'">'+esc(money(bal))+'<i class="'+gcls+'">'+esc(gtxt)+'</i></span>'+
    '<span class="lsub2">'+esc(sub)+'</span></span>'+
    '<span class="val '+cls+'">'+esc(val)+'</span></div>';
  }).join('');

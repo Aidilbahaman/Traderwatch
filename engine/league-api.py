@@ -177,7 +177,8 @@ class Handler(BaseHTTPRequestHandler):
                 for i, r in enumerate(rows):
                     r["rank"] = i + 1
                     r["is_me"] = (r.get("user_id") == uid)
-                return self._send(200, {"leaderboard": rows, "season": SEASON})
+                return self._send(200, {"leaderboard": rows, "season": SEASON,
+                                        "start_balance": START_BALANCE})
             if path == "/api/league/me":
                 trades = my_trades(uid)
                 bal, closed = balance_of(trades)
