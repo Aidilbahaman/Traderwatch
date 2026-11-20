@@ -1,7 +1,7 @@
 {
   "name": "TraderWatch AI Analyst",
   "short_name": "TW Analyst",
-  "description": "Pilih pair — AI TraderWatch baca chart M15 dan lukis Entry, SL & TP untuk anda. Chart OHLC sebenar, analisis AI masa sebenar. Boleh pasang, boleh offline.",
+  "description": "Analisis AI sebenar untuk pair pilihan anda — chart OHLC live, Entry/SL/TP, komuniti ahli dan profil. Boleh pasang, boleh offline.",
   "id": "./index.html",
   "start_url": "./index.html",
   "scope": "./",
@@ -16,13 +16,32 @@
   "icons": [
     { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
     { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
-    { "src": "icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+    { "src": "icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" },
+    { "src": "icons/icon-180.png", "sizes": "180x180", "type": "image/png", "purpose": "any" }
   ],
   "shortcuts": [
     {
-      "name": "Analisis AI",
-      "short_name": "Analisis",
-      "url": "./index.html",
+      "name": "Analyst",
+      "short_name": "Analyst",
+      "url": "./index.html?view=analyst",
+      "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Komuniti",
+      "short_name": "Komuniti",
+      "url": "./index.html?view=community",
+      "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Profil",
+      "short_name": "Profil",
+      "url": "./index.html?view=profile",
+      "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Tetapan",
+      "short_name": "Tetapan",
+      "url": "./index.html?view=settings",
       "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }]
     }
   ]

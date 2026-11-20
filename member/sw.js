@@ -1,11 +1,11 @@
-/* TraderWatch AI Analyst PWA — service worker (app single-file)
+/* TraderWatch AI Analyst — service worker app ahli 4-area (member/).
  * Strategi:
  *  - App shell (index.html + manifest + ikon): precache, cache-first
  *  - Navigasi: network-first, fallback ke index.html bila offline
- *  - /api/* (analyze, bars): NETWORK SAHAJA — jangan cache data pasaran
- *  - Pihak ketiga: network terus
+ *  - /api/* dan /auth/*: NETWORK SAHAJA — jangan cache data pasaran/user
+ *  - Data user (Supabase REST, chat, profil): tidak dicache sama sekali
  */
-const VERSION = 'tw-analyst-v1';
+const VERSION = 'tw-member-full-v1';
 const SHELL_CACHE = VERSION + '-shell';
 
 const SHELL_ASSETS = [
@@ -15,8 +15,16 @@ const SHELL_ASSETS = [
   './icons/icon-192.png',
   './icons/icon-512.png',
   './icons/icon-maskable-512.png',
-  './icons/icon-180.png'
+  './icons/icon-180.png',
+  './icons/apple-touch-icon.png'
 ];
+
+const SHELL_PATHS = new Set([
+  '/member/', '/member/index.html', '/member/manifest.webmanifest',
+  '/member/icons/icon-192.png', '/member/icons/icon-512.png',
+  '/member/icons/icon-maskable-512.png', '/member/icons/icon-180.png',
+  '/member/icons/apple-touch-icon.png'
+]);
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
@@ -39,7 +47,7 @@ self.addEventListener('activate', (event) => {
 async function networkFirstNavigation(request) {
   try {
     const response = await fetch(request);
-    // Hanya shell analyst disimpan sebagai fallback offline.
+    // Hanya shell app disimpan sebagai fallback offline.
     const p = new URL(request.url).pathname;
     if (response && response.ok && (p === '/member/' || p === '/member/index.html')) {
       const cache = await caches.open(SHELL_CACHE);
@@ -53,7 +61,7 @@ async function networkFirstNavigation(request) {
   }
 }
 
-async function cacheFirst(request) {
+async function cacheFirstShell(request) {
   const cache = await caches.open(SHELL_CACHE);
   const cached = await cache.match(request);
   if (cached) return cached;
@@ -64,16 +72,20 @@ async function cacheFirst(request) {
 
 self.addEventListener('fetch', (event) => {
   const { request } = event;
-  if (request.method !== 'GET') return;
+  if (request.method !== 'GET') return; // POST analyze/chat: network terus
   const url = new URL(request.url);
 
   if (request.mode === 'navigate') {
     event.respondWith(networkFirstNavigation(request));
     return;
   }
-  if (url.origin !== self.location.origin) return; // pihak ketiga: network terus
-  if (url.pathname.startsWith('/api/')) return;    // analisis & bars: network sahaja
-  event.respondWith(cacheFirst(request));
+  if (url.origin !== self.location.origin) return; // Supabase & pihak ketiga: network terus
+  if (url.pathname.startsWith('/api/') || url.pathname.startsWith('/auth/')) return; // jangan cache
+  if (SHELL_PATHS.has(url.pathname)) {
+    event.respondWith(cacheFirstShell(request));
+    return;
+  }
+  // Laluan lain (data feed dll): network sahaja, tiada cache data user.
 });
 
 self.addEventListener('message', (event) => {
