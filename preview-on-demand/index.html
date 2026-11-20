@@ -1,0 +1,816 @@
+<!doctype html>
+<html lang="ms">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0a0e0b">
+<meta name="robots" content="noindex">
+<meta name="description" content="TraderWatch — minta analisis AI on-demand untuk XAU/USD. Entry, stop loss & take profit dijana oleh model AI, bila-bila anda mahu.">
+<title>TraderWatch — Analisis AI On-Demand</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23c6f36b'/%3E%3Ctext x='16' y='22' font-family='Arial,sans-serif' font-size='18' font-weight='800' text-anchor='middle' fill='%2310170b'%3ET%3C/text%3E%3C/svg%3E">
+<style>
+/* TraderWatch — preview on-demand. Tema semasa PWA (lime/dark), inline & offline-first. */
+:root{
+  --bg:#0a0e0b; --surface:#121813; --surface2:#18211a; --line:#26332a;
+  --ink:#f2f5ef; --muted:#93a096; --lime:#c6f36b; --lime-ink:#10170b;
+  --red:#ff817d; --amber:#ffd479; --green:#8fd99a;
+  --r-card:20px; --r-chip:999px; --r-btn:14px;
+  --font:Inter,system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:ui-monospace,"SF Mono",SFMono-Regular,Menlo,Consolas,monospace;
+  --safe-bottom:env(safe-area-inset-bottom,0px);
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{height:100%}
+body{
+  margin:0;background:var(--bg);color:var(--ink);
+  font-family:var(--font);font-size:15px;line-height:1.5;
+  -webkit-font-smoothing:antialiased;-webkit-tap-highlight-color:transparent;
+}
+h1,h2,h3,h4,p{margin:0}
+a{color:var(--lime);text-decoration:none}
+button{font-family:inherit}
+input{font-family:inherit}
+:focus-visible{outline:2px solid var(--lime);outline-offset:2px;border-radius:4px}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
+.num{font-variant-numeric:tabular-nums}
+.mono{font-family:var(--mono);font-variant-numeric:tabular-nums}
+
+/* ---------- Shell ---------- */
+.shell{min-height:100dvh;display:flex;flex-direction:column;max-width:560px;margin:0 auto}
+@media (min-width:600px){
+  body{background:#070a08}
+  .shell{background:var(--bg);border-inline:1px solid var(--line);min-height:100vh}
+}
+
+/* ---------- App bar ---------- */
+.appbar{
+  position:sticky;top:0;z-index:20;display:flex;align-items:center;justify-content:space-between;gap:8px;
+  padding:10px 16px;padding-top:calc(10px + env(safe-area-inset-top,0px));
+  background:rgba(10,14,11,.92);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+  border-bottom:1px solid var(--line);
+}
+.appbar-brand{display:flex;align-items:center;gap:8px;color:var(--ink)}
+.brand-mark{display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:9px;background:var(--lime);color:var(--lime-ink);font-weight:800;font-size:16px;flex:none}
+.brand-name{font-size:13px;font-weight:800;letter-spacing:.14em}
+.appbar-actions{display:flex;align-items:center;gap:8px}
+.net-pill{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:var(--r-chip);border:1px solid var(--line);background:var(--surface);font-size:11px;font-weight:700;letter-spacing:.08em;color:var(--lime)}
+.net-dot{width:6px;height:6px;border-radius:50%;background:var(--lime);animation:pulse 2s ease-in-out infinite}
+.net-pill.offline{color:var(--amber)}
+.net-pill.offline .net-dot{background:var(--amber);animation:none}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+.avatar{display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:50%;background:var(--surface2);border:1px solid var(--line);color:var(--lime);font-size:13px;font-weight:800;flex:none;text-transform:uppercase}
+
+/* ---------- Main ---------- */
+main{flex:1;padding:16px 16px 24px}
+.greeting{margin-bottom:16px}
+.greeting h2{font-size:21px;font-weight:800;letter-spacing:-.01em;display:flex;align-items:center;gap:8px}
+.greet-hand{width:22px;height:22px;color:var(--lime);flex:none;transform-origin:70% 80%;animation:wave 2.6s ease-in-out infinite}
+@keyframes wave{0%,60%,100%{transform:rotate(0)}10%{transform:rotate(14deg)}20%{transform:rotate(-8deg)}30%{transform:rotate(12deg)}40%{transform:rotate(-4deg)}50%{transform:rotate(8deg)}}
+.greet-sub{color:var(--muted);font-size:13px;margin-top:2px}
+
+/* ---------- Cards ---------- */
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-card);padding:16px;margin-bottom:14px}
+.pair-head{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+.pair-icon{display:inline-flex;align-items:center;justify-content:center;width:46px;height:46px;border-radius:14px;font-weight:800;font-size:17px;flex:none;background:linear-gradient(135deg,#ffd479,#e0b64f);color:#3a2c07;box-shadow:0 0 0 1px rgba(255,212,121,.35),0 4px 14px rgba(255,212,121,.12)}
+.pair-id{flex:1;min-width:0}
+.pair-id h3{font-size:16px;font-weight:800;letter-spacing:.01em}
+.pair-price{font-family:var(--mono);font-variant-numeric:tabular-nums;font-size:14px;color:var(--muted);font-weight:600}
+.pair-price b{color:var(--ink);font-size:16px}
+
+/* ---------- Chips ---------- */
+.chip{display:inline-flex;align-items:center;gap:4px;border-radius:var(--r-chip);padding:3px 10px;font-size:11px;font-weight:700;letter-spacing:.05em;border:1px solid transparent;white-space:nowrap}
+.chip svg{width:12px;height:12px}
+.chip-buy{background:rgba(198,243,107,.14);color:var(--lime);border-color:rgba(198,243,107,.35)}
+.chip-sell{background:rgba(255,129,125,.12);color:var(--red);border-color:rgba(255,129,125,.35)}
+.chip-lime{background:rgba(198,243,107,.14);color:var(--lime);border-color:rgba(198,243,107,.35)}
+.chip-muted{background:var(--surface2);color:var(--muted);border-color:var(--line)}
+.chip-amber{background:rgba(255,212,121,.1);color:var(--amber);border-color:rgba(255,212,121,.3)}
+.chip-ai{background:var(--lime);color:var(--lime-ink)}
+
+/* ---------- Buttons ---------- */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border-radius:var(--r-btn);border:1px solid transparent;padding:11px 18px;font-size:14px;font-weight:700;cursor:pointer;transition:background .15s ease,opacity .15s ease,transform .1s ease;color:var(--ink);background:var(--surface2)}
+.btn:active{transform:scale(.98)}
+.btn svg{width:18px;height:18px;flex:none}
+.btn-primary{background:var(--lime);color:var(--lime-ink)}
+.btn-primary:hover{background:#d3fa85}
+.btn-ghost{background:transparent;border-color:var(--line);color:var(--ink)}
+.btn-ghost:hover{background:var(--surface2)}
+.btn-big{width:100%;padding:15px 18px;font-size:16px;font-weight:800;border-radius:16px}
+.btn[disabled]{opacity:.55;cursor:not-allowed;transform:none}
+.btn-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+.btn-row .btn{flex:1;min-width:150px}
+
+/* ---------- States ---------- */
+.state{animation:state-in .24s ease both}
+@keyframes state-in{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+.hint{font-size:12.5px;color:var(--muted);text-align:center;margin-top:10px}
+
+/* login nudge + login state */
+.nudge{display:flex;align-items:flex-start;gap:10px;margin-top:12px;padding:12px;border-radius:14px;background:rgba(255,212,121,.08);border:1px solid rgba(255,212,121,.28)}
+.nudge svg{width:18px;height:18px;color:var(--amber);flex:none;margin-top:1px}
+.nudge p{font-size:12.5px;color:var(--ink)}
+.nudge a{font-weight:700}
+.friendly{display:flex;flex-direction:column;align-items:center;text-align:center;gap:10px;padding:18px 8px}
+.friendly-icon{display:inline-flex;align-items:center;justify-content:center;width:56px;height:56px;border-radius:50%;background:var(--surface2);border:1px solid var(--line)}
+.friendly-icon svg{width:26px;height:26px;color:var(--lime)}
+.friendly-icon.amber svg{color:var(--amber)}
+.friendly-icon.red svg{color:var(--red)}
+.friendly h4{font-size:16px;font-weight:800}
+.friendly p{font-size:13px;color:var(--muted);max-width:320px}
+.friendly .btn{margin-top:4px}
+
+/* analyzing radar */
+.busy-wrap{display:flex;flex-direction:column;align-items:center;text-align:center;gap:12px;padding:14px 8px 6px}
+.radar{position:relative;width:92px;height:92px;border-radius:50%;border:1px solid var(--line);flex:none;
+  background:radial-gradient(circle,transparent 0 29%,rgba(198,243,107,.09) 29% 30.5%,transparent 30.5% 59%,rgba(198,243,107,.09) 59% 60.5%,transparent 60.5%)}
+.radar::before{content:"";position:absolute;inset:-1px;border-radius:50%;
+  background:conic-gradient(from 0deg,rgba(198,243,107,0) 0deg,rgba(198,243,107,.4) 42deg,rgba(198,243,107,0) 62deg);
+  animation:spin 2.4s linear infinite}
+.radar::after{content:"";position:absolute;left:50%;top:50%;width:8px;height:8px;margin:-4px 0 0 -4px;border-radius:50%;background:var(--lime);animation:pulse 1.6s ease-in-out infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.busy-msg{font-size:15px;font-weight:700;min-height:23px;transition:opacity .3s ease}
+.busy-msg.fade{opacity:0}
+.busy-eta{font-size:12.5px;color:var(--muted)}
+.busy-elapsed{font-family:var(--mono);font-variant-numeric:tabular-nums;font-size:12px;color:var(--lime);font-weight:600}
+
+/* ---------- Result ---------- */
+.signal-top{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+.signal-pair{font-size:17px;font-weight:800}
+.conf-row{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:6px}
+.conf-label{font-size:12px;font-weight:700;color:var(--muted);letter-spacing:.04em}
+.conf-val{font-family:var(--mono);font-variant-numeric:tabular-nums;font-size:14px;font-weight:700;color:var(--lime)}
+.conf-bar{height:6px;border-radius:var(--r-chip);background:var(--surface2);border:1px solid var(--line);overflow:hidden;margin-bottom:14px}
+.conf-fill{height:100%;border-radius:var(--r-chip);background:linear-gradient(90deg,#9fd94f,var(--lime));transition:width .6s ease}
+.levels{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+.level{background:var(--surface2);border:1px solid var(--line);border-radius:14px;padding:10px 12px;display:flex;flex-direction:column;gap:2px}
+.level-label{font-size:10px;font-weight:700;letter-spacing:.08em;color:var(--muted)}
+.level-value{font-family:var(--mono);font-variant-numeric:tabular-nums;font-size:19px;font-weight:700;letter-spacing:-.01em}
+.level-value.sl{color:var(--red)}
+.level-value.tp{color:var(--lime)}
+.level-value.tp2{color:var(--green)}
+.rr-row{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+.reason-card{margin-top:12px;background:var(--surface2);border:1px solid var(--line);border-radius:14px;padding:12px}
+.reason-card h4{font-size:11px;font-weight:700;letter-spacing:.08em;color:var(--muted);margin-bottom:4px;display:flex;align-items:center;gap:6px}
+.reason-card h4 svg{width:13px;height:13px;color:var(--lime)}
+.reason-card p{font-size:13px;line-height:1.55}
+.meta-row{display:flex;flex-wrap:wrap;gap:4px 14px;margin-top:12px;font-size:12px;color:var(--muted)}
+.meta-row .mono{color:var(--ink);font-weight:600}
+
+/* chart */
+.chart-card{margin-top:14px;background:var(--surface2);border:1px solid var(--line);border-radius:14px;padding:10px}
+.chart-card svg{display:block;width:100%;height:auto}
+.chart-legend{display:flex;flex-wrap:wrap;gap:6px 12px;margin-top:8px;padding:0 2px}
+.chart-legend span{display:inline-flex;align-items:center;gap:5px;font-size:10.5px;color:var(--muted);font-weight:600}
+.lg-line{width:14px;height:0;border-top:2px solid var(--lime)}
+.lg-line.dashed{border-top-style:dashed}
+.lg-line.sl{border-top-color:var(--red)}
+.lg-line.tp2{border-top-color:var(--green)}
+.lg-zone{width:12px;height:9px;border-radius:2px;background:repeating-linear-gradient(45deg,rgba(198,243,107,.35) 0 2px,rgba(198,243,107,.08) 2px 5px);border:1px solid var(--line)}
+.chart-fallback{display:flex;align-items:center;gap:10px;padding:16px 10px;font-size:12.5px;color:var(--muted)}
+.chart-fallback svg{width:18px;height:18px;color:var(--amber);flex:none}
+
+/* calculator */
+.calc{margin-top:12px;background:var(--surface2);border:1px solid var(--line);border-radius:14px;padding:14px}
+.calc h4{font-size:13px;font-weight:800;margin-bottom:10px;display:flex;align-items:center;gap:7px}
+.calc h4 svg{width:16px;height:16px;color:var(--lime)}
+.calc-inputs{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.calc-field label{display:block;font-size:11px;font-weight:700;letter-spacing:.05em;color:var(--muted);margin-bottom:4px}
+.calc-field input{width:100%;padding:10px 12px;border-radius:12px;border:1px solid var(--line);background:var(--surface);color:var(--ink);font-family:var(--mono);font-variant-numeric:tabular-nums;font-size:15px;font-weight:600}
+.calc-field input:focus{outline:2px solid var(--lime);outline-offset:1px}
+.calc-out{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px}
+.calc-out div{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:8px 10px}
+.calc-out span{display:block;font-size:9.5px;font-weight:700;letter-spacing:.07em;color:var(--muted)}
+.calc-out b{font-family:var(--mono);font-variant-numeric:tabular-nums;font-size:15px;font-weight:700}
+.calc-out b.lime{color:var(--lime)}
+.calc-note{font-size:11px;color:var(--muted);margin-top:10px}
+
+/* ---------- Soon pairs ---------- */
+.soon-grid{display:grid;grid-template-columns:minmax(0,1fr);gap:10px;margin-bottom:14px}
+@media (min-width:600px){.soon-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.soon-card{display:flex;align-items:center;gap:10px;padding:13px 14px;margin-bottom:0;opacity:.6;min-width:0}
+.soon-icon{display:inline-flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:11px;font-weight:800;font-size:13px;flex:none;background:var(--surface2);border:1px solid var(--line);color:var(--muted)}
+.soon-id{flex:1;min-width:0}
+.soon-id h3{font-size:13px;font-weight:700}
+.soon-id span{font-size:11px;color:var(--muted)}
+
+/* ---------- Disclaimer & footer ---------- */
+.disclaimer{display:flex;align-items:flex-start;gap:9px;padding:12px 14px;border-radius:14px;border:1px solid var(--line);background:var(--surface);font-size:11.5px;color:var(--muted);line-height:1.5;margin-bottom:14px}
+.disclaimer svg{width:15px;height:15px;color:var(--amber);flex:none;margin-top:1px}
+footer{padding:14px 16px calc(18px + var(--safe-bottom));border-top:1px solid var(--line);text-align:center}
+footer p{font-size:12px;color:var(--muted)}
+footer .foot-small{font-size:11px;margin-top:3px;opacity:.8}
+
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation:none!important;transition:none!important}
+}
+</style>
+</head>
+<body>
+<div class="shell">
+
+  <header class="appbar">
+    <div class="appbar-brand">
+      <span class="brand-mark" aria-hidden="true">T</span>
+      <span class="brand-name">TRADERWATCH</span>
+    </div>
+    <div class="appbar-actions">
+      <span class="net-pill" id="netPill"><span class="net-dot" aria-hidden="true"></span><span id="netLabel">LIVE</span></span>
+      <span class="avatar" id="avatar" hidden aria-hidden="true">T</span>
+    </div>
+  </header>
+
+  <main>
+    <section class="greeting">
+      <h2>
+        <svg class="greet-hand" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 11V6a2 2 0 0 0-2-2a2 2 0 0 0-2 2"/><path d="M14 10V4a2 2 0 0 0-2-2a2 2 0 0 0-2 2v2"/><path d="M10 10.5V6a2 2 0 0 0-2-2a2 2 0 0 0-2 2v8"/><path d="M18 8a2 2 0 1 1 4 0v6a8 8 0 0 1-8 8h-2c-2.8 0-4.5-.86-5.99-2.34l-3.6-3.6a2 2 0 0 1 2.83-2.82L7 15"/></svg>
+        Hai, <span id="greetName">Trader</span>
+      </h2>
+      <p class="greet-sub">Pilih pair, biar AI analisis untuk anda.</p>
+    </section>
+
+    <!-- Kad pair utama: XAU/USD -->
+    <section class="card" id="pairCard" aria-label="XAU/USD Gold — analisis on-demand">
+      <div class="pair-head">
+        <span class="pair-icon" aria-hidden="true">Au</span>
+        <div class="pair-id">
+          <h3>XAU/USD · Gold</h3>
+          <span class="pair-price num" id="pairPrice">Harga semasa: —</span>
+        </div>
+        <span class="chip chip-lime" id="pairChip">Sedia untuk analisis</span>
+      </div>
+
+      <!-- State: sedia -->
+      <div class="state" id="stateIdle">
+        <button class="btn btn-primary btn-big" id="btnAnalyze" type="button">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/><path d="M20 3v4"/><path d="M22 5h-4"/></svg>
+          Analisis XAUUSD
+        </button>
+        <p class="hint">AI akan cari setup terbaik — entry, stop loss &amp; take profit.</p>
+        <div class="nudge" id="loginNudge" hidden>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          <p><strong>Sila log masuk dahulu.</strong> Analisis AI tersedia untuk ahli TraderWatch. <a href="https://traderwatch.org/login.html">Log masuk di sini →</a></p>
+        </div>
+      </div>
+
+      <!-- State: perlu log masuk -->
+      <div class="state" id="stateLogin" hidden>
+        <div class="friendly">
+          <span class="friendly-icon amber">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          </span>
+          <h4>Sila log masuk dahulu</h4>
+          <p>Analisis AI on-demand ialah manfaat ahli TraderWatch. Log masuk untuk mula — ia percuma dan hanya mengambil beberapa saat.</p>
+          <a class="btn btn-primary" href="https://traderwatch.org/login.html">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" x2="3" y1="12" y2="12"/></svg>
+            Log masuk
+          </a>
+          <p class="hint">Selepas log masuk, kembali ke halaman ini dan tekan Analisis semula.</p>
+        </div>
+      </div>
+
+      <!-- State: menganalisis -->
+      <div class="state" id="stateBusy" hidden>
+        <div class="busy-wrap">
+          <div class="radar" aria-hidden="true"></div>
+          <p class="busy-msg" id="busyMsg">Membaca struktur pasaran…</p>
+          <p class="busy-eta">Biasanya 20–60 saat · <span class="busy-elapsed num" id="busyElapsed">0s</span> berlalu</p>
+          <button class="btn btn-ghost" id="btnCancel" type="button">Batal</button>
+        </div>
+      </div>
+
+      <!-- State: keputusan BUY/SELL -->
+      <div class="state" id="stateResult" hidden>
+        <div class="signal-top">
+          <span class="signal-pair">XAU/USD</span>
+          <span class="chip" id="sideChip">BUY</span>
+          <span class="chip chip-ai">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/></svg>
+            AI
+          </span>
+          <span class="chip chip-muted" id="tfChip">M15</span>
+        </div>
+
+        <div class="conf-row">
+          <span class="conf-label">KEYAKINAN AI</span>
+          <span class="conf-val num" id="confVal">—</span>
+        </div>
+        <div class="conf-bar" role="img" aria-label="Bar keyakinan AI" id="confBarWrap"><div class="conf-fill" id="confFill" style="width:0%"></div></div>
+
+        <div class="levels">
+          <div class="level"><span class="level-label">ENTRY</span><span class="level-value num" id="lvEntry">—</span></div>
+          <div class="level"><span class="level-label">STOP LOSS</span><span class="level-value sl num" id="lvSl">—</span></div>
+          <div class="level"><span class="level-label">TAKE PROFIT 1</span><span class="level-value tp num" id="lvTp1">—</span></div>
+          <div class="level"><span class="level-label">TAKE PROFIT 2</span><span class="level-value tp2 num" id="lvTp2">—</span></div>
+        </div>
+        <div class="rr-row">
+          <span class="chip chip-lime num" id="rr1Chip">RR1 —</span>
+          <span class="chip chip-lime num" id="rr2Chip">RR2 —</span>
+        </div>
+
+        <div class="reason-card">
+          <h4><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg> SEBAB ENTRY</h4>
+          <p id="reasonText">—</p>
+        </div>
+
+        <div class="meta-row">
+          <span>Harga semasa <span class="mono num" id="resPrice">—</span></span>
+          <span>Dijana <span class="mono num" id="resTime">—</span></span>
+          <span id="resModel"></span>
+        </div>
+
+        <div class="chart-card" id="chartWrap"></div>
+        <div class="chart-legend" id="chartLegend" hidden>
+          <span><i class="lg-line dashed"></i>Entry</span>
+          <span><i class="lg-line sl"></i>Stop loss</span>
+          <span><i class="lg-line"></i>TP1</span>
+          <span><i class="lg-line tp2"></i>TP2</span>
+          <span><i class="lg-zone"></i>Zon risiko / ganjaran</span>
+        </div>
+
+        <div class="btn-row">
+          <button class="btn btn-primary" id="btnReanalyze" type="button">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+            <span id="reanalyzeLabel">Analisis semula</span>
+          </button>
+          <button class="btn btn-ghost" id="btnCalc" type="button" aria-expanded="false" aria-controls="calcPanel">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="16" height="20" x="4" y="2" rx="2"/><line x1="8" x2="16" y1="6" y2="6"/><line x1="16" x2="16" y1="14" y2="18"/><path d="M16 10h.01"/><path d="M12 10h.01"/><path d="M8 10h.01"/><path d="M12 14h.01"/><path d="M8 14h.01"/><path d="M12 18h.01"/><path d="M8 18h.01"/></svg>
+            Kira saiz posisi
+          </button>
+        </div>
+
+        <div class="calc" id="calcPanel" hidden>
+          <h4>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="16" height="20" x="4" y="2" rx="2"/><line x1="8" x2="16" y1="6" y2="6"/></svg>
+            Kalkulator saiz posisi
+          </h4>
+          <div class="calc-inputs">
+            <div class="calc-field">
+              <label for="calcBalance">Baki akaun (USD)</label>
+              <input id="calcBalance" type="number" inputmode="decimal" min="1" step="any" value="1000">
+            </div>
+            <div class="calc-field">
+              <label for="calcRisk">Risiko setiap trade (%)</label>
+              <input id="calcRisk" type="number" inputmode="decimal" min="0.1" max="100" step="any" value="1">
+            </div>
+          </div>
+          <div class="calc-out">
+            <div><span>SAIZ POSISI</span><b class="lime num" id="calcLots">—</b></div>
+            <div><span>RISIKO (USD)</span><b class="num" id="calcRiskUsd">—</b></div>
+            <div><span>JARAK SL</span><b class="num" id="calcDist">—</b></div>
+          </div>
+          <p class="calc-note">1 lot XAUUSD = 100 oz. Anggaran sahaja — sahkan spesifikasi kontrak dengan broker anda.</p>
+        </div>
+      </div>
+
+      <!-- State: HOLD -->
+      <div class="state" id="stateHold" hidden>
+        <div class="friendly">
+          <span class="friendly-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 22h14"/><path d="M5 2h14"/><path d="M17 22v-4.172a2 2 0 0 0-.586-1.414L12 12l-4.414 4.414A2 2 0 0 0 7 17.828V22"/><path d="M7 2v4.172a2 2 0 0 0 .586 1.414L12 12l4.414-4.414A2 2 0 0 0 17 6.172V2"/></svg>
+          </span>
+          <h4>Tiada setup jelas sekarang</h4>
+          <p id="holdReason">Enjin menunggu peluang lebih baik. Cuba lagi sebentar.</p>
+          <p class="hint num" id="holdMeta"></p>
+          <button class="btn btn-primary" id="btnHoldRetry" type="button">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+            <span id="holdRetryLabel">Cuba lagi</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- State: ralat / cooldown -->
+      <div class="state" id="stateError" hidden>
+        <div class="friendly">
+          <span class="friendly-icon red" id="errIcon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 8v4"/><path d="M12 16h.01"/></svg>
+          </span>
+          <h4 id="errTitle">Alamak, ada gangguan kecil</h4>
+          <p id="errMsg">Tidak dapat menyiapkan analisis sekarang. Cuba lagi sebentar.</p>
+          <button class="btn btn-primary" id="btnErrRetry" type="button">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+            <span id="errRetryLabel">Cuba lagi</span>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Pair lain: akan datang -->
+    <div class="soon-grid">
+      <div class="card soon-card" aria-disabled="true">
+        <span class="soon-icon" aria-hidden="true">Ag</span>
+        <div class="soon-id"><h3>XAG/USD</h3><span>Silver</span></div>
+        <span class="chip chip-muted">Akan datang</span>
+      </div>
+      <div class="card soon-card" aria-disabled="true">
+        <span class="soon-icon" aria-hidden="true">B</span>
+        <div class="soon-id"><h3>BTC/USD</h3><span>Bitcoin</span></div>
+        <span class="chip chip-muted">Akan datang</span>
+      </div>
+    </div>
+
+    <p class="disclaimer">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="M12 8v4"/><path d="M12 16h.01"/></svg>
+      <span>Educational only. Trading involves substantial risk. Signal AI bukan nasihat kewangan — sahkan dengan broker anda.</span>
+    </p>
+  </main>
+
+  <footer>
+    <p>Analisis dijana oleh model AI on-demand.</p>
+    <p class="foot-small">TraderWatch · Preview on-demand · <span class="num" id="footYear"></span></p>
+  </footer>
+</div>
+
+<div class="sr-only" role="status" aria-live="polite" id="liveRegion"></div>
+<noscript><p style="padding:16px;text-align:center">Halaman ini memerlukan JavaScript untuk analisis AI on-demand.</p></noscript>
+
+<script>
+(function(){
+"use strict";
+var TOKEN_KEY = "sb-vicfiftvhxemuhxxmkxk-auth-token";
+var API_URL = "https://traderwatch.org/api/analyze";
+var BARS_URL = "../data/bars-xauusd.json";
+var MIN_GAP_MS = 20000; /* selaras dengan had enjin: 20s antara analisis */
+
+var $ = function(id){ return document.getElementById(id); };
+var states = ["stateIdle","stateLogin","stateBusy","stateResult","stateHold","stateError"];
+var bars = null;
+var verdict = null;
+var busyTimer = null, msgTimer = null, elapsedTimer = null, cooldownTimer = null;
+var abortCtrl = null;
+var cooldownUntil = 0;
+var busyStart = 0;
+
+var BUSY_MSGS = [
+  "Membaca struktur pasaran…",
+  "Mencari zon liquidity…",
+  "Mengira entry & risiko…",
+  "Menyemak confluence…"
+];
+
+/* ---------- util ---------- */
+function fmt2(n){
+  var v = Number(n);
+  return isFinite(v) ? v.toFixed(2) : "—";
+}
+function fmtMYT(iso){
+  try{
+    var d = new Date(iso);
+    if(isNaN(d.getTime())) return "—";
+    return new Intl.DateTimeFormat("ms-MY",{timeZone:"Asia/Kuala_Lumpur",day:"numeric",month:"short",hour:"numeric",minute:"2-digit",hour12:true}).format(d) + " MYT";
+  }catch(_){ return "—"; }
+}
+function announce(t){ $("liveRegion").textContent = t; }
+function getSession(){
+  try{
+    var raw = localStorage.getItem(TOKEN_KEY);
+    if(!raw) return null;
+    var s = JSON.parse(raw);
+    if(!s || !s.access_token) return null;
+    if(s.expires_at && s.expires_at * 1000 < Date.now()) return null;
+    return s;
+  }catch(_){ return null; }
+}
+function showState(id){
+  states.forEach(function(s){ $(s).hidden = (s !== id); });
+}
+function setChip(text, cls){
+  var c = $("pairChip");
+  c.textContent = text;
+  c.className = "chip " + cls;
+}
+
+/* ---------- session UI ---------- */
+function refreshSessionUI(){
+  var s = getSession();
+  var av = $("avatar");
+  if(s){
+    var name = (s.user && s.user.user_metadata && s.user.user_metadata.name) || "";
+    var email = (s.user && s.user.email) || "";
+    var first = name.trim().split(/\s+/)[0] || email.split("@")[0] || "Trader";
+    $("greetName").textContent = first;
+    av.textContent = (first.charAt(0) || "T");
+    av.hidden = false;
+    $("loginNudge").hidden = true;
+  }else{
+    $("greetName").textContent = "Trader";
+    av.hidden = true;
+    $("loginNudge").hidden = false;
+  }
+}
+
+/* ---------- bars & harga ---------- */
+function loadBars(){
+  return fetch(BARS_URL, {cache:"no-store"})
+    .then(function(r){ if(!r.ok) throw new Error("bars " + r.status); return r.json(); })
+    .then(function(d){
+      if(d && Array.isArray(d.bars) && d.bars.length){
+        bars = d.bars.slice(-120);
+        var last = bars[bars.length-1][4];
+        $("pairPrice").innerHTML = "Harga semasa: <b class='num'>" + fmt2(last) + "</b>";
+      }
+    })
+    .catch(function(){ bars = null; });
+}
+
+/* ---------- cooldown butang ---------- */
+function startCooldown(ms){
+  cooldownUntil = Date.now() + Math.max(0, ms);
+  tickCooldown();
+  if(cooldownTimer) clearInterval(cooldownTimer);
+  cooldownTimer = setInterval(tickCooldown, 500);
+}
+function tickCooldown(){
+  var left = Math.ceil((cooldownUntil - Date.now())/1000);
+  var btns = [
+    [$("btnReanalyze"), $("reanalyzeLabel"), "Analisis semula"],
+    [$("btnHoldRetry"), $("holdRetryLabel"), "Cuba lagi"],
+    [$("btnErrRetry"), $("errRetryLabel"), "Cuba lagi"]
+  ];
+  btns.forEach(function(b){
+    if(left > 0){ b[0].disabled = true; b[1].textContent = b[2] + " (" + left + "s)"; }
+    else{ b[0].disabled = false; b[1].textContent = b[2]; }
+  });
+  if(left <= 0 && cooldownTimer){ clearInterval(cooldownTimer); cooldownTimer = null; }
+}
+
+/* ---------- analyzing ---------- */
+function startBusy(){
+  showState("stateBusy");
+  setChip("Menganalisis…", "chip-amber");
+  announce("AI sedang menganalisis XAUUSD. Biasanya 20 hingga 60 saat.");
+  var i = 0;
+  $("busyMsg").textContent = BUSY_MSGS[0];
+  busyStart = Date.now();
+  $("busyElapsed").textContent = "0s";
+  if(msgTimer) clearInterval(msgTimer);
+  msgTimer = setInterval(function(){
+    i = (i+1) % BUSY_MSGS.length;
+    var el = $("busyMsg");
+    el.classList.add("fade");
+    setTimeout(function(){ el.textContent = BUSY_MSGS[i]; el.classList.remove("fade"); }, 300);
+  }, 3500);
+  if(elapsedTimer) clearInterval(elapsedTimer);
+  elapsedTimer = setInterval(function(){
+    $("busyElapsed").textContent = Math.floor((Date.now()-busyStart)/1000) + "s";
+  }, 1000);
+}
+function stopBusy(){
+  if(msgTimer){ clearInterval(msgTimer); msgTimer = null; }
+  if(elapsedTimer){ clearInterval(elapsedTimer); elapsedTimer = null; }
+}
+
+function analyze(){
+  var s = getSession();
+  if(!s){
+    showState("stateLogin");
+    setChip("Perlu log masuk", "chip-muted");
+    announce("Sila log masuk dahulu untuk menggunakan analisis AI.");
+    return;
+  }
+  startBusy();
+  abortCtrl = new AbortController();
+  /* Tiada timeout pendek — panggilan LLM boleh ambil 20–60 saat. */
+  fetch(API_URL, {
+    method: "POST",
+    headers: {"Content-Type":"application/json", "Authorization":"Bearer " + s.access_token},
+    body: JSON.stringify({pair:"XAUUSD"}),
+    signal: abortCtrl.signal
+  })
+  .then(function(res){
+    return res.json().catch(function(){ return {}; }).then(function(data){ return {status:res.status, data:data}; });
+  })
+  .then(function(r){
+    stopBusy();
+    if(r.status === 401){
+      showState("stateLogin");
+      setChip("Perlu log masuk", "chip-muted");
+      announce("Session tamat. Sila log masuk semula.");
+      return;
+    }
+    if(r.status === 429){
+      var msg = (r.data && r.data.error) || "Had analisis dicapai. Cuba lagi sebentar.";
+      var m = msg.match(/(\d+)\s*s/);
+      showError("Rehat sebentar ya", msg, m ? Math.max(5, parseInt(m[1],10))*1000 : MIN_GAP_MS, true);
+      return;
+    }
+    if(r.status !== 200){
+      showError("Alamak, ada gangguan kecil", (r.data && r.data.error) || "Enjin tidak dapat menyiapkan analisis sekarang. Cuba lagi sebentar.", 0, false);
+      return;
+    }
+    var v = r.data || {};
+    if(v.side === "HOLD"){ renderHold(v); }
+    else if(v.side === "BUY" || v.side === "SELL"){ renderResult(v); }
+    else{ showError("Alamak, ada gangguan kecil", "Respons enjin tidak dijangka. Cuba lagi sebentar.", 0, false); }
+  })
+  .catch(function(err){
+    stopBusy();
+    if(err && err.name === "AbortError"){
+      showState("stateIdle");
+      setChip("Sedia untuk analisis", "chip-lime");
+      announce("Analisis dibatalkan.");
+      return;
+    }
+    showError("Tidak dapat menghubungi enjin", "Semak sambungan internet anda, kemudian cuba lagi. Kami sedia menunggu.", 0, false);
+  });
+}
+
+function showError(title, msg, cooldownMs, isCooldown){
+  showState("stateError");
+  setChip(isCooldown ? "Cooldown" : "Cuba lagi", "chip-muted");
+  $("errTitle").textContent = title;
+  $("errMsg").textContent = msg;
+  $("errIcon").className = "friendly-icon " + (isCooldown ? "amber" : "red");
+  announce(title + ". " + msg);
+  if(cooldownMs > 0) startCooldown(cooldownMs);
+}
+
+/* ---------- HOLD ---------- */
+function renderHold(v){
+  verdict = null;
+  showState("stateHold");
+  setChip("Menunggu peluang", "chip-muted");
+  $("holdReason").textContent = (v.reason ? v.reason.replace(/[\s.]+$/, "") + ". " : "") + "Enjin menunggu peluang lebih baik. Cuba lagi sebentar.";
+  $("holdMeta").textContent = "Harga semasa " + fmt2(v.price) + " · " + fmtMYT(v.generated_at);
+  announce("Tiada setup jelas sekarang. Enjin menunggu peluang lebih baik.");
+  startCooldown(MIN_GAP_MS);
+}
+
+/* ---------- BUY/SELL ---------- */
+function renderResult(v){
+  verdict = v;
+  showState("stateResult");
+  var buy = v.side === "BUY";
+  setChip(v.side, buy ? "chip-buy" : "chip-sell");
+  var sc = $("sideChip");
+  sc.textContent = v.side;
+  sc.className = "chip " + (buy ? "chip-buy" : "chip-sell");
+  var conf = Math.round(Math.max(0, Math.min(1, Number(v.conf) || 0)) * 100);
+  $("confVal").textContent = conf + "%";
+  $("confFill").style.width = conf + "%";
+  $("confBarWrap").setAttribute("aria-label", "Keyakinan AI " + conf + " peratus");
+  $("lvEntry").textContent = fmt2(v.entry);
+  $("lvSl").textContent = fmt2(v.sl);
+  $("lvTp1").textContent = fmt2(v.tp1);
+  $("lvTp2").textContent = fmt2(v.tp2);
+  $("rr1Chip").textContent = "RR1 · " + fmt2(v.rr1);
+  $("rr2Chip").textContent = "RR2 · " + fmt2(v.rr2);
+  $("reasonText").textContent = v.reason || "Setup dikenal pasti oleh enjin AI berdasarkan struktur pasaran semasa.";
+  $("resPrice").textContent = fmt2(v.price);
+  $("resTime").textContent = fmtMYT(v.generated_at);
+  $("resModel").textContent = v.model ? ("Model " + v.model + (v.latency_s != null ? " · " + fmt2(v.latency_s) + "s" : "")) : "";
+  renderChart(v);
+  $("calcPanel").hidden = true;
+  $("btnCalc").setAttribute("aria-expanded","false");
+  computeCalc();
+  announce("Keputusan AI: " + v.side + " XAUUSD. Entry " + fmt2(v.entry) + ", stop loss " + fmt2(v.sl) + ", take profit " + fmt2(v.tp1) + " dan " + fmt2(v.tp2) + ".");
+  startCooldown(MIN_GAP_MS);
+}
+
+/* ---------- carta SVG beranotasi ---------- */
+function renderChart(v){
+  var wrap = $("chartWrap");
+  var legend = $("chartLegend");
+  if(!bars || !bars.length){
+    legend.hidden = true;
+    wrap.innerHTML = "";
+    var fb = document.createElement("div");
+    fb.className = "chart-fallback";
+    fb.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 20h.01"/><path d="M7 20v-4"/><path d="M12 20v-8"/><path d="M17 20V8"/><path d="M22 4v16"/></svg>';
+    var t = document.createElement("span");
+    t.textContent = "Carta tidak dapat dimuatkan sekarang. Paras entry, SL & TP di atas masih rujukan yang sah.";
+    fb.appendChild(t);
+    wrap.appendChild(fb);
+    return;
+  }
+  var W=760, H=330, mL=10, mR=98, mT=14, mB=26;
+  var pw = W-mL-mR, ph = H-mT-mB;
+  var n = bars.length;
+  var entry=Number(v.entry), sl=Number(v.sl), tp1=Number(v.tp1), tp2=Number(v.tp2);
+  var lo=Infinity, hi=-Infinity;
+  bars.forEach(function(b){ lo=Math.min(lo,b[3]); hi=Math.max(hi,b[2]); });
+  [entry,sl,tp1,tp2].forEach(function(p){ if(isFinite(p)){ lo=Math.min(lo,p); hi=Math.max(hi,p); } });
+  var pad=(hi-lo)*0.06 || 1; lo-=pad; hi+=pad;
+  var y=function(p){ return mT + (hi-p)/(hi-lo)*ph; };
+  var x=function(i){ return mL + (i+0.5)*pw/n; };
+  var cw=Math.max(2, pw/n*0.62);
+  var s = [];
+  s.push('<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Carta candlestick XAU/USD M15 dengan garisan entry, stop loss, take profit 1 dan take profit 2 berserta zon risiko dan ganjaran">');
+  s.push('<defs>'
+    + '<pattern id="hzRisk" width="7" height="7" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="7" height="7" fill="rgba(255,129,125,0.05)"/><line x1="0" y1="0" x2="0" y2="7" stroke="rgba(255,129,125,0.30)" stroke-width="1.4"/></pattern>'
+    + '<pattern id="hzReward" width="7" height="7" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="7" height="7" fill="rgba(198,243,107,0.05)"/><line x1="0" y1="0" x2="0" y2="7" stroke="rgba(198,243,107,0.28)" stroke-width="1.4"/></pattern>'
+    + '</defs>');
+  /* grid + label harga */
+  var ticks=5;
+  for(var g=0; g<=ticks; g++){
+    var pv = hi - (hi-lo)*g/ticks;
+    var gy = y(pv);
+    s.push('<line x1="'+mL+'" y1="'+gy.toFixed(1)+'" x2="'+(W-mR+6)+'" y2="'+gy.toFixed(1)+'" stroke="rgba(38,51,42,0.7)" stroke-width="1"/>');
+    s.push('<text x="'+(W-6)+'" y="'+(gy+3.5).toFixed(1)+'" text-anchor="end" font-family="ui-monospace,Menlo,Consolas,monospace" font-size="10" fill="#93a096">'+pv.toFixed(2)+'</text>');
+  }
+  /* zon risiko & ganjaran (lorek) */
+  function zone(pA,pB,fill,op){
+    if(!isFinite(pA)||!isFinite(pB)) return;
+    var ya=y(pA), yb=y(pB);
+    var top=Math.min(ya,yb), h=Math.abs(ya-yb);
+    if(h<1) return;
+    s.push('<rect x="'+mL+'" y="'+top.toFixed(1)+'" width="'+pw+'" height="'+h.toFixed(1)+'" fill="'+fill+'" opacity="'+op+'"/>');
+  }
+  zone(entry,sl,"url(#hzRisk)",1);
+  zone(entry,tp1,"url(#hzReward)",1);
+  zone(tp1,tp2,"url(#hzReward)",0.55);
+  /* candlestick */
+  bars.forEach(function(b,i){
+    var o=b[1],h=b[2],l=b[3],c=b[4];
+    var up=c>=o, col=up?"#c6f36b":"#ff817d";
+    var cx=x(i);
+    s.push('<line x1="'+cx.toFixed(1)+'" y1="'+y(h).toFixed(1)+'" x2="'+cx.toFixed(1)+'" y2="'+y(l).toFixed(1)+'" stroke="'+col+'" stroke-width="1" opacity="0.75"/>');
+    var top=y(Math.max(o,c)), bh=Math.max(1, Math.abs(y(o)-y(c)));
+    s.push('<rect x="'+(cx-cw/2).toFixed(1)+'" y="'+top.toFixed(1)+'" width="'+cw.toFixed(1)+'" height="'+bh.toFixed(1)+'" fill="'+col+'" opacity="'+(up?'0.9':'0.85')+'" rx="0.5"/>');
+  });
+  /* garisan paras + label */
+  var labels=[];
+  function level(p,color,dash,name){
+    if(!isFinite(p)) return;
+    var ly=y(p);
+    s.push('<line x1="'+mL+'" y1="'+ly.toFixed(1)+'" x2="'+(W-mR+6)+'" y2="'+ly.toFixed(1)+'" stroke="'+color+'" stroke-width="1.6"'+(dash?' stroke-dasharray="6 4"':'')+'/>');
+    labels.push({y:ly, text:name+" "+p.toFixed(2), color:color});
+  }
+  level(entry,"#c6f36b",true,"ENTRY");
+  level(sl,"#ff817d",false,"SL");
+  level(tp1,"#c6f36b",false,"TP1");
+  level(tp2,"#8fd99a",false,"TP2");
+  var lastC=bars[n-1][4];
+  labels.push({y:y(lastC), text:"NOW "+lastC.toFixed(2), color:"#f2f5ef"});
+  s.push('<circle cx="'+x(n-1).toFixed(1)+'" cy="'+y(lastC).toFixed(1)+'" r="3" fill="#f2f5ef"/>');
+  /* label kanan — elak bertindih */
+  labels.sort(function(a,b){ return a.y-b.y; });
+  var prevY=-99;
+  labels.forEach(function(lb){
+    var ly=Math.max(mT+8, Math.min(H-mB-8, lb.y));
+    if(ly < prevY+15) ly = prevY+15;
+    if(ly > H-mB-2) ly = H-mB-2;
+    prevY=ly;
+    var tw=lb.text.length*6.1+12;
+    s.push('<rect x="'+(W-mR+10)+'" y="'+(ly-8).toFixed(1)+'" width="'+tw.toFixed(0)+'" height="16" rx="5" fill="#18211a" stroke="#26332a"/>');
+    s.push('<text x="'+(W-mR+16)+'" y="'+(ly+3.5).toFixed(1)+'" font-family="ui-monospace,Menlo,Consolas,monospace" font-size="10" font-weight="700" fill="'+lb.color+'">'+lb.text+'</text>');
+  });
+  /* label masa */
+  [0, Math.floor(n/3), Math.floor(2*n/3), n-1].forEach(function(i){
+    var tm=String(bars[i][0]).slice(11,16);
+    s.push('<text x="'+x(i).toFixed(1)+'" y="'+(H-8)+'" text-anchor="middle" font-family="ui-monospace,Menlo,Consolas,monospace" font-size="10" fill="#93a096">'+tm+'</text>');
+  });
+  s.push('</svg>');
+  wrap.innerHTML = s.join("");
+  legend.hidden = false;
+}
+
+/* ---------- kalkulator saiz posisi ---------- */
+function computeCalc(){
+  if(!verdict) return;
+  var bal=Number($("calcBalance").value), risk=Number($("calcRisk").value);
+  var entry=Number(verdict.entry), sl=Number(verdict.sl);
+  var dist=Math.abs(entry-sl);
+  if(!(bal>0) || !(risk>0) || !(dist>0)){
+    $("calcLots").textContent="—"; $("calcRiskUsd").textContent="—"; $("calcDist").textContent = dist>0 ? dist.toFixed(2) : "—";
+    return;
+  }
+  var riskUsd=bal*risk/100;
+  var lots=riskUsd/(dist*100); /* 1 lot XAUUSD = 100 oz */
+  $("calcLots").textContent=lots.toFixed(2)+" lot";
+  $("calcRiskUsd").textContent="$"+riskUsd.toFixed(2);
+  $("calcDist").textContent=dist.toFixed(2);
+}
+
+/* ---------- wiring ---------- */
+$("btnAnalyze").addEventListener("click", analyze);
+$("btnReanalyze").addEventListener("click", function(){ if(!this.disabled) analyze(); });
+$("btnHoldRetry").addEventListener("click", function(){ if(!this.disabled) analyze(); });
+$("btnErrRetry").addEventListener("click", function(){ if(!this.disabled) analyze(); });
+$("btnCancel").addEventListener("click", function(){ if(abortCtrl) abortCtrl.abort(); });
+$("btnCalc").addEventListener("click", function(){
+  var p=$("calcPanel");
+  p.hidden=!p.hidden;
+  this.setAttribute("aria-expanded", String(!p.hidden));
+  if(!p.hidden){ computeCalc(); $("calcBalance").focus(); }
+});
+$("calcBalance").addEventListener("input", computeCalc);
+$("calcRisk").addEventListener("input", computeCalc);
+
+function netStatus(){
+  var on=navigator.onLine;
+  $("netPill").classList.toggle("offline", !on);
+  $("netLabel").textContent = on ? "LIVE" : "LUAR TALIAN";
+}
+window.addEventListener("online", netStatus);
+window.addEventListener("offline", netStatus);
+window.addEventListener("storage", function(e){ if(e.key===TOKEN_KEY) refreshSessionUI(); });
+
+$("footYear").textContent = new Date().getFullYear();
+refreshSessionUI();
+netStatus();
+loadBars();
+})();
+</script>
+</body>
+</html>
