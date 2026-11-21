@@ -73,6 +73,20 @@ def log(msg):
     print(f"{datetime.now(timezone.utc).isoformat()} ANALYZE {msg}", flush=True)
 
 
+def bump_analyses(uid):
+    """Atomic per-account analysis counter (Supabase RPC). Best-effort: a counter
+    failure must never break the analysis response."""
+    try:
+        req = urllib.request.Request(SB_URL + "/rest/v1/rpc/bump_analyses",
+                                     data=json.dumps({"p_uid": uid}).encode(),
+                                     headers={"apikey": SB_KEY, "Authorization": "Bearer " + SB_KEY,
+                                              "Content-Type": "application/json"}, method="POST")
+        with urllib.request.urlopen(req, timeout=15) as r:
+            r.read()
+    except Exception as e:
+        log(f"bump_analyses {uid[:8]} skipped: {type(e).__name__}")
+
+
 def verify_user(token):
     if not token:
         return None
@@ -342,6 +356,7 @@ class Handler(BaseHTTPRequestHandler):
             log(f"{pair} error {type(e).__name__}: {str(e)[:160]}")
             return self._send(500, {"error": "Analisis gagal buat masa ini. Cuba lagi sebentar."})
         log(f"{uid[:8]} {pair} -> {result.get('side')}")
+        bump_analyses(uid)   # server-side per-account count (replaces browser-local)
         # MT5 sync moved to "Take this trade" (league-api) so the owner's
         # chosen lot is used. Scans no longer place orders. See mt5_ondemand.py.
         return self._send(200, result)

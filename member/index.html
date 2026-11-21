@@ -1132,7 +1132,7 @@ function typeLine(html,run){
    if(i<plain.length){d.textContent=plain.slice(0,i);setTimeout(step,10)}else{d.innerHTML=html;setTimeout(function(){res(true)},120)}})();
  });
 }
-function bumpCount(){var n=parseInt(lsGet('tw-analysis-count')||'0',10)||0;lsSet('tw-analysis-count',n+1);if(profileLoaded)renderStats()}
+function bumpCount(){if(MYPERF)MYPERF.analyses_count=(+MYPERF.analyses_count||0)+1;if(profileLoaded)renderStats()}
 /* Kira verdict HOLD — dipakai untuk badge "Patient" dalam Liga. */
 function bumpHold(){var n=parseInt(lsGet('tw-hold-count')||'0',10)||0;lsSet('tw-hold-count',n+1)}
 function analyze(){
@@ -1459,7 +1459,7 @@ function drawBadges(){
  var badges=[
   {k:'bRisk',ck:'bcRisk',ic:'shield',cur:Math.min(lowRisk,10),max:10},
   {k:'bCons',ck:'bcCons',ic:'flame',cur:Math.min(greenStreak(),7),max:7},
-  {k:'bAna',ck:'bcAna',ic:'chart',cur:Math.min(lsCount('tw-analysis-count'),50),max:50},
+  {k:'bAna',ck:'bcAna',ic:'chart',cur:Math.min((me&&+me.analyses_count)||0,50),max:50},
   {k:'bPat',ck:'bcPat',ic:'clock',cur:Math.min(lsCount('tw-hold-count'),5),max:5},
   {k:'bTp',ck:'bcTp',ic:'target',cur:Math.min(tpStreak(),5),max:5},
   {k:'bStart',ck:'bcStart',ic:'star',cur:Math.min(total,1),max:1}
@@ -1626,13 +1626,13 @@ function loadProfile(){
 function loadPerf(){
  apiFetch('/api/league/me').then(function(r){
   var d=r.ok?r.data:null;
-  MYPERF=(d&&d.balance!=null)?{net_r:+d.net_r||0,win_rate:(d.win_rate!=null&&isFinite(+d.win_rate))?+d.win_rate:null,balance:+d.balance,rank:(d.rank!=null)?+d.rank:null,trades_closed:+d.trades_closed||0,trades_open:+d.trades_open||0}:null;
+  MYPERF=(d&&d.balance!=null)?{net_r:+d.net_r||0,win_rate:(d.win_rate!=null&&isFinite(+d.win_rate))?+d.win_rate:null,balance:+d.balance,rank:(d.rank!=null)?+d.rank:null,trades_closed:+d.trades_closed||0,trades_open:+d.trades_open||0,analyses_count:+d.analyses_count||0}:null;
   renderStats();
  }).catch(function(){MYPERF=null;renderStats()});
 }
 function renderStats(){
- var cnt=null;var v=lsGet('tw-analysis-count');if(v!=null){var n=parseInt(v,10);if(isFinite(n)&&n>0)cnt=n}
- $('s1v').textContent=cnt!=null?String(cnt):'—';
+ var ac=(MYPERF&&MYPERF.analyses_count>0)?MYPERF.analyses_count:null;
+ $('s1v').textContent=ac!=null?String(ac):'—';
  $('s2v').textContent=(MYPERF&&MYPERF.trades_closed>0)?String(MYPERF.trades_closed):'—';
  var nr=MYPERF?MYPERF.net_r:null,has=MYPERF&&MYPERF.trades_closed>0&&nr!=null&&isFinite(nr);
  var s3=$('s3v');
@@ -1674,7 +1674,7 @@ function showAccount(){
  $('altClose').onclick=closeSheet;
 }
 function showPerf(){
- var cnt='—';var v=lsGet('tw-analysis-count');if(v!=null&&parseInt(v,10)>0)cnt=String(parseInt(v,10));
+ var cnt=(MYPERF&&MYPERF.analyses_count>0)?String(MYPERF.analyses_count):'—';
  /* Tiada data peribadi / tiada trade langsung → empty state mesra. */
  if(!MYPERF||(MYPERF.trades_closed===0&&MYPERF.trades_open===0)){
   var he='<div class="empty">'+esc(t('perfEmpty'))+'</div><button class="again" id="perfAnalyst">'+esc(t('navAnalyst'))+'</button><button class="again" id="altClose">'+esc(t('close'))+'</button>';

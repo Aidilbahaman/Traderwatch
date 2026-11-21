@@ -180,10 +180,15 @@ class Handler(BaseHTTPRequestHandler):
                 board = sb("POST", "/rest/v1/rpc/get_leaderboard", body={"p_season": SEASON}) or []
                 me = display_name(user)
                 rank = next((i + 1 for i, r in enumerate(board) if r.get("user_id") == uid), None)
+                # Server-side per-account analysis count (user_analyses table).
+                ana = sb("GET", "/rest/v1/user_analyses", params={
+                    "select": "count", "user_id": f"eq.{uid}"}) or []
+                ana_count = int(ana[0]["count"]) if ana else 0
                 return self._send(200, {
                     "balance": bal, "start_balance": START_BALANCE, "net_r": net_r,
                     "win_rate": round(100.0 * wins / dec, 1) if dec else None,
                     "trades_closed": len(closed), "trades_open": open_n,
+                    "analyses_count": ana_count,
                     "rank": rank, "season": SEASON, "username": me,
                     "is_owner": bool(MO and MO.is_owner(uid))})
         except urllib.error.HTTPError as e:
