@@ -45,6 +45,7 @@
     <a class="logo" href="index.html" aria-label="TraderWatch home">
       <svg width="32" height="32" viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="7" fill="#050b14" stroke="#264261"/><path d="M8 9h16v4h-6.2v11h-3.6V13H8z" fill="#fff"/><rect x="20" y="20" width="5" height="5" fill="#2ecf6f"/></svg>
       <span>TraderWatch</span></a>
+    <button data-sound-toggle type="button" aria-label="Toggle sound" style="margin-left:auto;background:none;border:1px solid var(--line);border-radius:9px;width:36px;height:36px;display:grid;place-items:center;color:var(--muted);cursor:pointer"></button>
   </div>
 </header>
 <main class="wrap">
@@ -91,6 +92,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
 <script src="config.js?v=202610182133"></script>
 <script src="common.js?v=202610182133"></script>
+<script src="sound.js?v=20261121s3"></script>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 
 <script>
@@ -166,11 +168,12 @@ const signup = new URLSearchParams(location.search).get("mode") === "signup";
 const title = document.getElementById("formTitle"), hint = document.getElementById("formHint");
 const nameWrap = document.getElementById("nameWrap"), confirmWrap = document.getElementById("confirmWrap");
 const passwordInput = form.elements.password, submitButton = form.querySelector('button[type="submit"]');
-function show(t, ok){ msg.textContent = t; msg.className = "msg " + (ok ? "ok" : "err"); }
+function show(t, ok){ msg.textContent = t; msg.className = "msg " + (ok ? "ok" : "err"); if(window.TWSound && ok===false) TWSound.play('error'); }
 /* ---- Cloudflare Turnstile gate (anti-bot) ----
-   TEST site key below always passes (demo). Replace with your real site key
-   from Cloudflare dashboard → Turnstile for production protection. */
-const TURNSTILE_SITEKEY = "1x00000000000000000000AA";
+   Real widget (managed). Token dihantar terus ke Supabase sebagai captchaToken
+   (Supabase enforce di server). JANGAN pre-verify di backend kita: token
+   Turnstile single-use — siteverify kedua akan gagal. */
+const TURNSTILE_SITEKEY = "0x4AAAAAAGLylBqIwcPYBksV";
 let turnstileToken = null, turnstileReady = false, turnstileWidget = null;
 function setSubmit(on){ submitButton.disabled = !on; }
 function renderTurnstile(){
@@ -180,11 +183,7 @@ function renderTurnstile(){
     sitekey: TURNSTILE_SITEKEY,
     theme: "auto",
     callback: function(token){
-      fetch("/api/turnstile/verify", {method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({token})})
-        .then(function(r){return r.json()}).then(function(d){
-          if(d && d.ok){ turnstileToken = token; setSubmit(true); }
-          else { turnstileToken = null; setSubmit(false); show("Verification failed. Please try again.", false); try{window.turnstile.reset(turnstileWidget)}catch(_){} }
-        }).catch(function(){ turnstileToken = token; setSubmit(true); });
+      turnstileToken = token; setSubmit(true);
     },
     "expired-callback": function(){ turnstileToken = null; setSubmit(false); },
     "error-callback": function(){ turnstileToken = null; setSubmit(false); }
@@ -283,6 +282,7 @@ function goToMember(next, session){
     return;
   }
   twBeacon('login_ok', { exp: session && session.expires_at, inApp: twInApp(), ua: (navigator.userAgent||'').slice(0,220) });
+  if(window.TWSound) TWSound.play('success');
   const path = next && /^\/member(?:\/|$)/.test(next) ? next : "/member/";
   // Same origin as login (traderwatch.org): Supabase keeps the session in
   // localStorage here, so no cross-domain token handoff is needed. Sending the
@@ -307,11 +307,11 @@ form.addEventListener("submit", async e=>{
   if(next && /^\/(?!\/)/.test(next)) redirectUrl.searchParams.set("next", next);
   const redirectTo = redirectUrl.href;
   const result = signup
-      ? await sb.auth.signUp({ email, password, options: { data: { name: form.elements.name.value.trim() }, emailRedirectTo: redirectTo } })
-      : await sb.auth.signInWithPassword({ email, password });
-    if(result.error) { resetTurnstile(); twBeacon('login_err', { msg: result.error.message, signup: signup, inApp: twInApp(), ua: (navigator.userAgent||'').slice(0,220) }); return show(signup ? result.error.message : (/confirm/i.test(result.error.message) ? "Confirm your email first. Check your inbox for the link." : "Wrong email or password."), false); }
+      ? await sb.auth.signUp({ email, password, options: { data: { name: form.elements.name.value.trim() }, emailRedirectTo: redirectTo, captchaToken: turnstileToken } })
+      : await sb.auth.signInWithPassword({ email, password, options: { captchaToken: turnstileToken } });
+    if(result.error) { resetTurnstile(); twBeacon('login_err', { msg: result.error.message, signup: signup, inApp: twInApp(), ua: (navigator.userAgent||'').slice(0,220) }); return show(signup ? result.error.message : (/captcha/i.test(result.error.message) ? "Human verification required — reload the page and try again." : /confirm/i.test(result.error.message) ? "Confirm your email first. Check your inbox for the link." : "Wrong email or password."), false); }
     if(signup && !result.data.session && result.data.user && result.data.user.email_confirmed_at){
-      const signed = await sb.auth.signInWithPassword({email, password});
+      const signed = await sb.auth.signInWithPassword({email, password, options:{captchaToken: turnstileToken}});
       if(signed.error) return show("Account created. Log in with your new account.", true);
       goToMember(next,result.data.session);
       return;
@@ -348,7 +348,8 @@ resend.addEventListener("click", async ()=>{
   resend.disabled = true;
   try{
     const redirectTo = new URL("verify.html", location.href).href;
-    const r = await sb.auth.resend({type:"signup", email:resendEmail, options:{emailRedirectTo:redirectTo}});
+    const r = await sb.auth.resend({type:"signup", email:resendEmail, options:{emailRedirectTo:redirectTo, captchaToken:turnstileToken}});
+    resetTurnstile();
     if(r.error){ show("Could not resend the verification email: " + r.error.message, false); resend.disabled = false; return; }
     startResendCooldown(60);
     show("A new verification email was sent. Check your inbox and spam folder.", true);
@@ -385,7 +386,8 @@ document.getElementById('otpBtn').addEventListener('click', async ()=>{
   const redirectUrl = new URL("verify.html", location.href);
   if(next && /^\/(?!\/)/.test(next)) redirectUrl.searchParams.set("next", next);
   try {
-    const r = await sb.auth.signInWithOtp({ email, options: { emailRedirectTo: redirectUrl.href } });
+    const r = await sb.auth.signInWithOtp({ email, options: { emailRedirectTo: redirectUrl.href, captchaToken: turnstileToken } });
+    resetTurnstile();
     show(r.error ? 'Could not send link: ' + r.error.message : 'Magic link sent to ' + email + ' — click the link in the email to sign in (check spam).', !r.error);
   } catch(_) { show('Unable to connect. Please try again.', false); }
 });
@@ -395,7 +397,8 @@ document.getElementById("forgot").addEventListener("click", async ()=>{
   if(!/^\S+@\S+\.\S+$/.test(email)) return show("Enter your email above first, then press Forgot your password.", false);
   const redirectTo = location.href.replace(/[^/]*(#.*)?$/, "") + "login.html";
   try {
-    const r = await sb.auth.resetPasswordForEmail(email, { redirectTo });
+    const r = await sb.auth.resetPasswordForEmail(email, { redirectTo, captchaToken: turnstileToken });
+    resetTurnstile();
     show(r.error ? "Could not send the reset email: " + r.error.message : "If that email has an account, a reset link is on its way.", !r.error);
   } catch (_) { show("Unable to connect. Please try again.", false); }
 });

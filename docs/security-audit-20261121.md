@@ -42,10 +42,20 @@ pihak ketiga). Semua probe terhadap URL deployed sendiri + Supabase project send
 
 ## Risiko tinggal / keputusan owner
 
-- **H1 — Turnstile TEST key** (`1x00000000000000000000AA`, always-pass) + backend
-  fail-open bila CF unreachable → login tiada protection bot sebenar; panggilan
-  terus ke Supabase auth bypass widget. Fix: widget Turnstile sebenar (dashboard
-  owner) + enable **Supabase Auth captcha** dengan key sama.
+- **H1: SELESAI 2026-11-21** — widget Turnstile sebenar dicipta via API (token user
+  di-enable Turnstile Edit): sitekey `0x4AAAAAAGLylBqIwcPYBksV`, mode managed,
+  domain traderwatch.org + www. Secret 600 di `.secrets/turnstile.env` + env
+  `tw-analyze-api`. **Supabase Auth captcha enabled (provider turnstile)** —
+  enforcement disahkan: signup/password/otp tanpa captchaToken → 400
+  `captcha_failed`; magic-link verify exempt (flow disahkan headless).
+  Wiring login.html: token widget dihantar terus sebagai `captchaToken`
+  (single-use: pre-verify backend dibuang supaya token tidak consumed dua kali);
+  reset widget selepas setiap percubaan gagal/otp/recover/resend.
+  Nota QC: headless datacenter kena managed challenge interaktif → ujian UI login
+  password tidak lagi boleh headless; guna session inject / admin magic-link.
+  Pengesahan akhir password login: owner di device sebenar (managed pass di
+  residential IP). Revert segera jika perlu: PATCH config/auth
+  `security_captcha_enabled=false`.
 - **H2 — `ubuntu` sudo NOPASSWD ALL.** Service web-facing berjalan sebagai ubuntu;
   jika RCE pada mana-mana API → root serta-merta. Fix: scope sudoers kepada
   senarai command diperlukan (systemctl unit tw-*, caddy, bridge mt5, fail ops).
