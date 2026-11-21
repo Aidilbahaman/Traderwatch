@@ -9,6 +9,8 @@ Endpoints (Caddy proxies /api/league* here):
   GET  /api/league/me          -> balance, net_r, win_rate, open count, rank
   GET  /api/league/trades      -> my trades (newest first)
   GET  /api/league/leaderboard -> aggregated standings (RPC, no private data)
+  GET  /api/league/quote?pair=XAUUSD -> {pair, price, ts} live tick for the
+                                   member trade-detail modal (5s poll)
   POST /api/league/trade       -> open a paper trade {pair,side,entry,sl,tp,risk_pct|lot}
                                   optional mt5:true (OWNER ONLY) also places a real
                                   MT5 pending order with the exact lot chosen.
@@ -21,7 +23,7 @@ import pathlib
 import urllib.error
 import urllib.parse
 import urllib.request
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
 HERE = pathlib.Path(__file__).resolve().parent
@@ -49,6 +51,24 @@ def live_price(pair):
     if M5B is None:
         return None
     return M5B.mid(pair)
+
+
+def live_quote(pair):
+    """(price, ts_iso) from the MT5 broker tick; (None, None) when bridge down.
+    ts is the tick time normalized to UTC (same server-offset logic as
+    mt5_data.candles), falling back to now when the tick carries no time."""
+    if M5B is None:
+        return None, None
+    tk = M5B.tick(pair)
+    if not tk or not tk.get("bid") or not tk.get("ask"):
+        return None, None
+    price = round((float(tk["bid"]) + float(tk["ask"])) / 2.0, 5)
+    try:
+        ts = (datetime.fromtimestamp(int(tk["time"]), timezone.utc)
+              - timedelta(hours=M5B._offset_hours())).isoformat()
+    except (KeyError, TypeError, ValueError):
+        ts = datetime.now(timezone.utc).isoformat()
+    return price, ts
 
 ENV = pathlib.Path("/home/ubuntu/.secrets/supabase.env")
 PORT = int(os.environ.get("LEAGUE_PORT", "8103"))
@@ -191,6 +211,15 @@ class Handler(BaseHTTPRequestHandler):
                     "analyses_count": ana_count,
                     "rank": rank, "season": SEASON, "username": me,
                     "is_owner": bool(MO and MO.is_owner(uid))})
+            if path == "/api/league/quote":
+                qs = urllib.parse.parse_qs(parsed.query)
+                pair = qs.get("pair", [""])[0].upper().replace("/", "").replace(" ", "")
+                if pair not in ALLOWED_PAIRS:
+                    return self._send(400, {"error": "This pair is not open for the league yet."})
+                price, ts = live_quote(pair)
+                if price is None:
+                    return self._send(503, {"error": "Live price unavailable — try again in a moment."})
+                return self._send(200, {"pair": pair, "price": price, "ts": ts})
         except urllib.error.HTTPError as e:
             log(f"GET {path} sb HTTP {e.code}")
             return self._send(502, {"error": "Could not load league data. Try again."})

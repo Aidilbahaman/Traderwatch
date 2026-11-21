@@ -172,7 +172,10 @@ html[data-theme="light"] .lrow.me .lbadge{color:#4c7a17}
 .tstat b{display:block;font-size:15px;font-weight:850;font-variant-numeric:tabular-nums;letter-spacing:-.03em}
 .tstat small{display:block;color:var(--muted);font-size:9px;margin-top:3px;line-height:1.25}
 .tstat.pos b{color:var(--green)}
-.tcard{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:13px 14px;margin-bottom:10px;animation:up .4s both}
+.tcard{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:13px 14px;margin-bottom:10px;animation:up .4s both;cursor:pointer;transition:border-color .15s}
+.tcard:hover{border-color:#34452f}
+html[data-theme="light"] .tcard:hover{border-color:#b8c9a8}
+.tchev{flex:none;color:var(--muted);opacity:.65}
 .tcard .top{display:flex;align-items:center;gap:8px}
 .tcard .tpair{font-weight:850;font-size:14.5px;letter-spacing:-.02em}
 .side{font-size:9.5px;font-weight:850;padding:3px 9px;border-radius:999px;letter-spacing:.07em}
@@ -402,6 +405,34 @@ html[data-theme="light"] .lotbadge{color:#4c7a17}
 .rbase{font-size:10px;color:var(--muted);margin:7px 0 0;opacity:.8}
 .rnote{font-size:11px;color:var(--muted);background:var(--card2);border:1px solid var(--line);border-radius:12px;padding:9px 12px;margin:12px 0}
 
+/* trade detail modal (kad trade boleh ditekan) */
+#tdbd{position:absolute;inset:0;background:#000a;opacity:0;pointer-events:none;transition:opacity .25s;z-index:52}
+#td{position:absolute;left:50%;top:50%;transform:translate(-50%,-46%) scale(.96);width:min(340px,calc(100% - 32px));max-height:88%;overflow-y:auto;scrollbar-width:none;background:var(--card);border:1px solid var(--line);border-radius:22px;padding:18px;z-index:53;opacity:0;pointer-events:none;transition:.25s cubic-bezier(.2,.9,.2,1);box-shadow:0 30px 80px #000c}
+#td::-webkit-scrollbar{display:none}
+.tdopen #tdbd{opacity:1;pointer-events:auto}
+.tdopen #td{opacity:1;pointer-events:auto;transform:translate(-50%,-50%) scale(1)}
+#td .rhead{gap:8px}
+#td .rhead h3{font-size:16px}
+#td .rhead .x{margin-left:8px}
+.tdlive{background:var(--card2);border:1px solid var(--line);border-radius:14px;padding:11px 13px;margin-top:4px;text-align:center}
+.tdlive small{display:block;color:var(--muted);font-size:9px;font-weight:750;letter-spacing:.08em;text-transform:uppercase}
+.tdlive b{display:block;font-size:30px;font-weight:850;font-variant-numeric:tabular-nums;letter-spacing:-.03em;line-height:1.15;margin-top:2px}
+.tdpnl{display:block;font-size:13px;font-weight:800;font-variant-numeric:tabular-nums;margin-top:3px}
+.tdpnl small{display:inline;font-size:9.5px;letter-spacing:.05em;text-transform:uppercase;opacity:.85}
+.tdpnl.pos{color:var(--green)}.tdpnl.neg{color:var(--red)}.tdpnl.neu{color:var(--muted)}
+.tdchart{height:180px;margin-top:10px}
+#tdcv{display:block;width:100%;height:100%}
+#td .rlevels{margin-top:10px}
+#td .rlevels .tddist{display:block;font-style:normal;font-size:9.5px;color:var(--muted);margin-top:2px;font-variant-numeric:tabular-nums}
+.tdprog{margin-top:12px}
+.tdplab{display:flex;justify-content:space-between;align-items:center;font-size:9.5px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
+.tdplab b{color:var(--text);font-variant-numeric:tabular-nums;font-size:11px}
+.tdpbar{position:relative;height:8px;border-radius:999px;background:var(--card2);border:1px solid var(--line)}
+.tdpbar i{position:absolute;left:0;top:0;bottom:0;border-radius:999px;background:linear-gradient(90deg,#ff777d55,#b7f36b88);transition:width .5s cubic-bezier(.2,.8,.2,1)}
+.tdpbar u{position:absolute;top:50%;width:12px;height:12px;border-radius:50%;background:var(--text);border:2px solid var(--bg);transform:translate(-50%,-50%);box-shadow:0 2px 8px #000a;transition:left .5s cubic-bezier(.2,.8,.2,1)}
+.tdends{display:flex;justify-content:space-between;font-size:8.5px;font-weight:800;letter-spacing:.06em;color:var(--muted);margin-top:4px}
+#td .kv{margin-top:14px;font-size:12px}
+
 /* toast */
 #toast{position:absolute;left:50%;bottom:calc(96px + env(safe-area-inset-bottom));transform:translate(-50%,12px);z-index:70;background:var(--text);color:var(--bg);font-size:12.5px;font-weight:750;padding:10px 16px;border-radius:999px;box-shadow:0 12px 34px #0006;opacity:0;pointer-events:none;transition:.25s;white-space:nowrap;max-width:92%;overflow:hidden;text-overflow:ellipsis}
 #toast.show{opacity:1;transform:translate(-50%,0)}
@@ -569,6 +600,21 @@ html[data-theme="light"] .lotbadge{color:#4c7a17}
       <button class="go" id="rGo">Open trade</button>
     </div>
 
+    <!-- trade detail modal: kad trade boleh ditekan -->
+    <div id="tdbd"></div>
+    <div id="td" role="dialog" aria-modal="true" aria-labelledby="tdTitle">
+      <div class="rhead"><h3 id="tdTitle">—</h3><span class="side" id="tdSide"></span><span class="st" id="tdSt"></span><button class="x" id="tdx" aria-label="Close">✕</button></div>
+      <div class="tdlive"><small id="tdLiveLab">Harga live</small><b id="tdPrice">—</b><span class="tdpnl neu" id="tdPnl"></span></div>
+      <div class="chartbox tdchart"><canvas id="tdcv"></canvas></div>
+      <div class="rlevels" id="tdLevels"></div>
+      <div class="tdprog">
+        <div class="tdplab"><span id="tdRangeLab">Julat SL → TP</span><b id="tdProgPct">—</b></div>
+        <div class="tdpbar"><i id="tdProgFill"></i><u id="tdProgMark"></u></div>
+        <div class="tdends"><span>SL</span><span>TP</span></div>
+      </div>
+      <div class="kv" id="tdMeta"></div>
+    </div>
+
     <div id="toast" role="status" aria-live="polite"></div>
     <div id="floatAna" class="floata hidden" role="button" tabindex="0" aria-live="polite">
       <span class="fspin" aria-hidden="true"></span><span class="ftxt" id="floatTxt"></span><span class="fx" id="floatX" role="button" aria-label="Cancel analysis">✕</span>
@@ -653,6 +699,7 @@ var DICT={
   instantNote:'Instant entry — trade diisi pada harga pasaran semasa bila anda buka, bukan entry petikan.',
   toastOpened:'Paper trade dibuka! Pantau di Liga.',pickPair:'Pilih pair untuk analisis AI.',
   leagueErr:'Gagal memuatkan data liga. Cuba lagi.',tradeErr:'Gagal membuka trade. Cuba lagi.',noBalance:'Baki tidak tersedia — cuba lagi.',
+  tdTitle:'Detail trade',livePrice:'Harga live',unreal:'P&L belum realized',finalRes:'Keputusan akhir',openedAt:'Dibuka',closedAt:'Ditutup',slTpRange:'Julat SL → TP',quoteErr:'Harga live tidak tersedia.',
   loggingOut:'Melog keluar…',langNative:'Bahasa Melayu'
  },
  en:{
@@ -694,6 +741,7 @@ var DICT={
   mt5Opt:'Also place a real MT5 order with this lot',mt5Note:'Paper trade + real MT5 market order at the lot above.',mt5Sent:'Sent to MT5',mt5Dry:'MT5 dry-run (no live order)',mt5Fail:'MT5 order not placed',
   instantNote:'Instant entry — your trade fills at the live market price when you open, not the quoted entry.',
   leagueErr:'Could not load league data. Try again.',tradeErr:'Could not open the trade. Try again.',noBalance:'Balance unavailable — try again.',
+  tdTitle:'Trade detail',livePrice:'Live price',unreal:'Unrealized P&L',finalRes:'Final result',openedAt:'Opened',closedAt:'Closed',slTpRange:'SL → TP range',quoteErr:'Live price unavailable.',
   loggingOut:'Signing out…',langNative:'English'
  },
  zh:{
@@ -732,6 +780,7 @@ var DICT={
   mt5Opt:'同时以该手数向 MT5 下达真实订单',mt5Note:'模拟交易 + 按上述手数在 MT5 下真实市价单。',mt5Sent:'已发送至 MT5',mt5Dry:'MT5 演练（未下实单）',mt5Fail:'MT5 订单未下达',
   instantNote:'即时入场——开仓时按实时市价成交，而非报价入场位。',
   leagueErr:'无法加载联赛数据，请重试。',tradeErr:'开仓失败，请重试。',noBalance:'余额不可用——请重试。',
+  tdTitle:'交易详情',livePrice:'实时价格',unreal:'未实现盈亏',finalRes:'最终结果',openedAt:'开仓时间',closedAt:'平仓时间',slTpRange:'SL → TP 区间',quoteErr:'实时价格不可用。',
   loggingOut:'正在退出…',langNative:'中文'
  },
  id:{
@@ -770,6 +819,7 @@ var DICT={
   mt5Opt:'Juga kirim order nyata ke MT5 dengan lot ini',mt5Note:'Paper trade + order pasar MT5 nyata pada lot di atas.',mt5Sent:'Terkirim ke MT5',mt5Dry:'MT5 dry-run (tanpa order live)',mt5Fail:'Order MT5 tidak terkirim',
   instantNote:'Instant entry — trade diisi pada harga pasar saat dibuka, bukan entry kutipan.',
   leagueErr:'Gagal memuat data liga. Coba lagi.',tradeErr:'Gagal membuka trade. Coba lagi.',noBalance:'Saldo tidak tersedia — coba lagi.',
+  tdTitle:'Detail trade',livePrice:'Harga live',unreal:'P&L belum realized',finalRes:'Hasil akhir',openedAt:'Dibuka',closedAt:'Ditutup',slTpRange:'Rentang SL → TP',quoteErr:'Harga live tidak tersedia.',
   loggingOut:'Keluar…',langNative:'Bahasa Indonesia'
  },
  ta:{
@@ -808,6 +858,7 @@ var DICT={
   mt5Opt:'இந்த லாட்டுடன் MT5-க்கு உண்மையான ஆர்டரையும் அனுப்பு',mt5Note:'பேப்பர் வர்த்தகம் + மேலே உள்ள லாட்டில் உண்மையான MT5 சந்தை ஆர்டர்.',mt5Sent:'MT5-க்கு அனுப்பப்பட்டது',mt5Dry:'MT5 dry-run (நேரடி ஆர்டர் இல்லை)',mt5Fail:'MT5 ஆர்டர் அனுப்பப்படவில்லை',
   instantNote:'உடனடி நுழைவு — திறக்கும்போது நேரடி சந்தை விலையில் நிரப்பப்படும், மேற்கோள் நுழைவு விலையில் அல்ல.',
   leagueErr:'லீக் தரவை ஏற்ற முடியவில்லை. மீண்டும் முயற்சிக்கவும்.',tradeErr:'வர்த்தகத்தைத் தொடங்க முடியவில்லை. மீண்டும் முயற்சிக்கவும்.',noBalance:'இருப்பு கிடைக்கவில்லை — மீண்டும் முயற்சிக்கவும்.',
+  tdTitle:'வர்த்தக விவரம்',livePrice:'நேரடி விலை',unreal:'நிறைவேறாத லாப/நஷ்டம்',finalRes:'இறுதி முடிவு',openedAt:'திறக்கப்பட்ட நேரம்',closedAt:'மூடப்பட்ட நேரம்',slTpRange:'SL → TP வரம்பு',quoteErr:'நேரடி விலை கிடைக்கவில்லை.',
   loggingOut:'வெளியேறுகிறது…',langNative:'தமிழ்'
  }
 };
@@ -1444,11 +1495,15 @@ function drawTrades(){
   var run=isOpen?'<div class="trun"><i class="pulse"></i><span>'+esc(t('running'))+'</span></div>':'';
   var side=String(x.side||'').toUpperCase();
   var sizeTxt=(x.lot!=null&&isFinite(+x.lot))?'<b class="lotbadge">'+esc((+x.lot).toFixed(2))+' lot</b>':esc(t('riskLab'))+' '+(+x.risk_pct||0)+'%';
-  return '<div class="tcard" style="animation-delay:'+(i*40)+'ms">'+
+  return '<div class="tcard" role="button" tabindex="0" style="animation-delay:'+(i*40)+'ms">'+
    '<div class="top"><span class="tpair">'+esc(pairName(x.pair))+'</span><span class="side '+esc(side.toLowerCase())+'">'+esc(side)+'</span><span class="st '+stCls+'">'+stHtml+'</span></div>'+
    '<div class="tlevels"><span class="e">E <b>'+tfx(x.pair,x.entry)+'</b></span><span class="s">SL <b>'+tfx(x.pair,x.sl)+'</b></span><span class="t">TP <b>'+tfx(x.pair,x.tp)+'</b></span><span>'+esc(t('riskLab'))+' <b>'+money(x.risk_usd)+'</b></span></div>'+run+
-   '<div class="tmeta"><span>'+sizeTxt+' · '+esc(myTm(x.closed_at||x.opened_at))+'</span>'+res+'</div></div>';
+   '<div class="tmeta"><span>'+sizeTxt+' · '+esc(myTm(x.closed_at||x.opened_at))+'</span>'+res+'<svg class="tchev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></div></div>';
  }).join('');
+ Array.prototype.forEach.call(el.querySelectorAll('.tcard'),function(b,i){
+  b.onclick=function(){openTrade(LG.trades[i])};
+  b.onkeydown=function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();openTrade(LG.trades[i])}};
+ });
 }
 function drawBadges(){
  var el=$('bgrid');
@@ -1604,6 +1659,141 @@ function submitTrade(){
 }
 $('rGo').onclick=submitTrade;
 
+/* ---------------- modal detail trade (kad boleh ditekan) ----------------
+   Harga live poll 5s + chart M15 refresh 30s selagi modal dibuka; poll
+   berhenti bila ditutup dan pause bila tab tidak visible. Renderer canvas
+   berasingan — tidak menyentuh chart analyst (S/cur) atau JOB floating. */
+var TD={trade:null,price:null,candles:[],qTimer:null,cTimer:null,run:0};
+var tdcv=$('tdcv'),tdcx=tdcv.getContext('2d'),tdDPR=1;
+function tdVisible(){return !document.visibilityState||document.visibilityState==='visible'}
+function sizeTdCv(){tdDPR=Math.min(2,window.devicePixelRatio||1);var w=tdcv.clientWidth||300,h=tdcv.clientHeight||180;tdcv.width=w*tdDPR;tdcv.height=h*tdDPR}
+function tdPill(x,y,w,txt,bg,fg){tdcx.fillStyle=bg;tdcx.beginPath();if(tdcx.roundRect)tdcx.roundRect(x,y-8,w,16,5);else tdcx.rect(x,y-8,w,16);tdcx.fill();tdcx.fillStyle=fg;tdcx.font='700 9.5px ui-monospace,Menlo,monospace';tdcx.textAlign='center';tdcx.textBaseline='middle';tdcx.fillText(txt,x+w/2,y+.5)}
+function drawTdChart(){
+ var x=TD.trade;if(!x)return;
+ var W=tdcv.clientWidth||300,H=tdcv.clientHeight||180;
+ tdcx.setTransform(tdDPR,0,0,tdDPR,0,0);tdcx.clearRect(0,0,W,H);
+ var c=TD.candles;
+ if(!c.length){tdcx.fillStyle=css('--muted');tdcx.font='700 11px ui-monospace,Menlo,monospace';tdcx.textAlign='center';tdcx.textBaseline='middle';tdcx.fillText(t('loading'),W/2,H/2);return}
+ var n=c.length,pR=56,pT=10,pB=10,slot=(W-pR)/n,bw=Math.max(2,slot*.62);
+ var lo=Math.min.apply(0,c.map(function(k){return k.l})),hi=Math.max.apply(0,c.map(function(k){return k.h}));
+ [+x.entry,+x.sl,+x.tp,TD.price].forEach(function(v){if(v!=null&&isFinite(v)){lo=Math.min(lo,v);hi=Math.max(hi,v)}});
+ var pad=(hi-lo)*.06||1;lo-=pad;hi+=pad;
+ var y=function(v){return pT+(hi-v)/(hi-lo)*(H-pT-pB)};
+ var lime=css('--lime'),red=css('--red'),green=css('--green'),muted=css('--muted'),bg=css('--bg');
+ tdcx.lineWidth=1;tdcx.font='9.5px ui-monospace,Menlo,monospace';tdcx.textAlign='left';tdcx.textBaseline='middle';
+ for(var g=0;g<4;g++){var gv=lo+(hi-lo)*g/3,gy=y(gv);tdcx.strokeStyle='rgba(128,150,130,.12)';tdcx.beginPath();tdcx.moveTo(0,gy);tdcx.lineTo(W-pR,gy);tdcx.stroke();tdcx.fillStyle=muted;tdcx.fillText(tfx(x.pair,gv),W-pR+5,gy)}
+ for(var i=0;i<n;i++){var k=c[i],col=k.c>=k.o?lime:red,cxm=(i+.5)*slot;
+  tdcx.strokeStyle=col;tdcx.fillStyle=col;tdcx.beginPath();tdcx.moveTo(cxm,y(k.h));tdcx.lineTo(cxm,y(k.l));tdcx.stroke();
+  var ty=y(Math.max(k.o,k.c)),hh=Math.max(1.5,Math.abs(y(k.o)-y(k.c)));tdcx.fillRect(cxm-bw/2,ty,bw,hh)}
+ function line(v,colr,lab,dash){
+  if(v==null||!isFinite(v))return;var yy=y(v);
+  tdcx.strokeStyle=colr;tdcx.setLineDash(dash||[]);tdcx.beginPath();tdcx.moveTo(0,yy);tdcx.lineTo(W-pR,yy);tdcx.stroke();tdcx.setLineDash([]);
+  tdcx.fillStyle=colr;tdcx.font='800 9px ui-monospace,Menlo,monospace';tdcx.textAlign='left';tdcx.fillText(lab,4,yy-7);
+  tdPill(W-pR+2,yy,52,tfx(x.pair,v),colr,bg);
+ }
+ line(+x.entry,css('--text'),'E');
+ line(+x.sl,red,'SL');
+ line(+x.tp,green,'TP');
+ line(TD.price,css('--blue'),'LIVE',[3,4]);
+}
+function drawTdHead(){
+ var x=TD.trade;if(!x)return;
+ var st=String(x.status||'open').toLowerCase(),side=String(x.side||'').toUpperCase();
+ $('tdTitle').textContent=pairName(x.pair);
+ $('tdSide').className='side '+side.toLowerCase();$('tdSide').textContent=side;
+ $('tdSt').className='st '+(STK[st]?st:'open');
+ $('tdSt').innerHTML=(st==='open'?'<i class="pulse"></i>':'')+esc(t(STK[st]||'stOpen'));
+ $('tdLiveLab').textContent=t('livePrice');
+ $('tdRangeLab').textContent=t('slTpRange');
+}
+function drawTdLive(){
+ var x=TD.trade;if(!x)return;
+ var p=TD.price,el=$('tdPnl'),st=String(x.status||'open').toLowerCase();
+ $('tdPrice').textContent=p!=null?tfx(x.pair,p):'—';
+ if(st==='open'){
+  var e=+x.entry,s=+x.sl;
+  if(p==null||!isFinite(e)||!isFinite(s)||e===s){el.className='tdpnl neu';el.innerHTML='';return}
+  var r=(String(x.side||'').toUpperCase()==='SELL'?e-p:p-e)/Math.abs(e-s);
+  var usd=r*(+x.risk_usd||0);
+  el.className='tdpnl '+(r>0?'pos':r<0?'neg':'neu');
+  el.innerHTML='<small>'+esc(t('unreal'))+'</small> '+fmtR(r)+' · '+(usd>0?'+':usd<0?'−':'')+money(Math.abs(usd));
+ }else{
+  var rr=x.r_result==null?null:+x.r_result;
+  if(rr==null||!isFinite(rr)){el.className='tdpnl neu';el.innerHTML='<small>'+esc(t('finalRes'))+'</small> —';return}
+  var u2=rr*(+x.risk_usd||0);
+  el.className='tdpnl '+(rr>0?'pos':rr<0?'neg':'neu');
+  el.innerHTML='<small>'+esc(t('finalRes'))+'</small> '+fmtR(rr)+' · '+(u2>0?'+':u2<0?'−':'')+money(Math.abs(u2));
+ }
+}
+function drawTdLevels(){
+ var x=TD.trade;if(!x)return;
+ var p=TD.price;
+ function cell(cls,lab,v){
+  var d=(p!=null&&isFinite(v))?p-v:null;
+  var dt=d==null?'—':(d>0?'+':d<0?'−':'')+tfx(x.pair,Math.abs(d));
+  return '<div class="'+cls+'"><small>'+esc(lab)+'</small><b>'+tfx(x.pair,v)+'</b><i class="tddist">'+dt+'</i></div>';
+ }
+ $('tdLevels').innerHTML=cell('e',t('entry'),+x.entry)+cell('s',t('sl'),+x.sl)+cell('t',t('tp'),+x.tp);
+}
+function drawTdProg(){
+ var x=TD.trade;if(!x)return;
+ var sl=+x.sl,tp=+x.tp,pct=null;
+ if(TD.price!=null&&isFinite(sl)&&isFinite(tp)&&tp!==sl)pct=Math.max(0,Math.min(100,(TD.price-sl)/(tp-sl)*100));
+ $('tdProgPct').textContent=pct==null?'—':Math.round(pct)+'%';
+ $('tdProgFill').style.width=(pct==null?0:pct)+'%';
+ $('tdProgMark').style.left=(pct==null?0:pct)+'%';
+ $('tdProgMark').style.display=pct==null?'none':'block';
+}
+function drawTdMeta(){
+ var x=TD.trade;if(!x)return;
+ var hasLot=x.lot!=null&&isFinite(+x.lot);
+ var h='<b>'+esc(hasLot?t('lotSize'):t('riskLab'))+'</b><span>'+(hasLot?'<b class="lotbadge">'+(+x.lot).toFixed(2)+' lot</b>':esc((+x.risk_pct||0)+'%'))+'</span>'+
+  '<b>'+esc(t('riskAmt'))+'</b><span>'+money(x.risk_usd)+'</span>'+
+  '<b>'+esc(t('openedAt'))+'</b><span>'+esc(dateMY(x.opened_at))+'</span>';
+ if(x.closed_at)h+='<b>'+esc(t('closedAt'))+'</b><span>'+esc(dateMY(x.closed_at))+'</span>';
+ $('tdMeta').innerHTML=h;
+}
+function tdQuoteFail(){
+ if(TD.trade&&TD.price==null){$('tdPnl').className='tdpnl neu';$('tdPnl').innerHTML='<small>'+esc(t('quoteErr'))+'</small>'}
+}
+function pollQuote(){
+ if(!TD.trade||!tdVisible())return;
+ var run=TD.run,pair=TD.trade.pair;
+ apiFetch('/api/league/quote?pair='+encodeURIComponent(pair)).then(function(r){
+  if(run!==TD.run||!TD.trade)return;
+  if(r.ok&&r.data&&isFinite(+r.data.price)){TD.price=+r.data.price;drawTdLive();drawTdLevels();drawTdProg();drawTdChart()}
+  else tdQuoteFail();
+ }).catch(function(e){if(e&&e.message==='auth')return;if(run===TD.run)tdQuoteFail()});
+}
+function loadTdCandles(){
+ if(!TD.trade||!tdVisible())return;
+ var run=TD.run,pair=TD.trade.pair;
+ apiFetch('/api/bars?pair='+encodeURIComponent(pair)+'&tf=M15').then(function(r){
+  if(run!==TD.run||!TD.trade)return;
+  var cs=r.ok&&r.data&&Array.isArray(r.data.candles)?r.data.candles.map(function(k){return{o:+k.o,h:+k.h,l:+k.l,c:+k.c}}).filter(function(k){return isFinite(k.o)&&isFinite(k.h)&&isFinite(k.l)&&isFinite(k.c)}):[];
+  if(cs.length){TD.candles=cs.slice(-96);drawTdChart()}
+ }).catch(function(){});
+}
+function openTrade(x){
+ if(!x)return;
+ hap(8);
+ TD.run++;TD.trade=x;TD.price=null;TD.candles=[];
+ drawTdHead();drawTdLive();drawTdLevels();drawTdProg();drawTdMeta();
+ $('phone').classList.add('tdopen');
+ sizeTdCv();drawTdChart();
+ pollQuote();loadTdCandles();
+ clearInterval(TD.qTimer);clearInterval(TD.cTimer);
+ TD.qTimer=setInterval(pollQuote,5000);
+ TD.cTimer=setInterval(loadTdCandles,30000);
+}
+function closeTrade(){
+ TD.run++;TD.trade=null;TD.price=null;TD.candles=[];
+ clearInterval(TD.qTimer);clearInterval(TD.cTimer);TD.qTimer=null;TD.cTimer=null;
+ $('phone').classList.remove('tdopen');
+}
+$('tdbd').onclick=closeTrade;$('tdx').onclick=closeTrade;
+document.addEventListener('visibilitychange',function(){if(TD.trade&&tdVisible()){pollQuote();loadTdCandles()}});
+
 /* ---------------- profile (Supabase REST sebenar) ---------------- */
 var profileLoaded=false,ME=null,PLAN='free',MYPERF=null;
 function dateMY(iso){var d=new Date(iso);if(isNaN(d.getTime()))return '—';return new Intl.DateTimeFormat(lang==='en'?'en-GB':'ms-MY',{timeZone:'Asia/Kuala_Lumpur',day:'numeric',month:'short',year:'numeric'}).format(d)}
@@ -1755,6 +1945,7 @@ function renderAll(){
  $('lotSizeLab').textContent=t('lotSize');$('rLotInput').setAttribute('aria-label',t('lotSize'));
  drawRiskModes();updateLot();
  if(!riskBusy)$('rGo').textContent=t('openBtn');
+ if(TD.trade){drawTdHead();drawTdLive();drawTdLevels();drawTdMeta();drawTdProg()}
  var tb=$('takeBtn');if(tb)tb.textContent=t('takeTrade');
  renderStats();drawTabs();drawPairs(true);drawLangs();drawThemes();drawMenu();renderLiga();
  }catch(e){if(window.console)console.error('renderAll partial fail:',e);drawNav()}
