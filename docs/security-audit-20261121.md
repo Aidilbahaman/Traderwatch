@@ -1,6 +1,6 @@
 # Security Audit — traderwatch.org (2026-11-21)
 
-**Skor: 82/100 — launchable with caveats.** (H2/H3 dibaiki susulan; M1/M2 dalam kerja) Tiada blocker kritikal tinggal selepas
+**Skor: 84/100 — launchable with caveats.** (H2/H3/M1/M2 selesai; baki: H1 Turnstile real key + CSP enforce berperingkat; cap 84 kerana tiada CI) Tiada blocker kritikal tinggal selepas
 fix audit ini; baki risiko ialah keputusan owner (Turnstile real key, scope sudo,
 SSL Cloudflare Full-strict) dan hardening tambahan (CSP, rate-limit turnstile).
 
@@ -19,7 +19,10 @@ pihak ketiga). Semua probe terhadap URL deployed sendiri + Supabase project send
 | 6 | Chat API `Access-Control-Allow-Origin: *` | Low-Med | Whitelist `https://traderwatch.org` (+www), Vary: Origin | Origin evil → ACAO traderwatch.org |
 | 7 | Fail `engine/mt5-pending.env.bak-risk-*` committed dalam git (kandungan: config risk sahaja, **tiada credential**) | Low | `git rm` | git ls-files bersih |
 | 8 | **H2: ubuntu sudo NOPASSWD ALL** (RCE→root) | High | sudoers scoped `/etc/sudoers.d/10-ubuntu-traderwatch` (whitelist systemctl tw-*/caddy, cp/sed/chown terhad dest, bridge mt5, read ops); grant ALL dikoment | smoke: bridge MT5 ok, systemctl ok, caddy validate ok, cp+chown ok; `cat /etc/shadow` & `sudo bash` DITOLAK |
-| 9 | **H3: CF Flexible SSL + www NXDOMAIN** | High | CNAME www dicipta (CF_DNS_TOKEN); SSL mode zone → **strict**; origin cert LE CN=traderwatch.org sah | curl via CF: /member/ 200, /login.html 200, api health ok; www 525 sementara (backoff cert Caddy 6j — reset pada restart caddy seterusnya) |
+| 9 | **H3: CF Flexible SSL + www NXDOMAIN** | High | CNAME www dicipta (CF_DNS_TOKEN); SSL mode zone → **strict**; origin cert LE CN=traderwatch.org sah | curl via CF: /member/ 200, /login.html 200, api health ok; **www 301 ke kanonikal** (cert diperoleh selepas restart caddy) |
+| 10 | **M2: /api/turnstile/verify unauth tanpa rate limit** | Medium | In-memory 10 req/60s/IP + lock + prune; fail-open network kekal | 12 POST pantas: 10×200 then 429; window expiry 62s → 200 |
+| 11 | **M1: tiada CSP** | Medium | `Content-Security-Policy-Report-Only` pada semua blok site (origins disahkan via grep + smoke: telegram, tradingview, google fonts, formspree, cloudflareinsights) | headless login+member: 0 Uncaught, 0 violation selepas polish |
+| 12 | **Bug penempatan header audit #5**: anchor replace terpadan substring `member.traderwatch.org {` → blok HTTPS kanonikal tiada header; terselindung semasa CF flexible (traffic lalu blok HTTP) | Medium | Blok header penuh (5 header + CSP) ditambah ke `traderwatch.org {` oleh subagent susulan | curl -I kanonikal post-strict: nosniff/DENY/HSTS/CSP semua hadir |
 
 ## Kekuatan sedia ada (disahkan)
 
@@ -51,9 +54,8 @@ pihak ketiga). Semua probe terhadap URL deployed sendiri + Supabase project send
   private cloud). Fix: Full (strict) + origin certificate. Berkaitan:
   `www.traderwatch.org` NXDOMAIN → Caddy loop cuba cert (attempt 25+) dan www mati;
   tambah CNAME www di Cloudflare atau buang blok site www.
-- **M1 — Tiada CSP.** App inline-JS berat; mula dengan `Content-Security-Policy-Report-Only`
-  dan ketatkan berperingkat. Impak XSS tinggi kerana session dalam localStorage.
-- **M2 — `/api/turnstile/verify` unauth tanpa rate limit** → abuse quota siteverify CF.
+- **M1/M2: SELESAI** (jadual #10, #11). CSP masih report-only — enforce berperingkat
+  selepas pemerhatian violation beberapa hari (session dalam localStorage → impak XSS tinggi).
 - **M3 — Tiada CI / regression security automatik.** QC headless wujud tetapi manual.
 - **L1 — Caddy admin endpoint disabled** → `systemctl reload` gagal (guna restart);
   enable admin localhost:2019 untuk reload graceful (pilihan).
