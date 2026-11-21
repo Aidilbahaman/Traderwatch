@@ -848,11 +848,11 @@ function drawNav(){
 }
 function showView(v){
  if(VIEWS.indexOf(v)<0)return;
- current=v;
- VIEWS.forEach(function(x){$('view-'+x).classList.toggle('hidden',x!==v)});
+ current=v;drawNav();
+ VIEWS.forEach(function(x){var el=$('view-'+x);if(el)el.classList.toggle('hidden',x!==v)});
  $('composer').classList.toggle('hidden',v!=='community');
  $('scroll').classList.toggle('com',v==='community');
- drawNav();$('scroll').scrollTop=0;
+ $('scroll').scrollTop=0;
  if(v==='analyst'){drawPairs(true);maybePrices()}
  if(v==='community')loadMessages();
  if(v==='liga')renderLiga();
@@ -1725,6 +1725,7 @@ function setLang(l){lang=l;try{localStorage.setItem('tw-lang',l)}catch(e){}rende
 
 /* ---------------- render all ---------------- */
 function renderAll(){
+ drawNav();try{
  document.documentElement.lang=lang;
  $('greet').innerHTML=esc(t('greet'))+'<span>'+esc(t('trader'))+'</span>';
  $('greetSub').textContent=t('greetSub');$('hintTxt').textContent=t('hint');
@@ -1748,7 +1749,8 @@ function renderAll(){
  drawRiskModes();updateLot();
  if(!riskBusy)$('rGo').textContent=t('openBtn');
  var tb=$('takeBtn');if(tb)tb.textContent=t('takeTrade');
- renderStats();drawNav();drawTabs();drawPairs(true);drawLangs();drawThemes();drawMenu();renderLiga();
+ renderStats();drawTabs();drawPairs(true);drawLangs();drawThemes();drawMenu();renderLiga();
+ }catch(e){if(window.console)console.error('renderAll partial fail:',e);drawNav()}
 }
 $('langBtn').onclick=function(){showView('settings')};
 $('themeBtn').onclick=function(){setTheme(resolved()==='dark'?'light':'dark')};
