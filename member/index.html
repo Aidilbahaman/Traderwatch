@@ -57,7 +57,7 @@ h1{font-size:29px;line-height:1.08;letter-spacing:-.05em;margin:6px 0 6px;font-w
 .tabs{display:flex;gap:6px;overflow-x:auto;padding:2px 0 12px;scrollbar-width:none}.tabs::-webkit-scrollbar{display:none}
 .tab{background:var(--card);border:1px solid var(--line);color:var(--muted);padding:8px 14px;border-radius:999px;font-weight:700;font-size:13px;white-space:nowrap;transition:.15s}
 .tab.on{background:var(--lime);border-color:var(--lime);color:var(--onlime)}
-.pairs{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.pairs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
 .pair{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:13px;text-align:left;color:var(--text);transition:transform .15s,border-color .2s;animation:up .45s both}
 .pair:active{transform:scale(.96)}.pair:hover{border-color:#34452f}
 html[data-theme="light"] .pair:hover{border-color:#b8c9a8}
@@ -74,8 +74,7 @@ html[data-theme="light"] .ic{background:#e6efd9;border-color:#c9dbb4}
 .soon{display:inline-block;background:#ffc16b1f;color:var(--orange);font-weight:800;font-size:8px;letter-spacing:.04em;padding:2px 6px;border-radius:6px;margin-left:5px;vertical-align:middle;text-transform:uppercase}
 .pair.closed{opacity:.5;cursor:not-allowed;filter:grayscale(.5)}
 .pair.closed:hover{transform:none;border-color:var(--line)}
-.closed-tag{display:inline-block;background:#ff777d1f;color:var(--red);font-weight:800;font-size:8px;letter-spacing:.04em;padding:2px 6px;border-radius:6px;margin-left:5px;vertical-align:middle;text-transform:uppercase}
-.pair .reopen{font-size:9px;color:var(--muted);margin-top:5px;font-variant-numeric:tabular-nums}
+.closed-tag{display:inline-block;background:#ff777d1f;color:var(--red);font-weight:800;font-size:8px;letter-spacing:.04em;padding:2px 6px;border-radius:6px;vertical-align:middle;text-transform:uppercase}
 .none{grid-column:1/-1;text-align:center;color:var(--muted);padding:30px 0}
 .hint{display:flex;align-items:center;gap:8px;justify-content:center;color:var(--muted);font-size:12px;margin:18px 0 0;opacity:.8}
 .hint i{width:6px;height:6px;border-radius:50%;background:var(--lime);opacity:.7}
@@ -893,9 +892,10 @@ function drawPairs(quiet){
  $('pairs').innerHTML=list.length?list.map(function(p,i){
   var u=(p.chg||0)>=0,px=p.p!=null?fx(p,p.p):'—',ch=p.chg!=null?(u?'▲ +':'▼ ')+p.chg.toFixed(2)+'%':'—';
   var cl=pairClosed(p);
-  var tag=cl==='closed'?'<span class="closed-tag">'+esc(t('mktClosed'))+'</span>':cl==='offline'?'<span class="closed-tag">'+esc(t('dataOffline'))+'</span>':(p.soon?'<span class="soon">'+esc(t('soon'))+'</span>':'');
-  var reopen=(cl==='closed'&&window.TWMarket&&window.TWMarket.nextOpen)?'<div class="reopen">'+esc(t('mktReopens'))+' '+reopenStr(window.TWMarket.nextOpen)+'</div>':'';
-  return '<button class="pair'+(cl?' closed':'')+'" data-s="'+p.s+'"'+(cl?' aria-disabled="true"':'')+' style="'+(quiet?'animation:none':'animation-delay:'+(i*35)+'ms')+'"><div class="top"><div class="ic">'+p.s.slice(0,3)+'</div>'+spark(p)+'</div><div class="nm">'+p.s+'</div><div class="ds">'+esc(p.n)+tag+'</div><div class="px">'+px+'</div><div class="ch '+(u?'up':'dn')+'">'+ch+'</div>'+reopen+'</button>';
+  var tag=cl==='closed'?esc(t('mktClosed')):cl==='offline'?esc(t('dataOffline')):(p.soon?esc(t('soon')):'');
+  var tagCls=cl?'closed-tag':'soon';
+  var extra=(cl==='closed'&&window.TWMarket&&window.TWMarket.nextOpen)?' title="'+esc(t('mktReopens'))+' '+esc(reopenStr(window.TWMarket.nextOpen))+'"':'';
+  return '<button class="pair'+(cl?' closed':'')+'" data-s="'+p.s+'"'+(cl?' aria-disabled="true"':'')+extra+' style="'+(quiet?'animation:none':'animation-delay:'+(i*35)+'ms')+'"><div class="top"><div class="ic">'+p.s.slice(0,3)+'</div>'+spark(p)+'</div><div class="nm">'+p.s+'</div><div class="ds">'+esc(p.n)+'</div><div class="px">'+px+'</div><div class="ch '+(u?'up':'dn')+'">'+(tag?'<span class="'+tagCls+'">'+tag+'</span>':ch)+'</div></button>';
  }).join(''):'<div class="none">'+esc(t('noPairs'))+'</div>';
  Array.prototype.forEach.call($('pairs').querySelectorAll('.pair'),function(b){b.onclick=function(){var p=PAIRS.filter(function(x){return x.s===b.dataset.s})[0];if(p&&pairClosed(p)){var why=pairClosed(p);toast(why==='offline'?t('dataOffline'):t('mktClosed'));return}openSheet(b.dataset.s)}});
 }
