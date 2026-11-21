@@ -2,7 +2,9 @@
 """Generate member-data.json — the single real-data feed for the member page.
 
 Every number in this file is COMPUTED, never invented:
-  prices      : last close from state/sq-bars.db (Swissquote bar feed, real OHLC)
+  prices      : LIVE mid price (bid+ask)/2 from MT5 broker tick; fallback last
+                close from state/sq-bars.db when MT5 tick unavailable. Matches
+                the price the member sees in their own MT5 terminal.
   change_pct  : last close vs close 24h earlier in the same granularity
   day_range   : high/low across today's bars (MYT day boundary)
   support/res : recent swing lows/highs from H1 bars (structure, not guessed)
@@ -25,6 +27,9 @@ import urllib.request
 from datetime import datetime, timedelta, timezone
 
 REPO = pathlib.Path("/home/ubuntu/web/Traderwatch-repo")
+import sys
+if str(REPO / "engine") not in sys.path:
+    sys.path.insert(0, str(REPO / "engine"))   # import mt5_data (single MT5 feed)
 OUT = REPO / "member-data.json"
 BARS = REPO / "state" / "sq-bars.db"
 STATUS = REPO / "signal-status.json"
@@ -49,87 +54,92 @@ MT5_CMD = [
 
 
 # ---------------------------------------------------------------- prices
-def price_block():
-    """Last close + 24h change + today's range per pair, from real bars."""
-    if not BARS.exists():
-        return None, "sq-bars.db missing"
-    con = sqlite3.connect(f"file:{BARS}?mode=ro", uri=True)
-    out = {}
+def _mt5_tick(pair):
+    """Mid price live dari broker MT5 (bid+ask)/2. None bila gagal.
+
+    Harga bar M15 Swissquote boleh lambat <=15 minit dan berbeza feed daripada
+    broker ahli (RoboForex). Tick MT5 = harga sebenar akaun dagangan, jadi
+    member page padan dengan platform ahli.
+    """
     try:
-        for pair, (sym, gran) in PAIRS.items():
-            rows = con.execute(
-                "select ts, o, h, l, c from bars where pair=? and gran=? "
-                "order by ts desc limit 120",
-                (pair, gran),
-            ).fetchall()
-            if not rows:
+        req = json.dumps({"action": "tick", "symbol": pair})
+        r = subprocess.run(MT5_CMD + [req], capture_output=True, text=True,
+                           timeout=60, cwd="/tmp")
+        for line in (r.stdout or "").splitlines():
+            line = line.strip()
+            if not line.startswith("{"):
                 continue
-            rows = list(reversed(rows))          # oldest -> newest
-            last = rows[-1]
-            last_close = float(last[4])
-            last_ts = datetime.fromisoformat(last[0])
+            d = json.loads(line)
+            if d.get("ok") and d.get("bid") and d.get("ask"):
+                return (float(d["bid"]) + float(d["ask"])) / 2.0
+    except Exception:
+        pass
+    return None
 
-            # 24h change: find the newest bar that is >=24h older than the last
-            ref = None
-            for r in rows:
-                t = datetime.fromisoformat(r[0])
-                if last_ts - t >= timedelta(hours=24):
-                    ref = float(r[4])
-            if ref is None:
-                ref = float(rows[0][4])          # not 24h of data yet
-            change = ((last_close - ref) / ref * 100.0) if ref else 0.0
 
-            # today's range (MYT day boundary)
-            day = [r for r in rows
-                   if datetime.fromisoformat(r[0]).replace(tzinfo=timezone.utc).astimezone(MYT).date()
-                   == last_ts.replace(tzinfo=timezone.utc).astimezone(MYT).date()]
-            day = day or rows[-24:]
-            hi = max(float(r[2]) for r in day)
-            lo = min(float(r[3]) for r in day)
-
-            # pip size: gold/oil 2dp -> 0.1 per pip convention, BTC -> 1.0
-            pip = 0.1 if pair in ("XAUUSD", "USOIL") else 1.0
-
-            out[sym] = {
-                "pair": pair,
-                "price": round(last_close, 2),
-                "change_pct": round(change, 2),
-                "high": round(hi, 2),
-                "low": round(lo, 2),
-                "range_pips": int(round((hi - lo) / pip)),
-                "ts": last[0],
-                "spark": [round(float(r[4]), 2) for r in rows[-48:]],
-            }
-
-        # nearest support / resistance from hourly swing structure
-        for pair, (sym, _) in PAIRS.items():
-            h1 = con.execute(
-                "select ts, h, l, c from bars where pair=? and gran='M60' "
-                "order by ts desc limit 96",
-                (pair,),
-            ).fetchall()
-            if len(h1) < 20 or sym not in out:
-                continue
-            h1 = list(reversed(h1))
-            px = out[sym]["price"]
-            highs = [float(r[1]) for r in h1]
-            lows = [float(r[2]) for r in h1]
-            res = [x for x in sorted(set(highs)) if x > px]
-            sup = [x for x in sorted(set(lows), reverse=True) if x < px]
-            pip = 0.1 if pair in ("XAUUSD", "USOIL") else 1.0
-            if sup:
-                out[sym]["support"] = round(sup[0], 2)
-                out[sym]["support_pips"] = int(round((px - sup[0]) / pip))
-            if res:
-                out[sym]["resistance"] = round(res[0], 2)
-                out[sym]["resistance_pips"] = int(round((res[0] - px) / pip))
-            # trend read: last close vs 24-bar SMA, expressed as a % bias
-            sma = sum(float(r[3]) for r in h1[-24:]) / 24
-            out[sym]["trend"] = ("BULLISH" if px > sma else "BEARISH") if abs(px - sma) / sma > 0.0005 else "NEUTRAL"
-            out[sym]["buyers_pct"] = int(round(min(95, max(5, 50 + (px - sma) / sma * 2000))))
-    finally:
-        con.close()
-    return (out or None), None
+def price_block():
+    """Live price + 24h change + range + S/R — ALL from the MT5 broker (single
+    source, no Swissquote). Returns (None, err) when the bridge is down."""
+    import mt5_data as M5
+    out = {}
+    for pair, (sym, gran) in PAIRS.items():
+        rows = M5.candles(pair, gran, 120)      # [{t,o,h,l,c}] oldest -> newest
+        live = M5.mid(pair)
+        if not rows or live is None:
+            continue                            # bridge down / no data -> skip
+        last = rows[-1]
+        last_ts = datetime.fromisoformat(last["t"])
+        disp_price = live
+        # 24h change: newest bar >=24h older than the last
+        ref = None
+        for r in rows:
+            if last_ts - datetime.fromisoformat(r["t"]) >= timedelta(hours=24):
+                ref = float(r["c"])
+        if ref is None:
+            ref = float(rows[0]["c"])
+        change = ((disp_price - ref) / ref * 100.0) if ref else 0.0
+        # today's range (MYT day boundary)
+        day = [r for r in rows
+               if datetime.fromisoformat(r["t"]).astimezone(MYT).date()
+               == last_ts.astimezone(MYT).date()]
+        day = day or rows[-24:]
+        hi = max(float(r["h"]) for r in day)
+        lo = min(float(r["l"]) for r in day)
+        pip = 0.1 if pair in ("XAUUSD", "USOIL") else 1.0
+        out[sym] = {
+            "pair": pair,
+            "price": round(disp_price, 2),
+            "price_src": "mt5-live",
+            "change_pct": round(change, 2),
+            "high": round(hi, 2),
+            "low": round(lo, 2),
+            "range_pips": int(round((hi - lo) / pip)),
+            "ts": datetime.now(timezone.utc).isoformat(),
+            "spark": [round(float(r["c"]), 2) for r in rows[-48:]],
+        }
+    # nearest support / resistance + trend from H1 swing structure
+    for pair, (sym, _) in PAIRS.items():
+        if sym not in out:
+            continue
+        h1 = M5.candles(pair, "H1", 96)
+        if len(h1) < 20:
+            continue
+        px = out[sym]["price"]
+        highs = [float(r["h"]) for r in h1]
+        lows = [float(r["l"]) for r in h1]
+        res = [x for x in sorted(set(highs)) if x > px]
+        sup = [x for x in sorted(set(lows), reverse=True) if x < px]
+        pip = 0.1 if pair in ("XAUUSD", "USOIL") else 1.0
+        if sup:
+            out[sym]["support"] = round(sup[0], 2)
+            out[sym]["support_pips"] = int(round((px - sup[0]) / pip))
+        if res:
+            out[sym]["resistance"] = round(res[0], 2)
+            out[sym]["resistance_pips"] = int(round((res[0] - px) / pip))
+        sma = sum(float(r["c"]) for r in h1[-24:]) / 24
+        out[sym]["trend"] = ("BULLISH" if px > sma else "BEARISH") if abs(px - sma) / sma > 0.0005 else "NEUTRAL"
+        out[sym]["buyers_pct"] = int(round(min(95, max(5, 50 + (px - sma) / sma * 2000))))
+    return (out or None), (None if out else "mt5 bridge down / no data")
 
 
 # ---------------------------------------------------------------- performance

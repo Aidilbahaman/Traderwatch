@@ -6,8 +6,8 @@ Menghantar notifikasi peringkat hayat signal kepada member:
   🛑 SL HIT           — harga kena stop loss
   💎 TP HIT           — harga kena take profit
 
-Sumber harga: Swissquote live quote (sama feed dengan chart bot), jadi
-entry/SL/TP dinilai pada harga yang member nampak.
+Sumber harga: MT5 broker (RoboForex) — feed tunggal (sama dengan chart bot).
+Bridge down -> fail closed: tiada fallback Swissquote/Coinbase.
 
 Prinsip keselamatan:
   - Bootstrap senyap: signal yang sudah lepas entry SEBELUM skrip ini mula
@@ -34,6 +34,8 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 sys.path.insert(0, "/home/ubuntu/web/Traderwatch-repo")
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import mt5_data as M5
 
 TIMEOUT = 25
 SECRETS = Path.home() / ".secrets"
@@ -89,17 +91,8 @@ SB = load_secrets("supabase.env")
 SIGNALS_TOKEN = TG.get("TELEGRAM_SIGNALS_BOT_TOKEN") or TG["TELEGRAM_BOT_TOKEN"]
 ADMIN_CHAT = TG.get("TELEGRAM_ADMIN_CHAT_ID", "")
 
-# Kuota Telegram untuk ahli Free: 3 signal setiap tetingkap 5 jam.
-try:
-    import sys as _sys
-    _sys.path.insert(0, "/home/ubuntu/web")
-    import importlib.util as _ilu
-    _spec = _ilu.spec_from_file_location("free_quota", "/home/ubuntu/web/free-quota.py")
-    free_quota = _ilu.module_from_spec(_spec)
-    _spec.loader.exec_module(free_quota)
-except Exception as _ex:
-    free_quota = None
-    log(f"FREE-QUOTA-WARN: {type(_ex).__name__}: {_ex}")
+# Single tier (2026-11-20): kuota Free 3-signal/5-jam dihapuskan — semua
+# ahli dapat semua notification. Modul free-quota.py tidak lagi digunakan.
 SB_URL = SB["SUPABASE_URL"].rstrip("/")
 SB_KEY = SB["SUPABASE_SERVICE_KEY"]
 
@@ -118,7 +111,8 @@ FX_CLOSE_UTC = {"Fri": [21, None], "Sat": [None, None], "Sun": [None, 21]}
 
 def market_closed(now=None):
     """True bila pasaran forex tutup. Sabtu/Ahad penuh, Jumaat dari 21:00 UTC
-    hingga Ahad 21:00 UTC. Tiada signal/notifikasi dihantar padamasa ini.
+    hingga Ahad 21:00 UTC (window sama seperti signal-engine.in_session).
+    Tiada signal/notifikasi dihantar pada masa ini.
     """
     now = now or datetime.now(timezone.utc)
     d = now.weekday()
@@ -343,15 +337,19 @@ def is_expired(sig, st, now_dt, expiry_min=None, price=None, bars=None):
 
 
 def bars_since(pair, since_dt):
-    """Bar (ts, high, low) sejak since_dt. M1 dahulu, M15 sebagai ganti."""
-    try:
-        from engine.sq_collector import candles_from_bars
-    except Exception:
-        return []
-    code = pair.replace("/", "")
-    for gran in ("M1", "M15"):
+    """Bar (ts, high, low) sejak since_dt. M1 dahulu, M15 sebagai ganti.
+
+    Sumber tunggal: MT5 broker (M5.candles). Bridge down -> [] (fail closed,
+    tiada fallback Swissquote). M5.candles tiada `since`: ambil cukup bar
+    mengikut lebar window kemudian tapis ts >= since_dt dalam Python.
+    """
+    if since_dt.tzinfo is None:
+        since_dt = since_dt.replace(tzinfo=timezone.utc)
+    minutes = max(0.0, (datetime.now(timezone.utc) - since_dt).total_seconds() / 60.0)
+    for gran, per_bar in (("M1", 1), ("M15", 15)):
+        count = min(5000, max(10, int(minutes / per_bar) + 10))
         try:
-            rows = candles_from_bars(code, gran, 5000)
+            rows = M5.candles(pair, gran, count)
         except Exception:
             continue
         out = []
@@ -478,9 +476,9 @@ def fetch_signals():
 
 
 def fetch_targets():
-    """Pro/Max + Free (Free dihadkan 3 signal / 5 jam oleh free_quota)."""
+    """Semua ahli (single tier Free) yang sudah link Telegram."""
     rows = sb_get("profiles?select=id,name,plan,telegram_chat_id"
-                  "&plan=in.(free,pro,max)&telegram_chat_id=not.is.null") or []
+                  "&telegram_chat_id=not.is.null") or []
     tc = test_chat()
     if tc is not None:
         rows = [r for r in rows if int(r["telegram_chat_id"]) == tc]
@@ -489,16 +487,13 @@ def fetch_targets():
 
 
 def live_price(pair):
-    """Harga mid untuk pair gaya 'XAU/USD'.
+    """Harga mid untuk pair gaya 'XAU/USD' dari MT5 broker (feed tunggal).
 
-    Forex/XAU guna Swissquote; BTC guna Coinbase. Raise jika tiada data.
+    Fail closed: bridge down -> raise, tiada fallback Swissquote/Coinbase.
     """
-    from engine.sq_collector import poll_swissquote, poll_coinbase
-    code = str(pair).replace("/", "").upper()
-    if code == "BTCUSD":
-        mid, _spread = poll_coinbase(code)
-        return float(mid)
-    mid, _spread = poll_swissquote(code)
+    mid = M5.mid(pair)
+    if mid is None:
+        raise RuntimeError(f"tiada harga MT5 untuk {pair}")
     return float(mid)
 
 
@@ -538,8 +533,6 @@ def render_result_chart(sig, st, count=96, right_pad=0.43):
         import pandas as pd
         import mplfinance as mpf
         import matplotlib.pyplot as plt
-        from engine.sq_collector import candles_from_bars
-        code = sig["pair"].replace("/", "")
         # Berhenti pada bar terakhir SEBELUM trade ditutup supaya carta
         # achievement tidak tunjuk harga berhari-hari kemudian. Tanpa
         # penapis ini, trade #76 (ditutup 21 Okt) dipaparkan dengan
@@ -548,13 +541,23 @@ def render_result_chart(sig, st, count=96, right_pad=0.43):
         for key in ("closed_at", "entry_at"):
             v = st.get(key)
             if v:
-                cutoff = parse_ts(v).strftime("%Y-%m-%dT%H:%M:%S")
+                cutoff = parse_ts(v)
                 break
-        bars = candles_from_bars(code, "M15", count, until=cutoff)
+        # M5.candles tiada parameter `until`: ambil cukup bar dari sekarang
+        # (count + jarak masa ke cutoff) kemudian tapis <= cutoff dalam Python.
+        fetch_n = count
+        if cutoff is not None:
+            gap_min = max(0.0, (datetime.now(timezone.utc) - cutoff).total_seconds() / 60.0)
+            fetch_n = min(5000, count + int(gap_min / 15) + 2)
+        rows = M5.candles(sig["pair"], "M15", fetch_n)
+        if cutoff is not None:
+            bars = [b for b in rows if parse_ts(b["t"]) <= cutoff][-count:]
+        else:
+            bars = rows[-count:]
         if len(bars) < 10:
             # Window itu terlalu pendek (mis. trade lama sebelum collector
             # mula poll) — lebih baik tunjuk carta penuh daripada tiada.
-            bars = candles_from_bars(code, "M15", count)
+            bars = M5.candles(sig["pair"], "M15", count)
         if len(bars) < 10:
             return None
         idx = (pd.to_datetime([b["t"] for b in bars], utc=True)
@@ -953,9 +956,8 @@ def _repair_notify(sig, st, sid, targets, pending, dry_run=False):
 def dispatch(text, targets, dry_run=False, png=None, event=None, sig_key=None):
     """Hantar ke semua target + admin. Jika ada PNG, guna photo+caption.
 
-    Kuota Free: HANYA event 'entry' menolak 1 kuota (1 setup triggered entry =
-    1 kuota). Notifikasi TP/SL/expired selepas itu percuma — ahli Free sudah
-    "membayar" untuk setup itu apabila entry berlaku.
+    Single tier (2026-11-20): semua ahli Free dapat semua event — kuota
+    3-signal/5-jam lama sudah dihapuskan bersama tier pro/max.
 
     Pulangkan (sent, failed, ok_chats) — ok_chats ialah senarai chat_id yang
     berjaya terima, supaya state boleh catat siapa yang sudah tahu. Tanpa
@@ -987,32 +989,13 @@ def dispatch(text, targets, dry_run=False, png=None, event=None, sig_key=None):
     for cid in chats:
         prof = by_chat.get(cid)
         plan = str((prof or {}).get("plan") or "").lower()
-        quota_note = ""
-
-        # Free: 3 setup setiap tetingkap 5 jam. Hanya event 'entry' ditolak.
-        # TP/SL/expired untuk setup yang sama adalah percuma.
-        if prof and plan == "free" and free_quota is not None and event == "entry":
-            try:
-                res = free_quota.consume(prof.get("id"))
-            except Exception as ex:
-                log(f"FREE-QUOTA-FAIL chat={cid} {type(ex).__name__}: {ex}")
-                res = {"allowed": True, "remaining": None}
-            if not res.get("allowed"):
-                log(f"FREE-QUOTA-SKIP chat={cid} window={res.get('window')} "
-                    f"reset={res.get('reset_label')}")
-                continue
-            rem = res.get("remaining")
-            if rem is not None:
-                quota_note = ("\n\n━━━━━━━━━━━━━━━━━━━━\n"
-                              f"🎟 Kuota Free: <b>{rem}/{res.get('limit')}</b> tinggal · "
-                              f"reset {res.get('reset_label')}")
 
         if dry_run:
             log(f"DRY-RUN would send -> {cid} plan={plan or '-'}")
             sent += 1
             continue
 
-        body = text + quota_note
+        body = text
         ok, desc = tg_photo(cid, png, body) if png else tg_send(cid, body)
         if ok:
             sent += 1
@@ -1264,7 +1247,7 @@ def main():
     signal.signal(signal.SIGTERM, _sig_handler)
     signal.signal(signal.SIGINT, _sig_handler)
 
-    # Loop continuous 5-second checks (Swissquote-aligned)
+    # Loop continuous 5-second checks (MT5-aligned)
     while True:
         try:
             _run(dry_run=dry_run)

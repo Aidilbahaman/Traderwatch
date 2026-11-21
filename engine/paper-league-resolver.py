@@ -30,6 +30,10 @@ ENV = pathlib.Path("/home/ubuntu/.secrets/supabase.env")
 SEASON = int(os.environ.get("LEAGUE_SEASON", "1"))
 BAR_LIMIT = 30  # M1 bars since open (roughly 30 min lookback)
 
+import sys
+sys.path.insert(0, str(HERE))
+import mt5_data as M5  # single MT5 broker data source (no Swissquote fallback)
+
 
 def load_env():
     sec = {}
@@ -70,13 +74,13 @@ def sb(method, path, body=None, params=None):
 
 
 def bars(pair, gran="M1", count=BAR_LIMIT):
-    """Read from sq-bars.db (read-only) via sq_collector."""
-    import importlib.util as il
-    spec = il.spec_from_file_location("sqc", HERE / "sq_collector.py")
-    m = il.module_from_spec(spec)
-    spec.loader.exec_module(m)
-    p = pair.replace("/", "").replace(" ", "").upper()
-    rows = m.candles_from_bars(p, gran, count)
+    """MT5 broker bars (single data source — NO Swissquote fallback). Returns
+    resolver-format [{t:datetimeUTC,h,l,c}] or [] when the bridge is down.
+    Cached per (pair,gran) per run so multiple open trades cost one bridge call."""
+    key = (pair, gran)
+    if key in _BARS_CACHE:
+        return _BARS_CACHE[key]
+    rows = M5.candles(pair, gran, max(count, 1000))
     out = []
     for c in rows:
         try:
@@ -86,7 +90,15 @@ def bars(pair, gran="M1", count=BAR_LIMIT):
             out.append({"t": d, "h": float(c["h"]), "l": float(c["l"]), "c": float(c["c"])})
         except (KeyError, TypeError, ValueError):
             continue
+    _BARS_CACHE[key] = out
     return out
+
+
+# Partial close at TP1 (1R) mirrors MT5_BE_PARTIAL_PCT so a 1R hit banks profit
+# like the live executor (owner 2026-11-21). ALL clients resolve on MT5 broker
+# bars via mt5_data (single source, no Swissquote fallback).
+PARTIAL_PCT = float(os.environ.get("PAPER_BE_PARTIAL_PCT", "50")) / 100.0
+_BARS_CACHE = {}
 
 
 def resolve(trade):
@@ -100,9 +112,12 @@ def resolve(trade):
     age_min = (now - opened).total_seconds() / 60.0
     # Look back far enough to cover the whole life of the trade (not just 30m).
     count = min(10000, max(BAR_LIMIT, int(age_min) + 5))
+    # ALL trades resolve on the MT5 broker's M1 bars (single source). When the
+    # bridge is down bars() returns [] -> series empty -> trade left open (never
+    # closed on stale/missing data). Entry is synced to the MT5 fill by league-api.
+    src = bars(pair, count=count)
     # Include the M1 bar containing opened_at so market entries register filled.
-    series = [b for b in bars(pair, count=count)
-              if b["t"] >= opened - timedelta(seconds=60)]
+    series = [b for b in src if b["t"] >= opened - timedelta(seconds=60)]
     if not series:
         return None
     risk = abs(entry - sl)
@@ -122,32 +137,44 @@ def resolve(trade):
     if not active:
         return None
     be_level = entry + risk if side == "BUY" else entry - risk
-    hit_be = any((b["h"] >= be_level if side == "BUY" else b["l"] <= be_level) for b in active)
-    # Check chronological: first touch wins
+    # Walk chronological: first TP/SL touch wins. BE protection arms only AFTER
+    # price reaches 1R (be_level); trade closes 'be' only if price returns to
+    # entry on a LATER bar. (Bug fix 2026-11-21: previously checked ALL bars
+    # including the entry bar — whose high/low naturally crosses entry — so a
+    # trade was wrongly closed 'be' the moment 1R was hit, even while still in
+    # profit and never retracing to entry.)
+    rr = round(abs(tp - entry) / risk, 2)
+    frac = PARTIAL_PCT
+    be_armed = False
     for b in active:
-        if side == "BUY":
-            if b["h"] >= tp:
-                return ("tp", round(abs(tp - entry) / risk, 2))
-            if b["l"] <= sl:
+        hit_tp = b["h"] >= tp if side == "BUY" else b["l"] <= tp
+        hit_sl = b["l"] <= sl if side == "BUY" else b["h"] >= sl
+        hit_1r = b["h"] >= be_level if side == "BUY" else b["l"] <= be_level
+        hit_be = b["l"] <= entry if side == "BUY" else b["h"] >= entry
+        if hit_tp:
+            # TP1 partial banks frac at +1R once 1R is reached (earlier or this
+            # bar); the remainder rides to full TP. Mirrors the MT5 executor.
+            if frac > 0 and (be_armed or hit_1r):
+                return ("tp", round(frac * 1.0 + (1 - frac) * rr, 2))
+            return ("tp", rr)
+        if not be_armed:
+            if hit_sl:
                 return ("sl", -1.0)
-        else:
-            if b["l"] <= tp:
-                return ("tp", round(abs(tp - entry) / risk, 2))
-            if b["h"] >= sl:
-                return ("sl", -1.0)
-    if hit_be:
-        # price reached 1R — protection active; if it came back to entry, close BE
-        for b in active:
-            if side == "BUY" and b["l"] <= entry:
-                return ("be", 0.0)
-            if side == "SELL" and b["h"] >= entry:
-                return ("be", 0.0)
+            if hit_1r:
+                be_armed = True   # 1R/TP1 hit: bank partial, SL->entry; BE from NEXT bar
+        elif hit_be:
+            # Remainder stopped at break-even. With partial on, the trade already
+            # banked frac at +1R -> net positive, reported as a TP1 win (like MT5).
+            if frac > 0:
+                return ("tp", round(frac * 1.0, 2))
+            return ("be", 0.0)
     return None
 
 
 def main():
+    _BARS_CACHE.clear()
     open_trades = sb("GET", "/rest/v1/paper_trades", params={
-        "select": "id,pair,side,entry,sl,tp,risk_pct,risk_usd,opened_at",
+        "select": "id,user_id,pair,side,entry,sl,tp,risk_pct,risk_usd,opened_at",
         "status": "eq.open", "season": f"eq.{SEASON}", "limit": "200"
     }) or []
     log(f"open trades: {len(open_trades)}")

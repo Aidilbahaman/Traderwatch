@@ -6,18 +6,15 @@ TP/SL/expired/cancelled, writes signal-status.json, and commits only when
 something changed. Never invents prices: on missing data the existing status
 is preserved and the error is logged.
 
-Data source: Swissquote M1 from state/sq-bars.db is PRIMARY (local SQLite,
-populated live by sq-collector — no network, no rate limit, no credit cost).
-TwelveData 1-min is only a fallback for windows Swissquote does not cover
-(older trades from before the collector started polling).
+Data source: MT5 M1 via the wine bridge (engine/mt5_read.py) is the SINGLE
+market-data source (RoboForex broker). No Swissquote/TwelveData fallback:
+when the bridge is down or the terminal is stale, candles() fails closed
+(returns None) so no TP/SL verdict is ever made on substituted data.
 """
 import json
-import sqlite3
 import subprocess
 import sys
 import time
-import urllib.error
-import urllib.parse
 import urllib.request
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
@@ -35,7 +32,7 @@ EXPIRY_SCALP = None  # M15 stays active until TP/SL or explicit cancellation
 EXPIRY_H1 = timedelta(hours=48)
 MAX_AGE = timedelta(days=90)
 CALL_GAP = 9
-PIP = {"XAUUSD": 0.1, "USDJPY": 0.01, "BTCUSD": 1.0}
+PIP = {"XAUUSD": 0.1, "XAGUSD": 0.001, "USDJPY": 0.01, "BTCUSD": 1.0}
 DEFAULT_PIP = 0.0001
 # BTC movement is measured in USD, not forex pips.
 USD_UNIT = {"BTCUSD"}
@@ -99,66 +96,58 @@ def _sq_pair(pair):
     return "".join(c for c in str(pair).upper() if c.isalpha())
 
 
-def candles(pair, start, end):
-    """Fetch 1-minute candles between start and end (UTC).
+def _mt5_candles(code, start, end):
+    """MT5 M1 via wine bridge — rows [(ts_string, high, low)] oldest->newest.
 
-    Swissquote M1 SQLite ialah sumber UTAMA: sq-collector poll live setiap
-    beberapa saat dan simpan bar M1 terus ke state/sq-bars.db. Jadi semakan
-    TP/SL tidak bergantung network, tidak ada had rate, dan percuma.
-
-    TwelveData hanya sandaran bila Swissquote tiada bar dalam window itu
-    (contoh trade lama sebelum collector mula poll).
+    MT5 bar `t` ialah waktu server broker yang diencode sebagai unix epoch
+    (di sini UTC+2, musim panas UTC+3). Offset diterbitkan dari bar terbaru
+    vs waktu sebenar, dibundar ke jam penuh — jadi pertukaran DST tidak
+    memecahkan alignment. Jika terminal stale (>15 min) offset tidak boleh
+    dipercayai: tolak data, jangan evaluate TP/SL atas timestamp tersalah.
+    Returns (rows, err); rows None bila gagal/tak cukup coverage.
     """
-    try:
-        if SQ_DB.exists():
-            code = _sq_pair(pair)
-            con = sqlite3.connect(f"file:{SQ_DB}?mode=ro", uri=True)
-            try:
-                rows = con.execute(
-                    "SELECT ts, h, l FROM bars WHERE pair=? AND gran='M1' "
-                    "AND ts>=? AND ts<=? ORDER BY ts",
-                    (code, start.strftime("%Y-%m-%dT%H:%M:%S"),
-                     end.strftime("%Y-%m-%dT%H:%M:%S"))).fetchall()
-            finally:
-                con.close()
-            if rows:
-                return [(r[0], float(r[1]), float(r[2])) for r in rows], "swissquote"
-    except Exception as e:
-        log(f"SQ-ERR {pair}: {type(e).__name__}: {str(e)[:70]}")
+    from engine.mt5_read import run as mt5_run
+    now = datetime.now(timezone.utc)
+    need = int((now - start).total_seconds() // 60) + 5
+    need = max(60, min(need, 15000))
+    out, err = mt5_run(["candles", code, "1min", str(need)], timeout=120)
+    if not out:
+        return None, f"no output: {err[:90]}"
+    payload = json.loads(out)
+    if payload.get("error"):
+        return None, f"error: {str(payload['error'])[:90]}"
+    bars = payload.get("bars") or []
+    if not bars:
+        return None, "empty bars"
+    bars.sort(key=lambda b: b["t"])
+    off = round((bars[-1]["t"] - now.timestamp()) / 3600) * 3600
+    if now.timestamp() - (bars[-1]["t"] - off) > 15 * 60:
+        return None, "stale terminal"
+    rows = []
+    for b in bars:
+        d = datetime.fromtimestamp(b["t"] - off, tz=timezone.utc)
+        if start <= d <= end:
+            rows.append((d.strftime("%Y-%m-%dT%H:%M:%S"),
+                         float(b["h"]), float(b["l"])))
+    if not rows:
+        return None, "no bars in window"
+    first = datetime.fromtimestamp(bars[0]["t"] - off, tz=timezone.utc)
+    if first > start + timedelta(minutes=1):
+        return None, "history does not cover window start"
+    return rows, ""
 
-    # Sandaran: TwelveData 1-min.
-    params = urllib.parse.urlencode({
-        "symbol": pair, "interval": "1min", "timezone": "UTC",
-        "start_date": start.strftime("%Y-%m-%d %H:%M:%S"),
-        "end_date": end.strftime("%Y-%m-%d %H:%M:%S"),
-        "outputsize": 5000, "apikey": TD_KEY,
-    })
-    url = "https://api.twelvedata.com/time_series?" + params
-    for attempt in (1, 2):
-        try:
-            req = urllib.request.Request(url, headers={"User-Agent": "TraderWatch-status/1.0"})
-            with urllib.request.urlopen(req, timeout=30) as r:
-                data = json.loads(r.read().decode())
-            if data.get("status") == "error" or data.get("code"):
-                msg = str(data.get("message", ""))[:140]
-                if data.get("code") == 429 and attempt == 1:
-                    log(f"RATE-LIMIT {pair}: wait 62s")
-                    time.sleep(62)
-                    continue
-                return None, msg
-            vals = data.get("values") or []
-            out = []
-            for v in reversed(vals):
-                out.append((v["datetime"], float(v["high"]), float(v["low"])))
-            return out, "twelvedata"
-        except urllib.error.HTTPError as e:
-            if e.code == 429 and attempt == 1:
-                time.sleep(62)
-                continue
-            return None, f"HTTP {e.code}"
-        except Exception as e:
-            return None, f"{type(e).__name__}: {str(e)[:90]}"
-    return None, "rate limit persisted"
+
+def candles(pair, start, end):
+    """Fetch 1-minute candles between start and end (UTC) from the MT5 broker
+    (single source — no Swissquote/TwelveData fallback). Returns (rows, source)
+    or (None, err) when the bridge is down / data stale."""
+    try:
+        rows, err = _mt5_candles(_sq_pair(pair), start, end)
+        if rows:
+            return rows, "mt5"
+        return None, err or "mt5 no data"
+    except Exception as e:
+        return None, f"{type(e).__name__}: {str(e)[:90]}"
 
 
 def parse_ts(value):
@@ -360,9 +349,10 @@ def main():
         # request; evaluate from posting time through now.
         end = now if limit is None else min(now, posted + limit)
         data, src = candles(sig["pair"], posted, end)
-        # Swissquote M1 ialah SQLite lokal — tiada rate limit, jadi tiada
-        # keperluan tunggu CALL_GAP. Hanya TwelveData (network) perlu gap.
-        gap = 0 if src == "swissquote" else CALL_GAP
+        # Swissquote M1 ialah SQLite lokal, MT5 ialah bridge wine lokal —
+        # tiada rate limit, jadi tiada keperluan tunggu CALL_GAP. Hanya
+        # TwelveData (network) perlu gap.
+        gap = 0 if src in ("swissquote", "mt5") else CALL_GAP
         if data is None:
             log(f"DATA {sig['pair']}: {src}")
             errors += 1

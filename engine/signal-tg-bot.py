@@ -556,12 +556,12 @@ def toggle_mute(chat_id, sid):
 
 
 def send_chart(chat_id, sig):
-    """Render a chart PNG from Swissquote bars and send it."""
+    """Render a chart PNG from MT5 broker bars and send it."""
     try:
-        sys.path.insert(0, str(REPO))
-        from engine.sq_collector import candles_from_bars
+        sys.path.insert(0, str(REPO / "engine"))
+        import mt5_data as M5
         pair = sig["pair"].replace("/", "")
-        bars = candles_from_bars(pair, "M15", 96)
+        bars = M5.candles(pair, "M15", 96)
         if len(bars) < 20:
             reply(chat_id, "📈 Chart belum tersedia — data pasaran baru dikumpul "
                            f"({len(bars)} bar). Cuba lagi sebentar.")
@@ -598,7 +598,7 @@ def send_chart(chat_id, sig):
                              xlim=(idx[0], idx[-1] + pd.Timedelta(minutes=15 * pad_n)))
         ax = axes[0]
         ax.set_ylim(lo_p - span * 0.07, hi_p + span * 0.07)
-        ax.set_title(f"{sig['pair']} · {sig['timeframe']} · Swissquote · {len(bars)} bar",
+        ax.set_title(f"{sig['pair']} · {sig['timeframe']} · MT5 · {len(bars)} bar",
                      fontsize=12, color="#e6e6e6", pad=8)
         # Label di dalam axes, clip_on supaya bbox_inches tak meledak
         for lvl, lab, col in zip(lv, ("ENTRY", "SL", "TP"),
@@ -842,7 +842,6 @@ def handle(msg):
     elif cmd == "/position" or cmd == "/activetrades":
         try:
             import sqlite3
-            import pathlib
             import datetime
             conn = sqlite3.connect('/home/ubuntu/tw-bot/bot.db')
             conn.row_factory = sqlite3.Row
@@ -853,15 +852,14 @@ def handle(msg):
 
             current_prices = {}
             try:
-                sq_db = pathlib.Path("/home/ubuntu/web/Traderwatch-repo/state/sq-bars.db")
-                if sq_db.exists():
-                    sq_conn = sqlite3.connect(str(sq_db))
-                    sq_conn.row_factory = sqlite3.Row
-                    for p_name in set(r["pair"] for r in rows):
-                        cur_row = sq_conn.execute("SELECT c FROM bars WHERE pair=? AND gran='M1' ORDER BY ts DESC LIMIT 1", (p_name,)).fetchone()
-                        if cur_row:
-                            current_prices[p_name] = float(cur_row["c"])
-                    sq_conn.close()
+                # MT5 broker ialah sumber tunggal. Bridge down -> tiada
+                # harga (fail closed, tiada fallback sq-bars.db).
+                sys.path.insert(0, str(REPO / "engine"))
+                import mt5_data as M5
+                for p_name in set(r["pair"] for r in rows):
+                    mid = M5.mid(p_name)
+                    if mid is not None:
+                        current_prices[p_name] = float(mid)
             except Exception:
                 pass
 

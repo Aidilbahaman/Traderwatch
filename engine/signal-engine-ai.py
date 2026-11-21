@@ -117,7 +117,7 @@ LLM_MIN_CONF = float(os.environ.get("AI_LLM_MIN_CONF", "0.5"))
 # (5 min) bila conf kekal atas gate — malam 19 Nov 25 signal dalam 90 minit.
 # Cooldown 30 min/pair hadkan spam tanpa menyekat setup baru selepas resolve.
 # 0 = lumpuh. Mark hanya selepas insert berjaya.
-PAIR_COOLDOWN_MIN = float(os.environ.get("AI_PAIR_COOLDOWN_MIN", "30"))
+PAIR_COOLDOWN_MIN = float(os.environ.get("AI_PAIR_COOLDOWN_MIN", "5"))
 COOLDOWN_FILE = REPO / "state" / "ai-pair-cooldown.json"
 # M15: matches the trained model (state/ai-m15-model.json, timeframe M15).
 # Previously labelled M1 but mt5_read silently returned M15; now explicit so
@@ -975,23 +975,9 @@ def main():
                     bars, err = None, f"mt5 bars kurang: {len(bars or [])}"
             except Exception as mtx:
                 bars, err = None, f"mt5 gagal: {mtx}"
-            if not bars:
-                # Sandaran Swissquote (collector daemon)
-                try:
-                    bars = sq_bars(pair, TD_INTERVAL)
-                    if bars and len(bars) >= 60:
-                        err = ""
-                    else:
-                        bars, err = None, f"sq bars kurang: {len(bars or [])}"
-                except Exception as sqx:
-                    bars, err = None, f"sq gagal: {sqx}"
-            if not bars:
-                # Sandaran Twelve Data (terhad kuota harian)
-                if not credit_budget_ok():
-                    errors += 1
-                    continue
-                payload_c = td_get(pair, TD_INTERVAL)
-                bars, err = parse_candles(payload_c)
+            # MT5 broker is the SINGLE data source (owner 2026-11-21): no
+            # Swissquote / TwelveData fallback. Bridge down -> skip this pair
+            # (the website banner shows bridge / market status).
             if not bars:
                 log(f"DATA {pair} {TIMEFRAME}: {err}")
                 errors += 1

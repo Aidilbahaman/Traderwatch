@@ -56,6 +56,17 @@ a{color:inherit;text-decoration:none}button{font-family:inherit}
 .clock{color:var(--mute);min-width:86px;text-align:right}
 .pill{display:inline-block;padding:2px 10px;border-radius:99px;background:color-mix(in srgb,var(--green) 16%,transparent);color:var(--green);font-size:12px;font-weight:600}
 .pill.red{background:color-mix(in srgb,var(--red) 14%,transparent);color:var(--red)}
+.pill.hedge{background:color-mix(in srgb,var(--amber,#ffd479) 16%,transparent);color:var(--amber,#ffd479);animation:hedge-pulse 2s ease-in-out infinite}
+@keyframes hedge-pulse{0%,100%{opacity:1}50%{opacity:.55}}
+.hedge-banner{background:color-mix(in srgb,var(--amber,#ffd479) 10%,transparent);border:1px solid color-mix(in srgb,var(--amber,#ffd479) 35%,transparent);color:var(--amber,#ffd479);border-radius:12px;padding:10px 12px;font-size:12.5px;line-height:1.45;margin-bottom:10px}
+.live-ticker{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:8px 12px;margin-bottom:8px;border-radius:12px;background:color-mix(in srgb,var(--green) 10%,transparent);border:1px solid color-mix(in srgb,var(--green) 28%,transparent);font-size:13px;font-variant-numeric:tabular-nums}
+.live-ticker b{color:var(--green);font-size:15px}
+.live-ticker .tick-time{color:var(--mute);font-size:11px}
+.sc-follow{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;margin-top:10px;padding-top:8px;border-top:1px solid var(--line);font-size:12px;color:var(--mute)}
+.sc-follow b{color:var(--ink);font-variant-numeric:tabular-nums}
+.sc-follow small{opacity:.8}
+.sc-copy{margin-top:10px;width:100%;padding:8px 12px;border-radius:10px;border:1px solid var(--line);background:var(--fill,#f5f5f7);color:var(--ink);font-size:13px;font-weight:600;cursor:pointer;transition:background .15s ease}
+.sc-copy:hover{background:color-mix(in srgb,var(--green) 12%,transparent)}
 .mute{color:var(--mute)}.pos{color:var(--green)}.neg{color:var(--red)}.hide{display:none!important}.fine{font-size:12px;color:var(--mute)}
 .shell{max-width:1472px;margin:16px auto;padding:0 16px;display:grid;grid-template-columns:minmax(0,1fr) 372px;gap:16px;align-items:start}
 .main{display:flex;flex-direction:column;gap:14px;min-width:0}
@@ -209,7 +220,7 @@ body{scrollbar-gutter:stable;}
   <button class="nav" data-view="ideas" type="button">Community<span class="new">NEW</span></button>
   <a class="nav" href="education.html">Learn<span class="new">NEW</span></a>
  </nav>
- <div class="tools-r"><span class="mkt" id="mkt"><i></i><span id="mktTxt"></span></span><span class="clock" id="clock"></span><span class="pill" id="plan">Free</span><button class="themebtn" id="themebtn" type="button" aria-label="Switch to night mode" title="Night / light mode">&#9789;</button>
+ <div class="tools-r"><span class="mkt" id="mkt"><i></i><span id="mktTxt"></span></span><span class="clock" id="clock"></span><span class="pill" id="plan">Free</span><button class="themebtn" id="themebtn" type="button" aria-label="Switch to night mode" title="Night / light mode">&#9789;</button><button class="themebtn" data-sound-toggle type="button" aria-label="Toggle sound"></button>
 <a class="themebtn hide" id="addhome" href="#" role="button" aria-label="Add to home screen" title="Add to home screen">&#8962;</a><a class="mute" href="#" id="logout">Log out</a></div>
 </div></header>
 
@@ -220,14 +231,15 @@ body{scrollbar-gutter:stable;}
    <div class="kpi"><div class="mute">30-day win rate</div><div class="v" id="win">—</div></div>
    <div class="kpi"><div class="mute">Average R:R</div><div class="v" id="rr">—</div></div>
    <div class="kpi"><div class="mute">Active signal</div><div class="v" id="act">0</div></div>
-   <div class="kpi"><div class="mute" style="display:flex;justify-content:space-between"><span>Today</span><b id="quotaTxt" style="color:var(--ink)">0 / 3</b></div><div class="mbar"><i id="quotaBar" style="width:0"></i></div></div>
+   <div class="kpi"><div class="mute" style="display:flex;justify-content:space-between"><span>Today</span><b id="quotaTxt" style="color:var(--ink)">0 used</b></div><div class="mbar"><i id="quotaBar" style="width:0"></i></div></div>
   </div>
   <div class="strip" id="strip" aria-live="polite"></div>
   <div class="ws">
   <section class="view on" id="v-chart">
    <div class="seg" id="pairs" role="group" aria-label="Choose pair"></div>
+   <div class="live-ticker" id="liveTicker" aria-live="polite"><span class="mute">Harga broker: —</span></div>
    <div class="chartbox" id="chart"></div>
-   <div class="fine">Charts by TradingView. Prices may be delayed.</div>
+   <div class="fine">Charts by TradingView · harga di atas = tick MT5 live broker anda.</div>
   </section>
 
   <section class="view" id="v-signals">
@@ -364,7 +376,6 @@ body{scrollbar-gutter:stable;}
    <div class="bar"><i id="onboardBar" style="width:0"></i></div>
    <ul class="steps" style="margin-top:6px">
     <li data-step="1"><button class="chk" type="button" aria-label="Mark done">&#10003;</button><a class="lbl" href="#" data-goto="signals">View your first signal</a></li>
-    <li data-step="2"><button class="chk" type="button" aria-label="Mark done">&#10003;</button><a class="lbl" id="tgLink" href="#" onclick="window.open('https://t.me/Traderwatchmembershipbot', '_blank'); return false;">Connect Telegram for alerts</a></li>
     <li data-step="3"><button class="chk" type="button" aria-label="Mark done">&#10003;</button><a class="lbl" href="education.html">Watch the risk basics video</a></li>
    </ul>
   </div>
@@ -407,7 +418,6 @@ body{scrollbar-gutter:stable;}
   <div class="box">
    <h3>Community</h3>
    <div id="lb"></div>
-    <a class="btn ghostb" href="https://t.me/Traderwatchmembershipbot" target="_blank" rel="noopener" style="margin-top:10px">Open Telegram community</a>
    <div class="fine" style="margin-top:6px">Member leaderboard is not published yet. TraderWatch is a platform by traders, for traders.</div>
   </div>
 
@@ -446,6 +456,8 @@ body{scrollbar-gutter:stable;}
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
 <script src="config.js?v=202610260200"></script>
 <script src="common.js?v=202610260200"></script>
+<script src="sound.js?v=20261121s3"></script>
+<script src="/bridge-banner.js?v=20261121"></script>
 
 <script>
 /* ===== Block zoom gestures =====
@@ -604,13 +616,13 @@ var TOOLS = [
 var S = {
   user:{name:"member",plan:"Free"},
   stats:{win:null,rr:null},
-  quota:{used:0,total:3,cap:3},
+  quota:{used:0,total:null,cap:null},
   signals:[],
   news:[],
   performance:[],
   statuses:{}
 };
-var PLAN = "free", TIER_CAP = 3;
+var PLAN = "free", TIER_CAP = null; // single tier: semua ahli Free, tiada cap
 
 var $ = function(id){return document.getElementById(id)};
 function esc(s){return String(s==null?"":s).replace(/[&<>"]/g,function(c){
@@ -639,6 +651,40 @@ function mytToday(){
 }
 function fmtDateKey(iso){
   var t = mytParts(iso); return t ? (t.yyyy+"-"+t.mm+"-"+t.dd) : null;
+}
+/* Hedging: pair ada BUY + SELL serentak masih terbuka → maklumkan client. */
+function computeHedge(rows){
+  var CLOSED = ["tp","sl","expired","cancelled","collected","closed","void"];
+  var sides = {};
+  (rows||[]).forEach(function(s){
+    var v = S.statuses[signalKey(s.pair, s.posted_at)] || {};
+    var st = String(v.status||"").toLowerCase();
+    if(CLOSED.indexOf(st)!==-1) return;
+    var p = String(s.pair||"").replace(/[^A-Za-z]/g,"").toUpperCase();
+    var side = String(s.side||"").toUpperCase();
+    if(!p || (side!=="BUY" && side!=="SELL")) return;
+    (sides[p]=sides[p]||{})[side]=true;
+  });
+  var out={};
+  Object.keys(sides).forEach(function(p){ if(sides[p].BUY && sides[p].SELL) out[p]=true; });
+  return out;
+}
+function hedgePill(p){
+  return p ? '<span class="pill hedge" title="Pair ini ada BUY dan SELL serentak (hedging)">HEDGING</span>' : '';
+}
+function hedgeNorm(pair){ return String(pair||"").replace(/[^A-Za-z]/g,"").toUpperCase(); }
+/* Mudah follow: anggaran lot + ticket salin (kontrak standard broker). */
+var LOT_MULT = { XAUUSD:1, XAGUSD:50, BTCUSD:0.01 };
+function lotInfo(pair, entry, sl){
+  var p = hedgeNorm(pair); var mult = LOT_MULT[p];
+  var dist = Math.abs(parseFloat(entry)-parseFloat(sl));
+  if(!mult || !(dist>0)) return null;
+  var riskUsd = 100*2/100; // akaun rujukan $100 @ 2%
+  var lot = Math.floor((riskUsd/(dist*mult*100))*100)/100;
+  return { risk001: dist*mult, lot: Math.max(0.01,lot) };
+}
+function ticketText(s){
+  return s.pair+' '+String(s.side||'').toUpperCase()+'\nEntry: '+s.entry+'\nSL: '+s.sl+'\nTP: '+s.tp;
 }
 
 /* ---------- renderers ---------- */
@@ -695,8 +741,10 @@ function renderStats(){
 
 function renderMini(){
   var h = S.signals.map(function(s){
+    var hn = hedgeNorm(s.pair);
     return '<div class="mini"><span><b>'+esc(s.pair)+'</b> '
       + '<span class="pill '+(s.side==="SELL"?"red":"")+'">'+esc(s.side)+'</span>'
+      + (S.hedge&&S.hedge[hn]?hedgePill(hn):'')
       + '<small>'+esc(s.tf)+' · '+esc(s.note||"")+'</small></span>'
       + '<span style="text-align:right"><small>Entry</small>'+esc(s.entry)+'</span></div>';
   }).join("");
@@ -718,20 +766,36 @@ function renderNews(){
 
 var filter = "all";
 function renderCards(){
-  var list = S.signals.filter(function(x){
-    if(filter==="active") return x.status==="active";
-    if(filter==="closed") return x.status!=="active";
-    return true;
-  });
+  // "all"/"active": signal terkini masih terbuka per pair (mudah follow).
+  // "closed": arkib signal dah tutup.
+  var list = (filter==="closed")
+    ? S.signals.filter(function(x){ return x.status!=="active"; })
+    : (S.featured||[]);
   var html = list.map(function(s){
+    var hn = hedgeNorm(s.pair);
+    var li = lotInfo(s.pair, s.entry, s.sl);
     return '<article class="sc"><div class="hd"><span class="nm">'+esc(s.pair)+' '
-      + '<span class="pill '+(s.side==="SELL"?"red":"")+'">'+esc(s.side)+'</span></span>'
+      + '<span class="pill '+(s.side==="SELL"?"red":"")+'">'+esc(s.side)+'</span>'
+      + (S.hedge&&S.hedge[hn]?hedgePill(hn):'')+'</span>'
       + '<span class="mute" style="font-size:12px">'+esc(s.tf)+' · '+esc(s.note||"")+'</span></div>'
       + '<div class="lv"><div><span>Entry</span>'+esc(s.entry)+'</div>'
       + '<div><span>SL</span><b style="color:var(--red)">'+esc(s.sl)+'</b></div>'
       + '<div><span>TP</span><b style="color:var(--green-ink)">'+esc(s.tp)+'</b></div>'
-      + '<div><span>R:R</span>'+esc(s.rr||"—")+'</div></div></article>';
+      + '<div><span>R:R</span>'+esc(s.rr||"—")+'</div></div>'
+      + (li?'<div class="sc-follow"><span>Lot cadangan <small>($100@2%)</small> <b>'+li.lot.toFixed(2)+'</b></span>'
+            + '<span>Risiko 0.01 lot <b>$'+li.risk001.toFixed(2)+'</b></span></div>':'')
+      + '<button class="sc-copy" type="button" data-copy="'+encodeURIComponent(ticketText(s))+'">📋 Salin ticket</button>'
+      + '</article>';
   }).join("");
+  if(filter!=="closed" && !list.length){
+    html = '<div class="sc ghost">Tiada signal aktif sekarang. Signal baru akan muncul di sini.</div>';
+  }
+  var hk = Object.keys(S.hedge||{});
+  if(hk.length){
+    var names = hk.map(function(p){ return p.slice(0,3)+"/"+p.slice(3); }).join(", ");
+    html = '<div class="hedge-banner" role="note">⚠️ <b>Hedging aktif:</b> '+esc(names)
+      + ' — BUY dan SELL serentak. Risiko dua hala; urus saiz posisi dengan berhati-hati.</div>' + html;
+  }
   if(filter!=="closed" && S.quota.cap!=null){
     var left = Math.max(0, S.quota.cap - S.quota.used);
     if(left>0) html += '<div class="sc ghost">'+left+' signal slots left in this window.'
@@ -1469,6 +1533,25 @@ function toggleTheme(){
 
 /* ---------- TradingView chart ---------- */
 var chartLoaded = false, currentPair = "XAUUSD";
+var livePrices = null;
+function renderLiveTicker(){
+  var el = $("liveTicker"); if(!el) return;
+  var slug = String(PAIRS[currentPair]||currentPair).replace(/[^A-Za-z]/g,"").toLowerCase();
+  var p = livePrices && livePrices.prices && livePrices.prices[slug];
+  if(!p){ el.innerHTML = '<span class="mute">Harga broker: — (tunggu tick MT5)</span>'; return; }
+  var d = Math.abs(p)>=1000?2:(Math.abs(p)>=100?2:3);
+  var t = livePrices.updated ? new Date(livePrices.updated).toLocaleTimeString("en-GB",{timeZone:"Asia/Kuala_Lumpur",hour12:false}) : "";
+  el.innerHTML = '<span>'+esc(currentPair)+' <b>'+Number(p).toFixed(d)+'</b> <span class="mute">MT5 live</span></span>'
+    + '<span class="tick-time">'+(t?t+' MYT':'')+'</span>';
+}
+async function refreshLivePrices(){
+  try{
+    var r = await fetch("data/live-price.json?t="+Date.now(), {cache:"no-store"});
+    if(r.ok){ livePrices = await r.json(); renderLiveTicker(); }
+  }catch(_){}
+}
+refreshLivePrices();
+setInterval(refreshLivePrices, 60000);
 function loadChart(sym){
   chartLoaded = true;
   var box = $("chart"); box.innerHTML = "";
@@ -1498,6 +1581,7 @@ function loadChart(sym){
     $("pairs").querySelectorAll("button").forEach(function(x){
       x.setAttribute("aria-pressed", x===b ? "true":"false")});
     loadChart(PAIRS[currentPair]);
+    renderLiveTicker();
   });
   loadChart(PAIRS[keys[0]]);
 })();
@@ -1510,7 +1594,6 @@ function loadChart(sym){
   var days = (Date.now()-Number(first))/86400000;
   var box = $("onboard");
   (function tglink(){
-    var a = $("tgLink"); if(!a) return;
     a.removeAttribute("onclick");
     a.onclick = function(ev){
       ev.preventDefault();
@@ -1843,7 +1926,7 @@ async function boot(){
   if(!member) return;                                  // requireMember redirects
 
   PLAN = ["free","pro","max"].includes(member.plan) ? member.plan : "free";
-  TIER_CAP = PLAN==="max" ? null : (PLAN==="pro" ? 10 : 3);
+  TIER_CAP = null; // single tier Free — semua signal, semua pair, tiada had
   document.body.dataset.tier = PLAN;
   S.user = {name: member.name, plan: PLAN.charAt(0).toUpperCase()+PLAN.slice(1)};
   ME = { id: member.id, name: member.name || "Member" };
@@ -1853,6 +1936,27 @@ async function boot(){
   var lo = $("logout");
   if(lo) lo.addEventListener("click", function(e){ e.preventDefault(); logOut() });
 
+  await refreshSignals();
+  show("chart");
+  // Live update: fetch semula status + signal setiap 60 saat. Sebelum ini
+  // boot() fetch sekali sahaja dan setInterval(render,30s) hanya melukis
+  // semula data lama — halaman tak pernah segar tanpa reload manual.
+  setInterval(refreshSignals, 60000);
+
+  // Salin ticket satu-ketik (delegated — kad dijana semula setiap refresh).
+  document.addEventListener("click", function(e){
+    var b = e.target.closest(".sc-copy");
+    if(!b) return;
+    var txt = decodeURIComponent(b.getAttribute("data-copy")||"");
+    function done(ok){ var old=b.textContent; b.textContent = ok?"✓ Disalin":"Gagal salin";
+      setTimeout(function(){ b.textContent = old; }, 1500); }
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(txt).then(function(){done(true);}, function(){done(false);});
+    } else { window.prompt("Salin ticket ini:", txt); done(true); }
+  });
+}
+
+async function refreshSignals(){
   /* statuses first: drives stats + performance */
   try{
     var sr = await fetch("signal-status.json?t="+Date.now(), {cache:"no-store"});
@@ -1865,25 +1969,17 @@ async function boot(){
     }
   }catch(_){}
 
-  /* real signals, same plan rules as the previous members.html */
-  var HOT_PAIRS = ["XAUUSD","GBPUSD","EURUSD","USDJPY","AUDUSD","USDCAD","NZDUSD","BTCUSD"];
-  function normPair(p){ return String(p||"").replace(/[^A-Z]/gi,"").toUpperCase() }
+  /* real signals — single tier: semua verified signal, semua pair, tiada cap.
+     Server (RPC get_signals) sudah tapis verified + window 4 hari; tiada
+     lagi saringan plan/pair/private di client. */
   try{
     var r = await sb.rpc("get_signals");
     if(r.error) throw r.error;
     var rows = Array.isArray(r.data) ? r.data : [];
-    // Filter AI private signals (hidden from members)
-    try{
-      var privRes = await fetch("state/private-signals.json?t="+Date.now(), {cache:"no-store"});
-      if(privRes.ok){
-        var privData = await privRes.json();
-        var privIds = new Set((privData.ids || []).map(String));
-        rows = rows.filter(function(s){ return !privIds.has(String(s.id)); });
-      }
-    }catch(_){/* fail open — hide nothing if file unavailable */}
     var deduped = Array.from(new Map(rows.map(function(s){
       return [String(s.id || [s.pair,s.timeframe,s.side,s.entry,s.sl,s.tp,s.posted_at].join("|")), s];
     })).values());
+    S.hedge = computeHedge(deduped);
 
     var tk = todayKey();
     var isToday = function(s){ var p = mytParts(s.posted_at); return !!p && (p.yyyy+p.mm+p.dd === tk) };
@@ -1897,12 +1993,10 @@ async function boot(){
       var t = new Date(v.closed).getTime();
       return Number.isFinite(t) && (Date.now()-t) <= 48*60*60*1000;
     };
-    var allowed = PLAN==="free" ? HOT_PAIRS.slice(0,3) : HOT_PAIRS;
-    var forPlan = function(s){ return allowed.includes(normPair(s.pair)) };
-    var todays = deduped.filter(function(s){ return isToday(s) && forPlan(s) });
-    var older  = deduped.filter(function(s){ return !isToday(s) && forPlan(s) });
+    var todays = deduped.filter(isToday);
+    var older  = deduped.filter(function(s){ return !isToday(s) });
     var carried = older.filter(stillOpen).concat(older.filter(closedRecently).slice(0,5));
-    var selected = (PLAN==="max" ? todays : todays.slice(0, PLAN==="pro" ? 10 : 3)).concat(carried);
+    var selected = todays.concat(carried);
 
     S.signals = selected.map(function(s){
       var v = S.statuses[signalKey(s.pair, s.posted_at)] || {};
@@ -1917,19 +2011,35 @@ async function boot(){
         tf: s.timeframe || "H1",
         entry: s.entry, sl: s.sl, tp: s.tp, rr: rr,
         status: (v.status === "active" || !v.status) ? "active" : "closed",
+        rawStatus: String(v.status||"").toLowerCase(),
+        posted_at: s.posted_at,
         note: note
       };
     });
 
-    /* quota: how many setups this plan actually received today */
+    // Paparan mudah follow: signal TERKINI masih terbuka per pair (buang serabut layering).
+    var OPEN = ["active","pending","entry",""];
+    var feat = {};
+    function msOf(x){ var t=mytParts(x.posted_at); return t?Date.UTC(+t.yyyy,+t.mm-1,+t.dd,+t.HH,+t.MM,+t.SS):0; }
+    S.signals.forEach(function(x){
+      if(OPEN.indexOf(x.rawStatus)===-1) return;
+      var p = hedgeNorm(x.pair);
+      if(!feat[p] || msOf(x) > feat[p].ms) feat[p] = { x:x, ms:msOf(x) };
+    });
+    S.featured = Object.keys(feat).map(function(p){ return feat[p].x; })
+      .sort(function(a,b){ return msOf(b)-msOf(a); });
+
+    /* kiraan signal hari ini (single tier — tiada cap) */
     S.quota.used = todays.length;
   }catch(ex){
-    $("mini").innerHTML = '<div class="mute">Signals could not be loaded right now.</div>';
-    $("cards").innerHTML = '<div class="sc ghost">Signals could not be loaded right now.</div>';
+    // Refresh berkala gagal: kekal data lama, jangan kosongkan UI.
+    if(!S.signals.length){
+      $("mini").innerHTML = '<div class="mute">Signals could not be loaded right now.</div>';
+      $("cards").innerHTML = '<div class="sc ghost">Signals could not be loaded right now.</div>';
+    }
   }
 
   renderAll();
-  show("chart");
 }
 
 boot();

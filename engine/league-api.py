@@ -24,6 +24,11 @@ import urllib.request
 from datetime import datetime, timezone
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
+HERE = pathlib.Path(__file__).resolve().parent
+import sys
+if str(HERE) not in sys.path:
+    sys.path.insert(0, str(HERE))   # systemd runs from repo root; engine/ must be importable
+
 # Owner-only real-money sync ("Take this trade" -> MT5). Optional: if the MT5
 # module cannot load, the league keeps working paper-only.
 try:
@@ -31,41 +36,27 @@ try:
 except Exception:
     MO = None
 
-# Live prices from the same Swissquote feed the resolver uses — paper trades
-# fill at the CURRENT market price (instant entry), not the stale verdict entry.
+# Live entry price from the MT5 broker tick (single data source, no Swissquote
+# fallback). Paper trades fill at the CURRENT broker price (instant entry).
 try:
-    import sq_collector as SQC
+    import mt5_data as M5B
 except Exception:
-    SQC = None
+    M5B = None
 
 
 def live_price(pair):
-    """Latest M1 close from sq-bars.db, or None if feed missing/stale."""
-    if SQC is None:
+    """(bid+ask)/2 from the MT5 broker, or None when the bridge is down."""
+    if M5B is None:
         return None
-    try:
-        rows = SQC.candles_from_bars(pair, "M1", 2)
-        if not rows:
-            return None
-        last = rows[-1]
-        t = datetime.fromisoformat(str(last["t"]).replace("Z", "+00:00"))
-        if t.tzinfo is None:
-            t = t.replace(tzinfo=timezone.utc)
-        if (datetime.now(timezone.utc) - t).total_seconds() > 240:
-            return None
-        p = float(last["c"])
-        return p if p > 0 else None
-    except Exception:
-        return None
+    return M5B.mid(pair)
 
-HERE = pathlib.Path(__file__).resolve().parent
 ENV = pathlib.Path("/home/ubuntu/.secrets/supabase.env")
 PORT = int(os.environ.get("LEAGUE_PORT", "8103"))
 SEASON = int(os.environ.get("LEAGUE_SEASON", "1"))
 START_BALANCE = 10000.0
 ALLOWED_PAIRS = {"XAUUSD", "XAGUSD", "BTCUSD", "EURUSD", "GBPUSD",
                  "USDJPY", "AUDUSD", "USDCAD", "NZDUSD"}
-MAX_OPEN_PER_PAIR = 1
+MAX_OPEN_PER_PAIR = 5
 MAX_OPEN_TOTAL = 5
 RISK_CHOICES = (1.0, 2.0)
 # Contract multiplier (USD per 1.0 price move per 1 lot) — matches frontend lotFor.
@@ -296,6 +287,22 @@ class Handler(BaseHTTPRequestHandler):
                 except Exception as e:
                     log(f"mt5 sync error {type(e).__name__}: {str(e)[:120]}")
                     mt5res = {"synced": False, "reason": "sync-error"}
+                # Sync paper entry -> actual MT5 fill price (owner 2026-11-21).
+                # Paper entry came from the Swissquote feed; the MT5 market order
+                # fills at the broker price (spread/feed differ). Without this the
+                # resolver arms BE at a different 1R level than MT5 and can mark
+                # BE while the live MT5 trade goes on to hit TP (trade #26 bug).
+                if mt5res.get("synced") and not mt5res.get("dry_run") and mt5res.get("price") and tr.get("id"):
+                    fill = float(mt5res["price"])
+                    if fill > 0 and abs(fill - entry) > 1e-9:
+                        mult = CONTRACT_MULT.get(pair, DEFAULT_MULT)
+                        new_risk = round(use_lot * abs(fill - sl) * mult, 2)
+                        sb("PATCH", f"/rest/v1/paper_trades?id=eq.{tr['id']}", body={
+                            "entry": fill, "risk_usd": new_risk,
+                            "risk_pct": round(new_risk / bal * 100.0, 2) if bal > 0 else risk_pct})
+                        tr["entry"] = fill
+                        entry = fill
+                        log(f"{uid[:8]} paper entry synced to MT5 fill {fill}")
                 log(f"{uid[:8]} mt5 {pair} {side} lot={use_lot} -> {mt5res}")
             payload = {"trade": tr, "balance": bal}
             if mt5res is not None:

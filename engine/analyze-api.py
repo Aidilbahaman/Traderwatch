@@ -33,7 +33,8 @@ sys.path.insert(0, str(HERE))
 import ai_model as M            # noqa: E402
 import smc_filter as SMC        # noqa: E402
 import llm_analyst as LA        # noqa: E402
-import sq_collector as SQC      # noqa: E402
+import sq_collector as SQC      # noqa: E402  (kept for compat; NOT used as feed)
+import mt5_data as M5           # noqa: E402  MT5 broker = single market-data source
 
 ENV = pathlib.Path("/home/ubuntu/.secrets/supabase.env")
 PORT = int(os.environ.get("ANALYZE_PORT", "8102"))
@@ -41,6 +42,9 @@ ALLOWED_PAIRS = {"XAUUSD", "XAGUSD", "BTCUSD", "EURUSD", "GBPUSD",
                  "USDJPY", "AUDUSD", "USDCAD", "NZDUSD"}   # pairs dengan data bar live
 MIN_GAP_S = 20                      # min seconds between analyses per user
 HOURLY_CAP = 12                     # max analyses per user per hour
+# Disiplin trading (owner 2026-11-21): selepas client tekan "add to trade",
+# enforced cooldown sebelum scan seterusnya — AI ajar sabar, jangan overtrade.
+TRADE_COOLDOWN_S = float(os.environ.get("ANALYZE_TRADE_COOLDOWN_S", "300"))
 BARS_COUNT = 300                    # M15 bars fed to the analyst
 # Cloudflare Turnstile (login anti-bot). Test secret = always-pass for demo;
 # set TURNSTILE_SECRET to your real secret in the service env for production.
@@ -82,9 +86,47 @@ def verify_user(token):
         return None
 
 
+# Mesej disiplin — AI ajar client sabar selepas buka trade (rotate).
+_COOLDOWN_TIPS = [
+    "Overtrading is the fastest way to blow an account. Let this trade breathe.",
+    "One good trade beats ten rushed ones. Patience is an edge.",
+    "The market will still be here in 5 minutes — your capital might not be.",
+    "Winners wait. Let your setup play out before chasing the next one.",
+]
+
+
+def last_trade_age_s(uid):
+    """Seconds since user's most recent paper trade opened (None if none/error)."""
+    try:
+        url = (SB_URL + "/rest/v1/paper_trades?select=opened_at&user_id=eq." + uid
+               + "&order=opened_at.desc&limit=1")
+        req = urllib.request.Request(url, headers={"apikey": SB_KEY,
+                                                   "Authorization": "Bearer " + SB_KEY})
+        with urllib.request.urlopen(req, timeout=15) as r:
+            rows = json.loads(r.read().decode())
+        if not rows:
+            return None
+        opened = datetime.fromisoformat(str(rows[0]["opened_at"]).replace("Z", "+00:00"))
+        if opened.tzinfo is None:
+            opened = opened.replace(tzinfo=timezone.utc)
+        return (datetime.now(timezone.utc) - opened).total_seconds()
+    except Exception:
+        return None                      # fail-open: jangan lock user jika query gagal
+
+
 def rate_check(uid):
-    """Return (ok, message). Enforces min gap + hourly cap per user."""
+    """Return (ok, message). Trade-discipline cooldown + min gap + hourly cap."""
     now = time.time()
+    # 1) Disiplin trading: cooldown 5 minit selepas client buka trade.
+    age = last_trade_age_s(uid)
+    if age is not None and 0 <= age < TRADE_COOLDOWN_S:
+        remain = int(TRADE_COOLDOWN_S - age)
+        mm, ss = divmod(remain, 60)
+        wait = f"{mm}m {ss:02d}s" if mm else f"{ss}s"
+        tip = _COOLDOWN_TIPS[int(now) % len(_COOLDOWN_TIPS)]
+        return False, (f"☕ You just opened a trade — chill first. Wait {wait} "
+                       f"before your next scan. {tip}")
+    # 2) Min gap between scans (LLM cost control).
     last = _last_call.get(uid, 0)
     if now - last < MIN_GAP_S:
         return False, f"Sila tunggu {int(MIN_GAP_S - (now - last))}s sebelum analisis seterusnya."
@@ -107,7 +149,7 @@ def rate_commit(uid):
 
 
 def fetch_bars(pair):
-    rows = SQC.candles_from_bars(pair, "M15", BARS_COUNT)
+    rows = M5.candles(pair, "M15", BARS_COUNT)
     out = []
     for c in rows:
         try:
@@ -129,7 +171,7 @@ def fetch_ohlc(pair, tf, limit=200):
     tf = tf if tf in TF_MINUTES else "M15"
     base_gran = "M5" if tf == "M5" else "M15"
     base_min = 5 if tf == "M5" else 15
-    rows = SQC.candles_from_bars(pair, base_gran, 2000)
+    rows = M5.candles(pair, base_gran, 2000)
     bars = []
     for c in rows:
         try:
@@ -160,7 +202,7 @@ def fetch_bars_tf(pair, tf):
     H4/D1 resampled from M60. Returns list of (ts_ms, high, low, close)."""
     gran = {"M5": "M5", "M15": "M15", "H1": "M60", "H4": "M60", "D1": "M60"}.get(tf, "M15")
     count = {"M5": 300, "M15": 300, "H1": 300, "H4": 800, "D1": 1500}.get(tf, 300)
-    rows = SQC.candles_from_bars(pair, gran, count)
+    rows = M5.candles(pair, gran, count)
     bars = []
     for c in rows:
         try:
@@ -287,6 +329,10 @@ class Handler(BaseHTTPRequestHandler):
             return self._send(429, {"error": msg})
         rate_commit(uid)
         log(f"{uid[:8]} request {pair} {tf}")
+        # MT5 broker is the single data source. If the bridge is down, fail closed
+        # with a clear message (the site banner also shows bridge/market status).
+        if not M5.is_up():
+            return self._send(503, {"error": "MT5 data bridge is offline — analysis paused. Please try again shortly.", "bridge_down": True})
         try:
             result = run_analysis(pair, tf)
         except Exception as e:
