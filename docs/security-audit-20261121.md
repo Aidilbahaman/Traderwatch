@@ -1,6 +1,6 @@
 # Security Audit — traderwatch.org (2026-11-21)
 
-**Skor: 78/100 — launchable with caveats.** Tiada blocker kritikal tinggal selepas
+**Skor: 82/100 — launchable with caveats.** (H2/H3 dibaiki susulan; M1/M2 dalam kerja) Tiada blocker kritikal tinggal selepas
 fix audit ini; baki risiko ialah keputusan owner (Turnstile real key, scope sudo,
 SSL Cloudflare Full-strict) dan hardening tambahan (CSP, rate-limit turnstile).
 
@@ -18,6 +18,8 @@ pihak ketiga). Semua probe terhadap URL deployed sendiri + Supabase project send
 | 5 | **Tiada security headers** langsung (clickjack, MIME-sniff, referrer) | Medium | Caddy: nosniff, X-Frame-Options DENY, Referrer-Policy, Permissions-Policy, HSTS (blok HTTPS + HTTP) | curl -I live menunjukkan semua header |
 | 6 | Chat API `Access-Control-Allow-Origin: *` | Low-Med | Whitelist `https://traderwatch.org` (+www), Vary: Origin | Origin evil → ACAO traderwatch.org |
 | 7 | Fail `engine/mt5-pending.env.bak-risk-*` committed dalam git (kandungan: config risk sahaja, **tiada credential**) | Low | `git rm` | git ls-files bersih |
+| 8 | **H2: ubuntu sudo NOPASSWD ALL** (RCE→root) | High | sudoers scoped `/etc/sudoers.d/10-ubuntu-traderwatch` (whitelist systemctl tw-*/caddy, cp/sed/chown terhad dest, bridge mt5, read ops); grant ALL dikoment | smoke: bridge MT5 ok, systemctl ok, caddy validate ok, cp+chown ok; `cat /etc/shadow` & `sudo bash` DITOLAK |
+| 9 | **H3: CF Flexible SSL + www NXDOMAIN** | High | CNAME www dicipta (CF_DNS_TOKEN); SSL mode zone → **strict**; origin cert LE CN=traderwatch.org sah | curl via CF: /member/ 200, /login.html 200, api health ok; www 525 sementara (backoff cert Caddy 6j — reset pada restart caddy seterusnya) |
 
 ## Kekuatan sedia ada (disahkan)
 
