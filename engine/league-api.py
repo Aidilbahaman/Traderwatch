@@ -20,6 +20,8 @@ Auth: Supabase member Bearer token on every call.
 import json
 import os
 import pathlib
+import threading
+import time
 import urllib.error
 import urllib.parse
 import urllib.request
@@ -85,6 +87,41 @@ DEFAULT_MULT = 100000.0  # standard forex lot
 MAX_LOT = 100.0
 MIN_LOT = 0.01
 
+# Cache: leaderboard (RPC) berubah bila trade ditutup ~1/min — 30s TTL selamat
+# dan potong round-trip Supabase untuk /me + /leaderboard. Auth verify di-cache
+# 120s supaya 3 endpoint serentak tak buat 3x /auth/v1/user.
+_cache = {}
+_cache_lock = threading.Lock()
+LEADERBOARD_TTL = 30
+AUTH_TTL = 120
+
+
+def cached(key, ttl, fn):
+    now = time.time()
+    with _cache_lock:
+        hit = _cache.get(key)
+        if hit and now - hit[0] <= ttl:
+            return hit[1]
+    val = fn()
+    with _cache_lock:
+        _cache[key] = (now, val)
+    return val
+
+
+def cached_leaderboard():
+    return cached("leaderboard", LEADERBOARD_TTL,
+                  lambda: sb("POST", "/rest/v1/rpc/get_leaderboard",
+                             body={"p_season": SEASON}) or [])
+
+
+def invalidate_league(uid=None):
+    """Panggil selepas write (buka trade). Cache resolver (proses lain)
+    expire sendiri melalui TTL pendek. """
+    with _cache_lock:
+        _cache.pop("leaderboard", None)
+        if uid:
+            _cache.pop("trades:" + uid, None)
+
 
 def load_env():
     sec = {}
@@ -123,12 +160,22 @@ def sb(method, path, body=None, params=None, token=None):
 def verify_user(token):
     if not token:
         return None
+    ck = "auth:" + token
+    now = time.time()
+    with _cache_lock:
+        hit = _cache.get(ck)
+        if hit and now - hit[0] <= AUTH_TTL:
+            return hit[1]
     try:
         req = urllib.request.Request(SB_URL + "/auth/v1/user")
         req.add_header("apikey", SB_KEY)
         req.add_header("Authorization", "Bearer " + token)
         with urllib.request.urlopen(req, timeout=20) as r:
-            return json.loads(r.read().decode())
+            user = json.loads(r.read().decode())
+        if user and user.get("id"):
+            with _cache_lock:
+                _cache[ck] = (now, user)
+        return user
     except (urllib.error.HTTPError, urllib.error.URLError, ValueError):
         return None
 
@@ -139,9 +186,9 @@ def display_name(user):
 
 
 def my_trades(uid, limit=100):
-    return sb("GET", "/rest/v1/paper_trades", params={
+    return cached("trades:" + uid, 10, lambda: sb("GET", "/rest/v1/paper_trades", params={
         "select": "*", "user_id": f"eq.{uid}", "season": f"eq.{SEASON}",
-        "order": "opened_at.desc", "limit": str(limit)}) or []
+        "order": "opened_at.desc", "limit": str(limit)}) or [])
 
 
 def balance_of(trades):
@@ -184,7 +231,7 @@ class Handler(BaseHTTPRequestHandler):
             if path == "/api/league/trades":
                 return self._send(200, {"trades": my_trades(uid), "season": SEASON})
             if path == "/api/league/leaderboard":
-                rows = sb("POST", "/rest/v1/rpc/get_leaderboard", body={"p_season": SEASON}) or []
+                rows = cached_leaderboard()
                 for i, r in enumerate(rows):
                     r["rank"] = i + 1
                     r["is_me"] = (r.get("user_id") == uid)
@@ -197,12 +244,12 @@ class Handler(BaseHTTPRequestHandler):
                 dec = sum(1 for t in closed if t["status"] in ("tp", "sl"))
                 net_r = round(sum(float(t["r_result"]) for t in closed), 2)
                 open_n = sum(1 for t in trades if t["status"] == "open")
-                board = sb("POST", "/rest/v1/rpc/get_leaderboard", body={"p_season": SEASON}) or []
+                board = cached_leaderboard()
                 me = display_name(user)
                 rank = next((i + 1 for i, r in enumerate(board) if r.get("user_id") == uid), None)
                 # Server-side per-account analysis count (user_analyses table).
-                ana = sb("GET", "/rest/v1/user_analyses", params={
-                    "select": "count", "user_id": f"eq.{uid}"}) or []
+                ana = cached("ana:" + uid, 60, lambda: sb("GET", "/rest/v1/user_analyses", params={
+                    "select": "count", "user_id": f"eq.{uid}"}) or [])
                 ana_count = int(ana[0]["count"]) if ana else 0
                 return self._send(200, {
                     "balance": bal, "start_balance": START_BALANCE, "net_r": net_r,
@@ -304,6 +351,7 @@ class Handler(BaseHTTPRequestHandler):
             if custom_lot is not None:
                 body["lot"] = custom_lot
             row = sb("POST", "/rest/v1/paper_trades", body=body)
+            invalidate_league(uid)   # cache segar selepas trade baru
             tr = (row or [{}])[0]
             log(f"{uid[:8]} opened {pair} {side} " + (f"lot={custom_lot}" if custom_lot is not None else f"risk {risk_pct}%"))
             # Owner-only: also place a REAL MT5 pending order with the exact lot
