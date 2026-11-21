@@ -637,12 +637,55 @@ var LOGIN_URL='/login.html?next=%2Fmember%2F';
 var PH='place'+'holder';
 function getSession(){try{return JSON.parse(localStorage.getItem(AUTH_KEY)||'null')}catch(e){return null}}
 function getToken(){var s=getSession();return s&&s.access_token?s.access_token:null}
+function saveSession(s){try{localStorage.setItem(AUTH_KEY,JSON.stringify(s))}catch(e){}}
+/* Silent refresh: access token Supabase hidup ~1 jam. PWA homescreen dibuka
+   semula selepas itu -> gate lama terus logout walaupun refresh_token sah.
+   Kini cuba refresh dulu (endpoint refresh_token tak perlu captcha). */
+var _refreshing=null;
+function refreshSession(){
+ if(_refreshing)return _refreshing;
+ var s=getSession();
+ if(!s||!s.refresh_token)return Promise.resolve(false);
+ _refreshing=fetch(SB_URL+'/auth/v1/token?grant_type=refresh_token',{
+   method:'POST',headers:{apikey:SB_KEY,'Content-Type':'application/json'},
+   body:JSON.stringify({refresh_token:s.refresh_token})})
+  .then(function(r){return r.ok?r.json():null})
+  .then(function(d){
+   _refreshing=null;
+   if(!d||!d.access_token)return false;
+   saveSession(Object.assign({},s,d));
+   return true;
+  }).catch(function(){_refreshing=null;return false});
+ return _refreshing;
+}
+function sessionExpired(s){return !!(s&&s.expires_at&&s.expires_at*1000<Date.now())}
+function refreshAndReload(){
+ /* Splash sementara refresh berjalan; reload supaya seluruh app init dgn token baru. */
+ try{document.body.innerHTML='<div style="position:fixed;inset:0;display:grid;place-items:center;background:#0a0e0b;color:#b7f36b;font:600 14px -apple-system,sans-serif">Menyambung semula…</div>'}catch(e){}
+ refreshSession().then(function(ok){ if(ok)location.reload(); else goLogin(); });
+}
 var sess=getSession();
-if(!sess||!sess.access_token||(sess.expires_at&&sess.expires_at*1000<Date.now())){location.replace(LOGIN_URL);return}
+if(!sess||!sess.access_token){location.replace(LOGIN_URL);return}
+if(sessionExpired(sess)){
+ if(sess.refresh_token){refreshAndReload();return}
+ location.replace(LOGIN_URL);return;
+}
+/* Proaktif refresh sebelum tamat (5 min sebelum expiry) + bila app resume,
+   supaya token tak pernah expired semasa sesi aktif. */
+function maybeRefresh(){var s=getSession();if(s&&s.expires_at&&s.expires_at*1000-Date.now()<300000)refreshSession()}
+setInterval(maybeRefresh,240000);
+document.addEventListener('visibilitychange',function(){if(!document.visibilityState||document.visibilityState==='visible')maybeRefresh()});
 function goLogin(){try{localStorage.removeItem(AUTH_KEY)}catch(e){}location.replace(LOGIN_URL+'&why=signedout')}
 function apiFetch(url,opts){
  opts=opts||{};opts.headers=Object.assign({Authorization:'Bearer '+getToken()},opts.headers||{});
  return fetch(url,opts).then(function(r){
+  if(r.status===401&&!opts._retried){
+   return refreshSession().then(function(ok){
+    if(!ok){goLogin();throw new Error('auth')}
+    opts._retried=true;opts.headers=Object.assign({},opts.headers,{Authorization:'Bearer '+getToken()});
+    return apiFetch(url,opts);
+   });
+  }
   if(r.status===401){goLogin();throw new Error('auth')}
   return r.json().catch(function(){return{}}).then(function(j){return{ok:r.ok,status:r.status,data:j}});
  });
@@ -650,6 +693,13 @@ function apiFetch(url,opts){
 function sbFetch(path,opts){
  opts=opts||{};opts.headers=Object.assign({apikey:SB_KEY,Authorization:'Bearer '+getToken()},opts.headers||{});
  return fetch(SB_URL+path,opts).then(function(r){
+  if(r.status===401&&!opts._retried){
+   return refreshSession().then(function(ok){
+    if(!ok){goLogin();throw new Error('auth')}
+    opts._retried=true;opts.headers=Object.assign({},opts.headers,{Authorization:'Bearer '+getToken()});
+    return sbFetch(path,opts);
+   });
+  }
   if(r.status===401){goLogin();throw new Error('auth')}
   return r.json().catch(function(){return{}}).then(function(j){return{ok:r.ok,status:r.status,data:j}});
  });
