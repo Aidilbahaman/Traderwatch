@@ -21,6 +21,7 @@ Safety:
 import json
 import os
 import sys
+import threading
 import time
 import urllib.error
 import urllib.request
@@ -50,9 +51,15 @@ BARS_COUNT = 300                    # M15 bars fed to the analyst
 # set TURNSTILE_SECRET to your real secret in the service env for production.
 TURNSTILE_SECRET = os.environ.get("TURNSTILE_SECRET", "1x0000000000000000000000000000000AA")
 TURNSTILE_VERIFY_URL = "https://challenges.cloudflare.com/turnstile/v0/siteverify"
+# Audit M2 (2026-11-21): endpoint verify Turnstile tiada auth — had per-IP
+# supaya tidak boleh disalah guna untuk spam siteverify Cloudflare.
+TURNSTILE_RL_MAX = 10               # max verify requests per IP per window
+TURNSTILE_RL_WINDOW_S = 60
 
 _last_call = {}                     # uid -> ts of last accepted analysis
 _hour_count = {}                    # uid -> [window_start_ts, count]
+_turnstile_rl = {}                  # ip -> [window_start_ts, count]
+_turnstile_rl_lock = threading.Lock()
 
 
 def load_env():
@@ -160,6 +167,25 @@ def rate_commit(uid):
         win = [now, 0]
     win[1] += 1
     _hour_count[uid] = win
+
+
+def turnstile_rate_ok(ip):
+    """Per-IP fixed-window rate limit for the unauthenticated Turnstile verify
+    endpoint (audit M2): max TURNSTILE_RL_MAX requests per TURNSTILE_RL_WINDOW_S.
+    Counts every request (even bad JSON) and prunes expired windows in passing."""
+    now = time.time()
+    with _turnstile_rl_lock:
+        for k in [k for k, w in _turnstile_rl.items()
+                  if now - w[0] >= TURNSTILE_RL_WINDOW_S]:
+            del _turnstile_rl[k]
+        win = _turnstile_rl.get(ip)
+        if not win or now - win[0] >= TURNSTILE_RL_WINDOW_S:
+            win = [now, 0]
+        if win[1] >= TURNSTILE_RL_MAX:
+            return False
+        win[1] += 1
+        _turnstile_rl[ip] = win
+        return True
 
 
 def fetch_bars(pair):
@@ -297,6 +323,8 @@ class Handler(BaseHTTPRequestHandler):
         return self._send(404, {"error": "not found"})
 
     def _turnstile(self):
+        if not turnstile_rate_ok(self.client_address[0]):
+            return self._send(429, {"ok": False, "error": "rate limited"})
         try:
             n = int(self.headers.get("Content-Length") or 0)
             req = json.loads(self.rfile.read(n).decode() or "{}")
