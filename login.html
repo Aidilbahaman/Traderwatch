@@ -7,7 +7,7 @@
 <meta name="robots" content="noindex">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Source+Sans+3:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Source+Sans+3:wght@400;600&display=swap" media="print" onload="this.media='all'">
 <link rel="stylesheet" href="app.css">
 <style>
 [hidden]{display:none!important}
@@ -93,13 +93,14 @@
 <script src="config.js?v=202610182133"></script>
 <script src="common.js?v=202610182133"></script>
 <script src="sound.js?v=20261121s3"></script>
-<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<script src="https://telegram.org/js/telegram-web-app.js" async onload="window.__tgReady&&window.__tgReady()"></script>
 
 <script>
 /* ===== Telegram Mini App bootstrap =====
-   Outside Telegram this file does nothing: window.Telegram is undefined and
-   every guard below returns early. */
-(function(){
+   SDK dimuat async (tak sekat render form). Bootstrap jalan bila SDK siap,
+   atau terus jika telegram-web-app.js sudah ada dalam cache. */
+window.__tgReady = function(){
+ if(window.__tgBooted) return; window.__tgBooted = true;
   var tg = window.Telegram && window.Telegram.WebApp;
   /* telegram-web-app.js defines window.Telegram even in a normal browser, so
      presence is not proof. Outside Telegram the platform is "unknown" and
@@ -157,7 +158,8 @@
       tg.setBackgroundColor(dark ? "#000000" : "#f5f5f7");
     }
   }catch(_){}
-})();
+ };
+ if(window.Telegram && window.Telegram.WebApp) window.__tgReady();
 </script>
 
 <script>
