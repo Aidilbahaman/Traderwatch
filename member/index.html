@@ -1102,6 +1102,7 @@ function loadCandles(){
   if(run!==S.run)return;
   var cs=res.ok&&res.data&&Array.isArray(res.data.candles)?res.data.candles.map(function(k){return{o:+k.o,h:+k.h,l:+k.l,c:+k.c}}).filter(function(k){return isFinite(k.o)&&isFinite(k.h)&&isFinite(k.l)&&isFinite(k.c)}):[];
   if(cs.length<30){chartFail();return}
+  cs=cs.slice(-100);   /* chart kemas: 100 candle terkini sahaja (dilukis & dikira) */
   S.candles=cs;S.m=metrics(cs);S.rv=0;S.rv0=performance.now();if(!S.ana&&!(JOB&&JOB.state==='running'&&JOB.pair===pair)){$('go').disabled=false;setChip('','SEDIA')}
  }).catch(function(){if(run===S.run)chartFail()});
 }
