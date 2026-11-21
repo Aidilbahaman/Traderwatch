@@ -228,6 +228,19 @@ class Handler(BaseHTTPRequestHandler):
             return self._send(401, {"error": "Please sign in as a member."})
         uid = user["id"]
         try:
+            if path == "/api/league/pair-traders":
+                counts = cached("pair-traders", 60, lambda: sb(
+                    "GET", "/rest/v1/paper_trades",
+                    params={"select": "pair,user_id", "season": f"eq.{SEASON}",
+                            "limit": "2000"}) or [])
+                agg = {}
+                for r in counts:
+                    p = str(r.get("pair") or "").upper().replace("/", "")
+                    if not p:
+                        continue
+                    agg.setdefault(p, set()).add(r.get("user_id"))
+                out = {p: len(s) for p, s in agg.items()}
+                return self._send(200, {"traders": out, "season": SEASON})
             if path == "/api/league/trades":
                 return self._send(200, {"trades": my_trades(uid), "season": SEASON})
             if path == "/api/league/leaderboard":

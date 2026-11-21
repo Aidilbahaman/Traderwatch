@@ -70,6 +70,7 @@ html[data-theme="light"] .ic{background:#e6efd9;border-color:#c9dbb4}
 .pair .ds{font-size:11px;color:var(--muted);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .pair .px{font-weight:700;font-variant-numeric:tabular-nums;margin-top:9px;font-size:15px}
 .pair .ch{font-size:11px;font-weight:700;font-variant-numeric:tabular-nums}
+.pair .traders{display:inline-block;margin-top:5px;font-size:9px;font-weight:750;letter-spacing:.02em;color:#ff9ba0;background:#ff777d14;border:1px solid #ff777d30;border-radius:999px;padding:1px 7px}
 .up{color:var(--green)}.dn{color:var(--red)}
 .soon{display:inline-block;background:#ffc16b1f;color:var(--orange);font-weight:800;font-size:8px;letter-spacing:.04em;padding:2px 6px;border-radius:6px;margin-left:5px;vertical-align:middle;text-transform:uppercase}
 .pair.closed{opacity:.5;cursor:not-allowed;filter:grayscale(.5)}
@@ -727,7 +728,7 @@ var DICT={
   instT:'Pasang app',instS:'Offline-ready · App shell dicache',install:'Pasang',setNote:'Pilihan disimpan di peranti ini.',installHint:'Guna menu browser → Tambah ke skrin utama.',
   goAI:'Analisis dengan AI',loading:'Memuat…',aiLabel:'Pandangan AI',conf:'YAKIN',entry:'Entry',tp:'Take Profit',sl:'Stop Loss',checklist:'Checklist confluence',reasons:'Sebab analisis',risk:'Risiko',again:'← Analisis pair / timeframe lain',
   chartFail:'Gagal memuatkan chart.',retry:'Cuba lagi',waitMsg:'Tiada setup jelas sekarang — AI cadangkan menunggu.',
-  noAnalysis:'Analisis gagal buat masa ini. Cuba lagi sebentar.',limit:'Analisis dalam cooldown. Cuba lagi sebentar.',
+  noAnalysis:'Analisis gagal buat masa ini. Cuba lagi sebentar.',limit:'Analisis dalam cooldown. Cuba lagi sebentar.',tradersTitle:'Bilangan trader yang ambil pair ini',traderOne:'trader',traderUnit:'trader',
   account:'Butiran akaun',uid:'ID ahli',name:'Nama',email:'Emel',plan:'Plan',close:'Tutup',
   perfTitle:'Prestasi Saya',perfSub:'Keputusan paper trading anda dalam Liga.',perfWin:'Kadar menang',perfClosed:'Trade paper ditutup',perfMine:'Analisis anda dibuat',perfBalance:'Baki maya',perfRank:'Rank',perfOpen:'Trade dibuka',viewLeague:'Lihat Liga',perfEmpty:'Belum ada paper trade. Analisis satu pair dan ambil trade untuk bermula.',perfNote:'Paper trading sahaja — modal maya. Outcome dari harga sebenar.',
   notifTitle:'Notifikasi komuniti',notifSub:'Tahap peringatan mesej komuniti disimpan pada akaun anda.',notifOff:'Matikan',notifOffS:'Tiada peringatan mesej.',notifTeam:'Ahli sahaja',notifTeamS:'Peringatan apabila ahli menghantar mesej.',notifAll:'Semua',notifAllS:'Semua peringatan komuniti.',notifSaved:'Tahap notifikasi disimpan.',notifErr:'Gagal menyimpan. Cuba lagi.',
@@ -809,7 +810,8 @@ var DICT={
   setTitle:'设置',setSub:'语言、主题和应用。',langSec:'Bahasa / 语言',langSub:'选择显示语言',themeSec:'Tema / 主题',dark:'深色',light:'浅色',system:'系统',
   instT:'安装应用',instS:'可离线 · 应用外壳已缓存',install:'安装',setNote:'偏好设置保存在此设备上。',installHint:'使用浏览器菜单 → 添加到主屏幕。',
   goAI:'用 AI 分析',loading:'加载中…',aiLabel:'AI 观点',conf:'置信度',entry:'入场',tp:'止盈',sl:'止损',checklist:'共振检查表',reasons:'分析理由',risk:'风险',again:'← 分析其他货币对 / 周期',
-  chartFail:'图表加载失败。',retry:'重试',waitMsg:'目前没有清晰设置——AI 建议等待。',noAnalysis:'分析暂时失败，请稍后再试。',limit:'分析冷却中，请稍后再试。',
+  tradersTitle:'采用此货币对的交易者',traderOne:'位交易者',traderUnit:'位交易者',
+  chartFail:'图表加载失败。',retry:'重试',waitMsg:'目前没有清晰设置——AI 建议等待。',noAnalysis:'分析暂时失败，请稍后再试。',limit:'分析冷却中，请稍后再试。',tradersTitle:'采用此货币对的交易者',traderOne:'位交易者',traderUnit:'位交易者',
   account:'账户详情',uid:'会员 ID',name:'姓名',email:'邮箱',plan:'方案',close:'关闭',
   perfTitle:'我的表现',perfSub:'您在联赛中的模拟交易结果。',perfWin:'胜率',perfClosed:'已平仓模拟交易',perfMine:'您的分析次数',perfNote:'仅模拟交易——虚拟资金。结果由实时价格结算。',
   notifTitle:'社区通知',notifSub:'社区消息提醒级别保存在您的账户。',notifOff:'关闭',notifOffS:'无消息提醒。',notifTeam:'仅成员',notifTeamS:'成员发消息时提醒。',notifAll:'全部',notifAllS:'所有社区提醒。',notifSaved:'通知级别已保存。',notifErr:'保存失败，请重试。',
@@ -887,6 +889,7 @@ var DICT={
   setTitle:'அமைப்புகள்',setSub:'மொழி, தீம் மற்றும் ஆப்.',langSec:'Bahasa / மொழி',langSub:'காட்சி மொழியைத் தேர்ந்தெடுக்கவும்',themeSec:'Tema / தீம்',dark:'இருண்ட',light:'ஒளி',system:'கணினி',
   instT:'ஆப் நிறுவு',instS:'ஆஃப்லைன் தயார் · ஆப் ஷெல் கேச்',install:'நிறுவு',setNote:'விருப்பங்கள் இந்த சாதனத்தில் சேமிக்கப்படும்.',installHint:'உலாவி மெனு → முகப்புத் திரையில் சேர்.',
   goAI:'AI உடன் பகுப்பாய்வு',loading:'ஏற்றுகிறது…',aiLabel:'AI கருத்து',conf:'நம்பிக்கை',entry:'Entry',tp:'Take Profit',sl:'Stop Loss',checklist:'ஒற்றுமை பட்டியல்',reasons:'பகுப்பாய்வு காரணங்கள்',risk:'இடர்',again:'← மற்ற ஜோடி / காலத்தை பகுப்பாய்வு செய்',
+  tradersTitle:'இந்த ஜோடியை எடுத்த வர்த்தகர்கள்',traderOne:'வர்த்தகர்',traderUnit:'வர்த்தகர்கள்',
   chartFail:'கிராபை ஏற்ற முடியவில்லை.',retry:'மீண்டும் முயற்சி',waitMsg:'தற்போது தெளிவான அமைப்பு இல்லை — AI காத்திருக்க பரிந்துரைக்கிறது.',noAnalysis:'பகுப்பாய்வு தோல்வியடைந்தது. மீண்டும் முயற்சிக்கவும்.',limit:'பகுப்பாய்வு குளிரூட்டலில் உள்ளது.',
   account:'கணக்கு விவரங்கள்',uid:'உறுப்பினர் ID',name:'பெயர்',email:'மின்னஞ்சல்',plan:'திட்டம்',close:'மூடு',
   perfTitle:'என் செயல்திறன்',perfSub:'லீக்கில் உங்கள் பேப்பர் வர்த்தக முடிவுகள்.',perfWin:'வெற்றி விகிதம்',perfClosed:'மூடிய பேப்பர் வர்த்தகங்கள்',perfMine:'உங்கள் பகுப்பாய்வுகள்',perfNote:'பேப்பர் வர்த்தகம் மட்டும் — மெய்நிகர் மூலதனம். முடிவுகள் நேரடி விலைகளிலிருந்து.',
@@ -955,7 +958,7 @@ function showView(v){
  $('composer').classList.toggle('hidden',v!=='community');
  $('scroll').classList.toggle('com',v==='community');
  $('scroll').scrollTop=0;
- if(v==='analyst'){drawPairs(true);maybePrices()}
+ if(v==='analyst'){drawPairs(true);maybePrices();loadPairTraders()}
  if(v==='community')loadMessages();
  if(v==='liga')renderLiga();
  if(v==='profile'){if(!profileLoaded)loadProfile();else loadPerf()}
@@ -966,6 +969,12 @@ var tt;
 function toast(msg){var el=$('toast');el.textContent=msg;el.classList.add('show');clearTimeout(tt);tt=setTimeout(function(){el.classList.remove('show')},2600)}
 
 /* ---------------- analyst data ---------------- */
+var PAIR_TRADERS={};   /* pair -> bilangan member berbeza yang ambil trade (label 🔥) */
+function loadPairTraders(){
+ apiFetch('/api/league/pair-traders').then(function(r){
+  if(r.ok&&r.data&&r.data.traders){PAIR_TRADERS=r.data.traders;drawPairs(true)}
+ }).catch(function(){});
+}
 var PAIRS=[
  {s:'XAUUSD',n:'Gold / US Dollar',g:'c',d:2},{s:'XAGUSD',n:'Silver / US Dollar',g:'c',d:3},
  {s:'BTCUSD',n:'Bitcoin',g:'k',d:2},{s:'EURUSD',n:'Euro / US Dollar',g:'f',d:4},
@@ -997,7 +1006,9 @@ function drawPairs(quiet){
   var tag=cl==='closed'?esc(t('mktClosed')):cl==='offline'?esc(t('dataOffline')):(p.soon?esc(t('soon')):'');
   var tagCls=cl?'closed-tag':'soon';
   var extra=(cl==='closed'&&window.TWMarket&&window.TWMarket.nextOpen)?' title="'+esc(t('mktReopens'))+' '+esc(reopenStr(window.TWMarket.nextOpen))+'"':'';
-  return '<button class="pair'+(cl?' closed':'')+'" data-s="'+p.s+'"'+(cl?' aria-disabled="true"':'')+extra+' style="'+(quiet?'animation:none':'animation-delay:'+(i*35)+'ms')+'"><div class="top"><div class="ic">'+p.s.slice(0,3)+'</div>'+spark(p)+'</div><div class="nm">'+p.s+'</div><div class="ds">'+esc(p.n)+'</div><div class="px">'+px+'</div><div class="ch '+(u?'up':'dn')+'">'+(tag?'<span class="'+tagCls+'">'+tag+'</span>':ch)+'</div></button>';
+  var tn=PAIR_TRADERS[p.s]||0;
+  var badge=tn>0?'<span class="traders" title="'+esc(t('tradersTitle'))+'">🔥 '+tn+' '+esc(tn===1?t('traderOne'):t('traderUnit'))+'</span>':'';
+  return '<button class="pair'+(cl?' closed':'')+'" data-s="'+p.s+'"'+(cl?' aria-disabled="true"':'')+extra+' style="'+(quiet?'animation:none':'animation-delay:'+(i*35)+'ms')+'"><div class="top"><div class="ic">'+p.s.slice(0,3)+'</div>'+spark(p)+'</div><div class="nm">'+p.s+'</div><div class="ds">'+esc(p.n)+'</div><div class="px">'+px+'</div><div class="ch '+(u?'up':'dn')+'">'+(tag?'<span class="'+tagCls+'">'+tag+'</span>':ch)+'</div>'+badge+'</button>';
  }).join(''):'<div class="none">'+esc(t('noPairs'))+'</div>';
  Array.prototype.forEach.call($('pairs').querySelectorAll('.pair'),function(b){b.onclick=function(){var p=PAIRS.filter(function(x){return x.s===b.dataset.s})[0];if(p&&pairClosed(p)){var why=pairClosed(p);toast(why==='offline'?t('dataOffline'):t('mktClosed'));return}openSheet(b.dataset.s)}});
 }
