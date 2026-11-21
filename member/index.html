@@ -1132,9 +1132,9 @@ function typeLine(html,run){
    if(i<plain.length){d.textContent=plain.slice(0,i);setTimeout(step,10)}else{d.innerHTML=html;setTimeout(function(){res(true)},120)}})();
  });
 }
-function bumpCount(){try{var n=parseInt(localStorage.getItem('tw-analysis-count')||'0',10)||0;localStorage.setItem('tw-analysis-count',String(n+1));if(profileLoaded)renderStats()}catch(e){}}
+function bumpCount(){var n=parseInt(lsGet('tw-analysis-count')||'0',10)||0;lsSet('tw-analysis-count',n+1);if(profileLoaded)renderStats()}
 /* Kira verdict HOLD — dipakai untuk badge "Patient" dalam Liga. */
-function bumpHold(){try{var n=parseInt(localStorage.getItem('tw-hold-count')||'0',10)||0;localStorage.setItem('tw-hold-count',String(n+1))}catch(e){}}
+function bumpHold(){var n=parseInt(lsGet('tw-hold-count')||'0',10)||0;lsSet('tw-hold-count',n+1)}
 function analyze(){
  if(JOB&&JOB.state==='running'){toast(t('anaRunning'));return}
  if(S.busy)return;
@@ -1305,7 +1305,13 @@ function wrTxt(v){return (v==null||!isFinite(+v))?'—':(+v).toFixed(1)+'%'}
 function pairName(s){s=String(s||'').replace('/','');return s.length>3?s.slice(0,3)+'/'+s.slice(3):s}
 function pdec(s){var p=PAIRS.filter(function(x){return x.s===s})[0];return p?p.d:2}
 function tfx(s,v){return (v==null||!isFinite(+v))?'—':Number(v).toFixed(pdec(s))}
-function lsCount(k){try{var v=parseInt(localStorage.getItem(k)||'0',10);return isFinite(v)&&v>0?v:0}catch(e){return 0}}
+function twUid(){var s=getSession();return (s&&s.user&&s.user.id)||'anon'}
+function lsKey(base){return base+':'+twUid()}
+/* Counts are PER-ACCOUNT (not per-browser): a new login starts fresh/empty.
+   Legacy unscoped keys are adopted once into the current account then removed. */
+function lsGet(base){try{var k=lsKey(base);var v=localStorage.getItem(k);if(v==null&&isOwner()){var lg=localStorage.getItem(base);if(lg!=null){localStorage.setItem(k,lg);localStorage.removeItem(base);v=lg}}return v}catch(e){return null}}
+function lsSet(base,val){try{localStorage.setItem(lsKey(base),String(val))}catch(e){}}
+function lsCount(k){var v=parseInt(lsGet(k)||'0',10);return isFinite(v)&&v>0?v:0}
 function dayKey(d){return new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Kuala_Lumpur'}).format(d)}
 function closedSorted(){
  return LG.trades.filter(function(x){return x.status!=='open'&&x.r_result!=null}).slice().sort(function(a,b){return String(b.closed_at||'').localeCompare(String(a.closed_at||''))});
@@ -1376,6 +1382,7 @@ function drawYou(){
  if(LG.state==='error'){el.innerHTML=lgErrorHtml();return}
  if(!me){el.innerHTML='<div class="ylab">'+esc(t('youLab'))+'</div><div class="empty">'+esc(t('loading'))+'</div>';return}
  var rank=me.rank!=null?+me.rank:null,nr=+me.net_r||0;
+ var hasActivity=((+me.trades_closed||0)>0||(+me.trades_open||0)>0);
  var sorted=sortBoard(LG.board,'r'),idx=-1;
  sorted.forEach(function(x,i){if(x.is_me)idx=i});
  var above=(rank!=null&&idx>0)?sorted[idx-1]:null,prog;
@@ -1389,7 +1396,7 @@ function drawYou(){
   prog='<div class="nextprog"><div class="nt"><span>'+esc(t('rankHint'))+'</span></div><div class="bar"><i style="width:0%"></i></div></div>';
  }
  el.innerHTML='<div class="ylab">'+esc(t('youLab'))+'</div><div class="row"><div class="bigrank">'+(rank!=null?'#'+rank:'—')+'<small>'+esc(t('rankLab')).toUpperCase()+'</small></div><div class="youstats">'+
-  '<div class="ystat'+(nr>0?' pos':'')+'"><b>'+fmtR(nr)+'</b><small>'+esc(t('netR'))+'</small></div>'+
+  '<div class="ystat'+(nr>0?' pos':'')+'"><b>'+(hasActivity?fmtR(nr):'—')+'</b><small>'+esc(t('netR'))+'</small></div>'+
   '<div class="ystat"><b>'+wrTxt(me.win_rate)+'</b><small>'+esc(t('winRate'))+'</small></div>'+
   '<div class="ystat"><b>'+money(me.balance)+'</b><small>'+esc(t('balanceLab'))+'</small></div>'+
   '</div></div>'+prog;
@@ -1624,9 +1631,9 @@ function loadPerf(){
  }).catch(function(){MYPERF=null;renderStats()});
 }
 function renderStats(){
- var cnt=null;try{var v=localStorage.getItem('tw-analysis-count');cnt=v?parseInt(v,10):null}catch(e){}
- $('s1v').textContent=cnt!=null&&isFinite(cnt)?String(cnt):'—';
- $('s2v').textContent=MYPERF?String(MYPERF.trades_closed):'—';
+ var cnt=null;var v=lsGet('tw-analysis-count');if(v!=null){var n=parseInt(v,10);if(isFinite(n)&&n>0)cnt=n}
+ $('s1v').textContent=cnt!=null?String(cnt):'—';
+ $('s2v').textContent=(MYPERF&&MYPERF.trades_closed>0)?String(MYPERF.trades_closed):'—';
  var nr=MYPERF?MYPERF.net_r:null,has=MYPERF&&MYPERF.trades_closed>0&&nr!=null&&isFinite(nr);
  var s3=$('s3v');
  s3.textContent=has?(nr===0?'0R':fmtR(nr)):'—';
@@ -1667,7 +1674,7 @@ function showAccount(){
  $('altClose').onclick=closeSheet;
 }
 function showPerf(){
- var cnt='—';try{var v=localStorage.getItem('tw-analysis-count');if(v)cnt=String(parseInt(v,10))}catch(e){}
+ var cnt='—';var v=lsGet('tw-analysis-count');if(v!=null&&parseInt(v,10)>0)cnt=String(parseInt(v,10));
  /* Tiada data peribadi / tiada trade langsung → empty state mesra. */
  if(!MYPERF||(MYPERF.trades_closed===0&&MYPERF.trades_open===0)){
   var he='<div class="empty">'+esc(t('perfEmpty'))+'</div><button class="again" id="perfAnalyst">'+esc(t('navAnalyst'))+'</button><button class="again" id="altClose">'+esc(t('close'))+'</button>';
