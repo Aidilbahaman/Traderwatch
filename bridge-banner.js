@@ -1,89 +1,50 @@
-/* TraderWatch MT5 bridge / market-status banner.
- * Single source of truth: /data/mt5-bridge.json (written every minute by
- * engine/mt5_data.py health). Three states:
- *   ok=false            -> red: bridge offline, live data paused (admin fixing)
- *   ok=true, market=closed -> amber: forex market closed + countdown to reopen,
- *                             shown in the CLIENT's own timezone (auto-detected
- *                             from the browser, so each country sees local time)
- *   ok=true, market=open   -> hidden
- * Self-injecting: just add <script src="/bridge-banner.js"></script> to a page.
+/* TraderWatch market/bridge state provider (no visible header).
+ * Reads /data/mt5-bridge.json every minute (written by engine/mt5_data.py health)
+ * and exposes window.TWMarket + dispatches "twmarket" events so pair cards can
+ * show per-card "Market closed" labels instead of a global banner.
+ *
+ *   TWMarket.ok        true when MT5 bridge is up
+ *   TWMarket.market    "open" | "closed"  (forex/metals session)
+ *   TWMarket.nextOpen  Date of next forex open (UTC; render in client's own tz)
+ *   TWMarket.closed()  true when bridge down OR forex market closed
+ *   TWMarket.isPairClosed(symbol)  true for FOREX/METALS when market closed;
+ *                                  always false for BTCUSD (crypto trades 24/7)
  */
 (function () {
-  if (window.__twBridgeBanner) return;
-  window.__twBridgeBanner = true;
+  if (window.TWMarket) return;
 
-  var bar = document.createElement("div");
-  bar.id = "twBridgeBar";
-  bar.setAttribute("role", "status");
-  bar.style.cssText =
-    "position:fixed;top:0;left:0;right:0;z-index:2147483000;display:none;" +
-    "padding:9px 14px;font:600 13px/1.45 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;" +
-    "text-align:center;color:#fff;box-shadow:0 2px 12px rgba(0,0,0,.35)";
-  function mount() {
-    if (document.body) document.body.appendChild(bar);
-    else setTimeout(mount, 50);
+  var state = { ok: null, market: null, nextOpen: null, checkedAt: null, error: null };
+  var CRYPTO = { BTCUSD: true };   // crypto pairs stay live on weekends
+
+  function emit() {
+    window.dispatchEvent(new CustomEvent("twmarket", { detail: state }));
   }
-  mount();
-
-  var mode = "ok";
-  var nextOpen = null;
-
-  function pad(n) { return String(n).padStart(2, "0"); }
-  function countdown(ms) {
-    if (ms <= 0) return "0h 00m 00s";
-    var h = Math.floor(ms / 3600000);
-    var m = Math.floor((ms % 3600000) / 60000);
-    var s = Math.floor((ms % 60000) / 1000);
-    return h + "h " + pad(m) + "m " + pad(s) + "s";
+  function parse(s) {
+    state.ok = (s.ok === true);
+    state.market = s.market || null;
+    state.nextOpen = s.next_open ? new Date(s.next_open) : null;
+    state.checkedAt = s.checked_at ? new Date(s.checked_at) : null;
+    state.error = s.last_error || null;
   }
-  function localTime(d) {
-    var tz = "UTC";
-    try { tz = Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC"; } catch (e) {}
-    var txt;
-    try {
-      txt = d.toLocaleString(undefined, {
-        timeZone: tz, weekday: "short", day: "numeric", month: "short",
-        hour: "2-digit", minute: "2-digit", hour12: false
-      });
-    } catch (e) { txt = d.toUTCString(); }
-    return { txt: txt, tz: tz };
-  }
-
-  function render() {
-    if (mode === "down") {
-      bar.style.background = "#b3261e";
-      bar.innerHTML =
-        "⚠️ MT5 data bridge offline — live data paused. Admin is restarting the bridge.";
-      bar.style.display = "block";
-    } else if (mode === "closed" && nextOpen) {
-      var diff = nextOpen.getTime() - Date.now();
-      if (diff <= 0) { bar.style.display = "none"; return; }
-      var lt = localTime(nextOpen);
-      bar.style.background = "#8a6d1a";
-      bar.innerHTML =
-        "🌙 Market closed — reopens <b>" + lt.txt + "</b> (" + lt.tz +
-        ") · in <b>" + countdown(diff) + "</b>";
-      bar.style.display = "block";
-    } else {
-      bar.style.display = "none";
-    }
-  }
-
   function poll() {
     fetch("/data/mt5-bridge.json?t=" + Date.now(), { cache: "no-store" })
       .then(function (r) { return r.json(); })
-      .then(function (s) {
-        if (!s) return;
-        if (s.ok === false) { mode = "down"; nextOpen = null; }
-        else if (s.market === "closed" && s.next_open) {
-          mode = "closed"; nextOpen = new Date(s.next_open);
-        } else { mode = "ok"; nextOpen = null; }
-        render();
-      })
+      .then(function (s) { if (s) { parse(s); emit(); } })
       .catch(function () { /* keep last known state on network blip */ });
   }
 
+  window.TWMarket = {
+    get ok() { return state.ok; },
+    get market() { return state.market; },
+    get nextOpen() { return state.nextOpen; },
+    get checkedAt() { return state.checkedAt; },
+    isPairClosed: function (symbol) {
+      var s = String(symbol || "").toUpperCase().replace("/", "").replace(" ", "");
+      return !CRYPTO[s] && state.market === "closed";
+    },
+    closed: function () { return state.market === "closed" || state.ok === false; }
+  };
+
   poll();
-  setInterval(poll, 60000);   // refresh status each minute
-  setInterval(render, 1000);  // tick the countdown every second
+  setInterval(poll, 60000);
 })();

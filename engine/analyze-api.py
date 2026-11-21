@@ -333,6 +333,9 @@ class Handler(BaseHTTPRequestHandler):
         # with a clear message (the site banner also shows bridge/market status).
         if not M5.is_up():
             return self._send(503, {"error": "MT5 data bridge is offline — analysis paused. Please try again shortly.", "bridge_down": True})
+        # Forex/metals closed on weekends — only crypto (BTCUSD) trades 24/7.
+        if M5.read_status().get("market") == "closed" and pair != "BTCUSD":
+            return self._send(409, {"error": "Market closed for this pair — it reopens soon. BTCUSD is available 24/7.", "market_closed": True})
         try:
             result = run_analysis(pair, tf)
         except Exception as e:

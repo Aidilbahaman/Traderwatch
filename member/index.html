@@ -72,6 +72,10 @@ html[data-theme="light"] .ic{background:#e6efd9;border-color:#c9dbb4}
 .pair .ch{font-size:11px;font-weight:700;font-variant-numeric:tabular-nums}
 .up{color:var(--green)}.dn{color:var(--red)}
 .soon{display:inline-block;background:#ffc16b1f;color:var(--orange);font-weight:800;font-size:8px;letter-spacing:.04em;padding:2px 6px;border-radius:6px;margin-left:5px;vertical-align:middle;text-transform:uppercase}
+.pair.closed{opacity:.5;cursor:not-allowed;filter:grayscale(.5)}
+.pair.closed:hover{transform:none;border-color:var(--line)}
+.closed-tag{display:inline-block;background:#ff777d1f;color:var(--red);font-weight:800;font-size:8px;letter-spacing:.04em;padding:2px 6px;border-radius:6px;margin-left:5px;vertical-align:middle;text-transform:uppercase}
+.pair .reopen{font-size:9px;color:var(--muted);margin-top:5px;font-variant-numeric:tabular-nums}
 .none{grid-column:1/-1;text-align:center;color:var(--muted);padding:30px 0}
 .hint{display:flex;align-items:center;gap:8px;justify-content:center;color:var(--muted);font-size:12px;margin:18px 0 0;opacity:.8}
 .hint i{width:6px;height:6px;border-radius:50%;background:var(--lime);opacity:.7}
@@ -575,7 +579,7 @@ html[data-theme="light"] .lotbadge{color:#4c7a17}
 </div>
 
 <script src="../sound.js?v=20261121s3"></script>
-<script src="/bridge-banner.js?v=20261121"></script>
+<script src="/bridge-banner.js?v=20261121b"></script>
 <script>
 (function(){
 'use strict';
@@ -616,6 +620,7 @@ var DICT={
   navAnalyst:'Analyst',navCommunity:'Komuniti',navProfile:'Profil',navSettings:'Tetapan',
   search:'Cari pair…',noPairs:'Tiada pair dijumpai.',hint:'Pilih pair untuk analisis AI masa sebenar.',all:'Semua',commodity:'Komoditi',forex:'Forex',crypto:'Crypto',indices:'Indeks',
   soon:'Belum dibuka',notOpen:'Pair ini belum dibuka untuk analisis AI. Cuba pair di bawah.',
+  mktClosed:'Pasaran tutup',dataOffline:'Data luar talian',mktReopens:'Buka semula',
   comTitle:'Komuniti',comSub:'Berbincang dengan trader lain.',online:'Komuniti aktif',membersToday:'ahli hari ini',onlineNow:'sedang online',writeMsg:'Tulis mesej…',
   emptyChat:'Belum ada mesej hari ini. Jadilah yang pertama.',resetAt:'Mesej dikosongkan setiap tengah malam (MYT). Pautan, telefon & emel ditapis automatik.',
   sendErr:'Mesej gagal dihantar. Cuba lagi.',slow:'Sila tunggu beberapa saat sebelum hantar lagi.',emptyMsg:'Tulis mesej dahulu.',longMsg:'Mesej terlalu panjang (maks 500 aksara).',filtered:'Mesej disekat oleh penapis komuniti.',someFiltered:'Sebahagian kandungan disekat penapis.',
@@ -656,6 +661,7 @@ var DICT={
   navAnalyst:'Analyst',navCommunity:'Community',navProfile:'Profile',navSettings:'Settings',
   search:'Search pairs…',noPairs:'No pairs found.',hint:'Choose a pair for real-time AI analysis.',all:'All',commodity:'Commodities',forex:'Forex',crypto:'Crypto',indices:'Indices',
   soon:'Not open yet',notOpen:'This pair is not open for AI analysis yet. Try a pair below.',
+  mktClosed:'Market closed',dataOffline:'Data offline',mktReopens:'Reopens',
   comTitle:'Community',comSub:'Talk with other traders.',online:'Community active',membersToday:'members today',onlineNow:'online now',writeMsg:'Write a message…',
   emptyChat:'No messages today. Be the first.',resetAt:'Messages reset at midnight (MYT). Links, phone numbers & emails are filtered automatically.',
   sendErr:'Message could not be sent. Try again.',slow:'Please wait a few seconds before sending again.',emptyMsg:'Write a message first.',longMsg:'Message too long (max 500 characters).',filtered:'Message blocked by the community filter.',someFiltered:'Some content was blocked by the filter.',
@@ -886,10 +892,26 @@ function drawPairs(quiet){
  var list=PAIRS.filter(function(p){return(grp==='a'||p.g===grp)&&(!q||p.s.toLowerCase().indexOf(q)>-1||p.n.toLowerCase().indexOf(q)>-1)});
  $('pairs').innerHTML=list.length?list.map(function(p,i){
   var u=(p.chg||0)>=0,px=p.p!=null?fx(p,p.p):'—',ch=p.chg!=null?(u?'▲ +':'▼ ')+p.chg.toFixed(2)+'%':'—';
-  return '<button class="pair" data-s="'+p.s+'" style="'+(quiet?'animation:none':'animation-delay:'+(i*35)+'ms')+'"><div class="top"><div class="ic">'+p.s.slice(0,3)+'</div>'+spark(p)+'</div><div class="nm">'+p.s+'</div><div class="ds">'+esc(p.n)+(p.soon?'<span class="soon">'+esc(t('soon'))+'</span>':'')+'</div><div class="px">'+px+'</div><div class="ch '+(u?'up':'dn')+'">'+ch+'</div></button>';
+  var cl=pairClosed(p);
+  var tag=cl==='closed'?'<span class="closed-tag">'+esc(t('mktClosed'))+'</span>':cl==='offline'?'<span class="closed-tag">'+esc(t('dataOffline'))+'</span>':(p.soon?'<span class="soon">'+esc(t('soon'))+'</span>':'');
+  var reopen=(cl==='closed'&&window.TWMarket&&window.TWMarket.nextOpen)?'<div class="reopen">'+esc(t('mktReopens'))+' '+reopenStr(window.TWMarket.nextOpen)+'</div>':'';
+  return '<button class="pair'+(cl?' closed':'')+'" data-s="'+p.s+'"'+(cl?' aria-disabled="true"':'')+' style="'+(quiet?'animation:none':'animation-delay:'+(i*35)+'ms')+'"><div class="top"><div class="ic">'+p.s.slice(0,3)+'</div>'+spark(p)+'</div><div class="nm">'+p.s+'</div><div class="ds">'+esc(p.n)+tag+'</div><div class="px">'+px+'</div><div class="ch '+(u?'up':'dn')+'">'+ch+'</div>'+reopen+'</button>';
  }).join(''):'<div class="none">'+esc(t('noPairs'))+'</div>';
- Array.prototype.forEach.call($('pairs').querySelectorAll('.pair'),function(b){b.onclick=function(){openSheet(b.dataset.s)}});
+ Array.prototype.forEach.call($('pairs').querySelectorAll('.pair'),function(b){b.onclick=function(){var p=PAIRS.filter(function(x){return x.s===b.dataset.s})[0];if(p&&pairClosed(p)){var why=pairClosed(p);toast(why==='offline'?t('dataOffline'):t('mktClosed'));return}openSheet(b.dataset.s)}});
 }
+/* Market closed per pair: forex/metals tutup hujung minggu, BTC (crypto) buka 24/7.
+   Bridge down -> semua pair offline. Sumber: window.TWMarket (bridge-banner.js). */
+function pairClosed(p){
+ if(p.soon)return '';
+ var mk=window.TWMarket;if(!mk)return '';
+ if(mk.ok===false)return 'offline';
+ if(mk.isPairClosed&&mk.isPairClosed(p.s))return 'closed';
+ return '';
+}
+function reopenStr(d){
+ try{var tz=Intl.DateTimeFormat().resolvedOptions().timeZone;return d.toLocaleString(undefined,{timeZone:tz,weekday:'short',hour:'2-digit',minute:'2-digit',hour12:false})}catch(e){return d.toUTCString()}
+}
+window.addEventListener('twmarket',function(){drawPairs(true)});
 $('q').oninput=function(){drawPairs(true)};
 
 /* Harga + sparkline SEBENAR dari /api/bars (M15) untuk setiap pair disokong. */
@@ -1045,6 +1067,7 @@ function showSoon(){
 }
 function openSheet(sym){
  cur=PAIRS.filter(function(p){return p.s===sym})[0];if(!cur)return;
+ var _cl=pairClosed(cur);if(_cl){toast(_cl==='offline'?t('dataOffline'):t('mktClosed'));return}
  hap(12);S.run++;S.busy=false;S.open=false;
  $('sIc').textContent=cur.s.slice(0,3);$('sNm').textContent=cur.s;
  $('sDs').textContent=cur.n+(cur.p!=null?' · '+fx(cur,cur.p):'');
