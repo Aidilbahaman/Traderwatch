@@ -61,6 +61,13 @@ _hour_count = {}                    # uid -> [window_start_ts, count]
 _turnstile_rl = {}                  # ip -> [window_start_ts, count]
 _turnstile_rl_lock = threading.Lock()
 
+# /api/bars cache: MT5 candle read + resample ~1-2s per call; the member app
+# fires 9 pair cards in parallel on open -> 5-6s contention. Bars advance every
+# 5min, so a 20s TTL is safe and cuts repeat calls to ~0ms.
+_BARS_CACHE = {}                    # (pair,tf) -> (ts, candles)
+_BARS_CACHE_LOCK = threading.Lock()
+BARS_CACHE_TTL = 20
+
 
 def load_env():
     sec = {}
@@ -94,15 +101,28 @@ def bump_analyses(uid):
         log(f"bump_analyses {uid[:8]} skipped: {type(e).__name__}")
 
 
+_auth_cache = {}                    # token -> (ts, user); 120s TTL
+AUTH_CACHE_TTL = 120
+
+
 def verify_user(token):
     if not token:
         return None
+    now = time.time()
+    with _BARS_CACHE_LOCK:
+        hit = _auth_cache.get(token)
+        if hit and now - hit[0] <= AUTH_CACHE_TTL:
+            return hit[1]
     try:
         req = urllib.request.Request(SB_URL + "/auth/v1/user")
         req.add_header("apikey", SB_KEY)
         req.add_header("Authorization", "Bearer " + token)
         with urllib.request.urlopen(req, timeout=20) as r:
-            return json.loads(r.read().decode())
+            user = json.loads(r.read().decode())
+        if user and user.get("id"):
+            with _BARS_CACHE_LOCK:
+                _auth_cache[token] = (now, user)
+        return user
     except (urllib.error.HTTPError, urllib.error.URLError, ValueError):
         return None
 
@@ -313,7 +333,18 @@ class Handler(BaseHTTPRequestHandler):
             if pair not in ALLOWED_PAIRS:
                 return self._send(400, {"error": "Pair ini belum dibuka untuk analisis AI."})
             try:
-                candles = fetch_ohlc(pair, tf)
+                now = time.time()
+                ck = (pair, tf)
+                with _BARS_CACHE_LOCK:
+                    hit = _BARS_CACHE.get(ck)
+                    if hit and now - hit[0] <= BARS_CACHE_TTL:
+                        candles = hit[1]
+                    else:
+                        candles = None
+                if candles is None:
+                    candles = fetch_ohlc(pair, tf)
+                    with _BARS_CACHE_LOCK:
+                        _BARS_CACHE[ck] = (now, candles)
             except Exception as e:
                 log(f"bars {pair} error {type(e).__name__}: {str(e)[:120]}")
                 return self._send(500, {"error": "Gagal memuatkan data chart."})
@@ -390,8 +421,29 @@ class Handler(BaseHTTPRequestHandler):
         return self._send(200, result)
 
 
+def _bars_refresh_loop():
+    """Keep the 9 pair-card caches warm sequentially (MT5 bridge is serial).
+    Runs in background so no member request ever pays the 1-2s candle read."""
+    while True:
+        for pair in ALLOWED_PAIRS:
+            ck = (pair, "M15")
+            try:
+                now = time.time()
+                with _BARS_CACHE_LOCK:
+                    hit = _BARS_CACHE.get(ck)
+                    if hit and now - hit[0] <= BARS_CACHE_TTL - 5:
+                        continue
+                candles = fetch_ohlc(pair, "M15")
+                with _BARS_CACHE_LOCK:
+                    _BARS_CACHE[ck] = (now, candles)
+            except Exception as e:
+                log(f"bars prewarm {pair} {type(e).__name__}: {str(e)[:80]}")
+            time.sleep(0.2)
+
+
 def main():
     srv = ThreadingHTTPServer(("127.0.0.1", PORT), Handler)
+    threading.Thread(target=_bars_refresh_loop, daemon=True, name="bars-prewarm").start()
     log(f"listening on 127.0.0.1:{PORT} (pairs={sorted(ALLOWED_PAIRS)})")
     srv.serve_forever()
 
