@@ -34,12 +34,16 @@ from pathlib import Path
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
 import ai_model as M  # noqa: E402
+import vision_chart as VC  # noqa: E402  (render PNG untuk model vision)
 
 REPO = HERE.parent
 AUDIT_FILE = REPO / "state" / "llm-analysis-log.jsonl"
 ROOTSYS_KEY_FILE = Path.home() / ".config/opencode/secrets/rootsys-key"
+ROOTSYS_QWEN_KEY_FILE = Path.home() / ".config/opencode/secrets/rootsys-qwen-key"
 TW_BOT_ENV = Path("/home/ubuntu/tw-bot/.env")
 
+VISION_MODEL = os.environ.get("AI_LLM_VISION_MODEL", "deepseek-v4.1-flash")
+VISION_ENABLED = os.environ.get("AI_LLM_VISION", "1") == "1"
 PRIMARY_MODEL = os.environ.get("AI_LLM_MODEL", "qwen4-max")
 FALLBACK_MODELS = [m.strip() for m in os.environ.get(
     "AI_LLM_FALLBACKS",
@@ -108,10 +112,27 @@ def _read_env_file(path):
     return vals
 
 
+ROOTSYS_GATEWAY_MODELS = {
+    "glm-5.2", "glm-5.3-flash", "glm-5.3-flash-mod", "glm-5.3-flash-beta",
+    "glm-5.3-beta", "deepseek-v4-flash", "deepseek-v4-pro", "deepseek-v4.1-flash",
+    "deepseek-v4-pro-mod", "deepseek-v4.1-flash-mod", "step-5-preview",
+    "space-bunny", "mimo-v2.6-pro", "minimax-m3.1-flash", "hy4std",
+    "hy4flash-free", "glm-5.3-flashx",
+}
+
+
 def _route(model):
     """(url, key) untuk model. Dibaca setiap panggilan supaya perubahan
     .env berkuat kuasa tanpa restart."""
-    if model == PRIMARY_MODEL or model.startswith("rootsys/") or model == "qwen4-max":
+    bare = model.split("/", 1)[-1]
+    if bare == "qwen4-max":
+        try:
+            key = ROOTSYS_QWEN_KEY_FILE.read_text().strip()
+        except OSError:
+            key = ""
+        return "https://rootsys.cloud/v1/chat/completions", key
+    if (model == PRIMARY_MODEL or model.startswith("rootsys/")
+            or bare in ROOTSYS_GATEWAY_MODELS):
         key = os.environ.get("ROOTSYS_API_KEY", "")
         if not key:
             try:
@@ -274,6 +295,27 @@ def _call_model(model, prompt, timeout):
     return (choice.get("message") or {}).get("content") or ""
 
 
+def _call_vision(model, prompt, bars, pair, tf, timeout):
+    """Vision model: hantar prompt + screenshot chart (bar <= masa semasa)."""
+    url, key = _route(model)
+    if not key:
+        raise RuntimeError(f"tiada API key untuk vision {model}")
+    b64 = VC.render(bars, pair=pair, tf=tf)
+    if not b64:
+        raise RuntimeError("vision chart render gagal")
+    body = json.dumps({"model": model,
+                       "messages": [{"role": "user", "content": [
+                           {"type": "text", "text": prompt},
+                           {"type": "image_url", "image_url": {"url": "data:image/png;base64," + b64}}]}],
+                       "max_tokens": 700}).encode()
+    req = urllib.request.Request(url, data=body, headers={
+        "Authorization": "Bearer " + key, "Content-Type": "application/json"})
+    with urllib.request.urlopen(req, timeout=timeout) as r:
+        j = json.loads(r.read().decode())
+    choice = (j.get("choices") or [{}])[0]
+    return (choice.get("message") or {}).get("content") or ""
+
+
 def analyze(pair, bars, pip, spread_pips, call=None, budget_s=None, held=None, tf="M15"):
     """Analisis LLM untuk satu pair mengikut timeframe. Return verdict dict / None.
 
@@ -281,6 +323,7 @@ def analyze(pair, bars, pip, spread_pips, call=None, budget_s=None, held=None, t
     H4/D1=position (ketat struktur, target besar). tf default M15 = kelakuan
     enjin berjadual sedia ada (backward compatible).
     """
+    explicit_call = call is not None
     call = call or _call_model
     budget_s = budget_s or BUDGET_S
     prof = tf_profile(tf)
@@ -300,6 +343,46 @@ def analyze(pair, bars, pip, spread_pips, call=None, budget_s=None, held=None, t
     hh, ll = max(b[1] for b in win), min(b[2] for b in win)
     prompt = build_prompt(pair, price, ctx[-prof["ctx_show"]:], with_opens(bars)[-prof["base_show"]:],
                           atr, trend, hh, ll, spread_pips, tf=tf, held=held)
+    if VISION_ENABLED and not explicit_call:
+        # Model nampak imej: padat prompt angka, tambah metadata struktur BOS/CHoCH.
+        bos = trend if trend in ("UP", "DOWN") else "RANGE"
+        prompt = ("ICT/SMC analyst. You are looking at the chart IMAGE (real OHLC). "
+                  f"Pair {pair} {tf}, price {price}, spread {spread_pips:g} pips. "
+                  f"BOS/trend={bos}. Trade in BOS direction; HOLD if no clean structure. "
+                  f"Entry=current price. BUY: sl<entry<tp1<tp2; SELL: sl>entry>tp1>tp2. "
+                  "RR1 >= 1.5. SL beyond opposing swing. "
+                  'Reply ONLY compact JSON: {"bias":"BUY"|"SELL"|"HOLD","sl":num,'
+                  '"tp1":num,"tp2":num,"confidence":0-10,"reason":"<10 words>"}')
+    # Vision first: model tengok terus carta (kurang risiko prompt salah gambar).
+    # Gagal vision -> jatuh ke chain text sedia ada (fail-safe).
+    # Nota: `call` dioverride di atas untuk injection test; guna flag asal.
+    if VISION_ENABLED and not explicit_call:
+        t0 = time.time()
+        try:
+            content = _call_vision(VISION_MODEL, prompt, bars, pair, tf, CALL_TIMEOUT_S)
+            j = parse_response(content)
+        except Exception as e:
+            log(f"{pair} vision {VISION_MODEL} gagal ({type(e).__name__}: {str(e)[:90]}) - cuba text")
+            _audit({"ts": datetime.now(timezone.utc).isoformat(), "pair": pair, "tf": tf,
+                    "model": VISION_MODEL, "vision": True,
+                    "error": f"{type(e).__name__}: {str(e)[:200]}"})
+        else:
+            latency = time.time() - t0
+            try:
+                verdict = validate_verdict(j, price, pip, spread_pips, rr1_min=prof["rr1_min"])
+            except ValueError as e:
+                # Rejection (aras/RR tak sah) muktamad — jangan shop model lain.
+                log(f"{pair} {VISION_MODEL} (vision) verdict ditolak ({e})")
+                _audit({"ts": datetime.now(timezone.utc).isoformat(), "pair": pair, "tf": tf,
+                        "model": VISION_MODEL, "vision": True, "verdict_rejected": str(e)[:200]})
+                return None
+            verdict.update(model=VISION_MODEL, latency_s=round(latency, 1), vision=True)
+            _audit({"ts": datetime.now(timezone.utc).isoformat(), "pair": pair, "tf": tf,
+                    "model": VISION_MODEL, "vision": True, "latency_s": round(latency, 1),
+                    "side": verdict["side"], "conf": verdict.get("conf")})
+            log(f"{pair} {VISION_MODEL} (vision): {verdict['side']} conf={verdict.get('conf')} "
+                f"rr1={verdict.get('rr1')} ({latency:.1f}s)")
+            return verdict
     chain = [PRIMARY_MODEL] + [m for m in FALLBACK_MODELS if m != PRIMARY_MODEL]
     t_start = time.time()
     for model in chain:

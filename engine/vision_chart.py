@@ -1,0 +1,42 @@
+"""Render chart OHLC ringkas daripada bar (ts_ms,h,l,c) -> PNG base64
+untuk model vision. Ringan: PIL sahaja. Bar terakhir = harga semasa.
+"""
+import base64
+import io
+from PIL import Image, ImageDraw
+
+W, H = 640, 360
+
+
+def render(bars, pair="XAUUSD", tf="M15", bos="", choch=False):
+    """Return base64 PNG. bars = [(ts_ms, high, low, close), ...] oldest->newest."""
+    if not bars:
+        return ""
+    im = Image.new("RGB", (W, H), (10, 14, 11))
+    d = ImageDraw.Draw(im)
+    hi = max(b[1] for b in bars)
+    lo = min(b[2] for b in bars)
+    rng = (hi - lo) or 1.0
+    y = lambda v: 18 + (hi - v) / rng * (H - 56)
+    x = lambda i: 12 + i * (W - 90) / max(1, len(bars) - 1)
+    for g in range(5):
+        gy = 18 + g * (H - 56) / 4
+        d.line([(0, gy), (W - 80, gy)], fill=(30, 40, 32))
+    # wick + badan anggaran (open = close bar sebelum)
+    for i, b in enumerate(bars):
+        xx = x(i)
+        op = bars[i - 1][3] if i else b[3]
+        up = b[3] >= op
+        col = (183, 243, 107) if up else (255, 119, 125)
+        d.line([(xx, y(b[1])), (xx, y(b[2]))], fill=col, width=2)
+        top, bot = y(max(op, b[3])), y(min(op, b[3]))
+        d.rectangle([xx - 3, top, xx + 3, max(bot, top + 2)], fill=col)
+    price = bars[-1][3]
+    ly = y(price)
+    d.line([(0, ly), (W - 80, ly)], fill=(120, 180, 255), width=1)
+    d.text((W - 76, ly - 6), f"LIVE {price:.2f}", fill=(120, 180, 255))
+    d.text((10, 6), f"{pair} {tf} | BOS={bos} | CHoCH={'YES' if choch else 'NO'}",
+           fill=(220, 230, 220))
+    buf = io.BytesIO()
+    im.save(buf, format="PNG")
+    return base64.b64encode(buf.getvalue()).decode()
