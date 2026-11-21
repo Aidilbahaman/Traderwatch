@@ -5,7 +5,7 @@
  *  - /api/* dan /auth/*: NETWORK SAHAJA — jangan cache data pasaran/user
  *  - Data user (Supabase REST, chat, profil): tidak dicache sama sekali
  */
-const VERSION = 'tw-member-full-v15';
+const VERSION = 'tw-member-full-v16';
 const SHELL_CACHE = VERSION + '-shell';
 
 const SHELL_ASSETS = [

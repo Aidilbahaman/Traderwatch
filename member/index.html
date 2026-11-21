@@ -288,6 +288,7 @@ html[data-theme="light"] .theme.on{background:#eaf5db}
 .floata .ftxt{flex:1;min-width:0;font-size:12px;font-weight:700;color:var(--text);text-align:left;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .floata .fx{flex:none;color:var(--muted);font-size:13px;padding:2px 6px;border-radius:8px}
 .floata .fx:active{background:var(--card2)}
+#cv{cursor:pointer}
 @keyframes spin{to{transform:rotate(360deg)}}
 .open #bd{opacity:1;pointer-events:auto}.open #sheet{transform:none}
 .grab{padding:10px 0 8px;position:sticky;top:0;background:var(--card);z-index:2}
@@ -1033,9 +1034,12 @@ function pill(x,y,w,txt,bg,fg){cx.fillStyle=bg;cx.beginPath();if(cx.roundRect)cx
 function draw(now){
  var W=cv.clientWidth||320,H=cv.clientHeight||220;cx.setTransform(DPR,0,0,DPR,0,0);cx.clearRect(0,0,W,H);
  var c=S.candles;if(!c.length||!S.m)return;
- var n=c.length,fut=16,pR=58,pT=14,pB=14,slot=(W-pR)/(n+fut),bw=Math.max(2,slot*.62),m=S.m;
- var lo=Math.min(Math.min.apply(0,c.map(function(x){return x.l})),m.last-m.atr*3),hi=Math.max(Math.max.apply(0,c.map(function(x){return x.h})),m.last+m.atr*3);
- var y=function(v){return pT+(hi-v)/(hi-lo)*(H-pT-pB)},x=function(i){return(i+.5)*slot};
+ var n=c.length,fut=16,pR=58,pT=14,pB=14,m=S.m;
+ /* Zoom window: 100 candle masa scan, auto zoom-in ke 20 bila verdict siap. */
+ var win=Math.max(8,Math.min(n,S.win!=null?S.win:n)),start=n-win,i0=Math.max(0,Math.floor(start)),vis=c.slice(i0);
+ var slot=(W-pR)/(win+fut),bw=Math.max(2,slot*.62);
+ var lo=Math.min(Math.min.apply(0,vis.map(function(x){return x.l})),m.last-m.atr*3),hi=Math.max(Math.max.apply(0,vis.map(function(x){return x.h})),m.last+m.atr*3);
+ var y=function(v){return pT+(hi-v)/(hi-lo)*(H-pT-pB)},x=function(i){return(i-start+.5)*slot};
  cx.lineWidth=1;cx.font='10px ui-monospace,Menlo,monospace';cx.textAlign='left';cx.textBaseline='middle';
  for(var g=0;g<5;g++){var gv=lo+(hi-lo)*g/4,gy=y(gv);cx.strokeStyle='rgba(128,150,130,.12)';cx.beginPath();cx.moveTo(0,gy);cx.lineTo(W-pR,gy);cx.stroke();cx.fillStyle=css('--muted');cx.fillText(fx(cur,gv),W-pR+6,gy)}
  var lime=css('--lime'),red=css('--red'),blue=css('--blue'),txt=css('--text'),card2=css('--card2');
@@ -1044,9 +1048,9 @@ function draw(now){
    var ly=y(l[0]);cx.save();cx.globalAlpha=tt*.7;cx.strokeStyle=l[2];cx.setLineDash([2,5]);cx.beginPath();cx.moveTo(0,ly);cx.lineTo(xr*tt,ly);cx.stroke();cx.restore();
    cx.globalAlpha=tt;cx.fillStyle=l[2];cx.textAlign='left';cx.fillText(l[1],6,ly-8);cx.globalAlpha=1});
  }
- var show=Math.floor(n*S.rv);
- for(var i=0;i<show;i++){
-  var k=c[i],up=k.c>=k.o,col=up?lime:red,cxm=x(i);
+ var show=Math.floor(vis.length*S.rv);
+ for(var j=0;j<show;j++){
+  var i=i0+j,k=c[i],up=k.c>=k.o,col=up?lime:red,cxm=x(i);
   cx.globalAlpha=(S.scan!=null&&cxm>S.scan)?.25:1;
   cx.strokeStyle=col;cx.fillStyle=col;cx.beginPath();cx.moveTo(cxm,y(k.h));cx.lineTo(cxm,y(k.l));cx.stroke();
   var ty=y(Math.max(k.o,k.c)),hh=Math.max(1.5,Math.abs(y(k.o)-y(k.c)));cx.fillRect(cxm-bw/2,ty,bw,hh);
@@ -1070,9 +1074,18 @@ function draw(now){
 function loop(now){
  if(!S.open)return;
  if(S.rv<1)S.rv=Math.min(1,(now-S.rv0)/750);
+ if(S.zoomT0!=null){var zk=Math.min(1,(now-S.zoomT0)/900);S.win=S.winFrom+(S.winTo-S.winFrom)*ease(zk);if(zk>=1){S.win=S.winTo;S.zoomT0=null}}
  if(S.scan!=null){var W=cv.clientWidth-58;S.scan+=W/110;if(S.scan>W)S.scan=0}
  draw(now);requestAnimationFrame(loop);
 }
+/* Zoom beranimasi ke bilangan candle target (20 = jelas Entry/SL/TP). */
+function zoomTo(target){
+ if(!S.candles.length)return;
+ S.winFrom=S.win!=null?S.win:S.candles.length;
+ S.winTo=Math.max(8,Math.min(S.candles.length,target));
+ S.win=S.winFrom;S.zoomT0=performance.now();
+}
+cv.addEventListener('click',function(){if(S.ana&&S.ana.entry!=null)zoomTo(S.win!=null&&S.win<=20.5?S.candles.length:20)});
 
 /* ---------------- sheet ---------------- */
 function setChip(k,txt){$('chip').className='chipc '+(k||'');$('chipT').textContent=txt}
@@ -1082,7 +1095,7 @@ function altMode(on){
  $('alt').classList.toggle('hidden',!on);
 }
 function resetSheet(){
- S.ana=null;S.scan=null;S.busy=false;altMode(false);
+ S.ana=null;S.scan=null;S.busy=false;S.win=null;S.zoomT0=null;altMode(false);
  $('go').classList.remove('hidden');$('go').disabled=false;setChip('','SEDIA');
 }
 function buildTf(){
@@ -1096,7 +1109,7 @@ function buildTf(){
 /* Chart OHLC SEBENAR dari /api/bars — tiada janaan rawak. */
 function loadCandles(){
  var run=S.run,pair=cur.s,tfv=tf;
- S.candles=[];S.m=null;S.ana=null;S.scan=null;
+ S.candles=[];S.m=null;S.ana=null;S.scan=null;S.win=null;S.zoomT0=null;
  $('go').disabled=true;setChip('scan',t('loading'));
  apiFetch('/api/bars?pair='+encodeURIComponent(pair)+'&tf='+encodeURIComponent(tfv)).then(function(res){
   if(run!==S.run)return;
@@ -1194,7 +1207,7 @@ function analyze(){
  S.busy=true;var run=++S.run,f=function(v){return fx(cur,v)},m=S.m;hap(18);
  JOB={run:run,pair:cur.s,tf:tf,state:'running',res:null};
  $('go').classList.add('hidden');$('res').innerHTML='';$('term').innerHTML='';$('term').classList.remove('hidden');
- S.ana=null;S.scan=0;setChip('scan',lang==='en'?'AI SCANNING':'AI MENGIMBAS');
+ S.ana=null;S.scan=0;S.win=null;S.zoomT0=null;setChip('scan',lang==='en'?'AI SCANNING':'AI MENGIMBAS');
  /* Enjin analisis M15 (disokong backend), tanpa mengira TF chart dipapar. */
  var pre=apiFetch('/api/analyze',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({pair:cur.s,timeframe:tf})}).catch(function(){return{ok:false,status:0,data:{}}});
  var lines=[
@@ -1254,6 +1267,7 @@ function show(a){
  var t0p=performance.now();(function up(now){var k=Math.min(1,(now-t0p)/1100);$('cn').textContent=Math.round(a.conf*ease(k));if(k<1)requestAnimationFrame(up)})(t0p);
  $('again').onclick=function(){S.run++;resetSheet();$('sheet').scrollTo({top:0,behavior:'smooth'})};
  $('takeBtn').onclick=function(){if(a.entry==null)return;hap(10);openRisk(a)};
+ if(a.entry!=null)zoomTo(20);
  setTimeout(function(){$('res').scrollIntoView({behavior:'smooth',block:'start'})},220);
 }
 $('go').onclick=analyze;
