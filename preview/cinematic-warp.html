@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>TraderWatch — Cinematic</title>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;500;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#02040a;--panel:#0d1630;--line:#1f2c52;--ink:#eef2ff;--mute:#8b97b8;--up:#22c55e;color-scheme:dark;box-sizing:border-box}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0;background:var(--bg);color:var(--ink);font-family:"Bricolage Grotesque",system-ui,-apple-system,"Segoe UI",sans-serif;overflow:hidden}
+canvas{position:fixed;inset:0;width:100%;height:100%}
+.stage{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;text-align:center;padding:24px 24px calc(11vh + 28px);pointer-events:none;transition:opacity .5s}
+#cap{position:fixed;left:0;right:0;bottom:calc(11vh + 56px);text-align:center;font-size:clamp(16px,4.4vw,22px);font-weight:400;letter-spacing:.08em;color:#cfd8f5;opacity:0;transition:opacity .8s}
+#cap.show{opacity:1}
+h1{font-size:clamp(28px,7.4vw,42px);font-weight:500;letter-spacing:.2em;margin:0 0 12px -.2em;opacity:0;transition:opacity 1.4s}
+.tag{max-width:28ch;color:var(--mute);font-size:16px;line-height:1.5;margin:0 0 24px;opacity:0;transition:opacity 1.2s .7s}
+.cta{pointer-events:auto;font:800 16px inherit;font-family:inherit;color:#04130a;background:var(--up);border:0;border-radius:14px;padding:15px 38px;cursor:pointer;opacity:0;transition:opacity 1s 1.4s,transform .15s}
+.cta:active{transform:scale(.97)}
+.on h1,.on .tag,.on .cta{opacity:1}
+button:focus-visible{outline:2px solid var(--ink);outline-offset:3px}
+.pill{position:fixed;top:max(14px,env(safe-area-inset-top));font:600 14px inherit;font-family:inherit;color:var(--mute);background:var(--panel);border:1px solid var(--line);border-radius:999px;padding:8px 14px;cursor:pointer;z-index:5}
+#replay{right:16px}#mute{left:16px}
+#gate{position:fixed;inset:0;z-index:8;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:22px;text-align:center;padding:24px;transition:opacity .6s}
+#gate.gone{opacity:0;pointer-events:none}
+#gate button{font:800 17px inherit;font-family:inherit;color:var(--ink);background:none;border:1px solid var(--line);border-radius:999px;padding:16px 34px;cursor:pointer}
+#gate svg{animation:pl 2.4s ease-in-out infinite}
+@keyframes pl{50%{transform:scale(1.25);opacity:.6}}
+#gate p{margin:0;color:var(--mute);font-size:14px}
+.sheet{position:fixed;left:0;right:0;bottom:0;background:var(--panel);border-top:1px solid var(--line);border-radius:24px 24px 0 0;padding:26px 22px max(26px,env(safe-area-inset-bottom));transform:translateY(100%);transition:transform .5s cubic-bezier(.2,.9,.2,1);z-index:4;max-width:520px;margin:0 auto}
+.sheet.open{transform:none}
+.sheet h2{margin:0 0 4px;font-size:24px}
+.sheet p{margin:0 0 18px;color:var(--mute)}
+.row{display:flex;gap:14px;align-items:center;padding:14px 0;border-top:1px solid var(--line)}
+.row b{display:block;font-size:16px}.row span{color:var(--mute);font-size:14px}
+.ic{width:38px;height:38px;border-radius:10px;background:var(--bg);display:grid;place-items:center;flex:none}
+.sheet .go{width:100%;margin-top:14px;font:800 17px inherit;font-family:inherit;background:var(--up);color:#04130a;border:0;border-radius:14px;padding:16px;cursor:pointer}
+.sheet .skip{width:100%;margin-top:8px;font:500 15px inherit;font-family:inherit;background:none;color:var(--mute);border:0;padding:12px;cursor:pointer}
+.toast{position:fixed;top:60px;left:50%;transform:translateX(-50%);background:var(--panel);border:1px solid var(--line);padding:10px 16px;border-radius:10px;font-size:14px;opacity:0;transition:opacity .3s;z-index:6;pointer-events:none}
+.toast.show{opacity:1}
+</style>
+</head>
+<body>
+<canvas id="c" aria-hidden="true"></canvas>
+<button class="pill" id="mute" aria-label="Bunyi">🔊</button>
+<button class="pill" id="replay">↻ Replay</button>
+<div id="cap"></div>
+<div class="stage" id="stage">
+  <h1>TraderWatch</h1>
+  <p class="tag">Experience the new era of AI Trading.</p>
+  <button class="cta" id="enter">Masuk</button>
+</div>
+<div id="gate">
+  <svg width="44" height="44" viewBox="-22 -22 44 44" aria-hidden="true"><path d="M0-20Q0 0 20 0Q0 0 0 20Q0 0-20 0Q0 0 0-20Z" fill="#fff"/></svg>
+  <button id="start">Tekan untuk mula</button>
+  <p>Bunyi akan dimainkan. Pakai earphone untuk pengalaman terbaik.</p>
+</div>
+<div class="sheet" id="sheet" role="dialog" aria-label="Selamat datang">
+  <h2>Selamat datang!</h2>
+  <p>Sediakan app anda sebelum mula.</p>
+  <div class="row"><div class="ic">🔔</div><div><b>Hidupkan notifikasi</b><span>Alert TP/SL</span></div></div>
+  <div class="row"><div class="ic">⌂</div><div><b>Tambah ke skrin utama</b><span>Buka macam app</span></div></div>
+  <button class="go" data-t="Preview sahaja">Mula trade</button>
+  <button class="skip" data-t="Preview sahaja">Langkau dulu</button>
+</div>
+<div class="toast" id="toast"></div>
+<script>
+const $=id=>document.getElementById(id);
+const cv=$('c'),cx=cv.getContext('2d'),stage=$('stage'),sheet=$('sheet'),cap=$('cap'),toast=$('toast');
+const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+let W,H,dpr,CX,CY,R;
+function size(){dpr=Math.min(devicePixelRatio||1,2);W=innerWidth;H=innerHeight;cv.width=W*dpr;cv.height=H*dpr;cx.setTransform(dpr,0,0,dpr,0,0);CX=W/2;CY=H*.4;R=Math.min(W,H)*.09}
+addEventListener('resize',size);size();
+
+/* ---------- sound (synthesised, no files) ---------- */
+const BEATS=[.5,1.5,2.4,3.2,3.9,4.5,5,5.4,5.75];
+let AC,MG,muted=false,NB;
+function noise(){const b=AC.createBuffer(1,AC.sampleRate*2,AC.sampleRate),d=b.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=Math.random()*2-1;return b}
+function env(g,n,a,peak,dur){g.gain.setValueAtTime(0.0001,n);g.gain.linearRampToValueAtTime(peak,n+a);g.gain.exponentialRampToValueAtTime(0.0001,n+dur)}
+function audioStart(){
+  try{AC&&AC.close()}catch(e){}
+  AC=new(window.AudioContext||window.webkitAudioContext)();AC.resume();
+  MG=AC.createGain();MG.gain.value=muted?0:.85;MG.connect(AC.destination);NB=noise();
+  const n=AC.currentTime+.05;
+  // drone
+  const lp=AC.createBiquadFilter();lp.type='lowpass';lp.frequency.setValueAtTime(120,n);lp.frequency.exponentialRampToValueAtTime(1500,n+6);
+  const dg=AC.createGain();dg.gain.setValueAtTime(0,n);dg.gain.linearRampToValueAtTime(.1,n+3);dg.gain.linearRampToValueAtTime(.16,n+6);dg.gain.exponentialRampToValueAtTime(.001,n+11);
+  [55,55.5,82.4].forEach(f=>{const o=AC.createOscillator();o.type='sawtooth';o.frequency.setValueAtTime(f,n);o.frequency.exponentialRampToValueAtTime(f*1.5,n+6);o.connect(lp);o.start(n);o.stop(n+11)});
+  lp.connect(dg);dg.connect(MG);
+  // heartbeat
+  BEATS.forEach((b,i)=>{const o=AC.createOscillator(),g=AC.createGain();o.frequency.setValueAtTime(75,n+b);o.frequency.exponentialRampToValueAtTime(38,n+b+.25);env(g,n+b,.01,.3+i*.03,.4);o.connect(g);g.connect(MG);o.start(n+b);o.stop(n+b+.5)});
+  // riser: noise sweep + rising tone
+  const rs=AC.createBufferSource();rs.buffer=NB;rs.loop=true;
+  const bp=AC.createBiquadFilter();bp.type='bandpass';bp.Q.value=3;bp.frequency.setValueAtTime(300,n+1.4);bp.frequency.exponentialRampToValueAtTime(7500,n+6);
+  const rg=AC.createGain();rg.gain.setValueAtTime(0,n+1.4);rg.gain.exponentialRampToValueAtTime(.02,n+2);rg.gain.linearRampToValueAtTime(.34,n+5.95);rg.gain.linearRampToValueAtTime(0,n+6.02);
+  rs.connect(bp);bp.connect(rg);rg.connect(MG);rs.start(n+1.4);rs.stop(n+6.1);
+  const to=AC.createOscillator(),tg=AC.createGain();to.frequency.setValueAtTime(180,n+2);to.frequency.exponentialRampToValueAtTime(1800,n+6);tg.gain.setValueAtTime(0,n+2);tg.gain.linearRampToValueAtTime(.07,n+5.9);tg.gain.linearRampToValueAtTime(0,n+6.02);to.connect(tg);tg.connect(MG);to.start(n+2);to.stop(n+6.1);
+  // impact boom
+  const bo=AC.createOscillator(),bg=AC.createGain();bo.frequency.setValueAtTime(150,n+6);bo.frequency.exponentialRampToValueAtTime(30,n+7.4);env(bg,n+6,.005,.95,2.4);bo.connect(bg);bg.connect(MG);bo.start(n+6);bo.stop(n+8.5);
+  const bs=AC.createBufferSource();bs.buffer=NB;const bl=AC.createBiquadFilter();bl.type='lowpass';bl.frequency.setValueAtTime(3500,n+6);bl.frequency.exponentialRampToValueAtTime(120,n+7.6);const bn=AC.createGain();env(bn,n+6,.005,.55,1.8);bs.connect(bl);bl.connect(bn);bn.connect(MG);bs.start(n+6);bs.stop(n+8);
+  // shimmer chime
+  [880,1318.5,1760,2637,3520].forEach((f,i)=>{const o=AC.createOscillator(),g=AC.createGain();o.type='sine';o.frequency.value=f;env(g,n+6.5+i*.13,.02,.07,2.6);o.connect(g);g.connect(MG);o.start(n+6.5+i*.13);o.stop(n+9.5)});
+}
+function whoosh(){if(!AC)return;const n=AC.currentTime,s=AC.createBufferSource();s.buffer=NB;const b=AC.createBiquadFilter();b.type='bandpass';b.Q.value=1.5;b.frequency.setValueAtTime(300,n);b.frequency.exponentialRampToValueAtTime(5000,n+.7);const g=AC.createGain();env(g,n,.25,.35,.8);s.connect(b);b.connect(g);g.connect(MG);s.start(n);s.stop(n+.9)}
+
+/* ---------- visuals ---------- */
+const stars=Array.from({length:520},()=>({x:(Math.random()-.5)*2,y:(Math.random()-.5)*2,z:Math.random()*.95+.05,g:Math.random()<.12}));
+const shards=[];
+const CAPS=[[1.6,3.6,'Pasaran tak pernah tidur.'],[3.9,5.8,'Sekarang, ia berfikir.']];
+let t0,last,shown=false,burst=false,dive=null,running=false,started=false;
+const ease=x=>1-Math.pow(1-x,3);
+const back=x=>{const c1=1.70158,c3=c1+1;return 1+c3*Math.pow(x-1,3)+c1*Math.pow(x-1,2)};
+function star(x,y,r,a){cx.save();cx.globalAlpha=a;cx.translate(x,y);cx.shadowColor='#22c55e';cx.shadowBlur=r*1.3;cx.fillStyle='#fff';cx.beginPath();cx.moveTo(0,-r);cx.quadraticCurveTo(0,0,r,0);cx.quadraticCurveTo(0,0,0,r);cx.quadraticCurveTo(0,0,-r,0);cx.quadraticCurveTo(0,0,0,-r);cx.fill();cx.restore()}
+function speed(t){if(t<1.2)return .03;if(t<6)return .03+Math.pow((t-1.2)/4.8,3)*2.2;return Math.max(.015,2.23*Math.max(0,1-(t-6)*3))}
+
+function reset(){
+  shards.length=0;burst=false;shown=false;dive=null;cap.className='';cap.textContent='';
+  stage.classList.remove('on');stage.style.opacity=1;sheet.classList.remove('open');
+  if(!reduce)audioStart();
+  t0=performance.now()+50;last=t0;
+  if(!running){running=true;requestAnimationFrame(loop)}
+}
+
+function loop(now){
+  const dt=Math.min(.05,Math.max(0,(now-last)/1000));last=now;
+  let t=reduce?8:(now-t0)/1000;
+  cx.fillStyle='#02040a';cx.fillRect(0,0,W,H);
+  let sx=0,sy=0;
+  if(t>6&&t<6.6){const k=1-(t-6)/.6;sx=(Math.random()-.5)*14*k;sy=(Math.random()-.5)*14*k}
+  cx.save();cx.translate(sx,sy);
+  // starfield
+  const v=speed(Math.max(0,t)),post=t>6?.35:1,f=Math.max(W,H)*.25;
+  cx.lineCap='round';
+  for(const s of stars){
+    s.z-=v*dt;
+    let x1=CX+s.x/s.z*f,y1=CY+s.y/s.z*f;
+    if(s.z<.03||x1<-60||x1>W+60||y1<-60||y1>H+60){s.z=1;s.x=(Math.random()-.5)*2;s.y=(Math.random()-.5)*2;continue}
+    const zt=s.z+Math.max(.0015,v*.05),x0=CX+s.x/zt*f,y0=CY+s.y/zt*f;
+    const d=1-s.z;
+    cx.globalAlpha=Math.min(1,(.15+d*.9)*post);
+    cx.strokeStyle=s.g?'#86efac':(d>.6?'#fff':'#a9b8e8');
+    cx.lineWidth=.5+d*1.7;
+    cx.beginPath();cx.moveTo(x0,y0);cx.lineTo(x1,y1);cx.stroke();
+  }
+  cx.globalAlpha=1;
+  // pre-impact star + heartbeat pulse
+  if(t<6&&t>0){
+    let lb=-9;for(const b of BEATS)if(b<=t)lb=b;
+    const pulse=Math.exp(-(t-lb)*7);
+    const e=Math.pow(Math.max(0,(t-3)/3),2);
+    const r=6+(R*.5-6)*e+8*pulse*(1+e*2);
+    const g=cx.createRadialGradient(CX,CY,0,CX,CY,r*5);g.addColorStop(0,`rgba(34,197,94,${.22+.3*pulse})`);g.addColorStop(1,'rgba(34,197,94,0)');
+    cx.fillStyle=g;cx.fillRect(0,0,W,H);
+    star(CX,CY,r,Math.min(1,t/.6));
+  }
+  // impact
+  if(t>=6){
+    if(!burst){burst=true;for(let i=0;i<40;i++){const a=Math.random()*6.283;shards.push({a,s:200+Math.random()*700,r:Math.random()*6,w:(Math.random()-.5)*8,c:Math.random()<.55?'#22c55e':'#f43f5e',l:6+Math.random()*12})}}
+    const a=t-6;
+    [0,.18].forEach((dl,i)=>{const q=a-dl;if(q>0&&q<1.6){cx.globalAlpha=(1-q/1.6)*(i?.5:.9);cx.strokeStyle='#bbf7d0';cx.lineWidth=(i?2:4)*(1-q/1.6)+1;cx.shadowColor='#22c55e';cx.shadowBlur=18;cx.beginPath();cx.arc(CX,CY,q*Math.max(W,H)*.75,0,7);cx.stroke();cx.shadowBlur=0}});
+    cx.globalAlpha=1;
+    for(const s of shards){const d=s.s*(1-Math.exp(-a*1.6))/1.6,al=Math.max(0,1-a/2.2);if(al<=0)continue;cx.save();cx.globalAlpha=al;cx.translate(CX+Math.cos(s.a)*d,CY+Math.sin(s.a)*d);cx.rotate(s.r+s.w*a);cx.fillStyle=s.c;cx.fillRect(-1.5,-s.l/2,3,s.l);cx.restore()}
+    // anamorphic flare
+    const fw=ease(Math.min(1,a/.9)),fa=.3+.6*Math.exp(-a*1.4);
+    const lg=cx.createLinearGradient(CX-W*.9*fw,0,CX+W*.9*fw,0);lg.addColorStop(0,'rgba(34,197,94,0)');lg.addColorStop(.5,'rgba(200,255,220,1)');lg.addColorStop(1,'rgba(34,197,94,0)');
+    cx.globalAlpha=fa;cx.fillStyle=lg;cx.shadowColor='#22c55e';cx.shadowBlur=24;cx.fillRect(CX-W*.9*fw,CY-1.5,W*1.8*fw,3);cx.shadowBlur=0;cx.globalAlpha=1;
+    // logo star
+    const k=Math.min(1,a/1.4);let r=R*(.5+.5*back(k));
+    let sa=1;
+    if(dive!==null){const dk=Math.min(1,(now-dive)/900);r*=1+dk*dk*9}
+    star(CX,CY,r,sa);
+  }
+  cx.restore();
+  // flash
+  if(t>=6&&t<6.9){cx.fillStyle=`rgba(255,255,255,${Math.pow(1-(t-6)/.9,2)})`;cx.fillRect(0,0,W,H)}
+  // letterbox
+  const bh=H*.11*ease(Math.min(1,Math.max(0,(t-.4)/1.4)));
+  cx.fillStyle='#000';cx.fillRect(0,0,W,bh);cx.fillRect(0,H-bh,W,bh);
+  // captions
+  let txt='';for(const c of CAPS)if(t>=c[0]&&t<c[1])txt=c[2];
+  if(txt){if(cap.textContent!==txt)cap.textContent=txt;cap.classList.add('show')}else cap.classList.remove('show');
+  if(t>7&&!shown){shown=true;stage.classList.add('on')}
+  // dive out
+  if(dive!==null){
+    const dk=Math.min(1,(now-dive)/900);
+    cx.fillStyle=`rgba(210,255,225,${dk*dk})`;cx.fillRect(0,0,W,H);
+    if(dk>=1){cx.fillStyle='#02040a';cx.fillRect(0,0,W,H);sheet.classList.add('open');running=false;return}
+  }
+  if(!(reduce&&shown&&dive===null))requestAnimationFrame(loop);else running=false;
+}
+
+$('start').onclick=()=>{$('gate').classList.add('gone');started=true;reset()};
+$('replay').onclick=()=>{if(started)reset()};
+$('mute').onclick=()=>{muted=!muted;$('mute').textContent=muted?'🔇':'🔊';if(MG)MG.gain.value=muted?0:.85};
+$('enter').onclick=()=>{if(dive!==null)return;dive=performance.now();stage.style.opacity=0;whoosh();if(!running){running=true;last=dive;requestAnimationFrame(loop)}};
+document.querySelectorAll('.sheet button').forEach(b=>b.onclick=()=>{toast.textContent=b.dataset.t;toast.classList.add('show');setTimeout(()=>toast.classList.remove('show'),1400)});
+</script>
+</body>
+</html>
