@@ -110,11 +110,11 @@ if __name__ == "__main__":
     ASSETS.mkdir(exist_ok=True)
 
     for s in (180, 192, 512):
-        render(s).save(ICONS / f"icon-{s}.png")
+        render(s, fill_ratio=0.86).save(ICONS / f"icon-{s}.png")
         print("wrote icons/icon-%d.png" % s)
 
     # maskable: bintang lebih kecil (safe zone ~80%)
-    render(512, fill_ratio=0.66).save(ICONS / "icon-maskable-512.png")
+    render(512, fill_ratio=0.58).save(ICONS / "icon-maskable-512.png")
     print("wrote icons/icon-maskable-512.png")
 
     # apple touch: penuh latar, tiada alpha
