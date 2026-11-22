@@ -175,6 +175,15 @@ html[data-theme="light"] .msg.me .body{background:#eaf5db;border-color:#b9d999}
  border-radius:24px;padding:24px 20px 18px;box-shadow:0 24px 70px #0009;text-align:center}
 .wlogo{font-size:13px;font-weight:900;color:var(--lime);letter-spacing:.4px;margin-bottom:16px}
 .wlogo span{color:var(--text)}
+.wholerow{display:grid;place-items:center;margin:-4px 0 14px}
+.hole.wh{width:96px;height:96px}
+.hole.wh .aura{width:60px;height:60px}
+.hole.wh .photon{width:38px;height:38px}
+.hole.wh .core{width:26px;height:26px}
+.hole.wh .wv{width:38px;height:38px}
+.hole.wh .scanarc{width:74px;height:74px}
+.hole.wh .dot{--d:44px}
+
 .wttl{font-size:21px;font-weight:900;line-height:1.2}
 .wsub{font-size:11.5px;color:var(--muted);margin:7px 0 20px;line-height:1.5}
 .wopt{display:flex;align-items:center;gap:12px;width:100%;text-align:left;cursor:pointer;
@@ -773,6 +782,15 @@ html[data-theme="light"] .lotbadge{color:#4c7a17}
     <div id="welcome" class="welcome hidden" role="dialog" aria-modal="true" aria-label="Welcome">
       <div class="wcard">
         <div class="wlogo">✦ <span>TraderWatch</span></div>
+        <div class="wholerow">
+          <div class="hole wh" id="wHole" aria-hidden="true">
+            <div class="aura"></div>
+            <div class="wv"></div><div class="wv b"></div><div class="wv c"></div>
+            <div class="scanarc"></div>
+            <div class="photon"></div>
+            <div class="core"></div>
+          </div>
+        </div>
         <div class="wttl" id="wTitle">Selamat datang!</div>
         <div class="wsub" id="wSub">Sediakan app anda sebelum mula.</div>
 
@@ -2584,9 +2602,27 @@ function drawWelcome(){
 }
 function showWelcome(){
  if($('welcome').classList.contains('hidden')===false)return;
+ buildWelcomeHole();
  $('welcome').classList.remove('hidden');
  drawWelcome();
  $('wGo').focus();
+}
+function buildWelcomeHole(){
+ var hole=$('wHole');if(!hole||hole.dataset.built)return;
+ var cols=['','b','','o','','v','','b','','o','',''];
+ for(var i=0;i<12;i++){
+  var ray=document.createElement('div');ray.className='ray';
+  ray.style.transform='rotate('+(Math.random()*360).toFixed(1)+'deg)';
+  var d=document.createElement('div');d.className='dot '+(cols[i%cols.length]||'');
+  var dur=(2.4+Math.random()*2.6);
+  d.style.animationDuration=dur.toFixed(2)+'s';
+  d.style.animationDelay=(-Math.random()*dur).toFixed(2)+'s';
+  d.style.setProperty('--d',(40+Math.random()*10).toFixed(0)+'px');
+  var sz=(2.8+Math.random()*2).toFixed(1);
+  d.style.width=sz+'px';d.style.height=sz+'px';d.style.top=(-parseFloat(sz)/2).toFixed(1)+'px';
+  ray.appendChild(d);hole.appendChild(ray);
+ }
+ hole.dataset.built='1';
 }
 function maybeWelcome(){
  try{if(localStorage.getItem(WKEY))return}catch(e){return}
