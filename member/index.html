@@ -73,7 +73,7 @@ html[data-theme="light"] .ic{background:#e6efd9;border-color:#c9dbb4}
 .pair .ch{font-size:11px;font-weight:700;font-variant-numeric:tabular-nums}
 .pair .traders{display:inline-flex;align-items:center;font-size:8.5px;font-weight:800;
  color:#ff9ba0;background:#ff777d14;border:1px solid #ff777d30;border-radius:999px;
- padding:1.5px 7px;white-space:nowrap;flex:none;position:relative;z-index:2}
+ padding:1.5px 7px;white-space:nowrap;flex:0 0 auto;position:relative;z-index:2;max-width:52%}
 .pair .traders{overflow:hidden}
 @media(prefers-reduced-motion:no-preference){
  .pair .traders::after{content:"";position:absolute;top:0;left:-70%;width:50%;height:100%;
@@ -83,7 +83,7 @@ html[data-theme="light"] .ic{background:#e6efd9;border-color:#c9dbb4}
  position:relative;z-index:2;width:100%}
 /* AI requests this hour */
 .pair .aitick{display:inline-flex;align-items:center;gap:3.5px;font-size:8.5px;font-weight:750;
- letter-spacing:.02em;color:var(--muted);white-space:nowrap;min-width:0;overflow:hidden}
+ letter-spacing:.02em;color:var(--muted);white-space:nowrap;min-width:0;overflow:hidden;flex:1 1 auto}
 .pair .aitick .ico{display:inline-flex;color:var(--blue);opacity:.85;flex:none}
 .pair .aitick b{color:var(--blue);font-variant-numeric:tabular-nums;font-weight:850}
 .pair .aitick.live .ico{animation:aiTickPulse 1.8s ease-in-out infinite}
@@ -1580,13 +1580,54 @@ function draw(now){
    cx.globalAlpha=tt;cx.fillStyle=l[2];cx.textAlign='left';cx.fillText(l[1],6,ly-8);cx.globalAlpha=1});
  }
  var show=Math.floor(vis.length*S.rv);
- for(var j=0;j<show;j++){
-  var i=i0+j,k=c[i],up=k.c>=k.o,col=up?lime:red,cxm=x(i);
-  var edge=S.rv<1?Math.max(.12,Math.min(1,(show-j)/3)):1;
-  cx.globalAlpha=(S.scan!=null&&cxm>S.scan)?.25:edge;
-  cx.strokeStyle=col;cx.fillStyle=col;cx.beginPath();cx.moveTo(cxm,y(k.h));cx.lineTo(cxm,y(k.l));cx.stroke();
-  var ty=y(Math.max(k.o,k.c)),hh=Math.max(1.5,Math.abs(y(k.o)-y(k.c)));cx.fillRect(cxm-bw/2,ty,bw,hh);
+ /* LINE chart: garis tutup tebal + shadow julat halus + marker swing + label harga */
+ // 1) shadow julat high-low (halus — kekal konteks wick)
+ cx.strokeStyle='rgba(40,58,42,.85)';cx.lineWidth=1;
+ for(var j2=0;j2<show;j2++){
+  var i2=i0+j2,k2=c[i2],cx2=x(i2);
+  var e2=S.rv<1?Math.max(.12,Math.min(1,(show-j2)/3)):1;
+  cx.globalAlpha=(S.scan!=null&&cx2>S.scan)?.12:e2*.5;
+  cx.beginPath();cx.moveTo(cx2,y(k2.h));cx.lineTo(cx2,y(k2.l));cx.stroke();
  }
+ // 2) garis tutup (trend utama)
+ cx.globalAlpha=1;cx.strokeStyle=lime;cx.lineWidth=2.6;cx.lineJoin='round';cx.lineCap='round';
+ cx.beginPath();
+ for(var j3=0;j3<show;j3++){
+  var i3=i0+j3,k3=c[i3],cx3=x(i3);
+  var e3=S.rv<1?Math.max(.12,Math.min(1,(show-j3)/3)):1;
+  if(j3===0)cx.moveTo(cx3,y(k3.c));else{cx.globalAlpha=(S.scan!=null&&cx3>S.scan)?.25:e3;cx.lineTo(cx3,y(k3.c))}
+ }
+ cx.stroke();
+ // 3) marker swing high/low + label harga (5 terkini setiap arah)
+ cx.globalAlpha=1;cx.font='800 9px ui-monospace,Menlo,monospace';cx.textAlign='left';
+ var hiMk=[],loMk=[];
+ for(var j4=2;j4<show-2;j4++){
+  var i4=i0+j4,w4=[];
+  for(var q=-2;q<=2;q++){var kk=c[i0+j4+q];if(kk)w4.push(kk)}
+  var cur4=c[i4];
+  var isH=w4.every(function(z){return cur4.h>=z.h}), isL=w4.every(function(z){return cur4.l<=z.l});
+  if(isH)hiMk.push({x:x(i4),y:y(cur4.h),v:cur4.h});
+  if(isL)loMk.push({x:x(i4),y:y(cur4.l),v:cur4.l});
+ }
+ // elak label bertindih: jejak kotak yang dah dilukis
+ var placed=[];
+ function fits(x0,y0,w0,h0){
+  for(var q2=0;q2<placed.length;q2++){var r2=placed[q2];
+   if(x0<r2.x+r2.w&&x0+w0>r2.x&&y0<r2.y+r2.h&&y0+h0>r2.y)return false}
+  return true;
+ }
+ function lbl(mk,colr,above){
+  cx.beginPath();cx.arc(mk.x,mk.y,2.6,0,6.284);cx.fillStyle=colr;cx.fill();
+  var txt=fx(cur,mk.v),tw=cx.measureText(txt).width+4;
+  var tx2=mk.x+6,ty2=above?mk.y-11:mk.y+3;
+  if(tx2+tw>W-pR)tx2=mk.x-6-tw;            // elak keluar kanan
+  if(ty2<2)ty2=mk.y+3; if(ty2+11>H)ty2=mk.y-11;
+  if(!fits(tx2,ty2,tw,11))return;          // langkau jika bertindih
+  placed.push({x:tx2,y:ty2,w:tw,h:11});
+  cx.fillStyle=colr;cx.fillText(txt,tx2,ty2+8);
+ }
+ hiMk.slice(-6).forEach(function(mk){lbl(mk,'rgba(214,255,154,.85)',true)});
+ loMk.slice(-6).forEach(function(mk){lbl(mk,'rgba(255,159,159,.85)',false)});
  cx.globalAlpha=1;
  if(S.scan!=null){
   var sx=S.scan,gr=cx.createLinearGradient(sx-70,0,sx,0);gr.addColorStop(0,'#b7f36b00');gr.addColorStop(1,'#b7f36b2e');cx.fillStyle=gr;cx.fillRect(sx-70,0,70,H);
@@ -2446,9 +2487,14 @@ function drawTdChart(){
  var lime=css('--lime'),red=css('--red'),green=css('--green'),muted=css('--muted'),bg=css('--bg');
  tdcx.lineWidth=1;tdcx.font='9.5px ui-monospace,Menlo,monospace';tdcx.textAlign='left';tdcx.textBaseline='middle';
  for(var g=0;g<4;g++){var gv=lo+(hi-lo)*g/3,gy=y(gv);tdcx.strokeStyle='rgba(128,150,130,.12)';tdcx.beginPath();tdcx.moveTo(0,gy);tdcx.lineTo(W-pR,gy);tdcx.stroke();tdcx.fillStyle=muted;tdcx.fillText(tfx(x.pair,gv),W-pR+5,gy)}
- for(var i=0;i<n;i++){var k=c[i],col=k.c>=k.o?lime:red,cxm=(i+.5)*slot;
-  tdcx.strokeStyle=col;tdcx.fillStyle=col;tdcx.beginPath();tdcx.moveTo(cxm,y(k.h));tdcx.lineTo(cxm,y(k.l));tdcx.stroke();
-  var ty=y(Math.max(k.o,k.c)),hh=Math.max(1.5,Math.abs(y(k.o)-y(k.c)));tdcx.fillRect(cxm-bw/2,ty,bw,hh)}
+ /* LINE chart untuk detail trade juga */
+ tdcx.strokeStyle='rgba(40,58,42,.8)';tdcx.lineWidth=1;
+ for(var i=0;i<n;i++){var k=c[i],cxm=(i+.5)*slot;
+  tdcx.beginPath();tdcx.moveTo(cxm,y(k.h));tdcx.lineTo(cxm,y(k.l));tdcx.stroke()}
+ tdcx.strokeStyle=lime;tdcx.lineWidth=2.2;tdcx.lineJoin='round';tdcx.beginPath();
+ for(var i2=0;i2<n;i2++){var k2=c[i2],cx2=(i2+.5)*slot;
+  if(i2===0)tdcx.moveTo(cx2,y(k2.c));else tdcx.lineTo(cx2,y(k2.c))}
+ tdcx.stroke();tdcx.lineWidth=1;
  function line(v,colr,lab,dash){
   if(v==null||!isFinite(v))return;var yy=y(v);
   tdcx.strokeStyle=colr;tdcx.setLineDash(dash||[]);tdcx.beginPath();tdcx.moveTo(0,yy);tdcx.lineTo(W-pR,yy);tdcx.stroke();tdcx.setLineDash([]);
