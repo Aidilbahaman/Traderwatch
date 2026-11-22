@@ -999,11 +999,13 @@ function flashEl(el,dir){
 }
 /* Count-up: tween nombor lama -> baru 500ms, ease-out cubic (P&L modal). */
 function countUp(el,from,to,fmt){
- if(REDUCED||from==null||!isFinite(from)){el.textContent=fmt(to);return}
+ /* fmt pulangkan HTML dipercayai (dalaman) — guna innerHTML, bukan textContent
+    (textContent memaparkan tag <small> sebagai teks mentah). */
+ if(REDUCED||from==null||!isFinite(from)){el.innerHTML=fmt(to);return}
  var t0=performance.now();
  (function step(now){
   var k=Math.min(1,(now-t0)/500),v=from+(to-from)*(1-Math.pow(1-k,3));
-  el.textContent=fmt(v);
+  el.innerHTML=fmt(v);
   if(k<1)requestAnimationFrame(step);
  })(t0);
 }
