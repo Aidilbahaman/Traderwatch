@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>TraderWatch — Enter CTA (Tap + Draw Line)</title>
+<style>
+:root{--lime:#b7f36b;--lime2:#d6ff9a;--ink:#eef3ee;--mute:#8a978c;--bg:#02040a}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#050806;display:flex;align-items:center;justify-content:center;min-height:100vh;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+.stage{position:relative;width:390px;height:844px;max-height:100vh;background:radial-gradient(ellipse at 50% 34%,#0a1210 0%,#02040a 70%);
+ overflow:hidden;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;
+ padding:0 28px 150px;cursor:pointer;text-align:center}
+@media(max-width:420px){.stage{width:100vw;height:100dvh;padding-bottom:14vh}}
+
+/* ===== star core ===== */
+.stars{position:absolute;inset:0;pointer-events:none}
+.stars i{position:absolute;border-radius:50%;background:#dfe9ff;animation:tw linear infinite}
+@keyframes tw{0%,100%{opacity:.10}50%{opacity:.8}}
+.core{position:absolute;left:50%;top:34%;transform:translate(-50%,-50%)}
+.core .glow{position:absolute;left:50%;top:50%;width:200px;height:200px;margin:-100px 0 0 -100px;border-radius:50%;
+ background:radial-gradient(circle,rgba(183,243,107,.20) 0%,rgba(183,243,107,.055) 44%,transparent 70%);
+ animation:glowPulse 3.2s ease-in-out infinite}
+@keyframes glowPulse{0%,100%{transform:scale(.92);opacity:.7}50%{transform:scale(1.08);opacity:1}}
+.core .vline{position:absolute;left:50%;top:50%;width:1px;height:170px;margin:-85px 0 0 0;
+ background:linear-gradient(180deg,transparent,rgba(183,243,107,.35),transparent);opacity:.5}
+.core .hline{position:absolute;left:50%;top:50%;width:340px;height:1px;margin-left:-170px;
+ background:linear-gradient(90deg,transparent,rgba(183,243,107,.5),transparent)}
+.core svg{position:relative;display:block;width:80px;height:80px;margin:-40px 0 0 -40px;
+ filter:drop-shadow(0 0 16px rgba(183,243,107,.8));animation:starBreathe 3.2s ease-in-out infinite}
+@keyframes starBreathe{0%,100%{transform:scale(.97)}50%{transform:scale(1.04)}}
+
+/* ripple rings dari core */
+.ripple{position:absolute;left:50%;top:34%;width:130px;height:130px;margin:-65px 0 0 -65px;border-radius:50%;
+ border:1px solid rgba(183,243,107,.4);animation:rippleOut 3.6s ease-out infinite;pointer-events:none}
+.ripple.r2{animation-delay:1.2s}.ripple.r3{animation-delay:2.4s}
+@keyframes rippleOut{0%{transform:scale(.45);opacity:0}16%{opacity:.5}100%{transform:scale(2.6);opacity:0}}
+
+/* ===== text block ===== */
+.ttl{font-size:26px;font-weight:500;letter-spacing:.19em;margin:0 0 10px -.19em;color:#fff}
+.tag{font-size:13px;color:var(--mute);line-height:1.55;max-width:25ch;margin:0 0 34px}
+
+/* ===== CTA: tap anywhere + draw line ===== */
+.cta{position:relative;display:inline-flex;align-items:center;gap:10px;
+ font-size:11px;font-weight:700;letter-spacing:.26em;text-transform:uppercase;
+ color:var(--lime);padding:8px 2px 14px;animation:breathe 2.8s ease-in-out infinite}
+@keyframes breathe{0%,100%{opacity:.6}50%{opacity:1}}
+.cta .dot{width:6px;height:6px;border-radius:50%;background:var(--lime);
+ box-shadow:0 0 10px var(--lime),0 0 20px rgba(183,243,107,.5);
+ animation:dotPulse 2.8s ease-in-out infinite}
+@keyframes dotPulse{0%,100%{transform:scale(.7);opacity:.55}50%{transform:scale(1.3);opacity:1}}
+/* garis lime melukis */
+.cta::after{content:"";position:absolute;left:50%;bottom:0;height:1.5px;width:112%;
+ transform:translateX(-50%) scaleX(0);transform-origin:50% 50%;
+ background:linear-gradient(90deg,transparent 0%,var(--lime) 22%,var(--lime2) 50%,var(--lime) 78%,transparent 100%);
+ border-radius:2px;box-shadow:0 0 8px rgba(183,243,107,.55);
+ animation:drawLine 3.4s cubic-bezier(.45,0,.25,1) infinite}
+@keyframes drawLine{
+ 0%{transform:translateX(-50%) scaleX(0);opacity:0}
+ 12%{opacity:1}
+ 55%{transform:translateX(-50%) scaleX(1);opacity:1}
+ 82%{transform:translateX(-50%) scaleX(1);opacity:.9}
+ 100%{transform:translateX(-50%) scaleX(1) translateY(1px);opacity:0}
+}
+
+@media(prefers-reduced-motion:reduce){
+ .core .glow,.core svg,.ripple,.cta,.cta .dot{animation:none}
+ .cta::after{animation:none;transform:translateX(-50%) scaleX(1);opacity:.85}
+}
+</style>
+</head>
+<body>
+<div class="stage" id="stage">
+  <div class="stars" id="stars"></div>
+  <div class="ripple"></div><div class="ripple r2"></div><div class="ripple r3"></div>
+  <div class="core">
+    <div class="glow"></div>
+    <div class="vline"></div>
+    <div class="hline"></div>
+    <svg viewBox="-22 -22 44 44"><path d="M0-20Q0 0 20 0Q0 0 0 20Q0 0-20 0Q0 0 0-20Z" fill="#fff"/></svg>
+  </div>
+  <div class="ttl">TraderWatch</div>
+  <p class="tag">Institutional-grade market intelligence.</p>
+  <div class="cta"><span class="dot"></span>Tap anywhere to enter</div>
+</div>
+<script>
+/* bintang berkelip */
+(function(){
+  var wrap=document.getElementById('stars');
+  for(var i=0;i<48;i++){
+    var s=document.createElement('i');
+    s.style.left=(Math.random()*100)+'%';
+    s.style.top=(Math.random()*100)+'%';
+    var sz=(1+Math.random()*1.6).toFixed(1);
+    s.style.width=sz+'px';s.style.height=sz+'px';
+    s.style.opacity=(0.1+Math.random()*0.35).toFixed(2);
+    s.style.animationDuration=(2.6+Math.random()*4).toFixed(1)+'s';
+    s.style.animationDelay=(-Math.random()*6).toFixed(1)+'s';
+    wrap.appendChild(s);
+  }
+})();
+/* tap feedback */
+document.getElementById('stage').addEventListener('click',function(){
+  this.style.transition='filter .18s';
+  this.style.filter='brightness(1.45)';
+  var el=this;
+  setTimeout(function(){el.style.filter='';},200);
+});
+</script>
+</body>
+</html>
