@@ -58,6 +58,9 @@ FALLBACK_MODELS = [m.strip() for m in os.environ.get(
     "asai/freemodel-1-GLM,asai/freemodel-2-MiniMax,asai/deepseek-v4-flash"
 ).split(",") if m.strip()]
 CALL_TIMEOUT_S = float(os.environ.get("AI_LLM_CALL_TIMEOUT", "60"))
+# Had atas RR1: backtest mekanikal 780 trade (BTC/XAU/EUR, 33 hari) tunjuk
+# expectancy jatuh negatif bila TP > 1.5R. Hadkan supaya TP realistik.
+RR1_MAX = float(os.environ.get("AI_RR1_MAX", "1.6"))
 BUDGET_S = float(os.environ.get("AI_LLM_BUDGET_S", "120"))
 
 # Timeframe-aware trading styles. Lower TF = scalping (tight SL, quick targets,
@@ -73,25 +76,25 @@ TF_PROFILES = {
                          "are frequent; a clean micro sweep + displacement is enough, you do NOT need a perfect "
                          "higher-TF setup. Still avoid dead chop and news spikes.")),
     "M15": dict(ctx_factor=4, ctx_name="H1", min_bars=100, ctx_show=24, base_show=48,
-                rr1_min=1.2, role="INTRADAY TREND",
+                rr1_min=1.0, role="INTRADAY TREND",
                 approach=("Be selective and patient: only trade a CLEAR, confirmed setup aligned with the "
                           "H1 trend. Do NOT chase price extended deep into discount/premium — wait for a "
                           "pullback to an unmitigated FVG/order-block. In choppy/rangebound markets or without "
                           "a clean edge, choose HOLD. Quality over quantity.")),
     "H1": dict(ctx_factor=4, ctx_name="H4", min_bars=60, ctx_show=24, base_show=48,
-               rr1_min=1.5, role="SWING TREND",
+               rr1_min=1.2, role="SWING TREND",
                approach=("You are SWING trading the H1 chart. Only take clear structural setups aligned with "
                          "the H4 trend. Stops sit beyond the invalidating H1 swing (wider, ~1-1.5x ATR). "
                          "Targets are larger: TP1 ~2R at a meaningful liquidity level, TP2 ~3R+. Be selective "
                          "— a few high-quality swings, not noise. HOLD if structure is unclear.")),
     "H4": dict(ctx_factor=6, ctx_name="D1", min_bars=40, ctx_show=20, base_show=40,
-               rr1_min=2.0, role="POSITION TREND",
+               rr1_min=1.5, role="POSITION TREND",
                approach=("You are POSITION trading the H4 chart. Trade only major structural setups aligned "
                          "with the Daily trend. Wide stops beyond the invalidating H4 swing. Targets are "
                          "ambitious: TP1 ~2.5-3R, TP2 ~4R+ at major liquidity. Very selective — patience; "
                          "HOLD unless the edge is strong and clean.")),
     "D1": dict(ctx_factor=5, ctx_name="W1", min_bars=20, ctx_show=12, base_show=30,
-               rr1_min=2.5, role="POSITION TREND",
+               rr1_min=2.0, role="POSITION TREND",
                approach=("You are POSITION trading the Daily chart. Trade only major macro structural setups "
                          "aligned with the Weekly trend. Very wide stops beyond the invalidating Daily swing. "
                          "Targets: TP1 ~3R, TP2 ~5R+ at major weekly liquidity. Extremely selective — HOLD "
@@ -233,7 +236,22 @@ def parse_response(content):
     raise ValueError("tiada JSON valid dalam response")
 
 
-def validate_verdict(j, price, pip, spread_pips, rr1_min=1.5):
+# Sesi lemah ikut backtest 780 trade: XAU London/NY negatif, EUR Asia negatif.
+# Format: pair -> set jam-UTC yang DIDENDA (penalti conf, bukan sekatan keras).
+WEAK_SESSIONS = {
+    "XAU": {7, 8, 9, 10, 11, 12, 13, 14, 15, 16},   # London+NY: -0.16R / -0.12R
+    "EUR": {0, 1, 2, 3, 4, 5, 6},                     # Asia: -0.01R (marginal)
+    "GBP": {0, 1, 2, 3, 4, 5, 6},
+}
+
+
+def session_penalty(pair, hour_utc):
+    """Pendarab confidence ikut sesi lemah (bukti backtest). 1.0 = tiada denda."""
+    pref = str(pair).upper()[:3]
+    return 0.88 if hour_utc in WEAK_SESSIONS.get(pref, ()) else 1.0
+
+
+def validate_verdict(j, price, pip, spread_pips, rr1_min=1.5, pair_hint=""):
     """Semak sanity jawapan LLM; pulangkan verdict bersih atau raise ValueError.
 
     Jarak SL/TP = keputusan LLM (tiada cap). Semakan di sini mekanikal:
@@ -267,9 +285,13 @@ def validate_verdict(j, price, pip, spread_pips, rr1_min=1.5):
     rr2 = abs(tp2 - price) / risk
     if rr1 < rr1_min:
         raise ValueError(f"RR1 {rr1:.2f} below {rr1_min}")
+    # Had atas: backtest 780 trade -> RR>1.5 expectancy negatif pada M5/H1.
+    if rr1 > RR1_MAX:
+        raise ValueError(f"RR1 {rr1:.2f} above cap {RR1_MAX} (TP too far — unrealistic)")
+    sp = session_penalty(pair_hint, datetime.now(timezone.utc).hour)
     return {"side": bias, "entry": round(price, 5), "sl": round(sl, 5),
             "tp1": round(tp1, 5), "tp2": round(tp2, 5),
-            "conf": conf, "reason": reason,
+            "conf": round(min(0.95, conf * sp), 2), "reason": reason,
             "rr1": round(rr1, 2), "rr2": round(rr2, 2)}
 
 
@@ -423,9 +445,12 @@ def analyze(pair, bars, pip, spread_pips, call=None, budget_s=None, held=None, t
             "If price makes higher highs and higher lows -> BUY. "
             "If lower highs and lower lows -> SELL. "
             "If choppy or sideways with no clear direction -> HOLD. "
+            "Confidence is a PROBABILITY: 5=coin flip, 6=55-62%, 7=62-70%, "
+            "8=70-78%, 9+=rare. If you can name 2+ real counter-arguments, HOLD. "
             "Entry at CURRENT price (instant market entry). "
             "SL just beyond nearest opposing swing (must exceed 3x spread). "
-            f"TP at the next swing in your direction. RR1 >= {rr_min:g}. "
+            f"TP1 = exactly 1R from entry (risk x 1.0), TP2 = 1.5R. Keep TP1 CLOSE. "
+            f"Hard limits: RR1 must be {rr_min:g}-1.05 (never more than 1.05). "
             'Reply ONLY: {"bias":"BUY"|"SELL"|"HOLD","sl":num,'
             '"tp1":num,"tp2":num,"confidence":0-10,"reason":"<6 words>"}')
         ai_meta = {"bos": bos, "choch": choch,
@@ -443,6 +468,10 @@ def analyze(pair, bars, pip, spread_pips, call=None, budget_s=None, held=None, t
             if _lessons:
                 prompt += ("\nLEARNED from real client outcomes (respect this): "
                            + _lessons)
+            # Kalibrasi: beritahu model di mana ia SELALU terlebih yakin.
+            _cal = ai_learn.calibration_note()
+            if _cal:
+                prompt += "\n" + _cal
         except Exception:
             pass
     # Vision first: model tengok terus carta (kurang risiko prompt salah gambar).
@@ -461,7 +490,7 @@ def analyze(pair, bars, pip, spread_pips, call=None, budget_s=None, held=None, t
         else:
             latency = time.time() - t0
             try:
-                verdict = validate_verdict(j, price, pip, spread_pips, rr1_min=prof["rr1_min"])
+                verdict = validate_verdict(j, price, pip, spread_pips, rr1_min=prof["rr1_min"], pair_hint=pair)
             except ValueError as e:
                 # Rejection (aras/RR tak sah) muktamad — jangan shop model lain.
                 log(f"{pair} {VISION_MODEL} (vision) verdict ditolak ({e})")
@@ -499,7 +528,7 @@ def analyze(pair, bars, pip, spread_pips, call=None, budget_s=None, held=None, t
                     "content": content[:600], "reject": f"parse: {e}"})
             continue
         try:
-            verdict = validate_verdict(j, price, pip, spread_pips, rr1_min=prof["rr1_min"])
+            verdict = validate_verdict(j, price, pip, spread_pips, rr1_min=prof["rr1_min"], pair_hint=pair)
         except ValueError as e:
             # Penolakan sah = muktamad. Jangan "shop" model lain untuk jawapan
             # yang lepas — itu menipu diri sendiri tentang kualiti setup.

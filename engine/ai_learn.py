@@ -50,6 +50,58 @@ def _bucket(r):
     return (tf, side, "aligned" if aligned else "counter", "choch" if choch else "nochoch", band)
 
 
+def calibration(min_n=3):
+    """Uji sama ada confidence AI JUIUR: bila AI cakap 70%, adakah betul 70% menang?
+
+    Return list of bands {band, stated, actual, n} — stated = purata conf,
+    actual = win-rate sebenar. Jika actual jauh < stated, conf tidak boleh dipercayai.
+    """
+    rows = _rows()
+    bands = {}
+    for r in rows:
+        conf = float(r.get("ai_conf") or 0)
+        if conf <= 0:
+            continue
+        # ai_conf disimpan sebagai 0..1 (lama) atau 0..100 (baru) — normalkan ke 0..1
+        if conf > 1.0:
+            conf = conf / 100.0
+        lo = int(round(conf * 10)) * 10   # 50,60,70 ...
+        key = f"{lo}-{lo + 10}%"
+        b = bands.setdefault(key, {"stated": [], "tp": 0, "n": 0})
+        b["stated"].append(conf)
+        b["n"] += 1
+        b["tp"] += 1 if r.get("status") == "tp" else 0
+    out = []
+    for k in sorted(bands):
+        b = bands[k]
+        if b["n"] < min_n:
+            continue
+        out.append({"band": k,
+                    "stated": round(sum(b["stated"]) / len(b["stated"]) * 100, 1),
+                    "actual": round(100.0 * b["tp"] / b["n"], 1),
+                    "n": b["n"]})
+    return out
+
+
+def calibration_note():
+    """Teks ringkas untuk suntik ke prompt: band yang AI selalu terlebih yakin."""
+    cal = calibration()
+    if not cal:
+        return ""
+    over = [c for c in cal if c["actual"] + 8 < c["stated"]]
+    under = [c for c in cal if c["actual"] > c["stated"] + 8]
+    parts = []
+    if over:
+        parts.append("CAUTION — you have been OVERCONFIDENT on these bands: " + "; ".join(
+            f"{c['band']} you said {c['stated']:.0f}% but only {c['actual']:.0f}% won (n={c['n']})"
+            for c in over[:3]) + ".")
+    if under:
+        parts.append("Underconfident (safe to trust more): " + "; ".join(
+            f"{c['band']} said {c['stated']:.0f}% actual {c['actual']:.0f}% (n={c['n']})"
+            for c in under[:2]) + ".")
+    return " ".join(parts)
+
+
 def compute():
     rows = _rows()
     agg = defaultdict(lambda: [0, 0])   # bucket -> [tp, sl]

@@ -1,0 +1,186 @@
+{
+ "A-simple:BTCUSD": {
+  "name": "A-simple",
+  "pair": "BTCUSD",
+  "pts": 5,
+  "tp": 0,
+  "sl": 0,
+  "open": 0,
+  "hold": 4,
+  "reject": 21,
+  "r": [],
+  "conf": [],
+  "sides": {
+   "BUY": 0,
+   "SELL": 0
+  },
+  "errs": {
+   "HTTPError: HTTP Error 429: Too Many Requests": 20
+  },
+  "secs": 12.4
+ },
+ "A-simple:XAUUSD": {
+  "name": "A-simple",
+  "pair": "XAUUSD",
+  "pts": 0,
+  "tp": 0,
+  "sl": 0,
+  "open": 0,
+  "hold": 0,
+  "reject": 25,
+  "r": [],
+  "conf": [],
+  "sides": {
+   "BUY": 0,
+   "SELL": 0
+  },
+  "errs": {
+   "HTTPError: HTTP Error 429: Too Many Requests": 25
+  },
+  "secs": 1.6
+ },
+ "A-simple:EURUSD": {
+  "name": "A-simple",
+  "pair": "EURUSD",
+  "pts": 0,
+  "tp": 0,
+  "sl": 0,
+  "open": 0,
+  "hold": 0,
+  "reject": 25,
+  "r": [],
+  "conf": [],
+  "sides": {
+   "BUY": 0,
+   "SELL": 0
+  },
+  "errs": {
+   "HTTPError: HTTP Error 429: Too Many Requests": 25
+  },
+  "secs": 1.4
+ },
+ "B-calib:BTCUSD": {
+  "name": "B-calib",
+  "pair": "BTCUSD",
+  "pts": 1,
+  "tp": 0,
+  "sl": 0,
+  "open": 0,
+  "hold": 1,
+  "reject": 24,
+  "r": [],
+  "conf": [],
+  "sides": {
+   "BUY": 0,
+   "SELL": 0
+  },
+  "errs": {
+   "HTTPError: HTTP Error 429: Too Many Requests": 24
+  },
+  "secs": 3.8
+ },
+ "B-calib:XAUUSD": {
+  "name": "B-calib",
+  "pair": "XAUUSD",
+  "pts": 17,
+  "tp": 0,
+  "sl": 1,
+  "open": 0,
+  "hold": 16,
+  "reject": 8,
+  "r": [
+   -1.0
+  ],
+  "conf": [
+   0.6
+  ],
+  "sides": {
+   "BUY": 0,
+   "SELL": 1
+  },
+  "errs": {
+   "HTTPError: HTTP Error 429: Too Many Requests": 8
+  },
+  "secs": 43.4
+ },
+ "B-calib:EURUSD": {
+  "name": "B-calib",
+  "pair": "EURUSD",
+  "pts": 0,
+  "tp": 0,
+  "sl": 0,
+  "open": 0,
+  "hold": 0,
+  "reject": 25,
+  "r": [],
+  "conf": [],
+  "sides": {
+   "BUY": 0,
+   "SELL": 0
+  },
+  "errs": {
+   "HTTPError: HTTP Error 429: Too Many Requests": 25
+  },
+  "secs": 2.3
+ },
+ "C-strict:BTCUSD": {
+  "name": "C-strict",
+  "pair": "BTCUSD",
+  "pts": 0,
+  "tp": 0,
+  "sl": 0,
+  "open": 0,
+  "hold": 0,
+  "reject": 25,
+  "r": [],
+  "conf": [],
+  "sides": {
+   "BUY": 0,
+   "SELL": 0
+  },
+  "errs": {
+   "HTTPError: HTTP Error 429: Too Many Requests": 25
+  },
+  "secs": 2.2
+ },
+ "C-strict:XAUUSD": {
+  "name": "C-strict",
+  "pair": "XAUUSD",
+  "pts": 0,
+  "tp": 0,
+  "sl": 0,
+  "open": 0,
+  "hold": 0,
+  "reject": 25,
+  "r": [],
+  "conf": [],
+  "sides": {
+   "BUY": 0,
+   "SELL": 0
+  },
+  "errs": {
+   "HTTPError: HTTP Error 429: Too Many Requests": 25
+  },
+  "secs": 2.5
+ },
+ "C-strict:EURUSD": {
+  "name": "C-strict",
+  "pair": "EURUSD",
+  "pts": 0,
+  "tp": 0,
+  "sl": 0,
+  "open": 0,
+  "hold": 0,
+  "reject": 25,
+  "r": [],
+  "conf": [],
+  "sides": {
+   "BUY": 0,
+   "SELL": 0
+  },
+  "errs": {
+   "HTTPError: HTTP Error 429: Too Many Requests": 25
+  },
+  "secs": 1.8
+ }
+}
