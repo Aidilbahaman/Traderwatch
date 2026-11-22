@@ -1,0 +1,316 @@
+{
+ "XAUUSD": {
+  "pair": "XAUUSD",
+  "points": 30,
+  "buy": 2,
+  "sell": 11,
+  "hold": 14,
+  "reject": 3,
+  "tp": 6,
+  "sl": 2,
+  "open": 5,
+  "rr": [
+   1.86,
+   2.03,
+   2.71,
+   1.2,
+   1.29,
+   1.24,
+   1.61,
+   1.66,
+   1.08,
+   2.12,
+   1.14,
+   1.97,
+   2.86
+  ],
+  "conf": [
+   0.6,
+   0.6,
+   0.5,
+   0.5,
+   0.6,
+   0.6,
+   0.6,
+   0.7,
+   0.5,
+   0.6,
+   0.6,
+   0.7,
+   0.5
+  ],
+  "signals": [
+   {
+    "ts": "2026-10-21T13:45:00",
+    "side": "BUY",
+    "conf": 0.6,
+    "rr": 1.86,
+    "outcome": "SL",
+    "reason": "higher low after range breakout"
+   },
+   {
+    "ts": "2026-10-22T15:45:00",
+    "side": "SELL",
+    "conf": 0.6,
+    "rr": 2.03,
+    "outcome": "TP",
+    "reason": "M15 downtrend, lower highs lows"
+   },
+   {
+    "ts": "2026-10-29T01:30:00",
+    "side": "SELL",
+    "conf": 0.5,
+    "rr": 2.71,
+    "outcome": "TP",
+    "reason": "lower highs lower lows formed"
+   },
+   {
+    "ts": "2026-10-31T03:20:00",
+    "side": "SELL",
+    "conf": 0.5,
+    "rr": 1.2,
+    "outcome": "OPEN",
+    "reason": "M15 down, lower highs lows"
+   },
+   {
+    "ts": "2026-11-03T06:05:00",
+    "side": "SELL",
+    "conf": 0.6,
+    "rr": 1.29,
+    "outcome": "TP",
+    "reason": "M15 down, lower highs"
+   },
+   {
+    "ts": "2026-11-09T11:35:00",
+    "side": "BUY",
+    "conf": 0.6,
+    "rr": 1.24,
+    "outcome": "TP",
+    "reason": "M15 up, pullback recovery bounce"
+   },
+   {
+    "ts": "2026-11-10T12:30:00",
+    "side": "SELL",
+    "conf": 0.6,
+    "rr": 1.61,
+    "outcome": "TP",
+    "reason": "aligned downtrend continuation"
+   },
+   {
+    "ts": "2026-11-12T14:30:00",
+    "side": "SELL",
+    "conf": 0.7,
+    "rr": 1.66,
+    "outcome": "TP",
+    "reason": "Bearish M15 trend continues"
+   },
+   {
+    "ts": "2026-11-13T15:50:00",
+    "side": "SELL",
+    "conf": 0.5,
+    "rr": 1.08,
+    "outcome": "SL",
+    "reason": "M15 down, M5 making lower lows"
+   },
+   {
+    "ts": "2026-11-18T01:55:00",
+    "side": "SELL",
+    "conf": 0.6,
+    "rr": 2.12,
+    "outcome": "OPEN",
+    "reason": "Bearish breakdown new lows"
+   },
+   {
+    "ts": "2026-11-19T02:50:00",
+    "side": "SELL",
+    "conf": 0.6,
+    "rr": 1.14,
+    "outcome": "OPEN",
+    "reason": "M15 downtrend; M5 lower highs"
+   },
+   {
+    "ts": "2026-11-20T03:45:00",
+    "side": "SELL",
+    "conf": 0.7,
+    "rr": 1.97,
+    "outcome": "OPEN",
+    "reason": "downtrend lower highs lows"
+   },
+   {
+    "ts": "2026-11-21T04:40:00",
+    "side": "SELL",
+    "conf": 0.5,
+    "rr": 2.86,
+    "outcome": "OPEN",
+    "reason": "M15 downtrend but M5 range"
+   }
+  ],
+  "secs": 79.5
+ },
+ "EURUSD": {
+  "pair": "EURUSD",
+  "points": 30,
+  "buy": 2,
+  "sell": 3,
+  "hold": 17,
+  "reject": 8,
+  "tp": 1,
+  "sl": 2,
+  "open": 2,
+  "rr": [
+   1.13,
+   1.03,
+   1.0,
+   1.57,
+   1.41
+  ],
+  "conf": [
+   0.6,
+   0.7,
+   0.7,
+   0.6,
+   0.5
+  ],
+  "signals": [
+   {
+    "ts": "2026-10-21T13:45:00",
+    "side": "BUY",
+    "conf": 0.6,
+    "rr": 1.13,
+    "outcome": "SL",
+    "reason": "M15 up, higher lows forming"
+   },
+   {
+    "ts": "2026-10-26T20:55:00",
+    "side": "SELL",
+    "conf": 0.7,
+    "rr": 1.03,
+    "outcome": "OPEN",
+    "reason": "Lower highs, lower lows, downtrend"
+   },
+   {
+    "ts": "2026-11-02T05:55:00",
+    "side": "BUY",
+    "conf": 0.7,
+    "rr": 1.0,
+    "outcome": "TP",
+    "reason": "HH.HL aligned uptrend breakout"
+   },
+   {
+    "ts": "2026-11-13T17:30:00",
+    "side": "SELL",
+    "conf": 0.6,
+    "rr": 1.57,
+    "outcome": "OPEN",
+    "reason": "strong bearish breakout aligned HTF"
+   },
+   {
+    "ts": "2026-11-19T04:55:00",
+    "side": "SELL",
+    "conf": 0.5,
+    "rr": 1.41,
+    "outcome": "SL",
+    "reason": "M15 down, recent lower highs"
+   }
+  ],
+  "secs": 73.0
+ },
+ "BTCUSD": {
+  "pair": "BTCUSD",
+  "points": 30,
+  "buy": 4,
+  "sell": 4,
+  "hold": 20,
+  "reject": 2,
+  "tp": 4,
+  "sl": 3,
+  "open": 1,
+  "rr": [
+   1.19,
+   1.26,
+   1.48,
+   1.74,
+   1.83,
+   1.23,
+   2.68,
+   1.28
+  ],
+  "conf": [
+   0.6,
+   0.7,
+   0.5,
+   0.6,
+   0.6,
+   0.7,
+   0.7,
+   0.7
+  ],
+  "signals": [
+   {
+    "ts": "2026-10-21T06:00:00",
+    "side": "BUY",
+    "conf": 0.6,
+    "rr": 1.19,
+    "outcome": "TP",
+    "reason": "M15 up, M5 pullback support"
+   },
+   {
+    "ts": "2026-10-22T07:15:00",
+    "side": "SELL",
+    "conf": 0.7,
+    "rr": 1.26,
+    "outcome": "OPEN",
+    "reason": "lower highs lower lows alignment"
+   },
+   {
+    "ts": "2026-10-25T12:10:00",
+    "side": "SELL",
+    "conf": 0.5,
+    "rr": 1.48,
+    "outcome": "SL",
+    "reason": "lower highs, aligned lower TF"
+   },
+   {
+    "ts": "2026-10-27T17:10:00",
+    "side": "BUY",
+    "conf": 0.6,
+    "rr": 1.74,
+    "outcome": "TP",
+    "reason": "Higher highs extension, M15 up"
+   },
+   {
+    "ts": "2026-10-28T20:00:00",
+    "side": "BUY",
+    "conf": 0.6,
+    "rr": 1.83,
+    "outcome": "SL",
+    "reason": "Higher highs, uptrend intact"
+   },
+   {
+    "ts": "2026-11-02T01:00:00",
+    "side": "BUY",
+    "conf": 0.7,
+    "rr": 1.23,
+    "outcome": "TP",
+    "reason": "pullback in higher-TF uptrend"
+   },
+   {
+    "ts": "2026-11-12T13:40:00",
+    "side": "SELL",
+    "conf": 0.7,
+    "rr": 2.68,
+    "outcome": "TP",
+    "reason": "Downtrend continues, lower highs lows"
+   },
+   {
+    "ts": "2026-11-14T16:10:00",
+    "side": "SELL",
+    "conf": 0.7,
+    "rr": 1.28,
+    "outcome": "SL",
+    "reason": "Downtrend continuation lower lows"
+   }
+  ],
+  "secs": 100.7
+ }
+}

@@ -401,7 +401,7 @@ def analyze(pair, bars, pip, spread_pips, call=None, budget_s=None, held=None, t
         s_hi = s_lo = "RANGE"
         bos = trend if trend in ("UP", "DOWN") else "RANGE"
         choch = False
-        fvg_txt = "none"
+        fvg_n = 0
         if ICT is not None:
             try:
                 # Higher TF swing dari bar asing (guna ctx yang dah resample).
@@ -409,15 +409,11 @@ def analyze(pair, bars, pip, spread_pips, call=None, budget_s=None, held=None, t
                 lo_bars = [{"h": b[1], "l": b[2], "c": b[3]} for b in bars]
                 s_hi = ICT.swing_trend(hi_bars, 3, 2)
                 s_lo = ICT.swing_trend(lo_bars, 3, 2)
+                fvg_n = len(ICT.unfilled_fvg(lo_bars, price))
                 bos = s_lo if s_lo != "RANGE" else s_hi
                 choch = (s_hi != "RANGE" and s_lo != "RANGE" and s_lo != s_hi)
-                fvgs = ICT.unfilled_fvg(lo_bars, price)
-                if fvgs:
-                    fvg_txt = ", ".join(f"{x['dir']} {x['bot']:.2f}-{x['top']:.2f}" for x in fvgs[:2])
             except Exception:
                 pass
-        c_txt = ("YES — M15 structure flipped against higher TF (potential reversal)."
-                 if choch else "No CHoCH; follow dominant BOS.")
         rr_min = prof["rr1_min"]
         # Prompt SIMPLE: ikut trend je. Model tengok imej, bagi arah + SL/TP.
         prompt = (
@@ -433,7 +429,7 @@ def analyze(pair, bars, pip, spread_pips, call=None, budget_s=None, held=None, t
             'Reply ONLY: {"bias":"BUY"|"SELL"|"HOLD","sl":num,'
             '"tp1":num,"tp2":num,"confidence":0-10,"reason":"<6 words>"}')
         ai_meta = {"bos": bos, "choch": choch,
-                   "fvg": len(fvgs) if 'fvgs' in dir() else 0,
+                   "fvg": fvg_n,
                    "atr": round(atr, 3), "hour": datetime.now(timezone.utc).hour}
     else:
         ai_meta = {"bos": trend if trend in ("UP", "DOWN") else "RANGE",
