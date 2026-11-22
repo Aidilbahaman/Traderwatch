@@ -1804,7 +1804,25 @@
   "XAGUSD_20261123_055109": {
    "status": "active",
    "entry_at": "2026-11-23T05:54:00+08:00"
+  },
+  "XAUUSD_20261123_062555": {
+   "status": "pending"
+  },
+  "XAGUSD_20261123_061637": {
+   "status": "pending"
+  },
+  "XAUUSD_20261123_061541": {
+   "status": "pending"
+  },
+  "XAGUSD_20261123_060655": {
+   "status": "pending"
+  },
+  "XAUUSD_20261123_060544": {
+   "status": "pending"
+  },
+  "XAUUSD_20261123_055547": {
+   "status": "pending"
   }
  },
- "updated": "2026-11-23T06:21:02+08:00"
+ "updated": "2026-11-23T06:26:03+08:00"
 }
