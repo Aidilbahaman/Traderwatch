@@ -133,6 +133,15 @@ def format_context(pair, tf, hour_utc=None, lessons="", calibration=""):
     else:
         lines.append("Economic calendar unavailable — rely on technicals only.")
 
+    # Konteks USD (DXY sintetik) — penting untuk logam, tiada untuk yang lain.
+    try:
+        import usd_context as UC
+        u = UC.usd_context(pair)
+        if u:
+            lines.append(u)
+    except Exception:
+        pass
+
     if lessons:
         lines.append("PROVEN/AVOID from real client outcomes: " + lessons)
     if calibration:
