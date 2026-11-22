@@ -278,26 +278,31 @@ def fetch_ohlc(pair, tf, limit=200):
 
 
 def _fetch_ohlc_raw(pair, tf, limit=200):
-    """Real OHLC candles for the chart, resampled to the requested timeframe."""
+    """Real OHLC candles for the chart using native MT5 timeframes (M5..D1),
+    with automatic fallback to M15 resampling if native H1/H4/D1 is empty."""
     tf = tf if tf in TF_MINUTES else "M15"
-    base_gran = "M5" if tf == "M5" else "M15"
-    base_min = 5 if tf == "M5" else 15
-    rows = M5.candles(pair, base_gran, 800)
-    bars = []
-    for c in rows:
-        try:
-            d = datetime.fromisoformat(str(c["t"]).replace("Z", "+00:00"))
-            if d.tzinfo is None:
-                d = d.replace(tzinfo=timezone.utc)
-            bars.append((int(d.timestamp() * 1000), float(c["o"]), float(c["h"]),
-                         float(c["l"]), float(c["c"])))
-        except (KeyError, TypeError, ValueError):
-            continue
-    factor = max(1, TF_MINUTES[tf] // base_min)
-    if factor > 1:
+    gran = {"M5": "M5", "M15": "M15", "H1": "M60", "H4": "H4", "D1": "D1"}.get(tf, "M15")
+
+    def _parse(rows):
+        out = []
+        for c in rows or []:
+            try:
+                d = datetime.fromisoformat(str(c["t"]).replace("Z", "+00:00"))
+                if d.tzinfo is None:
+                    d = d.replace(tzinfo=timezone.utc)
+                out.append((int(d.timestamp() * 1000), float(c["o"]), float(c["h"]),
+                            float(c["l"]), float(c["c"])))
+            except (KeyError, TypeError, ValueError):
+                continue
+        return out
+
+    bars = _parse(M5.candles(pair, gran, max(limit, 200)))
+    if not bars and tf in ("H1", "H4", "D1"):
+        base_rows = _parse(M5.candles(pair, "M15", 800))
+        factor = max(1, TF_MINUTES[tf] // 15)
         res = []
-        for i in range(0, len(bars) - factor + 1, factor):
-            g = bars[i:i + factor]
+        for i in range(0, len(base_rows) - factor + 1, factor):
+            g = base_rows[i:i + factor]
             res.append((g[0][0], g[0][1], max(x[2] for x in g),
                         min(x[3] for x in g), g[-1][4]))
         bars = res
@@ -305,32 +310,40 @@ def _fetch_ohlc_raw(pair, tf, limit=200):
 
 
 ANALYSIS_TFS = ("M5", "M15", "H1", "H4", "D1")
-TF_MIN_BARS = {"M5": 80, "M15": 100, "H1": 60, "H4": 40, "D1": 20}
+TF_MIN_BARS = {"M5": 80, "M15": 100, "H1": 60, "H4": 60, "D1": 55}
 
 
 def fetch_bars_tf(pair, tf):
-    """Base-TF bars (ts_ms,h,l,c) for the analyst. M5/M15/H1 from DB gran;
-    H4/D1 resampled from M60. Returns list of (ts_ms, high, low, close)."""
-    gran = {"M5": "M5", "M15": "M15", "H1": "M60", "H4": "M60", "D1": "M60"}.get(tf, "M15")
-    count = {"M5": 300, "M15": 300, "H1": 300, "H4": 800, "D1": 1500}.get(tf, 300)
-    rows = M5.candles(pair, gran, count)
-    bars = []
-    for c in rows:
-        try:
-            d = datetime.fromisoformat(str(c["t"]).replace("Z", "+00:00"))
-            if d.tzinfo is None:
-                d = d.replace(tzinfo=timezone.utc)
-            bars.append((int(d.timestamp() * 1000), float(c["h"]), float(c["l"]), float(c["c"])))
-        except (KeyError, TypeError, ValueError):
-            continue
-    factor = {"H4": 4, "D1": 24}.get(tf, 1)
-    if factor > 1:
-        res = []
-        for i in range(0, len(bars) - factor + 1, factor):
-            g = bars[i:i + factor]
-            res.append((g[0][0], max(x[1] for x in g), min(x[2] for x in g), g[-1][3]))
-        bars = res
-    return bars
+    """Base-TF bars (ts_ms,h,l,c) for the analyst. Uses native MT5 candles for
+    M5/M15/H1/H4/D1 (giving 300 true broker bars on H4 & D1 instead of resampled
+    M60), with automatic fallback to M60 resampling if native returns too few."""
+    tf = tf if tf in ANALYSIS_TFS else "M15"
+    gran = {"M5": "M5", "M15": "M15", "H1": "M60", "H4": "H4", "D1": "D1"}.get(tf, "M15")
+    count = 300
+
+    def _parse(rows):
+        out = []
+        for c in rows or []:
+            try:
+                d = datetime.fromisoformat(str(c["t"]).replace("Z", "+00:00"))
+                if d.tzinfo is None:
+                    d = d.replace(tzinfo=timezone.utc)
+                out.append((int(d.timestamp() * 1000), float(c["h"]), float(c["l"]), float(c["c"])))
+            except (KeyError, TypeError, ValueError):
+                continue
+        return out
+
+    bars = _parse(M5.candles(pair, gran, count))
+    if len(bars) >= TF_MIN_BARS.get(tf, 60) or tf not in ("H4", "D1"):
+        return bars
+    # Fallback: resample from M60 if broker H4/D1 feed returned insufficient bars
+    m60 = _parse(M5.candles(pair, "M60", 800 if tf == "H4" else 1500))
+    factor = 4 if tf == "H4" else 24
+    res = []
+    for i in range(0, len(m60) - factor + 1, factor):
+        g = m60[i:i + factor]
+        res.append((g[0][0], max(x[1] for x in g), min(x[2] for x in g), g[-1][3]))
+    return res
 
 
 def run_analysis(pair, tf="M15"):

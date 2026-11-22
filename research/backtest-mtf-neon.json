@@ -1,0 +1,4773 @@
+{
+  "generated_at": "2026-11-22T22:12:14.714915+00:00",
+  "neon_model": "gemini-4-neon-high",
+  "elapsed_s": 483.6,
+  "part1_quant_9p_spread": {
+    "M5": {
+      "IS": {
+        "pairs": 9,
+        "trades": 469,
+        "tp": 264,
+        "sl": 199,
+        "open": 6,
+        "winrate_pct": 57.0,
+        "expectancy_r": -0.002,
+        "total_r": -1.0,
+        "trades_per_day": 40.09,
+        "per_pair": {
+          "XAUUSD": {
+            "trades": 110,
+            "tp": 66,
+            "sl": 43,
+            "open": 1,
+            "wr": 60.6,
+            "exp_r": 0.06
+          },
+          "XAGUSD": {
+            "trades": 120,
+            "tp": 72,
+            "sl": 48,
+            "open": 0,
+            "wr": 60.0,
+            "exp_r": 0.05
+          },
+          "BTCUSD": {
+            "trades": 93,
+            "tp": 58,
+            "sl": 35,
+            "open": 0,
+            "wr": 62.4,
+            "exp_r": 0.091
+          },
+          "EURUSD": {
+            "trades": 40,
+            "tp": 15,
+            "sl": 23,
+            "open": 2,
+            "wr": 39.5,
+            "exp_r": -0.309
+          },
+          "GBPUSD": {
+            "trades": 39,
+            "tp": 17,
+            "sl": 20,
+            "open": 2,
+            "wr": 45.9,
+            "exp_r": -0.196
+          },
+          "USDJPY": {
+            "trades": 50,
+            "tp": 28,
+            "sl": 22,
+            "open": 0,
+            "wr": 56.0,
+            "exp_r": -0.02
+          },
+          "AUDUSD": {
+            "trades": 5,
+            "tp": 2,
+            "sl": 2,
+            "open": 1,
+            "wr": 50.0,
+            "exp_r": -0.125
+          },
+          "USDCAD": {
+            "trades": 10,
+            "tp": 5,
+            "sl": 5,
+            "open": 0,
+            "wr": 50.0,
+            "exp_r": -0.125
+          },
+          "NZDUSD": {
+            "trades": 2,
+            "tp": 1,
+            "sl": 1,
+            "open": 0,
+            "wr": 50.0,
+            "exp_r": -0.125
+          }
+        }
+      },
+      "OOS": {
+        "pairs": 9,
+        "trades": 531,
+        "tp": 311,
+        "sl": 212,
+        "open": 8,
+        "winrate_pct": 59.5,
+        "expectancy_r": 0.041,
+        "total_r": 21.25,
+        "trades_per_day": 45.4,
+        "per_pair": {
+          "XAUUSD": {
+            "trades": 117,
+            "tp": 68,
+            "sl": 48,
+            "open": 1,
+            "wr": 58.6,
+            "exp_r": 0.026
+          },
+          "XAGUSD": {
+            "trades": 109,
+            "tp": 68,
+            "sl": 39,
+            "open": 2,
+            "wr": 63.6,
+            "exp_r": 0.112
+          },
+          "BTCUSD": {
+            "trades": 151,
+            "tp": 89,
+            "sl": 61,
+            "open": 1,
+            "wr": 59.3,
+            "exp_r": 0.038
+          },
+          "EURUSD": {
+            "trades": 46,
+            "tp": 26,
+            "sl": 18,
+            "open": 2,
+            "wr": 59.1,
+            "exp_r": 0.034
+          },
+          "GBPUSD": {
+            "trades": 31,
+            "tp": 17,
+            "sl": 13,
+            "open": 1,
+            "wr": 56.7,
+            "exp_r": -0.008
+          },
+          "USDJPY": {
+            "trades": 52,
+            "tp": 25,
+            "sl": 26,
+            "open": 1,
+            "wr": 49.0,
+            "exp_r": -0.142
+          },
+          "AUDUSD": {
+            "trades": 12,
+            "tp": 10,
+            "sl": 2,
+            "open": 0,
+            "wr": 83.3,
+            "exp_r": 0.458
+          },
+          "USDCAD": {
+            "trades": 13,
+            "tp": 8,
+            "sl": 5,
+            "open": 0,
+            "wr": 61.5,
+            "exp_r": 0.077
+          },
+          "NZDUSD": {
+            "trades": 0,
+            "tp": 0,
+            "sl": 0,
+            "open": 0,
+            "wr": 0.0,
+            "exp_r": 0.0
+          }
+        }
+      },
+      "ALL": {
+        "pairs": 9,
+        "trades": 997,
+        "tp": 573,
+        "sl": 410,
+        "open": 14,
+        "winrate_pct": 58.3,
+        "expectancy_r": 0.02,
+        "total_r": 19.75,
+        "trades_per_day": 42.62,
+        "per_pair": {
+          "XAUUSD": {
+            "trades": 224,
+            "tp": 132,
+            "sl": 90,
+            "open": 2,
+            "wr": 59.5,
+            "exp_r": 0.041
+          },
+          "XAGUSD": {
+            "trades": 229,
+            "tp": 140,
+            "sl": 87,
+            "open": 2,
+            "wr": 61.7,
+            "exp_r": 0.079
+          },
+          "BTCUSD": {
+            "trades": 244,
+            "tp": 147,
+            "sl": 96,
+            "open": 1,
+            "wr": 60.5,
+            "exp_r": 0.059
+          },
+          "EURUSD": {
+            "trades": 86,
+            "tp": 41,
+            "sl": 41,
+            "open": 4,
+            "wr": 50.0,
+            "exp_r": -0.125
+          },
+          "GBPUSD": {
+            "trades": 70,
+            "tp": 34,
+            "sl": 33,
+            "open": 3,
+            "wr": 50.7,
+            "exp_r": -0.112
+          },
+          "USDJPY": {
+            "trades": 102,
+            "tp": 53,
+            "sl": 48,
+            "open": 1,
+            "wr": 52.5,
+            "exp_r": -0.082
+          },
+          "AUDUSD": {
+            "trades": 17,
+            "tp": 12,
+            "sl": 4,
+            "open": 1,
+            "wr": 75.0,
+            "exp_r": 0.312
+          },
+          "USDCAD": {
+            "trades": 23,
+            "tp": 13,
+            "sl": 10,
+            "open": 0,
+            "wr": 56.5,
+            "exp_r": -0.011
+          },
+          "NZDUSD": {
+            "trades": 2,
+            "tp": 1,
+            "sl": 1,
+            "open": 0,
+            "wr": 50.0,
+            "exp_r": -0.125
+          }
+        }
+      }
+    },
+    "M15": {
+      "IS": {
+        "pairs": 9,
+        "trades": 336,
+        "tp": 184,
+        "sl": 151,
+        "open": 1,
+        "winrate_pct": 54.9,
+        "expectancy_r": -0.011,
+        "total_r": -3.8,
+        "trades_per_day": 28.97,
+        "per_pair": {
+          "XAUUSD": {
+            "trades": 41,
+            "tp": 26,
+            "sl": 15,
+            "open": 0,
+            "wr": 63.4,
+            "exp_r": 0.141
+          },
+          "XAGUSD": {
+            "trades": 43,
+            "tp": 27,
+            "sl": 16,
+            "open": 0,
+            "wr": 62.8,
+            "exp_r": 0.13
+          },
+          "BTCUSD": {
+            "trades": 60,
+            "tp": 30,
+            "sl": 30,
+            "open": 0,
+            "wr": 50.0,
+            "exp_r": -0.1
+          },
+          "EURUSD": {
+            "trades": 35,
+            "tp": 18,
+            "sl": 17,
+            "open": 0,
+            "wr": 51.4,
+            "exp_r": -0.074
+          },
+          "GBPUSD": {
+            "trades": 45,
+            "tp": 25,
+            "sl": 20,
+            "open": 0,
+            "wr": 55.6,
+            "exp_r": 0.0
+          },
+          "USDJPY": {
+            "trades": 43,
+            "tp": 23,
+            "sl": 20,
+            "open": 0,
+            "wr": 53.5,
+            "exp_r": -0.037
+          },
+          "AUDUSD": {
+            "trades": 26,
+            "tp": 14,
+            "sl": 12,
+            "open": 0,
+            "wr": 53.8,
+            "exp_r": -0.031
+          },
+          "USDCAD": {
+            "trades": 31,
+            "tp": 15,
+            "sl": 16,
+            "open": 0,
+            "wr": 48.4,
+            "exp_r": -0.129
+          },
+          "NZDUSD": {
+            "trades": 12,
+            "tp": 6,
+            "sl": 5,
+            "open": 1,
+            "wr": 54.5,
+            "exp_r": -0.018
+          }
+        }
+      },
+      "OOS": {
+        "pairs": 9,
+        "trades": 339,
+        "tp": 209,
+        "sl": 121,
+        "open": 9,
+        "winrate_pct": 63.3,
+        "expectancy_r": 0.14,
+        "total_r": 46.2,
+        "trades_per_day": 29.26,
+        "per_pair": {
+          "XAUUSD": {
+            "trades": 48,
+            "tp": 31,
+            "sl": 16,
+            "open": 1,
+            "wr": 66.0,
+            "exp_r": 0.187
+          },
+          "XAGUSD": {
+            "trades": 38,
+            "tp": 25,
+            "sl": 12,
+            "open": 1,
+            "wr": 67.6,
+            "exp_r": 0.216
+          },
+          "BTCUSD": {
+            "trades": 57,
+            "tp": 34,
+            "sl": 21,
+            "open": 2,
+            "wr": 61.8,
+            "exp_r": 0.113
+          },
+          "EURUSD": {
+            "trades": 43,
+            "tp": 28,
+            "sl": 14,
+            "open": 1,
+            "wr": 66.7,
+            "exp_r": 0.2
+          },
+          "GBPUSD": {
+            "trades": 39,
+            "tp": 25,
+            "sl": 13,
+            "open": 1,
+            "wr": 65.8,
+            "exp_r": 0.184
+          },
+          "USDJPY": {
+            "trades": 46,
+            "tp": 25,
+            "sl": 20,
+            "open": 1,
+            "wr": 55.6,
+            "exp_r": 0.0
+          },
+          "AUDUSD": {
+            "trades": 36,
+            "tp": 24,
+            "sl": 11,
+            "open": 1,
+            "wr": 68.6,
+            "exp_r": 0.234
+          },
+          "USDCAD": {
+            "trades": 24,
+            "tp": 14,
+            "sl": 10,
+            "open": 0,
+            "wr": 58.3,
+            "exp_r": 0.05
+          },
+          "NZDUSD": {
+            "trades": 8,
+            "tp": 3,
+            "sl": 4,
+            "open": 1,
+            "wr": 42.9,
+            "exp_r": -0.229
+          }
+        }
+      },
+      "ALL": {
+        "pairs": 9,
+        "trades": 672,
+        "tp": 392,
+        "sl": 270,
+        "open": 10,
+        "winrate_pct": 59.2,
+        "expectancy_r": 0.066,
+        "total_r": 43.6,
+        "trades_per_day": 28.98,
+        "per_pair": {
+          "XAUUSD": {
+            "trades": 88,
+            "tp": 57,
+            "sl": 30,
+            "open": 1,
+            "wr": 65.5,
+            "exp_r": 0.179
+          },
+          "XAGUSD": {
+            "trades": 81,
+            "tp": 52,
+            "sl": 28,
+            "open": 1,
+            "wr": 65.0,
+            "exp_r": 0.17
+          },
+          "BTCUSD": {
+            "trades": 116,
+            "tp": 64,
+            "sl": 50,
+            "open": 2,
+            "wr": 56.1,
+            "exp_r": 0.011
+          },
+          "EURUSD": {
+            "trades": 78,
+            "tp": 46,
+            "sl": 31,
+            "open": 1,
+            "wr": 59.7,
+            "exp_r": 0.075
+          },
+          "GBPUSD": {
+            "trades": 84,
+            "tp": 50,
+            "sl": 33,
+            "open": 1,
+            "wr": 60.2,
+            "exp_r": 0.084
+          },
+          "USDJPY": {
+            "trades": 89,
+            "tp": 48,
+            "sl": 40,
+            "open": 1,
+            "wr": 54.5,
+            "exp_r": -0.018
+          },
+          "AUDUSD": {
+            "trades": 62,
+            "tp": 38,
+            "sl": 23,
+            "open": 1,
+            "wr": 62.3,
+            "exp_r": 0.121
+          },
+          "USDCAD": {
+            "trades": 54,
+            "tp": 28,
+            "sl": 26,
+            "open": 0,
+            "wr": 51.9,
+            "exp_r": -0.067
+          },
+          "NZDUSD": {
+            "trades": 20,
+            "tp": 9,
+            "sl": 9,
+            "open": 2,
+            "wr": 50.0,
+            "exp_r": -0.1
+          }
+        }
+      }
+    },
+    "H1": {
+      "IS": {
+        "pairs": 9,
+        "trades": 90,
+        "tp": 52,
+        "sl": 38,
+        "open": 0,
+        "winrate_pct": 57.8,
+        "expectancy_r": 0.069,
+        "total_r": 6.2,
+        "trades_per_day": 7.7,
+        "per_pair": {
+          "XAUUSD": {
+            "trades": 11,
+            "tp": 6,
+            "sl": 5,
+            "open": 0,
+            "wr": 54.5,
+            "exp_r": 0.009
+          },
+          "XAGUSD": {
+            "trades": 11,
+            "tp": 7,
+            "sl": 4,
+            "open": 0,
+            "wr": 63.6,
+            "exp_r": 0.177
+          },
+          "BTCUSD": {
+            "trades": 15,
+            "tp": 7,
+            "sl": 8,
+            "open": 0,
+            "wr": 46.7,
+            "exp_r": -0.137
+          },
+          "EURUSD": {
+            "trades": 8,
+            "tp": 7,
+            "sl": 1,
+            "open": 0,
+            "wr": 87.5,
+            "exp_r": 0.619
+          },
+          "GBPUSD": {
+            "trades": 10,
+            "tp": 7,
+            "sl": 3,
+            "open": 0,
+            "wr": 70.0,
+            "exp_r": 0.295
+          },
+          "USDJPY": {
+            "trades": 9,
+            "tp": 5,
+            "sl": 4,
+            "open": 0,
+            "wr": 55.6,
+            "exp_r": 0.028
+          },
+          "AUDUSD": {
+            "trades": 7,
+            "tp": 4,
+            "sl": 3,
+            "open": 0,
+            "wr": 57.1,
+            "exp_r": 0.057
+          },
+          "USDCAD": {
+            "trades": 8,
+            "tp": 5,
+            "sl": 3,
+            "open": 0,
+            "wr": 62.5,
+            "exp_r": 0.156
+          },
+          "NZDUSD": {
+            "trades": 11,
+            "tp": 4,
+            "sl": 7,
+            "open": 0,
+            "wr": 36.4,
+            "exp_r": -0.327
+          }
+        }
+      },
+      "OOS": {
+        "pairs": 9,
+        "trades": 110,
+        "tp": 69,
+        "sl": 36,
+        "open": 5,
+        "winrate_pct": 65.7,
+        "expectancy_r": 0.216,
+        "total_r": 22.65,
+        "trades_per_day": 9.45,
+        "per_pair": {
+          "XAUUSD": {
+            "trades": 11,
+            "tp": 10,
+            "sl": 1,
+            "open": 0,
+            "wr": 90.9,
+            "exp_r": 0.682
+          },
+          "XAGUSD": {
+            "trades": 12,
+            "tp": 7,
+            "sl": 4,
+            "open": 1,
+            "wr": 63.6,
+            "exp_r": 0.177
+          },
+          "BTCUSD": {
+            "trades": 19,
+            "tp": 13,
+            "sl": 6,
+            "open": 0,
+            "wr": 68.4,
+            "exp_r": 0.266
+          },
+          "EURUSD": {
+            "trades": 9,
+            "tp": 6,
+            "sl": 3,
+            "open": 0,
+            "wr": 66.7,
+            "exp_r": 0.233
+          },
+          "GBPUSD": {
+            "trades": 14,
+            "tp": 8,
+            "sl": 5,
+            "open": 1,
+            "wr": 61.5,
+            "exp_r": 0.138
+          },
+          "USDJPY": {
+            "trades": 9,
+            "tp": 4,
+            "sl": 4,
+            "open": 1,
+            "wr": 50.0,
+            "exp_r": -0.075
+          },
+          "AUDUSD": {
+            "trades": 13,
+            "tp": 9,
+            "sl": 3,
+            "open": 1,
+            "wr": 75.0,
+            "exp_r": 0.387
+          },
+          "USDCAD": {
+            "trades": 12,
+            "tp": 6,
+            "sl": 5,
+            "open": 1,
+            "wr": 54.5,
+            "exp_r": 0.009
+          },
+          "NZDUSD": {
+            "trades": 11,
+            "tp": 6,
+            "sl": 5,
+            "open": 0,
+            "wr": 54.5,
+            "exp_r": 0.009
+          }
+        }
+      },
+      "ALL": {
+        "pairs": 9,
+        "trades": 198,
+        "tp": 121,
+        "sl": 72,
+        "open": 5,
+        "winrate_pct": 62.7,
+        "expectancy_r": 0.16,
+        "total_r": 30.85,
+        "trades_per_day": 8.49,
+        "per_pair": {
+          "XAUUSD": {
+            "trades": 22,
+            "tp": 16,
+            "sl": 6,
+            "open": 0,
+            "wr": 72.7,
+            "exp_r": 0.345
+          },
+          "XAGUSD": {
+            "trades": 23,
+            "tp": 14,
+            "sl": 8,
+            "open": 1,
+            "wr": 63.6,
+            "exp_r": 0.177
+          },
+          "BTCUSD": {
+            "trades": 32,
+            "tp": 20,
+            "sl": 12,
+            "open": 0,
+            "wr": 62.5,
+            "exp_r": 0.156
+          },
+          "EURUSD": {
+            "trades": 17,
+            "tp": 13,
+            "sl": 4,
+            "open": 0,
+            "wr": 76.5,
+            "exp_r": 0.415
+          },
+          "GBPUSD": {
+            "trades": 24,
+            "tp": 15,
+            "sl": 8,
+            "open": 1,
+            "wr": 65.2,
+            "exp_r": 0.207
+          },
+          "USDJPY": {
+            "trades": 18,
+            "tp": 9,
+            "sl": 8,
+            "open": 1,
+            "wr": 52.9,
+            "exp_r": -0.021
+          },
+          "AUDUSD": {
+            "trades": 20,
+            "tp": 13,
+            "sl": 6,
+            "open": 1,
+            "wr": 68.4,
+            "exp_r": 0.266
+          },
+          "USDCAD": {
+            "trades": 20,
+            "tp": 11,
+            "sl": 8,
+            "open": 1,
+            "wr": 57.9,
+            "exp_r": 0.071
+          },
+          "NZDUSD": {
+            "trades": 22,
+            "tp": 10,
+            "sl": 12,
+            "open": 0,
+            "wr": 45.5,
+            "exp_r": -0.159
+          }
+        }
+      }
+    },
+    "H4": {
+      "IS": {
+        "pairs": 9,
+        "trades": 248,
+        "tp": 143,
+        "sl": 98,
+        "open": 7,
+        "winrate_pct": 59.3,
+        "expectancy_r": 0.098,
+        "total_r": 23.55,
+        "trades_per_day": 2.61,
+        "per_pair": {
+          "XAUUSD": {
+            "trades": 30,
+            "tp": 19,
+            "sl": 10,
+            "open": 1,
+            "wr": 65.5,
+            "exp_r": 0.212
+          },
+          "XAGUSD": {
+            "trades": 28,
+            "tp": 16,
+            "sl": 10,
+            "open": 2,
+            "wr": 61.5,
+            "exp_r": 0.138
+          },
+          "BTCUSD": {
+            "trades": 23,
+            "tp": 10,
+            "sl": 11,
+            "open": 2,
+            "wr": 47.6,
+            "exp_r": -0.119
+          },
+          "EURUSD": {
+            "trades": 29,
+            "tp": 21,
+            "sl": 8,
+            "open": 0,
+            "wr": 72.4,
+            "exp_r": 0.34
+          },
+          "GBPUSD": {
+            "trades": 30,
+            "tp": 18,
+            "sl": 12,
+            "open": 0,
+            "wr": 60.0,
+            "exp_r": 0.11
+          },
+          "USDJPY": {
+            "trades": 28,
+            "tp": 16,
+            "sl": 11,
+            "open": 1,
+            "wr": 59.3,
+            "exp_r": 0.096
+          },
+          "AUDUSD": {
+            "trades": 26,
+            "tp": 12,
+            "sl": 13,
+            "open": 1,
+            "wr": 48.0,
+            "exp_r": -0.112
+          },
+          "USDCAD": {
+            "trades": 26,
+            "tp": 16,
+            "sl": 10,
+            "open": 0,
+            "wr": 61.5,
+            "exp_r": 0.138
+          },
+          "NZDUSD": {
+            "trades": 28,
+            "tp": 15,
+            "sl": 13,
+            "open": 0,
+            "wr": 53.6,
+            "exp_r": -0.009
+          }
+        }
+      },
+      "OOS": {
+        "pairs": 9,
+        "trades": 241,
+        "tp": 137,
+        "sl": 87,
+        "open": 17,
+        "winrate_pct": 61.2,
+        "expectancy_r": 0.131,
+        "total_r": 29.45,
+        "trades_per_day": 2.55,
+        "per_pair": {
+          "XAUUSD": {
+            "trades": 25,
+            "tp": 13,
+            "sl": 11,
+            "open": 1,
+            "wr": 54.2,
+            "exp_r": 0.002
+          },
+          "XAGUSD": {
+            "trades": 26,
+            "tp": 19,
+            "sl": 6,
+            "open": 1,
+            "wr": 76.0,
+            "exp_r": 0.406
+          },
+          "BTCUSD": {
+            "trades": 23,
+            "tp": 14,
+            "sl": 8,
+            "open": 1,
+            "wr": 63.6,
+            "exp_r": 0.177
+          },
+          "EURUSD": {
+            "trades": 29,
+            "tp": 19,
+            "sl": 8,
+            "open": 2,
+            "wr": 70.4,
+            "exp_r": 0.302
+          },
+          "GBPUSD": {
+            "trades": 32,
+            "tp": 17,
+            "sl": 13,
+            "open": 2,
+            "wr": 56.7,
+            "exp_r": 0.048
+          },
+          "USDJPY": {
+            "trades": 20,
+            "tp": 8,
+            "sl": 10,
+            "open": 2,
+            "wr": 44.4,
+            "exp_r": -0.178
+          },
+          "AUDUSD": {
+            "trades": 24,
+            "tp": 12,
+            "sl": 8,
+            "open": 4,
+            "wr": 60.0,
+            "exp_r": 0.11
+          },
+          "USDCAD": {
+            "trades": 36,
+            "tp": 22,
+            "sl": 13,
+            "open": 1,
+            "wr": 62.9,
+            "exp_r": 0.163
+          },
+          "NZDUSD": {
+            "trades": 26,
+            "tp": 13,
+            "sl": 10,
+            "open": 3,
+            "wr": 56.5,
+            "exp_r": 0.046
+          }
+        }
+      },
+      "ALL": {
+        "pairs": 9,
+        "trades": 479,
+        "tp": 272,
+        "sl": 183,
+        "open": 24,
+        "winrate_pct": 59.8,
+        "expectancy_r": 0.106,
+        "total_r": 48.2,
+        "trades_per_day": 2.53,
+        "per_pair": {
+          "XAUUSD": {
+            "trades": 52,
+            "tp": 31,
+            "sl": 19,
+            "open": 2,
+            "wr": 62.0,
+            "exp_r": 0.147
+          },
+          "XAGUSD": {
+            "trades": 53,
+            "tp": 34,
+            "sl": 16,
+            "open": 3,
+            "wr": 68.0,
+            "exp_r": 0.258
+          },
+          "BTCUSD": {
+            "trades": 46,
+            "tp": 24,
+            "sl": 19,
+            "open": 3,
+            "wr": 55.8,
+            "exp_r": 0.033
+          },
+          "EURUSD": {
+            "trades": 58,
+            "tp": 40,
+            "sl": 16,
+            "open": 2,
+            "wr": 71.4,
+            "exp_r": 0.321
+          },
+          "GBPUSD": {
+            "trades": 60,
+            "tp": 33,
+            "sl": 25,
+            "open": 2,
+            "wr": 56.9,
+            "exp_r": 0.053
+          },
+          "USDJPY": {
+            "trades": 48,
+            "tp": 24,
+            "sl": 21,
+            "open": 3,
+            "wr": 53.3,
+            "exp_r": -0.013
+          },
+          "AUDUSD": {
+            "trades": 50,
+            "tp": 24,
+            "sl": 21,
+            "open": 5,
+            "wr": 53.3,
+            "exp_r": -0.013
+          },
+          "USDCAD": {
+            "trades": 60,
+            "tp": 36,
+            "sl": 23,
+            "open": 1,
+            "wr": 61.0,
+            "exp_r": 0.129
+          },
+          "NZDUSD": {
+            "trades": 52,
+            "tp": 26,
+            "sl": 23,
+            "open": 3,
+            "wr": 53.1,
+            "exp_r": -0.018
+          }
+        }
+      }
+    },
+    "D1": {
+      "IS": {
+        "pairs": 9,
+        "trades": 113,
+        "tp": 56,
+        "sl": 48,
+        "open": 9,
+        "winrate_pct": 53.8,
+        "expectancy_r": 0.023,
+        "total_r": 2.4,
+        "trades_per_day": 0.42,
+        "per_pair": {
+          "XAUUSD": {
+            "trades": 17,
+            "tp": 13,
+            "sl": 3,
+            "open": 1,
+            "wr": 81.2,
+            "exp_r": 0.544
+          },
+          "XAGUSD": {
+            "trades": 13,
+            "tp": 8,
+            "sl": 5,
+            "open": 0,
+            "wr": 61.5,
+            "exp_r": 0.169
+          },
+          "BTCUSD": {
+            "trades": 12,
+            "tp": 4,
+            "sl": 7,
+            "open": 1,
+            "wr": 36.4,
+            "exp_r": -0.309
+          },
+          "EURUSD": {
+            "trades": 14,
+            "tp": 5,
+            "sl": 8,
+            "open": 1,
+            "wr": 38.5,
+            "exp_r": -0.269
+          },
+          "GBPUSD": {
+            "trades": 13,
+            "tp": 7,
+            "sl": 6,
+            "open": 0,
+            "wr": 53.8,
+            "exp_r": 0.023
+          },
+          "USDJPY": {
+            "trades": 13,
+            "tp": 6,
+            "sl": 7,
+            "open": 0,
+            "wr": 46.2,
+            "exp_r": -0.123
+          },
+          "AUDUSD": {
+            "trades": 9,
+            "tp": 4,
+            "sl": 3,
+            "open": 2,
+            "wr": 57.1,
+            "exp_r": 0.086
+          },
+          "USDCAD": {
+            "trades": 12,
+            "tp": 6,
+            "sl": 5,
+            "open": 1,
+            "wr": 54.5,
+            "exp_r": 0.036
+          },
+          "NZDUSD": {
+            "trades": 10,
+            "tp": 3,
+            "sl": 4,
+            "open": 3,
+            "wr": 42.9,
+            "exp_r": -0.186
+          }
+        }
+      },
+      "OOS": {
+        "pairs": 9,
+        "trades": 103,
+        "tp": 54,
+        "sl": 39,
+        "open": 10,
+        "winrate_pct": 58.1,
+        "expectancy_r": 0.103,
+        "total_r": 9.6,
+        "trades_per_day": 0.38,
+        "per_pair": {
+          "XAUUSD": {
+            "trades": 9,
+            "tp": 6,
+            "sl": 3,
+            "open": 0,
+            "wr": 66.7,
+            "exp_r": 0.267
+          },
+          "XAGUSD": {
+            "trades": 14,
+            "tp": 10,
+            "sl": 3,
+            "open": 1,
+            "wr": 76.9,
+            "exp_r": 0.462
+          },
+          "BTCUSD": {
+            "trades": 11,
+            "tp": 6,
+            "sl": 3,
+            "open": 2,
+            "wr": 66.7,
+            "exp_r": 0.267
+          },
+          "EURUSD": {
+            "trades": 11,
+            "tp": 5,
+            "sl": 4,
+            "open": 2,
+            "wr": 55.6,
+            "exp_r": 0.056
+          },
+          "GBPUSD": {
+            "trades": 13,
+            "tp": 5,
+            "sl": 7,
+            "open": 1,
+            "wr": 41.7,
+            "exp_r": -0.208
+          },
+          "USDJPY": {
+            "trades": 10,
+            "tp": 5,
+            "sl": 4,
+            "open": 1,
+            "wr": 55.6,
+            "exp_r": 0.056
+          },
+          "AUDUSD": {
+            "trades": 14,
+            "tp": 8,
+            "sl": 6,
+            "open": 0,
+            "wr": 57.1,
+            "exp_r": 0.086
+          },
+          "USDCAD": {
+            "trades": 11,
+            "tp": 6,
+            "sl": 5,
+            "open": 0,
+            "wr": 54.5,
+            "exp_r": 0.036
+          },
+          "NZDUSD": {
+            "trades": 10,
+            "tp": 3,
+            "sl": 4,
+            "open": 3,
+            "wr": 42.9,
+            "exp_r": -0.186
+          }
+        }
+      },
+      "ALL": {
+        "pairs": 9,
+        "trades": 216,
+        "tp": 109,
+        "sl": 88,
+        "open": 19,
+        "winrate_pct": 55.3,
+        "expectancy_r": 0.051,
+        "total_r": 10.1,
+        "trades_per_day": 0.4,
+        "per_pair": {
+          "XAUUSD": {
+            "trades": 26,
+            "tp": 19,
+            "sl": 6,
+            "open": 1,
+            "wr": 76.0,
+            "exp_r": 0.444
+          },
+          "XAGUSD": {
+            "trades": 27,
+            "tp": 18,
+            "sl": 8,
+            "open": 1,
+            "wr": 69.2,
+            "exp_r": 0.315
+          },
+          "BTCUSD": {
+            "trades": 23,
+            "tp": 10,
+            "sl": 10,
+            "open": 3,
+            "wr": 50.0,
+            "exp_r": -0.05
+          },
+          "EURUSD": {
+            "trades": 25,
+            "tp": 9,
+            "sl": 13,
+            "open": 3,
+            "wr": 40.9,
+            "exp_r": -0.223
+          },
+          "GBPUSD": {
+            "trades": 26,
+            "tp": 12,
+            "sl": 13,
+            "open": 1,
+            "wr": 48.0,
+            "exp_r": -0.088
+          },
+          "USDJPY": {
+            "trades": 23,
+            "tp": 11,
+            "sl": 11,
+            "open": 1,
+            "wr": 50.0,
+            "exp_r": -0.05
+          },
+          "AUDUSD": {
+            "trades": 23,
+            "tp": 12,
+            "sl": 9,
+            "open": 2,
+            "wr": 57.1,
+            "exp_r": 0.086
+          },
+          "USDCAD": {
+            "trades": 23,
+            "tp": 12,
+            "sl": 10,
+            "open": 1,
+            "wr": 54.5,
+            "exp_r": 0.036
+          },
+          "NZDUSD": {
+            "trades": 20,
+            "tp": 6,
+            "sl": 8,
+            "open": 6,
+            "wr": 42.9,
+            "exp_r": -0.186
+          }
+        }
+      }
+    }
+  },
+  "part1_quant_9p_mid": {
+    "M5": {
+      "IS": {
+        "pairs": 9,
+        "trades": 479,
+        "tp": 290,
+        "sl": 184,
+        "open": 5,
+        "winrate_pct": 61.2,
+        "expectancy_r": 0.071,
+        "total_r": 33.5,
+        "trades_per_day": 40.94,
+        "per_pair": {
+          "XAUUSD": {
+            "trades": 111,
+            "tp": 69,
+            "sl": 42,
+            "open": 0,
+            "wr": 62.2,
+            "exp_r": 0.088
+          },
+          "XAGUSD": {
+            "trades": 120,
+            "tp": 73,
+            "sl": 47,
+            "open": 0,
+            "wr": 60.8,
+            "exp_r": 0.065
+          },
+          "BTCUSD": {
+            "trades": 98,
+            "tp": 66,
+            "sl": 31,
+            "open": 1,
+            "wr": 68.0,
+            "exp_r": 0.191
+          },
+          "EURUSD": {
+            "trades": 40,
+            "tp": 17,
+            "sl": 21,
+            "open": 2,
+            "wr": 44.7,
+            "exp_r": -0.217
+          },
+          "GBPUSD": {
+            "trades": 41,
+            "tp": 24,
+            "sl": 16,
+            "open": 1,
+            "wr": 60.0,
+            "exp_r": 0.05
+          },
+          "USDJPY": {
+            "trades": 50,
+            "tp": 31,
+            "sl": 19,
+            "open": 0,
+            "wr": 62.0,
+            "exp_r": 0.085
+          },
+          "AUDUSD": {
+            "trades": 6,
+            "tp": 3,
+            "sl": 2,
+            "open": 1,
+            "wr": 60.0,
+            "exp_r": 0.05
+          },
+          "USDCAD": {
+            "trades": 11,
+            "tp": 6,
+            "sl": 5,
+            "open": 0,
+            "wr": 54.5,
+            "exp_r": -0.045
+          },
+          "NZDUSD": {
+            "trades": 2,
+            "tp": 1,
+            "sl": 1,
+            "open": 0,
+            "wr": 50.0,
+            "exp_r": -0.125
+          }
+        }
+      },
+      "OOS": {
+        "pairs": 9,
+        "trades": 528,
+        "tp": 322,
+        "sl": 200,
+        "open": 6,
+        "winrate_pct": 61.7,
+        "expectancy_r": 0.08,
+        "total_r": 41.5,
+        "trades_per_day": 45.15,
+        "per_pair": {
+          "XAUUSD": {
+            "trades": 116,
+            "tp": 68,
+            "sl": 47,
+            "open": 1,
+            "wr": 59.1,
+            "exp_r": 0.035
+          },
+          "XAGUSD": {
+            "trades": 108,
+            "tp": 68,
+            "sl": 38,
+            "open": 2,
+            "wr": 64.2,
+            "exp_r": 0.123
+          },
+          "BTCUSD": {
+            "trades": 151,
+            "tp": 93,
+            "sl": 58,
+            "open": 0,
+            "wr": 61.6,
+            "exp_r": 0.078
+          },
+          "EURUSD": {
+            "trades": 46,
+            "tp": 28,
+            "sl": 17,
+            "open": 1,
+            "wr": 62.2,
+            "exp_r": 0.089
+          },
+          "GBPUSD": {
+            "trades": 30,
+            "tp": 21,
+            "sl": 8,
+            "open": 1,
+            "wr": 72.4,
+            "exp_r": 0.267
+          },
+          "USDJPY": {
+            "trades": 51,
+            "tp": 25,
+            "sl": 25,
+            "open": 1,
+            "wr": 50.0,
+            "exp_r": -0.125
+          },
+          "AUDUSD": {
+            "trades": 14,
+            "tp": 12,
+            "sl": 2,
+            "open": 0,
+            "wr": 85.7,
+            "exp_r": 0.5
+          },
+          "USDCAD": {
+            "trades": 12,
+            "tp": 7,
+            "sl": 5,
+            "open": 0,
+            "wr": 58.3,
+            "exp_r": 0.021
+          },
+          "NZDUSD": {
+            "trades": 0,
+            "tp": 0,
+            "sl": 0,
+            "open": 0,
+            "wr": 0.0,
+            "exp_r": 0.0
+          }
+        }
+      },
+      "ALL": {
+        "pairs": 9,
+        "trades": 1004,
+        "tp": 610,
+        "sl": 383,
+        "open": 11,
+        "winrate_pct": 61.4,
+        "expectancy_r": 0.075,
+        "total_r": 74.5,
+        "trades_per_day": 42.92,
+        "per_pair": {
+          "XAUUSD": {
+            "trades": 224,
+            "tp": 135,
+            "sl": 88,
+            "open": 1,
+            "wr": 60.5,
+            "exp_r": 0.059
+          },
+          "XAGUSD": {
+            "trades": 228,
+            "tp": 141,
+            "sl": 85,
+            "open": 2,
+            "wr": 62.4,
+            "exp_r": 0.092
+          },
+          "BTCUSD": {
+            "trades": 249,
+            "tp": 159,
+            "sl": 89,
+            "open": 1,
+            "wr": 64.1,
+            "exp_r": 0.122
+          },
+          "EURUSD": {
+            "trades": 86,
+            "tp": 45,
+            "sl": 38,
+            "open": 3,
+            "wr": 54.2,
+            "exp_r": -0.051
+          },
+          "GBPUSD": {
+            "trades": 71,
+            "tp": 45,
+            "sl": 24,
+            "open": 2,
+            "wr": 65.2,
+            "exp_r": 0.141
+          },
+          "USDJPY": {
+            "trades": 101,
+            "tp": 56,
+            "sl": 44,
+            "open": 1,
+            "wr": 56.0,
+            "exp_r": -0.02
+          },
+          "AUDUSD": {
+            "trades": 20,
+            "tp": 15,
+            "sl": 4,
+            "open": 1,
+            "wr": 78.9,
+            "exp_r": 0.382
+          },
+          "USDCAD": {
+            "trades": 23,
+            "tp": 13,
+            "sl": 10,
+            "open": 0,
+            "wr": 56.5,
+            "exp_r": -0.011
+          },
+          "NZDUSD": {
+            "trades": 2,
+            "tp": 1,
+            "sl": 1,
+            "open": 0,
+            "wr": 50.0,
+            "exp_r": -0.125
+          }
+        }
+      }
+    },
+    "M15": {
+      "IS": {
+        "pairs": 9,
+        "trades": 345,
+        "tp": 203,
+        "sl": 142,
+        "open": 0,
+        "winrate_pct": 58.8,
+        "expectancy_r": 0.059,
+        "total_r": 20.4,
+        "trades_per_day": 29.74,
+        "per_pair": {
+          "XAUUSD": {
+            "trades": 41,
+            "tp": 27,
+            "sl": 14,
+            "open": 0,
+            "wr": 65.9,
+            "exp_r": 0.185
+          },
+          "XAGUSD": {
+            "trades": 43,
+            "tp": 27,
+            "sl": 16,
+            "open": 0,
+            "wr": 62.8,
+            "exp_r": 0.13
+          },
+          "BTCUSD": {
+            "trades": 63,
+            "tp": 34,
+            "sl": 29,
+            "open": 0,
+            "wr": 54.0,
+            "exp_r": -0.029
+          },
+          "EURUSD": {
+            "trades": 37,
+            "tp": 21,
+            "sl": 16,
+            "open": 0,
+            "wr": 56.8,
+            "exp_r": 0.022
+          },
+          "GBPUSD": {
+            "trades": 46,
+            "tp": 29,
+            "sl": 17,
+            "open": 0,
+            "wr": 63.0,
+            "exp_r": 0.135
+          },
+          "USDJPY": {
+            "trades": 45,
+            "tp": 25,
+            "sl": 20,
+            "open": 0,
+            "wr": 55.6,
+            "exp_r": -0.0
+          },
+          "AUDUSD": {
+            "trades": 25,
+            "tp": 16,
+            "sl": 9,
+            "open": 0,
+            "wr": 64.0,
+            "exp_r": 0.152
+          },
+          "USDCAD": {
+            "trades": 31,
+            "tp": 17,
+            "sl": 14,
+            "open": 0,
+            "wr": 54.8,
+            "exp_r": -0.013
+          },
+          "NZDUSD": {
+            "trades": 14,
+            "tp": 7,
+            "sl": 7,
+            "open": 0,
+            "wr": 50.0,
+            "exp_r": -0.1
+          }
+        }
+      },
+      "OOS": {
+        "pairs": 9,
+        "trades": 339,
+        "tp": 216,
+        "sl": 115,
+        "open": 8,
+        "winrate_pct": 65.3,
+        "expectancy_r": 0.175,
+        "total_r": 57.8,
+        "trades_per_day": 29.26,
+        "per_pair": {
+          "XAUUSD": {
+            "trades": 48,
+            "tp": 31,
+            "sl": 16,
+            "open": 1,
+            "wr": 66.0,
+            "exp_r": 0.187
+          },
+          "XAGUSD": {
+            "trades": 38,
+            "tp": 25,
+            "sl": 12,
+            "open": 1,
+            "wr": 67.6,
+            "exp_r": 0.216
+          },
+          "BTCUSD": {
+            "trades": 57,
+            "tp": 35,
+            "sl": 20,
+            "open": 2,
+            "wr": 63.6,
+            "exp_r": 0.145
+          },
+          "EURUSD": {
+            "trades": 45,
+            "tp": 30,
+            "sl": 14,
+            "open": 1,
+            "wr": 68.2,
+            "exp_r": 0.227
+          },
+          "GBPUSD": {
+            "trades": 36,
+            "tp": 25,
+            "sl": 10,
+            "open": 1,
+            "wr": 71.4,
+            "exp_r": 0.286
+          },
+          "USDJPY": {
+            "trades": 43,
+            "tp": 25,
+            "sl": 17,
+            "open": 1,
+            "wr": 59.5,
+            "exp_r": 0.071
+          },
+          "AUDUSD": {
+            "trades": 38,
+            "tp": 25,
+            "sl": 12,
+            "open": 1,
+            "wr": 67.6,
+            "exp_r": 0.216
+          },
+          "USDCAD": {
+            "trades": 26,
+            "tp": 16,
+            "sl": 10,
+            "open": 0,
+            "wr": 61.5,
+            "exp_r": 0.108
+          },
+          "NZDUSD": {
+            "trades": 8,
+            "tp": 4,
+            "sl": 4,
+            "open": 0,
+            "wr": 50.0,
+            "exp_r": -0.1
+          }
+        }
+      },
+      "ALL": {
+        "pairs": 9,
+        "trades": 680,
+        "tp": 417,
+        "sl": 255,
+        "open": 8,
+        "winrate_pct": 62.1,
+        "expectancy_r": 0.117,
+        "total_r": 78.6,
+        "trades_per_day": 29.33,
+        "per_pair": {
+          "XAUUSD": {
+            "trades": 88,
+            "tp": 58,
+            "sl": 29,
+            "open": 1,
+            "wr": 66.7,
+            "exp_r": 0.2
+          },
+          "XAGUSD": {
+            "trades": 81,
+            "tp": 52,
+            "sl": 28,
+            "open": 1,
+            "wr": 65.0,
+            "exp_r": 0.17
+          },
+          "BTCUSD": {
+            "trades": 118,
+            "tp": 68,
+            "sl": 48,
+            "open": 2,
+            "wr": 58.6,
+            "exp_r": 0.055
+          },
+          "EURUSD": {
+            "trades": 82,
+            "tp": 51,
+            "sl": 30,
+            "open": 1,
+            "wr": 63.0,
+            "exp_r": 0.133
+          },
+          "GBPUSD": {
+            "trades": 82,
+            "tp": 54,
+            "sl": 27,
+            "open": 1,
+            "wr": 66.7,
+            "exp_r": 0.2
+          },
+          "USDJPY": {
+            "trades": 88,
+            "tp": 50,
+            "sl": 37,
+            "open": 1,
+            "wr": 57.5,
+            "exp_r": 0.034
+          },
+          "AUDUSD": {
+            "trades": 63,
+            "tp": 41,
+            "sl": 21,
+            "open": 1,
+            "wr": 66.1,
+            "exp_r": 0.19
+          },
+          "USDCAD": {
+            "trades": 56,
+            "tp": 32,
+            "sl": 24,
+            "open": 0,
+            "wr": 57.1,
+            "exp_r": 0.029
+          },
+          "NZDUSD": {
+            "trades": 22,
+            "tp": 11,
+            "sl": 11,
+            "open": 0,
+            "wr": 50.0,
+            "exp_r": -0.1
+          }
+        }
+      }
+    },
+    "H1": {
+      "IS": {
+        "pairs": 9,
+        "trades": 92,
+        "tp": 55,
+        "sl": 37,
+        "open": 0,
+        "winrate_pct": 59.8,
+        "expectancy_r": 0.106,
+        "total_r": 9.75,
+        "trades_per_day": 7.87,
+        "per_pair": {
+          "XAUUSD": {
+            "trades": 11,
+            "tp": 6,
+            "sl": 5,
+            "open": 0,
+            "wr": 54.5,
+            "exp_r": 0.009
+          },
+          "XAGUSD": {
+            "trades": 11,
+            "tp": 7,
+            "sl": 4,
+            "open": 0,
+            "wr": 63.6,
+            "exp_r": 0.177
+          },
+          "BTCUSD": {
+            "trades": 15,
+            "tp": 7,
+            "sl": 8,
+            "open": 0,
+            "wr": 46.7,
+            "exp_r": -0.137
+          },
+          "EURUSD": {
+            "trades": 8,
+            "tp": 7,
+            "sl": 1,
+            "open": 0,
+            "wr": 87.5,
+            "exp_r": 0.619
+          },
+          "GBPUSD": {
+            "trades": 10,
+            "tp": 7,
+            "sl": 3,
+            "open": 0,
+            "wr": 70.0,
+            "exp_r": 0.295
+          },
+          "USDJPY": {
+            "trades": 10,
+            "tp": 6,
+            "sl": 4,
+            "open": 0,
+            "wr": 60.0,
+            "exp_r": 0.11
+          },
+          "AUDUSD": {
+            "trades": 6,
+            "tp": 5,
+            "sl": 1,
+            "open": 0,
+            "wr": 83.3,
+            "exp_r": 0.542
+          },
+          "USDCAD": {
+            "trades": 10,
+            "tp": 6,
+            "sl": 4,
+            "open": 0,
+            "wr": 60.0,
+            "exp_r": 0.11
+          },
+          "NZDUSD": {
+            "trades": 11,
+            "tp": 4,
+            "sl": 7,
+            "open": 0,
+            "wr": 36.4,
+            "exp_r": -0.327
+          }
+        }
+      },
+      "OOS": {
+        "pairs": 9,
+        "trades": 111,
+        "tp": 73,
+        "sl": 33,
+        "open": 5,
+        "winrate_pct": 68.9,
+        "expectancy_r": 0.274,
+        "total_r": 29.05,
+        "trades_per_day": 9.54,
+        "per_pair": {
+          "XAUUSD": {
+            "trades": 11,
+            "tp": 10,
+            "sl": 1,
+            "open": 0,
+            "wr": 90.9,
+            "exp_r": 0.682
+          },
+          "XAGUSD": {
+            "trades": 11,
+            "tp": 7,
+            "sl": 3,
+            "open": 1,
+            "wr": 70.0,
+            "exp_r": 0.295
+          },
+          "BTCUSD": {
+            "trades": 19,
+            "tp": 14,
+            "sl": 5,
+            "open": 0,
+            "wr": 73.7,
+            "exp_r": 0.363
+          },
+          "EURUSD": {
+            "trades": 9,
+            "tp": 6,
+            "sl": 3,
+            "open": 0,
+            "wr": 66.7,
+            "exp_r": 0.233
+          },
+          "GBPUSD": {
+            "trades": 14,
+            "tp": 8,
+            "sl": 5,
+            "open": 1,
+            "wr": 61.5,
+            "exp_r": 0.138
+          },
+          "USDJPY": {
+            "trades": 10,
+            "tp": 5,
+            "sl": 4,
+            "open": 1,
+            "wr": 55.6,
+            "exp_r": 0.028
+          },
+          "AUDUSD": {
+            "trades": 13,
+            "tp": 9,
+            "sl": 3,
+            "open": 1,
+            "wr": 75.0,
+            "exp_r": 0.387
+          },
+          "USDCAD": {
+            "trades": 12,
+            "tp": 7,
+            "sl": 4,
+            "open": 1,
+            "wr": 63.6,
+            "exp_r": 0.177
+          },
+          "NZDUSD": {
+            "trades": 12,
+            "tp": 7,
+            "sl": 5,
+            "open": 0,
+            "wr": 58.3,
+            "exp_r": 0.079
+          }
+        }
+      },
+      "ALL": {
+        "pairs": 9,
+        "trades": 201,
+        "tp": 128,
+        "sl": 68,
+        "open": 5,
+        "winrate_pct": 65.3,
+        "expectancy_r": 0.208,
+        "total_r": 40.8,
+        "trades_per_day": 8.62,
+        "per_pair": {
+          "XAUUSD": {
+            "trades": 22,
+            "tp": 16,
+            "sl": 6,
+            "open": 0,
+            "wr": 72.7,
+            "exp_r": 0.345
+          },
+          "XAGUSD": {
+            "trades": 22,
+            "tp": 14,
+            "sl": 7,
+            "open": 1,
+            "wr": 66.7,
+            "exp_r": 0.233
+          },
+          "BTCUSD": {
+            "trades": 32,
+            "tp": 21,
+            "sl": 11,
+            "open": 0,
+            "wr": 65.6,
+            "exp_r": 0.214
+          },
+          "EURUSD": {
+            "trades": 17,
+            "tp": 13,
+            "sl": 4,
+            "open": 0,
+            "wr": 76.5,
+            "exp_r": 0.415
+          },
+          "GBPUSD": {
+            "trades": 24,
+            "tp": 15,
+            "sl": 8,
+            "open": 1,
+            "wr": 65.2,
+            "exp_r": 0.207
+          },
+          "USDJPY": {
+            "trades": 20,
+            "tp": 11,
+            "sl": 8,
+            "open": 1,
+            "wr": 57.9,
+            "exp_r": 0.071
+          },
+          "AUDUSD": {
+            "trades": 19,
+            "tp": 14,
+            "sl": 4,
+            "open": 1,
+            "wr": 77.8,
+            "exp_r": 0.439
+          },
+          "USDCAD": {
+            "trades": 22,
+            "tp": 13,
+            "sl": 8,
+            "open": 1,
+            "wr": 61.9,
+            "exp_r": 0.145
+          },
+          "NZDUSD": {
+            "trades": 23,
+            "tp": 11,
+            "sl": 12,
+            "open": 0,
+            "wr": 47.8,
+            "exp_r": -0.115
+          }
+        }
+      }
+    },
+    "H4": {
+      "IS": {
+        "pairs": 9,
+        "trades": 250,
+        "tp": 144,
+        "sl": 99,
+        "open": 7,
+        "winrate_pct": 59.3,
+        "expectancy_r": 0.096,
+        "total_r": 23.4,
+        "trades_per_day": 2.63,
+        "per_pair": {
+          "XAUUSD": {
+            "trades": 31,
+            "tp": 20,
+            "sl": 10,
+            "open": 1,
+            "wr": 66.7,
+            "exp_r": 0.233
+          },
+          "XAGUSD": {
+            "trades": 27,
+            "tp": 15,
+            "sl": 10,
+            "open": 2,
+            "wr": 60.0,
+            "exp_r": 0.11
+          },
+          "BTCUSD": {
+            "trades": 22,
+            "tp": 10,
+            "sl": 10,
+            "open": 2,
+            "wr": 50.0,
+            "exp_r": -0.075
+          },
+          "EURUSD": {
+            "trades": 29,
+            "tp": 20,
+            "sl": 9,
+            "open": 0,
+            "wr": 69.0,
+            "exp_r": 0.276
+          },
+          "GBPUSD": {
+            "trades": 29,
+            "tp": 17,
+            "sl": 12,
+            "open": 0,
+            "wr": 58.6,
+            "exp_r": 0.084
+          },
+          "USDJPY": {
+            "trades": 28,
+            "tp": 16,
+            "sl": 11,
+            "open": 1,
+            "wr": 59.3,
+            "exp_r": 0.096
+          },
+          "AUDUSD": {
+            "trades": 27,
+            "tp": 13,
+            "sl": 13,
+            "open": 1,
+            "wr": 50.0,
+            "exp_r": -0.075
+          },
+          "USDCAD": {
+            "trades": 27,
+            "tp": 17,
+            "sl": 10,
+            "open": 0,
+            "wr": 63.0,
+            "exp_r": 0.165
+          },
+          "NZDUSD": {
+            "trades": 30,
+            "tp": 16,
+            "sl": 14,
+            "open": 0,
+            "wr": 53.3,
+            "exp_r": -0.013
+          }
+        }
+      },
+      "OOS": {
+        "pairs": 9,
+        "trades": 242,
+        "tp": 139,
+        "sl": 85,
+        "open": 18,
+        "winrate_pct": 62.1,
+        "expectancy_r": 0.148,
+        "total_r": 33.15,
+        "trades_per_day": 2.56,
+        "per_pair": {
+          "XAUUSD": {
+            "trades": 25,
+            "tp": 13,
+            "sl": 11,
+            "open": 1,
+            "wr": 54.2,
+            "exp_r": 0.002
+          },
+          "XAGUSD": {
+            "trades": 26,
+            "tp": 19,
+            "sl": 6,
+            "open": 1,
+            "wr": 76.0,
+            "exp_r": 0.406
+          },
+          "BTCUSD": {
+            "trades": 23,
+            "tp": 14,
+            "sl": 8,
+            "open": 1,
+            "wr": 63.6,
+            "exp_r": 0.177
+          },
+          "EURUSD": {
+            "trades": 29,
+            "tp": 19,
+            "sl": 8,
+            "open": 2,
+            "wr": 70.4,
+            "exp_r": 0.302
+          },
+          "GBPUSD": {
+            "trades": 30,
+            "tp": 15,
+            "sl": 13,
+            "open": 2,
+            "wr": 53.6,
+            "exp_r": -0.009
+          },
+          "USDJPY": {
+            "trades": 20,
+            "tp": 8,
+            "sl": 10,
+            "open": 2,
+            "wr": 44.4,
+            "exp_r": -0.178
+          },
+          "AUDUSD": {
+            "trades": 26,
+            "tp": 13,
+            "sl": 9,
+            "open": 4,
+            "wr": 59.1,
+            "exp_r": 0.093
+          },
+          "USDCAD": {
+            "trades": 37,
+            "tp": 23,
+            "sl": 13,
+            "open": 1,
+            "wr": 63.9,
+            "exp_r": 0.182
+          },
+          "NZDUSD": {
+            "trades": 26,
+            "tp": 15,
+            "sl": 7,
+            "open": 4,
+            "wr": 68.2,
+            "exp_r": 0.261
+          }
+        }
+      },
+      "ALL": {
+        "pairs": 9,
+        "trades": 482,
+        "tp": 275,
+        "sl": 182,
+        "open": 25,
+        "winrate_pct": 60.2,
+        "expectancy_r": 0.113,
+        "total_r": 51.75,
+        "trades_per_day": 2.54,
+        "per_pair": {
+          "XAUUSD": {
+            "trades": 53,
+            "tp": 32,
+            "sl": 19,
+            "open": 2,
+            "wr": 62.7,
+            "exp_r": 0.161
+          },
+          "XAGUSD": {
+            "trades": 52,
+            "tp": 33,
+            "sl": 16,
+            "open": 3,
+            "wr": 67.3,
+            "exp_r": 0.246
+          },
+          "BTCUSD": {
+            "trades": 45,
+            "tp": 24,
+            "sl": 18,
+            "open": 3,
+            "wr": 57.1,
+            "exp_r": 0.057
+          },
+          "EURUSD": {
+            "trades": 58,
+            "tp": 39,
+            "sl": 17,
+            "open": 2,
+            "wr": 69.6,
+            "exp_r": 0.288
+          },
+          "GBPUSD": {
+            "trades": 57,
+            "tp": 30,
+            "sl": 25,
+            "open": 2,
+            "wr": 54.5,
+            "exp_r": 0.009
+          },
+          "USDJPY": {
+            "trades": 48,
+            "tp": 24,
+            "sl": 21,
+            "open": 3,
+            "wr": 53.3,
+            "exp_r": -0.013
+          },
+          "AUDUSD": {
+            "trades": 53,
+            "tp": 26,
+            "sl": 22,
+            "open": 5,
+            "wr": 54.2,
+            "exp_r": 0.002
+          },
+          "USDCAD": {
+            "trades": 62,
+            "tp": 38,
+            "sl": 23,
+            "open": 1,
+            "wr": 62.3,
+            "exp_r": 0.152
+          },
+          "NZDUSD": {
+            "trades": 54,
+            "tp": 29,
+            "sl": 21,
+            "open": 4,
+            "wr": 58.0,
+            "exp_r": 0.073
+          }
+        }
+      }
+    },
+    "D1": {
+      "IS": {
+        "pairs": 9,
+        "trades": 113,
+        "tp": 56,
+        "sl": 47,
+        "open": 10,
+        "winrate_pct": 54.4,
+        "expectancy_r": 0.033,
+        "total_r": 3.4,
+        "trades_per_day": 0.42,
+        "per_pair": {
+          "XAUUSD": {
+            "trades": 17,
+            "tp": 13,
+            "sl": 3,
+            "open": 1,
+            "wr": 81.2,
+            "exp_r": 0.544
+          },
+          "XAGUSD": {
+            "trades": 13,
+            "tp": 8,
+            "sl": 5,
+            "open": 0,
+            "wr": 61.5,
+            "exp_r": 0.169
+          },
+          "BTCUSD": {
+            "trades": 12,
+            "tp": 4,
+            "sl": 7,
+            "open": 1,
+            "wr": 36.4,
+            "exp_r": -0.309
+          },
+          "EURUSD": {
+            "trades": 14,
+            "tp": 5,
+            "sl": 8,
+            "open": 1,
+            "wr": 38.5,
+            "exp_r": -0.269
+          },
+          "GBPUSD": {
+            "trades": 13,
+            "tp": 7,
+            "sl": 6,
+            "open": 0,
+            "wr": 53.8,
+            "exp_r": 0.023
+          },
+          "USDJPY": {
+            "trades": 12,
+            "tp": 5,
+            "sl": 6,
+            "open": 1,
+            "wr": 45.5,
+            "exp_r": -0.136
+          },
+          "AUDUSD": {
+            "trades": 9,
+            "tp": 4,
+            "sl": 3,
+            "open": 2,
+            "wr": 57.1,
+            "exp_r": 0.086
+          },
+          "USDCAD": {
+            "trades": 12,
+            "tp": 6,
+            "sl": 5,
+            "open": 1,
+            "wr": 54.5,
+            "exp_r": 0.036
+          },
+          "NZDUSD": {
+            "trades": 11,
+            "tp": 4,
+            "sl": 4,
+            "open": 3,
+            "wr": 50.0,
+            "exp_r": -0.05
+          }
+        }
+      },
+      "OOS": {
+        "pairs": 9,
+        "trades": 103,
+        "tp": 54,
+        "sl": 38,
+        "open": 11,
+        "winrate_pct": 58.7,
+        "expectancy_r": 0.115,
+        "total_r": 10.6,
+        "trades_per_day": 0.38,
+        "per_pair": {
+          "XAUUSD": {
+            "trades": 9,
+            "tp": 6,
+            "sl": 3,
+            "open": 0,
+            "wr": 66.7,
+            "exp_r": 0.267
+          },
+          "XAGUSD": {
+            "trades": 14,
+            "tp": 10,
+            "sl": 3,
+            "open": 1,
+            "wr": 76.9,
+            "exp_r": 0.462
+          },
+          "BTCUSD": {
+            "trades": 11,
+            "tp": 6,
+            "sl": 3,
+            "open": 2,
+            "wr": 66.7,
+            "exp_r": 0.267
+          },
+          "EURUSD": {
+            "trades": 11,
+            "tp": 5,
+            "sl": 4,
+            "open": 2,
+            "wr": 55.6,
+            "exp_r": 0.056
+          },
+          "GBPUSD": {
+            "trades": 13,
+            "tp": 5,
+            "sl": 7,
+            "open": 1,
+            "wr": 41.7,
+            "exp_r": -0.208
+          },
+          "USDJPY": {
+            "trades": 10,
+            "tp": 5,
+            "sl": 4,
+            "open": 1,
+            "wr": 55.6,
+            "exp_r": 0.056
+          },
+          "AUDUSD": {
+            "trades": 14,
+            "tp": 8,
+            "sl": 5,
+            "open": 1,
+            "wr": 61.5,
+            "exp_r": 0.169
+          },
+          "USDCAD": {
+            "trades": 11,
+            "tp": 6,
+            "sl": 5,
+            "open": 0,
+            "wr": 54.5,
+            "exp_r": 0.036
+          },
+          "NZDUSD": {
+            "trades": 10,
+            "tp": 3,
+            "sl": 4,
+            "open": 3,
+            "wr": 42.9,
+            "exp_r": -0.186
+          }
+        }
+      },
+      "ALL": {
+        "pairs": 9,
+        "trades": 216,
+        "tp": 109,
+        "sl": 86,
+        "open": 21,
+        "winrate_pct": 55.9,
+        "expectancy_r": 0.062,
+        "total_r": 12.1,
+        "trades_per_day": 0.4,
+        "per_pair": {
+          "XAUUSD": {
+            "trades": 26,
+            "tp": 19,
+            "sl": 6,
+            "open": 1,
+            "wr": 76.0,
+            "exp_r": 0.444
+          },
+          "XAGUSD": {
+            "trades": 27,
+            "tp": 18,
+            "sl": 8,
+            "open": 1,
+            "wr": 69.2,
+            "exp_r": 0.315
+          },
+          "BTCUSD": {
+            "trades": 23,
+            "tp": 10,
+            "sl": 10,
+            "open": 3,
+            "wr": 50.0,
+            "exp_r": -0.05
+          },
+          "EURUSD": {
+            "trades": 25,
+            "tp": 9,
+            "sl": 13,
+            "open": 3,
+            "wr": 40.9,
+            "exp_r": -0.223
+          },
+          "GBPUSD": {
+            "trades": 26,
+            "tp": 12,
+            "sl": 13,
+            "open": 1,
+            "wr": 48.0,
+            "exp_r": -0.088
+          },
+          "USDJPY": {
+            "trades": 22,
+            "tp": 10,
+            "sl": 10,
+            "open": 2,
+            "wr": 50.0,
+            "exp_r": -0.05
+          },
+          "AUDUSD": {
+            "trades": 23,
+            "tp": 12,
+            "sl": 8,
+            "open": 3,
+            "wr": 60.0,
+            "exp_r": 0.14
+          },
+          "USDCAD": {
+            "trades": 23,
+            "tp": 12,
+            "sl": 10,
+            "open": 1,
+            "wr": 54.5,
+            "exp_r": 0.036
+          },
+          "NZDUSD": {
+            "trades": 21,
+            "tp": 7,
+            "sl": 8,
+            "open": 6,
+            "wr": 46.7,
+            "exp_r": -0.113
+          }
+        }
+      }
+    }
+  },
+  "part1_quant_flagship3_spread": {
+    "M5": {
+      "IS": {
+        "pairs": 3,
+        "trades": 323,
+        "tp": 196,
+        "sl": 126,
+        "open": 1,
+        "winrate_pct": 60.9,
+        "expectancy_r": 0.065,
+        "total_r": 21.0,
+        "trades_per_day": 25.52,
+        "per_pair": {
+          "XAUUSD": {
+            "trades": 110,
+            "tp": 66,
+            "sl": 43,
+            "open": 1,
+            "wr": 60.6,
+            "exp_r": 0.06
+          },
+          "XAGUSD": {
+            "trades": 120,
+            "tp": 72,
+            "sl": 48,
+            "open": 0,
+            "wr": 60.0,
+            "exp_r": 0.05
+          },
+          "BTCUSD": {
+            "trades": 93,
+            "tp": 58,
+            "sl": 35,
+            "open": 0,
+            "wr": 62.4,
+            "exp_r": 0.091
+          }
+        }
+      },
+      "OOS": {
+        "pairs": 3,
+        "trades": 377,
+        "tp": 225,
+        "sl": 148,
+        "open": 4,
+        "winrate_pct": 60.3,
+        "expectancy_r": 0.056,
+        "total_r": 20.75,
+        "trades_per_day": 29.8,
+        "per_pair": {
+          "XAUUSD": {
+            "trades": 117,
+            "tp": 68,
+            "sl": 48,
+            "open": 1,
+            "wr": 58.6,
+            "exp_r": 0.026
+          },
+          "XAGUSD": {
+            "trades": 109,
+            "tp": 68,
+            "sl": 39,
+            "open": 2,
+            "wr": 63.6,
+            "exp_r": 0.112
+          },
+          "BTCUSD": {
+            "trades": 151,
+            "tp": 89,
+            "sl": 61,
+            "open": 1,
+            "wr": 59.3,
+            "exp_r": 0.038
+          }
+        }
+      },
+      "ALL": {
+        "pairs": 3,
+        "trades": 697,
+        "tp": 419,
+        "sl": 273,
+        "open": 5,
+        "winrate_pct": 60.5,
+        "expectancy_r": 0.06,
+        "total_r": 41.25,
+        "trades_per_day": 27.54,
+        "per_pair": {
+          "XAUUSD": {
+            "trades": 224,
+            "tp": 132,
+            "sl": 90,
+            "open": 2,
+            "wr": 59.5,
+            "exp_r": 0.041
+          },
+          "XAGUSD": {
+            "trades": 229,
+            "tp": 140,
+            "sl": 87,
+            "open": 2,
+            "wr": 61.7,
+            "exp_r": 0.079
+          },
+          "BTCUSD": {
+            "trades": 244,
+            "tp": 147,
+            "sl": 96,
+            "open": 1,
+            "wr": 60.5,
+            "exp_r": 0.059
+          }
+        }
+      }
+    },
+    "M15": {
+      "IS": {
+        "pairs": 3,
+        "trades": 144,
+        "tp": 83,
+        "sl": 61,
+        "open": 0,
+        "winrate_pct": 57.6,
+        "expectancy_r": 0.037,
+        "total_r": 5.4,
+        "trades_per_day": 11.16,
+        "per_pair": {
+          "XAUUSD": {
+            "trades": 41,
+            "tp": 26,
+            "sl": 15,
+            "open": 0,
+            "wr": 63.4,
+            "exp_r": 0.141
+          },
+          "XAGUSD": {
+            "trades": 43,
+            "tp": 27,
+            "sl": 16,
+            "open": 0,
+            "wr": 62.8,
+            "exp_r": 0.13
+          },
+          "BTCUSD": {
+            "trades": 60,
+            "tp": 30,
+            "sl": 30,
+            "open": 0,
+            "wr": 50.0,
+            "exp_r": -0.1
+          }
+        }
+      },
+      "OOS": {
+        "pairs": 3,
+        "trades": 143,
+        "tp": 90,
+        "sl": 49,
+        "open": 4,
+        "winrate_pct": 64.7,
+        "expectancy_r": 0.165,
+        "total_r": 23.0,
+        "trades_per_day": 11.1,
+        "per_pair": {
+          "XAUUSD": {
+            "trades": 48,
+            "tp": 31,
+            "sl": 16,
+            "open": 1,
+            "wr": 66.0,
+            "exp_r": 0.187
+          },
+          "XAGUSD": {
+            "trades": 38,
+            "tp": 25,
+            "sl": 12,
+            "open": 1,
+            "wr": 67.6,
+            "exp_r": 0.216
+          },
+          "BTCUSD": {
+            "trades": 57,
+            "tp": 34,
+            "sl": 21,
+            "open": 2,
+            "wr": 61.8,
+            "exp_r": 0.113
+          }
+        }
+      },
+      "ALL": {
+        "pairs": 3,
+        "trades": 285,
+        "tp": 173,
+        "sl": 108,
+        "open": 4,
+        "winrate_pct": 61.6,
+        "expectancy_r": 0.108,
+        "total_r": 30.4,
+        "trades_per_day": 11.05,
+        "per_pair": {
+          "XAUUSD": {
+            "trades": 88,
+            "tp": 57,
+            "sl": 30,
+            "open": 1,
+            "wr": 65.5,
+            "exp_r": 0.179
+          },
+          "XAGUSD": {
+            "trades": 81,
+            "tp": 52,
+            "sl": 28,
+            "open": 1,
+            "wr": 65.0,
+            "exp_r": 0.17
+          },
+          "BTCUSD": {
+            "trades": 116,
+            "tp": 64,
+            "sl": 50,
+            "open": 2,
+            "wr": 56.1,
+            "exp_r": 0.011
+          }
+        }
+      }
+    },
+    "H1": {
+      "IS": {
+        "pairs": 3,
+        "trades": 37,
+        "tp": 20,
+        "sl": 17,
+        "open": 0,
+        "winrate_pct": 54.1,
+        "expectancy_r": -0.0,
+        "total_r": -0.0,
+        "trades_per_day": 2.57,
+        "per_pair": {
+          "XAUUSD": {
+            "trades": 11,
+            "tp": 6,
+            "sl": 5,
+            "open": 0,
+            "wr": 54.5,
+            "exp_r": 0.009
+          },
+          "XAGUSD": {
+            "trades": 11,
+            "tp": 7,
+            "sl": 4,
+            "open": 0,
+            "wr": 63.6,
+            "exp_r": 0.177
+          },
+          "BTCUSD": {
+            "trades": 15,
+            "tp": 7,
+            "sl": 8,
+            "open": 0,
+            "wr": 46.7,
+            "exp_r": -0.137
+          }
+        }
+      },
+      "OOS": {
+        "pairs": 3,
+        "trades": 42,
+        "tp": 30,
+        "sl": 11,
+        "open": 1,
+        "winrate_pct": 73.2,
+        "expectancy_r": 0.354,
+        "total_r": 14.5,
+        "trades_per_day": 2.94,
+        "per_pair": {
+          "XAUUSD": {
+            "trades": 11,
+            "tp": 10,
+            "sl": 1,
+            "open": 0,
+            "wr": 90.9,
+            "exp_r": 0.682
+          },
+          "XAGUSD": {
+            "trades": 12,
+            "tp": 7,
+            "sl": 4,
+            "open": 1,
+            "wr": 63.6,
+            "exp_r": 0.177
+          },
+          "BTCUSD": {
+            "trades": 19,
+            "tp": 13,
+            "sl": 6,
+            "open": 0,
+            "wr": 68.4,
+            "exp_r": 0.266
+          }
+        }
+      },
+      "ALL": {
+        "pairs": 3,
+        "trades": 77,
+        "tp": 50,
+        "sl": 26,
+        "open": 1,
+        "winrate_pct": 65.8,
+        "expectancy_r": 0.217,
+        "total_r": 16.5,
+        "trades_per_day": 2.68,
+        "per_pair": {
+          "XAUUSD": {
+            "trades": 22,
+            "tp": 16,
+            "sl": 6,
+            "open": 0,
+            "wr": 72.7,
+            "exp_r": 0.345
+          },
+          "XAGUSD": {
+            "trades": 23,
+            "tp": 14,
+            "sl": 8,
+            "open": 1,
+            "wr": 63.6,
+            "exp_r": 0.177
+          },
+          "BTCUSD": {
+            "trades": 32,
+            "tp": 20,
+            "sl": 12,
+            "open": 0,
+            "wr": 62.5,
+            "exp_r": 0.156
+          }
+        }
+      }
+    },
+    "H4": {
+      "IS": {
+        "pairs": 3,
+        "trades": 81,
+        "tp": 45,
+        "sl": 31,
+        "open": 5,
+        "winrate_pct": 59.2,
+        "expectancy_r": 0.095,
+        "total_r": 7.25,
+        "trades_per_day": 0.85,
+        "per_pair": {
+          "XAUUSD": {
+            "trades": 30,
+            "tp": 19,
+            "sl": 10,
+            "open": 1,
+            "wr": 65.5,
+            "exp_r": 0.212
+          },
+          "XAGUSD": {
+            "trades": 28,
+            "tp": 16,
+            "sl": 10,
+            "open": 2,
+            "wr": 61.5,
+            "exp_r": 0.138
+          },
+          "BTCUSD": {
+            "trades": 23,
+            "tp": 10,
+            "sl": 11,
+            "open": 2,
+            "wr": 47.6,
+            "exp_r": -0.119
+          }
+        }
+      },
+      "OOS": {
+        "pairs": 3,
+        "trades": 74,
+        "tp": 46,
+        "sl": 25,
+        "open": 3,
+        "winrate_pct": 64.8,
+        "expectancy_r": 0.199,
+        "total_r": 14.1,
+        "trades_per_day": 0.78,
+        "per_pair": {
+          "XAUUSD": {
+            "trades": 25,
+            "tp": 13,
+            "sl": 11,
+            "open": 1,
+            "wr": 54.2,
+            "exp_r": 0.002
+          },
+          "XAGUSD": {
+            "trades": 26,
+            "tp": 19,
+            "sl": 6,
+            "open": 1,
+            "wr": 76.0,
+            "exp_r": 0.406
+          },
+          "BTCUSD": {
+            "trades": 23,
+            "tp": 14,
+            "sl": 8,
+            "open": 1,
+            "wr": 63.6,
+            "exp_r": 0.177
+          }
+        }
+      },
+      "ALL": {
+        "pairs": 3,
+        "trades": 151,
+        "tp": 89,
+        "sl": 54,
+        "open": 8,
+        "winrate_pct": 62.2,
+        "expectancy_r": 0.151,
+        "total_r": 21.65,
+        "trades_per_day": 0.8,
+        "per_pair": {
+          "XAUUSD": {
+            "trades": 52,
+            "tp": 31,
+            "sl": 19,
+            "open": 2,
+            "wr": 62.0,
+            "exp_r": 0.147
+          },
+          "XAGUSD": {
+            "trades": 53,
+            "tp": 34,
+            "sl": 16,
+            "open": 3,
+            "wr": 68.0,
+            "exp_r": 0.258
+          },
+          "BTCUSD": {
+            "trades": 46,
+            "tp": 24,
+            "sl": 19,
+            "open": 3,
+            "wr": 55.8,
+            "exp_r": 0.033
+          }
+        }
+      }
+    },
+    "D1": {
+      "IS": {
+        "pairs": 3,
+        "trades": 42,
+        "tp": 25,
+        "sl": 15,
+        "open": 2,
+        "winrate_pct": 62.5,
+        "expectancy_r": 0.188,
+        "total_r": 7.5,
+        "trades_per_day": 0.15,
+        "per_pair": {
+          "XAUUSD": {
+            "trades": 17,
+            "tp": 13,
+            "sl": 3,
+            "open": 1,
+            "wr": 81.2,
+            "exp_r": 0.544
+          },
+          "XAGUSD": {
+            "trades": 13,
+            "tp": 8,
+            "sl": 5,
+            "open": 0,
+            "wr": 61.5,
+            "exp_r": 0.169
+          },
+          "BTCUSD": {
+            "trades": 12,
+            "tp": 4,
+            "sl": 7,
+            "open": 1,
+            "wr": 36.4,
+            "exp_r": -0.309
+          }
+        }
+      },
+      "OOS": {
+        "pairs": 3,
+        "trades": 34,
+        "tp": 22,
+        "sl": 9,
+        "open": 3,
+        "winrate_pct": 71.0,
+        "expectancy_r": 0.348,
+        "total_r": 10.8,
+        "trades_per_day": 0.13,
+        "per_pair": {
+          "XAUUSD": {
+            "trades": 9,
+            "tp": 6,
+            "sl": 3,
+            "open": 0,
+            "wr": 66.7,
+            "exp_r": 0.267
+          },
+          "XAGUSD": {
+            "trades": 14,
+            "tp": 10,
+            "sl": 3,
+            "open": 1,
+            "wr": 76.9,
+            "exp_r": 0.462
+          },
+          "BTCUSD": {
+            "trades": 11,
+            "tp": 6,
+            "sl": 3,
+            "open": 2,
+            "wr": 66.7,
+            "exp_r": 0.267
+          }
+        }
+      },
+      "ALL": {
+        "pairs": 3,
+        "trades": 76,
+        "tp": 47,
+        "sl": 24,
+        "open": 5,
+        "winrate_pct": 66.2,
+        "expectancy_r": 0.258,
+        "total_r": 18.3,
+        "trades_per_day": 0.14,
+        "per_pair": {
+          "XAUUSD": {
+            "trades": 26,
+            "tp": 19,
+            "sl": 6,
+            "open": 1,
+            "wr": 76.0,
+            "exp_r": 0.444
+          },
+          "XAGUSD": {
+            "trades": 27,
+            "tp": 18,
+            "sl": 8,
+            "open": 1,
+            "wr": 69.2,
+            "exp_r": 0.315
+          },
+          "BTCUSD": {
+            "trades": 23,
+            "tp": 10,
+            "sl": 10,
+            "open": 3,
+            "wr": 50.0,
+            "exp_r": -0.05
+          }
+        }
+      }
+    }
+  },
+  "part1_quant_flagship3_mid": {
+    "M5": {
+      "IS": {
+        "pairs": 3,
+        "trades": 329,
+        "tp": 208,
+        "sl": 120,
+        "open": 1,
+        "winrate_pct": 63.4,
+        "expectancy_r": 0.11,
+        "total_r": 36.0,
+        "trades_per_day": 26.0,
+        "per_pair": {
+          "XAUUSD": {
+            "trades": 111,
+            "tp": 69,
+            "sl": 42,
+            "open": 0,
+            "wr": 62.2,
+            "exp_r": 0.088
+          },
+          "XAGUSD": {
+            "trades": 120,
+            "tp": 73,
+            "sl": 47,
+            "open": 0,
+            "wr": 60.8,
+            "exp_r": 0.065
+          },
+          "BTCUSD": {
+            "trades": 98,
+            "tp": 66,
+            "sl": 31,
+            "open": 1,
+            "wr": 68.0,
+            "exp_r": 0.191
+          }
+        }
+      },
+      "OOS": {
+        "pairs": 3,
+        "trades": 375,
+        "tp": 229,
+        "sl": 143,
+        "open": 3,
+        "winrate_pct": 61.6,
+        "expectancy_r": 0.077,
+        "total_r": 28.75,
+        "trades_per_day": 29.64,
+        "per_pair": {
+          "XAUUSD": {
+            "trades": 116,
+            "tp": 68,
+            "sl": 47,
+            "open": 1,
+            "wr": 59.1,
+            "exp_r": 0.035
+          },
+          "XAGUSD": {
+            "trades": 108,
+            "tp": 68,
+            "sl": 38,
+            "open": 2,
+            "wr": 64.2,
+            "exp_r": 0.123
+          },
+          "BTCUSD": {
+            "trades": 151,
+            "tp": 93,
+            "sl": 58,
+            "open": 0,
+            "wr": 61.6,
+            "exp_r": 0.078
+          }
+        }
+      },
+      "ALL": {
+        "pairs": 3,
+        "trades": 701,
+        "tp": 435,
+        "sl": 262,
+        "open": 4,
+        "winrate_pct": 62.4,
+        "expectancy_r": 0.092,
+        "total_r": 64.25,
+        "trades_per_day": 27.7,
+        "per_pair": {
+          "XAUUSD": {
+            "trades": 224,
+            "tp": 135,
+            "sl": 88,
+            "open": 1,
+            "wr": 60.5,
+            "exp_r": 0.059
+          },
+          "XAGUSD": {
+            "trades": 228,
+            "tp": 141,
+            "sl": 85,
+            "open": 2,
+            "wr": 62.4,
+            "exp_r": 0.092
+          },
+          "BTCUSD": {
+            "trades": 249,
+            "tp": 159,
+            "sl": 89,
+            "open": 1,
+            "wr": 64.1,
+            "exp_r": 0.122
+          }
+        }
+      }
+    },
+    "M15": {
+      "IS": {
+        "pairs": 3,
+        "trades": 147,
+        "tp": 88,
+        "sl": 59,
+        "open": 0,
+        "winrate_pct": 59.9,
+        "expectancy_r": 0.078,
+        "total_r": 11.4,
+        "trades_per_day": 11.4,
+        "per_pair": {
+          "XAUUSD": {
+            "trades": 41,
+            "tp": 27,
+            "sl": 14,
+            "open": 0,
+            "wr": 65.9,
+            "exp_r": 0.185
+          },
+          "XAGUSD": {
+            "trades": 43,
+            "tp": 27,
+            "sl": 16,
+            "open": 0,
+            "wr": 62.8,
+            "exp_r": 0.13
+          },
+          "BTCUSD": {
+            "trades": 63,
+            "tp": 34,
+            "sl": 29,
+            "open": 0,
+            "wr": 54.0,
+            "exp_r": -0.029
+          }
+        }
+      },
+      "OOS": {
+        "pairs": 3,
+        "trades": 143,
+        "tp": 91,
+        "sl": 48,
+        "open": 4,
+        "winrate_pct": 65.5,
+        "expectancy_r": 0.178,
+        "total_r": 24.8,
+        "trades_per_day": 11.1,
+        "per_pair": {
+          "XAUUSD": {
+            "trades": 48,
+            "tp": 31,
+            "sl": 16,
+            "open": 1,
+            "wr": 66.0,
+            "exp_r": 0.187
+          },
+          "XAGUSD": {
+            "trades": 38,
+            "tp": 25,
+            "sl": 12,
+            "open": 1,
+            "wr": 67.6,
+            "exp_r": 0.216
+          },
+          "BTCUSD": {
+            "trades": 57,
+            "tp": 35,
+            "sl": 20,
+            "open": 2,
+            "wr": 63.6,
+            "exp_r": 0.145
+          }
+        }
+      },
+      "ALL": {
+        "pairs": 3,
+        "trades": 287,
+        "tp": 178,
+        "sl": 105,
+        "open": 4,
+        "winrate_pct": 62.9,
+        "expectancy_r": 0.132,
+        "total_r": 37.4,
+        "trades_per_day": 11.13,
+        "per_pair": {
+          "XAUUSD": {
+            "trades": 88,
+            "tp": 58,
+            "sl": 29,
+            "open": 1,
+            "wr": 66.7,
+            "exp_r": 0.2
+          },
+          "XAGUSD": {
+            "trades": 81,
+            "tp": 52,
+            "sl": 28,
+            "open": 1,
+            "wr": 65.0,
+            "exp_r": 0.17
+          },
+          "BTCUSD": {
+            "trades": 118,
+            "tp": 68,
+            "sl": 48,
+            "open": 2,
+            "wr": 58.6,
+            "exp_r": 0.055
+          }
+        }
+      }
+    },
+    "H1": {
+      "IS": {
+        "pairs": 3,
+        "trades": 37,
+        "tp": 20,
+        "sl": 17,
+        "open": 0,
+        "winrate_pct": 54.1,
+        "expectancy_r": -0.0,
+        "total_r": -0.0,
+        "trades_per_day": 2.57,
+        "per_pair": {
+          "XAUUSD": {
+            "trades": 11,
+            "tp": 6,
+            "sl": 5,
+            "open": 0,
+            "wr": 54.5,
+            "exp_r": 0.009
+          },
+          "XAGUSD": {
+            "trades": 11,
+            "tp": 7,
+            "sl": 4,
+            "open": 0,
+            "wr": 63.6,
+            "exp_r": 0.177
+          },
+          "BTCUSD": {
+            "trades": 15,
+            "tp": 7,
+            "sl": 8,
+            "open": 0,
+            "wr": 46.7,
+            "exp_r": -0.137
+          }
+        }
+      },
+      "OOS": {
+        "pairs": 3,
+        "trades": 41,
+        "tp": 31,
+        "sl": 9,
+        "open": 1,
+        "winrate_pct": 77.5,
+        "expectancy_r": 0.434,
+        "total_r": 17.35,
+        "trades_per_day": 2.87,
+        "per_pair": {
+          "XAUUSD": {
+            "trades": 11,
+            "tp": 10,
+            "sl": 1,
+            "open": 0,
+            "wr": 90.9,
+            "exp_r": 0.682
+          },
+          "XAGUSD": {
+            "trades": 11,
+            "tp": 7,
+            "sl": 3,
+            "open": 1,
+            "wr": 70.0,
+            "exp_r": 0.295
+          },
+          "BTCUSD": {
+            "trades": 19,
+            "tp": 14,
+            "sl": 5,
+            "open": 0,
+            "wr": 73.7,
+            "exp_r": 0.363
+          }
+        }
+      },
+      "ALL": {
+        "pairs": 3,
+        "trades": 76,
+        "tp": 51,
+        "sl": 24,
+        "open": 1,
+        "winrate_pct": 68.0,
+        "expectancy_r": 0.258,
+        "total_r": 19.35,
+        "trades_per_day": 2.65,
+        "per_pair": {
+          "XAUUSD": {
+            "trades": 22,
+            "tp": 16,
+            "sl": 6,
+            "open": 0,
+            "wr": 72.7,
+            "exp_r": 0.345
+          },
+          "XAGUSD": {
+            "trades": 22,
+            "tp": 14,
+            "sl": 7,
+            "open": 1,
+            "wr": 66.7,
+            "exp_r": 0.233
+          },
+          "BTCUSD": {
+            "trades": 32,
+            "tp": 21,
+            "sl": 11,
+            "open": 0,
+            "wr": 65.6,
+            "exp_r": 0.214
+          }
+        }
+      }
+    },
+    "H4": {
+      "IS": {
+        "pairs": 3,
+        "trades": 80,
+        "tp": 45,
+        "sl": 30,
+        "open": 5,
+        "winrate_pct": 60.0,
+        "expectancy_r": 0.11,
+        "total_r": 8.25,
+        "trades_per_day": 0.84,
+        "per_pair": {
+          "XAUUSD": {
+            "trades": 31,
+            "tp": 20,
+            "sl": 10,
+            "open": 1,
+            "wr": 66.7,
+            "exp_r": 0.233
+          },
+          "XAGUSD": {
+            "trades": 27,
+            "tp": 15,
+            "sl": 10,
+            "open": 2,
+            "wr": 60.0,
+            "exp_r": 0.11
+          },
+          "BTCUSD": {
+            "trades": 22,
+            "tp": 10,
+            "sl": 10,
+            "open": 2,
+            "wr": 50.0,
+            "exp_r": -0.075
+          }
+        }
+      },
+      "OOS": {
+        "pairs": 3,
+        "trades": 74,
+        "tp": 46,
+        "sl": 25,
+        "open": 3,
+        "winrate_pct": 64.8,
+        "expectancy_r": 0.199,
+        "total_r": 14.1,
+        "trades_per_day": 0.78,
+        "per_pair": {
+          "XAUUSD": {
+            "trades": 25,
+            "tp": 13,
+            "sl": 11,
+            "open": 1,
+            "wr": 54.2,
+            "exp_r": 0.002
+          },
+          "XAGUSD": {
+            "trades": 26,
+            "tp": 19,
+            "sl": 6,
+            "open": 1,
+            "wr": 76.0,
+            "exp_r": 0.406
+          },
+          "BTCUSD": {
+            "trades": 23,
+            "tp": 14,
+            "sl": 8,
+            "open": 1,
+            "wr": 63.6,
+            "exp_r": 0.177
+          }
+        }
+      },
+      "ALL": {
+        "pairs": 3,
+        "trades": 150,
+        "tp": 89,
+        "sl": 53,
+        "open": 8,
+        "winrate_pct": 62.7,
+        "expectancy_r": 0.16,
+        "total_r": 22.65,
+        "trades_per_day": 0.79,
+        "per_pair": {
+          "XAUUSD": {
+            "trades": 53,
+            "tp": 32,
+            "sl": 19,
+            "open": 2,
+            "wr": 62.7,
+            "exp_r": 0.161
+          },
+          "XAGUSD": {
+            "trades": 52,
+            "tp": 33,
+            "sl": 16,
+            "open": 3,
+            "wr": 67.3,
+            "exp_r": 0.246
+          },
+          "BTCUSD": {
+            "trades": 45,
+            "tp": 24,
+            "sl": 18,
+            "open": 3,
+            "wr": 57.1,
+            "exp_r": 0.057
+          }
+        }
+      }
+    },
+    "D1": {
+      "IS": {
+        "pairs": 3,
+        "trades": 42,
+        "tp": 25,
+        "sl": 15,
+        "open": 2,
+        "winrate_pct": 62.5,
+        "expectancy_r": 0.188,
+        "total_r": 7.5,
+        "trades_per_day": 0.15,
+        "per_pair": {
+          "XAUUSD": {
+            "trades": 17,
+            "tp": 13,
+            "sl": 3,
+            "open": 1,
+            "wr": 81.2,
+            "exp_r": 0.544
+          },
+          "XAGUSD": {
+            "trades": 13,
+            "tp": 8,
+            "sl": 5,
+            "open": 0,
+            "wr": 61.5,
+            "exp_r": 0.169
+          },
+          "BTCUSD": {
+            "trades": 12,
+            "tp": 4,
+            "sl": 7,
+            "open": 1,
+            "wr": 36.4,
+            "exp_r": -0.309
+          }
+        }
+      },
+      "OOS": {
+        "pairs": 3,
+        "trades": 34,
+        "tp": 22,
+        "sl": 9,
+        "open": 3,
+        "winrate_pct": 71.0,
+        "expectancy_r": 0.348,
+        "total_r": 10.8,
+        "trades_per_day": 0.13,
+        "per_pair": {
+          "XAUUSD": {
+            "trades": 9,
+            "tp": 6,
+            "sl": 3,
+            "open": 0,
+            "wr": 66.7,
+            "exp_r": 0.267
+          },
+          "XAGUSD": {
+            "trades": 14,
+            "tp": 10,
+            "sl": 3,
+            "open": 1,
+            "wr": 76.9,
+            "exp_r": 0.462
+          },
+          "BTCUSD": {
+            "trades": 11,
+            "tp": 6,
+            "sl": 3,
+            "open": 2,
+            "wr": 66.7,
+            "exp_r": 0.267
+          }
+        }
+      },
+      "ALL": {
+        "pairs": 3,
+        "trades": 76,
+        "tp": 47,
+        "sl": 24,
+        "open": 5,
+        "winrate_pct": 66.2,
+        "expectancy_r": 0.258,
+        "total_r": 18.3,
+        "trades_per_day": 0.14,
+        "per_pair": {
+          "XAUUSD": {
+            "trades": 26,
+            "tp": 19,
+            "sl": 6,
+            "open": 1,
+            "wr": 76.0,
+            "exp_r": 0.444
+          },
+          "XAGUSD": {
+            "trades": 27,
+            "tp": 18,
+            "sl": 8,
+            "open": 1,
+            "wr": 69.2,
+            "exp_r": 0.315
+          },
+          "BTCUSD": {
+            "trades": 23,
+            "tp": 10,
+            "sl": 10,
+            "open": 3,
+            "wr": 50.0,
+            "exp_r": -0.05
+          }
+        }
+      }
+    }
+  },
+  "part2_live_neon_overall": {
+    "tested_setups": 50,
+    "approved": 40,
+    "veto_hold": 7,
+    "reject": 0,
+    "error": 3,
+    "tp_mid": 31,
+    "sl_mid": 9,
+    "wr_mid_pct": 77.5,
+    "exp_mid_r": 0.411,
+    "tot_mid_r": 16.44,
+    "tp_sp": 30,
+    "sl_sp": 10,
+    "wr_sp_pct": 75.0,
+    "exp_sp_r": 0.366,
+    "tot_sp_r": 14.64,
+    "veto_would_have_wr_pct": 42.9,
+    "avg_lat_s": 33.1
+  },
+  "part2_live_neon_by_tf": {
+    "M5": {
+      "summary": {
+        "tested_setups": 10,
+        "approved": 9,
+        "veto_hold": 1,
+        "reject": 0,
+        "error": 0,
+        "tp_mid": 8,
+        "sl_mid": 1,
+        "wr_mid_pct": 88.9,
+        "exp_mid_r": 0.554,
+        "tot_mid_r": 4.99,
+        "tp_sp": 8,
+        "sl_sp": 1,
+        "wr_sp_pct": 88.9,
+        "exp_sp_r": 0.554,
+        "tot_sp_r": 4.99,
+        "veto_would_have_wr_pct": 0.0,
+        "avg_lat_s": 35.1
+      },
+      "details": [
+        {
+          "pair": "XAUUSD",
+          "tf": "M5",
+          "ts": "2026-11-05T10:35:00",
+          "status": "TP",
+          "status_sp": "TP",
+          "side": "BUY",
+          "q_setup": "INSIDE_BAR",
+          "entry": 4127.58,
+          "sl": 4118.92,
+          "tp1": 4134.08,
+          "rr1": 0.75,
+          "conf": 0.7,
+          "r_mid": 0.75,
+          "r_sp": 0.75,
+          "q_mid": "TP",
+          "q_sp": "TP",
+          "reason": "Higher-low base reclaiming EMAs; clean path to TP1",
+          "lat": 45.0
+        },
+        {
+          "pair": "XAUUSD",
+          "tf": "M5",
+          "ts": "2026-11-11T14:45:00",
+          "status": "TP",
+          "status_sp": "TP",
+          "side": "SELL",
+          "q_setup": "INSIDE_BAR",
+          "entry": 4015.76,
+          "sl": 4027.07,
+          "tp1": 4007.27,
+          "rr1": 0.75,
+          "conf": 0.7,
+          "r_mid": 0.75,
+          "r_sp": 0.75,
+          "q_mid": "TP",
+          "q_sp": "TP",
+          "reason": "Clean downtrend continuation, open air below, no structural trap",
+          "lat": 31.1
+        },
+        {
+          "pair": "XAUUSD",
+          "tf": "M5",
+          "ts": "2026-11-17T09:40:00",
+          "status": "TP",
+          "status_sp": "TP",
+          "side": "SELL",
+          "q_setup": "RSI2_FLUSH",
+          "entry": 3866.97,
+          "sl": 3874.27,
+          "tp1": 3861.49,
+          "rr1": 0.75,
+          "conf": 0.7,
+          "r_mid": 0.75,
+          "r_sp": 0.75,
+          "q_mid": "TP",
+          "q_sp": "TP",
+          "reason": "Clean M5 downtrend pullback into falling EMA20 resistance",
+          "lat": 24.7
+        },
+        {
+          "pair": "XAGUSD",
+          "tf": "M5",
+          "ts": "2026-11-05T10:55:00",
+          "status": "VETO_HOLD",
+          "q_side": "BUY",
+          "q_setup": "INSIDE_BAR",
+          "q_mid": "SL",
+          "q_sp": "SL",
+          "q_rr1": 0.75,
+          "reason": "Buying straight into multi-swing ceiling before TP1",
+          "lat": 46.3
+        },
+        {
+          "pair": "XAGUSD",
+          "tf": "M5",
+          "ts": "2026-11-11T17:30:00",
+          "status": "TP",
+          "status_sp": "TP",
+          "side": "SELL",
+          "q_setup": "INSIDE_BAR",
+          "entry": 52.144,
+          "sl": 52.33009,
+          "tp1": 52.00444,
+          "rr1": 0.75,
+          "conf": 0.7,
+          "r_mid": 0.75,
+          "r_sp": 0.75,
+          "q_mid": "TP",
+          "q_sp": "TP",
+          "reason": "Clean downtrend EMA20 rejection with open room to TP1",
+          "lat": 24.0
+        },
+        {
+          "pair": "XAGUSD",
+          "tf": "M5",
+          "ts": "2026-11-17T17:15:00",
+          "status": "SL",
+          "status_sp": "SL",
+          "side": "BUY",
+          "q_setup": "INSIDE_BAR",
+          "entry": 47.741,
+          "sl": 47.43124,
+          "tp1": 47.97332,
+          "rr1": 0.75,
+          "conf": 0.7,
+          "r_mid": -1.0,
+          "r_sp": -1.0,
+          "q_mid": "SL",
+          "q_sp": "SL",
+          "reason": "EMA200 bounce reclaimed EMAs; clean SL below swing low",
+          "lat": 61.0
+        },
+        {
+          "pair": "BTCUSD",
+          "tf": "M5",
+          "ts": "2026-11-06T06:35:00",
+          "status": "TP",
+          "status_sp": "TP",
+          "side": "SELL",
+          "q_setup": "KELTNER_DIP",
+          "entry": 75659.07,
+          "sl": 75983.62,
+          "tp1": 75415.66,
+          "rr1": 0.75,
+          "conf": 0.7,
+          "r_mid": 0.75,
+          "r_sp": 0.75,
+          "q_mid": "TP",
+          "q_sp": "TP",
+          "reason": "Clean pullback to EMA50 resistance; TP1 above recent lows",
+          "lat": 27.9
+        },
+        {
+          "pair": "BTCUSD",
+          "tf": "M5",
+          "ts": "2026-11-13T01:25:00",
+          "status": "TP",
+          "status_sp": "TP",
+          "side": "SELL",
+          "q_setup": "RSI2_FLUSH",
+          "entry": 71063.52,
+          "sl": 71495.04,
+          "tp1": 70739.88,
+          "rr1": 0.75,
+          "conf": 0.7,
+          "r_mid": 0.75,
+          "r_sp": 0.75,
+          "q_mid": "TP",
+          "q_sp": "TP",
+          "reason": "Clean downtrend pullback to EMA20 and broken support retest",
+          "lat": 25.7
+        },
+        {
+          "pair": "BTCUSD",
+          "tf": "M5",
+          "ts": "2026-11-18T17:20:00",
+          "status": "TP",
+          "status_sp": "TP",
+          "side": "SELL",
+          "q_setup": "KELTNER_DIP",
+          "entry": 63131.82,
+          "sl": 63688.82,
+          "tp1": 62714.07,
+          "rr1": 0.75,
+          "conf": 0.7,
+          "r_mid": 0.75,
+          "r_sp": 0.75,
+          "q_mid": "TP",
+          "q_sp": "TP",
+          "reason": "Downtrend pullback to EMA50 resistance; SL above swing highs",
+          "lat": 42.1
+        },
+        {
+          "pair": "EURUSD",
+          "tf": "M5",
+          "ts": "2026-11-05T10:45:00",
+          "status": "TP",
+          "status_sp": "TP",
+          "side": "SELL",
+          "q_setup": "INSIDE_BAR",
+          "entry": 1.12281,
+          "sl": 1.12371,
+          "tp1": 1.12214,
+          "rr1": 0.74,
+          "conf": 0.7,
+          "r_mid": 0.74,
+          "r_sp": 0.74,
+          "q_mid": "TP",
+          "q_sp": "TP",
+          "reason": "Clean bearish trend breakdown, open space below to TP1",
+          "lat": 23.1
+        }
+      ]
+    },
+    "M15": {
+      "summary": {
+        "tested_setups": 10,
+        "approved": 10,
+        "veto_hold": 0,
+        "reject": 0,
+        "error": 0,
+        "tp_mid": 7,
+        "sl_mid": 3,
+        "wr_mid_pct": 70.0,
+        "exp_mid_r": 0.26,
+        "tot_mid_r": 2.6,
+        "tp_sp": 6,
+        "sl_sp": 4,
+        "wr_sp_pct": 60.0,
+        "exp_sp_r": 0.08,
+        "tot_sp_r": 0.8,
+        "veto_would_have_wr_pct": null,
+        "avg_lat_s": 34.0
+      },
+      "details": [
+        {
+          "pair": "XAUUSD",
+          "tf": "M15",
+          "ts": "2026-11-05T12:15:00",
+          "status": "SL",
+          "status_sp": "SL",
+          "side": "BUY",
+          "q_setup": "STREAK_TREND",
+          "entry": 4124.06,
+          "sl": 4107.28,
+          "tp1": 4137.49,
+          "rr1": 0.8,
+          "conf": 0.7,
+          "r_mid": -1.0,
+          "r_sp": -1.0,
+          "q_mid": "SL",
+          "q_sp": "SL",
+          "reason": "Healthy uptrend pullback above EMA50 and ascending swing lows",
+          "lat": 31.1
+        },
+        {
+          "pair": "XAUUSD",
+          "tf": "M15",
+          "ts": "2026-11-11T18:30:00",
+          "status": "TP",
+          "status_sp": "TP",
+          "side": "SELL",
+          "q_setup": "INSIDE_BAR",
+          "entry": 3990.37,
+          "sl": 4004.86,
+          "tp1": 3978.78,
+          "rr1": 0.8,
+          "conf": 0.7,
+          "r_mid": 0.8,
+          "r_sp": 0.8,
+          "q_mid": "TP",
+          "q_sp": "TP",
+          "reason": "Strong bearish cascade below EMAs, clean air to TP1",
+          "lat": 28.6
+        },
+        {
+          "pair": "XAUUSD",
+          "tf": "M15",
+          "ts": "2026-11-17T18:30:00",
+          "status": "TP",
+          "status_sp": "TP",
+          "side": "SELL",
+          "q_setup": "INSIDE_BAR",
+          "entry": 3858.46,
+          "sl": 3876.89,
+          "tp1": 3843.72,
+          "rr1": 0.8,
+          "conf": 0.7,
+          "r_mid": 0.8,
+          "r_sp": 0.8,
+          "q_mid": "TP",
+          "q_sp": "TP",
+          "reason": "Lower high below EMAs, H1 downtrend, clear TP1",
+          "lat": 54.0
+        },
+        {
+          "pair": "XAGUSD",
+          "tf": "M15",
+          "ts": "2026-11-06T02:30:00",
+          "status": "TP",
+          "status_sp": "TP",
+          "side": "SELL",
+          "q_setup": "STOCH_TURN",
+          "entry": 51.897,
+          "sl": 52.60369,
+          "tp1": 51.33165,
+          "rr1": 0.8,
+          "conf": 0.7,
+          "r_mid": 0.8,
+          "r_sp": 0.8,
+          "q_mid": "TP",
+          "q_sp": "TP",
+          "reason": "Clean EMA50 rejection, lower highs, bearish M15 structure",
+          "lat": 44.9
+        },
+        {
+          "pair": "XAGUSD",
+          "tf": "M15",
+          "ts": "2026-11-11T18:30:00",
+          "status": "TP",
+          "status_sp": "TP",
+          "side": "SELL",
+          "q_setup": "INSIDE_BAR",
+          "entry": 51.926,
+          "sl": 52.25928,
+          "tp1": 51.65937,
+          "rr1": 0.8,
+          "conf": 0.7,
+          "r_mid": 0.8,
+          "r_sp": 0.8,
+          "q_mid": "TP",
+          "q_sp": "TP",
+          "reason": "Clean downtrend below EMAs, clear runway to TP1",
+          "lat": 37.2
+        },
+        {
+          "pair": "XAGUSD",
+          "tf": "M15",
+          "ts": "2026-11-17T20:30:00",
+          "status": "TP",
+          "status_sp": "TP",
+          "side": "SELL",
+          "q_setup": "STREAK_TREND",
+          "entry": 47.292,
+          "sl": 47.68579,
+          "tp1": 46.97697,
+          "rr1": 0.8,
+          "conf": 0.7,
+          "r_mid": 0.8,
+          "r_sp": 0.8,
+          "q_mid": "TP",
+          "q_sp": "TP",
+          "reason": "Bearish breakdown below EMAs, pullback retest, clear TP1 path",
+          "lat": 30.0
+        },
+        {
+          "pair": "BTCUSD",
+          "tf": "M15",
+          "ts": "2026-11-05T07:45:00",
+          "status": "TP",
+          "status_sp": "SL",
+          "side": "BUY",
+          "q_setup": "RSI2_FLUSH+KELTNER_DIP+STREAK_TREND",
+          "entry": 80239.29,
+          "sl": 79830.34,
+          "tp1": 80566.45,
+          "rr1": 0.8,
+          "conf": 0.7,
+          "r_mid": 0.8,
+          "r_sp": -1.0,
+          "q_mid": "TP",
+          "q_sp": "SL",
+          "reason": "Orderly pullback to rising EMA50 support in uptrend",
+          "lat": 25.4
+        },
+        {
+          "pair": "BTCUSD",
+          "tf": "M15",
+          "ts": "2026-11-13T06:30:00",
+          "status": "SL",
+          "status_sp": "SL",
+          "side": "SELL",
+          "q_setup": "STREAK_TREND",
+          "entry": 68837.89,
+          "sl": 69786.06,
+          "tp1": 68079.36,
+          "rr1": 0.8,
+          "conf": 0.7,
+          "r_mid": -1.0,
+          "r_sp": -1.0,
+          "q_mid": "SL",
+          "q_sp": "SL",
+          "reason": "Clean downtrend pullback toward EMA20, no floor trap",
+          "lat": 25.0
+        },
+        {
+          "pair": "BTCUSD",
+          "tf": "M15",
+          "ts": "2026-11-17T20:30:00",
+          "status": "SL",
+          "status_sp": "SL",
+          "side": "SELL",
+          "q_setup": "STREAK_TREND",
+          "entry": 63931.82,
+          "sl": 64596.45,
+          "tp1": 63400.12,
+          "rr1": 0.8,
+          "conf": 0.7,
+          "r_mid": -1.0,
+          "r_sp": -1.0,
+          "q_mid": "SL",
+          "q_sp": "SL",
+          "reason": "Bearish EMA20 pullback at resistance; clean downtrend continuation",
+          "lat": 40.6
+        },
+        {
+          "pair": "EURUSD",
+          "tf": "M15",
+          "ts": "2026-11-06T01:45:00",
+          "status": "TP",
+          "status_sp": "TP",
+          "side": "SELL",
+          "q_setup": "INSIDE_BAR",
+          "entry": 1.12094,
+          "sl": 1.12227,
+          "tp1": 1.11987,
+          "rr1": 0.8,
+          "conf": 0.7,
+          "r_mid": 0.8,
+          "r_sp": 0.8,
+          "q_mid": "TP",
+          "q_sp": "TP",
+          "reason": "Lower highs under descending EMAs breaking range lows",
+          "lat": 22.7
+        }
+      ]
+    },
+    "H1": {
+      "summary": {
+        "tested_setups": 10,
+        "approved": 8,
+        "veto_hold": 2,
+        "reject": 0,
+        "error": 0,
+        "tp_mid": 6,
+        "sl_mid": 2,
+        "wr_mid_pct": 75.0,
+        "exp_mid_r": 0.388,
+        "tot_mid_r": 3.1,
+        "tp_sp": 6,
+        "sl_sp": 2,
+        "wr_sp_pct": 75.0,
+        "exp_sp_r": 0.388,
+        "tot_sp_r": 3.1,
+        "veto_would_have_wr_pct": 50.0,
+        "avg_lat_s": 29.6
+      },
+      "details": [
+        {
+          "pair": "XAUUSD",
+          "tf": "H1",
+          "ts": "2026-11-09T00:00:00",
+          "status": "TP",
+          "status_sp": "TP",
+          "side": "BUY",
+          "q_setup": "DONCHIAN20",
+          "entry": 4104.52,
+          "sl": 4058.72,
+          "tp1": 4143.45,
+          "rr1": 0.85,
+          "conf": 0.7,
+          "r_mid": 0.85,
+          "r_sp": 0.85,
+          "q_mid": "TP",
+          "q_sp": "TP",
+          "reason": "Clean Donchian breakout above EMAs; TP1 aligns with highs",
+          "lat": 41.9
+        },
+        {
+          "pair": "XAUUSD",
+          "tf": "H1",
+          "ts": "2026-11-12T20:00:00",
+          "status": "SL",
+          "status_sp": "SL",
+          "side": "SELL",
+          "q_setup": "INSIDE_BAR",
+          "entry": 3874.52,
+          "sl": 3916.77,
+          "tp1": 3838.61,
+          "rr1": 0.85,
+          "conf": 0.7,
+          "r_mid": -1.0,
+          "r_sp": -1.0,
+          "q_mid": "SL",
+          "q_sp": "SL",
+          "reason": "Clean downtrend continuation, open air below, no floor",
+          "lat": 23.1
+        },
+        {
+          "pair": "XAUUSD",
+          "tf": "H1",
+          "ts": "2026-11-18T06:00:00",
+          "status": "TP",
+          "status_sp": "TP",
+          "side": "SELL",
+          "q_setup": "DONCHIAN20",
+          "entry": 3777.85,
+          "sl": 3816.21,
+          "tp1": 3745.25,
+          "rr1": 0.85,
+          "conf": 0.7,
+          "r_mid": 0.85,
+          "r_sp": 0.85,
+          "q_mid": "TP",
+          "q_sp": "TP",
+          "reason": "Clean breakdown below consolidation; clear path to targets",
+          "lat": 23.3
+        },
+        {
+          "pair": "XAGUSD",
+          "tf": "H1",
+          "ts": "2026-11-09T00:00:00",
+          "status": "VETO_HOLD",
+          "q_side": "BUY",
+          "q_setup": "DONCHIAN20",
+          "q_mid": "SL",
+          "q_sp": "SL",
+          "q_rr1": 0.85,
+          "reason": "Vertical whipsaw spike into overhead resistance ceiling below TP1",
+          "lat": 31.8
+        },
+        {
+          "pair": "XAGUSD",
+          "tf": "H1",
+          "ts": "2026-11-12T14:00:00",
+          "status": "TP",
+          "status_sp": "TP",
+          "side": "SELL",
+          "q_setup": "DONCHIAN20",
+          "entry": 50.091,
+          "sl": 51.06955,
+          "tp1": 49.25923,
+          "rr1": 0.85,
+          "conf": 0.7,
+          "r_mid": 0.85,
+          "r_sp": 0.85,
+          "q_mid": "TP",
+          "q_sp": "TP",
+          "reason": "Clean support breakdown, aligned bearish EMAs, clear downside",
+          "lat": 24.7
+        },
+        {
+          "pair": "XAGUSD",
+          "tf": "H1",
+          "ts": "2026-11-17T18:00:00",
+          "status": "TP",
+          "status_sp": "TP",
+          "side": "SELL",
+          "q_setup": "INSIDE_BAR",
+          "entry": 47.404,
+          "sl": 48.22723,
+          "tp1": 46.70425,
+          "rr1": 0.85,
+          "conf": 0.7,
+          "r_mid": 0.85,
+          "r_sp": 0.85,
+          "q_mid": "TP",
+          "q_sp": "TP",
+          "reason": "Downtrend intact, EMA50 rejection, clean SL above swing highs",
+          "lat": 23.2
+        },
+        {
+          "pair": "BTCUSD",
+          "tf": "H1",
+          "ts": "2026-10-31T19:00:00",
+          "status": "SL",
+          "status_sp": "SL",
+          "side": "SELL",
+          "q_setup": "INSIDE_BAR",
+          "entry": 77428.18,
+          "sl": 78090.88,
+          "tp1": 76864.88,
+          "rr1": 0.85,
+          "conf": 0.7,
+          "r_mid": -1.0,
+          "r_sp": -1.0,
+          "q_mid": "SL",
+          "q_sp": "SL",
+          "reason": "Bear flag below EMA50, clean path to TP1",
+          "lat": 20.7
+        },
+        {
+          "pair": "BTCUSD",
+          "tf": "H1",
+          "ts": "2026-11-06T03:00:00",
+          "status": "VETO_HOLD",
+          "q_side": "SELL",
+          "q_setup": "INSIDE_BAR",
+          "q_mid": "TP",
+          "q_sp": "TP",
+          "q_rr1": 0.85,
+          "reason": "Selling into obvious multi-swing support floor before TP1",
+          "lat": 42.5
+        },
+        {
+          "pair": "BTCUSD",
+          "tf": "H1",
+          "ts": "2026-11-14T14:00:00",
+          "status": "TP",
+          "status_sp": "TP",
+          "side": "SELL",
+          "q_setup": "DONCHIAN20",
+          "entry": 65862.52,
+          "sl": 67148.81,
+          "tp1": 64769.17,
+          "rr1": 0.85,
+          "conf": 0.7,
+          "r_mid": 0.85,
+          "r_sp": 0.85,
+          "q_mid": "TP",
+          "q_sp": "TP",
+          "reason": "Clean downtrend breakdown with open space below to TP1",
+          "lat": 28.1
+        },
+        {
+          "pair": "EURUSD",
+          "tf": "H1",
+          "ts": "2026-11-09T19:00:00",
+          "status": "TP",
+          "status_sp": "TP",
+          "side": "BUY",
+          "q_setup": "DONCHIAN20",
+          "entry": 1.12233,
+          "sl": 1.11991,
+          "tp1": 1.12438,
+          "rr1": 0.85,
+          "conf": 0.6,
+          "r_mid": 0.85,
+          "r_sp": 0.85,
+          "q_mid": "TP",
+          "q_sp": "TP",
+          "reason": "Clean H1 breakout above EMAs; clear room to TP1.",
+          "lat": 36.9
+        }
+      ]
+    },
+    "H4": {
+      "summary": {
+        "tested_setups": 10,
+        "approved": 5,
+        "veto_hold": 2,
+        "reject": 0,
+        "error": 3,
+        "tp_mid": 5,
+        "sl_mid": 0,
+        "wr_mid_pct": 100.0,
+        "exp_mid_r": 0.85,
+        "tot_mid_r": 4.25,
+        "tp_sp": 5,
+        "sl_sp": 0,
+        "wr_sp_pct": 100.0,
+        "exp_sp_r": 0.85,
+        "tot_sp_r": 4.25,
+        "veto_would_have_wr_pct": 50.0,
+        "avg_lat_s": 38.9
+      },
+      "details": [
+        {
+          "pair": "XAUUSD",
+          "tf": "H4",
+          "ts": "2026-07-13T14:00:00+00:00",
+          "status": "VETO_HOLD",
+          "q_side": "SELL",
+          "q_setup": "DONCHIAN20",
+          "q_mid": "SL",
+          "q_sp": "SL",
+          "q_rr1": 0.85,
+          "reason": "Selling straight into obvious multi-swing floor before TP1",
+          "lat": 27.5
+        },
+        {
+          "pair": "XAUUSD",
+          "tf": "H4",
+          "ts": "2026-08-07T06:00:00+00:00",
+          "status": "TP",
+          "status_sp": "TP",
+          "side": "BUY",
+          "q_setup": "DONCHIAN20",
+          "entry": 4306.01,
+          "sl": 4206.22,
+          "tp1": 4390.84,
+          "rr1": 0.85,
+          "conf": 0.7,
+          "r_mid": 0.85,
+          "r_sp": 0.85,
+          "q_mid": "TP",
+          "q_sp": "TP",
+          "reason": "Clean Donchian breakout after pullback; open air to TP1",
+          "lat": 26.3
+        },
+        {
+          "pair": "XAUUSD",
+          "tf": "H4",
+          "ts": "2026-09-17T06:00:00+00:00",
+          "status": "TP",
+          "status_sp": "TP",
+          "side": "SELL",
+          "q_setup": "STREAK_TREND",
+          "entry": 4311.62,
+          "sl": 4423.76,
+          "tp1": 4216.3,
+          "rr1": 0.85,
+          "conf": 0.7,
+          "r_mid": 0.85,
+          "r_sp": 0.85,
+          "q_mid": "TP",
+          "q_sp": "TP",
+          "reason": "Clean H4 downtrend pullback to EMA20, lower lows intact",
+          "lat": 26.4
+        },
+        {
+          "pair": "XAGUSD",
+          "tf": "H4",
+          "ts": "2026-07-10T18:00:00+00:00",
+          "status": "TP",
+          "status_sp": "TP",
+          "side": "SELL",
+          "q_setup": "STREAK_TREND",
+          "entry": 59.844,
+          "sl": 62.43853,
+          "tp1": 57.63865,
+          "rr1": 0.85,
+          "conf": 0.7,
+          "r_mid": 0.85,
+          "r_sp": 0.85,
+          "q_mid": "TP",
+          "q_sp": "TP",
+          "reason": "Lower highs below EMA50, clean room to TP1 support",
+          "lat": 25.8
+        },
+        {
+          "pair": "XAGUSD",
+          "tf": "H4",
+          "ts": "2026-08-25T10:00:00+00:00",
+          "status": "TP",
+          "status_sp": "TP",
+          "side": "BUY",
+          "q_setup": "STOCH_TURN",
+          "entry": 68.219,
+          "sl": 65.46278,
+          "tp1": 70.56179,
+          "rr1": 0.85,
+          "conf": 0.7,
+          "r_mid": 0.85,
+          "r_sp": 0.85,
+          "q_mid": "TP",
+          "q_sp": "TP",
+          "reason": "Healthy uptrend pullback to rising EMA20 with clean support",
+          "lat": 29.1
+        },
+        {
+          "pair": "XAGUSD",
+          "tf": "H4",
+          "ts": "2026-10-15T14:00:00+00:00",
+          "status": "TP",
+          "status_sp": "TP",
+          "side": "SELL",
+          "q_setup": "STREAK_TREND",
+          "entry": 56.914,
+          "sl": 58.83209,
+          "tp1": 55.28363,
+          "rr1": 0.85,
+          "conf": 0.7,
+          "r_mid": 0.85,
+          "r_sp": 0.85,
+          "q_mid": "TP",
+          "q_sp": "TP",
+          "reason": "Clean breakdown pullback below falling EMAs; TP1 retests low",
+          "lat": 21.8
+        },
+        {
+          "pair": "BTCUSD",
+          "tf": "H4",
+          "ts": "2026-08-23T02:00:00+00:00",
+          "status": "VETO_HOLD",
+          "q_side": "BUY",
+          "q_setup": "RSI2_FLUSH",
+          "q_mid": "TP",
+          "q_sp": "TP",
+          "q_rr1": 0.85,
+          "reason": "Parabolic spike exhaustion with double-top ceiling below TP1",
+          "lat": 37.9
+        },
+        {
+          "pair": "BTCUSD",
+          "tf": "H4",
+          "ts": "2026-09-19T14:00:00+00:00",
+          "status": "ERROR",
+          "err": "RuntimeError: agy gagal: print timeout after 1m0s with the turn still in progress; the response is partial",
+          "q_mid": "TP",
+          "q_sp": "TP",
+          "q_rr1": 0.85,
+          "lat": 64.4
+        },
+        {
+          "pair": "BTCUSD",
+          "tf": "H4",
+          "ts": "2026-10-29T22:00:00+00:00",
+          "status": "ERROR",
+          "err": "RuntimeError: agy gagal: print timeout after 1m0s with the turn still in progress; the response is partial",
+          "q_mid": "SL",
+          "q_sp": "SL",
+          "q_rr1": 0.85,
+          "lat": 65.3
+        },
+        {
+          "pair": "EURUSD",
+          "tf": "H4",
+          "ts": "2026-07-13T18:00:00+00:00",
+          "status": "ERROR",
+          "err": "RuntimeError: agy gagal: print timeout after 1m0s with the turn still in progress; the response is partial",
+          "q_mid": "SL",
+          "q_sp": "SL",
+          "q_rr1": 0.85,
+          "lat": 64.1
+        }
+      ]
+    },
+    "D1": {
+      "summary": {
+        "tested_setups": 10,
+        "approved": 8,
+        "veto_hold": 2,
+        "reject": 0,
+        "error": 0,
+        "tp_mid": 5,
+        "sl_mid": 3,
+        "wr_mid_pct": 62.5,
+        "exp_mid_r": 0.188,
+        "tot_mid_r": 1.5,
+        "tp_sp": 5,
+        "sl_sp": 3,
+        "wr_sp_pct": 62.5,
+        "exp_sp_r": 0.188,
+        "tot_sp_r": 1.5,
+        "veto_would_have_wr_pct": 50.0,
+        "avg_lat_s": 28.0
+      },
+      "details": [
+        {
+          "pair": "XAUUSD",
+          "tf": "D1",
+          "ts": "2025-11-27T22:00:00+00:00",
+          "status": "TP",
+          "status_sp": "TP",
+          "side": "BUY",
+          "q_setup": "D1_INSIDE_BAR",
+          "entry": 4216.6,
+          "sl": 4019.06,
+          "tp1": 4394.39,
+          "rr1": 0.9,
+          "conf": 0.7,
+          "r_mid": 0.9,
+          "r_sp": 0.9,
+          "q_mid": "TP",
+          "q_sp": "TP",
+          "reason": "Strong uptrend holding EMA20 higher lows toward prior high",
+          "lat": 22.9
+        },
+        {
+          "pair": "XAUUSD",
+          "tf": "D1",
+          "ts": "2026-02-10T22:00:00+00:00",
+          "status": "SL",
+          "status_sp": "SL",
+          "side": "BUY",
+          "q_setup": "D1_INSIDE_BAR",
+          "entry": 5081.81,
+          "sl": 4596.59,
+          "tp1": 5518.51,
+          "rr1": 0.9,
+          "conf": 0.7,
+          "r_mid": -1.0,
+          "r_sp": -1.0,
+          "q_mid": "SL",
+          "q_sp": "SL",
+          "reason": "Healthy uptrend, higher low above EMA50, room to TP1",
+          "lat": 29.6
+        },
+        {
+          "pair": "XAUUSD",
+          "tf": "D1",
+          "ts": "2026-07-12T22:00:00+00:00",
+          "status": "VETO_HOLD",
+          "q_side": "SELL",
+          "q_setup": "D1_INSIDE_BAR",
+          "q_mid": "SL",
+          "q_sp": "SL",
+          "q_rr1": 0.9,
+          "reason": "Selling into obvious multi-swing floor near 4000 support",
+          "lat": 38.9
+        },
+        {
+          "pair": "XAGUSD",
+          "tf": "D1",
+          "ts": "2025-11-27T22:00:00+00:00",
+          "status": "TP",
+          "status_sp": "TP",
+          "side": "BUY",
+          "q_setup": "D1_DONCHIAN20",
+          "entry": 56.463,
+          "sl": 51.82987,
+          "tp1": 60.63282,
+          "rr1": 0.9,
+          "conf": 0.7,
+          "r_mid": 0.9,
+          "r_sp": 0.9,
+          "q_mid": "TP",
+          "q_sp": "TP",
+          "reason": "Clean Donchian breakout above prior highs in healthy uptrend",
+          "lat": 24.0
+        },
+        {
+          "pair": "XAGUSD",
+          "tf": "D1",
+          "ts": "2026-01-12T22:00:00+00:00",
+          "status": "TP",
+          "status_sp": "TP",
+          "side": "BUY",
+          "q_setup": "D1_DONCHIAN20",
+          "entry": 86.925,
+          "sl": 75.63275,
+          "tp1": 97.08802,
+          "rr1": 0.9,
+          "conf": 0.7,
+          "r_mid": 0.9,
+          "r_sp": 0.9,
+          "q_mid": "TP",
+          "q_sp": "TP",
+          "reason": "Clean Donchian breakout above consolidation highs in strong uptrend",
+          "lat": 25.3
+        },
+        {
+          "pair": "XAGUSD",
+          "tf": "D1",
+          "ts": "2026-06-08T22:00:00+00:00",
+          "status": "TP",
+          "status_sp": "TP",
+          "side": "SELL",
+          "q_setup": "D1_DONCHIAN20",
+          "entry": 65.336,
+          "sl": 74.42413,
+          "tp1": 57.15668,
+          "rr1": 0.9,
+          "conf": 0.7,
+          "r_mid": 0.9,
+          "r_sp": 0.9,
+          "q_mid": "TP",
+          "q_sp": "TP",
+          "reason": "Clean range breakdown below EMAs into fresh closing lows",
+          "lat": 34.3
+        },
+        {
+          "pair": "BTCUSD",
+          "tf": "D1",
+          "ts": "2026-02-26T22:00:00+00:00",
+          "status": "SL",
+          "status_sp": "SL",
+          "side": "SELL",
+          "q_setup": "D1_INSIDE_BAR",
+          "entry": 65522.24,
+          "sl": 73398.28,
+          "tp1": 58433.8,
+          "rr1": 0.9,
+          "conf": 0.7,
+          "r_mid": -1.0,
+          "r_sp": -1.0,
+          "q_mid": "SL",
+          "q_sp": "SL",
+          "reason": "Clean downtrend, lower highs rejecting EMA20, SL above swings",
+          "lat": 31.6
+        },
+        {
+          "pair": "BTCUSD",
+          "tf": "D1",
+          "ts": "2026-05-31T22:00:00+00:00",
+          "status": "TP",
+          "status_sp": "TP",
+          "side": "SELL",
+          "q_setup": "D1_DONCHIAN20",
+          "entry": 71438.7,
+          "sl": 76144.78,
+          "tp1": 67203.23,
+          "rr1": 0.9,
+          "conf": 0.7,
+          "r_mid": 0.9,
+          "r_sp": 0.9,
+          "q_mid": "TP",
+          "q_sp": "TP",
+          "reason": "Clean bearish breakdown below EMA20/50; clear path to TP1",
+          "lat": 23.2
+        },
+        {
+          "pair": "BTCUSD",
+          "tf": "D1",
+          "ts": "2026-08-19T22:00:00+00:00",
+          "status": "VETO_HOLD",
+          "q_side": "BUY",
+          "q_setup": "D1_DONCHIAN20",
+          "q_mid": "TP",
+          "q_sp": "TP",
+          "q_rr1": 0.9,
+          "reason": "Violent vertical parabolic spike far overextended above EMAs",
+          "lat": 23.6
+        },
+        {
+          "pair": "EURUSD",
+          "tf": "D1",
+          "ts": "2025-11-02T22:00:00+00:00",
+          "status": "SL",
+          "status_sp": "SL",
+          "side": "SELL",
+          "q_setup": "D1_DONCHIAN20",
+          "entry": 1.15195,
+          "sl": 1.16666,
+          "tp1": 1.13871,
+          "rr1": 0.9,
+          "conf": 0.7,
+          "r_mid": -1.0,
+          "r_sp": -1.0,
+          "q_mid": "SL",
+          "q_sp": "SL",
+          "reason": "Clean lower highs and support breakdown below bearish EMAs",
+          "lat": 26.8
+        }
+      ]
+    }
+  }
+}

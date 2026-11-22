@@ -1,0 +1,1051 @@
+{
+  "tf": "M15",
+  "points_per_pair": 20,
+  "forward_bars": 48,
+  "models": {
+    "gemini-4-neon-medium": {
+      "pairs": {
+        "XAUUSD": {
+          "summary": {
+            "points": 20,
+            "signals": 7,
+            "tp": 2,
+            "sl": 4,
+            "open": 1,
+            "hold": 12,
+            "reject": 1,
+            "error": 0,
+            "winrate_pct": 33.3,
+            "avg_rr1": 1.0,
+            "expectancy_r": -0.333,
+            "total_r": -2.0,
+            "avg_lat_s": 23.3
+          },
+          "details": [
+            {
+              "ts": "2026-10-22T20:15:00",
+              "status": "TP",
+              "side": "SELL",
+              "entry": 4022.78,
+              "sl": 4034.78,
+              "tp1": 4010.78,
+              "rr1": 1.0,
+              "conf": 0.7,
+              "r": 1.0,
+              "reason": "Strong downtrend, lower highs/lows",
+              "lat": 36.1
+            },
+            {
+              "ts": "2026-10-23T23:30:00",
+              "status": "HOLD",
+              "conf": 0.4,
+              "reason": "Sideways chop at range support",
+              "lat": 22.6
+            },
+            {
+              "ts": "2026-10-26T18:00:00",
+              "status": "SL",
+              "side": "BUY",
+              "entry": 4020.61,
+              "sl": 4013.8,
+              "tp1": 4027.42,
+              "rr1": 1.0,
+              "conf": 0.6,
+              "r": -1.0,
+              "reason": "H1 uptrend, HH/HL above EMAs",
+              "lat": 35.7
+            },
+            {
+              "ts": "2026-10-27T23:15:00",
+              "status": "HOLD",
+              "conf": 0.5,
+              "reason": "Sideways range at top",
+              "lat": 20.0
+            },
+            {
+              "ts": "2026-10-29T02:30:00",
+              "status": "HOLD",
+              "conf": 0.4,
+              "reason": "Choppy range below EMAs",
+              "lat": 21.6
+            },
+            {
+              "ts": "2026-10-30T06:00:00",
+              "status": "TP",
+              "side": "SELL",
+              "entry": 3988.72,
+              "sl": 4001.72,
+              "tp1": 3975.72,
+              "rr1": 1.0,
+              "conf": 0.7,
+              "r": 1.0,
+              "reason": "Strong downtrend, lower highs lows",
+              "lat": 29.6
+            },
+            {
+              "ts": "2026-10-31T09:15:00",
+              "status": "HOLD",
+              "conf": 0.0,
+              "reason": "Flat sideways price, no momentum",
+              "lat": 18.3
+            },
+            {
+              "ts": "2026-11-03T04:00:00",
+              "status": "HOLD",
+              "conf": 0.4,
+              "reason": "Conflicting trends, sharp oversold drop",
+              "lat": 17.3
+            },
+            {
+              "ts": "2026-11-04T07:15:00",
+              "status": "HOLD",
+              "conf": 0.4,
+              "reason": "Overextended spike, RSI overbought",
+              "lat": 16.8
+            },
+            {
+              "ts": "2026-11-05T10:45:00",
+              "status": "SL",
+              "side": "BUY",
+              "entry": 4130.34,
+              "sl": 4122.34,
+              "tp1": 4138.34,
+              "rr1": 1.0,
+              "conf": 0.7,
+              "r": -1.0,
+              "reason": "Uptrend higher lows above EMA20",
+              "lat": 26.0
+            },
+            {
+              "ts": "2026-11-06T14:00:00",
+              "status": "HOLD",
+              "conf": 0.5,
+              "reason": "Bearish M15 at H1 support",
+              "lat": 28.0
+            },
+            {
+              "ts": "2026-11-09T07:30:00",
+              "status": "HOLD",
+              "conf": 0.4,
+              "reason": "Conflicting trends, plunge below EMAs",
+              "lat": 15.5
+            },
+            {
+              "ts": "2026-11-10T11:00:00",
+              "status": "HOLD",
+              "conf": 0.5,
+              "reason": "Oversold drop against H1 uptrend",
+              "lat": 16.1
+            },
+            {
+              "ts": "2026-11-11T14:15:00",
+              "status": "REJECT",
+              "err": "RR1 1.00 below 1.0",
+              "lat": 28.8
+            },
+            {
+              "ts": "2026-11-12T17:45:00",
+              "status": "SL",
+              "side": "SELL",
+              "entry": 3874.4,
+              "sl": 3887.4,
+              "tp1": 3861.4,
+              "rr1": 1.0,
+              "conf": 0.7,
+              "r": -1.0,
+              "reason": "Strong downtrend, lower highs lows",
+              "lat": 22.9
+            },
+            {
+              "ts": "2026-11-13T21:15:00",
+              "status": "OPEN",
+              "side": "SELL",
+              "entry": 3876.0,
+              "sl": 3883.0,
+              "tp1": 3869.0,
+              "rr1": 1.0,
+              "conf": 0.7,
+              "r": 0.0,
+              "reason": "Downtrend, lower highs below EMAs",
+              "lat": 25.3
+            },
+            {
+              "ts": "2026-11-16T21:15:00",
+              "status": "SL",
+              "side": "SELL",
+              "entry": 3853.51,
+              "sl": 3860.01,
+              "tp1": 3847.01,
+              "rr1": 1.0,
+              "conf": 0.7,
+              "r": -1.0,
+              "reason": "H1 down, clear lower highs",
+              "lat": 20.3
+            },
+            {
+              "ts": "2026-11-18T00:30:00",
+              "status": "HOLD",
+              "conf": 0.5,
+              "reason": "Extremely oversold, avoid chasing",
+              "lat": 16.8
+            },
+            {
+              "ts": "2026-11-19T04:00:00",
+              "status": "HOLD",
+              "conf": 0.5,
+              "reason": "Strong V-bounce against downtrend",
+              "lat": 26.7
+            },
+            {
+              "ts": "2026-11-20T07:15:00",
+              "status": "HOLD",
+              "conf": 0.5,
+              "reason": "Range bounce against H1 downtrend",
+              "lat": 21.8
+            }
+          ]
+        },
+        "XAGUSD": {
+          "summary": {
+            "points": 20,
+            "signals": 3,
+            "tp": 1,
+            "sl": 1,
+            "open": 1,
+            "hold": 14,
+            "reject": 3,
+            "error": 0,
+            "winrate_pct": 50.0,
+            "avg_rr1": 1.0,
+            "expectancy_r": 0.0,
+            "total_r": 0.0,
+            "avg_lat_s": 22.4
+          },
+          "details": [
+            {
+              "ts": "2026-10-23T16:00:00",
+              "status": "HOLD",
+              "conf": 0.5,
+              "reason": "Choppy range, conflicting trend signals",
+              "lat": 21.8
+            },
+            {
+              "ts": "2026-10-26T09:30:00",
+              "status": "HOLD",
+              "conf": 0.5,
+              "reason": "Choppy range, no clear direction",
+              "lat": 19.7
+            },
+            {
+              "ts": "2026-10-27T12:15:00",
+              "status": "HOLD",
+              "conf": 0.5,
+              "reason": "H1 down conflicts with bounce",
+              "lat": 24.4
+            },
+            {
+              "ts": "2026-10-28T16:00:00",
+              "status": "REJECT",
+              "err": "RR1 1.00 below 1.0",
+              "lat": 30.1
+            },
+            {
+              "ts": "2026-10-29T18:30:00",
+              "status": "SL",
+              "side": "SELL",
+              "entry": 52.024,
+              "sl": 52.324,
+              "tp1": 51.724,
+              "rr1": 1.0,
+              "conf": 0.7,
+              "r": -1.0,
+              "reason": "Bearish lower highs and lows",
+              "lat": 29.7
+            },
+            {
+              "ts": "2026-10-30T20:45:00",
+              "status": "OPEN",
+              "side": "SELL",
+              "entry": 49.115,
+              "sl": 49.365,
+              "tp1": 48.865,
+              "rr1": 1.0,
+              "conf": 0.7,
+              "r": 0.0,
+              "reason": "Strong downtrend, lower high rejection",
+              "lat": 28.4
+            },
+            {
+              "ts": "2026-11-02T14:30:00",
+              "status": "HOLD",
+              "conf": 0.4,
+              "reason": "Spike rejection, overextended above EMA",
+              "lat": 18.8
+            },
+            {
+              "ts": "2026-11-03T16:45:00",
+              "status": "HOLD",
+              "conf": 0.5,
+              "reason": "Range between EMAs, neutral RSI",
+              "lat": 18.8
+            },
+            {
+              "ts": "2026-11-04T19:15:00",
+              "status": "TP",
+              "side": "BUY",
+              "entry": 52.277,
+              "sl": 52.09,
+              "tp1": 52.464,
+              "rr1": 1.0,
+              "conf": 0.7,
+              "r": 1.0,
+              "reason": "H1 uptrend, HH HL breakout",
+              "lat": 26.2
+            },
+            {
+              "ts": "2026-11-05T21:30:00",
+              "status": "HOLD",
+              "conf": 0.4,
+              "reason": "Conflicting trends at support",
+              "lat": 18.1
+            },
+            {
+              "ts": "2026-11-07T00:00:00",
+              "status": "HOLD",
+              "conf": 0.4,
+              "reason": "Choppy sideways range, neutral RSI",
+              "lat": 15.1
+            },
+            {
+              "ts": "2026-11-09T16:30:00",
+              "status": "HOLD",
+              "conf": 0.5,
+              "reason": "Choppy sideways range, neutral RSI",
+              "lat": 14.9
+            },
+            {
+              "ts": "2026-11-10T19:00:00",
+              "status": "REJECT",
+              "err": "RR1 1.00 below 1.0",
+              "lat": 31.6
+            },
+            {
+              "ts": "2026-11-11T21:15:00",
+              "status": "REJECT",
+              "err": "RR1 1.00 below 1.0",
+              "lat": 28.7
+            },
+            {
+              "ts": "2026-11-12T23:45:00",
+              "status": "HOLD",
+              "conf": 0.5,
+              "reason": "Choppy sideways range, mixed signals",
+              "lat": 17.4
+            },
+            {
+              "ts": "2026-11-14T02:15:00",
+              "status": "HOLD",
+              "conf": 0.4,
+              "reason": "Flat sideways range near oversold",
+              "lat": 27.3
+            },
+            {
+              "ts": "2026-11-17T01:15:00",
+              "status": "HOLD",
+              "conf": 0.4,
+              "reason": "Choppy range, conflicting trend signals",
+              "lat": 16.5
+            },
+            {
+              "ts": "2026-11-18T03:30:00",
+              "status": "HOLD",
+              "conf": 0.5,
+              "reason": "Oversold drop, wait for pullback",
+              "lat": 22.5
+            },
+            {
+              "ts": "2026-11-19T06:00:00",
+              "status": "HOLD",
+              "conf": 0.5,
+              "reason": "Downtrend conflicts with bullish bounce",
+              "lat": 21.3
+            },
+            {
+              "ts": "2026-11-20T08:15:00",
+              "status": "HOLD",
+              "conf": 0.5,
+              "reason": "Sharp rally into downtrend resistance",
+              "lat": 17.7
+            }
+          ]
+        },
+        "BTCUSD": {
+          "summary": {
+            "points": 20,
+            "signals": 2,
+            "tp": 1,
+            "sl": 1,
+            "open": 0,
+            "hold": 16,
+            "reject": 2,
+            "error": 0,
+            "winrate_pct": 50.0,
+            "avg_rr1": 1.0,
+            "expectancy_r": 0.0,
+            "total_r": 0.0,
+            "avg_lat_s": 23.5
+          },
+          "details": [
+            {
+              "ts": "2026-10-20T20:30:00",
+              "status": "REJECT",
+              "err": "RR1 1.00 below 1.0",
+              "lat": 31.5
+            },
+            {
+              "ts": "2026-10-22T11:45:00",
+              "status": "HOLD",
+              "conf": 0.5,
+              "reason": "Oversold at key horizontal support",
+              "lat": 21.0
+            },
+            {
+              "ts": "2026-10-24T02:45:00",
+              "status": "HOLD",
+              "conf": 0.4,
+              "reason": "Choppy range with conflicting bounce",
+              "lat": 20.7
+            },
+            {
+              "ts": "2026-10-25T17:15:00",
+              "status": "HOLD",
+              "conf": 0.5,
+              "reason": "Choppy range against H1 downtrend",
+              "lat": 20.4
+            },
+            {
+              "ts": "2026-10-27T09:00:00",
+              "status": "TP",
+              "side": "SELL",
+              "entry": 79600.61,
+              "sl": 79780.6,
+              "tp1": 79420.6,
+              "rr1": 1.0,
+              "conf": 0.7,
+              "r": 1.0,
+              "reason": "Downtrend lower highs below EMAs",
+              "lat": 28.6
+            },
+            {
+              "ts": "2026-10-29T01:00:00",
+              "status": "HOLD",
+              "conf": 0.5,
+              "reason": "Range pullback against H1 uptrend",
+              "lat": 21.8
+            },
+            {
+              "ts": "2026-10-30T15:30:00",
+              "status": "HOLD",
+              "conf": 0.4,
+              "reason": "Range between EMAs, neutral RSI",
+              "lat": 21.6
+            },
+            {
+              "ts": "2026-11-01T06:00:00",
+              "status": "HOLD",
+              "conf": 0.4,
+              "reason": "Choppy range against H1 downtrend",
+              "lat": 27.5
+            },
+            {
+              "ts": "2026-11-02T20:30:00",
+              "status": "SL",
+              "side": "SELL",
+              "entry": 76747.92,
+              "sl": 77097.9,
+              "tp1": 76397.9,
+              "rr1": 1.0,
+              "conf": 0.6,
+              "r": -1.0,
+              "reason": "Strong downtrend lower highs lows",
+              "lat": 22.4
+            },
+            {
+              "ts": "2026-11-04T11:00:00",
+              "status": "HOLD",
+              "conf": 0.5,
+              "reason": "Overextended into major resistance",
+              "lat": 29.9
+            },
+            {
+              "ts": "2026-11-06T01:45:00",
+              "status": "HOLD",
+              "conf": 0.5,
+              "reason": "Choppy sideways range after drop",
+              "lat": 17.5
+            },
+            {
+              "ts": "2026-11-07T16:15:00",
+              "status": "HOLD",
+              "conf": 0.4,
+              "reason": "Sideways range, oversold at support",
+              "lat": 16.9
+            },
+            {
+              "ts": "2026-11-09T06:45:00",
+              "status": "REJECT",
+              "err": "RR1 1.00 below 1.0",
+              "lat": 29.5
+            },
+            {
+              "ts": "2026-11-10T21:15:00",
+              "status": "HOLD",
+              "conf": 0.5,
+              "reason": "H1 down vs M15 rally",
+              "lat": 16.4
+            },
+            {
+              "ts": "2026-11-12T11:45:00",
+              "status": "HOLD",
+              "conf": 0.5,
+              "reason": "Oversold at major support low",
+              "lat": 26.7
+            },
+            {
+              "ts": "2026-11-14T02:15:00",
+              "status": "HOLD",
+              "conf": 0.5,
+              "reason": "Oversold RSI, overextended below EMA20",
+              "lat": 27.8
+            },
+            {
+              "ts": "2026-11-15T16:45:00",
+              "status": "HOLD",
+              "conf": 0.5,
+              "reason": "Choppy range at local support",
+              "lat": 24.4
+            },
+            {
+              "ts": "2026-11-17T13:30:00",
+              "status": "HOLD",
+              "conf": 0.5,
+              "reason": "Choppy sideways range mixed signals",
+              "lat": 17.5
+            },
+            {
+              "ts": "2026-11-19T04:00:00",
+              "status": "HOLD",
+              "conf": 0.4,
+              "reason": "H1 downtrend versus M15 bounce",
+              "lat": 17.8
+            },
+            {
+              "ts": "2026-11-20T18:30:00",
+              "status": "HOLD",
+              "conf": 0.5,
+              "reason": "Oversold RSI, overextended vertical drop",
+              "lat": 30.4
+            }
+          ]
+        }
+      },
+      "overall": {
+        "points": 60,
+        "signals": 12,
+        "tp": 4,
+        "sl": 6,
+        "open": 2,
+        "hold": 42,
+        "reject": 6,
+        "error": 0,
+        "winrate_pct": 40.0,
+        "avg_rr1": 1.0,
+        "expectancy_r": -0.2,
+        "total_r": -2.0,
+        "avg_lat_s": 23.1,
+        "elapsed_s": 316.7
+      }
+    },
+    "deepseek-v4.1-flash": {
+      "pairs": {
+        "XAUUSD": {
+          "summary": {
+            "points": 20,
+            "signals": 4,
+            "tp": 2,
+            "sl": 2,
+            "open": 0,
+            "hold": 9,
+            "reject": 7,
+            "error": 0,
+            "winrate_pct": 50.0,
+            "avg_rr1": 1.09,
+            "expectancy_r": 0.068,
+            "total_r": 0.27,
+            "avg_lat_s": 2.4
+          },
+          "details": [
+            {
+              "ts": "2026-10-22T20:15:00",
+              "status": "SL",
+              "side": "SELL",
+              "entry": 4022.78,
+              "sl": 4031.5,
+              "tp1": 4013.07,
+              "rr1": 1.11,
+              "conf": 0.6,
+              "r": -1.0,
+              "reason": "Downtrend lower lows continuation",
+              "lat": 2.8
+            },
+            {
+              "ts": "2026-10-23T23:30:00",
+              "status": "HOLD",
+              "conf": 0.5,
+              "reason": "Range chop, conflicting lower TF signals",
+              "lat": 2.8
+            },
+            {
+              "ts": "2026-10-26T18:00:00",
+              "status": "REJECT",
+              "err": "RR1 1.00 below 1.0",
+              "lat": 2.6
+            },
+            {
+              "ts": "2026-10-27T23:15:00",
+              "status": "REJECT",
+              "err": "RR1 0.90 below 1.0",
+              "lat": 4.1
+            },
+            {
+              "ts": "2026-10-29T02:30:00",
+              "status": "HOLD",
+              "conf": 0.5,
+              "reason": "Lower TF range, choppy sideways",
+              "lat": 2.2
+            },
+            {
+              "ts": "2026-10-30T06:00:00",
+              "status": "REJECT",
+              "err": "RR1 0.56 below 1.0",
+              "lat": 3.1
+            },
+            {
+              "ts": "2026-10-31T09:15:00",
+              "status": "REJECT",
+              "err": "RR1 1.00 below 1.0",
+              "lat": 1.6
+            },
+            {
+              "ts": "2026-11-03T04:00:00",
+              "status": "HOLD",
+              "conf": 0.4,
+              "reason": "Lower highs, below EMAs, RSI weak",
+              "lat": 2.7
+            },
+            {
+              "ts": "2026-11-04T07:15:00",
+              "status": "REJECT",
+              "err": "susunan aras tidak konsisten dengan arah",
+              "lat": 2.6
+            },
+            {
+              "ts": "2026-11-05T10:45:00",
+              "status": "HOLD",
+              "conf": 0.5,
+              "reason": "Choppy at top, counter-arguments: overextended, M15 range",
+              "lat": 2.4
+            },
+            {
+              "ts": "2026-11-06T14:00:00",
+              "status": "HOLD",
+              "conf": 0.5,
+              "reason": "Lower highs, bearish vs H1 uptrend",
+              "lat": 2.3
+            },
+            {
+              "ts": "2026-11-09T07:30:00",
+              "status": "REJECT",
+              "err": "RR1 0.99 below 1.0",
+              "lat": 2.4
+            },
+            {
+              "ts": "2026-11-10T11:00:00",
+              "status": "HOLD",
+              "conf": 0.4,
+              "reason": "Lower highs, bearish momentum against H1 up",
+              "lat": 2.1
+            },
+            {
+              "ts": "2026-11-11T14:15:00",
+              "status": "TP",
+              "side": "SELL",
+              "entry": 4031.2,
+              "sl": 4043.7,
+              "tp1": 4018.7,
+              "rr1": 1.0,
+              "conf": 0.6,
+              "r": 1.0,
+              "reason": "H1 downtrend, lower highs continue",
+              "lat": 2.2
+            },
+            {
+              "ts": "2026-11-12T17:45:00",
+              "status": "SL",
+              "side": "SELL",
+              "entry": 3874.4,
+              "sl": 3884.4,
+              "tp1": 3864.4,
+              "rr1": 1.0,
+              "conf": 0.7,
+              "r": -1.0,
+              "reason": "Downtrend lower lows lower highs",
+              "lat": 2.2
+            },
+            {
+              "ts": "2026-11-13T21:15:00",
+              "status": "HOLD",
+              "conf": 0.5,
+              "reason": "range lower timeframe no swing",
+              "lat": 1.6
+            },
+            {
+              "ts": "2026-11-16T21:15:00",
+              "status": "REJECT",
+              "err": "RR1 0.64 below 1.0",
+              "lat": 2.3
+            },
+            {
+              "ts": "2026-11-18T00:30:00",
+              "status": "HOLD",
+              "conf": 0.3,
+              "reason": "RSI oversold whipsaw vs downtrend",
+              "lat": 1.5
+            },
+            {
+              "ts": "2026-11-19T04:00:00",
+              "status": "HOLD",
+              "conf": 0.6,
+              "reason": "H1 down but M15 range, mixed",
+              "lat": 2.0
+            },
+            {
+              "ts": "2026-11-20T07:15:00",
+              "status": "TP",
+              "side": "SELL",
+              "entry": 3553.45,
+              "sl": 3562.0,
+              "tp1": 3542.6,
+              "rr1": 1.27,
+              "conf": 0.6,
+              "r": 1.27,
+              "reason": "H1 down, lower highs lower lows",
+              "lat": 2.0
+            }
+          ]
+        },
+        "XAGUSD": {
+          "summary": {
+            "points": 20,
+            "signals": 1,
+            "tp": 1,
+            "sl": 0,
+            "open": 0,
+            "hold": 0,
+            "reject": 2,
+            "error": 17,
+            "winrate_pct": 100.0,
+            "avg_rr1": 1.01,
+            "expectancy_r": 1.01,
+            "total_r": 1.01,
+            "avg_lat_s": 0.4
+          },
+          "details": [
+            {
+              "ts": "2026-10-23T16:00:00",
+              "status": "REJECT",
+              "err": "RR1 0.64 below 1.0",
+              "lat": 2.4
+            },
+            {
+              "ts": "2026-10-26T09:30:00",
+              "status": "REJECT",
+              "err": "RR1 0.42 below 1.0",
+              "lat": 2.2
+            },
+            {
+              "ts": "2026-10-27T12:15:00",
+              "status": "TP",
+              "side": "BUY",
+              "entry": 53.518,
+              "sl": 53.22,
+              "tp1": 53.818,
+              "rr1": 1.01,
+              "conf": 0.6,
+              "r": 1.01,
+              "reason": "H1 down but M15 bouncing",
+              "lat": 2.2
+            },
+            {
+              "ts": "2026-10-28T16:00:00",
+              "status": "ERROR",
+              "err": "HTTPError: HTTP Error 429: Too Many Requests",
+              "lat": 0.2
+            },
+            {
+              "ts": "2026-10-29T18:30:00",
+              "status": "ERROR",
+              "err": "HTTPError: HTTP Error 429: Too Many Requests",
+              "lat": 0.2
+            },
+            {
+              "ts": "2026-10-30T20:45:00",
+              "status": "ERROR",
+              "err": "HTTPError: HTTP Error 429: Too Many Requests",
+              "lat": 0.1
+            },
+            {
+              "ts": "2026-11-02T14:30:00",
+              "status": "ERROR",
+              "err": "HTTPError: HTTP Error 429: Too Many Requests",
+              "lat": 0.1
+            },
+            {
+              "ts": "2026-11-03T16:45:00",
+              "status": "ERROR",
+              "err": "HTTPError: HTTP Error 429: Too Many Requests",
+              "lat": 0.1
+            },
+            {
+              "ts": "2026-11-04T19:15:00",
+              "status": "ERROR",
+              "err": "HTTPError: HTTP Error 429: Too Many Requests",
+              "lat": 0.1
+            },
+            {
+              "ts": "2026-11-05T21:30:00",
+              "status": "ERROR",
+              "err": "HTTPError: HTTP Error 429: Too Many Requests",
+              "lat": 0.1
+            },
+            {
+              "ts": "2026-11-07T00:00:00",
+              "status": "ERROR",
+              "err": "HTTPError: HTTP Error 429: Too Many Requests",
+              "lat": 0.1
+            },
+            {
+              "ts": "2026-11-09T16:30:00",
+              "status": "ERROR",
+              "err": "HTTPError: HTTP Error 429: Too Many Requests",
+              "lat": 0.0
+            },
+            {
+              "ts": "2026-11-10T19:00:00",
+              "status": "ERROR",
+              "err": "HTTPError: HTTP Error 429: Too Many Requests",
+              "lat": 0.1
+            },
+            {
+              "ts": "2026-11-11T21:15:00",
+              "status": "ERROR",
+              "err": "HTTPError: HTTP Error 429: Too Many Requests",
+              "lat": 0.0
+            },
+            {
+              "ts": "2026-11-12T23:45:00",
+              "status": "ERROR",
+              "err": "HTTPError: HTTP Error 429: Too Many Requests",
+              "lat": 0.0
+            },
+            {
+              "ts": "2026-11-14T02:15:00",
+              "status": "ERROR",
+              "err": "HTTPError: HTTP Error 429: Too Many Requests",
+              "lat": 0.0
+            },
+            {
+              "ts": "2026-11-17T01:15:00",
+              "status": "ERROR",
+              "err": "HTTPError: HTTP Error 429: Too Many Requests",
+              "lat": 0.0
+            },
+            {
+              "ts": "2026-11-18T03:30:00",
+              "status": "ERROR",
+              "err": "HTTPError: HTTP Error 429: Too Many Requests",
+              "lat": 0.1
+            },
+            {
+              "ts": "2026-11-19T06:00:00",
+              "status": "ERROR",
+              "err": "HTTPError: HTTP Error 429: Too Many Requests",
+              "lat": 0.1
+            },
+            {
+              "ts": "2026-11-20T08:15:00",
+              "status": "ERROR",
+              "err": "HTTPError: HTTP Error 429: Too Many Requests",
+              "lat": 0.0
+            }
+          ]
+        },
+        "BTCUSD": {
+          "summary": {
+            "points": 20,
+            "signals": 0,
+            "tp": 0,
+            "sl": 0,
+            "open": 0,
+            "hold": 0,
+            "reject": 0,
+            "error": 20,
+            "winrate_pct": 0.0,
+            "avg_rr1": 0.0,
+            "expectancy_r": 0.0,
+            "total_r": 0,
+            "avg_lat_s": 0.2
+          },
+          "details": [
+            {
+              "ts": "2026-10-20T20:30:00",
+              "status": "ERROR",
+              "err": "HTTPError: HTTP Error 429: Too Many Requests",
+              "lat": 0.2
+            },
+            {
+              "ts": "2026-10-22T11:45:00",
+              "status": "ERROR",
+              "err": "HTTPError: HTTP Error 429: Too Many Requests",
+              "lat": 0.3
+            },
+            {
+              "ts": "2026-10-24T02:45:00",
+              "status": "ERROR",
+              "err": "HTTPError: HTTP Error 429: Too Many Requests",
+              "lat": 0.3
+            },
+            {
+              "ts": "2026-10-25T17:15:00",
+              "status": "ERROR",
+              "err": "HTTPError: HTTP Error 429: Too Many Requests",
+              "lat": 0.2
+            },
+            {
+              "ts": "2026-10-27T09:00:00",
+              "status": "ERROR",
+              "err": "HTTPError: HTTP Error 429: Too Many Requests",
+              "lat": 0.2
+            },
+            {
+              "ts": "2026-10-29T01:00:00",
+              "status": "ERROR",
+              "err": "HTTPError: HTTP Error 429: Too Many Requests",
+              "lat": 0.2
+            },
+            {
+              "ts": "2026-10-30T15:30:00",
+              "status": "ERROR",
+              "err": "HTTPError: HTTP Error 429: Too Many Requests",
+              "lat": 0.2
+            },
+            {
+              "ts": "2026-11-01T06:00:00",
+              "status": "ERROR",
+              "err": "HTTPError: HTTP Error 429: Too Many Requests",
+              "lat": 0.2
+            },
+            {
+              "ts": "2026-11-02T20:30:00",
+              "status": "ERROR",
+              "err": "HTTPError: HTTP Error 429: Too Many Requests",
+              "lat": 0.3
+            },
+            {
+              "ts": "2026-11-04T11:00:00",
+              "status": "ERROR",
+              "err": "HTTPError: HTTP Error 429: Too Many Requests",
+              "lat": 0.2
+            },
+            {
+              "ts": "2026-11-06T01:45:00",
+              "status": "ERROR",
+              "err": "HTTPError: HTTP Error 429: Too Many Requests",
+              "lat": 0.2
+            },
+            {
+              "ts": "2026-11-07T16:15:00",
+              "status": "ERROR",
+              "err": "HTTPError: HTTP Error 429: Too Many Requests",
+              "lat": 0.2
+            },
+            {
+              "ts": "2026-11-09T06:45:00",
+              "status": "ERROR",
+              "err": "HTTPError: HTTP Error 429: Too Many Requests",
+              "lat": 0.2
+            },
+            {
+              "ts": "2026-11-10T21:15:00",
+              "status": "ERROR",
+              "err": "HTTPError: HTTP Error 429: Too Many Requests",
+              "lat": 0.3
+            },
+            {
+              "ts": "2026-11-12T11:45:00",
+              "status": "ERROR",
+              "err": "HTTPError: HTTP Error 429: Too Many Requests",
+              "lat": 0.2
+            },
+            {
+              "ts": "2026-11-14T02:15:00",
+              "status": "ERROR",
+              "err": "HTTPError: HTTP Error 429: Too Many Requests",
+              "lat": 0.2
+            },
+            {
+              "ts": "2026-11-15T16:45:00",
+              "status": "ERROR",
+              "err": "HTTPError: HTTP Error 429: Too Many Requests",
+              "lat": 0.2
+            },
+            {
+              "ts": "2026-11-17T13:30:00",
+              "status": "ERROR",
+              "err": "HTTPError: HTTP Error 429: Too Many Requests",
+              "lat": 0.2
+            },
+            {
+              "ts": "2026-11-19T04:00:00",
+              "status": "ERROR",
+              "err": "HTTPError: HTTP Error 429: Too Many Requests",
+              "lat": 0.2
+            },
+            {
+              "ts": "2026-11-20T18:30:00",
+              "status": "ERROR",
+              "err": "HTTPError: HTTP Error 429: Too Many Requests",
+              "lat": 0.1
+            }
+          ]
+        }
+      },
+      "overall": {
+        "points": 60,
+        "signals": 5,
+        "tp": 3,
+        "sl": 2,
+        "open": 0,
+        "hold": 9,
+        "reject": 9,
+        "error": 37,
+        "winrate_pct": 60.0,
+        "avg_rr1": 1.08,
+        "expectancy_r": 0.256,
+        "total_r": 1.28,
+        "avg_lat_s": 1.0,
+        "elapsed_s": 13.8
+      }
+    }
+  }
+}

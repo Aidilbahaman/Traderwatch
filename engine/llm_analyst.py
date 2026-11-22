@@ -28,6 +28,7 @@ ticket TP1/TP2 sistem).
 """
 import base64
 import json
+import math
 import os
 import re
 import subprocess
@@ -55,6 +56,10 @@ try:
     import market_context as MC  # noqa: E402  (sesi, berita, konteks sebenar)
 except Exception:
     MC = None
+try:
+    import quant_engine as QE  # noqa: E402  (multi-TF causal quant setup engine)
+except Exception:
+    QE = None
 
 REPO = HERE.parent
 AUDIT_FILE = REPO / "state" / "llm-analysis-log.jsonl"
@@ -64,55 +69,56 @@ TW_BOT_ENV = Path("/home/ubuntu/tw-bot/.env")
 
 AGY_BIN = os.environ.get("AGY_BIN", str(Path.home() / ".local/bin/agy"))
 VISION_MODEL = os.environ.get("AI_LLM_VISION_MODEL", "gemini-4-neon-high")
-VISION_FALLBACK_MODEL = os.environ.get("AI_LLM_VISION_FALLBACK", "deepseek-v4.1-flash")
+VISION_FALLBACK_MODEL = os.environ.get("AI_LLM_VISION_FALLBACK", "gemini-4-neon-medium")
+VISION_FALLBACK_MODELS = [m.strip() for m in os.environ.get(
+    "AI_LLM_VISION_FALLBACKS",
+    "gemini-4-neon-medium,deepseek-v4.1-flash"
+).split(",") if m.strip()]
 VISION_ENABLED = os.environ.get("AI_LLM_VISION", "1") == "1"
+QUANT_ENABLED = os.environ.get("AI_QUANT_ENGINE", "1") == "1"
 PRIMARY_MODEL = os.environ.get("AI_LLM_MODEL", "gemini-4-neon-high")
 FALLBACK_MODELS = [m.strip() for m in os.environ.get(
     "AI_LLM_FALLBACKS",
-    "deepseek-v4.1-flash,asai/freemodel-1-GLM,asai/freemodel-2-MiniMax,asai/deepseek-v4-flash"
+    "gemini-4-neon-medium,deepseek-v4.1-flash,asai/freemodel-1-GLM,asai/freemodel-2-MiniMax,asai/deepseek-v4-flash"
 ).split(",") if m.strip()]
 CALL_TIMEOUT_S = float(os.environ.get("AI_LLM_CALL_TIMEOUT", "60"))
-# Had atas RR1: backtest mekanikal 780 trade (BTC/XAU/EUR, 33 hari) tunjuk
-# expectancy jatuh negatif bila TP > 1.5R. Hadkan supaya TP realistik.
+# Had atas RR1 lalai (untuk panggilan tanpa rr1_max eksplisit).
 RR1_MAX = float(os.environ.get("AI_RR1_MAX", "1.6"))
+# Toleransi pembundaran float untuk semakan RR1 (elak "RR1 1.00 below 1.0").
+RR1_EPS = 0.015
 BUDGET_S = float(os.environ.get("AI_LLM_BUDGET_S", "120"))
 
-# Timeframe-aware trading styles. Lower TF = scalping (tight SL, quick targets,
-# opportunistic); higher TF = swing/position (wide SL, big targets, selective).
-# ctx_factor = how many base bars make one context (higher-TF) bar.
+# Timeframe-aware trading styles. Aligned with quant_engine.TF_CONFIG across
+# all 5 timeframes (M5, M15, H1, H4, D1) so rr1_min < quant_rr1 < rr1_max
+# with zero contradictory bounds.
 TF_PROFILES = {
     "M5": dict(ctx_factor=3, ctx_name="M15", min_bars=80, ctx_show=24, base_show=60,
-               rr1_min=1.0, role="SCALPER",
-               approach=("You are SCALPING the M5 chart. Take quick, high-probability momentum setups "
-                         "aligned with the M15 trend. Stops are TIGHT (just beyond the nearest micro "
-                         "swing / liquidity sweep, ~0.6-1.0x M5 ATR). Targets are QUICK: TP1 at the nearest "
-                         "liquidity pool (~1-1.5R), TP2 a little further (~2-2.5R). Be opportunistic — scalps "
-                         "are frequent; a clean micro sweep + displacement is enough, you do NOT need a perfect "
-                         "higher-TF setup. Still avoid dead chop and news spikes.")),
+               rr1_min=0.70, rr1_max=1.50, role="SCALPER",
+               approach=("You are SCALPING the M5 chart. Take high-probability macro-aligned pullback "
+                         "and compression setups aligned with the M15/EMA200 trend. Stops sit outside noise "
+                         "(~2.4-2.8x M5 ATR, well above broker spread). Targets are QUICK and realistic: "
+                         "TP1 ~0.75-1.0R, TP2 ~1.5-2.0R. Avoid dead chop and low ATR/spread conditions.")),
     "M15": dict(ctx_factor=4, ctx_name="H1", min_bars=100, ctx_show=24, base_show=48,
-                rr1_min=1.0, role="INTRADAY TREND",
-                approach=("Be selective and patient: only trade a CLEAR, confirmed setup aligned with the "
-                          "H1 trend. Do NOT chase price extended deep into discount/premium — wait for a "
-                          "pullback to an unmitigated FVG/order-block. In choppy/rangebound markets or without "
-                          "a clean edge, choose HOLD. Quality over quantity.")),
+                rr1_min=0.75, rr1_max=1.60, role="INTRADAY TREND",
+                approach=("Trade clean intraday setups aligned with the H1/EMA200 trend and EMA50 slope. "
+                          "Favor value pullbacks, exhaustion flushes, and inside-bar continuations with "
+                          "volatility-calibrated stops (~2.5x ATR) and realistic TP1 (~0.80-1.1R), TP2 (~1.55R). "
+                          "In choppy/rangebound markets without an edge, choose HOLD.")),
     "H1": dict(ctx_factor=4, ctx_name="H4", min_bars=60, ctx_show=24, base_show=48,
-               rr1_min=1.2, role="SWING TREND",
-               approach=("You are SWING trading the H1 chart. Only take clear structural setups aligned with "
-                         "the H4 trend. Stops sit beyond the invalidating H1 swing (wider, ~1-1.5x ATR). "
-                         "Targets are larger: TP1 ~2R at a meaningful liquidity level, TP2 ~3R+. Be selective "
-                         "— a few high-quality swings, not noise. HOLD if structure is unclear.")),
-    "H4": dict(ctx_factor=6, ctx_name="D1", min_bars=40, ctx_show=20, base_show=40,
-               rr1_min=1.5, role="POSITION TREND",
-               approach=("You are POSITION trading the H4 chart. Trade only major structural setups aligned "
-                         "with the Daily trend. Wide stops beyond the invalidating H4 swing. Targets are "
-                         "ambitious: TP1 ~2.5-3R, TP2 ~4R+ at major liquidity. Very selective — patience; "
-                         "HOLD unless the edge is strong and clean.")),
-    "D1": dict(ctx_factor=5, ctx_name="W1", min_bars=20, ctx_show=12, base_show=30,
-               rr1_min=2.0, role="POSITION TREND",
-               approach=("You are POSITION trading the Daily chart. Trade only major macro structural setups "
-                         "aligned with the Weekly trend. Very wide stops beyond the invalidating Daily swing. "
-                         "Targets: TP1 ~3R, TP2 ~5R+ at major weekly liquidity. Extremely selective — HOLD "
-                         "unless a rare, high-conviction setup is present.")),
+               rr1_min=0.80, rr1_max=1.80, role="SWING TREND",
+               approach=("You are SWING trading the H1 chart. Focus on clean structural trend breakouts "
+                         "and continuation patterns aligned with the H4 trend and EMA50 slope. Stops sit "
+                         "outside structural volatility (~2.4x H1 ATR). TP1 ~0.85-1.2R, TP2 ~1.65R+.")),
+    "H4": dict(ctx_factor=6, ctx_name="D1", min_bars=60, ctx_show=20, base_show=40,
+               rr1_min=0.80, rr1_max=2.00, role="POSITION TREND",
+               approach=("You are POSITION trading the H4 chart. Trade macro-aligned pullbacks and swing "
+                         "breakouts aligned with the Daily/EMA200 trend. Stops beyond H4 volatility (~2.6x ATR). "
+                         "TP1 ~0.85-1.3R at clean liquidity, TP2 ~1.65R+.")),
+    "D1": dict(ctx_factor=5, ctx_name="W1", min_bars=55, ctx_show=12, base_show=30,
+               rr1_min=0.85, rr1_max=2.20, role="POSITION TREND",
+               approach=("You are POSITION trading the Daily chart. Trade institutional macro trend "
+                         "continuation breakouts aligned with EMA20/EMA50/EMA100. Wide volatility stops "
+                         "(~2.4x D1 ATR). TP1 ~0.90-1.5R, TP2 ~1.80R+.")),
 }
 
 
@@ -265,16 +271,18 @@ def session_penalty(pair, hour_utc):
     return 0.88 if hour_utc in WEAK_SESSIONS.get(pref, ()) else 1.0
 
 
-def validate_verdict(j, price, pip, spread_pips, rr1_min=1.5, pair_hint=""):
+def validate_verdict(j, price, pip, spread_pips, rr1_min=1.5, pair_hint="", rr1_max=None):
     """Semak sanity jawapan LLM; pulangkan verdict bersih atau raise ValueError.
 
     Jarak SL/TP = keputusan LLM (tiada cap). Semakan di sini mekanikal:
-    susunan aras, risk positif, lantai spread, RR1 >= 1.5 (konvensyen ticket).
+    susunan aras, risk positif, lantai spread, julat RR1 [rr1_min, rr1_max]
+    dengan toleransi pembundaran float (RR1_EPS).
     """
     bias = str(j.get("bias", "")).strip().upper()
     reason = str(j.get("reason", ""))[:200]
     try:
-        conf = min(1.0, max(0.0, float(j.get("confidence", 5)) / 10.0))
+        raw_conf = float(j.get("confidence", 5))
+        conf = min(1.0, max(0.0, raw_conf / 10.0)) if math.isfinite(raw_conf) else 0.5
     except (TypeError, ValueError):
         conf = 0.5
     if bias == "HOLD":
@@ -285,6 +293,8 @@ def validate_verdict(j, price, pip, spread_pips, rr1_min=1.5, pair_hint=""):
         sl, tp1, tp2 = float(j["sl"]), float(j["tp1"]), float(j["tp2"])
     except (KeyError, TypeError, ValueError):
         raise ValueError("medan sl/tp1/tp2 tiada atau bukan nombor")
+    if not (math.isfinite(sl) and math.isfinite(tp1) and math.isfinite(tp2) and math.isfinite(price)):
+        raise ValueError("medan harga bukan nombor terhingga")
     if bias == "BUY":
         ok = sl < price < tp1 < tp2
     else:
@@ -297,11 +307,11 @@ def validate_verdict(j, price, pip, spread_pips, rr1_min=1.5, pair_hint=""):
         raise ValueError(f"SL {risk:.5f} bawah lantai spread {floor:.5f}")
     rr1 = abs(tp1 - price) / risk
     rr2 = abs(tp2 - price) / risk
-    if rr1 < rr1_min:
+    cap = RR1_MAX if rr1_max is None else float(rr1_max)
+    if rr1 + RR1_EPS < rr1_min:
         raise ValueError(f"RR1 {rr1:.2f} below {rr1_min}")
-    # Had atas: backtest 780 trade -> RR>1.5 expectancy negatif pada M5/H1.
-    if rr1 > RR1_MAX:
-        raise ValueError(f"RR1 {rr1:.2f} above cap {RR1_MAX} (TP too far — unrealistic)")
+    if rr1 - RR1_EPS > cap:
+        raise ValueError(f"RR1 {rr1:.2f} above cap {cap} (TP too far — unrealistic)")
     sp = session_penalty(pair_hint, datetime.now(timezone.utc).hour)
     return {"side": bias, "entry": round(price, 5), "sl": round(sl, 5),
             "tp1": round(tp1, 5), "tp2": round(tp2, 5),
@@ -434,12 +444,21 @@ def _call_vision_b64(model, prompt, b64, timeout, max_tokens=700):
     return (choice.get("message") or {}).get("content") or ""
 
 
-def _call_vision(model, prompt, bars, pair, tf, timeout):
+def _call_vision(model, prompt, bars, pair, tf, timeout, bos="", choch=False, levels=None):
     """Vision model: hantar prompt + screenshot chart (bar <= masa semasa)."""
-    b64 = VC.render(bars, pair=pair, tf=tf)
+    b64 = VC.render(bars, pair=pair, tf=tf, bos=bos, choch=choch, levels=levels)
     if not b64:
         raise RuntimeError("vision chart render gagal")
     return _call_vision_b64(model, prompt, b64, timeout, max_tokens=700)
+
+
+def _vision_chain():
+    """Deduplicated ordered list of vision models (Neon High -> Neon Medium -> fallback)."""
+    out = []
+    for m in [VISION_MODEL, VISION_FALLBACK_MODEL] + list(VISION_FALLBACK_MODELS):
+        if m and m not in out:
+            out.append(m)
+    return out
 
 
 def alignment(pair, tf_bars, timeout=60):
@@ -457,10 +476,7 @@ def alignment(pair, tf_bars, timeout=60):
               "short-term structural bias from its candles: BUY, SELL or HOLD. "
               'Reply ONLY compact JSON: {"tfs":{"' + '":"BUY|SELL|HOLD","'.join(tfs) +
               '":"BUY|SELL|HOLD"},"note":"<8 words on alignment>"}')
-    models = [VISION_MODEL]
-    if VISION_FALLBACK_MODEL and VISION_FALLBACK_MODEL != VISION_MODEL:
-        models.append(VISION_FALLBACK_MODEL)
-    for mdl in models:
+    for mdl in _vision_chain():
         try:
             content = _call_vision_b64(mdl, prompt, b64, timeout, max_tokens=300)
             m = json.loads(content[content.find("{"):content.rfind("}") + 1])
@@ -475,18 +491,91 @@ def alignment(pair, tf_bars, timeout=60):
     return None
 
 
+def build_quant_vision_prompt(pair, tf, price, spread_pips, tf_key, trend, bos,
+                              e20, e50, rsi14, atr, dec, prof, q, market_ctx="", held=None):
+    """Build the Quant + Vision confirmation prompt for Gemini 4 Neon.
+
+    Shared by live analyze() and end-to-end backtests so zero prompt drift occurs.
+    """
+    rr_min = prof["rr1_min"]
+    rr_max = prof["rr1_max"]
+    qm = q.get("metrics") or {}
+    held_line = ""
+    if held:
+        if len(held) > 1:
+            held_line = "Both BUY and SELL already open on this pair -> reply HOLD.\n"
+        else:
+            hs = next(iter(held))
+            opp = "BUY" if hs == "SELL" else "SELL"
+            held_line = f"Open position: {hs}. Do NOT issue {opp} (no hedging).\n"
+    ctx_block = ("MARKET CONTEXT (real data):\n" + market_ctx + "\n") if market_ctx else ""
+    return (
+        f"You are the senior visual risk analyst confirming a statistically validated {tf} quant setup.\n"
+        f"Pair: {pair} {tf} | Live price: {price:.{dec}f} | Spread: {spread_pips:g} pips\n"
+        f"Higher TF ({tf_key}) trend: {trend} | Structure BOS: {bos} | Macro EMA200 bias: {qm.get('macro', trend)}\n"
+        f"Indicators (real bars): EMA20={e20:.{dec}f}, EMA50={e50:.{dec}f}, "
+        f"EMA200={qm.get('ema200', e50):.{dec}f}, RSI2={qm.get('rsi2', 50)}, "
+        f"RSI14={rsi14:.1f}, StochK={qm.get('stoch_k', 50)}, ATR14={atr:.{dec}f} "
+        f"(ATR/spread={qm.get('atr_to_spread', 0)}x).\n"
+        f"QUANT CANDIDATE: {q['side']} | Triggers: {q['setup_label']} | Grade {q['grade']} "
+        f"(score={q['score']}, quant_conf={int(q['base_conf']*10)}/10)\n"
+        f"PROPOSED LEVELS (drawn on chart): entry={q['entry']:.{dec}f}, "
+        f"sl={q['sl']:.{dec}f} ({q['risk_atr']}x ATR), "
+        f"tp1={q['tp1']:.{dec}f} ({q['rr1']}R), tp2={q['tp2']:.{dec}f} ({q['rr2']}R).\n"
+        f"{ctx_block}{held_line}"
+        "Inspect the chart image (candlesticks: lime body=close above open, red body=close below open, "
+        "wick high-low range, amber=EMA20, purple=EMA50, "
+        "circles=swings, red=SL, green=TP1, cyan=TP2).\n"
+        "DECISION RULES:\n"
+        f"1. APPROVE ({q['side']}) if the chart structure supports this {q['side']} setup without a severe visual trap. "
+        "Keep the proposed calibrated SL/TP1/TP2 (only adjust slightly if a clear swing demands it; "
+        f"RR1 must stay between {rr_min:g} and {rr_max:g}).\n"
+        "2. VETO (HOLD) ONLY for a CLEAR, severe visual invalidation right now: "
+        "(a) buying straight into an obvious multi-swing double-top/brick-wall ceiling before TP1, "
+        "(b) selling straight into an obvious multi-swing floor before TP1, "
+        "(c) violent parabolic spike / whipsaw news bar, or (d) clear structural breakdown opposing the setup. "
+        "Do NOT veto normal pullbacks in a healthy trend.\n"
+        f"3. Never flip to the opposite side — reply only {q['side']} or HOLD.\n"
+        "Confidence is honest probability (6=60%, 7=68%, 8=75%, 9=rare).\n"
+        'Reply ONLY one compact JSON object, no markdown: '
+        '{"bias":"BUY"|"SELL"|"HOLD","sl":num,"tp1":num,"tp2":num,"confidence":0-10,"reason":"<max 10 words>"}'
+    )
+
+
+def build_quant_text_prompt(base_prompt, q, prof, market_ctx=""):
+    """Append quant candidate details onto the OHLC text prompt for text-only fallback models.
+
+    Unlike build_quant_vision_prompt(), this never references a chart image and preserves
+    the full higher-TF + base-TF OHLC rows in `base_prompt`.
+    """
+    rr_min = prof["rr1_min"]
+    rr_max = prof["rr1_max"]
+    ctx_block = ("\nMARKET CONTEXT (real data):\n" + market_ctx) if market_ctx else ""
+    return (
+        base_prompt
+        + ctx_block
+        + f"\nQUANT CANDIDATE (validated setup): {q['side']} | Triggers: {q['setup_label']} "
+        f"| Grade {q['grade']} (score={q['score']}, quant_conf={int(q['base_conf']*10)}/10)\n"
+        f"PROPOSED CALIBRATED LEVELS: entry={q['entry']}, sl={q['sl']} ({q['risk_atr']}x ATR), "
+        f"tp1={q['tp1']} ({q['rr1']}R), tp2={q['tp2']} ({q['rr2']}R).\n"
+        f"Confirm {q['side']} (keeping calibrated levels; RR1 between {rr_min:g} and {rr_max:g}) "
+        f"OR veto with HOLD if recent OHLC shows a severe trap/reversal. Never flip to opposite side."
+    )
+
+
 def analyze(pair, bars, pip, spread_pips, call=None, budget_s=None, held=None, tf="M15"):
     """Analisis LLM untuk satu pair mengikut timeframe. Return verdict dict / None.
 
-    TF-aware: M5=scalping (longgar, target cepat), M15=intraday, H1=swing,
-    H4/D1=position (ketat struktur, target besar). tf default M15 = kelakuan
-    enjin berjadual sedia ada (backward compatible).
+    TF-aware: M5=scalping, M15=intraday, H1=swing, H4/D1=position.
+    Dalam mod live/vision (AI_QUANT_ENGINE=1), quant_engine menyaring setup
+    berkebarangkalian tinggi terlebih dahulu, kemudian Gemini 4 Neon memeriksa
+    carta visual (dengan EMA20/50 + paras SL/TP1/TP2) untuk sahkan atau veto.
     """
     explicit_call = call is not None
     call = call or _call_model
     budget_s = budget_s or BUDGET_S
-    prof = tf_profile(tf)
     tf = str(tf).upper() if str(tf).upper() in TF_PROFILES else "M15"
+    prof = tf_profile(tf)
     if not bars or len(bars) < prof["min_bars"]:
         log(f"{pair} {tf}: bar tidak cukup ({len(bars or [])} < {prof['min_bars']})")
         return None
@@ -496,33 +585,46 @@ def analyze(pair, bars, pip, spread_pips, call=None, budget_s=None, held=None, t
     _uniq = len({(round(b[1], 6), round(b[2], 6)) for b in bars[-60:]})
     if _uniq < 5:
         log(f"{pair} {tf}: tolak — data flat ({_uniq} harga unik /60 bar)")
-        return {"side": "HOLD", "conf": 0.0,
+        return {"side": "HOLD", "conf": 0.0, "tf": tf,
                 "reason": "Market data unavailable — no price movement "
                           "(market closed or feed stalled).", "stale_data": True}
+    # Berita high-impact dekat (<=1 jam) -> HOLD paksa, jangan panggil LLM.
+    # Bukti: spread melebar & stop-hunt biasa semasa release; lebih baik duduk luar.
+    if not explicit_call and MC is not None:
+        try:
+            _nr = MC.news_risk(pair)
+            if _nr and _nr.get("blocked"):
+                log(f"{pair} {tf}: HOLD — news blackout ({_nr['reason']})")
+                return {"side": "HOLD", "conf": 0.2, "tf": tf,
+                        "reason": "News blackout: " + _nr["reason"][:80],
+                        "news_blocked": True}
+        except Exception:
+            pass
+
     ctx = resample(bars, prof["ctx_factor"])
     closes_ctx = [b[4] for b in ctx]
     trend = "FLAT"
     if len(closes_ctx) >= 50:
-        e20, e50 = M.ema(closes_ctx, 20), M.ema(closes_ctx, 50)
-        trend = "UP" if e20[-1] > e50[-1] else ("DOWN" if e20[-1] < e50[-1] else "FLAT")
+        e20c, e50c = M.ema(closes_ctx, 20), M.ema(closes_ctx, 50)
+        trend = "UP" if e20c[-1] > e50c[-1] else ("DOWN" if e20c[-1] < e50c[-1] else "FLAT")
     win = bars[-96:]
     hh, ll = max(b[1] for b in win), min(b[2] for b in win)
-    prompt = build_prompt(pair, price, ctx[-prof["ctx_show"]:], with_opens(bars)[-prof["base_show"]:],
-                          atr, trend, hh, ll, spread_pips, tf=tf, held=held)
+    text_prompt = build_prompt(pair, price, ctx[-prof["ctx_show"]:], with_opens(bars)[-prof["base_show"]:],
+                               atr, trend, hh, ll, spread_pips, tf=tf, held=held)
+    vision_prompt = None
     _ctx = ""
+    bos = trend if trend in ("UP", "DOWN") else "RANGE"
+    choch = False
+    q_setup = None
+    rr_min = prof["rr1_min"]
+    rr_max = prof.get("rr1_max", RR1_MAX)
+
     if VISION_ENABLED and not explicit_call:
-        # Model nampak imej: prompt kaya BOS + CHoCH + FVG (backtest 7/7 TP,
-        # engine/backtest-bos-choch.py). Struktur dikira deterministik dari bar,
-        # model cuma sahkan dari imej + pilih SL/TP.
-        tf_key = {"M5": "M15", "M15": "H1", "H1": "H4", "H4": "D1", "D1": "D1"}[tf]
-        gran = {"M5": "M5", "M15": "M15", "H1": "M60", "H4": "M60", "D1": "M60"}[tf]
+        tf_key = {"M5": "M15", "M15": "H1", "H1": "H4", "H4": "D1", "D1": "W1"}[tf]
         s_hi = s_lo = "RANGE"
-        bos = trend if trend in ("UP", "DOWN") else "RANGE"
-        choch = False
         fvg_n = 0
         if ICT is not None:
             try:
-                # Higher TF swing dari bar asing (guna ctx yang dah resample).
                 hi_bars = [{"h": b[2], "l": b[3], "c": b[4]} for b in ctx]
                 lo_bars = [{"h": b[1], "l": b[2], "c": b[3]} for b in bars]
                 s_hi = ICT.swing_trend(hi_bars, 3, 2)
@@ -532,16 +634,11 @@ def analyze(pair, bars, pip, spread_pips, call=None, budget_s=None, held=None, t
                 choch = (s_hi != "RANGE" and s_lo != "RANGE" and s_lo != s_hi)
             except Exception:
                 pass
-        rr_min = prof["rr1_min"]
-        # Indikator sebenar dihantar ke AI (ia tidak boleh baca nombor dari imej).
         _cl = [b[3] for b in bars]
         e20 = M.ema(_cl, 20)[-1] if len(_cl) >= 20 else price
         e50 = M.ema(_cl, 50)[-1] if len(_cl) >= 50 else price
         _rsi14 = M.rsi_s(_cl, 14)[-1]
-        _dec = 2 if (price > 100 or "JPY" in pair.upper()) else 5
-        # Konteks pasaran sebenar — apa yang carta SAHAJA tidak beritahu
-        # (sesi, berita high-impact, prestasi lampau, kalibrasi diri).
-        _ctx = ""
+        _dec = 2 if price > 500 else (3 if pip >= 0.01 else 5)
         if MC is not None:
             try:
                 _l, _ = (ai_learn.lessons() if ai_learn is not None else ("", None))
@@ -549,76 +646,108 @@ def analyze(pair, bars, pip, spread_pips, call=None, budget_s=None, held=None, t
                 _ctx = MC.format_context(pair, tf, lessons=_l or "", calibration=_c or "")
             except Exception:
                 _ctx = ""
-        # Prompt: analyst buat keputusan dengan konteks penuh, bukan nasib.
-        prompt = (
-            "Look at this candlestick chart image and trade WITH the trend. "
-            f"{pair} {tf}, current price {price:g}, spread {spread_pips:g} pips. "
-            f"Higher TF ({tf_key}) trend: {trend}. Lower TF trend: {bos}. "
-            f"Indicators (real bars): EMA20={e20:.{_dec}f} EMA50={e50:.{_dec}f} "
-            f"RSI14={_rsi14:.1f} ATR14={atr:.{_dec}f}. "
-            "If price makes higher highs and higher lows -> BUY. "
-            "If lower highs and lower lows -> SELL. "
-            "If choppy or sideways with no clear direction -> HOLD. "
-            + (("MARKET CONTEXT (real data):\n" + _ctx + "\n") if _ctx else "") +
-            "Confidence is a PROBABILITY: 5=coin flip, 6=55-62%, 7=62-70%, "
-            "8=70-78%, 9+=rare. If you can name 2+ real counter-arguments, HOLD. "
-            "Entry at CURRENT price (instant market entry). "
-            "SL just beyond nearest opposing swing (must exceed 3x spread). "
-            f"TP1 = exactly 1R from entry (risk x 1.0), TP2 = 1.5R. Keep TP1 CLOSE. "
-            f"RR1 must be between {rr_min:g} and {rr_min+0.3:.2f} (TP1 near 1R). "
-            'Reply ONLY: {"bias":"BUY"|"SELL"|"HOLD","sl":num,'
-            '"tp1":num,"tp2":num,"confidence":0-10,"reason":"<6 words>"}')
-        ai_meta = {"bos": bos, "choch": choch,
-                   "fvg": fvg_n,
-                   "atr": round(atr, 3), "hour": datetime.now(timezone.utc).hour,
-                   # apa AI BACA (dipaparkan kepada client, bukan rahsia)
-                   "input": {"ema20": round(e20, _dec), "ema50": round(e50, _dec),
-                             "rsi14": round(_rsi14, 1), "atr14": round(atr, _dec),
-                             "bars": len(bars), "tf": tf,
-                             "h1_trend": trend, "structure": bos,
-                             "context": _ctx,
-                             "vision": bool(VISION_ENABLED)}}
+
+        if QUANT_ENABLED and QE is not None:
+            q_setup = QE.scan(bars, pair, tf, pip, spread_pips)
+
+        ai_meta = {
+            "bos": bos, "choch": choch, "fvg": fvg_n,
+            "atr": round(atr, 5 if _dec == 5 else 3),
+            "hour": datetime.now(timezone.utc).hour,
+            "quant": ({
+                "side": q_setup.get("side"),
+                "setups": q_setup.get("setups", []),
+                "setup_label": q_setup.get("setup_label", ""),
+                "grade": q_setup.get("grade", "NONE"),
+                "score": q_setup.get("score", 0),
+                "risk_atr": q_setup.get("risk_atr"),
+            } if q_setup else None),
+            "input": {
+                "ema20": round(e20, _dec), "ema50": round(e50, _dec),
+                "rsi14": round(_rsi14, 1), "atr14": round(atr, _dec),
+                "bars": len(bars), "tf": tf,
+                "h1_trend": trend, "structure": bos,
+                "context": _ctx, "vision": bool(VISION_ENABLED),
+            },
+        }
+
+        if q_setup is not None:
+            # Anti-hedge gate sebelum panggil LLM
+            if q_setup.get("side") and held:
+                if len(held) > 1 or q_setup["side"] not in held:
+                    reason = f"Anti-hedge: open {sorted(held)} blocks {q_setup['side']}."
+                    log(f"{pair} {tf} quant HOLD: {reason}")
+                    return {
+                        "side": "HOLD", "conf": 0.3, "reason": reason, "tf": tf,
+                        "model": f"{VISION_MODEL}+quant", "latency_s": 0.0,
+                        "vision": False, "ai_meta": ai_meta,
+                    }
+            # Tiada trigger quant -> HOLD pantas tanpa bakar masa/kuota LLM
+            if not q_setup.get("side"):
+                reason = q_setup.get("hold_reason") or f"Waiting for clean {tf} setup."
+                _audit({"ts": datetime.now(timezone.utc).isoformat(), "pair": pair, "tf": tf,
+                        "model": f"{VISION_MODEL}+quant", "vision": False, "latency_s": 0.0,
+                        "side": "HOLD", "conf": 0.35, "quant_gate": reason[:140]})
+                log(f"{pair} {tf} quant-gate: HOLD ({reason[:90]})")
+                return {
+                    "side": "HOLD", "conf": 0.35, "reason": reason, "tf": tf,
+                    "model": f"{VISION_MODEL}+quant", "latency_s": 0.0,
+                    "vision": False, "ai_meta": ai_meta,
+                }
+            # Setup quant aktif -> Gemini 4 Neon sahkan secara visual pada carta
+            vision_prompt = build_quant_vision_prompt(
+                pair, tf, price, spread_pips, tf_key, trend, bos,
+                e20, e50, _rsi14, atr, _dec, prof, q_setup,
+                market_ctx=_ctx, held=held,
+            )
+            text_prompt = build_quant_text_prompt(text_prompt, q_setup, prof, market_ctx=_ctx)
+        else:
+            # Standalone vision fallback jika AI_QUANT_ENGINE=0
+            vision_prompt = (
+                "Look at this price chart image and trade WITH the trend. "
+                f"{pair} {tf}, current price {price:.{_dec}f}, spread {spread_pips:g} pips. "
+                f"Higher TF ({tf_key}) trend: {trend}. Lower TF trend: {bos}. "
+                f"Indicators (real bars): EMA20={e20:.{_dec}f} EMA50={e50:.{_dec}f} "
+                f"RSI14={_rsi14:.1f} ATR14={atr:.{_dec}f}. "
+                "If price makes higher highs and higher lows -> BUY. "
+                "If lower highs and lower lows -> SELL. "
+                "If choppy or sideways with no clear direction -> HOLD. "
+                + (("MARKET CONTEXT (real data):\n" + _ctx + "\n") if _ctx else "") +
+                "Confidence is a PROBABILITY: 5=coin flip, 6=55-62%, 7=62-70%, "
+                "8=70-78%, 9+=rare. If you can name 2+ real counter-arguments, HOLD. "
+                "Entry at CURRENT price (instant market entry). "
+                "SL outside volatility/swing (~2-2.5x ATR, must exceed 3x spread). "
+                f"RR1 must be between {rr_min:g} and {rr_max:g}; TP2 further at next target. "
+                'Reply ONLY: {"bias":"BUY"|"SELL"|"HOLD","sl":num,'
+                '"tp1":num,"tp2":num,"confidence":0-10,"reason":"<8 words>"}')
     else:
-        ai_meta = {"bos": trend if trend in ("UP", "DOWN") else "RANGE",
-                   "choch": False, "fvg": 0, "atr": round(atr, 3),
+        ai_meta = {"bos": bos, "choch": False, "fvg": 0, "atr": round(atr, 3),
                    "hour": datetime.now(timezone.utc).hour}
-    # Closed-loop learning: suap statistik corak TP/SL sebenar client ke prompt.
-    # Retrieval-augmented (bukan training) — cache 1 jam, fail-safe bila tiada data.
-    # Lessons + kalibrasi sudah disuntik SEKALI melalui MC.format_context.
-    # (Dulu ditambah dua kali -> buang token & kelirukan model.)
-    if not _ctx and ai_learn is not None:
+
+    # Closed-loop learning fallback bila tiada MC context (hanya untuk bukan explicit_call)
+    if not _ctx and not explicit_call and ai_learn is not None:
         try:
             _lessons, _ = ai_learn.lessons()
             _cal = ai_learn.calibration_note()
             _extra = " ".join(x for x in (_lessons, _cal) if x)
             if _extra:
-                prompt += "\nLEARNED from real client outcomes: " + _extra
+                text_prompt += "\nLEARNED from real client outcomes: " + _extra
+                if vision_prompt is not None:
+                    vision_prompt += "\nLEARNED from real client outcomes: " + _extra
         except Exception:
             pass
-    # Berita high-impact dekat (<=1 jam) -> HOLD paksa, jangan panggil LLM.
-    # Bukti: spread melebar & stop-hunt biasa semasa release; lebih baik duduk luar.
-    if MC is not None:
-        try:
-            _nr = MC.news_risk(pair)
-            if _nr and _nr.get("blocked"):
-                log(f"{pair} {tf}: HOLD — news blackout ({_nr['reason']})")
-                return {"side": "HOLD", "conf": 0.2,
-                        "reason": "News blackout: " + _nr["reason"][:80],
-                        "news_blocked": True}
-        except Exception:
-            pass
-    # Vision first: model tengok terus carta (kurang risiko prompt salah gambar).
+
+    # Vision first: Gemini 4 Neon (High -> Medium) tengok carta (EMA20/50 + SL/TP1/TP2).
     # Gagal vision -> cuba sandaran vision -> jatuh ke chain text sedia ada (fail-safe).
-    # Nota: `call` dioverride di atas untuk injection test; guna flag asal.
     vision_failed = set()
-    if VISION_ENABLED and not explicit_call:
-        vision_models = [VISION_MODEL]
-        if VISION_FALLBACK_MODEL and VISION_FALLBACK_MODEL != VISION_MODEL:
-            vision_models.append(VISION_FALLBACK_MODEL)
-        for v_model in vision_models:
+    if VISION_ENABLED and not explicit_call and vision_prompt is not None:
+        for v_model in _vision_chain():
             t0 = time.time()
             try:
-                content = _call_vision(v_model, prompt, bars, pair, tf, CALL_TIMEOUT_S)
+                content = _call_vision(
+                    v_model, vision_prompt, bars, pair, tf, CALL_TIMEOUT_S,
+                    bos=bos, choch=choch, levels=q_setup if (q_setup and q_setup.get("side")) else None,
+                )
                 j = parse_response(content)
             except Exception as e:
                 vision_failed.add(v_model)
@@ -628,21 +757,41 @@ def analyze(pair, bars, pip, spread_pips, call=None, budget_s=None, held=None, t
                         "error": f"{type(e).__name__}: {str(e)[:200]}"})
                 continue
             latency = time.time() - t0
+            # Jika quant mencadangkan arah tertentu dan vision cuba terbalik arah -> HOLD (elak konflik).
+            if q_setup and q_setup.get("side"):
+                v_bias = str(j.get("bias", "")).strip().upper()
+                if v_bias in ("BUY", "SELL") and v_bias != q_setup["side"]:
+                    log(f"{pair} {tf} {v_model} conflict: quant={q_setup['side']} vision={v_bias} -> HOLD")
+                    verdict = {
+                        "side": "HOLD", "conf": 0.4,
+                        "reason": f"Quant ({q_setup['side']}) vs Vision ({v_bias}) conflict — stay flat.",
+                    }
+                    verdict.update(model=v_model, tf=tf, latency_s=round(latency, 1),
+                                   vision=True, ai_meta=ai_meta)
+                    _audit({"ts": datetime.now(timezone.utc).isoformat(), "pair": pair, "tf": tf,
+                            "model": v_model, "vision": True, "latency_s": round(latency, 1),
+                            "side": "HOLD", "conflict": f"{q_setup['side']}!={v_bias}"})
+                    return verdict
             try:
-                verdict = validate_verdict(j, price, pip, spread_pips, rr1_min=prof["rr1_min"], pair_hint=pair)
+                verdict = validate_verdict(
+                    j, price, pip, spread_pips,
+                    rr1_min=rr_min, rr1_max=rr_max, pair_hint=pair,
+                )
             except ValueError as e:
-                # Rejection (aras/RR tak sah) muktamad — jangan shop model lain.
                 log(f"{pair} {v_model} (vision) verdict ditolak ({e})")
                 _audit({"ts": datetime.now(timezone.utc).isoformat(), "pair": pair, "tf": tf,
                         "model": v_model, "vision": True, "verdict_rejected": str(e)[:200]})
                 return None
-            verdict.update(model=v_model, latency_s=round(latency, 1), vision=True, ai_meta=ai_meta)
+            verdict.update(model=v_model, tf=tf, latency_s=round(latency, 1),
+                           vision=True, ai_meta=ai_meta)
             _audit({"ts": datetime.now(timezone.utc).isoformat(), "pair": pair, "tf": tf,
                     "model": v_model, "vision": True, "latency_s": round(latency, 1),
-                    "side": verdict["side"], "conf": verdict.get("conf")})
-            log(f"{pair} {v_model} (vision): {verdict['side']} conf={verdict.get('conf')} "
+                    "side": verdict["side"], "conf": verdict.get("conf"),
+                    "setup": q_setup.get("setup_label") if q_setup else ""})
+            log(f"{pair} {tf} {v_model} (vision): {verdict['side']} conf={verdict.get('conf')} "
                 f"rr1={verdict.get('rr1')} ({latency:.1f}s)")
             return verdict
+
     chain = [m for m in ([PRIMARY_MODEL] + [m for m in FALLBACK_MODELS if m != PRIMARY_MODEL])
              if m not in vision_failed]
     t_start = time.time()
@@ -652,7 +801,7 @@ def analyze(pair, bars, pip, spread_pips, call=None, budget_s=None, held=None, t
             break
         t0 = time.time()
         try:
-            content = call(model, prompt, CALL_TIMEOUT_S)
+            content = call(model, text_prompt, CALL_TIMEOUT_S)
         except Exception as e:
             log(f"{pair} {model}: panggilan gagal ({type(e).__name__}: {str(e)[:100]})")
             _audit({"ts": datetime.now(timezone.utc).isoformat(), "pair": pair,
@@ -667,11 +816,23 @@ def analyze(pair, bars, pip, spread_pips, call=None, budget_s=None, held=None, t
                     "model": model, "latency_s": round(latency, 1),
                     "content": content[:600], "reject": f"parse: {e}"})
             continue
+        if q_setup and q_setup.get("side"):
+            v_bias = str(j.get("bias", "")).strip().upper()
+            if v_bias in ("BUY", "SELL") and v_bias != q_setup["side"]:
+                verdict = {
+                    "side": "HOLD", "conf": 0.4, "model": model, "tf": tf,
+                    "latency_s": round(latency, 1), "vision": False, "ai_meta": ai_meta,
+                    "reason": f"Quant ({q_setup['side']}) vs LLM ({v_bias}) conflict — stay flat.",
+                }
+                _audit({"ts": datetime.now(timezone.utc).isoformat(), "pair": pair, "tf": tf,
+                        "model": model, "latency_s": round(latency, 1), "verdict": verdict})
+                return verdict
         try:
-            verdict = validate_verdict(j, price, pip, spread_pips, rr1_min=prof["rr1_min"], pair_hint=pair)
+            verdict = validate_verdict(
+                j, price, pip, spread_pips,
+                rr1_min=rr_min, rr1_max=rr_max, pair_hint=pair,
+            )
         except ValueError as e:
-            # Penolakan sah = muktamad. Jangan "shop" model lain untuk jawapan
-            # yang lepas — itu menipu diri sendiri tentang kualiti setup.
             log(f"{pair} {model}: verdict ditolak ({e})")
             _audit({"ts": datetime.now(timezone.utc).isoformat(), "pair": pair,
                     "model": model, "latency_s": round(latency, 1),
@@ -680,6 +841,8 @@ def analyze(pair, bars, pip, spread_pips, call=None, budget_s=None, held=None, t
         verdict["model"] = model
         verdict["tf"] = tf
         verdict["latency_s"] = round(latency, 1)
+        verdict["vision"] = False
+        verdict["ai_meta"] = ai_meta
         log(f"{pair} {model}: {verdict['side']} conf={verdict.get('conf')} "
             f"({latency:.1f}s) {verdict.get('reason', '')}")
         _audit({"ts": datetime.now(timezone.utc).isoformat(), "pair": pair,
