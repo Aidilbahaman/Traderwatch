@@ -116,39 +116,57 @@ html[data-theme="light"] .msg.me .body{background:#eaf5db;border-color:#b9d999}
 .lsub{display:flex;gap:4px;background:var(--card2);border:1px solid var(--line);border-radius:999px;padding:4px;margin-bottom:14px}
 .lsub button{flex:1;padding:8px 4px;border-radius:999px;font-weight:750;font-size:12px;color:var(--muted);white-space:nowrap;transition:.15s}
 .lsub button.on{background:var(--lime);color:var(--onlime);box-shadow:0 0 14px #b7f36b33}
-/* Weekly recap card (mockup: preview/push-recap-preview.html s3) */
-.recap{background:linear-gradient(150deg,#141c12,var(--card));border:1px solid #b7f36b30;border-radius:20px;padding:16px;margin-bottom:14px}
-.recap .wk{font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--lime);font-weight:800}
-.recap .recap-hd{display:flex;align-items:center;gap:6px;margin-bottom:2px}
-.recap h3{margin:4px 0 14px;font-size:16px;font-weight:850}
-.recap .stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px;margin-bottom:14px}
-.recap .st{min-width:0;text-align:center}
-.recap .st b{display:block;font-size:15px;font-weight:850;font-variant-numeric:tabular-nums;line-height:1.15;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.recap .st b.g{color:var(--green)}.recap .st b.r{color:var(--red)}
-.recap .st small{display:block;font-size:8px;letter-spacing:.03em;text-transform:uppercase;color:var(--muted);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.2}
-.recap .best{display:flex;align-items:center;gap:9px;background:var(--card2);border-radius:12px;padding:9px 11px;margin-bottom:10px;font-size:12px}
-.recap .best .em{font-size:18px}
-.recap .coach{font-size:11.5px;color:#c9d4c9;font-style:italic;border-top:1px dashed var(--line);padding-top:10px;line-height:1.55}
-.recap .coach b{color:var(--lime);font-style:normal}
-.recap .spark{margin-top:10px;height:56px}
-.recap .spark svg{width:100%;height:56px;display:block}
-/* Recap live animation */
-.recap{animation:rcIn .5s cubic-bezier(.2,.9,.2,1) both}
-@keyframes rcIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
-.recap .st b{animation:rcPop .55s cubic-bezier(.2,.9,.2,1) both}
-.recap .st:nth-child(2) b{animation-delay:.08s}.recap .st:nth-child(3) b{animation-delay:.16s}.recap .st:nth-child(4) b{animation-delay:.24s}
-@keyframes rcPop{from{opacity:0;transform:translateY(7px) scale(.94)}to{opacity:1;transform:none}}
-.recap .spark polyline.line{stroke-dasharray:1200;stroke-dashoffset:1200;animation:rcDraw 1.4s .3s cubic-bezier(.3,.7,.3,1) forwards}
-@keyframes rcDraw{to{stroke-dashoffset:0}}
-.recap .spark path.area{opacity:0;animation:rcFade .8s 1.1s ease forwards}
-@keyframes rcFade{to{opacity:1}}
-.recap .spark circle.tip{opacity:0;animation:rcFade .3s 1.6s ease forwards,rcTip 2.2s 1.9s ease-in-out infinite}
-@keyframes rcTip{0%,100%{r:3}50%{r:4.6}}
-.recap .wk{position:relative;overflow:hidden}
-.recap .wk::after{content:"";position:absolute;top:0;left:-60%;width:45%;height:100%;background:linear-gradient(105deg,transparent,#b7f36b26,transparent);animation:rcShine 9s 1.5s ease-in-out infinite}
-@keyframes rcShine{0%,88%{left:-60%}96%,100%{left:120%}}
-.recap .best{animation:rcPop .5s .3s cubic-bezier(.2,.9,.2,1) both}
-.recap .coach{animation:rcFade .6s .5s ease both}
+/* ===== AI Orb hub (blackhole) — preview/ai-orb-request.html ===== */
+.aihub{display:flex;align-items:center;gap:14px;background:var(--card);border:1px solid var(--line);
+ border-radius:20px;padding:13px 15px;margin-bottom:14px;overflow:hidden;position:relative}
+.aihub-tx{flex:1;min-width:0}
+.chip{display:inline-flex;align-items:center;gap:7px;font-size:10.5px;font-weight:800;border-radius:99px;padding:5px 12px;max-width:100%}
+.chip .p{width:6px;height:6px;border-radius:50%;flex:none}
+.chip.idle{color:var(--muted);background:var(--card2);border:1px solid var(--line)}
+.chip.idle .p{background:var(--lime);opacity:.6}
+.chip.run{color:var(--blue);background:#8ab4ff12;border:1px solid #8ab4ff45}
+.chip.run .p{background:var(--blue);animation:orbBlink 1s infinite}
+.chip.done{color:var(--lime);background:#b7f36b14;border:1px solid #b7f36b4d}
+.chip.done .p{background:var(--lime)}
+@keyframes orbBlink{0%,100%{opacity:.25}50%{opacity:1}}
+.aihub-sub{font-size:10.5px;color:var(--muted);margin-top:6px;padding-left:2px;line-height:1.4}
+.hole{position:relative;width:72px;height:72px;display:grid;place-items:center;flex:none;isolation:isolate}
+.hole .aura{position:absolute;width:44px;height:44px;border-radius:50%;
+ background:radial-gradient(circle,#b7f36b2e 0%,#b7f36b12 48%,transparent 68%);
+ animation:orbSpin 9s linear infinite;will-change:transform}
+.hole .photon{position:absolute;width:28px;height:28px;border-radius:50%;border:1.5px solid #d6ff9a;opacity:.5;
+ animation:orbPulse 2.8s ease-in-out infinite;box-shadow:0 0 8px #b7f36b40 inset}
+.hole .core{position:relative;width:20px;height:20px;border-radius:50%;background:#000;z-index:6;
+ box-shadow:0 0 0 1.5px #b7f36ba6,0 0 12px 3px #b7f36b6b,0 0 30px 8px #b7f36b26;transition:box-shadow .45s}
+.hole .wv{position:absolute;width:28px;height:28px;border-radius:50%;border:1px solid #b7f36b99;z-index:2;
+ animation:orbWave 3.2s ease-out infinite;will-change:transform,opacity}
+.hole .wv.b{animation-delay:1.05s}
+.hole .wv.c{animation-delay:2.1s}
+@keyframes orbSpin{to{transform:rotate(360deg)}}
+@keyframes orbPulse{0%,100%{transform:scale(.96);opacity:.45}50%{transform:scale(1.06);opacity:.78}}
+@keyframes orbWave{0%{transform:scale(1);opacity:.75}100%{transform:scale(2.1);opacity:0}}
+.hole .ray{position:absolute;left:50%;top:50%;width:0;height:0;transform-origin:0 0}
+.hole .dot{position:absolute;top:-2px;left:0;border-radius:50%;background:#eaffc4;
+ box-shadow:0 0 6px #b7f36bcc;will-change:transform,opacity;animation:orbSuction linear infinite}
+.hole .dot.b{background:#dbe7ff;box-shadow:0 0 6px #8ab4ffcc}
+.hole .dot.o{background:#ffe8c8;box-shadow:0 0 6px #ffc16bcc}
+.hole .dot.v{background:#e6dbff;box-shadow:0 0 6px #b18cffcc}
+@keyframes orbSuction{0%{transform:translate3d(var(--d,34px),0,0);opacity:0}6%{opacity:1}94%{opacity:1}100%{transform:translate3d(0,0,0);opacity:0}}
+.hole .scanarc{position:absolute;width:56px;height:56px;border-radius:50%;border:1.5px solid transparent;
+ border-top-color:#b7f36b;border-right-color:#b7f36b88;z-index:7;opacity:0;transition:opacity .3s;
+ animation:orbSpin 1.5s linear infinite}
+/* fasa */
+.hole.analysing .aura{animation-duration:3.4s}
+.hole.analysing .core{box-shadow:0 0 0 1.5px #b7f36bd9,0 0 18px 6px #b7f36ba6,0 0 46px 14px #b7f36b45}
+.hole.analysing .wv{border-color:#8ab4ffcc;animation-duration:1.9s}
+.hole.analysing .wv.b{animation-delay:.63s}.hole.analysing .wv.c{animation-delay:1.26s}
+.hole.analysing .dot{animation-duration:1.5s}
+.hole.analysing .scanarc{opacity:1}
+.hole.result .core{animation:orbPop .9s cubic-bezier(.2,1.4,.4,1) 1;
+ box-shadow:0 0 0 1.5px #b7f36b,0 0 24px 9px #b7f36bb3,0 0 60px 20px #b7f36b59}
+@keyframes orbPop{0%{transform:scale(1)}35%{transform:scale(1.3)}100%{transform:scale(1)}}
+.hole.result .wv{border-color:#b7f36b;animation:orbWave 1.1s ease-out 1}
+@keyframes orbReduce{}
 @media(prefers-reduced-motion:reduce){.recap,.recap .st b,.recap .best,.recap .coach{animation:none}.recap .spark polyline.line{stroke-dashoffset:0;animation:none}.recap .spark path.area,.recap .spark circle.tip{opacity:1;animation:none}.recap .wk::after{display:none}}
 .season{display:flex;align-items:center;gap:12px;background:linear-gradient(135deg,#b7f36b14,var(--card));border:1px solid #b7f36b33;border-radius:20px;padding:14px 16px;margin-bottom:12px}
 html[data-theme="light"] .season{background:linear-gradient(135deg,#eaf5db,var(--card))}
@@ -552,7 +570,19 @@ html[data-theme="light"] .lotbadge{color:#4c7a17}
         <div class="lsub" id="lsub" role="tablist" aria-label="League sections"></div>
 
         <div id="liga-lb">
-          <div id="recapCard"></div>
+          <div id="aiOrb" class="aihub" role="status" aria-live="polite">
+            <div class="hole" id="orbHole">
+              <div class="aura"></div>
+              <div class="wv"></div><div class="wv b"></div><div class="wv c"></div>
+              <div class="scanarc"></div>
+              <div class="photon"></div>
+              <div class="core"></div>
+            </div>
+            <div class="aihub-tx">
+              <div class="chip idle" id="orbChip"><span class="p"></span><span id="orbChipTx">Enjin AI sedia</span></div>
+              <div class="aihub-sub" id="orbSub"></div>
+            </div>
+          </div>
           <div class="season">
             <div class="sic"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0V4Z"/><path d="M7 6H4a1 1 0 0 0-1 1c0 2.2 1.8 4 4 4M17 6h3a1 1 0 0 1 1 1c0 2.2-1.8 4-4 4"/></svg></div>
             <div class="st"><b><span id="seasonT">Weekly Season</span><span class="weekchip" id="seasonChip">Season 1</span></b><small id="seasonS">Net R decides the ranking — not raw profit.</small></div>
@@ -834,6 +864,7 @@ var DICT={
   toastOpened:'Paper trade dibuka! Pantau di Liga.',tpHit:'TP!',slHit:'SL!',tpHit:'TP!',slHit:'SL!',pickPair:'Pilih pair untuk analisis AI.',
   leagueErr:'Gagal memuatkan data liga. Cuba lagi.',tradeErr:'Gagal membuka trade. Cuba lagi.',noBalance:'Baki tidak tersedia — cuba lagi.',
   mtfLab:'Alignment multi-TF',mtfAligned:'Searah',mtfMixed:'Bercampur',shareLab:'Share result',shareSaved:'Gambar disimpan 📥',shareErr:'Gagal jana gambar.',
+  orbIdle:'Enjin AI sedia',orbSubIdle:'12 pair dipantau',orbOne:'AI sedang membaca',orbMany:'%n analisis berjalan',orbBy:'oleh',orbNow:'sekarang',orbLiveN:'%n client minta serentak',
   tdTitle:'Detail trade',livePrice:'Harga live',unreal:'P&L belum realized',finalRes:'Keputusan akhir',openedAt:'Dibuka',closedAt:'Ditutup',slTpRange:'Julat SL → TP',quoteErr:'Harga live tidak tersedia.',
   loggingOut:'Melog keluar…',langNative:'Bahasa Melayu'
  },
@@ -879,6 +910,7 @@ var DICT={
   instantNote:'Instant entry — your trade fills at the live market price when you open, not the quoted entry.',
   leagueErr:'Could not load league data. Try again.',tradeErr:'Could not open the trade. Try again.',noBalance:'Balance unavailable — try again.',
   mtfLab:'Multi-TF alignment',mtfAligned:'Aligned',mtfMixed:'Mixed',shareLab:'Share result',shareSaved:'Image saved 📥',shareErr:'Could not generate image.',
+  orbIdle:'AI engine ready',orbSubIdle:'12 pairs monitored',orbOne:'AI is reading',orbMany:'%n analyses running',orbBy:'by',orbNow:'now',orbLiveN:'%n clients requesting',
   tdTitle:'Trade detail',livePrice:'Live price',unreal:'Unrealized P&L',finalRes:'Final result',openedAt:'Opened',closedAt:'Closed',slTpRange:'SL → TP range',quoteErr:'Live price unavailable.',
   loggingOut:'Signing out…',langNative:'English'
  },
@@ -922,6 +954,7 @@ var DICT={
   instantNote:'即时入场——开仓时按实时市价成交，而非报价入场位。',
   leagueErr:'无法加载联赛数据，请重试。',tradeErr:'开仓失败，请重试。',noBalance:'余额不可用——请重试。',
   mtfLab:'多周期一致性',mtfAligned:'同向',mtfMixed:'分歧',shareLab:'分享战绩',shareSaved:'图片已保存 📥',shareErr:'无法生成图片。',
+  orbIdle:'AI 引擎就绪',orbSubIdle:'监控 12 个货币对',orbOne:'AI 正在读取',orbMany:'%n 个分析进行中',orbBy:'来自',orbNow:'现在',orbLiveN:'%n 位客户同时请求',
   tdTitle:'交易详情',livePrice:'实时价格',unreal:'未实现盈亏',finalRes:'最终结果',openedAt:'开仓时间',closedAt:'平仓时间',slTpRange:'SL → TP 区间',quoteErr:'实时价格不可用。',
   loggingOut:'正在退出…',langNative:'中文'
  },
@@ -964,6 +997,7 @@ var DICT={
   instantNote:'Instant entry — trade diisi pada harga pasar saat dibuka, bukan entry kutipan.',
   leagueErr:'Gagal memuat data liga. Coba lagi.',tradeErr:'Gagal membuka trade. Coba lagi.',noBalance:'Saldo tidak tersedia — coba lagi.',
   mtfLab:'Alignment multi-TF',mtfAligned:'Searah',mtfMixed:'Campuran',shareLab:'Bagikan hasil',shareSaved:'Gambar tersimpan 📥',shareErr:'Gagal membuat gambar.',
+  orbIdle:'Mesin AI siap',orbSubIdle:'12 pasangan dipantau',orbOne:'AI sedang membaca',orbMany:'%n analisis berjalan',orbBy:'oleh',orbNow:'sekarang',orbLiveN:'%n klien meminta',
   tdTitle:'Detail trade',livePrice:'Harga live',unreal:'P&L belum realized',finalRes:'Hasil akhir',openedAt:'Dibuka',closedAt:'Ditutup',slTpRange:'Rentang SL → TP',quoteErr:'Harga live tidak tersedia.',
   loggingOut:'Keluar…',langNative:'Bahasa Indonesia'
  },
@@ -1007,6 +1041,7 @@ var DICT={
   instantNote:'உடனடி நுழைவு — திறக்கும்போது நேரடி சந்தை விலையில் நிரப்பப்படும், மேற்கோள் நுழைவு விலையில் அல்ல.',
   leagueErr:'லீக் தரவை ஏற்ற முடியவில்லை. மீண்டும் முயற்சிக்கவும்.',tradeErr:'வர்த்தகத்தைத் தொடங்க முடியவில்லை. மீண்டும் முயற்சிக்கவும்.',noBalance:'இருப்பு கிடைக்கவில்லை — மீண்டும் முயற்சிக்கவும்.',
   mtfLab:'பல-TF ஒருமை',mtfAligned:'ஒரே திசை',mtfMixed:'கலப்பு',shareLab:'முடிவைப் பகிர்',shareSaved:'படம் சேமிக்கப்பட்டது 📥',shareErr:'படம் உருவாக்க முடியவில்லை.',
+  orbIdle:'AI இயந்திரம் தயார்',orbSubIdle:'12 ஜோடிகள் கண்காணிப்பில்',orbOne:'AI படிக்கிறது',orbMany:'%n பகுப்பாய்வுகள் இயங்குகின்றன',orbBy:'மூலம்',orbNow:'இப்போது',orbLiveN:'%n வாடிக்கையாளர்கள் கோருகிறார்கள்',
   tdTitle:'வர்த்தக விவரம்',livePrice:'நேரடி விலை',unreal:'நிறைவேறாத லாப/நஷ்டம்',finalRes:'இறுதி முடிவு',openedAt:'திறக்கப்பட்ட நேரம்',closedAt:'மூடப்பட்ட நேரம்',slTpRange:'SL → TP வரம்பு',quoteErr:'நேரடி விலை கிடைக்கவில்லை.',
   loggingOut:'வெளியேறுகிறது…',langNative:'தமிழ்'
  }
@@ -1780,54 +1815,65 @@ function drawBadges(){
 }
 /* ---------------- weekly recap card (GET /api/league/recap, cache 1j) ---------------- */
 var RECAP={data:null,at:0};
-function loadRecap(){
- if(!getSession())return Promise.resolve();
- if(RECAP.data&&Date.now()-RECAP.at<3600000)return Promise.resolve();
- return apiFetch('/api/league/recap').then(function(r){
-  RECAP.at=Date.now();
-  RECAP.data=r.ok?(r.data||null):null;
-  drawRecap();
- }).catch(function(){});
-}
-function drawRecap(){
- var el=$('recapCard');if(!el)return;
- if(lsub!=='lb'||!RECAP.data||RECAP.data.empty){el.innerHTML='';return}
- var d=RECAP.data,nr=+d.net_r||0;
- var nrCls=nr>0?'g':nr<0?'r':'';
- var wr=(d.win_rate==null)?'—':(+d.win_rate).toFixed(0)+'%';
- var best=d.best_pair?(' <div class="best"><span class="em">🥇</span><div><b>'+esc(t('recapBest'))+': '+esc(pairName(d.best_pair.pair))+'</b>'+
-   '<div style="font-size:11px;color:var(--muted)">'+d.best_pair.wins+'/'+d.best_pair.total+' TP · '+fmtR(d.best_pair.r)+'</div></div></div>'):'';
- var spark='';
- var sp=Array.isArray(d.equity_spark)?d.equity_spark:[];
- if(sp.length>1){
-  var min=Math.min.apply(null,sp),max=Math.max.apply(null,sp),rng=(max-min)||1;
-  var pts=sp.map(function(v,i){
-   var x=sp.length>1?i*(340/(sp.length-1)):0;
-   var y=34-((v-min)/rng)*28;
-   return x.toFixed(1)+','+y.toFixed(1);
-  }).join(' ');
-  var zero=34-((0-min)/rng)*28;
-  spark='<div class="spark"><svg viewBox="0 0 340 38" preserveAspectRatio="none">'+
-   '<line x1="0" y1="'+zero.toFixed(1)+'" x2="340" y2="'+zero.toFixed(1)+'" stroke="#222b23" stroke-dasharray="3,4"/>'+
-   '<path class="area" d="M0,34 L'+pts.replace(/ /g,' L')+' L340,34 Z" fill="#b7f36b18"/>'+
-   '<polyline class="line" points="'+pts+'" fill="none" stroke="#b7f36b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>'+
-   '<circle class="tip" cx="340" cy="'+pts.split(' ').pop().split(',')[1]+'" r="3" fill="#b7f36b" stroke="#0a0e0b" stroke-width="1.5"/></svg></div>';
+
+/* ===== AI Orb hub — dot masuk rawak + 3 fasa (idle/analysing/result) ===== */
+var ORB={built:false,timer:null,last:null};
+function buildOrb(){
+ if(ORB.built)return; var hole=$('orbHole'); if(!hole)return;
+ var cols=['','b','','o','','v','','b','','o','',''];
+ for(var i=0;i<10;i++){
+  var ray=document.createElement('div'); ray.className='ray';
+  ray.style.transform='rotate('+(Math.random()*360).toFixed(1)+'deg)';
+  var d=document.createElement('div'); d.className='dot '+(cols[i%cols.length]||'');
+  var dur=(2.4+Math.random()*2.6);
+  d.style.animationDuration=dur.toFixed(2)+'s';
+  d.style.animationDelay=(-Math.random()*dur).toFixed(2)+'s';
+  d.style.setProperty('--d',(30+Math.random()*8).toFixed(0)+'px');
+  var sz=(2.4+Math.random()*1.8).toFixed(1);
+  d.style.width=sz+'px'; d.style.height=sz+'px'; d.style.top=(-parseFloat(sz)/2).toFixed(1)+'px';
+  ray.appendChild(d); hole.appendChild(ray);
  }
- el.innerHTML='<div class="recap">'+
-  '<div class="wk">'+esc(t('recapTitle'))+' · '+esc(d.week_label||'')+'</div>'+
-  '<h3>'+esc(t('recapHead'))+'</h3>'+
-  '<div class="stats">'+
-   '<div class="st"><b class="'+nrCls+'">'+fmtR(nr)+'</b><small>'+esc(t('recapNetR'))+'</small></div>'+
-   '<div class="st"><b>'+esc(wr)+'</b><small>'+esc(t('recapWin'))+'</small></div>'+
-   '<div class="st"><b>'+(d.trades!=null?d.trades:'—')+'</b><small>'+esc(t('recapTrades'))+'</small></div>'+
-   '<div class="st"><b class="'+((+d.best_streak||0)>=3?'g':'')+'">'+(+d.best_streak||0)+'</b><small>'+esc(t('recapStreak'))+'</small></div>'+
-  '</div>'+best+spark+
-  '<div class="coach"><b>'+esc(t('recapCoach'))+':</b> "'+esc(d.coach||'')+'"</div>'+
-  '</div>';
+ ORB.built=true;
 }
+function orbSet(phase,chipTxt,subTxt){
+ var hole=$('orbHole'),chip=$('orbChip'),tx=$('orbChipTx'),sub=$('orbSub');
+ if(!hole||!chip)return;
+ hole.classList.remove('analysing','result');
+ if(phase==='run')hole.classList.add('analysing');
+ if(phase==='done'){hole.classList.add('result');setTimeout(function(){var h=$('orbHole');if(h)h.classList.remove('result')},1400)}
+ chip.className='chip '+(phase==='run'?'run':phase==='done'?'done':'idle');
+ if(tx)tx.textContent=chipTxt||'';
+ if(sub)sub.textContent=subTxt||'';
+}
+function loadAiLive(){
+ buildOrb();
+ apiFetch('/api/analyze/live').then(function(r){
+  if(!r.ok||!r.data)return orbSet('idle',t('orbIdle'),'');
+  var live=r.data.live||[],n=live.length;
+  if(n===0){
+   var last=r.data.last;
+   if(last&&last.pair)orbSet('idle',t('orbIdle'),last.pair+' '+last.tf+' · '+(last.side||'')+' '+Math.round((last.conf||0)*100)+'%');
+   else orbSet('idle',t('orbIdle'),t('orbSubIdle'));
+   return;
+  }
+  var first=live[0];
+  orbSet('run',(n===1?t('orbOne'):t('orbMany').replace('%n',n))+' · '+first.pair+' '+first.tf,
+         n===1?(t('orbBy')+' '+(first.who||'')+' · '+t('orbNow')):(t('orbLiveN').replace('%n',n)));
+ }).catch(function(e){if(e&&e.message==='auth')return;orbSet('idle',t('orbIdle'),t('orbSubIdle'))});
+}
+function orbStartPoll(){
+ if(ORB.timer)return;
+ ORB.timer=setInterval(function(){
+  if(document.visibilityState&&document.visibilityState!=='visible')return;
+  if(current==='liga'&&lsub==='lb')loadAiLive();
+ },8000);
+}
+orbStartPoll();
+if(typeof window!=='undefined'){window.__orbSet=orbSet;window.__orbLive=loadAiLive;}
+
 function renderLiga(){
- drawSub();drawSeason();drawYou();drawMetric();drawLb();drawTrades();drawBadges();drawRecap();
- if(lsub==='lb')loadRecap();
+ drawSub();drawSeason();drawYou();drawMetric();drawLb();drawTrades();drawBadges();
+ if(lsub==='lb')loadAiLive();
  var r=$('lgRetry');if(r)r.onclick=function(){hap(8);loadLeague(true)};
  if(LG.state==='idle'&&current==='liga')loadLeague();
  else if(LG.state==='ready'&&current==='liga'&&Date.now()-LG.at>=60000)loadLeague();

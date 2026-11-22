@@ -39,6 +39,7 @@ import mt5_data as M5           # noqa: E402  MT5 broker = single market-data so
 
 ENV = pathlib.Path("/home/ubuntu/.secrets/supabase.env")
 PORT = int(os.environ.get("ANALYZE_PORT", "8102"))
+REPO_LIVE_LAST = pathlib.Path(__file__).resolve().parent.parent / "state" / "ai-live-last.json"
 ALLOWED_PAIRS = {"XAUUSD", "XAGUSD", "BTCUSD", "EURUSD", "GBPUSD",
                  "USDJPY", "AUDUSD", "USDCAD", "NZDUSD"}   # pairs dengan data bar live
 MIN_GAP_S = 20                      # min seconds between analyses per user
@@ -67,6 +68,30 @@ _turnstile_rl_lock = threading.Lock()
 _BARS_CACHE = {}                    # (pair,tf) -> (ts, candles)
 _BARS_CACHE_LOCK = threading.Lock()
 BARS_CACHE_TTL = 20
+
+# Live AI activity: siapa sedang minta analisis apa. TTL 60s supaya senarai
+# tidak tersangkut bila sesi terputus. Hanya inisial didedah (privasi).
+_LIVE = {}                          # uid -> {pair, tf, who, started}
+_LIVE_LOCK = threading.Lock()
+LIVE_TTL = 60
+
+
+def live_mark(uid, pair, tf, who):
+    now = time.time()
+    with _LIVE_LOCK:
+        for k in [k for k, v in _LIVE.items() if now - v["started"] > LIVE_TTL]:
+            _LIVE.pop(k, None)
+        _LIVE[uid] = {"pair": pair, "tf": tf, "who": who, "started": now}
+
+
+def live_list():
+    now = time.time()
+    with _LIVE_LOCK:
+        rows = [dict(uid=k, **v) for k, v in _LIVE.items()
+                if now - v["started"] <= LIVE_TTL]
+    rows.sort(key=lambda r: r["started"])
+    return rows
+
 
 
 def load_env():
@@ -321,6 +346,19 @@ class Handler(BaseHTTPRequestHandler):
     def do_GET(self):
         parsed = urllib.parse.urlparse(self.path)
         path = parsed.path
+        if path == "/api/analyze/live":
+            user = verify_user(self._token())
+            if not user or not user.get("id"):
+                return self._send(401, {"error": "Please sign in as a member."})
+            rows = live_list()
+            last = None
+            try:
+                p = pathlib.Path(REPO_LIVE_LAST)
+                if p.exists():
+                    last = json.loads(p.read_text())
+            except Exception:
+                last = None
+            return self._send(200, {"live": rows, "last": last})
         if path == "/api/analyze/health":
             return self._send(200, {"ok": True, "pairs": sorted(ALLOWED_PAIRS)})
         if path == "/api/bars":
@@ -443,6 +481,12 @@ class Handler(BaseHTTPRequestHandler):
         if not ok:
             return self._send(429, {"error": msg})
         rate_commit(uid)
+        meta = (user.get("user_metadata") or {})
+        nm = str(meta.get("username") or meta.get("full_name") or meta.get("name")
+                 or (user.get("email") or "member").split("@")[0])
+        parts = [p for p in nm.replace("_", " ").replace(".", " ").split() if p]
+        who = " ".join([parts[0][:1].upper() + "."] + [p[:1].upper() + "." for p in parts[1:2]]) if parts else "A."
+        live_mark(uid, pair, tf, who)
         log(f"{uid[:8]} request {pair} {tf}")
         # MT5 broker is the single data source. If the bridge is down, fail closed
         # with a clear message (the site banner also shows bridge/market status).
@@ -457,6 +501,15 @@ class Handler(BaseHTTPRequestHandler):
             log(f"{pair} error {type(e).__name__}: {str(e)[:160]}")
             return self._send(500, {"error": "Analisis gagal buat masa ini. Cuba lagi sebentar."})
         log(f"{uid[:8]} {pair} -> {result.get('side')}")
+        # Simpan verdict terakhir untuk orb hub (siapa nampak aktiviti AI).
+        try:
+            REPO_LIVE_LAST.parent.mkdir(parents=True, exist_ok=True)
+            REPO_LIVE_LAST.write_text(json.dumps({
+                "pair": result.get("pair") or pair, "tf": result.get("tf") or tf,
+                "side": result.get("side"), "conf": result.get("conf"),
+                "at": datetime.now(timezone.utc).isoformat()}, ensure_ascii=False))
+        except Exception as e:
+            log(f"live-last write fail {type(e).__name__}")
         bump_analyses(uid)   # server-side per-account count (replaces browser-local)
         # MT5 sync moved to "Take this trade" (league-api) so the owner's
         # chosen lot is used. Scans no longer place orders. See mt5_ondemand.py.
