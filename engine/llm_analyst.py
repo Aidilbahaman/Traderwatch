@@ -441,6 +441,12 @@ def analyze(pair, bars, pip, spread_pips, call=None, budget_s=None, held=None, t
             except Exception:
                 pass
         rr_min = prof["rr1_min"]
+        # Indikator sebenar dihantar ke AI (ia tidak boleh baca nombor dari imej).
+        _cl = [b[3] for b in bars]
+        e20 = M.ema(_cl, 20)[-1] if len(_cl) >= 20 else price
+        e50 = M.ema(_cl, 50)[-1] if len(_cl) >= 50 else price
+        _rsi14 = M.rsi_s(_cl, 14)[-1]
+        _dec = 2 if (price > 100 or "JPY" in pair.upper()) else 5
         # Konteks pasaran sebenar — apa yang carta SAHAJA tidak beritahu
         # (sesi, berita high-impact, prestasi lampau, kalibrasi diri).
         _ctx = ""
@@ -456,6 +462,8 @@ def analyze(pair, bars, pip, spread_pips, call=None, budget_s=None, held=None, t
             "Look at this candlestick chart image and trade WITH the trend. "
             f"{pair} {tf}, current price {price:g}, spread {spread_pips:g} pips. "
             f"Higher TF ({tf_key}) trend: {trend}. Lower TF trend: {bos}. "
+            f"Indicators (real bars): EMA20={e20:.{_dec}f} EMA50={e50:.{_dec}f} "
+            f"RSI14={_rsi14:.1f} ATR14={atr:.{_dec}f}. "
             "If price makes higher highs and higher lows -> BUY. "
             "If lower highs and lower lows -> SELL. "
             "If choppy or sideways with no clear direction -> HOLD. "
@@ -465,28 +473,34 @@ def analyze(pair, bars, pip, spread_pips, call=None, budget_s=None, held=None, t
             "Entry at CURRENT price (instant market entry). "
             "SL just beyond nearest opposing swing (must exceed 3x spread). "
             f"TP1 = exactly 1R from entry (risk x 1.0), TP2 = 1.5R. Keep TP1 CLOSE. "
-            f"Hard limits: RR1 must be {rr_min:g}-1.05 (never more than 1.05). "
+            f"RR1 must be between {rr_min:g} and {rr_min+0.3:.2f} (TP1 near 1R). "
             'Reply ONLY: {"bias":"BUY"|"SELL"|"HOLD","sl":num,'
             '"tp1":num,"tp2":num,"confidence":0-10,"reason":"<6 words>"}')
         ai_meta = {"bos": bos, "choch": choch,
                    "fvg": fvg_n,
-                   "atr": round(atr, 3), "hour": datetime.now(timezone.utc).hour}
+                   "atr": round(atr, 3), "hour": datetime.now(timezone.utc).hour,
+                   # apa AI BACA (dipaparkan kepada client, bukan rahsia)
+                   "input": {"ema20": round(e20, _dec), "ema50": round(e50, _dec),
+                             "rsi14": round(_rsi14, 1), "atr14": round(atr, _dec),
+                             "bars": len(bars), "tf": tf,
+                             "h1_trend": trend, "structure": bos,
+                             "context": _ctx,
+                             "vision": bool(VISION_ENABLED)}}
     else:
         ai_meta = {"bos": trend if trend in ("UP", "DOWN") else "RANGE",
                    "choch": False, "fvg": 0, "atr": round(atr, 3),
                    "hour": datetime.now(timezone.utc).hour}
     # Closed-loop learning: suap statistik corak TP/SL sebenar client ke prompt.
     # Retrieval-augmented (bukan training) — cache 1 jam, fail-safe bila tiada data.
-    if ai_learn is not None:
+    # Lessons + kalibrasi sudah disuntik SEKALI melalui MC.format_context.
+    # (Dulu ditambah dua kali -> buang token & kelirukan model.)
+    if not _ctx and ai_learn is not None:
         try:
             _lessons, _ = ai_learn.lessons()
-            if _lessons:
-                prompt += ("\nLEARNED from real client outcomes (respect this): "
-                           + _lessons)
-            # Kalibrasi: beritahu model di mana ia SELALU terlebih yakin.
             _cal = ai_learn.calibration_note()
-            if _cal:
-                prompt += "\n" + _cal
+            _extra = " ".join(x for x in (_lessons, _cal) if x)
+            if _extra:
+                prompt += "\nLEARNED from real client outcomes: " + _extra
         except Exception:
             pass
     # Berita high-impact dekat (<=1 jam) -> HOLD paksa, jangan panggil LLM.
