@@ -119,17 +119,19 @@ html[data-theme="light"] .msg.me .body{background:#eaf5db;border-color:#b9d999}
 /* Weekly recap card (mockup: preview/push-recap-preview.html s3) */
 .recap{background:linear-gradient(150deg,#141c12,var(--card));border:1px solid #b7f36b30;border-radius:20px;padding:16px;margin-bottom:14px}
 .recap .wk{font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--lime);font-weight:800}
+.recap .recap-hd{display:flex;align-items:center;gap:6px;margin-bottom:2px}
 .recap h3{margin:4px 0 14px;font-size:16px;font-weight:850}
-.recap .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:14px}
-.recap .st b{display:block;font-size:17px;font-weight:850;font-variant-numeric:tabular-nums}
+.recap .stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px;margin-bottom:14px}
+.recap .st{min-width:0;text-align:center}
+.recap .st b{display:block;font-size:15px;font-weight:850;font-variant-numeric:tabular-nums;line-height:1.15;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .recap .st b.g{color:var(--green)}.recap .st b.r{color:var(--red)}
-.recap .st small{font-size:8.5px;letter-spacing:.05em;text-transform:uppercase;color:var(--muted)}
+.recap .st small{display:block;font-size:8px;letter-spacing:.03em;text-transform:uppercase;color:var(--muted);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.2}
 .recap .best{display:flex;align-items:center;gap:9px;background:var(--card2);border-radius:12px;padding:9px 11px;margin-bottom:10px;font-size:12px}
 .recap .best .em{font-size:18px}
 .recap .coach{font-size:11.5px;color:#c9d4c9;font-style:italic;border-top:1px dashed var(--line);padding-top:10px;line-height:1.55}
 .recap .coach b{color:var(--lime);font-style:normal}
-.recap .spark{margin-top:10px;height:38px}
-.recap .spark svg{width:100%;height:38px}
+.recap .spark{margin-top:10px;height:56px}
+.recap .spark svg{width:100%;height:56px;display:block}
 /* Recap live animation */
 .recap{animation:rcIn .5s cubic-bezier(.2,.9,.2,1) both}
 @keyframes rcIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
@@ -1812,7 +1814,7 @@ function drawRecap(){
    '<circle class="tip" cx="340" cy="'+pts.split(' ').pop().split(',')[1]+'" r="3" fill="#b7f36b" stroke="#0a0e0b" stroke-width="1.5"/></svg></div>';
  }
  el.innerHTML='<div class="recap">'+
-  '<div class="wk">📅 '+esc(t('recapTitle'))+' · '+esc(d.week_label||'')+'</div>'+
+  '<div class="wk">'+esc(t('recapTitle'))+' · '+esc(d.week_label||'')+'</div>'+
   '<h3>'+esc(t('recapHead'))+'</h3>'+
   '<div class="stats">'+
    '<div class="st"><b class="'+nrCls+'">'+fmtR(nr)+'</b><small>'+esc(t('recapNetR'))+'</small></div>'+
