@@ -1913,6 +1913,9 @@ function loadAiLearn(){
  }).catch(function(e){if(e&&e.message==='auth')return;drawAiLearn(null)});
 }
 if(typeof window!=='undefined'){window.__aiLearn=loadAiLearn;window.__drawAiLearn=drawAiLearn;}
+if(typeof window!=='undefined'){window.__showAccount=showAccount;}
+if(typeof window!=='undefined'){window.__loadProfile=loadProfile;window.__showView=showView;}
+if(typeof window!=='undefined'){window.__getME=function(){return ME};window.__getLG=function(){return LG.me};}
 
 function renderLiga(){
  drawSub();drawSeason();drawYou();drawMetric();drawLb();drawTrades();drawBadges();
@@ -2301,6 +2304,7 @@ function menuAction(k){
  if(k==='mLogout')return logout();
 }
 function showAccount(){
+ var en=lang==='en';
  var nm=(ME&&ME.dispName)||'—',em=(ME&&ME.email)||'—',uid=(ME&&ME.id)||'—';
  var kv='<div class="kv"><b>'+esc(t('name'))+'</b><span>'+esc(nm)+'</span><b>'+esc(t('email'))+'</b><span>'+esc(em)+'</span><b>'+esc(t('uid'))+'</b><span style="word-break:break-all;font-size:11px">'+esc(uid)+'</span><b>'+esc(t('plan'))+'</b><span>'+esc(PLAN.toUpperCase())+'</span></div>';
  function render(a){
