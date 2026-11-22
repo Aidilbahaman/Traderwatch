@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Splash Preview — TraderWatch</title>
+<style>
+:root{--bg:#0a0e0b;--lime:#b7f36b;--lime2:#d6ff9a;--muted:#8a978c}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#050806;color:#eef3ee;font:13px -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+ padding:24px 16px 50px;min-height:100vh}
+
+h1{font-size:19px;font-weight:800;text-align:center;margin-bottom:4px}
+.sub{color:var(--muted);font-size:11.5px;text-align:center;line-height:1.6;margin-bottom:20px;
+ max-width:520px;margin-left:auto;margin-right:auto}
+
+.stage{position:relative;width:340px;height:640px;margin:0 auto 18px;border-radius:26px;overflow:hidden;
+ background:var(--bg);border:1px solid #1c2620;box-shadow:0 20px 50px #000a}
+.ctrl{max-width:340px;margin:0 auto 26px;display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
+.btn{background:#131a15;border:1px solid #243028;color:var(--lime);font:700 11px inherit;
+ padding:9px 16px;border-radius:99px;cursor:pointer}
+.btn:active{transform:scale(.97)}
+.btn.alt{color:var(--muted);border-color:#1e2620}
+
+/* ================= SPLASH LAYER ================= */
+#splash{position:absolute;inset:0;z-index:20;display:grid;place-items:center;background:var(--bg);
+ transition:opacity .28s ease,visibility .28s}
+#splash.gone{opacity:0;visibility:hidden}
+.sp-wrap{display:flex;flex-direction:column;align-items:center;gap:22px}
+/* bintang — bentuk rasmi */
+.sp-star{width:76px;height:76px;filter:drop-shadow(0 0 22px #b7f36b66)}
+.sp-star path{fill:url(#sg)}
+.sp-name{font-size:12px;font-weight:900;letter-spacing:.34em;color:#eef3ee;padding-left:.34em}
+/* loader halus di bawah */
+.sp-bar{width:120px;height:2px;border-radius:99px;background:#b7f36b1f;overflow:hidden;margin-top:2px}
+.sp-bar i{display:block;height:100%;width:36%;border-radius:99px;
+ background:linear-gradient(90deg,transparent,var(--lime),transparent);
+ animation:spSlide 1.15s cubic-bezier(.45,0,.25,1) infinite}
+@keyframes spSlide{0%{transform:translateX(-120%)}100%{transform:translateX(390%)}}
+
+/* ================= APP LAYER (mock) ================= */
+#app{position:absolute;inset:0;display:flex;flex-direction:column;background:var(--bg)}
+.appbar{display:flex;align-items:center;gap:9px;padding:12px 14px;border-bottom:1px solid #18211a}
+.applogo{width:30px;height:30px;border-radius:9px;background:var(--lime);display:grid;place-items:center}
+.applogo svg{width:17px;height:17px}
+.applogo path{fill:#10150b}
+.appbrand{font-size:10.5px;font-weight:900;letter-spacing:.16em}
+.appbrand small{display:block;font-size:8.5px;font-weight:600;letter-spacing:.06em;color:var(--muted);margin-top:1px}
+.body{flex:1;padding:16px 14px;display:flex;flex-direction:column;gap:11px}
+.ghost{height:14px;border-radius:6px;background:#131a15}
+.ghost.w70{width:70%}.ghost.w45{width:45%}.ghost.w88{width:88%}
+.cards{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:6px}
+.card{height:104px;border-radius:14px;background:#111612;border:1px solid #1c2620}
+
+/* caption / log */
+.log{max-width:340px;margin:0 auto;background:#0e1410;border:1px solid #1c2620;border-radius:11px;
+ padding:11px 13px;font:10.5px/1.9 ui-monospace,SFMono-Regular,Menlo,monospace;color:var(--muted)}
+.log b{color:var(--lime)}
+h2.sec{font-size:12px;font-weight:800;color:var(--lime);letter-spacing:.09em;margin:24px auto 8px;max-width:340px}
+p.note{max-width:520px;margin:0 auto;color:var(--muted);font-size:10.5px;line-height:1.8}
+p.note b{color:var(--lime)}
+</style>
+</head>
+<body>
+<h1>✦ Splash Screen Preview</h1>
+<p class="sub">Lapisan paling awal bila app dibuka dari home screen — tutup jurang "skrin putih" sebelum HTML siap.</p>
+
+<div class="stage" id="stage">
+  <!-- SPLASH -->
+  <div id="splash">
+    <div class="sp-wrap">
+      <svg class="sp-star" viewBox="-22 -22 44 44" aria-hidden="true">
+        <defs>
+          <linearGradient id="sg" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#eaffc4"/><stop offset="1" stop-color="#9fe83f"/>
+          </linearGradient>
+        </defs>
+        <path d="M0-20Q0 0 20 0Q0 0 0 20Q0 0-20 0Q0 0 0-20Z"/>
+      </svg>
+      <div class="sp-name">TRADERWATCH</div>
+      <div class="sp-bar"><i></i></div>
+    </div>
+  </div>
+
+  <!-- APP MOCK -->
+  <div id="app">
+    <div class="appbar">
+      <div class="applogo"><svg viewBox="-22 -22 44 44"><path d="M0-20Q0 0 20 0Q0 0 0 20Q0 0-20 0Q0 0 0-20Z"/></svg></div>
+      <div class="appbrand">TRADERWATCH<small>AI Analyst</small></div>
+    </div>
+    <div class="body">
+      <div class="ghost w70"></div><div class="ghost w45"></div>
+      <div class="cards">
+        <div class="card"></div><div class="card"></div>
+        <div class="card"></div><div class="card"></div>
+      </div>
+      <div class="ghost w88"></div>
+    </div>
+  </div>
+</div>
+
+<div class="ctrl">
+  <button class="btn" id="play">▶ Main semula</button>
+  <button class="btn alt" id="slow">🐢 Perlahan (3s)</button>
+</div>
+
+<h2 class="sec">APA YANG BERLAKU</h2>
+<div class="log" id="log">tekan "Main semula" untuk lihat urutan</div>
+
+<h2 class="sec">KENAPA PERLU</h2>
+<p class="note">
+Tanpa splash: client tekan icon → <b>skrin putih/kosong 1–3 saat</b> (HTML &amp; JS belum siap) → app keluar.<br><br>
+Dengan splash: client tekan icon → <b>bintang lime terus kelihatan</b> → app siap → splash <b>fade keluar 280ms</b>.<br><br>
+Splash ini <b>statik</b> (tiada animasi berat) supaya render segera — cuma ada satu loader bar halus sebagai isyarat "sedang memuatkan".<br><br>
+Kalau client belum pernah login → selepas splash terus ke <b>welcome cinematic</b>. Kalau dah pernah → terus ke app.
+</p>
+
+<script>
+var LOG=document.getElementById('log');
+function mark(t){LOG.innerHTML='<b>'+t+'</b>';}
+function play(dur){
+  var sp=document.getElementById('splash');
+  sp.classList.remove('gone');
+  mark('0 ms — splash muncul (bintang + loader)');
+  setTimeout(function(){mark(dur+' ms — app siap, splash fade keluar 280ms')},dur*0.6);
+  setTimeout(function(){
+    sp.classList.add('gone');
+    mark(dur+' ms — fade bermula → app kelihatan');
+  },dur);
+  setTimeout(function(){mark('app sedia · splash hilang')},dur+320);
+}
+document.getElementById('play').onclick=function(){play(900)};
+document.getElementById('slow').onclick=function(){play(3000)};
+/* auto main sekali */
+setTimeout(function(){play(900)},400);
+</script>
+</body>
+</html>
