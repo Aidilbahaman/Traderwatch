@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="ms">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Preview — Kad Pembelajaran AI</title>
+<style>
+:root{--card:#121814;--card2:#1a221c;--line:#2a352c;--muted:#8b9a8c;--lime:#b7f36b;--blue:#8ab4ff}
+*{box-sizing:border-box}
+body{margin:0;background:#0a0e0b;color:#e8f0e4;font:14px -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;padding:24px;min-height:100vh}
+.wrap{max-width:420px;margin:0 auto}
+.hint{color:var(--muted);font-size:11px;margin-bottom:14px;line-height:1.6}
+.hint b{color:var(--lime)}
+/* CSS kad — salinan tepat dari member/index.html */
+.ailc{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:13px 15px;margin-bottom:12px}
+.ailc .hd{display:flex;align-items:center;gap:8px;font-size:11px;font-weight:800;letter-spacing:.2px}
+.ailc .hd .ic{width:22px;height:22px;border-radius:7px;display:grid;place-items:center;background:#8ab4ff1c;color:var(--blue)}
+.ailc .hd small{margin-left:auto;color:var(--muted);font-weight:600;font-size:10px}
+.ailc .bar{height:6px;border-radius:99px;background:#ff6b6b33;overflow:hidden;margin:11px 0 7px}
+.ailc .bar i{display:block;height:100%;background:var(--lime);border-radius:99px;transition:width .5s}
+.ailc .rate{font-size:10.5px;color:var(--muted);line-height:1.5}
+.ailc .rate b{color:var(--lime)}
+.ailc .pats{display:flex;flex-wrap:wrap;gap:5px;margin-top:9px}
+.ailc .pat{font-size:9.5px;font-weight:700;border-radius:99px;padding:4px 8px;border:1px solid var(--line);color:var(--muted)}
+.ailc .pat.g{color:var(--lime);border-color:#b7f36b55;background:#b7f36b12}
+.ailc .pat.b{color:#ff9b9b;border-color:#ff6b6b55;background:#ff6b6b10}
+.ailc .empty{font-size:10px;color:var(--muted);line-height:1.5;margin-top:8px}
+.label{font-size:10px;color:var(--muted);font-weight:700;letter-spacing:.5px;margin:18px 0 7px;text-transform:uppercase}
+.note{font-size:10px;color:var(--muted);line-height:1.6;margin-top:14px;border-top:1px solid var(--line);padding-top:12px}
+.note code{color:var(--blue);font-size:9.5px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="hint">Preview kad <b>"Pembelajaran AI"</b> — data simulasi 4 client (Aidil, Amir, Abie, TWADMIN) untuk tunjuk bentuk bila sistem dah belajar. Kad sebenar ada di tab <b>League → Leaderboard</b>.</div>
+
+  <div class="label">Keadaan sekarang (data kosong)</div>
+  <div class="ailc">
+    <div class="hd"><span class="ic"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a7 7 0 0 1 7 7c0 2.4-1.2 4-2.5 5.2-.9.9-1.5 1.6-1.5 2.8h-6c0-1.2-.6-1.9-1.5-2.8C6.2 13 5 11.4 5 9a7 7 0 0 1 7-7Z"/><path d="M9 21h6"/></svg></span><span>Pembelajaran AI</span></div>
+    <div class="empty">AI masih belajar — perlukan beberapa trade ditutup dulu sebelum corak dikenal pasti.</div>
+  </div>
+
+  <div class="label">Selepas 4+ trade client ditutup</div>
+  <div class="ailc">
+    <div class="hd"><span class="ic"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a7 7 0 0 1 7 7c0 2.4-1.2 4-2.5 5.2-.9.9-1.5 1.6-1.5 2.8h-6c0-1.2-.6-1.9-1.5-2.8C6.2 13 5 11.4 5 9a7 7 0 0 1 7-7Z"/><path d="M9 21h6"/></svg></span><span>Pembelajaran AI</span><small>12 trade</small></div>
+    <div class="bar"><i style="width:75%"></i></div>
+    <div class="rate">9 TP · 3 SL · <b>75% kadar menang</b></div>
+    <div class="pats">
+      <span class="pat g">M5 SELL aligned nochoch conf-high · 83%</span>
+      <span class="pat g">M15 BUY aligned nochoch conf-high · 67%</span>
+      <span class="pat b">M5 BUY counter choch conf-low · 25%</span>
+    </div>
+  </div>
+
+  <div class="note">
+    <b>Cara kira:</b> semua client dikira bersama (tiada user_id filter). Corak = TF + arah + BOS-searah? + CHoCH? + jalur-conf.
+    <br><br>
+    <b>PROVEN</b> (hijau) = ≥60% win, n≥4 → model cenderung. &nbsp; <b>AVOID</b> (merah) = ≤35% win → model elak.
+    <br><br>
+    Lesson disuntik ke prompt: <code>LEARNED from real client outcomes: Overall 9TP/3SL (75% win). PROVEN: M5 SELL aligned conf-high 83%...</code>
+    <br><br>
+    Statistik sahaja — <b>tiada nama client</b> dipaparkan.
+  </div>
+</div>
+</body>
+</html>
