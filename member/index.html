@@ -658,7 +658,7 @@ html[data-theme="light"] .lotbadge{color:#4c7a17}
           <div id="aiLearnCard" hidden></div>
           <div class="season">
             <div class="sic"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0V4Z"/><path d="M7 6H4a1 1 0 0 0-1 1c0 2.2 1.8 4 4 4M17 6h3a1 1 0 0 1 1 1c0 2.2-1.8 4-4 4"/></svg></div>
-            <div class="st"><b><span id="seasonT">Weekly Season</span><span class="weekchip" id="seasonChip">Season 1</span></b><small id="seasonS">Net R decides the ranking — not raw profit.</small></div>
+            <div class="st"><b><span id="seasonT">Weekly Season</span><span class="weekchip" id="seasonChip">Season 1</span></b><small id="seasonS">Win rate decides the ranking — not raw profit.</small></div>
             <div class="cd"><b id="rankedN" class="num">—</b><small id="rankedLab">Ranked</small></div>
           </div>
           <div class="youcard" id="youcard"></div>
@@ -953,7 +953,7 @@ var DICT={
   pushSec:'🔔 Alert trade',pushT:'Alert TP/SL',pushStatusOn:'Aktif',pushStatusOff:'Belum aktif',pushOn:'Aktifkan',pushOnOk:'Alert TP/SL diaktifkan 🔔',pushDenied:'Notifikasi disekat — benarkan dalam tetapan browser.',pushErr:'Gagal aktifkan alert. Cuba lagi.',pushTestOk:'Notifikasi ujian dihantar',pushTestNone:'Tiada langganan aktif',pushOffOk:'Alert dimatikan',pushKindsTpsl:'TP/SL sahaja',pushKindsAll:'TP/SL + verdict',
   navLiga:'Liga',ligaTitle:'Liga Kertas',ligaSub:'Modal maya $10,000. Disiplin menang, bukan judi.',
   subLb:'Leaderboard',subTrades:'Trade Saya',subBadges:'Badge',
-  seasonT:'Musim Mingguan',seasonS:'Net R menentukan kedudukan — bukan jumlah duit.',seasonLab:'Musim',rankedLab:'Disenarai',
+  seasonT:'Musim Mingguan',seasonS:'Win rate menentukan kedudukan — bukan jumlah duit.',seasonLab:'Musim',rankedLab:'Disenarai',
   youLab:'Kedudukan anda',rankLab:'Rank',netR:'Net R',winRate:'Win rate',balanceLab:'Baki maya',toNext:'lagi ke',topMsg:'Di puncak musim ini — kekalkan!',rankHint:'Tutup satu paper trade untuk masuk ranking.',
   mNetR:'Net R',mWr:'Win rate',mBal:'Baki',mCons:'Konsisten',anaRunning:'AI sedang analisis…',anaReady:'Analisis siap',consNote:'Win rate berwajaran bilangan trade (min 5 trade).',tradeUnit:'trade',tradeOne:'trade',youName:'Anda',
   lbEmpty:'Belum ada trade berperingkat. Jadilah yang pertama membuka paper trade.',lbNote:'Modal maya sahaja — outcome diselesaikan dari harga live.',
@@ -1001,7 +1001,7 @@ var DICT={
   pushSec:'🔔 Trade alerts',pushT:'TP/SL alerts',pushStatusOn:'Active',pushStatusOff:'Not active',pushOn:'Enable',pushOnOk:'TP/SL alerts enabled 🔔',pushDenied:'Notifications blocked — allow them in browser settings.',pushErr:'Could not enable alerts. Try again.',pushTestOk:'Test notification sent',pushTestNone:'No active subscription',pushOffOk:'Alerts turned off',pushKindsTpsl:'TP/SL only',pushKindsAll:'TP/SL + verdicts',
   navLiga:'League',ligaTitle:'Paper League',ligaSub:'Virtual $10,000 capital. Discipline wins, not gambling.',
   subLb:'Leaderboard',subTrades:'My Trades',subBadges:'Badges',
-  seasonT:'Weekly Season',seasonS:'Net R decides the ranking — not raw profit.',seasonLab:'Season',rankedLab:'Ranked',
+  seasonT:'Weekly Season',seasonS:'Win rate decides the ranking — not raw profit.',seasonLab:'Season',rankedLab:'Ranked',
   youLab:'Your position',rankLab:'Rank',netR:'Net R',winRate:'Win rate',balanceLab:'Virtual balance',toNext:'more to',topMsg:'Top of the season — keep it up!',rankHint:'Close a paper trade to get ranked.',
   mNetR:'Net R',mWr:'Win rate',mBal:'Balance',mCons:'Consistency',anaRunning:'AI analyzing…',anaReady:'Analysis ready',consNote:'Win rate weighted by trade count (min 5 trades).',tradeUnit:'trades',tradeOne:'trade',youName:'You',
   lbEmpty:'No ranked trades yet. Be the first to open a paper trade.',lbNote:'Virtual capital only — outcomes resolved from live prices.',
@@ -1735,7 +1735,7 @@ $('msgInput').addEventListener('keydown',function(e){if(e.key==='Enter')sendMsg(
 
 /* ---------------- liga (paper league — API sebenar) ---------------- */
 var LG={me:null,trades:[],board:[],season:null,state:'idle',at:0};
-var lsub='lb',metric='r',MIN_CONS=5;
+var lsub='lb',metric='wr',MIN_CONS=5;
 var STK={open:'stOpen',tp:'stTP',sl:'stSL',be:'stBE',expired:'stExp'};
 var MEDALS=[
  '<svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 2h3.4l1.2 4.6L8.4 9 7 2Zm10 0h-3.4l-1.2 4.6L15.6 9 17 2Z" fill="#ffd76b"/><circle cx="12" cy="15" r="6.2" fill="#ffd76b"/><circle cx="12" cy="15" r="3.6" fill="none" stroke="rgba(0,0,0,.28)" stroke-width="1.3"/></svg>',
@@ -1783,7 +1783,7 @@ function greenStreak(){
 function consScore(x){var wr=x.win_rate==null?0:+x.win_rate,n=+x.trades||0;return n>=MIN_CONS?wr:wr*(n/MIN_CONS)}
 function sortBoard(list,m){
  return list.slice().sort(function(a,b){
-  var d=m==='wr'?((+b.win_rate||0)-(+a.win_rate||0)):m==='cons'?(consScore(b)-consScore(a)):m==='bal'?((+b.profit_usd||0)-(+a.profit_usd||0)):((+b.net_r||0)-(+a.net_r||0));
+  var d=m==='cons'?(consScore(b)-consScore(a)):m==='bal'?((+b.profit_usd||0)-(+a.profit_usd||0)):((+b.win_rate||0)-(+a.win_rate||0));
   if(d!==0)return d;
   d=(+b.net_r||0)-(+a.net_r||0);
   return d!==0?d:((+b.trades||0)-(+a.trades||0));
@@ -1822,7 +1822,7 @@ function drawSeason(){
  $('rankedN').textContent=LG.state==='ready'?String(LG.board.length):'—';
 }
 function drawMetric(){
- var ms=[['r','mNetR'],['wr','mWr'],['bal','mBal'],['cons','mCons']];
+ var ms=[['wr','mWr'],['bal','mBal'],['cons','mCons']];
  $('mtoggle').innerHTML=ms.map(function(x){return '<button data-m="'+x[0]+'" class="'+(x[0]===metric?'on':'')+'" aria-pressed="'+(x[0]===metric)+'">'+esc(t(x[1]))+'</button>'}).join('');
  Array.prototype.forEach.call($('mtoggle').querySelectorAll('button'),function(b){b.onclick=function(){metric=b.dataset.m;hap(6);drawMetric();drawLb()}});
  $('consNote').textContent=t('consNote');
@@ -1834,22 +1834,23 @@ function drawYou(){
  if(!me){el.innerHTML='<div class="ylab">'+esc(t('youLab'))+'</div><div class="empty">'+esc(t('loading'))+'</div>';return}
  var rank=me.rank!=null?+me.rank:null,nr=+me.net_r||0;
  var hasActivity=((+me.trades_closed||0)>0||(+me.trades_open||0)>0);
- var sorted=sortBoard(LG.board,'r'),idx=-1;
+ var sorted=sortBoard(LG.board,metric),idx=-1;
  sorted.forEach(function(x,i){if(x.is_me)idx=i});
  var above=(rank!=null&&idx>0)?sorted[idx-1]:null,prog;
  if(above){
-  var diff=Math.max(0,(+above.net_r||0)-nr);
-  var pct=(+above.net_r||0)>0?Math.max(4,Math.min(100,nr/(+above.net_r)*100)):100;
-  prog='<div class="nextprog"><div class="nt"><span>'+esc(above.username)+' · #'+idx+'</span><b>+'+diff.toFixed(1)+'R '+esc(t('toNext'))+' #'+idx+'</b></div><div class="bar"><i style="width:'+pct.toFixed(0)+'%"></i></div></div>';
+  var awr=+above.win_rate||0,mwr=+me.win_rate||0;
+  var diff=Math.max(0,awr-mwr);
+  var pct=awr>0?Math.max(4,Math.min(100,mwr/awr*100)):100;
+  prog='<div class="nextprog"><div class="nt"><span>'+esc(above.username)+' · #'+idx+'</span><b>+'+diff.toFixed(1)+'% '+esc(t('toNext'))+' #'+idx+'</b></div><div class="bar"><i style="width:'+pct.toFixed(0)+'%"></i></div></div>';
  }else if(rank===1){
   prog='<div class="nextprog"><div class="nt"><span>'+esc(t('topMsg'))+'</span></div><div class="bar"><i style="width:100%"></i></div></div>';
  }else{
   prog='<div class="nextprog"><div class="nt"><span>'+esc(t('rankHint'))+'</span></div><div class="bar"><i style="width:0%"></i></div></div>';
  }
  el.innerHTML='<div class="ylab">'+esc(t('youLab'))+'</div><div class="row"><div class="bigrank">'+(rank!=null?'#'+rank:'—')+'<small>'+esc(t('rankLab')).toUpperCase()+'</small></div><div class="youstats">'+
-  '<div class="ystat'+(nr>0?' pos':'')+'"><b>'+(hasActivity?fmtR(nr):'—')+'</b><small>'+esc(t('netR'))+'</small></div>'+
   '<div class="ystat"><b>'+wrTxt(me.win_rate)+'</b><small>'+esc(t('winRate'))+'</small></div>'+
   '<div class="ystat"><b>'+money(me.balance)+'</b><small>'+esc(t('balanceLab'))+'</small></div>'+
+  '<div class="ystat"><b>'+consScore(me).toFixed(0)+'</b><small>'+esc(t('mCons'))+'</small></div>'+
   '</div></div>'+prog;
 }
 function drawLb(){
@@ -1863,9 +1864,9 @@ function drawLb(){
   var n=+x.trades||0,unit=n===1?t('tradeOne'):t('tradeUnit');
   var start=LG.start||10000,bal=start+(+x.profit_usd||0),gr=(+x.profit_usd||0)/start*100;
   var gcls=gr>0.005?'up':gr<-0.005?'dn':'fl',gtxt=(gr>0?'+':'')+gr.toFixed(1)+'%';
-  if(metric==='r'){val=fmtR(nr);cls=nr>0?'pos':nr<0?'neg':'neu';sub=wrTxt(x.win_rate)+' · '+n+' '+unit}
-  else if(metric==='bal'){val=money(bal);cls=gr>0.005?'pos':gr<-0.005?'neg':'neu';sub=fmtR(nr)+' · '+wrTxt(x.win_rate)}
-  else{val=wrTxt(x.win_rate);cls='neu';sub=fmtR(nr)+' · '+n+' '+unit}
+  if(metric==='bal'){val=money(bal);cls=gr>0.005?'pos':gr<-0.005?'neg':'neu';sub=wrTxt(x.win_rate)+' · '+n+' '+unit}
+  else if(metric==='cons'){val=wrTxt(x.win_rate);cls='neu';sub=money(bal)+' · '+n+' '+unit}
+  else{val=wrTxt(x.win_rate);cls='neu';sub=money(bal)+' · '+n+' '+unit}
   var flame=(x.is_me&&tpStreak()>=3)?'<span class="fl" aria-hidden="true">🔥</span>':'';
   return '<div class="lrow'+(x.is_me?' me':'')+(rank<=3?' g'+rank:'')+'" style="animation-delay:'+(i*30)+'ms">'+
    '<span class="rk">'+rk+'</span>'+
