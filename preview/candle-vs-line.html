@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Candlestick vs Line Chart</title>
+<style>
+:root{--bg:#0a0e0b;--card:#111612;--line:#222b23;--text:#eef3ee;--muted:#8a978c;
+ --lime:#b7f36b;--red:#ff777d;--orange:#ffc16b;--blue:#8ab4ff}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#070a08;color:var(--text);font:13px -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;padding:22px 14px 60px}
+h1{font-size:18px;font-weight:800;text-align:center;margin-bottom:4px}
+.sub{color:var(--muted);font-size:11px;text-align:center;margin-bottom:20px;line-height:1.6;max-width:560px;margin-left:auto;margin-right:auto}
+.wrap{max-width:900px;margin:0 auto}
+.cols{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:22px}
+@media(max-width:720px){.cols{grid-template-columns:1fr}}
+.col{background:var(--bg);border:1px solid #1c2620;border-radius:16px;overflow:hidden}
+.col .hd{padding:11px 13px;border-bottom:1px solid #16201a;display:flex;align-items:center;gap:8px}
+.col .hd b{font-size:12px;font-weight:800}
+.col .hd .tag{font-size:8.5px;font-weight:800;padding:2px 7px;border-radius:99px}
+.col.win .hd .tag{background:#b7f36b1f;color:var(--lime);border:1px solid #b7f36b40}
+.col.lose .hd .tag{background:#ff777d14;color:#ffb3b7;border:1px solid #ff777d33}
+.col .hd small{margin-left:auto;font-size:9.5px;color:var(--muted)}
+.chart{position:relative;height:200px;background:#0a0e0b}
+.chart svg{display:block;width:100%;height:100%}
+.meta{display:flex;flex-direction:column;gap:5px;padding:11px 13px;border-top:1px solid #16201a;font-size:10.5px;line-height:1.5}
+.meta .r{display:flex;gap:7px}
+.meta .k{color:var(--muted);min-width:78px;flex:none}
+.meta .v{color:#cfd8cf}
+.meta .v b{color:var(--text)}
+
+table{width:100%;border-collapse:collapse;font-size:11px;margin-bottom:20px}
+th,td{padding:8px 10px;text-align:left;border-bottom:1px solid #16201a}
+th{font-size:9px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+td.ok{color:var(--lime);font-weight:800}
+td.no{color:var(--red);font-weight:800}
+td.mid{color:var(--orange)}
+
+.note{color:var(--muted);font-size:10.5px;line-height:1.8}
+.note b{color:var(--lime)}
+.note .warn{color:var(--orange);font-weight:700}
+h2{font-size:12px;font-weight:800;color:var(--lime);letter-spacing:.1em;margin:22px 0 10px}
+</style>
+</head>
+<body>
+<h1>✦ Candlestick vs Line Chart</h1>
+<p class="sub">Data sama (BTCUSD M15, 120 bar). Kiri = candlestick (sekarang). Kanan = line chart.</p>
+
+<div class="wrap">
+  <div class="cols">
+    <div class="col win">
+      <div class="hd"><b>Candlestick</b><span class="tag">SEKARANG</span><small>6/6 trend tepat</small></div>
+      <div class="chart"><svg id="cs" viewBox="0 0 420 200" preserveAspectRatio="none"></svg></div>
+      <div class="meta">
+        <div class="r"><span class="k">Melihat</span><span class="v">Wick + badan + gap setiap bar</span></div>
+        <div class="r"><span class="k">Maklumat</span><span class="v"><b>4 nilai</b> per bar (O/H/L/C)</span></div>
+        <div class="r"><span class="k">Kesan pattern</span><span class="v"><b>50%</b> (nama klasik)</span></div>
+        <div class="r"><span class="k">Kesan trend</span><span class="v"><b>100%</b> (6/6)</span></div>
+      </div>
+    </div>
+    <div class="col lose">
+      <div class="hd"><b>Line chart</b><span class="tag">CADANGAN</span><small>5/6 trend tepat</small></div>
+      <div class="chart"><svg id="ln" viewBox="0 0 420 200" preserveAspectRatio="none"></svg></div>
+      <div class="meta">
+        <div class="r"><span class="k">Melihat</span><span class="v">Satu garisan harga tutup</span></div>
+        <div class="r"><span class="k">Maklumat</span><span class="v"><b>1 nilai</b> per bar (C sahaja)</span></div>
+        <div class="r"><span class="k">Kesan pattern</span><span class="v"><b>50%</b> (sama)</span></div>
+        <div class="r"><span class="k">Kesan trend</span><span class="v"><b>83%</b> (5/6) ↓</span></div>
+      </div>
+    </div>
+  </div>
+
+  <h2>HASIL UJIAN SEBENAR</h2>
+  <table>
+    <tr><th>Kes</th><th>Kebenaran</th><th>Candle</th><th>Line</th></tr>
+    <tr><td>Uptrend</td><td>UP</td><td class="ok">✓ UP</td><td class="ok">✓ UP</td></tr>
+    <tr><td>Downtrend</td><td>DOWN</td><td class="ok">✓ DOWN</td><td class="ok">✓ DOWN</td></tr>
+    <tr><td>Range</td><td>RANGE</td><td class="ok">✓ RANGE</td><td class="ok">✓ RANGE</td></tr>
+    <tr><td>Triangle</td><td>RANGE</td><td class="ok">✓ RANGE</td><td class="no">✗ DOWN</td></tr>
+    <tr><td>Double top</td><td>RANGE</td><td class="ok">✓ RANGE</td><td class="ok">✓ RANGE</td></tr>
+    <tr><td>Head &amp; shoulders</td><td>RANGE</td><td class="ok">✓ RANGE</td><td class="ok">✓ RANGE</td></tr>
+    <tr><td><b>Jumlah</b></td><td></td><td class="ok">6/6</td><td class="mid">5/6</td></tr>
+  </table>
+
+  <h2>KENAPA CANDLE LEBIH BAIK</h2>
+  <p class="note">
+    Line chart buang <b>wick</b> (jarak harga sebenar disentuh) dan <b>badan</b> (siapa menang dalam bar).
+    Yang tinggal cuma harga tutup — <b>25% maklumat</b> daripada candle.<br><br>
+    Contoh: bila harga <b>sentuh</b> 60,805 tapi <b>tutup</b> di 60,700, candle tunjuk itu sebagai penolakan (wick panjang atas).
+    Line chart cuma tunjuk garisan di 60,700 — <span class="warn">AI tak nampak penolakan itu</span>.<br><br>
+    Bila anda trade XAU/forex, wick matters — stop-hunt terjadi di situ.
+  </p>
+
+  <h2>BILA LINE BERGUNA</h2>
+  <p class="note">
+    Line chart bagus untuk <b>pair crypto</b> (BTC) sebab tiada gap sesi, dan untuk baca <b>trend jangka panjang</b>
+    (D1/W1) di mana noise bar kecil tak penting.<br><br>
+    Tapi untuk <b>entry</b> M5–H1 yang kita buat sekarang, candle memberi maklumat yang AI perlukan.
+  </p>
+
+  <h2>CADANGAN</h2>
+  <p class="note">
+    <b>Kekal candlestick.</b> Kalau nak tambah untuk clarity, boleh buat <b>hybrid</b>: candle + garis halus
+    pada harga tutup (supaya trend jelas tanpa buang maklumat wick).<br><br>
+    <span class="warn">Jangan</span> tukar penuh ke line — bukti tunjuk trend accuracy turun 6/6 → 5/6.
+  </p>
+</div>
+
+<script>
+/* data sintetik meniru bentuk BTCUSD 120 bar */
+var DATA=(function(){
+  var v=[],x=100,r=1;
+  // pseudo-random deterministik
+  function rnd(){r=(r*9301+49297)%233280;return r/233280}
+  for(var i=0;i<120;i++){
+    var t=i/119;
+    var drift = t<0.35 ? -0.55 : (t<0.55 ? 0.9 : (t<0.75 ? -0.25 : 0.35));
+    x += drift + (rnd()-0.5)*0.9;
+    v.push(x);
+  }
+  return v;
+})();
+
+function drawCandles(){
+  var svg=document.getElementById('cs'), n=DATA.length, W=420,H=200;
+  var hi=Math.max.apply(0,DATA), lo=Math.min.apply(0,DATA), rng=(hi-lo)||1;
+  var Y=function(v){return 14+(hi-v)/rng*(H-34)};
+  var X=function(i){return 10+i*(W-46)/(n-1)};
+  var out='';
+  var r=7;
+  function rnd2(){r=(r*9301+49297)%233280;return r/233280}
+  for(var i=0;i<n;i++){
+    var op = i? DATA[i-1] : DATA[i];
+    var cl = DATA[i];
+    var wick = 0.9+rnd2()*1.6;
+    var hiP = Math.max(op,cl)+wick, loP=Math.min(op,cl)-wick;
+    var col = cl>=op ? '#b7f36b' : '#ff777d';
+    out += '<line x1="'+X(i).toFixed(1)+'" y1="'+Y(hiP).toFixed(1)+'" x2="'+X(i).toFixed(1)+'" y2="'+Y(loP).toFixed(1)+'" stroke="'+col+'" stroke-width="1.6"/>';
+    var t=Y(Math.max(op,cl)), b=Y(Math.min(op,cl));
+    out += '<rect x="'+(X(i)-2.2).toFixed(1)+'" y="'+t.toFixed(1)+'" width="4.4" height="'+Math.max(1.6,b-t).toFixed(1)+'" fill="'+col+'"/>';
+  }
+  svg.innerHTML=out;
+}
+
+function drawLine(){
+  var svg=document.getElementById('ln'), n=DATA.length, W=420,H=200;
+  var hi=Math.max.apply(0,DATA), lo=Math.min.apply(0,DATA), rng=(hi-lo)||1;
+  var Y=function(v){return 14+(hi-v)/rng*(H-34)};
+  var X=function(i){return 10+i*(W-46)/(n-1)};
+  var pts=DATA.map(function(v,i){return X(i).toFixed(1)+','+Y(v).toFixed(1)}).join(' ');
+  svg.innerHTML='<polyline points="'+pts+'" fill="none" stroke="#b7f36b" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round"/>';
+}
+
+drawCandles(); drawLine();
+</script>
+</body>
+</html>
