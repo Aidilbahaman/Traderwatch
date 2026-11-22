@@ -1,0 +1,75 @@
+<!doctype html><html lang="ms"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>V5 — Terminal HUD</title>
+<style>
+*{box-sizing:border-box;margin:0}
+body{background:#020604;color:#4ade80;font:13px "SFMono-Regular",Consolas,monospace}
+.phone{width:390px;max-width:100%;height:800px;max-height:100vh;margin:0 auto;position:relative;overflow:hidden;background:radial-gradient(ellipse at 50% 45%,#07140c,#010403 72%)}
+.scanlines{position:absolute;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 3px,#4ade8008 4px);pointer-events:none;z-index:9}
+.corner{position:absolute;width:26px;height:26px;border:1px solid #4ade8055;z-index:8}
+.corner.tl{top:16px;left:16px;border-right:0;border-bottom:0}.corner.tr{top:16px;right:16px;border-left:0;border-bottom:0}
+.corner.bl{bottom:16px;left:16px;border-right:0;border-top:0}.corner.br{bottom:16px;right:16px;border-left:0;border-top:0}
+#intro{position:absolute;inset:0;z-index:10;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;transition:opacity .5s}
+#intro.gone{opacity:0;pointer-events:none}
+.brand{position:absolute;top:52px;font-size:11px;letter-spacing:2px;color:#86efac;z-index:3}
+.brand::before{content:'● ';color:#4ade80;animation:bl 1.2s infinite}
+@keyframes bl{0%,100%{opacity:1}50%{opacity:.2}}
+.sg{position:relative;width:250px;height:250px;display:grid;place-items:center;z-index:3}
+.sg .gridcirc{position:absolute;width:200px;height:200px;border:1px solid #4ade8044;border-radius:50%;animation:spin 20s linear infinite}
+.sg .gridcirc::before,.sg .gridcirc::after{content:'';position:absolute;inset:18px;border:1px dashed #4ade8033;border-radius:50%}
+.sg .gridcirc::after{inset:40px;border-style:dotted}
+@keyframes spin{to{transform:rotate(360deg)}}
+.sg cross{position:absolute;width:220px;height:1px;background:linear-gradient(90deg,transparent,#4ade8066,transparent)}
+.sg cross.v{transform:rotate(90deg)}
+.sg .core{position:relative;width:72px;height:72px;border-radius:50%;background:#010403;z-index:4;
+ box-shadow:0 0 0 1px #4ade80,0 0 28px 8px #4ade8077,inset 0 0 18px #000;animation:corep 2.6s ease-in-out infinite}
+@keyframes corep{0%,100%{box-shadow:0 0 0 1px #4ade80,0 0 26px 6px #4ade8066,inset 0 0 18px #000}50%{box-shadow:0 0 0 2px #86efac,0 0 44px 14px #4ade8099,inset 0 0 18px #000}}
+.sg .wave{position:absolute;width:110px;height:110px;border-radius:50%;border:1px solid #4ade8088;animation:wave 3s linear infinite}
+.sg .wave.b{animation-delay:1s}.sg .wave.c{animation-delay:2s}
+@keyframes wave{0%{transform:scale(1);opacity:.8}100%{transform:scale(2.3);opacity:0}}
+.sg .ray{position:absolute;left:50%;top:50%;width:0;height:0;transform-origin:0 0}
+.sg .dot{position:absolute;width:3px;height:3px;background:#86efac;box-shadow:0 0 6px #4ade80;animation:suck linear infinite}
+@keyframes suck{0%{transform:translate3d(var(--d),0,0);opacity:0}10%{opacity:1}90%{opacity:1}100%{transform:translate3d(0,0,0);opacity:0}}
+.hudtxt{position:absolute;bottom:158px;left:26px;right:26px;z-index:4;font-size:10px;line-height:1.9;color:#86efac}
+.hudtxt .row{display:flex;justify-content:space-between;border-bottom:1px solid #4ade8022;padding:2px 0}
+.hudtxt b{color:#4ade80;font-size:15px;letter-spacing:1px}
+.tap{position:absolute;bottom:48px;left:26px;font-size:10px;color:#4ade80;letter-spacing:1px;animation:bl 1.4s infinite;z-index:4}
+#on{position:absolute;inset:0;z-index:20;display:flex;align-items:center;justify-content:center;padding:22px;background:#010403dd;backdrop-filter:blur(4px);opacity:0;pointer-events:none;transition:opacity .4s}
+#on.show{opacity:1;pointer-events:auto}
+.card{width:100%;max-width:360px;background:#06110a;border:1px solid #4ade8066;padding:24px 20px 18px;text-align:center;box-shadow:0 0 40px #4ade8022}
+.clogo{font-size:10px;letter-spacing:2px;color:#4ade80;margin-bottom:18px}
+.mini{width:70px;height:70px;margin:0 auto 16px;border:1px solid #4ade8066;border-radius:50%;display:grid;place-items:center;position:relative}
+.mini .v{width:22px;height:22px;border-radius:50%;background:#010403;box-shadow:0 0 0 1px #4ade80,0 0 12px #4ade8088}
+.ct{font-size:18px;font-weight:700;color:#86efac}.cs{font-size:10.5px;color:#4ade80aa;margin:7px 0 20px}
+.opt{display:flex;align-items:center;gap:10px;width:100%;text-align:left;background:#4ade8008;border:1px solid #4ade8044;padding:12px;margin-bottom:9px;color:#86efac;font:inherit;cursor:pointer}
+.oi{width:32px;height:32px;flex:none;border:1px solid #4ade8066;display:grid;place-items:center}
+.ot{flex:1;display:flex;flex-direction:column;gap:2px}.ot b{font-size:11.5px}.ot small{font-size:9.5px;color:#4ade80aa}
+.go{width:100%;border:1px solid #4ade80;padding:13px;font:700 12px inherit;cursor:pointer;background:#4ade8022;color:#86efac;margin-top:8px}
+.sk{display:block;margin:11px auto 0;border:0;background:none;color:#4ade80aa;cursor:pointer;font:600 10px inherit;text-decoration:underline}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style></head><body>
+<div class="phone"><div class="scanlines"></div>
+<div class="corner tl"></div><div class="corner tr"></div><div class="corner bl"></div><div class="corner br"></div>
+<div id="intro"><div class="brand">TRADERWATCH // SYS.INIT</div>
+ <div class="sg" id="sg"><div class="gridcirc"></div><cross></cross><cross class="v"></cross><div class="wave"></div><div class="wave b"></div><div class="wave c"></div><div class="core"></div></div>
+ <div class="hudtxt">
+  <div class="row"><span>ENGINE</span><b>ONLINE</b></div>
+  <div class="row"><span>MARKET FEED</span><b>LIVE</b></div>
+  <div class="row"><span>AI VISION</span><b>READY</b></div>
+  <div class="row"><span>ANALYSTS DETECTED</span><b>12</b></div>
+ </div>
+ <div class="tap">&gt; PRESS TO INITIALIZE_</div>
+</div>
+<div id="on"><div class="card"><div class="clogo">TRADERWATCH // SETUP</div>
+ <div class="mini"><div class="v"></div></div>
+ <div class="ct">&gt; Selamat datang_</div><div class="cs">Sediakan sistem sebelum mula.</div>
+ <button class="opt"><span class="oi"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"/></svg></span><span class="ot"><b>HIDUPKAN NOTIFIKASI</b><small>Alert TP/SL &amp; signal</small></span></button>
+ <button class="opt"><span class="oi"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="6" y="2" width="12" height="20" rx="2"/></svg></span><span class="ot"><b>TAMBAH KE HOME SCREEN</b><small>Buka macam app</small></span></button>
+ <button class="go">&gt; MULA TRADE_</button><button class="sk">skip/setup later</button>
+</div></div></div>
+<script>
+(function(){var sg=document.getElementById('sg');
+ for(var i=0;i<14;i++){var r=document.createElement('div');r.className='ray';r.style.transform='rotate('+(Math.random()*360)+'deg)';var d=document.createElement('div');d.className='dot';var du=2+Math.random()*2;d.style.animationDuration=du+'s';d.style.animationDelay=(-Math.random()*du)+'s';d.style.setProperty('--d',(88+Math.random()*26)+'px');r.appendChild(d);sg.appendChild(r)}
+ document.getElementById('intro').onclick=function(){this.classList.add('gone');setTimeout(function(){document.getElementById('on').classList.add('show')},480)};
+})();
+</script></body></html>

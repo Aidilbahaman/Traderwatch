@@ -1,0 +1,83 @@
+<!doctype html><html lang="ms"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>V1 — Nebula Cosmic</title>
+<style>
+*{box-sizing:border-box;margin:0}
+body{background:#07050f;color:#f0eaff;font:14px -apple-system,sans-serif}
+.phone{width:390px;max-width:100%;height:800px;max-height:100vh;margin:0 auto;position:relative;overflow:hidden;background:#07050f}
+#intro{position:absolute;inset:0;z-index:10;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;transition:opacity .5s}
+#intro.gone{opacity:0;pointer-events:none}
+/* nebula clouds */
+.neb{position:absolute;border-radius:50%;filter:blur(60px);opacity:.55;will-change:transform}
+.neb.a{width:340px;height:340px;background:radial-gradient(circle,#7c3aed,#4c1d95 60%,transparent);top:12%;left:-18%;animation:drift 18s ease-in-out infinite}
+.neb.b{width:300px;height:300px;background:radial-gradient(circle,#c026d3,#7e22ce 55%,transparent);bottom:14%;right:-16%;animation:drift 22s ease-in-out infinite reverse}
+.neb.c{width:240px;height:240px;background:radial-gradient(circle,#2563eb,#1e1b4b 60%,transparent);top:42%;left:28%;animation:drift 26s ease-in-out infinite}
+@keyframes drift{0%,100%{transform:translate(0,0) scale(1)}33%{transform:translate(30px,-24px) scale(1.12)}66%{transform:translate(-24px,20px) scale(.94)}}
+/* stars */
+.star{position:absolute;background:#fff;border-radius:50%;animation:tw linear infinite}
+@keyframes tw{0%,100%{opacity:.15}50%{opacity:.95}}
+/* core singularity */
+.sg{position:relative;width:220px;height:220px;display:grid;place-items:center;z-index:2}
+.sg .ring{position:absolute;border-radius:50%;border:1px solid #a78bfa66;animation:ringOut 4s ease-out infinite}
+.sg .ring:nth-child(1){width:120px;height:120px}
+.sg .ring:nth-child(2){width:120px;height:120px;animation-delay:1.3s}
+.sg .ring:nth-child(3){width:120px;height:120px;animation-delay:2.6s}
+@keyframes ringOut{0%{transform:scale(1);opacity:.9}100%{transform:scale(2.4);opacity:0}}
+.sg .disc{position:absolute;width:170px;height:170px;border-radius:50%;
+ background:conic-gradient(from 0deg,#7c3aed,#c026d3,#2563eb,#a78bfa,#7c3aed);
+ filter:blur(3px);opacity:.75;animation:spin 8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.sg .void{position:relative;width:78px;height:78px;border-radius:50%;background:#050310;z-index:3;
+ box-shadow:0 0 0 1.5px #a78bfa,0 0 40px 12px #7c3aedaa,0 0 100px 40px #c026d355}
+.sg .spark{position:absolute;left:50%;top:50%;width:0;height:0;transform-origin:0 0}
+.sg .spark i{position:absolute;display:block;width:3px;height:3px;border-radius:50%;background:#e9d5ff;box-shadow:0 0 8px #a78bfa;animation:suck linear infinite}
+@keyframes suck{0%{transform:translate3d(var(--d),0,0);opacity:0}10%{opacity:1}90%{opacity:1}100%{transform:translate3d(0,0,0);opacity:0}}
+.brand{position:absolute;top:60px;font-size:12px;font-weight:900;letter-spacing:3px;color:#c4b5fd;z-index:3}
+.itxt{position:absolute;bottom:150px;text-align:center;z-index:3;padding:0 30px}
+.itxt b{display:block;font-size:27px;font-weight:900;letter-spacing:-.6px;background:linear-gradient(90deg,#c4b5fd,#f0abfc,#93c5fd);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.itxt small{display:block;color:#a78bfa;font-size:11.5px;margin-top:10px;line-height:1.6}
+.tap{position:absolute;bottom:46px;font-size:10.5px;color:#c4b5fd;font-weight:700;letter-spacing:1.5px;animation:bl 1.8s ease-in-out infinite;z-index:3}
+@keyframes bl{0%,100%{opacity:.3}50%{opacity:1}}
+/* layer2 */
+#on{position:absolute;inset:0;z-index:20;display:flex;align-items:center;justify-content:center;padding:22px;
+ background:rgba(7,5,15,.88);backdrop-filter:blur(12px);opacity:0;pointer-events:none;transition:opacity .45s}
+#on.show{opacity:1;pointer-events:auto}
+.card{width:100%;max-width:360px;background:#120d24;border:1px solid #7c3aed55;border-radius:26px;padding:26px 20px 18px;text-align:center;box-shadow:0 24px 70px #000c}
+.clogo{font-size:11px;font-weight:900;letter-spacing:3px;color:#c4b5fd;margin-bottom:18px}
+.mini{width:76px;height:76px;margin:0 auto 16px;position:relative;display:grid;place-items:center}
+.mini .d{position:absolute;width:60px;height:60px;border-radius:50%;background:conic-gradient(#7c3aed,#c026d3,#2563eb,#7c3aed);filter:blur(3px);opacity:.7;animation:spin 6s linear infinite}
+.mini .v{position:relative;width:26px;height:26px;border-radius:50%;background:#050310;box-shadow:0 0 0 1.5px #a78bfa,0 0 16px 4px #7c3aedaa;z-index:2}
+.ct{font-size:21px;font-weight:900}
+.cs{font-size:11.5px;color:#a78bfa;margin:7px 0 20px;line-height:1.5}
+.opt{display:flex;align-items:center;gap:12px;width:100%;text-align:left;background:#1a1333;border:1px solid #7c3aed44;border-radius:15px;padding:13px;margin-bottom:10px;color:#f0eaff;font:inherit;cursor:pointer}
+.oi{width:36px;height:36px;flex:none;border-radius:11px;display:grid;place-items:center;background:#7c3aed22;color:#c4b5fd}
+.ot{flex:1;display:flex;flex-direction:column;gap:3px}.ot b{font-size:12.5px;font-weight:800}.ot small{font-size:10px;color:#a78bfa}
+.go{width:100%;border:0;border-radius:14px;padding:14px;font:800 13px inherit;cursor:pointer;background:linear-gradient(135deg,#7c3aed,#c026d3);color:#fff;margin-top:8px}
+.sk{display:block;margin:11px auto 0;border:0;background:none;color:#8b7cb8;cursor:pointer;font:600 11px inherit;text-decoration:underline}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style></head><body>
+<div class="phone">
+ <div id="intro">
+  <div class="neb a"></div><div class="neb b"></div><div class="neb c"></div>
+  <div class="brand">TRADERWATCH</div>
+  <div class="sg" id="sg"><div class="ring"></div><div class="ring"></div><div class="ring"></div><div class="disc"></div><div class="void"></div></div>
+  <div class="itxt"><b>Enter the market</b><small>Nebula intelligence — baca pasaran seperti institusi.</small></div>
+  <div class="tap">TEKAN UNTUK MASUK</div>
+ </div>
+ <div id="on"><div class="card">
+  <div class="clogo">TRADERWATCH</div>
+  <div class="mini"><div class="d"></div><div class="v"></div></div>
+  <div class="ct">Selamat datang!</div><div class="cs">Sediakan app anda sebelum mula.</div>
+  <button class="opt"><span class="oi"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"/><path d="M10 21h4"/></svg></span><span class="ot"><b>Hidupkan notifikasi</b><small>Alert bila trade kena TP/SL</small></span></button>
+  <button class="opt"><span class="oi"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="6" y="2" width="12" height="20" rx="2"/><path d="M11 18h2"/></svg></span><span class="ot"><b>Tambah ke skrin utama</b><small>Buka macam app</small></span></button>
+  <button class="go">Mula trade →</button><button class="sk">Langkau dulu</button>
+ </div></div>
+</div>
+<script>
+(function(){var ph=document.querySelector('.phone');
+ for(var i=0;i<70;i++){var s=document.createElement('div');s.className='star';var z=(Math.random()*2+1).toFixed(1);s.style.width=z+'px';s.style.height=z+'px';s.style.left=(Math.random()*100)+'%';s.style.top=(Math.random()*100)+'%';s.style.animationDuration=(2+Math.random()*4).toFixed(1)+'s';s.style.animationDelay=(-Math.random()*5).toFixed(1)+'s';ph.appendChild(s)}
+ var sg=document.getElementById('sg');
+ for(var i=0;i<16;i++){var r=document.createElement('div');r.className='spark';r.style.transform='rotate('+(Math.random()*360)+'deg)';var d=document.createElement('i');var du=(2+Math.random()*2);d.style.animationDuration=du+'s';d.style.animationDelay=(-Math.random()*du)+'s';d.style.setProperty('--d',(90+Math.random()*30)+'px');r.appendChild(d);sg.appendChild(r)}
+ document.getElementById('intro').onclick=function(){this.classList.add('gone');setTimeout(function(){document.getElementById('on').classList.add('show')},480)};
+})();
+</script></body></html>

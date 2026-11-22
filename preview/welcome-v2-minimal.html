@@ -1,0 +1,64 @@
+<!doctype html><html lang="ms"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>V2 — Minimal Wireframe</title>
+<style>
+*{box-sizing:border-box;margin:0}
+body{background:#f7f8fa;color:#111827;font:14px -apple-system,sans-serif}
+.phone{width:390px;max-width:100%;height:800px;max-height:100vh;margin:0 auto;position:relative;overflow:hidden;background:#fff}
+#intro{position:absolute;inset:0;z-index:10;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;background:#fff;transition:opacity .5s}
+#intro.gone{opacity:0;pointer-events:none}
+/* grid */
+.grid{position:absolute;inset:0;background-image:linear-gradient(#e5e7eb 1px,transparent 1px),linear-gradient(90deg,#e5e7eb 1px,transparent 1px);background-size:32px 32px;opacity:.7}
+.brand{position:absolute;top:54px;font-size:12px;font-weight:800;letter-spacing:2px;color:#111827}
+.brand em{font-style:normal;color:#6b7280}
+/* wireframe blackhole — pure lines */
+.sg{position:relative;width:230px;height:230px;display:grid;place-items:center;z-index:2}
+.sg .cir{position:absolute;border:1px solid #d1d5db;border-radius:50%}
+.sg .c1{width:110px;height:110px;animation:spin 14s linear infinite;border-style:dashed}
+.sg .c2{width:150px;height:150px;border-color:#9ca3af66;animation:spin 10s linear infinite reverse}
+.sg .c3{width:190px;height:190px;border-color:#d1d5db;border-style:dotted;animation:spin 20s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.sg .dot{position:absolute;width:4px;height:4px;border-radius:50%;background:#111827;animation:suck 2.6s linear infinite}
+.sg .ray{position:absolute;left:50%;top:50%;transform-origin:0 0;width:0;height:0}
+@keyframes suck{0%{transform:translate3d(var(--d),0,0);opacity:0}10%{opacity:1}90%{opacity:1}100%{transform:translate3d(0,0,0);opacity:0}}
+.sg .core{position:relative;width:56px;height:56px;border-radius:50%;background:#111827;z-index:3;animation:pulse 3s ease-in-out infinite}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 6px #e5e7eb}50%{box-shadow:0 0 0 14px #f3f4f6}}
+.itxt{position:absolute;bottom:150px;text-align:center;z-index:3;padding:0 30px}
+.itxt b{display:block;font-size:26px;font-weight:900;letter-spacing:-1px}
+.itxt small{display:block;color:#6b7280;font-size:11.5px;margin-top:9px;line-height:1.6}
+.tap{position:absolute;bottom:46px;font-size:10px;color:#111827;font-weight:800;letter-spacing:1px;animation:bl 1.8s ease-in-out infinite;z-index:3}
+@keyframes bl{0%,100%{opacity:.25}50%{opacity:1}}
+#on{position:absolute;inset:0;z-index:20;display:flex;align-items:center;justify-content:center;padding:22px;background:#fffffff0;backdrop-filter:blur(6px);opacity:0;pointer-events:none;transition:opacity .45s}
+#on.show{opacity:1;pointer-events:auto}
+.card{width:100%;max-width:360px;background:#fff;border:1.5px solid #111827;border-radius:0;padding:26px 20px 18px;text-align:center;box-shadow:8px 8px 0 #111827}
+.clogo{font-size:11px;font-weight:800;letter-spacing:2px;margin-bottom:18px}
+.mini{width:70px;height:70px;margin:0 auto 16px;position:relative;display:grid;place-items:center;border:1px solid #111827;border-radius:50%}
+.mini .v{width:22px;height:22px;background:#111827;border-radius:50%;animation:pulse 3s ease-in-out infinite}
+.ct{font-size:21px;font-weight:900}.cs{font-size:11.5px;color:#6b7280;margin:7px 0 20px}
+.opt{display:flex;align-items:center;gap:12px;width:100%;text-align:left;background:#fff;border:1.5px solid #111827;border-radius:0;padding:13px;margin-bottom:10px;color:#111827;font:inherit;cursor:pointer}
+.opt:hover{background:#f3f4f6}
+.oi{width:34px;height:34px;flex:none;border:1px solid #111827;display:grid;place-items:center}
+.ot{flex:1;display:flex;flex-direction:column;gap:3px}.ot b{font-size:12.5px;font-weight:800}.ot small{font-size:10px;color:#6b7280}
+.go{width:100%;border:1.5px solid #111827;border-radius:0;padding:14px;font:800 13px inherit;cursor:pointer;background:#111827;color:#fff;margin-top:8px}
+.sk{display:block;margin:11px auto 0;border:0;background:none;color:#6b7280;cursor:pointer;font:600 11px inherit;text-decoration:underline}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style></head><body>
+<div class="phone"><div id="intro"><div class="grid"></div>
+ <div class="brand">TRADERWATCH <em>／ 001</em></div>
+ <div class="sg" id="sg"><div class="cir c1"></div><div class="cir c2"></div><div class="cir c3"></div><div class="core"></div></div>
+ <div class="itxt"><b>Market intelligence.</b><small>Simple. Clean. Data-driven.</small></div>
+ <div class="tap">TEKAN UNTUK MASUK →</div>
+</div>
+<div id="on"><div class="card"><div class="clogo">TRADERWATCH ／ 002</div>
+ <div class="mini"><div class="v"></div></div>
+ <div class="ct">Selamat datang!</div><div class="cs">Sediakan app anda sebelum mula.</div>
+ <button class="opt"><span class="oi"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"/></svg></span><span class="ot"><b>Hidupkan notifikasi</b><small>Alert bila trade kena TP/SL</small></span></button>
+ <button class="opt"><span class="oi"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="6" y="2" width="12" height="20" rx="2"/></svg></span><span class="ot"><b>Tambah ke skrin utama</b><small>Buka macam app</small></span></button>
+ <button class="go">Mula trade →</button><button class="sk">Langkau dulu</button>
+</div></div></div>
+<script>
+(function(){var sg=document.getElementById('sg');
+ for(var i=0;i<12;i++){var r=document.createElement('div');r.className='ray';r.style.transform='rotate('+(Math.random()*360)+'deg)';var d=document.createElement('div');d.className='dot';var du=2+Math.random()*2;d.style.animationDuration=du+'s';d.style.animationDelay=(-Math.random()*du)+'s';d.style.setProperty('--d',(70+Math.random()*30)+'px');r.appendChild(d);sg.appendChild(r)}
+ document.getElementById('intro').onclick=function(){this.classList.add('gone');setTimeout(function(){document.getElementById('on').classList.add('show')},480)};
+})();
+</script></body></html>

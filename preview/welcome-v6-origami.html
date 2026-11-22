@@ -1,0 +1,66 @@
+<!doctype html><html lang="ms"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>V6 — Origami Paper</title>
+<style>
+*{box-sizing:border-box;margin:0}
+body{background:#eef2f5;color:#1f2937;font:14px -apple-system,sans-serif}
+.phone{width:390px;max-width:100%;height:800px;max-height:100vh;margin:0 auto;position:relative;overflow:hidden;background:linear-gradient(150deg,#f8fafc,#e2e8f0)}
+/* folded shapes */
+.fold{position:absolute;opacity:.6}
+.f1{width:0;height:0;border-left:200px solid transparent;border-bottom:200px solid #cbd5e1;top:-40px;right:-60px;transform:rotate(18deg)}
+.f2{width:0;height:0;border-right:180px solid transparent;border-top:180px solid #94a3b8;bottom:-30px;left:-40px;opacity:.4}
+.f3{width:260px;height:260px;background:linear-gradient(135deg,#ffffff88,#cbd5e188);transform:rotate(45deg);top:18%;left:20%;border-radius:20px;opacity:.5}
+#intro{position:absolute;inset:0;z-index:10;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;transition:opacity .5s}
+#intro.gone{opacity:0;pointer-events:none}
+.brand{position:absolute;top:56px;font-size:11px;font-weight:800;letter-spacing:3px;color:#475569;z-index:3}
+/* paper blackhole — layered rotations */
+.sg{position:relative;width:240px;height:240px;display:grid;place-items:center;z-index:3}
+.sg .p{position:absolute;width:150px;height:150px;border-radius:30% 70% 60% 40%/50% 45% 55% 50%;animation:fold 9s ease-in-out infinite}
+.sg .p1{background:#94a3b8;animation-direction:normal}
+.sg .p2{background:#cbd5e1;width:130px;height:130px;animation-duration:11s;animation-direction:reverse}
+.sg .p3{background:#e2e8f0;width:110px;height:110px;animation-duration:7s}
+@keyframes fold{0%,100%{transform:rotate(0deg) scale(1);border-radius:30% 70% 60% 40%/50% 45% 55% 50%}50%{transform:rotate(180deg) scale(1.08);border-radius:60% 40% 35% 65%/45% 60% 40% 55%}}
+.sg .core{position:relative;width:62px;height:62px;border-radius:50%;background:linear-gradient(145deg,#1e293b,#0f172a);z-index:4;box-shadow:0 10px 30px #1e293b66,inset 2px 2px 6px #ffffff18;animation:float 3.4s ease-in-out infinite}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+.sg .ray{position:absolute;left:50%;top:50%;width:0;height:0;transform-origin:0 0}
+.sg .dot{position:absolute;width:5px;height:5px;border-radius:2px;background:#64748b;animation:suck linear infinite}
+@keyframes suck{0%{transform:translate3d(var(--d),0,0) rotate(45deg);opacity:0}12%{opacity:1}88%{opacity:1}100%{transform:translate3d(0,0,0) rotate(180deg);opacity:0}}
+.itxt{position:absolute;bottom:150px;text-align:center;z-index:4;padding:0 30px}
+.itxt b{display:block;font-size:26px;font-weight:900;letter-spacing:-.8px;color:#1e293b}
+.itxt small{display:block;color:#64748b;font-size:11.5px;margin-top:9px;line-height:1.6}
+.tap{position:absolute;bottom:46px;font-size:10px;color:#475569;font-weight:800;letter-spacing:1px;animation:bl 1.8s infinite;z-index:4}
+@keyframes bl{0%,100%{opacity:.3}50%{opacity:1}}
+#on{position:absolute;inset:0;z-index:20;display:flex;align-items:center;justify-content:center;padding:22px;background:#e2e8f0cc;backdrop-filter:blur(10px);opacity:0;pointer-events:none;transition:opacity .45s}
+#on.show{opacity:1;pointer-events:auto}
+.card{width:100%;max-width:360px;background:#fff;border-radius:28px;padding:26px 20px 18px;text-align:center;box-shadow:0 20px 60px #1e293b22,0 2px 6px #1e293b11}
+.clogo{font-size:11px;font-weight:800;letter-spacing:3px;color:#94a3b8;margin-bottom:18px}
+.mini{width:74px;height:74px;margin:0 auto 16px;position:relative;display:grid;place-items:center}
+.mini .p{position:absolute;width:60px;height:60px;border-radius:30% 70% 60% 40%;background:#e2e8f0;animation:fold 8s ease-in-out infinite}
+.mini .v{position:relative;width:24px;height:24px;border-radius:50%;background:#1e293b;box-shadow:0 6px 14px #1e293b55;z-index:2}
+.ct{font-size:21px;font-weight:900;color:#1e293b}.cs{font-size:11.5px;color:#64748b;margin:7px 0 20px}
+.opt{display:flex;align-items:center;gap:12px;width:100%;text-align:left;background:#f8fafc;border:1px solid #e2e8f0;border-radius:16px;padding:13px;margin-bottom:10px;color:#1e293b;font:inherit;cursor:pointer}
+.oi{width:36px;height:36px;flex:none;border-radius:12px;display:grid;place-items:center;background:#e2e8f0;color:#475569}
+.ot{flex:1;display:flex;flex-direction:column;gap:3px}.ot b{font-size:12.5px;font-weight:800}.ot small{font-size:10px;color:#94a3b8}
+.go{width:100%;border:0;border-radius:14px;padding:14px;font:800 13px inherit;cursor:pointer;background:#1e293b;color:#fff;margin-top:8px}
+.sk{display:block;margin:11px auto 0;border:0;background:none;color:#94a3b8;cursor:pointer;font:600 11px inherit;text-decoration:underline}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style></head><body>
+<div class="phone"><div class="fold f1"></div><div class="fold f2"></div><div class="fold f3"></div>
+<div id="intro"><div class="brand">TRADERWATCH</div>
+ <div class="sg" id="sg"><div class="p p1"></div><div class="p p2"></div><div class="p p3"></div><div class="core"></div></div>
+ <div class="itxt"><b>Fold into focus.</b><small>Setiap lapisan data, dilipat jadi satu keputusan.</small></div>
+ <div class="tap">TEKAN UNTUK MASUK →</div>
+</div>
+<div id="on"><div class="card"><div class="clogo">TRADERWATCH</div>
+ <div class="mini"><div class="p"></div><div class="v"></div></div>
+ <div class="ct">Selamat datang!</div><div class="cs">Sediakan app anda sebelum mula.</div>
+ <button class="opt"><span class="oi"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"/></svg></span><span class="ot"><b>Hidupkan notifikasi</b><small>Alert bila trade kena TP/SL</small></span></button>
+ <button class="opt"><span class="oi"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="6" y="2" width="12" height="20" rx="2"/></svg></span><span class="ot"><b>Tambah ke skrin utama</b><small>Buka macam app</small></span></button>
+ <button class="go">Mula trade →</button><button class="sk">Langkau dulu</button>
+</div></div></div>
+<script>
+(function(){var sg=document.getElementById('sg');
+ for(var i=0;i<12;i++){var r=document.createElement('div');r.className='ray';r.style.transform='rotate('+(Math.random()*360)+'deg)';var d=document.createElement('div');d.className='dot';var du=2.4+Math.random()*2;d.style.animationDuration=du+'s';d.style.animationDelay=(-Math.random()*du)+'s';d.style.setProperty('--d',(88+Math.random()*24)+'px');r.appendChild(d);sg.appendChild(r)}
+ document.getElementById('intro').onclick=function(){this.classList.add('gone');setTimeout(function(){document.getElementById('on').classList.add('show')},480)};
+})();
+</script></body></html>

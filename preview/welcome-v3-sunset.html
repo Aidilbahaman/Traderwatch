@@ -1,0 +1,66 @@
+<!doctype html><html lang="ms"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>V3 — Sunset Horizon</title>
+<style>
+*{box-sizing:border-box;margin:0}
+body{background:#1a0f0a;color:#fff7ed;font:14px -apple-system,sans-serif}
+.phone{width:390px;max-width:100%;height:800px;max-height:100vh;margin:0 auto;position:relative;overflow:hidden;background:linear-gradient(180deg,#2d1b0e 0%,#7c2d12 45%,#ea580c 75%,#fbbf24 100%)}
+/* sun glow */
+.sunglow{position:absolute;width:420px;height:420px;border-radius:50%;background:radial-gradient(circle,#fbbf24aa,#f97316 40%,transparent 70%);bottom:8%;left:50%;transform:translateX(-50%);filter:blur(10px);animation:glow 5s ease-in-out infinite}
+@keyframes glow{0%,100%{opacity:.75;transform:translateX(-50%) scale(1)}50%{opacity:1;transform:translateX(-50%) scale(1.08)}}
+/* horizon lines */
+.hz{position:absolute;left:0;right:0;bottom:0;height:46%;background:repeating-linear-gradient(0deg,transparent,transparent 22px,#fed7aa22 23px,#fed7aa22 24px);transform:perspective(300px) rotateX(58deg);transform-origin:bottom;opacity:.5}
+#intro{position:absolute;inset:0;z-index:10;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;transition:opacity .5s}
+#intro.gone{opacity:0;pointer-events:none}
+.brand{position:absolute;top:56px;font-size:12px;font-weight:900;letter-spacing:3px;color:#ffedd5;z-index:3}
+/* eclipse */
+.sg{position:relative;width:230px;height:230px;display:grid;place-items:center;z-index:3}
+.sg .sun{position:absolute;width:150px;height:150px;border-radius:50%;background:radial-gradient(circle,#fef3c7,#fbbf24 50%,#f97316 80%);box-shadow:0 0 70px 20px #f9731688;animation:sunpulse 3.5s ease-in-out infinite}
+@keyframes sunpulse{0%,100%{transform:scale(1)}50%{transform:scale(1.06)}}
+.sg .ecl{position:relative;width:104px;height:104px;border-radius:50%;background:#2d1b0e;z-index:3;box-shadow:0 0 0 2px #fbbf24,0 0 40px 10px #f9731655;animation:float 4s ease-in-out infinite}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+.sg .wave{position:absolute;width:150px;height:150px;border-radius:50%;border:1px solid #fed7aa88;animation:wave 3.2s ease-out infinite}
+.sg .wave.b{animation-delay:1.05s}.sg .wave.c{animation-delay:2.1s}
+@keyframes wave{0%{transform:scale(1);opacity:.85}100%{transform:scale(2.1);opacity:0}}
+.sg .ray{position:absolute;left:50%;top:50%;width:0;height:0;transform-origin:0 0}
+.sg .dot{position:absolute;width:3px;height:3px;border-radius:50%;background:#fef3c7;box-shadow:0 0 8px #fbbf24;animation:suck linear infinite}
+@keyframes suck{0%{transform:translate3d(var(--d),0,0);opacity:0}10%{opacity:1}90%{opacity:1}100%{transform:translate3d(0,0,0);opacity:0}}
+.itxt{position:absolute;bottom:150px;text-align:center;z-index:4;padding:0 30px}
+.itxt b{display:block;font-size:27px;font-weight:900;text-shadow:0 2px 20px #0008}
+.itxt small{display:block;color:#ffedd5;font-size:11.5px;margin-top:9px;line-height:1.6;text-shadow:0 1px 8px #0009}
+.tap{position:absolute;bottom:46px;font-size:10.5px;color:#fff7ed;font-weight:800;letter-spacing:1.5px;animation:bl 1.8s ease-in-out infinite;z-index:4}
+@keyframes bl{0%,100%{opacity:.35}50%{opacity:1}}
+#on{position:absolute;inset:0;z-index:20;display:flex;align-items:center;justify-content:center;padding:22px;background:#1a0f0acc;backdrop-filter:blur(12px);opacity:0;pointer-events:none;transition:opacity .45s}
+#on.show{opacity:1;pointer-events:auto}
+.card{width:100%;max-width:360px;background:linear-gradient(160deg,#3b1d0e,#1a0f0a);border:1px solid #f9731655;border-radius:24px;padding:26px 20px 18px;text-align:center;box-shadow:0 24px 70px #000b}
+.clogo{font-size:11px;font-weight:900;letter-spacing:3px;color:#fdba74;margin-bottom:18px}
+.mini{width:76px;height:76px;margin:0 auto 16px;position:relative;display:grid;place-items:center}
+.mini .s{position:absolute;width:56px;height:56px;border-radius:50%;background:radial-gradient(circle,#fbbf24,#f97316);box-shadow:0 0 26px #f9731699}
+.mini .e{position:relative;width:32px;height:32px;border-radius:50%;background:#1a0f0a;box-shadow:0 0 0 2px #fbbf24;z-index:2}
+.ct{font-size:21px;font-weight:900}.cs{font-size:11.5px;color:#fdba74;margin:7px 0 20px}
+.opt{display:flex;align-items:center;gap:12px;width:100%;text-align:left;background:#ffffff0d;border:1px solid #f9731655;border-radius:15px;padding:13px;margin-bottom:10px;color:#fff7ed;font:inherit;cursor:pointer}
+.oi{width:36px;height:36px;flex:none;border-radius:11px;display:grid;place-items:center;background:#f9731622;color:#fdba74}
+.ot{flex:1;display:flex;flex-direction:column;gap:3px}.ot b{font-size:12.5px;font-weight:800}.ot small{font-size:10px;color:#fdba74}
+.go{width:100%;border:0;border-radius:14px;padding:14px;font:800 13px inherit;cursor:pointer;background:linear-gradient(135deg,#f97316,#fbbf24);color:#2d1b0e;margin-top:8px}
+.sk{display:block;margin:11px auto 0;border:0;background:none;color:#fdba74;cursor:pointer;font:600 11px inherit;text-decoration:underline}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style></head><body>
+<div class="phone"><div class="sunglow"></div><div class="hz"></div>
+<div id="intro"><div class="brand">TRADERWATCH</div>
+ <div class="sg" id="sg"><div class="wave"></div><div class="wave b"></div><div class="wave c"></div><div class="sun"></div><div class="ecl"></div></div>
+ <div class="itxt"><b>Golden hour analysis.</b><small>Setiap peluang ada masanya. Kami jumpa masa itu.</small></div>
+ <div class="tap">TEKAN UNTUK MASUK</div>
+</div>
+<div id="on"><div class="card"><div class="clogo">TRADERWATCH</div>
+ <div class="mini"><div class="s"></div><div class="e"></div></div>
+ <div class="ct">Selamat datang!</div><div class="cs">Sediakan app anda sebelum mula.</div>
+ <button class="opt"><span class="oi"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"/></svg></span><span class="ot"><b>Hidupkan notifikasi</b><small>Alert bila trade kena TP/SL</small></span></button>
+ <button class="opt"><span class="oi"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="6" y="2" width="12" height="20" rx="2"/></svg></span><span class="ot"><b>Tambah ke skrin utama</b><small>Buka macam app</small></span></button>
+ <button class="go">Mula trade →</button><button class="sk">Langkau dulu</button>
+</div></div></div>
+<script>
+(function(){var sg=document.getElementById('sg');
+ for(var i=0;i<14;i++){var r=document.createElement('div');r.className='ray';r.style.transform='rotate('+(Math.random()*360)+'deg)';var d=document.createElement('div');d.className='dot';var du=2.2+Math.random()*2;d.style.animationDuration=du+'s';d.style.animationDelay=(-Math.random()*du)+'s';d.style.setProperty('--d',(85+Math.random()*30)+'px');r.appendChild(d);sg.appendChild(r)}
+ document.getElementById('intro').onclick=function(){this.classList.add('gone');setTimeout(function(){document.getElementById('on').classList.add('show')},480)};
+})();
+</script></body></html>

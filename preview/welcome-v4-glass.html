@@ -1,0 +1,71 @@
+<!doctype html><html lang="ms"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>V4 — Glassmorphism</title>
+<style>
+*{box-sizing:border-box;margin:0}
+body{background:#0b1420;color:#e2e8f0;font:14px -apple-system,sans-serif}
+.phone{width:390px;max-width:100%;height:800px;max-height:100vh;margin:0 auto;position:relative;overflow:hidden;background:linear-gradient(135deg,#0b1420 0%,#123047 50%,#0f2027 100%)}
+.blob{position:absolute;border-radius:50%;filter:blur(70px);opacity:.5;will-change:transform}
+.blob.a{width:320px;height:320px;background:#06b6d4;top:-10%;left:-15%;animation:drift 20s ease-in-out infinite}
+.blob.b{width:280px;height:280px;background:#3b82f6;bottom:5%;right:-12%;animation:drift 24s ease-in-out infinite reverse}
+.blob.c{width:220px;height:220px;background:#8b5cf6;top:40%;left:35%;animation:drift 28s ease-in-out infinite}
+@keyframes drift{0%,100%{transform:translate(0,0)}50%{transform:translate(28px,-24px)}}
+#intro{position:absolute;inset:0;z-index:10;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;transition:opacity .5s}
+#intro.gone{opacity:0;pointer-events:none}
+.brand{position:absolute;top:56px;font-size:12px;font-weight:900;letter-spacing:2px;color:#a5f3fc;z-index:3;text-shadow:0 0 20px #06b6d4aa}
+/* glass orb */
+.sg{position:relative;width:240px;height:240px;display:grid;place-items:center;z-index:3}
+.sg .glass{position:absolute;width:160px;height:160px;border-radius:50%;
+ background:radial-gradient(circle at 32% 28%,#ffffff33,#ffffff08 45%,#00000044 75%);
+ border:1px solid #ffffff55;backdrop-filter:blur(6px);box-shadow:inset 0 0 30px #ffffff22,0 12px 50px #0008;
+ animation:tilt 8s ease-in-out infinite}
+@keyframes tilt{0%,100%{transform:rotate(-6deg) scale(1)}50%{transform:rotate(6deg) scale(1.04)}}
+.sg .glint{position:absolute;width:60px;height:20px;border-radius:50%;background:linear-gradient(90deg,transparent,#ffffffaa,transparent);top:52px;left:50px;transform:rotate(-24deg);filter:blur(2px);animation:glint 4s ease-in-out infinite}
+@keyframes glint{0%,100%{opacity:.4;transform:translateX(-10px) rotate(-24deg)}50%{opacity:.9;transform:translateX(14px) rotate(-24deg)}}
+.sg .core{position:relative;width:70px;height:70px;border-radius:50%;background:radial-gradient(circle,#0b1420,#000);z-index:4;
+ box-shadow:0 0 0 1px #a5f3fcaa,0 0 30px 8px #06b6d488,inset 0 0 20px #000;animation:corePulse 3.2s ease-in-out infinite}
+@keyframes corePulse{0%,100%{box-shadow:0 0 0 1px #a5f3fcaa,0 0 30px 8px #06b6d488,inset 0 0 20px #000}50%{box-shadow:0 0 0 1.5px #a5f3fc,0 0 46px 14px #06b6d4aa,inset 0 0 20px #000}}
+.sg .wave{position:absolute;width:120px;height:120px;border-radius:50%;border:1px solid #a5f3fc66;animation:wave 3.2s ease-out infinite}
+.sg .wave.b{animation-delay:1.05s}.sg .wave.c{animation-delay:2.1s}
+@keyframes wave{0%{transform:scale(1);opacity:.7}100%{transform:scale(2.2);opacity:0}}
+.sg .ray{position:absolute;left:50%;top:50%;width:0;height:0;transform-origin:0 0}
+.sg .dot{position:absolute;width:3px;height:3px;border-radius:50%;background:#cffafe;box-shadow:0 0 8px #06b6d4;animation:suck linear infinite}
+@keyframes suck{0%{transform:translate3d(var(--d),0,0);opacity:0}10%{opacity:1}90%{opacity:1}100%{transform:translate3d(0,0,0);opacity:0}}
+.itxt{position:absolute;bottom:150px;text-align:center;z-index:4;padding:0 30px}
+.itxt b{display:block;font-size:26px;font-weight:900;letter-spacing:-.5px}
+.itxt small{display:block;color:#a5f3fc;font-size:11.5px;margin-top:9px;line-height:1.6}
+.tap{position:absolute;bottom:46px;font-size:10.5px;color:#a5f3fc;font-weight:800;letter-spacing:1.5px;animation:bl 1.8s ease-in-out infinite;z-index:4}
+@keyframes bl{0%,100%{opacity:.3}50%{opacity:1}}
+#on{position:absolute;inset:0;z-index:20;display:flex;align-items:center;justify-content:center;padding:22px;background:#0b1420aa;backdrop-filter:blur(14px);opacity:0;pointer-events:none;transition:opacity .45s}
+#on.show{opacity:1;pointer-events:auto}
+.card{width:100%;max-width:360px;background:#ffffff0d;border:1px solid #ffffff33;border-radius:26px;padding:26px 20px 18px;text-align:center;backdrop-filter:blur(20px);box-shadow:0 20px 60px #0008}
+.clogo{font-size:11px;font-weight:900;letter-spacing:2px;color:#a5f3fc;margin-bottom:18px}
+.mini{width:74px;height:74px;margin:0 auto 16px;border-radius:50%;background:radial-gradient(circle at 34% 30%,#ffffff44,#ffffff0a 50%,#0006 80%);border:1px solid #ffffff55;display:grid;place-items:center;box-shadow:inset 0 0 16px #ffffff22}
+.mini .v{width:24px;height:24px;border-radius:50%;background:#0b1420;box-shadow:0 0 0 1px #a5f3fc,0 0 14px #06b6d4aa}
+.ct{font-size:21px;font-weight:900}.cs{font-size:11.5px;color:#a5f3fc;margin:7px 0 20px}
+.opt{display:flex;align-items:center;gap:12px;width:100%;text-align:left;background:#ffffff0a;border:1px solid #ffffff2a;border-radius:15px;padding:13px;margin-bottom:10px;color:#e2e8f0;font:inherit;cursor:pointer}
+.oi{width:36px;height:36px;flex:none;border-radius:11px;display:grid;place-items:center;background:#06b6d425;color:#a5f3fc}
+.ot{flex:1;display:flex;flex-direction:column;gap:3px}.ot b{font-size:12.5px;font-weight:800}.ot small{font-size:10px;color:#7dd3fc}
+.go{width:100%;border:1px solid #a5f3fc66;border-radius:14px;padding:14px;font:800 13px inherit;cursor:pointer;background:linear-gradient(135deg,#06b6d4,#3b82f6);color:#fff;margin-top:8px}
+.sk{display:block;margin:11px auto 0;border:0;background:none;color:#7dd3fc;cursor:pointer;font:600 11px inherit;text-decoration:underline}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style></head><body>
+<div class="phone"><div class="blob a"></div><div class="blob b"></div><div class="blob c"></div>
+<div id="intro"><div class="brand">TRADERWATCH</div>
+ <div class="sg" id="sg"><div class="wave"></div><div class="wave b"></div><div class="wave c"></div><div class="glass"></div><div class="glint"></div><div class="core"></div></div>
+ <div class="itxt"><b>Clarity in the chaos.</b><small>Data jadi keputusan. Tenang, jelas, tepat.</small></div>
+ <div class="tap">TEKAN UNTUK MASUK</div>
+</div>
+<div id="on"><div class="card"><div class="clogo">TRADERWATCH</div>
+ <div class="mini"><div class="v"></div></div>
+ <div class="ct">Selamat datang!</div><div class="cs">Sediakan app anda sebelum mula.</div>
+ <button class="opt"><span class="oi"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"/></svg></span><span class="ot"><b>Hidupkan notifikasi</b><small>Alert bila trade kena TP/SL</small></span></button>
+ <button class="opt"><span class="oi"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="6" y="2" width="12" height="20" rx="2"/></svg></span><span class="ot"><b>Tambah ke skrin utama</b><small>Buka macam app</small></span></button>
+ <button class="go">Mula trade →</button><button class="sk">Langkau dulu</button>
+</div></div></div>
+<script>
+(function(){var sg=document.getElementById('sg');
+ for(var i=0;i<14;i++){var r=document.createElement('div');r.className='ray';r.style.transform='rotate('+(Math.random()*360)+'deg)';var d=document.createElement('div');d.className='dot';var du=2+Math.random()*2.2;d.style.animationDuration=du+'s';d.style.animationDelay=(-Math.random()*du)+'s';d.style.setProperty('--d',(88+Math.random()*28)+'px');r.appendChild(d);sg.appendChild(r)}
+ document.getElementById('intro').onclick=function(){this.classList.add('gone');setTimeout(function(){document.getElementById('on').classList.add('show')},480)};
+})();
+</script></body></html>
