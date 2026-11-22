@@ -1,0 +1,112 @@
+<!doctype html><html lang="ms"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Z4 — Pixel Dissolve</title>
+<style>
+:root{--lime:#b7f36b;--card:#111612;--card2:#171e18;--line:#222b23;--muted:#8a978c;--text:#eef3ee;--onlime:#10150b}
+*{box-sizing:border-box;margin:0}
+body{background:#0a0e0b;color:var(--text);font:14px -apple-system,sans-serif}
+.hint{position:fixed;top:0;left:0;right:0;z-index:999;background:#171e18dd;color:var(--muted);font-size:10.5px;padding:8px 14px;text-align:center;border-bottom:1px solid var(--line)}
+.hint b{color:var(--lime)}
+.replay{position:fixed;bottom:14px;right:14px;z-index:999;background:var(--card2);border:1px solid var(--line);color:var(--lime);font:700 10px inherit;padding:8px 14px;border-radius:99px;cursor:pointer}
+.phone{width:390px;max-width:100%;height:800px;max-height:100vh;margin:0 auto;position:relative;overflow:hidden;background:#050807}
+#intro{position:absolute;inset:0;z-index:10;display:grid;place-items:center;cursor:pointer;overflow:hidden;background:radial-gradient(ellipse at 50% 50%,#0e150f,#030604 75%)}
+.brand{position:absolute;top:60px;font-size:12px;font-weight:900;letter-spacing:2px;color:var(--lime);z-index:6;transition:opacity .2s}
+.brand span{color:var(--text)}
+.bh{position:relative;width:230px;height:230px;display:grid;place-items:center;z-index:5}
+.bh .glow{position:absolute;width:200px;height:200px;border-radius:50%;background:radial-gradient(circle,#b7f36b33,transparent 65%)}
+.bh .core{position:relative;width:78px;height:78px;border-radius:50%;background:#000;z-index:6;
+ box-shadow:0 0 0 2px var(--lime),0 0 38px 12px #b7f36baa,0 0 100px 34px #b7f36b44;animation:beat 2.6s ease-in-out infinite}
+@keyframes beat{0%,100%{transform:scale(1)}50%{transform:scale(1.05)}}
+.bh .ring{position:absolute;width:110px;height:110px;border-radius:50%;border:1px solid #b7f36b88;animation:wv 3s ease-out infinite}
+.bh .ring.b{animation-delay:1s}.bh .ring.c{animation-delay:2s}
+@keyframes wv{0%{transform:scale(1);opacity:.7}100%{transform:scale(2.4);opacity:0}}
+.itxt{position:absolute;bottom:140px;text-align:center;z-index:6;padding:0 30px;transition:opacity .2s}
+.itxt b{display:block;font-size:24px;font-weight:900}.itxt small{display:block;color:var(--muted);font-size:11.5px;margin-top:8px}
+.tap{position:absolute;bottom:44px;font-size:10.5px;color:var(--lime);font-weight:800;letter-spacing:1px;animation:bl 1.6s infinite;z-index:6}
+@keyframes bl{0%,100%{opacity:.3}50%{opacity:1}}
+/* pixel grid dissolve */
+#pixels{position:absolute;inset:0;z-index:8;display:grid;pointer-events:none;opacity:0}
+#pixels i{background:var(--lime);border-radius:1px;transform:scale(0)}
+#intro.go #pixels{opacity:1}
+#intro.go #pixels i{animation:pix .85s ease-in forwards}
+@keyframes pix{
+ 0%{transform:scale(0) rotate(0);opacity:1}
+ 35%{transform:scale(1.4) rotate(45deg);opacity:.9}
+ 100%{transform:scale(0) rotate(180deg);opacity:0}
+}
+#intro.go .bh{animation:bhZoom .7s cubic-bezier(.7,0,.9,.4) forwards}
+@keyframes bhZoom{0%{transform:scale(1);filter:blur(0)}100%{transform:scale(13);filter:blur(14px)}}
+#intro.go .brand,#intro.go .tap,#intro.go .itxt{opacity:0}
+#void{position:absolute;inset:0;z-index:15;background:#050807;opacity:0;transition:opacity .2s}
+#void.on{opacity:1}
+#on{position:absolute;inset:0;z-index:20;display:flex;align-items:center;justify-content:center;padding:22px;background:rgba(4,8,5,.92);backdrop-filter:blur(10px);opacity:0;pointer-events:none;transition:opacity .5s}
+#on.show{opacity:1;pointer-events:auto}
+.card{width:100%;max-width:360px;background:var(--card);border:1px solid #b7f36b3d;border-radius:24px;padding:24px 20px 18px;text-align:center;transform:translateY(30px);opacity:0;transition:transform .55s cubic-bezier(.2,1.2,.4,1),opacity .45s}
+#on.show .card{transform:translateY(0);opacity:1}
+.clogo{font-size:12px;font-weight:900;color:var(--lime);margin-bottom:14px}.clogo span{color:var(--text)}
+.mini{width:62px;height:62px;margin:0 auto 14px;border-radius:50%;background:#000;box-shadow:0 0 0 1.5px var(--lime),0 0 18px 5px #b7f36b77;animation:beat 3s ease-in-out infinite}
+.ct{font-size:20px;font-weight:900}.cs{font-size:11px;color:var(--muted);margin:6px 0 18px}
+.opt{display:flex;align-items:center;gap:11px;width:100%;text-align:left;background:var(--card2);border:1px solid var(--line);border-radius:14px;padding:12px;margin-bottom:9px;color:var(--text);font:inherit;cursor:pointer}
+.oi{width:34px;height:34px;flex:none;border-radius:10px;display:grid;place-items:center;background:#b7f36b18;color:var(--lime)}
+.ot{flex:1;display:flex;flex-direction:column;gap:2px}.ot b{font-size:12px;font-weight:800}.ot small{font-size:9.5px;color:var(--muted)}
+.go{width:100%;border:0;border-radius:13px;padding:13px;font:800 12.5px inherit;cursor:pointer;background:linear-gradient(135deg,var(--lime),#8ed94e);color:var(--onlime);margin-top:7px}
+.sk{display:block;margin:10px auto 0;border:0;background:none;color:var(--muted);cursor:pointer;font:600 10.5px inherit;text-decoration:underline}
+@media(prefers-reduced-motion:reduce){*{animation:none!important}#intro.go .bh{transform:none;filter:none}}
+</style></head><body>
+<div class="hint"><b>Z4 Pixel Dissolve</b> — chart pecah jadi pixel lime yang berpusar. 🔊 Bunyi "digital crunch + blip arpeggio"</div>
+<button class="replay" onclick="location.reload()">↻ Replay</button>
+<div class="phone">
+ <div id="intro">
+  <div class="brand">✦ <span>TraderWatch</span></div>
+  <div class="bh" id="bh"><div class="glow"></div><div class="ring"></div><div class="ring b"></div><div class="ring c"></div><div class="core"></div></div>
+  <div id="pixels"></div>
+  <div class="itxt"><b>Decode the market.</b><small>Setiap data dipecah, difahami, disusun semula.</small></div>
+  <div class="tap">TEKAN UNTUK MASUK →</div>
+ </div>
+ <div id="void"></div>
+ <div id="on"><div class="card">
+  <div class="clogo">✦ <span>TraderWatch</span></div><div class="mini"></div>
+  <div class="ct">Selamat datang!</div><div class="cs">Sediakan app anda sebelum mula.</div>
+  <button class="opt"><span class="oi"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"/></svg></span><span class="ot"><b>Hidupkan notifikasi</b><small>Alert TP/SL</small></span></button>
+  <button class="opt"><span class="oi"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="6" y="2" width="12" height="20" rx="2"/></svg></span><span class="ot"><b>Tambah ke skrin utama</b><small>Buka macam app</small></span></button>
+  <button class="go">Mula trade →</button><button class="sk">Langkau dulu</button>
+ </div></div>
+</div>
+<script>
+var AC=null;function ac(){if(!AC)AC=new(window.AudioContext||window.webkitAudioContext)();if(AC.state==='suspended')AC.resume();return AC}
+function pixelSound(){
+ var c=ac(),t=c.currentTime;
+ /* digital crunch: noise gated fast */
+ var n=c.createBufferSource(),b=c.createBuffer(1,c.sampleRate*.7,c.sampleRate),d=b.getChannelData(0);
+ for(var i=0;i<d.length;i++)d[i]=((i%97)<40?1:-1)*(Math.random()*.5+.5);
+ n.buffer=b;
+ var bp=c.createBiquadFilter();bp.type='bandpass';bp.frequency.value=1200;bp.Q.value=.8;
+ var g=c.createGain();g.gain.setValueAtTime(.001,t);g.gain.exponentialRampToValueAtTime(.18,t+.05);g.gain.exponentialRampToValueAtTime(.001,t+.7);
+ n.connect(bp).connect(g).connect(c.destination);n.start(t);n.stop(t+.75);
+ /* blip arpeggio naik */
+ [523,659,784,1047].forEach(function(f,i){
+  var o=c.createOscillator();o.type='square';o.frequency.value=f;
+  var og=c.createGain();og.gain.setValueAtTime(.0001,t+i*.09);og.gain.exponentialRampToValueAtTime(.08,t+i*.09+.01);og.gain.exponentialRampToValueAtTime(.001,t+i*.09+.14);
+  o.connect(og).connect(c.destination);o.start(t+i*.09);o.stop(t+i*.09+.16);
+ });
+}
+(function(){
+ var px=document.getElementById('pixels'),COLS=20,ROWS=36;
+ px.style.gridTemplateColumns='repeat('+COLS+',1fr)';px.style.gridTemplateRows='repeat('+ROWS+',1fr)';
+ for(var i=0;i<COLS*ROWS;i++){
+  var p=document.createElement('i');
+  var delay=(Math.random()*.35).toFixed(2);
+  p.style.animationDelay=delay+'s';
+  p.style.background=Math.random()>.75?'#dbe7ff':(Math.random()>.5?'#b7f36b':'#8ab4ff');
+  px.appendChild(p);
+ }
+ var intro=document.getElementById('intro'),busy=false;
+ intro.onclick=function(){
+  if(busy)return;busy=true;try{pixelSound()}catch(e){}
+  intro.classList.add('go');
+  setTimeout(function(){document.getElementById('void').classList.add('on')},700);
+  setTimeout(function(){intro.style.display='none';document.getElementById('on').classList.add('show');
+   setTimeout(function(){var v=document.getElementById('void');v.style.transition='opacity .5s';v.classList.remove('on')},120)},980);
+ };
+})();
+</script></body></html>

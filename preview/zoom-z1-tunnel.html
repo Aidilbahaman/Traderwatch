@@ -1,0 +1,109 @@
+<!doctype html><html lang="ms"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Z1 — Wormhole Tunnel</title>
+<style>
+:root{--lime:#b7f36b;--card:#111612;--card2:#171e18;--line:#222b23;--muted:#8a978c;--text:#eef3ee;--onlime:#10150b}
+*{box-sizing:border-box;margin:0}
+body{background:#0a0e0b;color:var(--text);font:14px -apple-system,sans-serif}
+.hint{position:fixed;top:0;left:0;right:0;z-index:999;background:#171e18dd;color:var(--muted);font-size:10.5px;padding:8px 14px;text-align:center;border-bottom:1px solid var(--line)}
+.hint b{color:var(--lime)}
+.replay{position:fixed;bottom:14px;right:14px;z-index:999;background:var(--card2);border:1px solid var(--line);color:var(--lime);font:700 10px inherit;padding:8px 14px;border-radius:99px;cursor:pointer}
+.phone{width:390px;max-width:100%;height:800px;max-height:100vh;margin:0 auto;position:relative;overflow:hidden;background:#050807}
+#intro{position:absolute;inset:0;z-index:10;display:grid;place-items:center;cursor:pointer;overflow:hidden;background:radial-gradient(ellipse at 50% 50%,#101810,#030604 75%)}
+.brand{position:absolute;top:60px;font-size:12px;font-weight:900;letter-spacing:2px;color:var(--lime);z-index:6;transition:opacity .3s}
+.brand span{color:var(--text)}
+/* TUNNEL — cincin perspektif yang lalu kamera */
+.tunnel{position:absolute;inset:0;display:grid;place-items:center;perspective:420px;z-index:2}
+.tunnel .ring{position:absolute;width:300px;height:300px;border-radius:50%;
+ border:2px solid #b7f36b55;box-shadow:0 0 24px #b7f36b33,inset 0 0 24px #b7f36b22;
+ transform:translateZ(-600px);opacity:0;animation:ringIdle 4s linear infinite}
+@keyframes ringIdle{0%{transform:translateZ(-600px) scale(.4);opacity:0}20%{opacity:.5}100%{transform:translateZ(60px) scale(1.1);opacity:0}}
+.core{position:relative;width:74px;height:74px;border-radius:50%;background:#000;z-index:5;
+ box-shadow:0 0 0 2px var(--lime),0 0 40px 14px #b7f36b99,0 0 110px 40px #b7f36b44;animation:beat 2.8s ease-in-out infinite}
+@keyframes beat{0%,100%{transform:scale(1)}50%{transform:scale(1.06)}}
+.itxt{position:absolute;bottom:140px;text-align:center;z-index:6;padding:0 30px;transition:opacity .3s,transform .5s}
+.itxt b{display:block;font-size:24px;font-weight:900}
+.itxt small{display:block;color:var(--muted);font-size:11.5px;margin-top:8px}
+.tap{position:absolute;bottom:44px;font-size:10.5px;color:var(--lime);font-weight:800;letter-spacing:1px;animation:bl 1.6s infinite;z-index:6}
+@keyframes bl{0%,100%{opacity:.3}50%{opacity:1}}
+/* ZOOM: cincin rush past camera */
+#intro.go .tunnel .ring{animation:ringRush .95s cubic-bezier(.5,0,.9,.4) forwards}
+@keyframes ringRush{0%{transform:translateZ(-600px) scale(.4);opacity:0}12%{opacity:.95}100%{transform:translateZ(500px) scale(3.4);opacity:0}}
+#intro.go .core{animation:coreZoom 1.05s cubic-bezier(.6,0,.9,.35) forwards}
+@keyframes coreZoom{0%{transform:scale(1)}100%{transform:scale(22)}}
+#intro.go .brand,#intro.go .tap{opacity:0}
+#intro.go .itxt{opacity:0;transform:translateY(50px)}
+#void{position:absolute;inset:0;z-index:15;background:#000;opacity:0;transition:opacity .25s}
+#void.on{opacity:1}
+#on{position:absolute;inset:0;z-index:20;display:flex;align-items:center;justify-content:center;padding:22px;background:rgba(4,8,5,.9);backdrop-filter:blur(10px);opacity:0;pointer-events:none;transition:opacity .5s}
+#on.show{opacity:1;pointer-events:auto}
+.card{width:100%;max-width:360px;background:var(--card);border:1px solid #b7f36b3d;border-radius:24px;padding:24px 20px 18px;text-align:center;transform:scale(.85);transition:transform .5s cubic-bezier(.2,1.2,.4,1)}
+#on.show .card{transform:scale(1)}
+.clogo{font-size:12px;font-weight:900;color:var(--lime);margin-bottom:14px}.clogo span{color:var(--text)}
+.mini{width:64px;height:64px;margin:0 auto 14px;border-radius:50%;background:#000;box-shadow:0 0 0 1.5px var(--lime),0 0 20px 6px #b7f36b77;animation:beat 3s ease-in-out infinite}
+.ct{font-size:20px;font-weight:900}.cs{font-size:11px;color:var(--muted);margin:6px 0 18px}
+.opt{display:flex;align-items:center;gap:11px;width:100%;text-align:left;background:var(--card2);border:1px solid var(--line);border-radius:14px;padding:12px;margin-bottom:9px;color:var(--text);font:inherit;cursor:pointer}
+.oi{width:34px;height:34px;flex:none;border-radius:10px;display:grid;place-items:center;background:#b7f36b18;color:var(--lime)}
+.ot{flex:1;display:flex;flex-direction:column;gap:2px}.ot b{font-size:12px;font-weight:800}.ot small{font-size:9.5px;color:var(--muted)}
+.go{width:100%;border:0;border-radius:13px;padding:13px;font:800 12.5px inherit;cursor:pointer;background:linear-gradient(135deg,var(--lime),#8ed94e);color:var(--onlime);margin-top:7px}
+.sk{display:block;margin:10px auto 0;border:0;background:none;color:var(--muted);cursor:pointer;font:600 10.5px inherit;text-decoration:underline}
+@media(prefers-reduced-motion:reduce){*{animation:none!important}#intro.go .core{transform:none}}
+</style></head><body>
+<div class="hint"><b>Z1 Wormhole Tunnel</b> — cincin lalu kamera + bass drop. 🔊 Bunyi ON (tekan untuk dengar)</div>
+<button class="replay" onclick="location.reload()">↻ Replay</button>
+<div class="phone">
+ <div id="intro">
+  <div class="brand">✦ <span>TraderWatch</span></div>
+  <div class="tunnel" id="tunnel"></div>
+  <div class="core"></div>
+  <div class="itxt"><b>Enter the tunnel.</b><small>Satu keputusan di hujung lorong.</small></div>
+  <div class="tap">TEKAN UNTUK MASUK →</div>
+ </div>
+ <div id="void"></div>
+ <div id="on"><div class="card">
+  <div class="clogo">✦ <span>TraderWatch</span></div><div class="mini"></div>
+  <div class="ct">Selamat datang!</div><div class="cs">Sediakan app anda sebelum mula.</div>
+  <button class="opt"><span class="oi"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"/></svg></span><span class="ot"><b>Hidupkan notifikasi</b><small>Alert TP/SL</small></span></button>
+  <button class="opt"><span class="oi"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="6" y="2" width="12" height="20" rx="2"/></svg></span><span class="ot"><b>Tambah ke skrin utama</b><small>Buka macam app</small></span></button>
+  <button class="go">Mula trade →</button><button class="sk">Langkau dulu</button>
+ </div></div>
+</div>
+<script>
+/* ===== AUDIO ENGINE (synth, tiada fail) ===== */
+var AC=null;
+function ac(){if(!AC)AC=new (window.AudioContext||window.webkitAudioContext)();if(AC.state==='suspended')AC.resume();return AC}
+function noiseBuf(c,sec){var b=c.createBuffer(1,c.sampleRate*sec,c.sampleRate),d=b.getChannelData(0);for(var i=0;i<d.length;i++)d[i]=Math.random()*2-1;return b}
+function wormholeSound(){
+ var c=ac(),t=c.currentTime;
+ /* deep whoosh: noise + bandpass sweep up */
+ var n=c.createBufferSource();n.buffer=noiseBuf(c,1.6);
+ var bp=c.createBiquadFilter();bp.type='bandpass';bp.Q.value=1.2;
+ bp.frequency.setValueAtTime(180,t);bp.frequency.exponentialRampToValueAtTime(2600,t+1.0);
+ var g=c.createGain();g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(.28,t+.15);g.gain.exponentialRampToValueAtTime(.001,t+1.5);
+ n.connect(bp).connect(g).connect(c.destination);n.start(t);n.stop(t+1.6);
+ /* bass drop: sine 110 -> 28Hz */
+ var o=c.createOscillator();o.type='sine';o.frequency.setValueAtTime(110,t);o.frequency.exponentialRampToValueAtTime(28,t+1.1);
+ var og=c.createGain();og.gain.setValueAtTime(.0001,t);og.gain.exponentialRampToValueAtTime(.5,t+.1);og.gain.exponentialRampToValueAtTime(.001,t+1.4);
+ o.connect(og).connect(c.destination);o.start(t);o.stop(t+1.5);
+ /* impact thump at void */
+ var o2=c.createOscillator();o2.type='sine';o2.frequency.setValueAtTime(70,t+1.15);o2.frequency.exponentialRampToValueAtTime(30,t+1.45);
+ var g2=c.createGain();g2.gain.setValueAtTime(.0001,t+1.15);g2.gain.exponentialRampToValueAtTime(.45,t+1.2);g2.gain.exponentialRampToValueAtTime(.001,t+1.7);
+ o2.connect(g2).connect(c.destination);o2.start(t+1.15);o2.stop(t+1.75);
+}
+(function(){
+ var tn=document.getElementById('tunnel');
+ for(var i=0;i<9;i++){var r=document.createElement('div');r.className='ring';r.style.animationDelay=(i*0.44).toFixed(2)+'s';tn.appendChild(r)}
+ var intro=document.getElementById('intro'),busy=false;
+ intro.onclick=function(){
+  if(busy)return;busy=true;
+  try{wormholeSound()}catch(e){}
+  /* reset ring delays supaya semua rush serentak berturutan */
+  var rings=tn.querySelectorAll('.ring');
+  rings.forEach(function(r,i){r.style.animationDelay=(i*0.07).toFixed(2)+'s'});
+  intro.classList.add('go');
+  setTimeout(function(){document.getElementById('void').classList.add('on')},1150);
+  setTimeout(function(){intro.style.display='none';document.getElementById('on').classList.add('show');
+   setTimeout(function(){var v=document.getElementById('void');v.style.transition='opacity .6s';v.classList.remove('on')},120)},1450);
+ };
+})();
+</script></body></html>
