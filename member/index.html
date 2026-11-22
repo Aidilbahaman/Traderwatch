@@ -58,7 +58,7 @@ h1{font-size:29px;line-height:1.08;letter-spacing:-.05em;margin:6px 0 6px;font-w
 .tab{background:var(--card);border:1px solid var(--line);color:var(--muted);padding:8px 14px;border-radius:999px;font-weight:700;font-size:13px;white-space:nowrap;transition:.15s}
 .tab.on{background:var(--lime);border-color:var(--lime);color:var(--onlime)}
 .pairs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
-.pair{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:13px;text-align:left;color:var(--text);transition:transform .15s,border-color .2s;animation:up .45s both}
+.pair{position:relative;overflow:hidden;isolation:isolate;background:var(--card);border:1px solid var(--line);border-radius:18px;padding:13px;text-align:left;color:var(--text);transition:transform .15s,border-color .2s;animation:up .45s both}
 .pair:active{transform:scale(.96)}.pair:hover{border-color:#34452f}
 html[data-theme="light"] .pair:hover{border-color:#b8c9a8}
 .pair .top{display:flex;justify-content:space-between;align-items:center;margin-bottom:9px}
@@ -70,22 +70,66 @@ html[data-theme="light"] .ic{background:#e6efd9;border-color:#c9dbb4}
 .pair .ds{font-size:11px;color:var(--muted);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .pair .px{font-weight:700;font-variant-numeric:tabular-nums;margin-top:9px;font-size:15px}
 .pair .ch{font-size:11px;font-weight:700;font-variant-numeric:tabular-nums}
-.pair .traders{display:inline-block;margin-top:5px;font-size:9px;font-weight:750;letter-spacing:.02em;color:#ff9ba0;background:#ff777d14;border:1px solid #ff777d30;border-radius:999px;padding:1px 7px}
-/* AI requests this hour — denyut bila ada aktiviti */
-.pair .aitick{display:inline-flex;align-items:center;gap:4px;margin-top:5px;margin-right:5px;
- font-size:9px;font-weight:750;letter-spacing:.02em;color:var(--muted);vertical-align:middle}
-.pair .aitick .ico{display:inline-flex;color:var(--blue);opacity:.85}
+.pair .traders{display:inline-flex;align-items:center;font-size:8.5px;font-weight:800;
+ color:#ff9ba0;background:#ff777d14;border:1px solid #ff777d30;border-radius:999px;
+ padding:1.5px 7px;white-space:nowrap;flex:none;position:relative;z-index:2}
+.pair .traders{overflow:hidden}
+@media(prefers-reduced-motion:no-preference){
+ .pair .traders::after{content:"";position:absolute;top:0;left:-70%;width:50%;height:100%;
+  background:linear-gradient(105deg,transparent,#ffffff2e,transparent);animation:shine 8s ease-in-out infinite}}
+/* baris badge: layout B — AI kiri, trader kanan */
+.pair .badges{display:flex;align-items:center;justify-content:space-between;gap:6px;margin-top:3px;
+ position:relative;z-index:2;width:100%}
+/* AI requests this hour */
+.pair .aitick{display:inline-flex;align-items:center;gap:3.5px;font-size:8.5px;font-weight:750;
+ letter-spacing:.02em;color:var(--muted);white-space:nowrap;min-width:0;overflow:hidden}
+.pair .aitick .ico{display:inline-flex;color:var(--blue);opacity:.85;flex:none}
 .pair .aitick b{color:var(--blue);font-variant-numeric:tabular-nums;font-weight:850}
 .pair .aitick.live .ico{animation:aiTickPulse 1.8s ease-in-out infinite}
 .pair .aitick.live b{animation:aiTickCount 1.8s ease-in-out infinite}
-.pair .aitick.live::after{content:"";width:3.5px;height:3.5px;border-radius:50%;background:var(--blue);
- box-shadow:0 0 6px var(--blue);animation:aiTickDot 1.8s ease-in-out infinite;margin-left:1px}
+.pair .aitick.live::after{content:"";width:3px;height:3px;border-radius:50%;background:var(--blue);
+ box-shadow:0 0 5px var(--blue);animation:aiTickDot 1.8s ease-in-out infinite;flex:none}
 .pair .aitick.idle{opacity:.55}
 @keyframes aiTickPulse{0%,100%{opacity:.55;transform:scale(.92)}50%{opacity:1;transform:scale(1.12);filter:drop-shadow(0 0 6px #8ab4ffcc)}}
 @keyframes aiTickCount{0%,100%{opacity:.7}50%{opacity:1;text-shadow:0 0 8px #8ab4ff99}}
 @keyframes aiTickDot{0%,100%{opacity:.25;transform:scale(.7)}50%{opacity:1;transform:scale(1.35)}}
+/* ===== TRENDING TIERS (ikot AI requests/jam) ===== */
+/* TIER 1 — 10+ : api bernafas + ember naik + garis api */
+.pair.hot1{border-color:#ff6b3544}
+.pair.hot1 .ic{background:#ff6b3520;border-color:#ff6b3555;color:#ffa070}
+.pair.hot1::before{content:"";position:absolute;left:50%;bottom:-40%;width:150%;height:120%;z-index:0;
+ transform:translateX(-50%);pointer-events:none;
+ background:radial-gradient(ellipse at 50% 100%,#ff6b3547 0%,#ff6b351a 38%,transparent 66%);
+ animation:fireBreath 2.6s ease-in-out infinite}
+@keyframes fireBreath{0%,100%{opacity:.55;transform:translateX(-50%) scaleY(.92)}
+ 50%{opacity:1;transform:translateX(-50%) scaleY(1.08)}}
+.pair.hot1::after{content:"";position:absolute;left:0;right:0;top:0;height:1.5px;z-index:3;pointer-events:none;
+ background:linear-gradient(90deg,transparent,#ff6b35 20%,#ffd08a 50%,#ff6b35 80%,transparent);
+ background-size:220% 100%;animation:fireLine 3s linear infinite}
+@keyframes fireLine{0%{background-position:0% 50%}100%{background-position:220% 50%}}
+.pair.hot1 .ember{position:absolute;bottom:0;border-radius:50%;z-index:1;pointer-events:none;opacity:0;
+ background:radial-gradient(circle,#ffd08a,#ff6b35 60%,transparent 70%);animation:emberRise 2.8s ease-out infinite}
+@keyframes emberRise{0%{transform:translateY(4px) scale(.5);opacity:0}15%{opacity:.95}
+ 70%{opacity:.7}100%{transform:translateY(-64px) scale(.15);opacity:0}}
+.pair.hot1 .aitick b,.pair.hot1 .aitick .ico{color:#ffa070;animation:hotCount 1.4s ease-in-out infinite}
+@keyframes hotCount{0%,100%{opacity:.7}50%{opacity:1;text-shadow:0 0 10px #ff6b3599}}
+/* TIER 2 — 5..9 : kilau hangat */
+.pair.hot2{border-color:#ffc16b33}
+.pair.hot2 .ic{background:#ffc16b1c;border-color:#ffc16b44;color:#ffd08a}
+.pair.hot2::before{content:"";position:absolute;inset:0;z-index:0;pointer-events:none;
+ background:linear-gradient(105deg,transparent 40%,#ffc16b17 50%,transparent 60%);
+ transform:translateX(-130%);animation:warmSheen 5.5s ease-in-out infinite}
+@keyframes warmSheen{0%,45%{transform:translateX(-130%)}75%,100%{transform:translateX(130%)}}
+.pair.hot2 .aitick b,.pair.hot2 .aitick .ico{color:#ffd08a}
+/* TIER 3 — 1..4 : mula hangat */
+.pair.hot3{border-color:#8ab4ff2b}
+.pair.hot3 .aitick b,.pair.hot3 .aitick .ico{color:#a9c7ff}
+/* TIER 0 — 0 */
+.pair.cold .aitick{opacity:.5}
 @media(prefers-reduced-motion:reduce){
- .pair .aitick.live .ico,.pair .aitick.live b,.pair .aitick.live::after{animation:none!important}
+ .pair .aitick.live .ico,.pair .aitick.live b,.pair .aitick.live::after,
+ .pair.hot1::before,.pair.hot1::after,.pair.hot1 .ember,
+ .pair.hot2::before,.pair.hot1 .aitick b,.pair.hot1 .aitick .ico{animation:none!important}
  .pair .aitick.live .ico{opacity:1;transform:none}}
 .up{color:var(--green)}.dn{color:var(--red)}
 .soon{display:inline-block;background:#ffc16b1f;color:var(--orange);font-weight:800;font-size:8px;letter-spacing:.04em;padding:2px 6px;border-radius:6px;margin-left:5px;vertical-align:middle;text-transform:uppercase}
@@ -1367,10 +1411,21 @@ function drawPairs(quiet){
   var tn=PAIR_TRADERS[p.s]||0;
   var badge=tn>0?'<span class="traders" title="'+esc(t('tradersTitle'))+'">🔥 '+tn+' '+esc(tn===1?t('traderOne'):t('traderUnit'))+'</span>':'';
   var an=PAIR_AI[p.s]||0;
+  var tier=an>=10?1:an>=5?2:an>=1?3:0;
   var aibadge='<span class="aitick '+(an>0?'live':'idle')+'" title="'+esc(t('aiReqTitle'))+'">'+
-    '<span class="ico"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 2v4M12 18v4M2 12h4M18 12h4"/><circle cx="12" cy="12" r="4"/></svg></span>'+
+    '<span class="ico"><svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M12 2v4M12 18v4M2 12h4M18 12h4"/><circle cx="12" cy="12" r="4"/></svg></span>'+
     '<b>'+an+'</b><span>'+esc(t('aiReqHour'))+'</span></span>';
-  return '<button class="pair'+(cl?' closed':'')+'" data-s="'+p.s+'"'+(cl?' aria-disabled="true"':'')+extra+' style="'+(quiet?'animation:none':'animation-delay:'+(i*35)+'ms')+'"><div class="top"><div class="ic">'+p.s.slice(0,3)+'</div>'+sparkHtml+'</div><div class="nm">'+p.s+'</div><div class="ds">'+esc(p.n)+'</div><div class="px">'+pxHtml+'</div><div class="ch '+(u?'up':'dn')+'">'+(tag?'<span class="'+tagCls+'">'+tag+'</span>':ch)+'</div>'+aibadge+badge+'</button>';
+  var tierCls=tier===1?' hot1':tier===2?' hot2':tier===3?' hot3':' cold';
+  var embers='';
+  if(tier===1){
+   for(var ei=0;ei<5;ei++){
+    var el2=(14+ei*16+Math.random()*6).toFixed(0);
+    var ed=(-Math.random()*2.8).toFixed(2);
+    var es=(3+Math.random()*3).toFixed(1);
+    embers+='<i class="ember" aria-hidden="true" style="left:'+el2+'%;animation-delay:'+ed+'s;width:'+es+'px;height:'+es+'px"></i>';
+   }
+  }
+  return '<button class="pair'+(cl?' closed':'')+tierCls+'" data-s="'+p.s+'"'+(cl?' aria-disabled="true"':'')+extra+' style="'+(quiet?'animation:none':'animation-delay:'+(i*35)+'ms')+'">'+embers+'<div class="top"><div class="ic">'+p.s.slice(0,3)+'</div>'+sparkHtml+'</div><div class="nm">'+p.s+'</div><div class="ds">'+esc(p.n)+'</div><div class="px">'+pxHtml+'</div><div class="ch '+(u?'up':'dn')+'">'+(tag?'<span class="'+tagCls+'">'+tag+'</span>':ch)+'</div><div class="badges">'+aibadge+badge+'</div></button>';
  }).join(''):'<div class="none">'+esc(t('noPairs'))+'</div>';
  Array.prototype.forEach.call($('pairs').querySelectorAll('.pair'),function(b){b.onclick=function(){var p=PAIRS.filter(function(x){return x.s===b.dataset.s})[0];if(p&&pairClosed(p)){var why=pairClosed(p);toast(why==='offline'?t('dataOffline'):t('mktClosed'));return}openSheet(b.dataset.s)}});
 }
