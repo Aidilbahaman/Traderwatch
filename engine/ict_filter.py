@@ -48,14 +48,6 @@ def swing_trend(bars, lookback=3, need=2):
     return "RANGE"
 
 
-def swing_levels(bars, lookback=3):
-    """Swing high/low prices (sorted) dari bar dict {h,l,c}."""
-    sw = _swings(bars, lookback)
-    hs = sorted({v for _, v, _ in sw if v is not None})
-    ls = sorted({v for _, _, v in sw if v is not None})
-    return hs, ls
-
-
 def unfilled_fvg(bars, price, atr_mult=3.0):
     """FVG bullish (low[i+2] > high[i]) / bearish belum terisi berhampiran harga."""
     out = []

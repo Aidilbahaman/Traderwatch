@@ -43,10 +43,6 @@ try:
     import ai_learn  # noqa: E402  (closed-loop: corak TP/SL sebenar client)
 except Exception:
     ai_learn = None
-try:
-    import institutional as INST  # noqa: E402  (prompt institutional + parse verdict)
-except Exception:
-    INST = None
 
 REPO = HERE.parent
 AUDIT_FILE = REPO / "state" / "llm-analysis-log.jsonl"
@@ -69,7 +65,7 @@ BUDGET_S = float(os.environ.get("AI_LLM_BUDGET_S", "120"))
 # ctx_factor = how many base bars make one context (higher-TF) bar.
 TF_PROFILES = {
     "M5": dict(ctx_factor=3, ctx_name="M15", min_bars=80, ctx_show=24, base_show=60,
-               rr1_min=1.2, role="SCALPER",
+               rr1_min=1.0, role="SCALPER",
                approach=("You are SCALPING the M5 chart. Take quick, high-probability momentum setups "
                          "aligned with the M15 trend. Stops are TIGHT (just beyond the nearest micro "
                          "swing / liquidity sweep, ~0.6-1.0x M5 ATR). Targets are QUICK: TP1 at the nearest "
@@ -77,25 +73,25 @@ TF_PROFILES = {
                          "are frequent; a clean micro sweep + displacement is enough, you do NOT need a perfect "
                          "higher-TF setup. Still avoid dead chop and news spikes.")),
     "M15": dict(ctx_factor=4, ctx_name="H1", min_bars=100, ctx_show=24, base_show=48,
-                rr1_min=1.5, role="INTRADAY SMC/ICT",
+                rr1_min=1.2, role="INTRADAY TREND",
                 approach=("Be selective and patient: only trade a CLEAR, confirmed setup aligned with the "
                           "H1 trend. Do NOT chase price extended deep into discount/premium — wait for a "
                           "pullback to an unmitigated FVG/order-block. In choppy/rangebound markets or without "
                           "a clean edge, choose HOLD. Quality over quantity.")),
     "H1": dict(ctx_factor=4, ctx_name="H4", min_bars=60, ctx_show=24, base_show=48,
-               rr1_min=2.0, role="SWING",
+               rr1_min=1.5, role="SWING TREND",
                approach=("You are SWING trading the H1 chart. Only take clear structural setups aligned with "
                          "the H4 trend. Stops sit beyond the invalidating H1 swing (wider, ~1-1.5x ATR). "
                          "Targets are larger: TP1 ~2R at a meaningful liquidity level, TP2 ~3R+. Be selective "
                          "— a few high-quality swings, not noise. HOLD if structure is unclear.")),
     "H4": dict(ctx_factor=6, ctx_name="D1", min_bars=40, ctx_show=20, base_show=40,
-               rr1_min=2.5, role="POSITION",
+               rr1_min=2.0, role="POSITION TREND",
                approach=("You are POSITION trading the H4 chart. Trade only major structural setups aligned "
                          "with the Daily trend. Wide stops beyond the invalidating H4 swing. Targets are "
                          "ambitious: TP1 ~2.5-3R, TP2 ~4R+ at major liquidity. Very selective — patience; "
                          "HOLD unless the edge is strong and clean.")),
     "D1": dict(ctx_factor=5, ctx_name="W1", min_bars=20, ctx_show=12, base_show=30,
-               rr1_min=3.0, role="POSITION",
+               rr1_min=2.5, role="POSITION TREND",
                approach=("You are POSITION trading the Daily chart. Trade only major macro structural setups "
                          "aligned with the Weekly trend. Very wide stops beyond the invalidating Daily swing. "
                          "Targets: TP1 ~3R, TP2 ~5R+ at major weekly liquidity. Extremely selective — HOLD "
@@ -406,11 +402,11 @@ def analyze(pair, bars, pip, spread_pips, call=None, budget_s=None, held=None, t
         bos = trend if trend in ("UP", "DOWN") else "RANGE"
         choch = False
         fvg_txt = "none"
-        hi_bars = [{"h": b[2], "l": b[3], "c": b[4]} for b in ctx]
-        lo_bars = [{"h": b[1], "l": b[2], "c": b[3]} for b in bars]
         if ICT is not None:
             try:
                 # Higher TF swing dari bar asing (guna ctx yang dah resample).
+                hi_bars = [{"h": b[2], "l": b[3], "c": b[4]} for b in ctx]
+                lo_bars = [{"h": b[1], "l": b[2], "c": b[3]} for b in bars]
                 s_hi = ICT.swing_trend(hi_bars, 3, 2)
                 s_lo = ICT.swing_trend(lo_bars, 3, 2)
                 bos = s_lo if s_lo != "RANGE" else s_hi
@@ -420,41 +416,22 @@ def analyze(pair, bars, pip, spread_pips, call=None, budget_s=None, held=None, t
                     fvg_txt = ", ".join(f"{x['dir']} {x['bot']:.2f}-{x['top']:.2f}" for x in fvgs[:2])
             except Exception:
                 pass
-        c_txt = ("YES — structure flipped against higher TF (potential reversal)."
+        c_txt = ("YES — M15 structure flipped against higher TF (potential reversal)."
                  if choch else "No CHoCH; follow dominant BOS.")
-        # Institutional engine: sistem prompt + semua data sebenar + kontrak
-        # JSON. Model bebas pilih BUY/SELL/WAIT/NO_TRADE; enjin yang validate.
-        if INST is not None:
-            closes = [b[3] for b in bars]
-            e20 = M.ema(closes, 20)[-1] if len(closes) >= 20 else price
-            e50 = M.ema(closes, 50)[-1] if len(closes) >= 50 else price
-            e200 = M.ema(closes, 200)[-1] if len(closes) >= 200 else None
-            rsi = M.rsi_s(closes, 14)[-1]
-            hi_sw, lo_sw = ([], [])
-            if ICT is not None:
-                try:
-                    hi_sw, lo_sw = ICT.swing_levels(lo_bars, 3)
-                except Exception:
-                    pass
-            pdh = pdl = pwh = pwl = None
-            _lessons = ""
-            if ai_learn is not None:
-                try:
-                    _lessons, _ = ai_learn.lessons()
-                except Exception:
-                    _lessons = ""
-            prompt = INST.build(
-                pair, tf, price, spread_pips, bars, ctx, atr, prof, tf_key,
-                e20, e50, e200, rsi, None, hi_sw, lo_sw,
-                pdh, pdl, pwh, pwl, fvg_txt, held=held, lessons=_lessons)
-        else:
-            prompt = ("ICT/SMC BOS + CHoCH + FVG analyst. You are looking at the chart IMAGE (real OHLC). "
-                      f"Pair {pair} {tf}, price {price}, spread {spread_pips:g} pips. "
-                      f"Higher-TF {tf_key} swing: {s_hi}. {tf} swing/BOS: {s_lo}. CHoCH: {c_txt} "
-                      f"Unfilled FVG near price: {fvg_txt}. "
-                      f"HOLD if structure unclear. "
-                      'Reply ONLY compact JSON: {"bias":"BUY"|"SELL"|"HOLD","sl":num,'
-                      '"tp1":num,"tp2":num,"confidence":0-10,"reason":"<10 words>"}')
+        rr_min = prof["rr1_min"]
+        # Prompt SIMPLE: ikut trend je. Model tengok imej, bagi arah + SL/TP.
+        prompt = (
+            "Look at this candlestick chart image and trade WITH the trend. "
+            f"{pair} {tf}, current price {price:g}, spread {spread_pips:g} pips. "
+            f"Higher TF ({tf_key}) trend: {trend}. Lower TF trend: {bos}. "
+            "If price makes higher highs and higher lows -> BUY. "
+            "If lower highs and lower lows -> SELL. "
+            "If choppy or sideways with no clear direction -> HOLD. "
+            "Entry at CURRENT price (instant market entry). "
+            "SL just beyond nearest opposing swing (must exceed 3x spread). "
+            f"TP at the next swing in your direction. RR1 >= {rr_min:g}. "
+            'Reply ONLY: {"bias":"BUY"|"SELL"|"HOLD","sl":num,'
+            '"tp1":num,"tp2":num,"confidence":0-10,"reason":"<6 words>"}')
         ai_meta = {"bos": bos, "choch": choch,
                    "fvg": len(fvgs) if 'fvgs' in dir() else 0,
                    "atr": round(atr, 3), "hour": datetime.now(timezone.utc).hour}
@@ -488,14 +465,9 @@ def analyze(pair, bars, pip, spread_pips, call=None, budget_s=None, held=None, t
         else:
             latency = time.time() - t0
             try:
-                if INST is not None:
-                    verdict = INST.parse_verdict(j, price, pip, spread_pips,
-                                                  rr_min=max(INST.RR_DEFAULT, prof["rr1_min"]))
-                else:
-                    verdict = validate_verdict(j, price, pip, spread_pips,
-                                               rr1_min=prof["rr1_min"])
+                verdict = validate_verdict(j, price, pip, spread_pips, rr1_min=prof["rr1_min"])
             except ValueError as e:
-                # Penolakan mekanikal muktamad — jangan shop model lain.
+                # Rejection (aras/RR tak sah) muktamad — jangan shop model lain.
                 log(f"{pair} {VISION_MODEL} (vision) verdict ditolak ({e})")
                 _audit({"ts": datetime.now(timezone.utc).isoformat(), "pair": pair, "tf": tf,
                         "model": VISION_MODEL, "vision": True, "verdict_rejected": str(e)[:200]})
