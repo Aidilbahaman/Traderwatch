@@ -42,11 +42,12 @@ PORT = int(os.environ.get("ANALYZE_PORT", "8102"))
 REPO_LIVE_LAST = pathlib.Path(__file__).resolve().parent.parent / "state" / "ai-live-last.json"
 ALLOWED_PAIRS = {"XAUUSD", "XAGUSD", "BTCUSD", "EURUSD", "GBPUSD",
                  "USDJPY", "AUDUSD", "USDCAD", "NZDUSD"}   # pairs dengan data bar live
-MIN_GAP_S = 20                      # min seconds between analyses per user
-HOURLY_CAP = 12                     # max analyses per user per hour
-# Disiplin trading (owner 2026-11-21): selepas client tekan "add to trade",
-# enforced cooldown sebelum scan seterusnya — AI ajar sabar, jangan overtrade.
-TRADE_COOLDOWN_S = float(os.environ.get("ANALYZE_TRADE_COOLDOWN_S", "300"))
+# Had longgar — client bayar untuk analisis tanpa had; jangan sekat kerja dia.
+# Semua boleh dilaras guna env tanpa ubah kod.
+MIN_GAP_S = float(os.environ.get("ANALYZE_MIN_GAP_S", "3"))
+HOURLY_CAP = int(os.environ.get("ANALYZE_HOURLY_CAP", "120"))
+# Cooldown selepas buka trade: 0 = tiada sekatan (client bebas scan semula).
+TRADE_COOLDOWN_S = float(os.environ.get("ANALYZE_TRADE_COOLDOWN_S", "0"))
 BARS_COUNT = 300                    # M15 bars fed to the analyst
 # Cloudflare Turnstile (login anti-bot). Test secret = always-pass for demo;
 # set TURNSTILE_SECRET to your real secret in the service env for production.
@@ -185,7 +186,7 @@ def rate_check(uid):
     now = time.time()
     # 1) Disiplin trading: cooldown 5 minit selepas client buka trade.
     age = last_trade_age_s(uid)
-    if age is not None and 0 <= age < TRADE_COOLDOWN_S:
+    if TRADE_COOLDOWN_S > 0 and age is not None and 0 <= age < TRADE_COOLDOWN_S:
         remain = int(TRADE_COOLDOWN_S - age)
         mm, ss = divmod(remain, 60)
         wait = f"{mm}m {ss:02d}s" if mm else f"{ss}s"
@@ -195,12 +196,15 @@ def rate_check(uid):
     # 2) Min gap between scans (LLM cost control).
     last = _last_call.get(uid, 0)
     if now - last < MIN_GAP_S:
-        return False, f"Sila tunggu {int(MIN_GAP_S - (now - last))}s sebelum analisis seterusnya."
+        return False, f"Please wait {max(1, int(MIN_GAP_S - (now - last)))}s before the next analysis."
     win = _hour_count.get(uid)
     if not win or now - win[0] >= 3600:
         win = [now, 0]
     if win[1] >= HOURLY_CAP:
-        return False, "Had analisis sejam dicapai. Cuba lagi sejam kemudian."
+        reset_in = int(3600 - (now - win[0]))
+        mm, ss = divmod(max(0, reset_in), 60)
+        return False, (f"Hourly analysis limit reached ({HOURLY_CAP}). "
+                       f"Resets in {mm}m {ss:02d}s.")
     return True, ""
 
 
@@ -250,13 +254,35 @@ def fetch_bars(pair):
 
 TF_MINUTES = {"M5": 5, "M15": 15, "H1": 60, "H4": 240, "D1": 1440}
 
+# Chart-OHLC cache: every client opening the same chart used to spawn its own
+# ~2s wine bridge call. Cache per (pair,tf) for 60s so N viewers cost 1 call.
+_OHLC_CACHE = {}      # (pair,tf) -> (ts, bars)
+_OHLC_TTL = 60.0
+
 
 def fetch_ohlc(pair, tf, limit=200):
     """Real OHLC candles for the chart, resampled to the requested timeframe."""
     tf = tf if tf in TF_MINUTES else "M15"
+    ck = (pair, tf)
+    hit = _OHLC_CACHE.get(ck)
+    if hit and (time.time() - hit[0]) < _OHLC_TTL:
+        return hit[1][-limit:]
+    bars = _fetch_ohlc_raw(pair, tf, limit)
+    if bars:
+        _OHLC_CACHE[ck] = (time.time(), bars)
+        # housekeeping: drop stale entries
+        for k, v in list(_OHLC_CACHE.items()):
+            if (time.time() - v[0]) > _OHLC_TTL * 4:
+                _OHLC_CACHE.pop(k, None)
+    return bars
+
+
+def _fetch_ohlc_raw(pair, tf, limit=200):
+    """Real OHLC candles for the chart, resampled to the requested timeframe."""
+    tf = tf if tf in TF_MINUTES else "M15"
     base_gran = "M5" if tf == "M5" else "M15"
     base_min = 5 if tf == "M5" else 15
-    rows = M5.candles(pair, base_gran, 2000)
+    rows = M5.candles(pair, base_gran, 800)
     bars = []
     for c in rows:
         try:
