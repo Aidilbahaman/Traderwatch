@@ -1778,24 +1778,33 @@
    "entry_at": "2026-11-20T23:48:00+08:00"
   },
   "XAUUSD_20261123_052532": {
-   "status": "pending"
+   "status": "active",
+   "entry_at": "2026-11-23T05:52:00+08:00"
   },
   "XAUUSD_20261123_051506": {
-   "status": "pending"
+   "status": "active",
+   "entry_at": "2026-11-23T05:52:00+08:00"
   },
   "XAUUSD_20261123_050507": {
-   "status": "pending"
+   "status": "active",
+   "entry_at": "2026-11-23T05:52:00+08:00"
   },
   "XAGUSD_20261123_053051": {
    "status": "active",
    "entry_at": "2026-11-23T05:48:00+08:00"
   },
   "XAUUSD_20261123_053556": {
-   "status": "pending"
+   "status": "active",
+   "entry_at": "2026-11-23T05:52:00+08:00"
   },
   "XAUUSD_20261123_054549": {
-   "status": "pending"
+   "status": "active",
+   "entry_at": "2026-11-23T05:52:00+08:00"
+  },
+  "XAGUSD_20261123_055109": {
+   "status": "active",
+   "entry_at": "2026-11-23T05:54:00+08:00"
   }
  },
- "updated": "2026-11-23T05:51:02+08:00"
+ "updated": "2026-11-23T05:56:02+08:00"
 }
