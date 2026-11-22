@@ -337,7 +337,10 @@ class Handler(BaseHTTPRequestHandler):
         self.send_header("Content-Length", str(len(body)))
         self.send_header("Cache-Control", "no-store")
         self.end_headers()
-        self.wfile.write(body)
+        try:
+            self.wfile.write(body)
+        except (BrokenPipeError, ConnectionResetError):
+            pass  # client tutup fetching (app reload / navigasi) — biasa, jangan log traceback
 
     def _token(self):
         h = self.headers.get("Authorization", "")
