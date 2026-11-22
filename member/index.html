@@ -1777,6 +1777,12 @@ function show(a){
   '<li><b>'+esc(t('aiStruct'))+'</b><span>'+esc(ai.h1_trend||'-')+' / '+esc(ai.structure||'-')+' · '+ai.bars+' bars '+esc(ai.tf||'')+'</span></li>'+
   (ai.context?'<li><b>'+esc(t('aiCtx'))+'</b><span style="white-space:pre-line">'+esc(String(ai.context).slice(0,420))+'</span></li>':'')+
   '<li><b>'+esc(t('aiVision'))+'</b><span>'+(ai.vision?esc(t('aiVisionOn')):esc(t('aiVisionOff')))+'</span></li></ul>'}
+ if(a.entry!=null)h+='<div class="lv"><div class="e" style="animation-delay:.15s"><small>'+esc(t('entry'))+'</small><b>'+f(a.entry)+'</b></div><div class="t" style="animation-delay:.25s"><small>'+esc(t('tp'))+'</small><b>'+f(a.tp)+(a.tp2!=null?' / '+f(a.tp2):'')+'</b></div><div class="s" style="animation-delay:.35s"><small>'+esc(t('sl'))+'</small><b>'+f(a.sl)+'</b></div></div>';
+ else h+='<p style="text-align:center;color:var(--muted);font-size:12px;margin:4px 0 0">'+esc(t('waitMsg'))+'</p>';
+ if(a.entry!=null)h+='<button class="take" id="takeBtn">'+esc(t('takeTrade'))+'</button>';
+ else h+='<button class="take" id="takeBtn" disabled>'+esc(t('takeTrade'))+'</button><p class="takenote">'+esc(t('noSetup'))+'</p>';
+ h+='<div class="sec">'+esc(t('checklist'))+'</div><ul class="chk">'+a.checks.map(function(c,i){return '<li class="'+(c.ok?'y':'n')+'" style="animation-delay:'+(.4+i*.12)+'s"><span class="b">'+(c.ok?'✓':'✕')+'</span>'+esc(c.t)+'</li>'}).join('')+'</ul>';
+ h+='<div class="sec">'+esc(t('reasons'))+'</div><ul class="reasons">'+a.reasons.map(function(x,i){return '<li style="animation-delay:'+(1+i*.12)+'s"><span class="dot" style="background:'+col+'"></span><span>'+x+'</span></li>'}).join('')+'</ul>';
  h+='<div class="sec">'+esc(t('risk'))+'</div><ul class="reasons">'+a.risk.map(function(x,i){return '<li style="animation-delay:'+(1.5+i*.12)+'s"><span class="dot" style="background:#ffc16b"></span><span>'+esc(x)+'</span></li>'}).join('')+'</ul>';
  h+='<div class="note">'+(lang==='en'?'Not financial advice. All trading decisions are your own.':'Ini bukan nasihat kewangan. Semua keputusan trading adalah tanggungjawab anda.')+'</div><button class="again" id="again">'+esc(t('again'))+'</button>';
  $('res').innerHTML=h;
