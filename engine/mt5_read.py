@@ -53,10 +53,13 @@ elif cmd == "candles":
     sym = sys.argv[2]; tf = sys.argv[3]; n = int(sys.argv[4])
     TFS = {"M1": mt5.TIMEFRAME_M1, "M5": mt5.TIMEFRAME_M5, "M15": mt5.TIMEFRAME_M15,
            "M30": mt5.TIMEFRAME_M30, "H1": mt5.TIMEFRAME_H1, "H4": mt5.TIMEFRAME_H4,
-           "D1": mt5.TIMEFRAME_D1}
+           "D1": mt5.TIMEFRAME_D1,
+           "1min": mt5.TIMEFRAME_M1, "5min": mt5.TIMEFRAME_M5, "15min": mt5.TIMEFRAME_M15,
+           "30min": mt5.TIMEFRAME_M30, "1h": mt5.TIMEFRAME_H1, "60min": mt5.TIMEFRAME_H1,
+           "4h": mt5.TIMEFRAME_H4, "1d": mt5.TIMEFRAME_D1}
     if not mt5.symbol_select(sym, True):
         out({"error": f"symbol_select failed for {sym}"}); sys.exit(0)
-    rates = mt5.copy_rates_from_pos(sym, TFS.get(tf, mt5.TIMEFRAME_M15), 0, n)
+    rates = mt5.copy_rates_from_pos(sym, TFS.get(tf, mt5.TIMEFRAME_M1), 0, n)
     if rates is None:
         out({"error": "copy_rates None", "code": mt5.last_error()})
     else:

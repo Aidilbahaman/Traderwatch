@@ -55,6 +55,13 @@ KILL_STATE = REPO / "state" / "mt5-kill.json"
 RISK_PCT = float(os.environ.get("MT5_RISK_PCT", "1.0"))      # % per trade
 LOT_MIN_ALLOW = os.environ.get("MT5_LOT_MIN_ALLOW", "1") == "1"
 
+# ---------- break-even protection (owner 2026-11-21) ----------
+# Bila harga hit 1R (TP1), anjak SL ke entry supaya profit dilindungi dari
+# patah balik jadi rugi penuh (selaras Paper League). MT5_BE_PARTIAL_PCT:
+# peratus partial close di TP1 (0 = off, 50 = tutup 50% baki BE).
+BE_ENABLED = os.environ.get("MT5_BREAK_EVEN", "1") == "1"
+BE_PARTIAL_PCT = float(os.environ.get("MT5_BE_PARTIAL_PCT", "0"))
+
 # ---------- compounding ----------
 # Asas saiz lot naik/turun ikut modal. "equity" (DEFAULT, owner 2026-11-20)
 # = lot ikut equity SEMASA termasuk floating P/L — lot membesar bila equity
@@ -294,8 +301,11 @@ elif act == "close_position":
         tick = mt5.symbol_info_tick(p.symbol)
         price = tick.bid if close_type == mt5.ORDER_TYPE_SELL else tick.ask
         filling = mt5.ORDER_FILLING_IOC
+        close_vol = float(req.get("volume", 0) or 0)
+        if close_vol <= 0 or close_vol > p.volume:
+            close_vol = p.volume          # full close jika volume tiada/lebih
         req_close = {"action": mt5.TRADE_ACTION_DEAL, "position": ticket,
-            "symbol": p.symbol, "volume": p.volume, "type": close_type,
+            "symbol": p.symbol, "volume": close_vol, "type": close_type,
             "price": price, "deviation": 20, "magic": p.magic,
             "comment": "TW-CLOSE", "type_time": mt5.ORDER_TIME_GTC,
             "type_filling": filling}
@@ -860,6 +870,56 @@ def main():
             seen.setdefault(sid, {})["status"] = "filled"
             seen[sid]["position_ticket"] = filled[0]["ticket"]
             log(f"FILLED #{sid} — posisi {filled[0]['ticket']} (TIADA order baru)")
+
+    # ---- Break-even protection: SL -> entry selepas harga hit 1R (TP1) ----
+    # Lindungi profit dari patah balik jadi rugi penuh (selaras Paper League).
+    if BE_ENABLED:
+        for p in positions:
+            m = p.get("magic", 0)
+            if m < MAGIC_BASE:
+                continue
+            sid = str(m - MAGIC_BASE)
+            rec = seen.get(sid) or {}
+            if rec.get("be_done") and (rec.get("partial_done") or BE_PARTIAL_PCT <= 0):
+                continue                      # sudah diproses sepenuhnya
+            entry = float(rec.get("entry") or p.get("price_open") or 0)
+            orig_sl = float(rec.get("sl") or p.get("sl") or 0)
+            if entry <= 0 or orig_sl <= 0:
+                continue
+            risk = abs(entry - orig_sl)
+            if risk <= 0:
+                continue
+            is_buy = p.get("type") == 0
+            be_level = entry + risk if is_buy else entry - risk
+            tk = mt5({"action": "tick", "symbol": p["symbol"]})
+            if not tk.get("ok"):
+                continue
+            px = float(tk.get("bid") if is_buy else tk.get("ask") or 0)
+            reached = (px >= be_level) if is_buy else (px <= be_level)
+            if not reached:
+                continue
+            cur_sl = float(p.get("sl") or 0)
+            if not rec.get("be_done") and abs(cur_sl - entry) > 1e-9:
+                r = mt5({"action": "modify_position", "ticket": p["ticket"],
+                         "sl": entry, "tp": float(p.get("tp") or 0)})
+                if r.get("ok"):
+                    rec["be_done"] = True
+                    rec["be_at"] = datetime.now(MYT).isoformat()
+                    seen[sid] = rec
+                    log(f"BE #{sid} {p['symbol']} SL->entry {entry} "
+                        f"(1R {be_level:.2f} dicapai, profit dilindungi)")
+                else:
+                    log(f"BE-FAIL #{sid} {p['symbol']}: {r.get('error') or r.get('comment')} retcode={r.get('retcode')}")
+            if BE_PARTIAL_PCT > 0 and not rec.get("partial_done"):
+                vol = round(float(p.get("volume", 0)) * BE_PARTIAL_PCT / 100.0, 2)
+                if vol > 0:
+                    rc = mt5({"action": "close_position", "ticket": p["ticket"], "volume": vol})
+                    if rc.get("ok"):
+                        rec["partial_done"] = True
+                        seen[sid] = rec
+                        log(f"BE-PARTIAL #{sid} {p['symbol']} tutup {vol} lot ({BE_PARTIAL_PCT:g}%) di TP1")
+                    else:
+                        log(f"BE-PARTIAL-FAIL #{sid}: {rc.get('error') or rc.get('comment')}")
 
     save_state({"signals": seen})
     log(f"done: {placed} baru · {len(seen)} tracked")
