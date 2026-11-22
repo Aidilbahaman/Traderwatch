@@ -107,6 +107,16 @@ LEADERBOARD_TTL = 30
 AUTH_TTL = 120
 
 
+MYT = timezone(timedelta(hours=8))   # Malaysia (UTC+8) — reset harian ikut waktu tempatan
+
+
+def my_day_start_iso():
+    """Awal hari ini (00:00 waktu Malaysia) dalam ISO-8601 UTC untuk query Supabase."""
+    now = datetime.now(MYT)
+    start = now.replace(hour=0, minute=0, second=0, microsecond=0)
+    return start.astimezone(timezone.utc).isoformat()
+
+
 def cached(key, ttl, fn):
     now = time.time()
     with _cache_lock:
@@ -370,9 +380,11 @@ class Handler(BaseHTTPRequestHandler):
         uid = user["id"]
         try:
             if path == "/api/league/pair-traders":
-                counts = cached("pair-traders", 60, lambda: sb(
+                day_start = my_day_start_iso()
+                counts = cached("pair-traders-day", 60, lambda: sb(
                     "GET", "/rest/v1/paper_trades",
-                    params={"select": "pair,user_id", "season": f"eq.{SEASON}",
+                    params={"select": "pair,user_id",
+                            "opened_at": f"gte.{day_start}",
                             "limit": "2000"}) or [])
                 agg = {}
                 for r in counts:
@@ -381,7 +393,8 @@ class Handler(BaseHTTPRequestHandler):
                         continue
                     agg.setdefault(p, set()).add(r.get("user_id"))
                 out = {p: len(s) for p, s in agg.items()}
-                return self._send(200, {"traders": out, "season": SEASON})
+                return self._send(200, {"traders": out, "scope": "today",
+                                        "since": day_start, "season": SEASON})
             if path == "/api/league/pair-ai-requests":
                 return self._send(200, {"requests": pair_ai_requests(), "window": "1h"})
             if path == "/api/league/trades":
