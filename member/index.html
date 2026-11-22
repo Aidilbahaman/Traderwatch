@@ -233,6 +233,9 @@ html[data-theme="light"] .msg.me .body{background:#eaf5db;border-color:#b9d999}
  width:100vw;height:100vh;height:100dvh;max-width:none;max-height:none;margin:0;border:0;border-radius:0;
  left:0;top:0;right:0;bottom:0;transform:none}
 html:has(.welcome:not(.hidden)) body{overflow:hidden}
+/* semasa splash, sembunyikan stage supaya tiada FOUC */
+html:has(#splash:not(.gone)) body{overflow:hidden}
+html:has(#splash:not(.gone)) .stage{visibility:hidden}
 .welcome.hidden{display:none!important}
 #cineWrap{position:absolute;inset:0;display:block;width:100%;height:100%;padding:0;margin:0}
 #cineCanvas{position:absolute;left:0;top:0;width:100%;height:100%;display:block;touch-action:none;padding:0;margin:0}
@@ -691,9 +694,35 @@ html[data-theme="light"] .lotbadge{color:#4c7a17}
 .fl{animation:flame 1.6s ease-in-out infinite;display:inline-block}
 @keyframes flame{0%,100%{transform:scale(1);filter:brightness(1)}50%{transform:scale(1.18);filter:brightness(1.25)}}
 @media(prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;transition-duration:.01ms!important}}
+/* ===== SPLASH (paling awal, 3s) ===== */
+#splash{position:fixed;inset:0;z-index:200;display:grid;place-items:center;background:#0a0e0b;
+ width:100vw;height:100vh;height:100dvh;margin:0;border:0;border-radius:0;
+ transition:opacity .32s ease,visibility .32s;pointer-events:none}
+#splash.gone{opacity:0;visibility:hidden}
+#splash .sp-wrap{display:flex;flex-direction:column;align-items:center;gap:22px;
+ transform:translateY(-4vh)}
+#splash .sp-star{width:76px;height:76px;filter:drop-shadow(0 0 22px #b7f36b66)}
+#splash .sp-name{font-size:12px;font-weight:900;letter-spacing:.34em;color:#eef3ee;padding-left:.34em}
+#splash .sp-bar{width:120px;height:2px;border-radius:99px;background:#b7f36b1f;overflow:hidden;margin-top:2px}
+#splash .sp-bar i{display:block;height:100%;width:36%;border-radius:99px;
+ background:linear-gradient(90deg,transparent,#b7f36b,transparent);animation:spSlide 1.15s cubic-bezier(.45,0,.25,1) infinite}
+@keyframes spSlide{0%{transform:translateX(-120%)}100%{transform:translateX(390%)}}
+@media(prefers-reduced-motion:reduce){#splash .sp-bar i{animation:none;width:100%;opacity:.5}}
 </style>
 </head>
 <body>
+<div id="splash" role="status" aria-live="polite" aria-label="Loading TraderWatch">
+  <div class="sp-wrap">
+    <svg class="sp-star" viewBox="-22 -22 44 44" aria-hidden="true">
+      <defs><linearGradient id="spg" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#eaffc4"/><stop offset="1" stop-color="#9fe83f"/>
+      </linearGradient></defs>
+      <path d="M0-20Q0 0 20 0Q0 0 0 20Q0 0-20 0Q0 0 0-20Z" fill="url(#spg)"/>
+    </svg>
+    <div class="sp-name">TRADERWATCH</div>
+    <div class="sp-bar"><i></i></div>
+  </div>
+</div>
 <div class="stage">
   <div class="phone" id="phone">
     <div class="notch"></div>
@@ -3010,9 +3039,24 @@ function showWelcome(){
  var st=$('cineStage');if(st){st.classList.add('on');st.style.opacity=1}
  cineReset();
 }
-function maybeWelcome(){
+var SPLASH_MS=3000;      /* splash tampil 3 saat */
+function splashDone(){
+ var el=$('splash');
+ if(!el)return;
+ el.classList.add('gone');
+ setTimeout(function(){try{el.style.display='none'}catch(e){}},380);
+}
+function splashStart(){
+ /* Selepas 3s: tutup splash, kemudian baru papar welcome (jika belum) */
+ setTimeout(function(){
+  splashDone();
+  maybeWelcome({delay:320});
+ }, SPLASH_MS);
+}
+function maybeWelcome(opts){
  try{if(localStorage.getItem(WKEY))return}catch(e){return}
- setTimeout(showWelcome,600);
+ var d=(opts&&opts.delay)||600;
+ setTimeout(showWelcome,d);
 }
 try{window.addEventListener('resize',cineSize)}catch(e){}
 /* Tap anywhere (kecuali sheet) untuk masuk */
@@ -3070,7 +3114,7 @@ if(!iv){
  iv=HMAP[hv]||null;
 }
 showView(VIEWS.indexOf(iv)>-1?iv:'analyst');
-maybeWelcome();
+splashStart();
 })();
 </script>
     <!-- ===== WELCOME CINEMATIC (2 layer) ===== -->
