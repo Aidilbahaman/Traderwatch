@@ -5,7 +5,7 @@
  *  - /api/* dan /auth/*: NETWORK SAHAJA — jangan cache data pasaran/user
  *  - Data user (Supabase REST, chat, profil): tidak dicache sama sekali
  */
-const VERSION = 'tw-member-full-v20';
+const VERSION = 'tw-member-full-v21';
 const SHELL_CACHE = VERSION + '-shell';
 
 const SHELL_ASSETS = [
@@ -90,4 +90,49 @@ self.addEventListener('fetch', (event) => {
 
 self.addEventListener('message', (event) => {
   if (event.data === 'SKIP_WAITING') self.skipWaiting();
+});
+
+/* ===== Web Push (VAPID) — alert TP/SL + verdict ===== */
+self.addEventListener('push', (event) => {
+  let data = {};
+  try { data = event.data ? event.data.json() : {}; } catch (e) { data = {}; }
+  const title = data.title || 'TraderWatch';
+  const opts = {
+    body: data.body || '',
+    icon: '/member/icons/icon-192.png',
+    badge: '/member/icons/icon-192.png',
+    tag: data.tag || 'tw-alert',
+    data: { url: data.url || '/member/' }
+  };
+  event.waitUntil(self.registration.showNotification(title, opts));
+});
+
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+  const url = (event.notification.data && event.notification.data.url) || '/member/';
+  event.waitUntil(
+    self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((list) => {
+      for (const c of list) {
+        if (c.url.startsWith('https://traderwatch.org/member')) {
+          if ('focus' in c) { c.navigate(url).catch(() => c.focus()); return c; }
+        }
+      }
+      return self.clients.openWindow(url);
+    })
+  );
+});
+
+/* Best-effort: browser renew endpoint -> simpan ke localStorage app supaya
+   app boleh re-POST ke push API bila member buka app (SW tiada auth token). */
+self.addEventListener('pushsubscriptionchange', (event) => {
+  event.waitUntil(
+    self.registration.pushManager.getSubscription().then((sub) => {
+      if (!sub) return;
+      self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((list) => {
+        for (const c of list) {
+          if ('postMessage' in c) { c.postMessage({ type: 'PUSH_SUB_CHANGED', subscription: sub.toJSON() }); }
+        }
+      });
+    })
+  );
 });

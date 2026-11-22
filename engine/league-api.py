@@ -33,6 +33,11 @@ import sys
 if str(HERE) not in sys.path:
     sys.path.insert(0, str(HERE))   # systemd runs from repo root; engine/ must be importable
 
+try:
+    import llm_analyst as LA
+except Exception:
+    LA = None
+
 # Owner-only real-money sync ("Take this trade" -> MT5). Optional: if the MT5
 # module cannot load, the league keeps working paper-only.
 try:
@@ -197,6 +202,90 @@ def balance_of(trades):
     return round(START_BALANCE + profit, 2), closed
 
 
+RECAP_COACH_FALLBACK = "Kekalkan disiplin — risiko kecil, konsisten menang."
+
+
+def coach_line(uid, stats):
+    """One-sentence Malay coaching line via glm-5.2; cached per uid+week (1h)."""
+    week = datetime.now(timezone.utc).strftime("%G-W%V")
+    ck = "coach:" + uid + ":" + week
+    now = time.time()
+    with _cache_lock:
+        hit = _cache.get(ck)
+        if hit and now - hit[0] <= 3600:
+            return hit[1]
+    line = RECAP_COACH_FALLBACK
+    if LA is not None:
+        try:
+            prompt = (
+                "Anda coach trading disiplin Melayu. Data paper trading 7 hari "
+                "ahli: " + json.dumps(stats, ensure_ascii=False) + ". "
+                "Balas SATU ayat coaching max 18 patah perkataan. Nada: jujur, "
+                "tenang, membina, hormat (seperti jurulatih profesional). "
+                "DULUARAN: jangan guna perkataan 'buang duit', 'kau', 'dongok', "
+                "atau apa-apa yang menghina. Fokus pada SATU tindakan praktikal "
+                "untuk minggu depan. Contoh: '42% win dengan R negatif — kurangkan "
+                "frekuensi, tunggu setup jelas; kualiti lebih penting dari kuantiti.' "
+                "JSON sahaja: {\"coach\":\"...\"}")
+            raw = LA._call_model("glm-5.2", prompt, 30)
+            m = json.loads(raw[raw.find("{"):raw.rfind("}") + 1])
+            c = str(m.get("coach") or "").strip()
+            if c:
+                line = c[:200]
+        except Exception as e:
+            log(f"coach LLM fail {type(e).__name__}: {str(e)[:120]}")
+    with _cache_lock:
+        _cache[ck] = (now, line)
+    return line
+
+
+def weekly_recap(uid):
+    """7-day recap: net R, win rate, streak, best pair, equity spark, coach."""
+    since = (datetime.now(timezone.utc) - timedelta(days=7)).isoformat()
+    rows = sb("GET", "/rest/v1/paper_trades", params={
+        "select": "*", "user_id": f"eq.{uid}", "season": f"eq.{SEASON}",
+        "opened_at": f"gte.{since}", "order": "opened_at.asc", "limit": "500"}) or []
+    closed = [t for t in rows if t["status"] in ("tp", "sl", "be")
+              and t.get("r_result") is not None]
+    if not rows:
+        return {"empty": True}
+    closed.sort(key=lambda t: t.get("closed_at") or t["opened_at"])
+    net_r = round(sum(float(t["r_result"]) for t in closed), 2)
+    wins = sum(1 for t in closed if t["status"] == "tp")
+    dec = sum(1 for t in closed if t["status"] in ("tp", "sl"))
+    # Best streak: consecutive tp by closed_at order.
+    streak = best = 0
+    for t in closed:
+        streak = streak + 1 if t["status"] == "tp" else 0
+        best = max(best, streak)
+    # Best pair by R contribution.
+    by_pair = {}
+    for t in closed:
+        p = by_pair.setdefault(t["pair"], {"pair": t["pair"], "wins": 0,
+                                           "total": 0, "r": 0.0})
+        p["total"] += 1
+        if t["status"] == "tp":
+            p["wins"] += 1
+        p["r"] = round(p["r"] + float(t["r_result"]), 2)
+    best_pair = max(by_pair.values(), key=lambda p: p["r"]) if by_pair else None
+    # Equity spark: cumulative R after each closed trade in order.
+    spark, cum = [], 0.0
+    for t in closed:
+        cum += float(t["r_result"])
+        spark.append(round(cum, 2))
+    week_label = (datetime.now(timezone.utc) - timedelta(days=6)
+                  ).strftime("%-d") + "\u2013" + datetime.now(timezone.utc).strftime("%-d %b")
+    stats = {"net_r": net_r, "win_rate": round(100.0 * wins / dec, 1) if dec else 0,
+             "trades": len(closed), "best_streak": best,
+             "best_pair": best_pair["pair"] if best_pair else None}
+    return {
+        "week_label": week_label, "net_r": net_r,
+        "win_rate": round(100.0 * wins / dec, 1) if dec else None,
+        "trades": len(closed), "best_streak": best,
+        "best_pair": best_pair, "equity_spark": spark,
+        "coach": coach_line(uid, stats)}
+
+
 class Handler(BaseHTTPRequestHandler):
     def log_message(self, fmt, *args):
         pass
@@ -243,6 +332,8 @@ class Handler(BaseHTTPRequestHandler):
                 return self._send(200, {"traders": out, "season": SEASON})
             if path == "/api/league/trades":
                 return self._send(200, {"trades": my_trades(uid), "season": SEASON})
+            if path == "/api/league/recap":
+                return self._send(200, weekly_recap(uid))
             if path == "/api/league/leaderboard":
                 rows = cached_leaderboard()
                 for i, r in enumerate(rows):

@@ -116,6 +116,20 @@ html[data-theme="light"] .msg.me .body{background:#eaf5db;border-color:#b9d999}
 .lsub{display:flex;gap:4px;background:var(--card2);border:1px solid var(--line);border-radius:999px;padding:4px;margin-bottom:14px}
 .lsub button{flex:1;padding:8px 4px;border-radius:999px;font-weight:750;font-size:12px;color:var(--muted);white-space:nowrap;transition:.15s}
 .lsub button.on{background:var(--lime);color:var(--onlime);box-shadow:0 0 14px #b7f36b33}
+/* Weekly recap card (mockup: preview/push-recap-preview.html s3) */
+.recap{background:linear-gradient(150deg,#141c12,var(--card));border:1px solid #b7f36b30;border-radius:20px;padding:16px;margin-bottom:14px}
+.recap .wk{font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--lime);font-weight:800}
+.recap h3{margin:4px 0 14px;font-size:16px;font-weight:850}
+.recap .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:14px}
+.recap .st b{display:block;font-size:17px;font-weight:850;font-variant-numeric:tabular-nums}
+.recap .st b.g{color:var(--green)}.recap .st b.r{color:var(--red)}
+.recap .st small{font-size:8.5px;letter-spacing:.05em;text-transform:uppercase;color:var(--muted)}
+.recap .best{display:flex;align-items:center;gap:9px;background:var(--card2);border-radius:12px;padding:9px 11px;margin-bottom:10px;font-size:12px}
+.recap .best .em{font-size:18px}
+.recap .coach{font-size:11.5px;color:#c9d4c9;font-style:italic;border-top:1px dashed var(--line);padding-top:10px;line-height:1.55}
+.recap .coach b{color:var(--lime);font-style:normal}
+.recap .spark{margin-top:10px;height:38px}
+.recap .spark svg{width:100%;height:38px}
 .season{display:flex;align-items:center;gap:12px;background:linear-gradient(135deg,#b7f36b14,var(--card));border:1px solid #b7f36b33;border-radius:20px;padding:14px 16px;margin-bottom:12px}
 html[data-theme="light"] .season{background:linear-gradient(135deg,#eaf5db,var(--card))}
 .season .sic{width:40px;height:40px;border-radius:13px;background:#b7f36b1c;color:var(--lime);display:grid;place-items:center;flex:none}
@@ -506,6 +520,7 @@ html[data-theme="light"] .lotbadge{color:#4c7a17}
         <div class="lsub" id="lsub" role="tablist" aria-label="League sections"></div>
 
         <div id="liga-lb">
+          <div id="recapCard"></div>
           <div class="season">
             <div class="sic"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0V4Z"/><path d="M7 6H4a1 1 0 0 0-1 1c0 2.2 1.8 4 4 4M17 6h3a1 1 0 0 1 1 1c0 2.2-1.8 4-4 4"/></svg></div>
             <div class="st"><b><span id="seasonT">Weekly Season</span><span class="weekchip" id="seasonChip">Season 1</span></b><small id="seasonS">Net R decides the ranking — not raw profit.</small></div>
@@ -571,6 +586,19 @@ html[data-theme="light"] .lotbadge{color:#4c7a17}
             <div class="pi"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m0 0 4-4m-4 4-4-4M4 17v3h16v-3"/></svg></div>
             <div><div class="pt" id="instT">Pasang app</div><div class="ps" id="instS">Offline-ready · App shell dicache</div></div>
             <button class="install" id="instBtn">Pasang</button>
+          </div>
+        </div>
+        <div class="setgroup">
+          <div class="setlabel"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg><span id="pushSec">🔔 Alert trade</span></div>
+          <div class="pwa">
+            <div class="pi"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg></div>
+            <div><div class="pt" id="pushT">Alert TP/SL</div><div class="ps" id="pushS">Status: —</div></div>
+            <button class="install" id="pushBtn">Aktifkan</button>
+          </div>
+          <div class="modepills" id="pushKinds" style="margin-top:8px" role="tablist" aria-label="Alert kinds"></div>
+          <div style="display:flex;gap:10px;margin-top:8px;flex-wrap:wrap">
+            <button class="again" id="pushTest" style="flex:1;min-width:120px">Hantar notifikasi ujian</button>
+            <button class="again" id="pushOff" style="flex:0 0 auto;color:var(--muted)">Matikan</button>
           </div>
         </div>
         <p class="setnote" id="setNote">Pilihan disimpan di peranti ini.</p>
@@ -750,6 +778,8 @@ var DICT={
   account:'Butiran akaun',uid:'ID ahli',name:'Nama',email:'Emel',plan:'Plan',close:'Tutup',
   perfTitle:'Prestasi Saya',perfSub:'Keputusan paper trading anda dalam Liga.',perfWin:'Kadar menang',perfClosed:'Trade paper ditutup',perfMine:'Analisis anda dibuat',perfBalance:'Baki maya',perfRank:'Rank',perfOpen:'Trade dibuka',viewLeague:'Lihat Liga',perfEmpty:'Belum ada paper trade. Analisis satu pair dan ambil trade untuk bermula.',perfNote:'Paper trading sahaja — modal maya. Outcome dari harga sebenar.',
   notifTitle:'Notifikasi komuniti',notifSub:'Tahap peringatan mesej komuniti disimpan pada akaun anda.',notifOff:'Matikan',notifOffS:'Tiada peringatan mesej.',notifTeam:'Ahli sahaja',notifTeamS:'Peringatan apabila ahli menghantar mesej.',notifAll:'Semua',notifAllS:'Semua peringatan komuniti.',notifSaved:'Tahap notifikasi disimpan.',notifErr:'Gagal menyimpan. Cuba lagi.',
+  recapTitle:'📊 Recap mingguan',recapHead:'Prestasi anda minggu ini',recapNetR:'Net R',recapWin:'Win rate',recapTrades:'Trade',recapStreak:'Streak 🔥',recapBest:'Pair terbaik',recapCoach:'Coach',recapEmpty:'Tiada trade minggu ini — rekod satu untuk nampak recap.',
+  pushSec:'🔔 Alert trade',pushT:'Alert TP/SL',pushStatusOn:'Aktif',pushStatusOff:'Belum aktif',pushOn:'Aktifkan',pushOnOk:'Alert TP/SL diaktifkan 🔔',pushDenied:'Notifikasi disekat — benarkan dalam tetapan browser.',pushErr:'Gagal aktifkan alert. Cuba lagi.',pushTestOk:'Notifikasi ujian dihantar',pushTestNone:'Tiada langganan aktif',pushOffOk:'Alert dimatikan',pushKindsTpsl:'TP/SL sahaja',pushKindsAll:'TP/SL + verdict',
   navLiga:'Liga',ligaTitle:'Liga Kertas',ligaSub:'Modal maya $10,000. Disiplin menang, bukan judi.',
   subLb:'Leaderboard',subTrades:'Trade Saya',subBadges:'Badge',
   seasonT:'Musim Mingguan',seasonS:'Net R menentukan kedudukan — bukan jumlah duit.',seasonLab:'Musim',rankedLab:'Disenarai',
@@ -792,6 +822,8 @@ var DICT={
   account:'Account details',uid:'Member ID',name:'Name',email:'Email',plan:'Plan',close:'Close',
   perfTitle:'My Performance',perfSub:'Your paper trading results in the League.',perfWin:'Win rate',perfClosed:'Paper trades closed',perfMine:'Analyses made',perfBalance:'Virtual balance',perfRank:'Rank',perfOpen:'Open trades',viewLeague:'View League',perfEmpty:'No paper trades yet. Analyze a pair and take a trade to start.',perfNote:'Paper trading only — virtual capital. Outcomes resolved from live prices.',
   notifTitle:'Community notifications',notifSub:'Your community message alert level is stored on your account.',notifOff:'Off',notifOffS:'No message alerts.',notifTeam:'Members only',notifTeamS:'Alert when a member posts a message.',notifAll:'All',notifAllS:'All community alerts.',notifSaved:'Notification level saved.',notifErr:'Could not save. Try again.',
+  recapTitle:'📊 Weekly recap',recapHead:'Your performance this week',recapNetR:'Net R',recapWin:'Win rate',recapTrades:'Trades',recapStreak:'Streak 🔥',recapBest:'Best pair',recapCoach:'Coach',recapEmpty:'No trades this week — record one to see your recap.',
+  pushSec:'🔔 Trade alerts',pushT:'TP/SL alerts',pushStatusOn:'Active',pushStatusOff:'Not active',pushOn:'Enable',pushOnOk:'TP/SL alerts enabled 🔔',pushDenied:'Notifications blocked — allow them in browser settings.',pushErr:'Could not enable alerts. Try again.',pushTestOk:'Test notification sent',pushTestNone:'No active subscription',pushOffOk:'Alerts turned off',pushKindsTpsl:'TP/SL only',pushKindsAll:'TP/SL + verdicts',
   navLiga:'League',ligaTitle:'Paper League',ligaSub:'Virtual $10,000 capital. Discipline wins, not gambling.',
   subLb:'Leaderboard',subTrades:'My Trades',subBadges:'Badges',
   seasonT:'Weekly Season',seasonS:'Net R decides the ranking — not raw profit.',seasonLab:'Season',rankedLab:'Ranked',
@@ -833,6 +865,8 @@ var DICT={
   account:'账户详情',uid:'会员 ID',name:'姓名',email:'邮箱',plan:'方案',close:'关闭',
   perfTitle:'我的表现',perfSub:'您在联赛中的模拟交易结果。',perfWin:'胜率',perfClosed:'已平仓模拟交易',perfMine:'您的分析次数',perfNote:'仅模拟交易——虚拟资金。结果由实时价格结算。',
   notifTitle:'社区通知',notifSub:'社区消息提醒级别保存在您的账户。',notifOff:'关闭',notifOffS:'无消息提醒。',notifTeam:'仅成员',notifTeamS:'成员发消息时提醒。',notifAll:'全部',notifAllS:'所有社区提醒。',notifSaved:'通知级别已保存。',notifErr:'保存失败，请重试。',
+  recapTitle:'📊 每周回顾',recapHead:'您本周的表现',recapNetR:'净 R',recapWin:'胜率',recapTrades:'交易',recapStreak:'连胜 🔥',recapBest:'最佳货币对',recapCoach:'教练',recapEmpty:'本周暂无交易——记录一笔即可查看回顾。',
+  pushSec:'🔔 交易提醒',pushT:'TP/SL 提醒',pushStatusOn:'已启用',pushStatusOff:'未启用',pushOn:'启用',pushOnOk:'TP/SL 提醒已启用 🔔',pushDenied:'通知被拦截——请在浏览器设置中允许。',pushErr:'启用提醒失败。请重试。',pushTestOk:'测试通知已发送',pushTestNone:'暂无有效订阅',pushOffOk:'提醒已关闭',pushKindsTpsl:'仅 TP/SL',pushKindsAll:'TP/SL + 观点',
   navLiga:'联赛',ligaTitle:'模拟交易联赛',ligaSub:'虚拟资金 $10,000。纪律取胜，而非赌博。',
   subLb:'排行榜',subTrades:'我的交易',subBadges:'徽章',
   seasonT:'每周赛季',seasonS:'净 R 决定排名——而非利润金额。',seasonLab:'赛季',rankedLab:'已排名',
@@ -872,6 +906,8 @@ var DICT={
   account:'Detail akun',uid:'ID anggota',name:'Nama',email:'Email',plan:'Paket',close:'Tutup',
   perfTitle:'Performa Saya',perfSub:'Hasil paper trading Anda di Liga.',perfWin:'Tingkat menang',perfClosed:'Trade paper ditutup',perfMine:'Analisis Anda dibuat',perfNote:'Hanya paper trading — modal virtual. Hasil diselesaikan dari harga live.',
   notifTitle:'Notifikasi komunitas',notifSub:'Tingkat peringatan pesan komunitas disimpan di akun Anda.',notifOff:'Matikan',notifOffS:'Tanpa peringatan pesan.',notifTeam:'Anggota saja',notifTeamS:'Peringatan saat anggota mengirim pesan.',notifAll:'Semua',notifAllS:'Semua peringatan komunitas.',notifSaved:'Tingkat notifikasi disimpan.',notifErr:'Gagal menyimpan. Coba lagi.',
+  recapTitle:'📊 Rekap mingguan',recapHead:'Performa Anda minggu ini',recapNetR:'Net R',recapWin:'Tingkat menang',recapTrades:'Trade',recapStreak:'Streak 🔥',recapBest:'Pair terbaik',recapCoach:'Coach',recapEmpty:'Belum ada trade minggu ini — catat satu untuk melihat rekap.',
+  pushSec:'🔔 Alert trade',pushT:'Alert TP/SL',pushStatusOn:'Aktif',pushStatusOff:'Belum aktif',pushOn:'Aktifkan',pushOnOk:'Alert TP/SL diaktifkan 🔔',pushDenied:'Notifikasi diblokir — izinkan di pengaturan browser.',pushErr:'Gagal mengaktifkan alert. Coba lagi.',pushTestOk:'Notifikasi ujian terkirim',pushTestNone:'Tidak ada langganan aktif',pushOffOk:'Alert dimatikan',pushKindsTpsl:'Hanya TP/SL',pushKindsAll:'TP/SL + verdict',
   navLiga:'Liga',ligaTitle:'Liga Paper',ligaSub:'Modal virtual $10.000. Disiplin menang, bukan judi.',
   subLb:'Papan peringkat',subTrades:'Trade Saya',subBadges:'Lencana',
   seasonT:'Musim Mingguan',seasonS:'Net R menentukan peringkat — bukan jumlah uang.',seasonLab:'Musim',rankedLab:'Terperingkat',
@@ -912,6 +948,8 @@ var DICT={
   account:'கணக்கு விவரங்கள்',uid:'உறுப்பினர் ID',name:'பெயர்',email:'மின்னஞ்சல்',plan:'திட்டம்',close:'மூடு',
   perfTitle:'என் செயல்திறன்',perfSub:'லீக்கில் உங்கள் பேப்பர் வர்த்தக முடிவுகள்.',perfWin:'வெற்றி விகிதம்',perfClosed:'மூடிய பேப்பர் வர்த்தகங்கள்',perfMine:'உங்கள் பகுப்பாய்வுகள்',perfNote:'பேப்பர் வர்த்தகம் மட்டும் — மெய்நிகர் மூலதனம். முடிவுகள் நேரடி விலைகளிலிருந்து.',
   notifTitle:'சமூக அறிவிப்புகள்',notifSub:'சமூக செய்தி எச்சரிக்கை நிலை உங்கள் கணக்கில் சேமிக்கப்படும்.',notifOff:'அணை',notifOffS:'செய்தி எச்சரிக்கை இல்லை.',notifTeam:'உறுப்பினர்கள் மட்டும்',notifTeamS:'உறுப்பினர் செய்தி அனுப்பும்போது எச்சரிக்கை.',notifAll:'அனைத்தும்',notifAllS:'அனைத்து சமூக எச்சரிக்கைகள்.',notifSaved:'அறிவிப்பு நிலை சேமிக்கப்பட்டது.',notifErr:'சேமிக்க முடியவில்லை. மீண்டும் முயற்சிக்கவும்.',
+  recapTitle:'📊 வாராந்திர மறுபார்வை',recapHead:'இந்த வாரம் உங்கள் செயல்திறன்',recapNetR:'நிகர R',recapWin:'வெற்றி விகிதம்',recapTrades:'வர்த்தகங்கள்',recapStreak:'தொடர் 🔥',recapBest:'சிறந்த ஜோடி',recapCoach:'பயிற்சியாளர்',recapEmpty:'இந்த வாரம் வர்த்தகங்கள் இல்லை — ஒன்றைப் பதிவு செய்யவும்.',
+  pushSec:'🔔 வர்த்தக எச்சரிக்கைகள்',pushT:'TP/SL எச்சரிக்கைகள்',pushStatusOn:'செயலில்',pushStatusOff:'செயலில் இல்லை',pushOn:'இயக்கு',pushOnOk:'TP/SL எச்சரிக்கைகள் இயக்கப்பட்டன 🔔',pushDenied:'அறிவிப்புகள் தடுக்கப்பட்டுள்ளன — உலாவி அமைப்புகளில் அனுமதிக்கவும்.',pushErr:'எச்சரிக்கைகளை இயக்க முடியவில்லை. மீண்டும் முயற்சிக்கவும்.',pushTestOk:'சோதனை அறிவிப்பு அனுப்பப்பட்டது',pushTestNone:'செயலில் உள்ள சந்தா இல்லை',pushOffOk:'எச்சரிக்கைகள் முடக்கப்பட்டன',pushKindsTpsl:'TP/SL மட்டும்',pushKindsAll:'TP/SL + கருத்து',
   navLiga:'லீக்',ligaTitle:'பேப்பர் லீக்',ligaSub:'மெய்நிகர் மூலதனம் $10,000. ஒழுக்கமே வெல்லும், சூதாட்டம் அல்ல.',
   subLb:'தரவரிசை',subTrades:'என் வர்த்தகங்கள்',subBadges:'பதக்கங்கள்',
   seasonT:'வாராந்திர சீசன்',seasonS:'நிகர R தான் தரவரிசையைத் தீர்மானிக்கும் — லாபத் தொகை அல்ல.',seasonLab:'சீசன்',rankedLab:'தரவரிசையில்',
@@ -1682,8 +1720,54 @@ function drawBadges(){
    '<b>'+esc(t(b.k))+'</b><small>'+esc(t(b.ck))+'</small>'+status+'</div>';
  }).join('');
 }
+/* ---------------- weekly recap card (GET /api/league/recap, cache 1j) ---------------- */
+var RECAP={data:null,at:0};
+function loadRecap(){
+ if(!getSession())return Promise.resolve();
+ if(RECAP.data&&Date.now()-RECAP.at<3600000)return Promise.resolve();
+ return apiFetch('/api/league/recap').then(function(r){
+  RECAP.at=Date.now();
+  RECAP.data=r.ok?(r.data||null):null;
+  drawRecap();
+ }).catch(function(){});
+}
+function drawRecap(){
+ var el=$('recapCard');if(!el)return;
+ if(lsub!=='lb'||!RECAP.data||RECAP.data.empty){el.innerHTML='';return}
+ var d=RECAP.data,nr=+d.net_r||0;
+ var nrCls=nr>0?'g':nr<0?'r':'';
+ var wr=(d.win_rate==null)?'—':(+d.win_rate).toFixed(0)+'%';
+ var best=d.best_pair?(' <div class="best"><span class="em">🥇</span><div><b>'+esc(t('recapBest'))+': '+esc(pairName(d.best_pair.pair))+'</b>'+
+   '<div style="font-size:11px;color:var(--muted)">'+d.best_pair.wins+'/'+d.best_pair.total+' TP · '+fmtR(d.best_pair.r)+'</div></div></div>'):'';
+ var spark='';
+ var sp=Array.isArray(d.equity_spark)?d.equity_spark:[];
+ if(sp.length>1){
+  var min=Math.min.apply(null,sp),max=Math.max.apply(null,sp),rng=(max-min)||1;
+  var pts=sp.map(function(v,i){
+   var x=sp.length>1?i*(340/(sp.length-1)):0;
+   var y=34-((v-min)/rng)*28;
+   return x.toFixed(1)+','+y.toFixed(1);
+  }).join(' ');
+  var zero=34-((0-min)/rng)*28;
+  spark='<div class="spark"><svg viewBox="0 0 340 38" preserveAspectRatio="none">'+
+   '<line x1="0" y1="'+zero.toFixed(1)+'" x2="340" y2="'+zero.toFixed(1)+'" stroke="#222b23" stroke-dasharray="3,4"/>'+
+   '<polyline points="'+pts+'" fill="none" stroke="#b7f36b" stroke-width="2" stroke-linecap="round"/></svg></div>';
+ }
+ el.innerHTML='<div class="recap">'+
+  '<div class="wk">📅 '+esc(t('recapTitle'))+' · '+esc(d.week_label||'')+'</div>'+
+  '<h3>'+esc(t('recapHead'))+'</h3>'+
+  '<div class="stats">'+
+   '<div class="st"><b class="'+nrCls+'">'+fmtR(nr)+'</b><small>'+esc(t('recapNetR'))+'</small></div>'+
+   '<div class="st"><b>'+esc(wr)+'</b><small>'+esc(t('recapWin'))+'</small></div>'+
+   '<div class="st"><b>'+(d.trades!=null?d.trades:'—')+'</b><small>'+esc(t('recapTrades'))+'</small></div>'+
+   '<div class="st"><b class="'+((+d.best_streak||0)>=3?'g':'')+'">'+(+d.best_streak||0)+'</b><small>'+esc(t('recapStreak'))+'</small></div>'+
+  '</div>'+best+spark+
+  '<div class="coach"><b>'+esc(t('recapCoach'))+':</b> "'+esc(d.coach||'')+'"</div>'+
+  '</div>';
+}
 function renderLiga(){
- drawSub();drawSeason();drawYou();drawMetric();drawLb();drawTrades();drawBadges();
+ drawSub();drawSeason();drawYou();drawMetric();drawLb();drawTrades();drawBadges();drawRecap();
+ if(lsub==='lb')loadRecap();
  var r=$('lgRetry');if(r)r.onclick=function(){hap(8);loadLeague(true)};
  if(LG.state==='idle'&&current==='liga')loadLeague();
  else if(LG.state==='ready'&&current==='liga'&&Date.now()-LG.at>=60000)loadLeague();
@@ -2107,11 +2191,89 @@ function renderAll(){
  if(TD.trade){drawTdHead();drawTdLive();drawTdLevels();drawTdMeta();drawTdProg()}
  var tb=$('takeBtn');if(tb)tb.textContent=t('takeTrade');
  renderStats();drawTabs();drawPairs(true);drawLangs();drawThemes();drawMenu();renderLiga();
+ if(current==='settings')pushStatus();
  }catch(e){if(window.console)console.error('renderAll partial fail:',e);drawNav()}
 }
 $('langBtn').onclick=function(){showView('settings')};
 $('themeBtn').onclick=function(){setTheme(resolved()==='dark'?'light':'dark')};
 $('avatarBtn').onclick=function(){showView('profile')};
+
+/* ---------------- web push alerts (TP/SL / verdict) ---------------- */
+var PUSH={sub:null,kinds:null,at:0};
+function urlBase64ToUint8Array(b64){
+ var pad='='.repeat((4-b64.length%4)%4),raw=window.atob((b64+pad).replace(/-/g,'+').replace(/_/g,'/'));
+ var out=new Uint8Array(raw.length);
+ for(var i=0;i<raw.length;i++)out[i]=raw.charCodeAt(i);
+ return out;
+}
+function pushReg(){
+ if(!('serviceWorker' in navigator))return Promise.resolve(null);
+ return navigator.serviceWorker.getRegistration('./').then(function(r){return r||navigator.serviceWorker.ready});
+}
+function pushStatus(){
+ apiFetch('/api/push/status').then(function(r){
+  if(!r.ok)return;
+  PUSH.at=Date.now();
+  var d=r.data||{};
+  PUSH.subscribed=!!d.subscribed;PUSH.kinds=(d.kinds&&d.kinds[0])||'tpsl';
+  drawPush();
+ }).catch(function(){});
+}
+function drawPush(){
+ var sec=$('pushSec');if(!sec)return;
+ sec.textContent=t('pushSec');$('pushT').textContent=t('pushT');
+ $('pushS').textContent=(PUSH.subscribed?t('pushStatusOn'):t('pushStatusOff'));
+ $('pushBtn').textContent=PUSH.subscribed?t('pushOn'):t('pushOn');
+ var kinds=[['tpsl','pushKindsTpsl'],['all','pushKindsAll']];
+ $('pushKinds').innerHTML=kinds.map(function(k){return '<button data-k="'+k[0]+'" class="'+(PUSH.kinds===k[0]?'on':'')+'" role="tab" aria-selected="'+(PUSH.kinds===k[0])+'">'+esc(t(k[1]))+'</button>'}).join('');
+ Array.prototype.forEach.call($('pushKinds').querySelectorAll('button'),function(b){b.onclick=function(){
+  PUSH.kinds=b.dataset.k;drawPush();
+  if(PUSH.sub&&PUSH.subscribed)subscribePush(PUSH.kinds);
+ }});
+}
+function subscribePush(kinds){
+ if(!('Notification' in window)||!('PushManager' in window)){toast(t('pushErr'));return}
+ Notification.requestPermission().then(function(perm){
+  if(perm!=='granted'){toast(t('pushDenied'));return}
+  pushReg().then(function(reg){
+   if(!reg){toast(t('pushErr'));return}
+   return apiFetch('/api/push/vapid').then(function(r){
+    if(!r.ok||!r.data.publicKey)throw new Error('no vapid');
+    return reg.pushManager.getSubscription().then(function(ex){
+     var sub=ex||null;
+     var p=sub?Promise.resolve(sub):reg.pushManager.subscribe({
+       userVisibleOnly:true,applicationServerKey:urlBase64ToUint8Array(r.data.publicKey)});
+     return p.then(function(s){
+      PUSH.sub=s;
+      var j=s.toJSON();
+      return apiFetch('/api/push/subscribe',{method:'POST',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({endpoint:j.endpoint,keys:j.keys,kinds:kinds||PUSH.kinds||'tpsl'})});
+     });
+    });
+   });
+  }).then(function(r){
+   if(r&&!r.ok)throw new Error('subscribe fail');
+   PUSH.subscribed=true;drawPush();toast(t('pushOnOk'));hap(8);
+  }).catch(function(){toast(t('pushErr'))});
+ });
+}
+$('pushBtn').onclick=function(){hap(6);subscribePush(PUSH.kinds||'tpsl')};
+$('pushTest').onclick=function(){
+ apiFetch('/api/push/test',{method:'POST'}).then(function(r){
+  if(!r.ok){toast(t('pushErr'));return}
+  toast((r.data&&r.data.sent>0)?t('pushTestOk'):t('pushTestNone'));
+ }).catch(function(){toast(t('pushErr'))});
+};
+$('pushOff').onclick=function(){
+ var ep=(PUSH.sub&&PUSH.sub.endpoint)||null;
+ if(!ep){toast(t('pushTestNone'));return}
+ apiFetch('/api/push/unsubscribe',{method:'POST',headers:{'Content-Type':'application/json'},
+  body:JSON.stringify({endpoint:ep})}).then(function(r){
+  if(!r.ok){toast(t('pushErr'));return}
+  try{PUSH.sub.unsubscribe()}catch(e){}
+  PUSH.sub=null;PUSH.subscribed=false;drawPush();toast(t('pushOffOk'));
+ }).catch(function(){toast(t('pushErr'))});
+};
 
 /* ---------------- PWA (install prompt + service worker sebenar) ---------------- */
 var dp=null;

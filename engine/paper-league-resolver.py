@@ -34,6 +34,70 @@ import sys
 sys.path.insert(0, str(HERE))
 import mt5_data as M5  # single MT5 broker data source (no Swissquote fallback)
 
+# Web Push (lazy import inside sender — push failure NEVER breaks resolution).
+PUSH_ENV = pathlib.Path("/home/ubuntu/.secrets/push.env")
+
+
+def _push_env():
+    if not PUSH_ENV.exists():
+        return {}
+    sec = {}
+    for line in PUSH_ENV.read_text().splitlines():
+        if "=" in line and not line.strip().startswith("#"):
+            k, v = line.split("=", 1)
+            sec[k.strip()] = v.strip().strip('"').strip("'")
+    return sec
+
+
+def push_closed_trade(tr, status, r):
+    """Notify the trade owner via Web Push (TP/SL only; be/expired skipped).
+    Best-effort: any failure is logged and swallowed."""
+    if status not in ("tp", "sl"):
+        return
+    try:
+        rows = sb("GET", "/rest/v1/push_subs", params={
+            "select": "id,endpoint,p256dh,auth",
+            "user_id": f"eq.{tr['user_id']}", "limit": "50"}) or []
+        if not rows:
+            return
+        from pywebpush import webpush
+        env = _push_env()
+        if not env.get("VAPID_PRIVATE_KEY"):
+            log("push skip: no VAPID keys")
+            return
+        pair = tr["pair"]
+        side = tr["side"]
+        risk_usd = float(tr.get("risk_usd") or 0)
+        pnl = round(r * risk_usd, 2)
+        sign = "+" if pnl >= 0 else "\u2212"
+        if status == "tp":
+            title = f"\U0001F389 {pair} — TP HIT!"
+            body = f"+{r}R · {sign}${abs(pnl)} · {side} ditutup — buka app untuk recap"
+        else:
+            title = f"{pair} — SL"
+            body = f"\u22121R · {side} — buka app untuk recap"
+        payload = json.dumps({"title": title, "body": body,
+                              "url": "https://traderwatch.org/member/"})
+        for sub in rows:
+            try:
+                resp = webpush(
+                    subscription_info={"endpoint": sub["endpoint"],
+                                       "keys": {"p256dh": sub["p256dh"], "auth": sub["auth"]}},
+                    data=payload,
+                    vapid_private_key=env["VAPID_PRIVATE_KEY"],
+                    vapid_claims={"sub": env.get("VAPID_SUBJECT", "mailto:ops@traderwatch.org")})
+                log(f"push {sub['id']} {status} {pair} -> {resp.status_code}")
+            except Exception as e:
+                scode = getattr(getattr(e, "response", None), "status_code", None)
+                log(f"push fail {sub['id']} {type(e).__name__}: {str(e)[:100]}")
+                if scode in (404, 410):
+                    try:
+                        sb("DELETE", "/rest/v1/push_subs", params={"id": f"eq.{sub['id']}"})
+                    except Exception:
+                        pass
+    except Exception as e:
+        log(f"push_closed_trade error {type(e).__name__}: {str(e)[:140]}")
+
 
 def load_env():
     sec = {}
@@ -192,6 +256,10 @@ def main():
             "closed_at": datetime.now(timezone.utc).isoformat()
         })
         log(f"trade {tr['id']} {tr['pair']} {tr['side']} -> {status} {r:+.2f}R")
+        try:
+            push_closed_trade(tr, status, r)
+        except Exception as e:
+            log(f"push outer error {type(e).__name__}: {str(e)[:120]}")
     log("done")
 
 

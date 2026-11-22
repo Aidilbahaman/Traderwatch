@@ -37,6 +37,73 @@ sys.path.insert(0, str(HERE.parent))
 import ai_model as M  # noqa: E402
 import smc_filter as SMC  # noqa: E402
 import llm_analyst as LA  # noqa: E402
+
+# Web Push verdict alerts (kinds='all'). Lazy import, best-effort: push
+# failure NEVER breaks the signal flow. Throttle: max 1 verdict push per
+# pair per 2h (module-level dict; process restarts reset it — acceptable).
+PUSH_ENV = pathlib.Path("/home/ubuntu/.secrets/push.env")
+_VERDICT_PUSH_TS = {}
+
+
+def _load_push_env():
+    if not PUSH_ENV.exists():
+        return {}
+    sec = {}
+    for line in PUSH_ENV.read_text().splitlines():
+        if "=" in line and not line.strip().startswith("#"):
+            k, v = line.split("=", 1)
+            sec[k.strip()] = v.strip().strip('"').strip("'")
+    return sec
+
+
+def push_verdict(pair, side, conf):
+    """Notify 'all' subscribers about a new verified signal. Best-effort."""
+    try:
+        import json as _json
+        import pathlib as _pl
+        now = time.time()
+        if now - _VERDICT_PUSH_TS.get(pair, 0) < 2 * 3600:
+            return  # max 1 push per pair per 2h
+        env = _load_push_env()
+        if not env.get("VAPID_PRIVATE_KEY"):
+            return
+        subs = _sb("GET", "/rest/v1/push_subs", params={
+            "select": "id,endpoint,p256dh,auth", "kinds": "eq.all", "limit": "200"})
+        if not subs:
+            _VERDICT_PUSH_TS[pair] = now
+            return
+        from pywebpush import webpush
+        payload = _json.dumps({
+            "title": f"Verdict baru: {pair}",
+            "body": f"{TIMEFRAME} {side} · conf {round(conf*100)}% — buka app untuk chart",
+            "url": "https://traderwatch.org/member/"})
+        for sub in subs:
+            try:
+                webpush(
+                    subscription_info={"endpoint": sub["endpoint"],
+                                       "keys": {"p256dh": sub["p256dh"], "auth": sub["auth"]}},
+                    data=payload,
+                    vapid_private_key=env["VAPID_PRIVATE_KEY"],
+                    vapid_claims={"sub": env.get("VAPID_SUBJECT", "mailto:ops@traderwatch.org")})
+            except Exception as e:
+                log(f"verdict push fail {sub.get('id')} {type(e).__name__}: {str(e)[:100]}")
+        _VERDICT_PUSH_TS[pair] = now
+    except Exception as e:
+        log(f"push_verdict error {type(e).__name__}: {str(e)[:140]}")
+
+
+def _sb(path, method="GET", params=None):
+    """Service-key Supabase GET/POST returning decoded JSON (push helper).
+    Separate from sb() which returns (code, text) for the signal flow."""
+    url = f"{SB_URL}/rest/v1/{path}"
+    if params:
+        url += "?" + urllib.parse.urlencode(params)
+    req = urllib.request.Request(url, headers={
+        "apikey": SB_KEY, "Authorization": f"Bearer {SB_KEY}",
+        "Content-Type": "application/json"})
+    with urllib.request.urlopen(req, timeout=25) as r:
+        raw = r.read().decode()
+        return json.loads(raw) if raw.strip() else []
 from mt5_read import run as mt5_run  # noqa: E402
 
 TIMEOUT = 25
@@ -1155,6 +1222,9 @@ def main():
                 mark_pair_fired(pair)
                 if smc:
                     smc_mark_posted(pair, smc)
+                # Web push "verdict baru" kepada pelanggan kinds='all'
+                # (best-effort, throttle 1/pair/2j). Tak pernah ganggu flow.
+                push_verdict(pair, side, conf)
                 sid = None
                 try:
                     sid = (json.loads(txt) or [{}])[0].get("id")
