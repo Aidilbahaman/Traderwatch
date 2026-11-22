@@ -1540,13 +1540,13 @@ function mapVerdict(d){
    'TP1 '+fx(cur,a.tp)+' · RR 1:'+rr1+'.',
    a.tp2!=null?'TP2 '+fx(cur,a.tp2)+' · RR 1:'+rr2+'.':null].filter(Boolean);
   a.checks=[{t:en?'Clear direction (BUY/SELL)':'Arah jelas (BUY/SELL)',ok:true},
-   {t:'Risk:Reward ≥ 1:1.5',ok:rr1>=1.5},
+   {t:(en?'Calibrated Risk:Reward (TP1 1:'+rr1+(a.tp2!=null?' · TP2 1:'+rr2:'')+')':'Risk:Reward terkalibrasi (TP1 1:'+rr1+(a.tp2!=null?' · TP2 1:'+rr2:'')+')'),ok:(rr1>=0.7&&(rr2>=1.4||rr1>=1.0))},
    {t:en?'AI confidence ≥ 50%':'Keyakinan AI ≥ 50%',ok:conf>=50},
    {t:en?'SL beyond spread':'SL di luar spread',ok:true}];
  }else{
   a.reasons=[d.reason?esc(d.reason):t('waitMsg'),en?'No entry suggested — wait for a clearer setup.':'Tiada entry dicadangkan — tunggu setup lebih jelas.'];
   a.checks=[{t:(en?'Clear direction (BUY/SELL) — waiting':'Arah jelas (BUY/SELL) — masih menunggu'),ok:false},
-   {t:(en?'Risk:Reward ≥ 1:1.5 — no setup':'Risk:Reward ≥ 1:1.5 — tiada setup'),ok:false},
+   {t:(en?'Calibrated Risk:Reward — no setup':'Risk:Reward terkalibrasi — tiada setup'),ok:false},
    {t:en?'AI confidence ≥ 50%':'Keyakinan AI ≥ 50%',ok:conf>=50},
    {t:(en?'SL beyond spread — no entry':'SL di luar spread — tiada entry'),ok:false}];
  }
@@ -2603,7 +2603,7 @@ function loadTdCandles(){
  apiFetch('/api/bars?pair='+encodeURIComponent(pair)+'&tf=M15').then(function(r){
   if(run!==TD.run||!TD.trade)return;
   var cs=r.ok&&r.data&&Array.isArray(r.data.candles)?r.data.candles.map(function(k){return{o:+k.o,h:+k.h,l:+k.l,c:+k.c}}).filter(function(k){return isFinite(k.o)&&isFinite(k.h)&&isFinite(k.l)&&isFinite(k.c)}):[];
-  if(cs.length){TD.candles=cs.slice(-96);drawTdChart()}
+  if(cs.length){TD.candles=cs.slice(-64);drawTdChart()}
  }).catch(function(){});
 }
 function openTrade(x){
@@ -3209,7 +3209,7 @@ window.addEventListener('appinstalled',function(){drawWelcome();try{localStorage
 if(typeof window!=='undefined'){window.__welcome=showWelcome;window.__drawWelcome=drawWelcome;}
 if(typeof window!=='undefined'){window.__forceLogout=goLogin;}
 if('serviceWorker' in navigator){window.addEventListener('load',function(){
- navigator.serviceWorker.register('sw.js?v=20261122v32',{scope:'./',updateViaCache:'none'}).then(function(reg){
+ navigator.serviceWorker.register('sw.js?v=20261123v58',{scope:'./',updateViaCache:'none'}).then(function(reg){
   /* PWA homescreen resume instance lama tanpa navigation -> check update
      bila app kembali nampak/focus + setiap 30 min, dan reload automatik
      bila SW versi baru mengambil alih (controllerchange). */
