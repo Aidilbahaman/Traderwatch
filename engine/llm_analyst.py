@@ -1,5 +1,9 @@
 #!/usr/bin/env python3
-"""LLM analyst untuk enjin signal AI — Qwen4 Max (rootsys) buat keputusan.
+"""LLM analyst untuk enjin signal AI — Gemini 4 Neon (Antigravity CLI) utama.
+
+Owner 2026-11-23: Tukar model analisis utama kepada Gemini 4 Neon (melalui
+Antigravity CLI `agy -p`), dengan sandaran rootsys (deepseek-v4.1-flash) +
+serveras jika agy/kuota gagal.
 
 Owner 2026-11-20: LLM sahaja sebagai penganalisis (ganti model logistic +
 gate SMC yang terlalu ketat). Setiap scan, hantar konteks H1 + M15 kepada
@@ -10,8 +14,9 @@ Reka bentuk (belajar dari kegagalan bot_v2):
     token pada reasoning dan content kosong.
   * max_tokens 1500 + temperature 0.2; parser extract JSON dari mana-mana
     bahagian content (GLM tulis prose dahulu sebelum JSON).
-  * Chain model: qwen4-max (rootsys) utama -> sandaran serveras percuma.
-    Kegagalan HTTP/parse -> cuba model seterusnya. Penolakan validasi
+  * Chain model: gemini-4-neon-high (agy CLI) utama -> sandaran rootsys
+    (deepseek-v4.1-flash) -> sandaran serveras percuma.
+    Kegagalan HTTP/CLI/parse -> cuba model seterusnya. Penolakan validasi
     (aras tak sah / SL terlalu lebar) = muktamad, TIDAK "shop" model lain.
   * Fail-closed: semua model gagal -> None (enjin skip pair, bukan pos).
   * Audit: setiap panggilan direkod ke state/llm-analysis-log.jsonl.
@@ -21,10 +26,13 @@ sepenuhnya keputusan LLM, TIADA cap): susunan aras, risk > 0, lantai
 3x spread (mekanikal — spread jangan makan stop), RR1 >= 1.5 (konvensyen
 ticket TP1/TP2 sistem).
 """
+import base64
 import json
 import os
 import re
+import subprocess
 import sys
+import tempfile
 import time
 import urllib.error
 import urllib.request
@@ -54,12 +62,14 @@ ROOTSYS_KEY_FILE = Path.home() / ".config/opencode/secrets/rootsys-key"
 ROOTSYS_QWEN_KEY_FILE = Path.home() / ".config/opencode/secrets/rootsys-qwen-key"
 TW_BOT_ENV = Path("/home/ubuntu/tw-bot/.env")
 
-VISION_MODEL = os.environ.get("AI_LLM_VISION_MODEL", "deepseek-v4.1-flash")
+AGY_BIN = os.environ.get("AGY_BIN", str(Path.home() / ".local/bin/agy"))
+VISION_MODEL = os.environ.get("AI_LLM_VISION_MODEL", "gemini-4-neon-high")
+VISION_FALLBACK_MODEL = os.environ.get("AI_LLM_VISION_FALLBACK", "deepseek-v4.1-flash")
 VISION_ENABLED = os.environ.get("AI_LLM_VISION", "1") == "1"
-PRIMARY_MODEL = os.environ.get("AI_LLM_MODEL", "qwen4-max")
+PRIMARY_MODEL = os.environ.get("AI_LLM_MODEL", "gemini-4-neon-high")
 FALLBACK_MODELS = [m.strip() for m in os.environ.get(
     "AI_LLM_FALLBACKS",
-    "asai/freemodel-1-GLM,asai/freemodel-2-MiniMax,asai/deepseek-v4-flash"
+    "deepseek-v4.1-flash,asai/freemodel-1-GLM,asai/freemodel-2-MiniMax,asai/deepseek-v4-flash"
 ).split(",") if m.strip()]
 CALL_TIMEOUT_S = float(os.environ.get("AI_LLM_CALL_TIMEOUT", "60"))
 # Had atas RR1: backtest mekanikal 780 trade (BTC/XAU/EUR, 33 hari) tunjuk
@@ -311,7 +321,82 @@ def _audit(record):
         log(f"WARN audit gagal: {type(e).__name__}")
 
 
+def _is_agy_model(model):
+    bare = model.split("/", 1)[-1].lower()
+    return model.startswith("agy/") or bare.startswith("gemini-")
+
+
+def _call_agy(model, prompt, timeout, image_b64=None):
+    """Panggil model Antigravity CLI (contoh: gemini-4-neon-medium) secara headless."""
+    if not Path(AGY_BIN).is_file():
+        raise RuntimeError(f"agy binary tidak dijumpai: {AGY_BIN}")
+    slug = model.split("/", 1)[-1]
+    timeout_s = max(15, int(timeout))
+    img_path = None
+    try:
+        if image_b64:
+            fd, img_path = tempfile.mkstemp(prefix="tw_chart_", suffix=".png", dir="/tmp")
+            with os.fdopen(fd, "wb") as f:
+                f.write(base64.b64decode(image_b64))
+            full_prompt = (
+                f"First call read_file on {img_path} to inspect the chart image. "
+                "Do not call any other tools. Then reply strictly following these instructions:\n\n"
+                + prompt
+            )
+        else:
+            full_prompt = (
+                "Do not call any tools. Reply directly following these instructions:\n\n"
+                + prompt
+            )
+        env = os.environ.copy()
+        env.setdefault("HOME", str(Path.home()))
+        local_bin = str(Path.home() / ".local/bin")
+        if local_bin not in env.get("PATH", ""):
+            env["PATH"] = f"{local_bin}:{env.get('PATH', '/usr/local/bin:/usr/bin:/bin')}"
+        cmd = [
+            AGY_BIN,
+            "-p", full_prompt,
+            "--model", slug,
+            "--output-format", "json",
+            "--disable-slash-commands",
+            "--print-timeout", f"{timeout_s}s",
+        ]
+        proc = subprocess.run(
+            cmd,
+            capture_output=True,
+            text=True,
+            timeout=timeout_s + 15,
+            cwd="/tmp",
+            env=env,
+        )
+        raw = (proc.stdout or "").strip()
+        data = None
+        for line in reversed(raw.splitlines()):
+            line = line.strip()
+            if line.startswith("{"):
+                try:
+                    data = json.loads(line)
+                    break
+                except json.JSONDecodeError:
+                    continue
+        if not isinstance(data, dict):
+            err = (proc.stderr or raw or f"exit {proc.returncode}")[:180]
+            raise RuntimeError(f"agy non-JSON output: {err}")
+        if data.get("status") != "SUCCESS":
+            err = (data.get("error") or proc.stderr or data.get("status"))
+            raise RuntimeError(f"agy gagal: {str(err)[:180]}")
+        return data.get("response") or ""
+    finally:
+        if img_path:
+            try:
+                os.unlink(img_path)
+            except OSError:
+                pass
+
+
 def _call_model(model, prompt, timeout):
+    if _is_agy_model(model):
+        return _call_agy(model, prompt, timeout)
     url, key = _route(model)
     if not key:
         raise RuntimeError(f"tiada API key untuk {model}")
@@ -329,19 +414,18 @@ def _call_model(model, prompt, timeout):
     return (choice.get("message") or {}).get("content") or ""
 
 
-def _call_vision(model, prompt, bars, pair, tf, timeout):
-    """Vision model: hantar prompt + screenshot chart (bar <= masa semasa)."""
+def _call_vision_b64(model, prompt, b64, timeout, max_tokens=700):
+    """Panggil model vision (agy CLI atau HTTP OpenAI-compatible) dengan PNG base64."""
+    if _is_agy_model(model):
+        return _call_agy(model, prompt, timeout, image_b64=b64)
     url, key = _route(model)
     if not key:
         raise RuntimeError(f"tiada API key untuk vision {model}")
-    b64 = VC.render(bars, pair=pair, tf=tf)
-    if not b64:
-        raise RuntimeError("vision chart render gagal")
     body = json.dumps({"model": model,
                        "messages": [{"role": "user", "content": [
                            {"type": "text", "text": prompt},
                            {"type": "image_url", "image_url": {"url": "data:image/png;base64," + b64}}]}],
-                       "max_tokens": 700}).encode()
+                       "max_tokens": max_tokens}).encode()
     req = urllib.request.Request(url, data=body, headers={
         "Authorization": "Bearer " + key, "Content-Type": "application/json"})
     with urllib.request.urlopen(req, timeout=timeout) as r:
@@ -350,14 +434,19 @@ def _call_vision(model, prompt, bars, pair, tf, timeout):
     return (choice.get("message") or {}).get("content") or ""
 
 
+def _call_vision(model, prompt, bars, pair, tf, timeout):
+    """Vision model: hantar prompt + screenshot chart (bar <= masa semasa)."""
+    b64 = VC.render(bars, pair=pair, tf=tf)
+    if not b64:
+        raise RuntimeError("vision chart render gagal")
+    return _call_vision_b64(model, prompt, b64, timeout, max_tokens=700)
+
+
 def alignment(pair, tf_bars, timeout=60):
     """Multi-TF alignment: satu imej gabungan (M5/H1/H4), satu panggilan vision.
     tf_bars = {tf: bars}. Return {tfs:{tf:bias}, aligned, note} atau None."""
     panels = [(tf, tf_bars[tf]) for tf in ("M5", "H1", "H4") if tf_bars.get(tf)]
     if not panels:
-        return None
-    url, key = _route(VISION_MODEL)
-    if not key:
         return None
     b64 = VC.render_multi(panels, pair=pair)
     if not b64:
@@ -368,27 +457,22 @@ def alignment(pair, tf_bars, timeout=60):
               "short-term structural bias from its candles: BUY, SELL or HOLD. "
               'Reply ONLY compact JSON: {"tfs":{"' + '":"BUY|SELL|HOLD","'.join(tfs) +
               '":"BUY|SELL|HOLD"},"note":"<8 words on alignment>"}')
-    body = json.dumps({"model": VISION_MODEL,
-                       "messages": [{"role": "user", "content": [
-                           {"type": "text", "text": prompt},
-                           {"type": "image_url", "image_url": {"url": "data:image/png;base64," + b64}}]}],
-                       "max_tokens": 300}).encode()
-    req = urllib.request.Request(url, data=body, headers={
-        "Authorization": "Bearer " + key, "Content-Type": "application/json"})
-    try:
-        with urllib.request.urlopen(req, timeout=timeout) as r:
-            j = json.loads(r.read().decode())
-        content = (j.get("choices") or [{}])[0].get("message", {}).get("content") or ""
-        m = json.loads(content[content.find("{"):content.rfind("}") + 1])
-        t = {k: str(v).upper() for k, v in (m.get("tfs") or {}).items() if str(v).upper() in ("BUY", "SELL", "HOLD")}
-        if not t:
-            return None
-        dirs = [v for v in t.values() if v in ("BUY", "SELL")]
-        aligned = len(dirs) >= 2 and len(set(dirs)) == 1
-        return {"tfs": t, "aligned": aligned, "note": str(m.get("note") or "")[:80]}
-    except Exception as e:
-        log(f"{pair} alignment gagal ({type(e).__name__}: {str(e)[:80]})")
-        return None
+    models = [VISION_MODEL]
+    if VISION_FALLBACK_MODEL and VISION_FALLBACK_MODEL != VISION_MODEL:
+        models.append(VISION_FALLBACK_MODEL)
+    for mdl in models:
+        try:
+            content = _call_vision_b64(mdl, prompt, b64, timeout, max_tokens=300)
+            m = json.loads(content[content.find("{"):content.rfind("}") + 1])
+            t = {k: str(v).upper() for k, v in (m.get("tfs") or {}).items() if str(v).upper() in ("BUY", "SELL", "HOLD")}
+            if not t:
+                continue
+            dirs = [v for v in t.values() if v in ("BUY", "SELL")]
+            aligned = len(dirs) >= 2 and len(set(dirs)) == 1
+            return {"tfs": t, "aligned": aligned, "note": str(m.get("note") or "")[:80], "model": mdl}
+        except Exception as e:
+            log(f"{pair} alignment {mdl} gagal ({type(e).__name__}: {str(e)[:80]})")
+    return None
 
 
 def analyze(pair, bars, pip, spread_pips, call=None, budget_s=None, held=None, tf="M15"):
@@ -425,6 +509,7 @@ def analyze(pair, bars, pip, spread_pips, call=None, budget_s=None, held=None, t
     hh, ll = max(b[1] for b in win), min(b[2] for b in win)
     prompt = build_prompt(pair, price, ctx[-prof["ctx_show"]:], with_opens(bars)[-prof["base_show"]:],
                           atr, trend, hh, ll, spread_pips, tf=tf, held=held)
+    _ctx = ""
     if VISION_ENABLED and not explicit_call:
         # Model nampak imej: prompt kaya BOS + CHoCH + FVG (backtest 7/7 TP,
         # engine/backtest-bos-choch.py). Struktur dikira deterministik dari bar,
@@ -523,36 +608,43 @@ def analyze(pair, bars, pip, spread_pips, call=None, budget_s=None, held=None, t
         except Exception:
             pass
     # Vision first: model tengok terus carta (kurang risiko prompt salah gambar).
-    # Gagal vision -> jatuh ke chain text sedia ada (fail-safe).
+    # Gagal vision -> cuba sandaran vision -> jatuh ke chain text sedia ada (fail-safe).
     # Nota: `call` dioverride di atas untuk injection test; guna flag asal.
+    vision_failed = set()
     if VISION_ENABLED and not explicit_call:
-        t0 = time.time()
-        try:
-            content = _call_vision(VISION_MODEL, prompt, bars, pair, tf, CALL_TIMEOUT_S)
-            j = parse_response(content)
-        except Exception as e:
-            log(f"{pair} vision {VISION_MODEL} gagal ({type(e).__name__}: {str(e)[:90]}) - cuba text")
-            _audit({"ts": datetime.now(timezone.utc).isoformat(), "pair": pair, "tf": tf,
-                    "model": VISION_MODEL, "vision": True,
-                    "error": f"{type(e).__name__}: {str(e)[:200]}"})
-        else:
+        vision_models = [VISION_MODEL]
+        if VISION_FALLBACK_MODEL and VISION_FALLBACK_MODEL != VISION_MODEL:
+            vision_models.append(VISION_FALLBACK_MODEL)
+        for v_model in vision_models:
+            t0 = time.time()
+            try:
+                content = _call_vision(v_model, prompt, bars, pair, tf, CALL_TIMEOUT_S)
+                j = parse_response(content)
+            except Exception as e:
+                vision_failed.add(v_model)
+                log(f"{pair} vision {v_model} gagal ({type(e).__name__}: {str(e)[:90]}) - cuba seterusnya")
+                _audit({"ts": datetime.now(timezone.utc).isoformat(), "pair": pair, "tf": tf,
+                        "model": v_model, "vision": True,
+                        "error": f"{type(e).__name__}: {str(e)[:200]}"})
+                continue
             latency = time.time() - t0
             try:
                 verdict = validate_verdict(j, price, pip, spread_pips, rr1_min=prof["rr1_min"], pair_hint=pair)
             except ValueError as e:
                 # Rejection (aras/RR tak sah) muktamad — jangan shop model lain.
-                log(f"{pair} {VISION_MODEL} (vision) verdict ditolak ({e})")
+                log(f"{pair} {v_model} (vision) verdict ditolak ({e})")
                 _audit({"ts": datetime.now(timezone.utc).isoformat(), "pair": pair, "tf": tf,
-                        "model": VISION_MODEL, "vision": True, "verdict_rejected": str(e)[:200]})
+                        "model": v_model, "vision": True, "verdict_rejected": str(e)[:200]})
                 return None
-            verdict.update(model=VISION_MODEL, latency_s=round(latency, 1), vision=True, ai_meta=ai_meta)
+            verdict.update(model=v_model, latency_s=round(latency, 1), vision=True, ai_meta=ai_meta)
             _audit({"ts": datetime.now(timezone.utc).isoformat(), "pair": pair, "tf": tf,
-                    "model": VISION_MODEL, "vision": True, "latency_s": round(latency, 1),
+                    "model": v_model, "vision": True, "latency_s": round(latency, 1),
                     "side": verdict["side"], "conf": verdict.get("conf")})
-            log(f"{pair} {VISION_MODEL} (vision): {verdict['side']} conf={verdict.get('conf')} "
+            log(f"{pair} {v_model} (vision): {verdict['side']} conf={verdict.get('conf')} "
                 f"rr1={verdict.get('rr1')} ({latency:.1f}s)")
             return verdict
-    chain = [PRIMARY_MODEL] + [m for m in FALLBACK_MODELS if m != PRIMARY_MODEL]
+    chain = [m for m in ([PRIMARY_MODEL] + [m for m in FALLBACK_MODELS if m != PRIMARY_MODEL])
+             if m not in vision_failed]
     t_start = time.time()
     for model in chain:
         if time.time() - t_start > budget_s:
