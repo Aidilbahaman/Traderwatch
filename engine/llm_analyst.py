@@ -43,6 +43,10 @@ try:
     import ai_learn  # noqa: E402  (closed-loop: corak TP/SL sebenar client)
 except Exception:
     ai_learn = None
+try:
+    import market_context as MC  # noqa: E402  (sesi, berita, konteks sebenar)
+except Exception:
+    MC = None
 
 REPO = HERE.parent
 AUDIT_FILE = REPO / "state" / "llm-analysis-log.jsonl"
@@ -437,7 +441,17 @@ def analyze(pair, bars, pip, spread_pips, call=None, budget_s=None, held=None, t
             except Exception:
                 pass
         rr_min = prof["rr1_min"]
-        # Prompt SIMPLE: ikut trend je. Model tengok imej, bagi arah + SL/TP.
+        # Konteks pasaran sebenar — apa yang carta SAHAJA tidak beritahu
+        # (sesi, berita high-impact, prestasi lampau, kalibrasi diri).
+        _ctx = ""
+        if MC is not None:
+            try:
+                _l, _ = (ai_learn.lessons() if ai_learn is not None else ("", None))
+                _c = (ai_learn.calibration_note() if ai_learn is not None else "")
+                _ctx = MC.format_context(pair, tf, lessons=_l or "", calibration=_c or "")
+            except Exception:
+                _ctx = ""
+        # Prompt: analyst buat keputusan dengan konteks penuh, bukan nasib.
         prompt = (
             "Look at this candlestick chart image and trade WITH the trend. "
             f"{pair} {tf}, current price {price:g}, spread {spread_pips:g} pips. "
@@ -445,6 +459,7 @@ def analyze(pair, bars, pip, spread_pips, call=None, budget_s=None, held=None, t
             "If price makes higher highs and higher lows -> BUY. "
             "If lower highs and lower lows -> SELL. "
             "If choppy or sideways with no clear direction -> HOLD. "
+            + (("MARKET CONTEXT (real data):\n" + _ctx + "\n") if _ctx else "") +
             "Confidence is a PROBABILITY: 5=coin flip, 6=55-62%, 7=62-70%, "
             "8=70-78%, 9+=rare. If you can name 2+ real counter-arguments, HOLD. "
             "Entry at CURRENT price (instant market entry). "
@@ -472,6 +487,18 @@ def analyze(pair, bars, pip, spread_pips, call=None, budget_s=None, held=None, t
             _cal = ai_learn.calibration_note()
             if _cal:
                 prompt += "\n" + _cal
+        except Exception:
+            pass
+    # Berita high-impact dekat (<=1 jam) -> HOLD paksa, jangan panggil LLM.
+    # Bukti: spread melebar & stop-hunt biasa semasa release; lebih baik duduk luar.
+    if MC is not None:
+        try:
+            _nr = MC.news_risk(pair)
+            if _nr and _nr.get("blocked"):
+                log(f"{pair} {tf}: HOLD — news blackout ({_nr['reason']})")
+                return {"side": "HOLD", "conf": 0.2,
+                        "reason": "News blackout: " + _nr["reason"][:80],
+                        "news_blocked": True}
         except Exception:
             pass
     # Vision first: model tengok terus carta (kurang risiko prompt salah gambar).
