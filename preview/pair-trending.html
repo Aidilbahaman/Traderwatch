@@ -54,12 +54,6 @@ h1{font-size:19px;font-weight:800;text-align:center;margin-bottom:5px}
    hot3 = mula hangat (1-4)
    ============================================================ */
 
-/* --- flame badge di sudut (semua tier) --- */
-.flame-badge{position:absolute;top:8px;right:8px;z-index:4;display:inline-flex;align-items:center;gap:2px;
- font-size:7.5px;font-weight:900;padding:2px 6px;border-radius:99px;letter-spacing:.04em}
-.flame-badge.h1{background:#ff6b3518;border:1px solid #ff6b3555;color:#ff8a4d}
-.flame-badge.h2{background:#ffc16b14;border:1px solid #ffc16b3d;color:#ffd08a}
-.flame-badge.h3{background:#8ab4ff12;border:1px solid #8ab4ff2e;color:#a9c7ff}
 
 /* ---------- TIER 1: FIRE (paling gempak) ---------- */
 .hot1{border-color:#ff6b3544}
@@ -154,8 +148,7 @@ function render(){
         embers+='<i class="ember" style="left:'+left+'%;animation-delay:'+delay+'s;width:'+sz+'px;height:'+sz+'px"></i>';
       }
     }
-    var badge=t?'<span class="flame-badge h'+t+'">'+(t===1?'🔥':t===2?'🔥':'⚡')+' '+p.an+'</span>':'';
-    return '<div class="'+cls+'">'+embers+badge+
+    return '<div class="'+cls+'">'+embers+
       '<div class="top"><span class="ic">'+p.s.slice(0,3)+'</span>'+sparks(p.up)+'</div>'+
       '<div class="nm">'+p.s+'</div><div class="ds">'+p.n+'</div>'+
       '<div class="px">'+p.px+'</div>'+
