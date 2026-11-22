@@ -19,11 +19,23 @@ body{background:#0a0e0b;color:var(--text);font:14px -apple-system,sans-serif}
 #zh .core{position:relative;width:96px;height:96px;border-radius:50%;background:#000;z-index:7;
  box-shadow:0 0 0 1.6px #b7f36b, 0 0 14px 2px #b7f36baa, 0 0 60px 16px #b7f36b3d;
  will-change:transform,box-shadow}
-#zh .photon{position:absolute;width:118px;height:118px;border-radius:50%;
- border:1px solid #b7f36b66;z-index:5;will-change:transform,opacity}
-#zh .disk{position:absolute;width:164px;height:46px;border-radius:50%;z-index:4;
- background:conic-gradient(from 0deg,transparent,#b7f36b88,transparent 40%,#8ab4ff66,transparent 70%,#b7f36b66);
- filter:blur(7px);opacity:.65;will-change:transform,opacity}
+#zh .photon{position:absolute;width:124px;height:124px;border-radius:50%;
+ border:1.5px solid #d6ff9a;z-index:5;will-change:transform,opacity;
+ box-shadow:0 0 12px #b7f36b88, inset 0 0 10px #b7f36b44}
+/* accretion disk — FLARE utama, tebal & terang */
+#zh .disk{position:absolute;width:210px;height:210px;border-radius:50%;z-index:3;
+ background:conic-gradient(from 0deg,
+   #b7f36b00 0deg,#b7f36bcc 30deg,#eaffc4 55deg,#b7f36b99 80deg,
+   #8ab4ff88 120deg,#b7f36b00 160deg,
+   #b7f36b00 200deg,#ffc16bcc 240deg,#eaffc4 265deg,#b7f36b88 300deg,
+   #8ab4ff66 330deg,#b7f36b00 360deg);
+ filter:blur(4px);opacity:.9;will-change:transform,opacity}
+/* flare pancaran (jet) atas-bawah */
+#zh .jet{position:absolute;width:5px;height:110px;border-radius:99px;z-index:2;
+ background:linear-gradient(180deg,transparent,#b7f36bcc 40%,#eaffc4,transparent);
+ filter:blur(2px);opacity:.75;will-change:transform,opacity}
+#zh .jet.up{transform:translateY(-70px)}
+#zh .jet.dn{transform:translateY(70px) rotate(180deg)}
 #zlab{position:absolute;z-index:40;top:42%;left:0;right:0;text-align:center;
  font:900 14px monospace;letter-spacing:3px;color:#b7f36b;opacity:0;
  text-shadow:0 0 16px #b7f36b,0 0 36px #b7f36b77;pointer-events:none}
@@ -65,6 +77,8 @@ body{background:#0a0e0b;color:var(--text);font:14px -apple-system,sans-serif}
   <div id="decor" class=""></div>
   <div class="brand">✦ <span>TraderWatch</span></div>
   <div id="zh">
+   <div class="jet up"></div>
+   <div class="jet dn"></div>
    <div class="disk"></div>
    <div class="photon"></div>
    <div class="core"></div>
@@ -169,6 +183,7 @@ var busy=false;
 (function(){
  var zh=document.getElementById('zh'),
      core=zh.querySelector('.core'),photon=zh.querySelector('.photon'),disk=zh.querySelector('.disk'),
+     jets=zh.querySelectorAll('.jet'),
      zlab=document.getElementById('zlab'),zbar=document.getElementById('zbar'),zbarI=zbar.querySelector('i'),
      voidEl=document.getElementById('void'),on=document.getElementById('on'),intro=document.getElementById('intro');
  var DUR=2000;
@@ -196,12 +211,26 @@ var busy=false;
     o.el.style.transform='translate('+x.toFixed(1)+'px,'+y.toFixed(1)+'px) scale('+(1-p*0.6).toFixed(2)+')';
     o.el.style.opacity=(p<0.05?0.9:(0.9*(1-p))).toFixed(2);
    }
-   /* teras hitam mengembang perlahan, disk berputar */
+   /* FLARE: disk berputar laju + makin terang dulu, kemudian ditelan */
+   var flareUp=Math.min(1,p*4);            /* flare naik pantas */
+   /* flare kekal terang sehingga 75% progress, baru ditelan */
+   var flareFade=p<0.75?1:1-(p-0.75)/0.25;
+   disk.style.transform='rotate('+(p*620).toFixed(0)+'deg) scale('+(1+e*9).toFixed(2)+')';
+   disk.style.opacity=(0.95*flareUp*flareFade).toFixed(2);
+   /* photon ring mengembang & menyala */
+   photon.style.transform='scale('+(1+e*16).toFixed(2)+')';
+   photon.style.opacity=(0.9*flareUp*flareFade).toFixed(2);
+   /* jet menembak keluar */
+   for(var jn=0;jn<jets.length;jn++){
+    var jp=Math.max(0,Math.min(1,p*1.7-(jn?0.08:0)));
+    var jl=110+jp*190;
+    jets[jn].style.height=jl.toFixed(0)+'px';
+    var ty=(jl/2+72).toFixed(0);
+    jets[jn].style.transform=jn?('translateY('+ty+'px) rotate(180deg)'):('translateY(-'+ty+'px)');
+    jets[jn].style.opacity=(jp<0.12?jp/0.12:Math.pow(1-jp,1.1)*0.9).toFixed(2);
+   }
+   /* teras hitam akhirnya menelan flare */
    core.style.transform='scale('+(1+e*24).toFixed(2)+')';
-   disk.style.transform='rotate('+(p*540).toFixed(0)+'deg) scale('+(1+e*7).toFixed(2)+')';
-   disk.style.opacity=(0.7*(1-e*0.9)).toFixed(2);
-   photon.style.transform='scale('+(1+e*14).toFixed(2)+')';
-   photon.style.opacity=(0.6*(1-e)).toFixed(2);
    zbarI.style.width=(p*100).toFixed(1)+'%';
    zlab.textContent=p<.3?'ENTERING…':(p<.68?'FALLING…':'SWALLOWED');
    if(p<1){requestAnimationFrame(frame)}
