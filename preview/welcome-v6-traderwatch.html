@@ -1,0 +1,95 @@
+<!doctype html><html lang="ms" data-theme="dark"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>V6 TraderWatch — Origami (Theme Colors)</title>
+<style>
+/* Palet sebenar TraderWatch dari member/index.html */
+:root{--bg:#0a0e0b;--card:#111612;--card2:#171e18;--text:#eef3ee;--muted:#8a978c;
+ --line:#222b23;--lime:#b7f36b;--red:#ff777d;--orange:#ffc16b;--blue:#8ab4ff;
+ --chart:#0c110d;--onlime:#10150b;--glass:rgba(10,14,11,.82);color-scheme:dark}
+html[data-theme="light"]{--bg:#f5f7f5;--card:#ffffff;--card2:#eef2ed;--text:#14211a;
+ --muted:#63736a;--line:rgba(0,0,0,.1);--lime:#7ab52e;--red:#d64b55;--orange:#b8791b;
+ --blue:#3a6fc4;--chart:#f0f4ef;--onlime:#0b1405;--glass:rgba(245,247,245,.86);color-scheme:light}
+*{box-sizing:border-box;margin:0}
+body{background:var(--bg);color:var(--text);font:14px -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+.phone{width:390px;max-width:100%;height:800px;max-height:100vh;margin:0 auto;position:relative;overflow:hidden;background:var(--bg)}
+/* toggle tema untuk preview */
+.ttoggle{position:fixed;top:10px;right:10px;z-index:999;background:var(--card2);border:1px solid var(--line);
+ color:var(--text);font:700 10px inherit;padding:7px 12px;border-radius:99px;cursor:pointer}
+/* lipatan origami — guna lime/green tema */
+.fold{position:absolute;opacity:.5;will-change:transform}
+.f1{width:0;height:0;border-left:200px solid transparent;border-bottom:200px solid #b7f36b1f;top:-40px;right:-60px;transform:rotate(18deg)}
+.f2{width:0;height:0;border-right:180px solid transparent;border-top:180px solid #b7f36b14;bottom:-30px;left:-40px;opacity:.4}
+.f3{width:260px;height:260px;background:linear-gradient(135deg,#b7f36b12,var(--card2));transform:rotate(45deg);top:18%;left:20%;border-radius:20px;opacity:.55}
+html[data-theme="light"] .f1{border-bottom-color:#7ab52e1f}
+html[data-theme="light"] .f2{border-top-color:#7ab52e18}
+html[data-theme="light"] .f3{background:linear-gradient(135deg,#7ab52e12,#e6efd9)}
+#intro{position:absolute;inset:0;z-index:10;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;transition:opacity .5s}
+#intro.gone{opacity:0;pointer-events:none}
+.brand{position:absolute;top:56px;font-size:11px;font-weight:800;letter-spacing:3px;color:var(--muted);z-index:3}
+.brand b{color:var(--lime)}
+/* origami blackhole — lipatan berputar dalam lime tema */
+.sg{position:relative;width:240px;height:240px;display:grid;place-items:center;z-index:3}
+.sg .p{position:absolute;width:150px;height:150px;border-radius:30% 70% 60% 40%/50% 45% 55% 50%;animation:fold 9s ease-in-out infinite;will-change:transform,border-radius}
+.sg .p1{background:#b7f36b2e;border:1px solid #b7f36b44}
+.sg .p2{background:#b7f36b1c;width:130px;height:130px;animation-duration:11s;animation-direction:reverse;border:1px solid #b7f36b33}
+.sg .p3{background:#b7f36b12;width:110px;height:110px;animation-duration:7s;border:1px solid #b7f36b26}
+html[data-theme="light"] .sg .p1{background:#7ab52e2e;border-color:#7ab52e44}
+html[data-theme="light"] .sg .p2{background:#7ab52e1c;border-color:#7ab52e33}
+html[data-theme="light"] .sg .p3{background:#7ab52e12;border-color:#7ab52e26}
+@keyframes fold{0%,100%{transform:rotate(0deg) scale(1);border-radius:30% 70% 60% 40%/50% 45% 55% 50%}50%{transform:rotate(180deg) scale(1.08);border-radius:60% 40% 35% 65%/45% 60% 40% 55%}}
+.sg .core{position:relative;width:64px;height:64px;border-radius:50%;background:#000;z-index:4;
+ box-shadow:0 0 0 1.5px var(--lime),0 0 26px 8px #b7f36b66,0 0 70px 22px #b7f36b26,inset 0 0 14px #000;
+ animation:corebeat 3.2s ease-in-out infinite}
+html[data-theme="light"] .sg .core{box-shadow:0 0 0 1.5px var(--lime),0 0 22px 6px #7ab52e55,0 0 60px 18px #7ab52e22}
+@keyframes corebeat{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-6px) scale(1.04)}}
+.sg .ray{position:absolute;left:50%;top:50%;width:0;height:0;transform-origin:0 0}
+.sg .dot{position:absolute;width:5px;height:5px;border-radius:2px;background:var(--lime);box-shadow:0 0 6px #b7f36bcc;animation:suck linear infinite}
+@keyframes suck{0%{transform:translate3d(var(--d),0,0) rotate(45deg);opacity:0}12%{opacity:1}88%{opacity:1}100%{transform:translate3d(0,0,0) rotate(180deg);opacity:0}}
+.itxt{position:absolute;bottom:150px;text-align:center;z-index:4;padding:0 30px}
+.itxt b{display:block;font-size:26px;font-weight:900;letter-spacing:-.8px;color:var(--text)}
+.itxt small{display:block;color:var(--muted);font-size:11.5px;margin-top:9px;line-height:1.6}
+.tap{position:absolute;bottom:46px;font-size:10px;color:var(--lime);font-weight:800;letter-spacing:1px;animation:bl 1.8s infinite;z-index:4}
+@keyframes bl{0%,100%{opacity:.3}50%{opacity:1}}
+/* layer 2 */
+#on{position:absolute;inset:0;z-index:20;display:flex;align-items:center;justify-content:center;padding:22px;background:var(--glass);backdrop-filter:blur(10px);opacity:0;pointer-events:none;transition:opacity .45s}
+#on.show{opacity:1;pointer-events:auto}
+.card{width:100%;max-width:360px;background:var(--card);border:1px solid #b7f36b3d;border-radius:24px;padding:26px 20px 18px;text-align:center;box-shadow:0 24px 70px #0008}
+html[data-theme="light"] .card{border-color:#7ab52e44;box-shadow:0 20px 60px #14211a22}
+.clogo{font-size:11px;font-weight:800;letter-spacing:3px;color:var(--muted);margin-bottom:18px}
+.clogo b{color:var(--lime)}
+.mini{width:76px;height:76px;margin:0 auto 16px;position:relative;display:grid;place-items:center}
+.mini .p{position:absolute;width:60px;height:60px;border-radius:30% 70% 60% 40%;background:#b7f36b26;border:1px solid #b7f36b44;animation:fold 8s ease-in-out infinite}
+html[data-theme="light"] .mini .p{background:#7ab52e26;border-color:#7ab52e44}
+.mini .v{position:relative;width:24px;height:24px;border-radius:50%;background:#000;box-shadow:0 0 0 1.5px var(--lime),0 0 14px #b7f36b88;z-index:2}
+.ct{font-size:21px;font-weight:900;color:var(--text)}
+.cs{font-size:11.5px;color:var(--muted);margin:7px 0 20px;line-height:1.5}
+.opt{display:flex;align-items:center;gap:12px;width:100%;text-align:left;background:var(--card2);border:1px solid var(--line);border-radius:15px;padding:13px;margin-bottom:10px;color:var(--text);font:inherit;cursor:pointer;transition:border-color .2s}
+.opt:hover{border-color:#b7f36b66}
+.oi{width:36px;height:36px;flex:none;border-radius:11px;display:grid;place-items:center;background:#b7f36b18;color:var(--lime)}
+.ot{flex:1;display:flex;flex-direction:column;gap:3px}.ot b{font-size:12.5px;font-weight:800}.ot small{font-size:10px;color:var(--muted)}
+.wstate{font-size:10px;font-weight:800;color:var(--muted)}
+.go{width:100%;border:0;border-radius:14px;padding:14px;font:800 13px inherit;cursor:pointer;background:linear-gradient(135deg,var(--lime),#8ed94e);color:var(--onlime);margin-top:8px}
+html[data-theme="light"] .go{background:linear-gradient(135deg,#7ab52e,#5f9c22);color:#fff}
+.sk{display:block;margin:11px auto 0;border:0;background:none;color:var(--muted);cursor:pointer;font:600 11px inherit;text-decoration:underline;padding:6px}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style></head><body>
+<button class="ttoggle" onclick="var h=document.documentElement;h.dataset.theme=h.dataset.theme==='dark'?'light':'dark'">🌗 Tema</button>
+<div class="phone"><div class="fold f1"></div><div class="fold f2"></div><div class="fold f3"></div>
+<div id="intro"><div class="brand">✦ <b>TRADERWATCH</b></div>
+ <div class="sg" id="sg"><div class="p p1"></div><div class="p p2"></div><div class="p p3"></div><div class="core"></div></div>
+ <div class="itxt"><b>Fold into focus.</b><small>Setiap lapisan data, dilipat jadi satu keputusan.</small></div>
+ <div class="tap">TEKAN UNTUK MASUK →</div>
+</div>
+<div id="on"><div class="card"><div class="clogo">✦ <b>TRADERWATCH</b></div>
+ <div class="mini"><div class="p"></div><div class="v"></div></div>
+ <div class="ct">Selamat datang!</div><div class="cs">Sediakan app anda sebelum mula.</div>
+ <button class="opt"><span class="oi"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"/><path d="M10 21h4"/></svg></span><span class="ot"><b>Hidupkan notifikasi</b><small>Alert bila trade kena TP/SL</small></span><span class="wstate">Hidupkan</span></button>
+ <button class="opt"><span class="oi"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="6" y="2" width="12" height="20" rx="2"/><path d="M11 18h2"/></svg></span><span class="ot"><b>Tambah ke skrin utama</b><small>Buka macam app, penuh skrin</small></span><span class="wstate">Tambah</span></button>
+ <button class="go">Mula trade →</button><button class="sk">Langkau dulu</button>
+</div></div></div>
+<script>
+(function(){var sg=document.getElementById('sg');
+ for(var i=0;i<12;i++){var r=document.createElement('div');r.className='ray';r.style.transform='rotate('+(Math.random()*360)+'deg)';var d=document.createElement('div');d.className='dot';var du=2.4+Math.random()*2;d.style.animationDuration=du+'s';d.style.animationDelay=(-Math.random()*du)+'s';d.style.setProperty('--d',(88+Math.random()*24)+'px');r.appendChild(d);sg.appendChild(r)}
+ document.getElementById('intro').onclick=function(){this.classList.add('gone');setTimeout(function(){document.getElementById('on').classList.add('show')},480)};
+})();
+</script></body></html>
