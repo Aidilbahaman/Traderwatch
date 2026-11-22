@@ -35,6 +35,10 @@ HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
 import ai_model as M  # noqa: E402
 import vision_chart as VC  # noqa: E402  (render PNG untuk model vision)
+try:
+    import ict_filter as ICT  # noqa: E402  (BOS/CHoCH/FVG metadata untuk vision)
+except Exception:
+    ICT = None
 
 REPO = HERE.parent
 AUDIT_FILE = REPO / "state" / "llm-analysis-log.jsonl"
@@ -385,13 +389,40 @@ def analyze(pair, bars, pip, spread_pips, call=None, budget_s=None, held=None, t
     prompt = build_prompt(pair, price, ctx[-prof["ctx_show"]:], with_opens(bars)[-prof["base_show"]:],
                           atr, trend, hh, ll, spread_pips, tf=tf, held=held)
     if VISION_ENABLED and not explicit_call:
-        # Model nampak imej: padat prompt angka, tambah metadata struktur BOS/CHoCH.
+        # Model nampak imej: prompt kaya BOS + CHoCH + FVG (backtest 7/7 TP,
+        # engine/backtest-bos-choch.py). Struktur dikira deterministik dari bar,
+        # model cuma sahkan dari imej + pilih SL/TP.
+        tf_key = {"M5": "M15", "M15": "H1", "H1": "H4", "H4": "D1", "D1": "D1"}[tf]
+        gran = {"M5": "M5", "M15": "M15", "H1": "M60", "H4": "M60", "D1": "M60"}[tf]
+        s_hi = s_lo = "RANGE"
         bos = trend if trend in ("UP", "DOWN") else "RANGE"
-        prompt = ("ICT/SMC analyst. You are looking at the chart IMAGE (real OHLC). "
-                  f"Pair {pair} {tf}, price {price}, spread {spread_pips:g} pips. "
-                  f"BOS/trend={bos}. Trade in BOS direction; HOLD if no clean structure. "
-                  f"Entry=current price. BUY: sl<entry<tp1<tp2; SELL: sl>entry>tp1>tp2. "
-                  "RR1 >= 1.5. SL beyond opposing swing. "
+        choch = False
+        fvg_txt = "none"
+        if ICT is not None:
+            try:
+                # Higher TF swing dari bar asing (guna ctx yang dah resample).
+                hi_bars = [{"h": b[2], "l": b[3], "c": b[4]} for b in ctx]
+                lo_bars = [{"h": b[1], "l": b[2], "c": b[3]} for b in bars]
+                s_hi = ICT.swing_trend(hi_bars, 3, 2)
+                s_lo = ICT.swing_trend(lo_bars, 3, 2)
+                bos = s_lo if s_lo != "RANGE" else s_hi
+                choch = (s_hi != "RANGE" and s_lo != "RANGE" and s_lo != s_hi)
+                fvgs = ICT.unfilled_fvg(lo_bars, price)
+                if fvgs:
+                    fvg_txt = ", ".join(f"{x['dir']} {x['bot']:.2f}-{x['top']:.2f}" for x in fvgs[:2])
+            except Exception:
+                pass
+        c_txt = ("YES — M15 structure flipped against higher TF (potential reversal)."
+                 if choch else "No CHoCH; follow dominant BOS.")
+        rr_min = prof["rr1_min"]
+        prompt = ("ICT/SMC BOS + CHoCH + FVG analyst. You are looking at the chart IMAGE (real OHLC). "
+                  f"Pair {pair} {tf}, price {price}, ATR {atr:.2f}, spread {spread_pips:g} pips. "
+                  f"Higher-TF {tf_key} swing: {s_hi}. {tf} swing/BOS: {s_lo}. CHoCH: {c_txt} "
+                  f"Unfilled FVG near price: {fvg_txt}. "
+                  f"Rules: trade IN the BOS direction; if CHoCH=YES prefer the NEW {tf} direction. "
+                  f"Entry=current price. SL beyond the last opposing swing (never inside spread). "
+                  f"TP at next liquidity/structure target. RR1 >= {rr_min:g}. "
+                  f"HOLD if structure unclear. "
                   'Reply ONLY compact JSON: {"bias":"BUY"|"SELL"|"HOLD","sl":num,'
                   '"tp1":num,"tp2":num,"confidence":0-10,"reason":"<10 words>"}')
     # Vision first: model tengok terus carta (kurang risiko prompt salah gambar).
