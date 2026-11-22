@@ -173,8 +173,8 @@ html[data-theme="light"] .msg.me .body{background:#eaf5db;border-color:#b9d999}
  left:0;top:0;right:0;bottom:0;transform:none}
 html:has(.welcome:not(.hidden)) body{overflow:hidden}
 .welcome.hidden{display:none!important}
-#cineWrap{position:absolute;inset:0;display:block;width:100%;height:100%}
-#cineCanvas{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none}
+#cineWrap{position:absolute;inset:0;display:block;width:100%;height:100%;padding:0;margin:0}
+#cineCanvas{position:absolute;left:0;top:0;width:100%;height:100%;display:block;touch-action:none;padding:0;margin:0}
 #cineCap{position:absolute;left:0;right:0;bottom:calc(11% + 56px);text-align:center;
  font-size:clamp(15px,4.2vw,21px);letter-spacing:.08em;color:#cfd8f5;opacity:0;transition:opacity .8s;pointer-events:none}
 #cineCap.show{opacity:1}
@@ -189,9 +189,6 @@ html:has(.welcome:not(.hidden)) body{overflow:hidden}
  cursor:pointer;opacity:0;transition:opacity 1s 1.4s,transform .15s}
 .cineStage .cineCta:active{transform:scale(.97)}
 .cineStage.on h1,.cineStage.on .cineTag,.cineStage.on .cineCta{opacity:1}
-.cinePill{position:absolute;top:calc(max(14px,env(safe-area-inset-top)));font:600 13px inherit;color:#8a978c;
- background:#0d120e;border:1px solid #222b23;border-radius:999px;padding:8px 13px;cursor:pointer;z-index:5}
-.cinePill.right{right:14px}.cinePill:not(.right){left:14px}
 /* layer 2 — sheet */
 .wsheet{position:absolute;left:0;right:0;bottom:0;z-index:8;background:#111612;border-top:1px solid #222b23;
  border-radius:24px 24px 0 0;padding:24px 20px calc(24px + env(safe-area-inset-bottom));
@@ -807,8 +804,6 @@ html[data-theme="light"] .lotbadge{color:#4c7a17}
           <p class="cineTag" id="cineTag">Experience the new era of AI Trading.</p>
           <button class="cineCta" id="cineEnter" type="button"><span id="cineEnterT">Masuk</span></button>
         </div>
-        <button class="cinePill" id="cineMute" type="button" aria-label="Bunyi">🔊</button>
-        <button class="cinePill right" id="cineReplay" type="button">↻</button>
       </div>
 
       <!-- LAYER 2: sheet onboarding -->
@@ -2670,7 +2665,14 @@ var CV=null,CX2=null,CW=0,CH=0,CCX=0,CCY=0,CR=0;
 function cineSize(){
  CV=$('cineCanvas'); if(!CV)return;
  var dpr=Math.min(window.devicePixelRatio||1,2);
- var w=window.innerWidth,h=window.innerHeight;
+ var w=window.innerWidth;
+ var h=(window.visualViewport&&window.visualViewport.height)||window.innerHeight;
+ var el=$('cineCanvas');
+ if(el&&el.parentElement){
+  var pr=el.parentElement.getBoundingClientRect();
+  if(pr.height>0)h=pr.height;
+  if(pr.width>0)w=pr.width;
+ }
  CW=w;CH=h;
  CV.width=Math.round(w*dpr);CV.height=Math.round(h*dpr);
  CX2=CV.getContext('2d');CX2.setTransform(dpr,0,0,dpr,0,0);
@@ -2798,9 +2800,7 @@ function cineLoop(now){
  CX2.restore();
  /* flash */
  if(t>=6&&t<6.9){CX2.fillStyle='rgba(255,255,255,'+Math.pow(1-(t-6)/.9,2).toFixed(3)+')';CX2.fillRect(0,0,CW,CH)}
- /* letterbox */
- var bh=CH*.11*cineEase(Math.min(1,Math.max(0,(t-.4)/1.4)));
- CX2.fillStyle='#000';CX2.fillRect(0,0,CW,bh);CX2.fillRect(0,CH-bh,CW,bh);
+
  /* captions */
  var txt='';
  var _cp=cineCaps();for(var ci=0;ci<_cp.length;ci++)if(t>=_cp[ci][0]&&t<_cp[ci][1])txt=_cp[ci][2];
@@ -2862,12 +2862,6 @@ function maybeWelcome(){
 }
 try{window.addEventListener('resize',cineSize)}catch(e){}
 $('cineEnter').onclick=cineEnter;
-$('cineMute').onclick=function(){
- CINE.mute=!CINE.mute;
- this.textContent=CINE.mute?'🔇':'🔊';
- try{if(CINE.MG)CINE.MG.gain.value=CINE.mute?0:.8}catch(e){}
-};
-$('cineReplay').onclick=function(){if(CINE.started||true)CINE.started=true;cineReset()};
 $('wNotif').onclick=function(){
  hap(6);
  if(('Notification' in window)&&Notification.permission==='granted'){toast(t('pushOnOk'));drawWelcome();return}
