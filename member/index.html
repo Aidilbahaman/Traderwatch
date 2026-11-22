@@ -167,44 +167,49 @@ html[data-theme="light"] .msg.me .body{background:#eaf5db;border-color:#b9d999}
 @keyframes orbPop{0%{transform:scale(1)}35%{transform:scale(1.3)}100%{transform:scale(1)}}
 .hole.result .wv{border-color:#b7f36b;animation:orbWave 1.1s ease-out 1}
 @keyframes orbReduce{}
-/* Welcome / onboarding layer (sekali selepas login) */
-.welcome{position:fixed;inset:0;z-index:120;display:grid;place-items:center;padding:22px;
- background:rgba(4,8,5,.82);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+/* ===== Welcome Cinematic (layer1 canvas + layer2 sheet) ===== */
+.welcome{position:fixed;inset:0;z-index:160;background:#02040a;overflow:hidden}
 .welcome.hidden{display:none!important}
-.wcard{width:100%;max-width:380px;background:var(--card);border:1px solid #b7f36b3d;
- border-radius:24px;padding:24px 20px 18px;box-shadow:0 24px 70px #0009;text-align:center}
-.wlogo{font-size:13px;font-weight:900;color:var(--lime);letter-spacing:.4px;margin-bottom:16px}
-.wlogo span{color:var(--text)}
-.wholerow{display:grid;place-items:center;margin:-4px 0 14px}
-.hole.wh{width:96px;height:96px}
-.hole.wh .aura{width:60px;height:60px}
-.hole.wh .photon{width:38px;height:38px}
-.hole.wh .core{width:26px;height:26px}
-.hole.wh .wv{width:38px;height:38px}
-.hole.wh .scanarc{width:74px;height:74px}
-.hole.wh .dot{--d:44px}
-
-.wttl{font-size:21px;font-weight:900;line-height:1.2}
-.wsub{font-size:11.5px;color:var(--muted);margin:7px 0 20px;line-height:1.5}
-.wopt{display:flex;align-items:center;gap:12px;width:100%;text-align:left;cursor:pointer;
- background:var(--card2);border:1px solid var(--line);border-radius:15px;padding:13px 13px;
- margin-bottom:10px;color:var(--text);font:inherit;transition:border-color .2s,transform .15s}
-.wopt:active{transform:scale(.98)}
-.wopt:hover{border-color:#b7f36b66}
-.wic{width:36px;height:36px;flex:none;border-radius:11px;display:grid;place-items:center;
- background:#b7f36b18;color:var(--lime)}
-.wtx{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px}
-.wtx b{font-size:12.5px;font-weight:800}
-.wtx small{font-size:10px;color:var(--muted);line-height:1.35}
-.wstate{font-size:10px;font-weight:800;color:var(--muted);flex:none;max-width:72px;text-align:right}
-.wstate.on{color:var(--lime)}
-.wstate.busy{color:var(--blue)}
-.wgo{width:100%;border:0;border-radius:14px;padding:14px;cursor:pointer;font:800 13px inherit;
- background:linear-gradient(135deg,#b7f36b,#8ed94e);color:#0a1407;margin-top:8px}
-.wgo:active{transform:scale(.98)}
-.wskip{display:block;margin:11px auto 0;border:0;background:none;color:var(--muted);
- cursor:pointer;font:600 11px inherit;text-decoration:underline;padding:6px}
-@media(prefers-reduced-motion:reduce){.wopt,.wgo:active{transition:none;transform:none}}
+#cineWrap{position:absolute;inset:0;display:block}
+#cineCanvas{position:absolute;inset:0;width:100%;height:100%;display:block}
+#cineCap{position:absolute;left:0;right:0;bottom:calc(11% + 56px);text-align:center;
+ font-size:clamp(15px,4.2vw,21px);letter-spacing:.08em;color:#cfd8f5;opacity:0;transition:opacity .8s;pointer-events:none}
+#cineCap.show{opacity:1}
+.cineStage{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;
+ justify-content:flex-end;text-align:center;padding:24px 24px calc(11% + 28px);pointer-events:none;transition:opacity .5s}
+.cineStage h1{font-size:clamp(26px,7.4vw,40px);font-weight:500;letter-spacing:.2em;margin:0 0 12px -.2em;
+ opacity:0;transition:opacity 1.4s;color:#eef3ee}
+.cineStage .cineTag{max-width:28ch;color:#8a978c;font-size:15px;line-height:1.5;margin:0 0 22px;
+ opacity:0;transition:opacity 1.2s .7s}
+.cineStage .cineCta{pointer-events:auto;font:800 15px inherit;color:#10150b;
+ background:linear-gradient(135deg,#b7f36b,#8ed94e);border:0;border-radius:14px;padding:15px 38px;
+ cursor:pointer;opacity:0;transition:opacity 1s 1.4s,transform .15s}
+.cineStage .cineCta:active{transform:scale(.97)}
+.cineStage.on h1,.cineStage.on .cineTag,.cineStage.on .cineCta{opacity:1}
+.cinePill{position:absolute;top:max(14px,env(safe-area-inset-top));font:600 13px inherit;color:#8a978c;
+ background:#0d120e;border:1px solid #222b23;border-radius:999px;padding:8px 13px;cursor:pointer;z-index:5}
+.cinePill.right{right:14px}.cinePill:not(.right){left:14px}
+/* layer 2 — sheet */
+.wsheet{position:absolute;left:0;right:0;bottom:0;z-index:8;background:#111612;border-top:1px solid #222b23;
+ border-radius:24px 24px 0 0;padding:24px 20px max(24px,env(safe-area-inset-bottom));
+ transform:translateY(100%);transition:transform .5s cubic-bezier(.2,.9,.2,1);
+ max-width:520px;margin:0 auto;box-shadow:0 -20px 60px #000a}
+.wsheet.open{transform:none}
+.wsheet h2{margin:0 0 4px;font-size:22px;font-weight:900;color:#eef3ee}
+.wsheet p{margin:0 0 16px;color:#8a978c;font-size:12px;line-height:1.5}
+.wrow{display:flex;gap:13px;align-items:center;width:100%;padding:13px 0;border:0;border-top:1px solid #222b23;
+ background:none;color:#eef3ee;font:inherit;text-align:left;cursor:pointer}
+.wrow:first-of-type{border-top:0}
+.wrow .wic{width:38px;height:38px;border-radius:10px;background:#0a0e0b;display:grid;place-items:center;flex:none;color:#b7f36b}
+.wrow .wtx{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+.wrow .wtx b{display:block;font-size:13.5px;font-weight:800}
+.wrow .wtx small{color:#8a978c;font-size:11px}
+.wrow .wstate{font-size:10px;font-weight:800;color:#8a978c;flex:none}
+.wrow .wstate.on{color:#b7f36b}
+.wsheet .wgo{width:100%;margin-top:14px;font:800 15px inherit;background:linear-gradient(135deg,#b7f36b,#8ed94e);
+ color:#10150b;border:0;border-radius:14px;padding:15px;cursor:pointer}
+.wsheet .wskip{width:100%;margin-top:6px;font:600 12px inherit;background:none;color:#8a978c;border:0;padding:11px;cursor:pointer}
+@media(prefers-reduced-motion:reduce){.welcome *{transition:none!important}}
 /* AI Learning card — corak TP/SL sebenar client */.ailc{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:13px 15px;margin-bottom:12px}
 .ailc .hd{display:flex;align-items:center;gap:8px;font-size:11px;font-weight:800;letter-spacing:.2px}
 .ailc .hd .ic{width:22px;height:22px;border-radius:7px;display:grid;place-items:center;background:#8ab4ff1c;color:var(--blue)}
@@ -633,7 +638,7 @@ html[data-theme="light"] .lotbadge{color:#4c7a17}
               <div class="aihub-sub" id="orbSub"></div>
             </div>
           </div>
-          <div id="aiLearnCard"></div>
+          <div id="aiLearnCard" hidden></div>
           <div class="season">
             <div class="sic"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0V4Z"/><path d="M7 6H4a1 1 0 0 0-1 1c0 2.2 1.8 4 4 4M17 6h3a1 1 0 0 1 1 1c0 2.2-1.8 4-4 4"/></svg></div>
             <div class="st"><b><span id="seasonT">Weekly Season</span><span class="weekchip" id="seasonChip">Season 1</span></b><small id="seasonS">Net R decides the ranking — not raw profit.</small></div>
@@ -778,36 +783,37 @@ html[data-theme="light"] .lotbadge{color:#4c7a17}
       <div class="tdshare"><button class="btn-share" id="tdShare" type="button">🖼 <span id="tdShareLab">Share result</span></button></div>
     </div>
 
-    <!-- WELCOME / ONBOARDING LAYER — muncul sekali selepas login -->
+    <!-- ===== WELCOME CINEMATIC (2 layer) ===== -->
     <div id="welcome" class="welcome hidden" role="dialog" aria-modal="true" aria-label="Welcome">
-      <div class="wcard">
-        <div class="wlogo">✦ <span>TraderWatch</span></div>
-        <div class="wholerow">
-          <div class="hole wh" id="wHole" aria-hidden="true">
-            <div class="aura"></div>
-            <div class="wv"></div><div class="wv b"></div><div class="wv c"></div>
-            <div class="scanarc"></div>
-            <div class="photon"></div>
-            <div class="core"></div>
-          </div>
+      <!-- LAYER 1: canvas starfield sinematik -->
+      <div id="cineWrap">
+        <canvas id="cineCanvas" aria-hidden="true"></canvas>
+        <div id="cineCap"></div>
+        <div class="cineStage" id="cineStage">
+          <h1 id="cineH1">TraderWatch</h1>
+          <p class="cineTag" id="cineTag">Experience the new era of AI Trading.</p>
+          <button class="cineCta" id="cineEnter" type="button"><span id="cineEnterT">Masuk</span></button>
         </div>
-        <div class="wttl" id="wTitle">Selamat datang!</div>
-        <div class="wsub" id="wSub">Sediakan app anda sebelum mula.</div>
+        <button class="cinePill" id="cineMute" type="button" aria-label="Bunyi">🔊</button>
+        <button class="cinePill right" id="cineReplay" type="button">↻</button>
+      </div>
 
-        <button class="wopt" id="wNotif" type="button">
+      <!-- LAYER 2: sheet onboarding -->
+      <div class="wsheet" id="wSheet" role="dialog" aria-label="Selamat datang">
+        <h2 id="wTitle">Selamat datang!</h2>
+        <p id="wSub">Sediakan app anda sebelum mula.</p>
+        <button class="wrow" id="wNotif" type="button">
           <span class="wic"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"/><path d="M10 21h4"/></svg></span>
-          <span class="wtx"><b id="wNotifT">Turn on notifications</b><small id="wNotifS">Alert bila trade kena TP/SL &amp; signal baru</small></span>
+          <span class="wtx"><b id="wNotifT">Hidupkan notifikasi</b><small id="wNotifS">Alert bila trade kena TP/SL</small></span>
           <span class="wstate" id="wNotifState"></span>
         </button>
-
-        <button class="wopt" id="wInstall" type="button">
+        <button class="wrow" id="wInstall" type="button">
           <span class="wic"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="2" width="12" height="20" rx="2"/><path d="M11 18h2"/></svg></span>
-          <span class="wtx"><b id="wInstallT">Add to home screen</b><small id="wInstallS">Buka macam app, penuh skrin</small></span>
+          <span class="wtx"><b id="wInstallT">Tambah ke skrin utama</b><small id="wInstallS">Buka macam app</small></span>
           <span class="wstate" id="wInstallState"></span>
         </button>
-
-        <button class="wgo" id="wGo" type="button"><span id="wGoT">Start trading</span> →</button>
-        <button class="wskip" id="wSkip" type="button"><span id="wSkipT">Skip for now</span></button>
+        <button class="wgo" id="wGo" type="button"><span id="wGoT">Mula trade</span> →</button>
+        <button class="wskip" id="wSkip" type="button"><span id="wSkipT">Langkau dulu</span></button>
       </div>
     </div>
 
@@ -1305,7 +1311,7 @@ $('q').oninput=function(){drawPairs(true)};
 
 /* Harga + sparkline SEBENAR dari /api/bars (M15) untuk setiap pair disokong. */
 var pricesAt=0;
-function maybePrices(){if(Date.now()-pricesAt>300000)loadPrices()}
+function maybePrices(){if(Date.now()-pricesAt>60000)loadPrices()} /* harga refresh 1 min (dulu 5 min) */
 function loadPrices(){
  pricesAt=Date.now();
  PAIRS.forEach(function(p){
@@ -1675,7 +1681,7 @@ function beat(){
   }
  }).catch(function(){});
 }
-setInterval(beat,60000);
+setInterval(beat,30000); /* presence refresh 30s (dulu 60s) */
 document.addEventListener('visibilitychange',function(){if(!document.visibilityState||document.visibilityState==='visible')beat()});
 beat();
 function loadMessages(){
@@ -1965,8 +1971,12 @@ function orbStartPoll(){
 orbStartPoll();
 if(typeof window!=='undefined'){window.__orbSet=orbSet;window.__orbLive=loadAiLive;}
 
-/* AI Learning card — papar corak TP/SL yang AI dah belajar dari trade sebenar */
+/* AI Learning card — DISSEMBUNYIKAN (hidden) atas permintaan owner.
+   Prestasi awan belum stabil; paparan kadar menang boleh jejaskan kepercayaan
+   client. Container ada atribut hidden + fungsi ini sengaja no-op.
+   Nak pulihkan: buang `hidden` pada #aiLearnCard dan padam baris return ini. */
 function drawAiLearn(st){
+ return;
  var el=$('aiLearnCard');if(!el)return;
  if(!st||((st.tp||0)+(st.sl||0))===0){
   el.innerHTML='<div class="ailc"><div class="hd"><span class="ic"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a7 7 0 0 1 7 7c0 2.4-1.2 4-2.5 5.2-.9.9-1.5 1.6-1.5 2.8h-6c0-1.2-.6-1.9-1.5-2.8C6.2 13 5 11.4 5 9a7 7 0 0 1 7-7Z"/><path d="M9 21h6"/></svg></span><span>'+t('ailTitle')+'</span></div><div class="empty">'+t('ailEmpty')+'</div></div>';
@@ -1983,6 +1993,7 @@ function drawAiLearn(st){
   +'</div>';
 }
 function loadAiLearn(){
+ return; /* AI Learning disembunyikan — jangan panggil API */
  apiFetch('/api/analyze/learn').then(function(r){
   drawAiLearn(r.ok&&r.data?r.data.stats:null);
  }).catch(function(e){if(e&&e.message==='auth')return;drawAiLearn(null)});
@@ -1997,7 +2008,7 @@ function renderLiga(){
  if(lsub==='lb'){loadAiLive();loadAiLearn();}
  var r=$('lgRetry');if(r)r.onclick=function(){hap(8);loadLeague(true)};
  if(LG.state==='idle'&&current==='liga')loadLeague();
- else if(LG.state==='ready'&&current==='liga'&&Date.now()-LG.at>=60000)loadLeague();
+ else if(LG.state==='ready'&&current==='liga'&&Date.now()-LG.at>=30000)loadLeague(); /* liga refresh 30s (dulu 60s) */
 }
 $('newTrade').onclick=function(){hap(8);showView('analyst');toast(t('pickPair'))};
 
@@ -2584,71 +2595,295 @@ $('instBtn').onclick=function(){
 
 /* ---------------- WELCOME LAYER (sekali selepas login) ---------------- */
 var WKEY='tw-welcomed-v1';
-function isStandalone(){
- return !!(window.matchMedia&&window.matchMedia('(display-mode: standalone)').matches)||
-        !!navigator.standalone||/(iPhone|iPad|iPod)/.test(navigator.userAgent)&&document.referrer===''&&window.navigator.standalone;
+var CINE={raf:0,t0:0,last:0,stars:[],shards:[],running:false,burst:false,shown:false,
+          dive:null,started:false,AC:null,MG:null,mute:false,NB:null,t:0};
+var CINE_UP='#b7f36b', CINE_UP2='#d6ff9a', CINE_RED='#ff777d';
+var CINE_CAPS=[[1.6,3.6,'Pasaran tak pernah tidur.'],[3.9,5.8,'Sekarang, ia berfikir.']];
+var CINE_BEATS=[.5,1.5,2.4,3.2,3.9,4.5,5,5.4,5.75];
+function cineReduce(){try{return matchMedia('(prefers-reduced-motion: reduce)').matches}catch(e){return false}}
+
+/* ---------- audio (synth, tiada fail) ---------- */
+function cineNoise(ac){var b=ac.createBuffer(1,ac.sampleRate*2,ac.sampleRate),d=b.getChannelData(0);
+ for(var i=0;i<d.length;i++)d[i]=Math.random()*2-1;return b}
+function cineEnv(g,n,a,peak,dur){g.gain.setValueAtTime(.0001,n);g.gain.linearRampToValueAtTime(peak,n+a);g.gain.exponentialRampToValueAtTime(.0001,n+dur)}
+function cineAudio(){
+ var AC=CINE.AC; if(!AC)return;
+ try{
+  CINE.MG=AC.createGain();CINE.MG.gain.value=CINE.mute?0:.8;CINE.MG.connect(AC.destination);
+  CINE.NB=cineNoise(AC);
+  var n=AC.currentTime+.05;
+  /* drone */
+  var lp=AC.createBiquadFilter();lp.type='lowpass';
+  lp.frequency.setValueAtTime(120,n);lp.frequency.exponentialRampToValueAtTime(1400,n+6);
+  var dg=AC.createGain();dg.gain.setValueAtTime(0,n);dg.gain.linearRampToValueAtTime(.09,n+3);
+  dg.gain.linearRampToValueAtTime(.14,n+6);dg.gain.exponentialRampToValueAtTime(.001,n+10);
+  [55,55.5,82.4].forEach(function(f){var o=AC.createOscillator();o.type='sawtooth';
+   o.frequency.setValueAtTime(f,n);o.frequency.exponentialRampToValueAtTime(f*1.5,n+6);
+   o.connect(lp);o.start(n);o.stop(n+10)});
+  lp.connect(dg);dg.connect(CINE.MG);
+  /* heartbeat */
+  CINE_BEATS.forEach(function(b,i){var o=AC.createOscillator(),g=AC.createGain();
+   o.frequency.setValueAtTime(75,n+b);o.frequency.exponentialRampToValueAtTime(38,n+b+.25);
+   cineEnv(g,n+b,.01,.28+i*.03,.4);o.connect(g);g.connect(CINE.MG);o.start(n+b);o.stop(n+b+.5)});
+  /* riser */
+  var rs=AC.createBufferSource();rs.buffer=CINE.NB;rs.loop=true;
+  var bp=AC.createBiquadFilter();bp.type='bandpass';bp.Q.value=3;
+  bp.frequency.setValueAtTime(300,n+1.4);bp.frequency.exponentialRampToValueAtTime(7000,n+6);
+  var rg=AC.createGain();rg.gain.setValueAtTime(0,n+1.4);rg.gain.exponentialRampToValueAtTime(.02,n+2);
+  rg.gain.linearRampToValueAtTime(.3,n+5.95);rg.gain.linearRampToValueAtTime(0,n+6.02);
+  rs.connect(bp);bp.connect(rg);rg.connect(CINE.MG);rs.start(n+1.4);rs.stop(n+6.1);
+  var to=AC.createOscillator(),tg=AC.createGain();
+  to.frequency.setValueAtTime(180,n+2);to.frequency.exponentialRampToValueAtTime(1800,n+6);
+  tg.gain.setValueAtTime(0,n+2);tg.gain.linearRampToValueAtTime(.06,n+5.9);
+  tg.gain.linearRampToValueAtTime(0,n+6.02);to.connect(tg);tg.connect(CINE.MG);to.start(n+2);to.stop(n+6.1);
+  /* impact */
+  var bo=AC.createOscillator(),bg=AC.createGain();
+  bo.frequency.setValueAtTime(150,n+6);bo.frequency.exponentialRampToValueAtTime(30,n+7.4);
+  cineEnv(bg,n+6,.005,.9,2.3);bo.connect(bg);bg.connect(CINE.MG);bo.start(n+6);bo.stop(n+8.3);
+  var bs=AC.createBufferSource();bs.buffer=CINE.NB;
+  var bl=AC.createBiquadFilter();bl.type='lowpass';
+  bl.frequency.setValueAtTime(3400,n+6);bl.frequency.exponentialRampToValueAtTime(120,n+7.5);
+  var bn=AC.createGain();cineEnv(bn,n+6,.005,.5,1.7);
+  bs.connect(bl);bl.connect(bn);bn.connect(CINE.MG);bs.start(n+6);bs.stop(n+7.9);
+  /* shimmer */
+  [880,1318.5,1760,2637,3520].forEach(function(f,i){var o=AC.createOscillator(),g=AC.createGain();
+   o.type='sine';o.frequency.value=f;cineEnv(g,n+6.5+i*.13,.02,.06,2.4);
+   o.connect(g);g.connect(CINE.MG);o.start(n+6.5+i*.13);o.stop(n+9.2)});
+ }catch(e){}
 }
-function wDone(){try{localStorage.setItem(WKEY,'1')}catch(e){} $('welcome').classList.add('hidden')}
+function cineWhoosh(){var AC=CINE.AC;if(!AC)return;
+ try{var n=AC.currentTime,s=AC.createBufferSource();s.buffer=CINE.NB;
+  var b=AC.createBiquadFilter();b.type='bandpass';b.Q.value=1.5;
+  b.frequency.setValueAtTime(300,n);b.frequency.exponentialRampToValueAtTime(4800,n+.7);
+  var g=AC.createGain();cineEnv(g,n,.02,.32,.8);
+  s.connect(b);b.connect(g);g.connect(CINE.MG);s.start(n);s.stop(n+.9)}catch(e){}
+}
+
+/* ---------- canvas engine ---------- */
+var CV=null,CX2=null,CW=0,CH=0,CCX=0,CCY=0,CR=0;
+function cineSize(){
+ CV=$('cineCanvas'); if(!CV)return;
+ var dpr=Math.min(window.devicePixelRatio||1,2);
+ var w=window.innerWidth,h=window.innerHeight;
+ CW=w;CH=h;
+ CV.width=Math.round(w*dpr);CV.height=Math.round(h*dpr);
+ CX2=CV.getContext('2d');CX2.setTransform(dpr,0,0,dpr,0,0);
+ CCX=w/2;CCY=h*.4;CR=Math.min(w,h)*.09;
+}
+function cineStar(x,y,r,a){
+ if(!CX2)return;
+ CX2.save();CX2.globalAlpha=a;CX2.translate(x,y);
+ CX2.shadowColor=CINE_UP;CX2.shadowBlur=r*1.3;CX2.fillStyle='#fff';
+ CX2.beginPath();CX2.moveTo(0,-r);CX2.quadraticCurveTo(0,0,r,0);
+ CX2.quadraticCurveTo(0,0,0,r);CX2.quadraticCurveTo(0,0,-r,0);
+ CX2.quadraticCurveTo(0,0,0,-r);CX2.fill();CX2.restore();
+}
+function cineSpeed(t){
+ if(t<1.2)return .03;
+ if(t<6)return .03+Math.pow((t-1.2)/4.8,3)*2.1;
+ return Math.max(.015,2.13*Math.max(0,1-(t-6)*3));
+}
+function cineEase(x){return 1-Math.pow(1-x,3)}
+function cineBack(x){var c1=1.70158,c3=c1+1;return 1+c3*Math.pow(x-1,3)+c1*Math.pow(x-1,2)}
+
+function cineReset(){
+ CINE.shards.length=0;CINE.burst=false;CINE.shown=false;CINE.dive=null;CINE.raf=0;
+ var cap=$('cineCap'),st=$('cineStage'),sh=$('wSheet');
+ if(cap){cap.className='';cap.textContent=''}
+ if(st)st.classList.remove('on');
+ if(sh)sh.classList.remove('open');
+ if(CINE.stars.length===0){
+  for(var i=0;i<520;i++)CINE.stars.push({x:(Math.random()-.5)*2,y:(Math.random()-.5)*2,
+   z:Math.random()*.95+.05,g:Math.random()<.12});
+ }else{
+  CINE.stars.forEach(function(o){o.x=(Math.random()-.5)*2;o.y=(Math.random()-.5)*2;o.z=Math.random()*.95+.05});
+ }
+ try{
+  if(CINE.AC)try{CINE.AC.close()}catch(e){}
+  CINE.AC=new (window.AudioContext||window.webkitAudioContext)();
+  CINE.AC.resume();cineAudio();
+ }catch(e){}
+ CINE.t0=performance.now()+50;CINE.last=CINE.t0;CINE.running=true;
+ requestAnimationFrame(cineLoop);
+}
+
+function cineLoop(now){
+ if(!CINE.running)return;
+ var dt=Math.min(.05,Math.max(0,(now-CINE.last)/1000));CINE.last=now;
+ var red=cineReduce();
+ var t=red?8:(now-CINE.t0)/1000;
+ CINE.t=t;
+ if(!CX2){CINE.running=false;return}
+ CX2.fillStyle='#02040a';CX2.fillRect(0,0,CW,CH);
+ var sx=0,sy=0;
+ if(t>6&&t<6.6){var k=1-(t-6)/.6;sx=(Math.random()-.5)*14*k;sy=(Math.random()-.5)*14*k}
+ CX2.save();CX2.translate(sx,sy);
+ /* starfield */
+ var v=cineSpeed(Math.max(0,t)),post=t>6?.35:1,f=Math.max(CW,CH)*.25;
+ CX2.lineCap='round';
+ for(var si=0;si<CINE.stars.length;si++){
+  var st=CINE.stars[si];
+  st.z-=v*dt;
+  var x1=CCX+st.x/st.z*f,y1=CCY+st.y/st.z*f;
+  if(st.z<.03||x1<-60||x1>CW+60||y1<-60||y1>CH+60){
+   st.z=1;st.x=(Math.random()-.5)*2;st.y=(Math.random()-.5)*2;continue;
+  }
+  var zt=st.z+Math.max(.0015,v*.05),x0=CCX+st.x/zt*f,y0=CCY+st.y/zt*f;
+  var d=1-st.z;
+  CX2.globalAlpha=Math.min(1,(.15+d*.9)*post);
+  CX2.strokeStyle=st.g?CINE_UP2:(d>.6?'#fff':'#a9b8e8');
+  CX2.lineWidth=.5+d*1.7;
+  CX2.beginPath();CX2.moveTo(x0,y0);CX2.lineTo(x1,y1);CX2.stroke();
+ }
+ CX2.globalAlpha=1;
+ /* pre-impact */
+ if(t<6&&t>0){
+  var lb=-9;for(var bi=0;bi<CINE_BEATS.length;bi++)if(CINE_BEATS[bi]<=t)lb=CINE_BEATS[bi];
+  var pulse=Math.exp(-(t-lb)*7);
+  var e2=Math.pow(Math.max(0,(t-3)/3),2);
+  var rr=6+(CR*.5-6)*e2+8*pulse*(1+e2*2);
+  var g2=CX2.createRadialGradient(CCX,CCY,0,CCX,CCY,rr*5);
+  g2.addColorStop(0,'rgba(183,243,107,'+(.22+.3*pulse).toFixed(2)+')');
+  g2.addColorStop(1,'rgba(183,243,107,0)');
+  CX2.fillStyle=g2;CX2.fillRect(0,0,CW,CH);
+  cineStar(CCX,CCY,rr,Math.min(1,t/.6));
+ }
+ /* impact */
+ if(t>=6){
+  if(!CINE.burst){
+   CINE.burst=true;
+   for(var j=0;j<40;j++){
+    CINE.shards.push({a:Math.random()*6.283,s:200+Math.random()*700,r:Math.random()*6,
+     w:(Math.random()-.5)*8,c:Math.random()<.55?CINE_UP:CINE_RED,l:6+Math.random()*12});
+   }
+  }
+  var a=t-6;
+  [0,.18].forEach(function(dl,ii){
+   var q=a-dl;
+   if(q>0&&q<1.6){
+    CX2.globalAlpha=(1-q/1.6)*(ii?.5:.9);
+    CX2.strokeStyle='#e8ffd0';CX2.lineWidth=(ii?2:4)*(1-q/1.6)+1;
+    CX2.shadowColor=CINE_UP;CX2.shadowBlur=18;
+    CX2.beginPath();CX2.arc(CCX,CCY,q*Math.max(CW,CH)*.75,0,7);CX2.stroke();CX2.shadowBlur=0;
+   }
+  });
+  CX2.globalAlpha=1;
+  for(var sh2=0;sh2<CINE.shards.length;sh2++){
+   var sd=CINE.shards[sh2];
+   var dd=sd.s*(1-Math.exp(-a*1.6))/1.6,al=Math.max(0,1-a/2.2);
+   if(al<=0)continue;
+   CX2.save();CX2.globalAlpha=al;
+   CX2.translate(CCX+Math.cos(sd.a)*dd,CCY+Math.sin(sd.a)*dd);
+   CX2.rotate(sd.r+sd.w*a);CX2.fillStyle=sd.c;CX2.fillRect(-1.5,-sd.l/2,3,sd.l);CX2.restore();
+  }
+  /* anamorphic flare */
+  var fw=cineEase(Math.min(1,a/.9)),fa=.3+.6*Math.exp(-a*1.4);
+  var lg=CX2.createLinearGradient(CCX-CW*.9*fw,0,CCX+CW*.9*fw,0);
+  lg.addColorStop(0,'rgba(183,243,107,0)');
+  lg.addColorStop(.5,'rgba(220,255,200,1)');
+  lg.addColorStop(1,'rgba(183,243,107,0)');
+  CX2.globalAlpha=fa;CX2.fillStyle=lg;CX2.shadowColor=CINE_UP;CX2.shadowBlur=24;
+  CX2.fillRect(CCX-CW*.9*fw,CCY-1.5,CW*1.8*fw,3);CX2.shadowBlur=0;CX2.globalAlpha=1;
+  /* logo star */
+  var kk=Math.min(1,a/1.4),rsz=CR*(.5+.5*cineBack(kk));
+  if(CINE.dive!==null){var dk=Math.min(1,(now-CINE.dive)/900);rsz*=1+dk*dk*9}
+  cineStar(CCX,CCY,rsz,1);
+ }
+ CX2.restore();
+ /* flash */
+ if(t>=6&&t<6.9){CX2.fillStyle='rgba(255,255,255,'+Math.pow(1-(t-6)/.9,2).toFixed(3)+')';CX2.fillRect(0,0,CW,CH)}
+ /* letterbox */
+ var bh=CH*.11*cineEase(Math.min(1,Math.max(0,(t-.4)/1.4)));
+ CX2.fillStyle='#000';CX2.fillRect(0,0,CW,bh);CX2.fillRect(0,CH-bh,CW,bh);
+ /* captions */
+ var txt='';
+ for(var ci=0;ci<CINE_CAPS.length;ci++)if(t>=CINE_CAPS[ci][0]&&t<CINE_CAPS[ci][1])txt=CINE_CAPS[ci][2];
+ var capEl=$('cineCap');
+ if(capEl){
+  if(txt){if(capEl.textContent!==txt)capEl.textContent=txt;capEl.classList.add('show')}
+  else capEl.classList.remove('show');
+ }
+ if(t>7&&!CINE.shown){CINE.shown=true;var stEl=$('cineStage');if(stEl)stEl.classList.add('on')}
+ /* dive out -> sheet */
+ if(CINE.dive!==null){
+  var dk2=Math.min(1,(now-CINE.dive)/900);
+  CX2.fillStyle='rgba(215,255,225,'+(dk2*dk2).toFixed(3)+')';CX2.fillRect(0,0,CW,CH);
+  if(dk2>=1){
+   CX2.fillStyle='#02040a';CX2.fillRect(0,0,CW,CH);
+   var shEl=$('wSheet');if(shEl)shEl.classList.add('open');
+   CINE.running=false;return;
+  }
+ }
+ if(!(red&&CINE.shown&&CINE.dive===null))CINE.raf=requestAnimationFrame(cineLoop);
+ else CINE.running=false;
+}
+
+function cineEnter(){
+ if(CINE.dive!==null)return;
+ CINE.dive=performance.now();
+ var st=$('cineStage');if(st)st.style.opacity=0;
+ cineWhoosh();
+ if(!CINE.running){CINE.running=true;CINE.last=CINE.dive;requestAnimationFrame(cineLoop)}
+}
+
+function wDone(){
+ try{localStorage.setItem(WKEY,'1')}catch(e){}
+ CINE.running=false;
+ try{if(CINE.raf)cancelAnimationFrame(CINE.raf)}catch(e){}
+ try{if(CINE.AC&&CINE.AC.state==='running')CINE.AC.suspend()}catch(e){}
+ var el=$('welcome');if(el)el.classList.add('hidden');
+}
 function drawWelcome(){
  var nOn=('Notification' in window)&&Notification.permission==='granted';
- ['wTitle','wSub','wNotifT','wNotifS','wInstallT','wInstallS','wGoT','wSkipT'].forEach(function(k){
-  var e=$(k);if(e)e.textContent=t(k);
- });
- $('wNotifState').textContent=nOn?t('wDone'):t('wTurnOn');
- $('wNotifState').className='wstate'+(nOn?' on':'');
- var installed=isStandalone();
- $('wInstallState').textContent=installed?t('wDone'):(dp?t('wAdd'):t('wManual'));
- $('wInstallState').className='wstate'+(installed?' on':'');
+ var keys=['wTitle','wSub','wNotifT','wNotifS','wInstallT','wInstallS','wGoT','wSkipT','cineEnterT'];
+ keys.forEach(function(k){var e=$(k);if(e)e.textContent=t(k)});
+ var ns=$('wNotifState');if(ns){ns.textContent=nOn?t('wDone'):t('wTurnOn');ns.className='wstate'+(nOn?' on':'')}
+ var installed=(window.matchMedia&&window.matchMedia('(display-mode: standalone)').matches)||navigator.standalone;
+ var is=$('wInstallState');if(is){is.textContent=installed?t('wDone'):(dp?t('wAdd'):t('wManual'));is.className='wstate'+(installed?' on':'')}
 }
 function showWelcome(){
- if($('welcome').classList.contains('hidden')===false)return;
- buildWelcomeHole();
- $('welcome').classList.remove('hidden');
+ var el=$('welcome');if(!el||!el.classList.contains('hidden'))return;
+ el.classList.remove('hidden');
+ cineSize();
  drawWelcome();
- $('wGo').focus();
-}
-function buildWelcomeHole(){
- var hole=$('wHole');if(!hole||hole.dataset.built)return;
- var cols=['','b','','o','','v','','b','','o','',''];
- for(var i=0;i<12;i++){
-  var ray=document.createElement('div');ray.className='ray';
-  ray.style.transform='rotate('+(Math.random()*360).toFixed(1)+'deg)';
-  var d=document.createElement('div');d.className='dot '+(cols[i%cols.length]||'');
-  var dur=(2.4+Math.random()*2.6);
-  d.style.animationDuration=dur.toFixed(2)+'s';
-  d.style.animationDelay=(-Math.random()*dur).toFixed(2)+'s';
-  d.style.setProperty('--d',(40+Math.random()*10).toFixed(0)+'px');
-  var sz=(2.8+Math.random()*2).toFixed(1);
-  d.style.width=sz+'px';d.style.height=sz+'px';d.style.top=(-parseFloat(sz)/2).toFixed(1)+'px';
-  ray.appendChild(d);hole.appendChild(ray);
- }
- hole.dataset.built='1';
+ var sh=$('wSheet');if(sh)sh.classList.remove('open');
+ var st=$('cineStage');if(st){st.classList.add('on');st.style.opacity=1}
+ cineReset();
 }
 function maybeWelcome(){
  try{if(localStorage.getItem(WKEY))return}catch(e){return}
- /* Tunggu app render siap sebelum paparkan, supaya tak tindih splash. */
- setTimeout(showWelcome,1400);
+ setTimeout(showWelcome,600);
 }
+try{window.addEventListener('resize',cineSize)}catch(e){}
+$('cineEnter').onclick=cineEnter;
+$('cineMute').onclick=function(){
+ CINE.mute=!CINE.mute;
+ this.textContent=CINE.mute?'🔇':'🔊';
+ try{if(CINE.MG)CINE.MG.gain.value=CINE.mute?0:.8}catch(e){}
+};
+$('cineReplay').onclick=function(){if(CINE.started||true)CINE.started=true;cineReset()};
 $('wNotif').onclick=function(){
  hap(6);
  if(('Notification' in window)&&Notification.permission==='granted'){toast(t('pushOnOk'));drawWelcome();return}
- $('wNotifState').textContent=t('wWait');$('wNotifState').className='wstate busy';
+ var ns=$('wNotifState');if(ns){ns.textContent=t('wWait');ns.className='wstate'}
  subscribePush('tpsl');
  setTimeout(drawWelcome,1200);
 };
 $('wInstall').onclick=function(){
  hap(6);
- if(isStandalone()){toast(t('installHint'));drawWelcome();return}
+ var installed=(window.matchMedia&&window.matchMedia('(display-mode: standalone)').matches)||navigator.standalone;
+ if(installed){toast(t('installHint'));drawWelcome();return}
  if(dp){dp.prompt();dp.userChoice.then(function(c){dp=null;drawWelcome();if(c&&c.outcome==='accepted')toast(t('installHint'))})}
  else{toast(t('installHint'));showView('settings')}
 };
 $('wGo').onclick=function(){hap(8);wDone()};
 $('wSkip').onclick=function(){hap(6);wDone()};
+if(typeof window!=='undefined'){window.__welcome=showWelcome;window.__drawWelcome=drawWelcome;}
 window.addEventListener('appinstalled',function(){drawWelcome();try{localStorage.setItem(WKEY,'1')}catch(e){}});
 if(typeof window!=='undefined'){window.__welcome=showWelcome;window.__drawWelcome=drawWelcome;}
 if(typeof window!=='undefined'){window.__forceLogout=goLogin;}
 if('serviceWorker' in navigator){window.addEventListener('load',function(){
- navigator.serviceWorker.register('sw.js',{scope:'./',updateViaCache:'none'}).then(function(reg){
+ navigator.serviceWorker.register('sw.js?v=20261122v32',{scope:'./',updateViaCache:'none'}).then(function(reg){
   /* PWA homescreen resume instance lama tanpa navigation -> check update
      bila app kembali nampak/focus + setiap 30 min, dan reload automatik
      bila SW versi baru mengambil alih (controllerchange). */
@@ -2657,7 +2892,7 @@ if('serviceWorker' in navigator){window.addEventListener('load',function(){
   function chk(){try{reg.update()}catch(e){}}
   document.addEventListener('visibilitychange',function(){if(document.visibilityState==='visible')chk()});
   window.addEventListener('focus',chk);
-  setInterval(chk,1800000);
+  setInterval(chk,120000); /* semak update SW tiap 2 min (dulu 30 min) — app lebih cepat refresh */
   chk();
  }).catch(function(){});
 })}
