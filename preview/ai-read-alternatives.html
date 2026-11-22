@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AI Read → 5 Alternatif</title>
+<style>
+:root{--bg:#0a0e0b;--card:#111612;--card2:#171e18;--line:#222b23;--text:#eef3ee;--muted:#8a978c;
+ --lime:#b7f36b;--red:#ff777d;--orange:#ffc16b;--blue:#8ab4ff}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#070a08;color:var(--text);font:13px -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;padding:24px 14px 60px}
+h1{font-size:19px;font-weight:800;text-align:center;margin-bottom:5px}
+.sub{color:var(--muted);font-size:11.5px;text-align:center;margin-bottom:20px;line-height:1.6;max-width:520px;margin-left:auto;margin-right:auto}
+.opt{max-width:430px;margin:0 auto 26px;background:var(--bg);border:1px solid #1c2620;border-radius:16px;padding:14px}
+.opt h2{font-size:11.5px;font-weight:800;color:var(--lime);letter-spacing:.1em;margin-bottom:3px}
+.opt p{font-size:10.5px;color:var(--muted);line-height:1.5;margin-bottom:12px}
+.sec{font-size:9.5px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin:0 0 8px}
+
+/* ============ A: WHY THIS VERDICT ============ */
+.why{display:flex;flex-direction:column;gap:7px}
+.wgrp{border-radius:12px;padding:9px 11px;border:1px solid var(--line);background:var(--card)}
+.wgrp .hd{display:flex;align-items:center;gap:6px;font-size:10px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;margin-bottom:5px}
+.wgrp.for{border-color:#b7f36b3d;background:#b7f36b0a}
+.wgrp.for .hd{color:var(--lime)}
+.wgrp.against{border-color:#ff777d3d;background:#ff777d0a}
+.wgrp.against .hd{color:var(--red)}
+.wgrp ul{list-style:none;display:flex;flex-direction:column;gap:4px}
+.wgrp li{font-size:10.5px;line-height:1.45;color:#cfd8cf;display:flex;gap:6px}
+.wgrp li::before{content:"·";color:var(--muted);flex:none}
+.blocker{font-size:10.5px;padding:8px 11px;border-radius:10px;background:#ff777d0f;border:1px solid #ff777d30;color:#ffb3b7;line-height:1.45}
+
+/* ============ B: FACTOR SCORECARD ============ */
+.sc{display:flex;flex-direction:column;gap:8px}
+.scr{display:grid;grid-template-columns:84px 1fr 38px;align-items:center;gap:9px}
+.scr .lab{font-size:10px;font-weight:700;color:var(--muted)}
+.scbar{height:5px;border-radius:99px;background:#ffffff0d;overflow:hidden;position:relative}
+.scbar::after{content:"";position:absolute;left:50%;top:-2px;bottom:-2px;width:1px;background:#ffffff1f}
+.scbar i{position:absolute;top:0;height:100%;border-radius:99px;transition:width .5s}
+.scbar i.pos{left:50%;background:linear-gradient(90deg,#b7f36b22,#b7f36b)}
+.scbar i.neg{right:50%;background:linear-gradient(270deg,#ff777d22,#ff777d)}
+.scr .v{font-size:9.5px;font-weight:800;text-align:right;font-variant-numeric:tabular-nums}
+.scr .v.pos{color:var(--lime)}.scr .v.neg{color:var(--red)}.scr .v.neu{color:var(--muted)}
+
+/* ============ C: FACTOR CHIPS ============ */
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip2{display:inline-flex;align-items:center;gap:5px;font-size:10px;font-weight:700;
+ border-radius:99px;padding:5px 10px;border:1px solid var(--line);background:var(--card);color:#cfd8cf}
+.chip2.y{border-color:#b7f36b44;background:#b7f36b0f;color:var(--lime)}
+.chip2.n{border-color:#ff777d44;background:#ff777d0f;color:#ffb3b7}
+.chip2.m{border-color:#ffc16b44;background:#ffc16b0f;color:var(--orange)}
+.chip2 .dot2{width:5px;height:5px;border-radius:50%;background:currentColor;flex:none}
+
+/* ============ D: WHAT WOULD CHANGE ============ */
+.wcm{display:flex;flex-direction:column;gap:7px}
+.wrow2{display:flex;gap:10px;align-items:flex-start;padding:9px 11px;border-radius:11px;
+ background:var(--card);border:1px solid var(--line)}
+.wrow2 .ic2{width:18px;height:18px;border-radius:6px;display:grid;place-items:center;flex:none;
+ font-size:9px;font-weight:900;background:#b7f36b18;color:var(--lime)}
+.wrow2 .tx{flex:1;font-size:10.5px;line-height:1.45;color:#cfd8cf}
+.wrow2 .tx b{color:var(--text);font-variant-numeric:tabular-nums}
+
+/* ============ E: HOW CONFIDENCE WAS BUILT ============ */
+.cb{display:flex;gap:12px;align-items:center}
+.donut{width:82px;height:82px;flex:none;position:relative}
+.donut svg{transform:rotate(-90deg)}
+.donut .mid{position:absolute;inset:0;display:grid;place-items:center;text-align:center}
+.donut .mid b{font-size:17px;font-weight:900;color:var(--orange);line-height:1}
+.donut .mid small{font-size:7.5px;color:var(--muted);letter-spacing:.06em}
+.cblist{flex:1;display:flex;flex-direction:column;gap:5px}
+.cbl{display:flex;justify-content:space-between;font-size:10px;gap:8px}
+.cbl span{color:var(--muted)}
+.cbl b{font-weight:800;font-variant-numeric:tabular-nums}
+.cbl b.plus{color:var(--lime)}.cbl b.minus{color:var(--red)}
+
+/* verdict strip */
+.vs{display:flex;align-items:center;gap:9px;padding:9px 11px;border-radius:11px;
+ background:var(--card2);border:1px solid var(--line);margin-bottom:11px}
+.vs .l{font-size:9px;font-weight:800;letter-spacing:.1em;color:var(--muted);text-transform:uppercase}
+.vs .r{margin-left:auto;font-size:13px;font-weight:900;color:var(--orange)}
+.note{max-width:430px;margin:0 auto;color:var(--muted);font-size:10.5px;line-height:1.7}
+.note b{color:var(--lime)}
+</style>
+</head>
+<body>
+<h1>✦ "What the AI read" → 5 alternatif</h1>
+<p class="sub">Data sama (BTCUSD M15 · WAIT · 40% · mixed MTF). Pilih yang paling jelas untuk client.</p>
+
+<!-- ================= A ================= -->
+<div class="opt">
+  <h2>A · WHY THIS VERDICT</h2>
+  <p>Kumpul bukti: apa menyokong, apa menentang, apa menyekat. Client faham logik keputusan.</p>
+  <div class="vs"><span class="l">Verdict</span><span class="r">WAIT 40%</span></div>
+  <div class="why">
+    <div class="wgrp for">
+      <div class="hd">✓ Supports BUY</div>
+      <ul><li>M5 turned bullish — short-term momentum up</li><li>Price holding above EMA20 &amp; EMA50</li></ul>
+    </div>
+    <div class="wgrp against">
+      <div class="hd">✗ Argues against</div>
+      <ul><li>H1 and H4 both bearish — counter-trend</li><li>Timeframes conflict: no aligned direction</li><li>Range-bound structure, no clean break</li></ul>
+    </div>
+    <div class="blocker">⚠ Blocked: this setup type has lost 5 of 6 times in your history.</div>
+  </div>
+</div>
+
+<!-- ================= B ================= -->
+<div class="opt">
+  <h2>B · FACTOR SCORECARD</h2>
+  <p>Setiap faktor ada skor −100..+100. Client nampak faktor mana kuat, mana lawan.</p>
+  <div class="vs"><span class="l">Verdict</span><span class="r">WAIT 40%</span></div>
+  <div class="sc">
+    <div class="scr"><span class="lab">Trend</span><div class="scbar"><i class="neg" style="width:38%"></i></div><span class="v neg">−38</span></div>
+    <div class="scr"><span class="lab">Structure</span><div class="scbar"><i class="pos" style="width:6%"></i></div><span class="v neu">+6</span></div>
+    <div class="scr"><span class="lab">Momentum</span><div class="scbar"><i class="pos" style="width:14%"></i></div><span class="v pos">+14</span></div>
+    <div class="scr"><span class="lab">MTF align</span><div class="scbar"><i class="neg" style="width:42%"></i></div><span class="v neg">−42</span></div>
+    <div class="scr"><span class="lab">News risk</span><div class="scbar"><i class="pos" style="width:0%"></i></div><span class="v neu">0</span></div>
+    <div class="scr"><span class="lab">USD bias</span><div class="scbar"><i class="pos" style="width:0%"></i></div><span class="v neu">0</span></div>
+    <div class="scr"><span class="lab">Your history</span><div class="scbar"><i class="neg" style="width:60%"></i></div><span class="v neg">−60</span></div>
+  </div>
+</div>
+
+<!-- ================= C ================= -->
+<div class="opt">
+  <h2>C · DECISION FACTORS</h2>
+  <p>Chips ringkas — client imbas 2 saat dah tahu. Paling padat.</p>
+  <div class="vs"><span class="l">Verdict</span><span class="r">WAIT 40%</span></div>
+  <div class="sec">In favour</div>
+  <div class="chips" style="margin-bottom:11px">
+    <span class="chip2 y"><span class="dot2"></span>M5 bullish</span>
+    <span class="chip2 y"><span class="dot2"></span>Above EMA20/50</span>
+    <span class="chip2 y"><span class="dot2"></span>RSI 49 neutral</span>
+  </div>
+  <div class="sec">Against</div>
+  <div class="chips" style="margin-bottom:11px">
+    <span class="chip2 n"><span class="dot2"></span>H1 bearish</span>
+    <span class="chip2 n"><span class="dot2"></span>H4 bearish</span>
+    <span class="chip2 n"><span class="dot2"></span>Range structure</span>
+  </div>
+  <div class="sec">Blockers</div>
+  <div class="chips">
+    <span class="chip2 m"><span class="dot2"></span>Setup lost 5/6 before</span>
+  </div>
+</div>
+
+<!-- ================= D ================= -->
+<div class="opt">
+  <h2>D · WHAT WOULD CHANGE MY MIND</h2>
+  <p>Paling actionable — client tahu level apa untuk pantau seterusnya.</p>
+  <div class="vs"><span class="l">Verdict</span><span class="r">WAIT 40%</span></div>
+  <div class="wcm">
+    <div class="wrow2"><span class="ic2">↑</span><span class="tx">Close above <b>60,805</b> on M15 with volume → turns <b>BUY</b></span></div>
+    <div class="wrow2"><span class="ic2">↓</span><span class="tx">Break below <b>60,072</b> → aligned bearish, turns <b>SELL</b></span></div>
+    <div class="wrow2"><span class="ic2">=</span><span class="tx">Stay between <b>60,072 – 60,805</b> → stays <b>WAIT</b> (range)</span></div>
+  </div>
+</div>
+
+<!-- ================= E ================= -->
+<div class="opt">
+  <h2>E · HOW CONFIDENCE WAS BUILT</h2>
+  <p>Tunjuk matematik di sebalik 40% — kenapa bukan 70%.</p>
+  <div class="vs"><span class="l">Verdict</span><span class="r">WAIT 40%</span></div>
+  <div class="cb">
+    <div class="donut">
+      <svg width="82" height="82" viewBox="0 0 82 82">
+        <circle cx="41" cy="41" r="34" fill="none" stroke="#ffffff0d" stroke-width="8"/>
+        <circle cx="41" cy="41" r="34" fill="none" stroke="#ffc16b" stroke-width="8"
+          stroke-dasharray="85.4 213.6" stroke-linecap="round"/>
+      </svg>
+      <div class="mid"><div><b>40</b><small>%</small></div></div>
+    </div>
+    <div class="cblist">
+      <div class="cbl"><span>Base setup quality</span><b class="plus">+55</b></div>
+      <div class="cbl"><span>MTF conflict</span><b class="minus">−15</b></div>
+      <div class="cbl"><span>Range structure</span><b class="minus">−10</b></div>
+      <div class="cbl"><span>Your history (5/6 lost)</span><b class="minus">−8</b></div>
+      <div class="cbl"><span>Session quality</span><b class="plus">+18</b></div>
+    </div>
+  </div>
+</div>
+
+<p class="note"><b>Cadangan saya:</b> <b>A</b> (Why this verdict) paling seimbang — client faham logik tanpa jargon. <b>C</b> (chips) kalau nak paling padat. <b>D</b> paling berguna kalau client nak tahu bila nak masuk.<br><br>Boleh <b>campur</b>: A untuk alasan + D untuk level pantau.</p>
+</body>
+</html>
