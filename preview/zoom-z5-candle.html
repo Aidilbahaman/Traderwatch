@@ -2,42 +2,37 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Z5 — Candle Cascade</title>
 <style>
-:root{--lime:#b7f36b;--card:#111612;--card2:#171e18;--line:#222b23;--muted:#8a978c;--text:#eef3ee;--onlime:#10150b;--red:#ff777d}
+:root{--lime:#b7f36b;--card:#111612;--card2:#171e18;--line:#222b23;--muted:#8a978c;--text:#eef3ee;--onlime:#10150b;--red:#ff777d;--blue:#8ab4ff}
 *{box-sizing:border-box;margin:0}
 body{background:#0a0e0b;color:var(--text);font:14px -apple-system,sans-serif}
 .hint{position:fixed;top:0;left:0;right:0;z-index:999;background:#171e18ee;color:var(--muted);font-size:10.5px;padding:8px 14px;text-align:center;border-bottom:1px solid var(--line)}
 .hint b{color:var(--lime)}
 .replay{position:fixed;bottom:14px;right:14px;z-index:999;background:var(--card2);border:1px solid var(--line);color:var(--lime);font:700 10px inherit;padding:8px 14px;border-radius:99px;cursor:pointer}
 .phone{width:390px;max-width:100%;height:800px;max-height:100vh;margin:0 auto;position:relative;overflow:hidden;background:#050807}
-#intro{position:absolute;inset:0;z-index:10;display:grid;place-items:center;cursor:pointer;overflow:hidden;
- background:radial-gradient(ellipse at 50% 50%,#0e150f,#030604 78%)}
-/* decor layer */
-#decor{position:absolute;inset:0;z-index:2;display:grid;place-items:center;pointer-events:none}
-/* ZOOM TARGET — dibesarkan oleh JS, TERANG supaya jelas nampak */
-#zh{position:relative;width:220px;height:220px;display:grid;place-items:center;z-index:6;
- will-change:transform;transform-origin:50% 50%}
-#zh .glow{position:absolute;width:200px;height:200px;border-radius:50%;
- background:radial-gradient(circle,#b7f36b44 0%,#b7f36b14 45%,transparent 70%)}
+#intro{position:absolute;inset:0;z-index:10;display:grid;place-items:center;cursor:pointer;overflow:hidden;background:radial-gradient(ellipse at 50% 50%,#0e150f,#030604 78%)}
+#decor{position:absolute;inset:0;z-index:2;pointer-events:none;overflow:hidden}
+#decor.persp{perspective:600px;perspective-origin:50% 50%}
+.dec{position:absolute;left:50%;top:50%;will-change:transform,opacity;transform-origin:50% 50%}
+#zh{position:relative;width:200px;height:200px;display:grid;place-items:center;z-index:6;will-change:transform,filter;transform-origin:50% 50%}
+#zh .glow{position:absolute;width:190px;height:190px;border-radius:50%;background:radial-gradient(circle,#b7f36b44 0%,#b7f36b14 45%,transparent 70%)}
 #zh .core{position:relative;width:84px;height:84px;border-radius:50%;z-index:7;
  background:radial-gradient(circle,#eaffc4 0%,#b7f36b 26%,#5f9c22 55%,#000 100%);
  box-shadow:0 0 0 2px #b7f36b,0 0 44px 14px #b7f36baa,0 0 120px 44px #b7f36b44}
-#zh .wv{position:absolute;width:120px;height:120px;border-radius:50%;border:1px solid #b7f36b88}
-#zh .wv.b{width:150px;height:150px;border-color:#b7f36b55}
-#zh .wv.c{width:180px;height:180px;border-color:#b7f36b33}
-/* label JS progress */
-#zlab{position:absolute;z-index:40;top:44%;left:0;right:0;text-align:center;
+#zh .wv{position:absolute;width:118px;height:118px;border-radius:50%;border:1px solid #b7f36b88}
+#zh .wv.b{width:148px;height:148px;border-color:#b7f36b55}
+#zh .wv.c{width:178px;height:178px;border-color:#b7f36b33}
+#zlab{position:absolute;z-index:40;top:42%;left:0;right:0;text-align:center;
  font:900 15px monospace;letter-spacing:3px;color:#b7f36b;opacity:0;
  text-shadow:0 0 18px #b7f36b,0 0 40px #b7f36b88;pointer-events:none}
 #zbar{position:absolute;z-index:40;bottom:70px;left:60px;right:60px;height:4px;border-radius:99px;
  background:#b7f36b22;opacity:0;overflow:hidden}
 #zbar i{display:block;height:100%;width:0;background:linear-gradient(90deg,#b7f36b,#eaffc4);border-radius:99px}
-.brand{position:absolute;top:58px;font-size:12px;font-weight:900;letter-spacing:2px;color:var(--lime);z-index:9}
+.brand{position:absolute;top:58px;left:0;right:0;text-align:center;font-size:12px;font-weight:900;letter-spacing:2px;color:var(--lime);z-index:9}
 .brand span{color:var(--text)}
 .itxt{position:absolute;bottom:140px;text-align:center;z-index:9;padding:0 30px;left:0;right:0}
 .itxt b{display:block;font-size:24px;font-weight:900}
 .itxt small{display:block;color:var(--muted);font-size:11.5px;margin-top:8px;line-height:1.6}
-.tap{position:absolute;bottom:44px;left:0;right:0;text-align:center;font-size:10.5px;color:var(--lime);
- font-weight:800;letter-spacing:1.5px;z-index:9}
+.tap{position:absolute;bottom:44px;left:0;right:0;text-align:center;font-size:10.5px;color:var(--lime);font-weight:800;letter-spacing:1.5px;z-index:9}
 #void{position:absolute;inset:0;z-index:15;background:#000;opacity:0;transition:opacity .22s;pointer-events:none}
 #void.on{opacity:1}
 #on{position:absolute;inset:0;z-index:20;display:flex;align-items:center;justify-content:center;padding:22px;
@@ -58,20 +53,15 @@ body{background:#0a0e0b;color:var(--text);font:14px -apple-system,sans-serif}
  background:linear-gradient(135deg,var(--lime),#8ed94e);color:var(--onlime);margin-top:7px}
 .sk{display:block;margin:10px auto 0;border:0;background:none;color:var(--muted);cursor:pointer;
  font:600 10.5px inherit;text-decoration:underline;padding:5px}
-/* decor timbul perlahan (JS-driven, no CSS animation) */
-@keyframes none{}
+
 </style></head><body>
-<div class="hint"><b>Candle Cascade</b> — tekan blackhole → zoom masuk. 🔊 bunyi ON</div>
+<div class="hint"><b>Candle Cascade</b> — 28 candlestick berputar 540° jatuh ke pusat. 🔊 tick + bass drop</div>
 <button class="replay" onclick="location.reload()">↻ Replay</button>
 <div class="phone">
  <div id="intro">
-  <div id="decor"><div style="position:absolute;width:5px;height:14px;border-radius:2px;background:#ff777d;opacity:.75;transform:rotate(0.0deg) translateY(-150px)"></div><div style="position:absolute;width:5px;height:21px;border-radius:2px;background:#b7f36b;opacity:.75;transform:rotate(12.857142857142858deg) translateY(-150px)"></div><div style="position:absolute;width:5px;height:28px;border-radius:2px;background:#b7f36b;opacity:.75;transform:rotate(25.714285714285715deg) translateY(-150px)"></div><div style="position:absolute;width:5px;height:35px;border-radius:2px;background:#ff777d;opacity:.75;transform:rotate(38.57142857142857deg) translateY(-150px)"></div><div style="position:absolute;width:5px;height:42px;border-radius:2px;background:#b7f36b;opacity:.75;transform:rotate(51.42857142857143deg) translateY(-150px)"></div><div style="position:absolute;width:5px;height:49px;border-radius:2px;background:#b7f36b;opacity:.75;transform:rotate(64.28571428571429deg) translateY(-150px)"></div><div style="position:absolute;width:5px;height:56px;border-radius:2px;background:#ff777d;opacity:.75;transform:rotate(77.14285714285714deg) translateY(-150px)"></div><div style="position:absolute;width:5px;height:19px;border-radius:2px;background:#b7f36b;opacity:.75;transform:rotate(90.0deg) translateY(-150px)"></div><div style="position:absolute;width:5px;height:26px;border-radius:2px;background:#b7f36b;opacity:.75;transform:rotate(102.85714285714286deg) translateY(-150px)"></div><div style="position:absolute;width:5px;height:33px;border-radius:2px;background:#ff777d;opacity:.75;transform:rotate(115.71428571428572deg) translateY(-150px)"></div><div style="position:absolute;width:5px;height:40px;border-radius:2px;background:#b7f36b;opacity:.75;transform:rotate(128.57142857142858deg) translateY(-150px)"></div><div style="position:absolute;width:5px;height:47px;border-radius:2px;background:#b7f36b;opacity:.75;transform:rotate(141.42857142857144deg) translateY(-150px)"></div><div style="position:absolute;width:5px;height:54px;border-radius:2px;background:#ff777d;opacity:.75;transform:rotate(154.28571428571428deg) translateY(-150px)"></div><div style="position:absolute;width:5px;height:17px;border-radius:2px;background:#b7f36b;opacity:.75;transform:rotate(167.14285714285714deg) translateY(-150px)"></div><div style="position:absolute;width:5px;height:24px;border-radius:2px;background:#b7f36b;opacity:.75;transform:rotate(180.0deg) translateY(-150px)"></div><div style="position:absolute;width:5px;height:31px;border-radius:2px;background:#ff777d;opacity:.75;transform:rotate(192.85714285714286deg) translateY(-150px)"></div><div style="position:absolute;width:5px;height:38px;border-radius:2px;background:#b7f36b;opacity:.75;transform:rotate(205.71428571428572deg) translateY(-150px)"></div><div style="position:absolute;width:5px;height:45px;border-radius:2px;background:#b7f36b;opacity:.75;transform:rotate(218.57142857142858deg) translateY(-150px)"></div><div style="position:absolute;width:5px;height:52px;border-radius:2px;background:#ff777d;opacity:.75;transform:rotate(231.42857142857144deg) translateY(-150px)"></div><div style="position:absolute;width:5px;height:15px;border-radius:2px;background:#b7f36b;opacity:.75;transform:rotate(244.2857142857143deg) translateY(-150px)"></div><div style="position:absolute;width:5px;height:22px;border-radius:2px;background:#b7f36b;opacity:.75;transform:rotate(257.14285714285717deg) translateY(-150px)"></div><div style="position:absolute;width:5px;height:29px;border-radius:2px;background:#ff777d;opacity:.75;transform:rotate(270.0deg) translateY(-150px)"></div><div style="position:absolute;width:5px;height:36px;border-radius:2px;background:#b7f36b;opacity:.75;transform:rotate(282.8571428571429deg) translateY(-150px)"></div><div style="position:absolute;width:5px;height:43px;border-radius:2px;background:#b7f36b;opacity:.75;transform:rotate(295.7142857142857deg) translateY(-150px)"></div><div style="position:absolute;width:5px;height:50px;border-radius:2px;background:#ff777d;opacity:.75;transform:rotate(308.57142857142856deg) translateY(-150px)"></div><div style="position:absolute;width:5px;height:57px;border-radius:2px;background:#b7f36b;opacity:.75;transform:rotate(321.42857142857144deg) translateY(-150px)"></div><div style="position:absolute;width:5px;height:20px;border-radius:2px;background:#b7f36b;opacity:.75;transform:rotate(334.2857142857143deg) translateY(-150px)"></div><div style="position:absolute;width:5px;height:27px;border-radius:2px;background:#ff777d;opacity:.75;transform:rotate(347.14285714285717deg) translateY(-150px)"></div></div>
+  <div id="decor" class=""></div>
   <div class="brand">✦ <span>TraderWatch</span></div>
-  <div id="zh">
-   <div class="glow"></div>
-   <div class="wv"></div><div class="wv b"></div><div class="wv c"></div>
-   <div class="core"></div>
-  </div>
+  <div id="zh"><div class="glow"></div><div class="wv"></div><div class="wv b"></div><div class="wv c"></div><div class="core"></div></div>
   <div id="zlab">ENTERING…</div>
   <div id="zbar"><i></i></div>
   <div class="itxt"><b>Every candle counts.</b><small>Setiap lilin menuju satu keputusan.</small></div>
@@ -87,13 +77,13 @@ body{background:#0a0e0b;color:var(--text);font:14px -apple-system,sans-serif}
  </div></div>
 </div>
 <script>
-/* ===== Web Audio (synth, no files) ===== */
+/* ===== Web Audio synth (no files) ===== */
 var AC=null;
 function ac(){if(!AC)AC=new (window.AudioContext||window.webkitAudioContext)();if(AC.state==='suspended')AC.resume();return AC}
-function noise(c,sec){var b=c.createBuffer(1,c.sampleRate*sec,c.sampleRate),d=b.getChannelData(0);
+function nz(c,sec){var b=c.createBuffer(1,c.sampleRate*sec,c.sampleRate),d=b.getChannelData(0);
  for(var i=0;i<d.length;i++)d[i]=Math.random()*2-1;return b}
 function sndTunnel(){var c=ac(),t=c.currentTime;
- var n=c.createBufferSource();n.buffer=noise(c,1.6);
+ var n=c.createBufferSource();n.buffer=nz(c,1.7);
  var bp=c.createBiquadFilter();bp.type='bandpass';bp.Q.value=1.2;
  bp.frequency.setValueAtTime(180,t);bp.frequency.exponentialRampToValueAtTime(2600,t+1.1);
  var g=c.createGain();g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(.3,t+.15);
@@ -111,30 +101,30 @@ function sndFlare(){var c=ac(),t=c.currentTime;
   var g=c.createGain();g.gain.setValueAtTime(.0001,t);
   g.gain.exponentialRampToValueAtTime(.12,t+.1+i*.03);g.gain.exponentialRampToValueAtTime(.001,t+.85);
   o.connect(g);g.connect(c.destination);o.start(t);o.stop(t+.9)});
- var n=c.createBufferSource();n.buffer=noise(c,.5);
- var hp=c.createBiquadFilter();hp.type='highpass';hp.frequency.value=2000;
- var ng=c.createGain();ng.gain.setValueAtTime(.22,t);ng.gain.exponentialRampToValueAtTime(.001,t+.45);
- n.connect(hp);hp.connect(ng);ng.connect(c.destination);n.start(t);n.stop(t+.5)}
+ var n=c.createBufferSource();n.buffer=nz(c,.6);
+ var hp=c.createBiquadFilter();hp.type='highpass';hp.frequency.value=2200;
+ var ng=c.createGain();ng.gain.setValueAtTime(.22,t);ng.gain.exponentialRampToValueAtTime(.001,t+.5);
+ n.connect(hp);hp.connect(ng);ng.connect(c.destination);n.start(t);n.stop(t+.55)}
 function sndGravity(){var c=ac(),t=c.currentTime;
  var o=c.createOscillator();o.type='sawtooth';o.frequency.setValueAtTime(620,t);
- o.frequency.exponentialRampToValueAtTime(90,t+.95);
+ o.frequency.exponentialRampToValueAtTime(80,t+1);
  var f=c.createBiquadFilter();f.type='lowpass';f.frequency.setValueAtTime(2400,t);
- f.frequency.exponentialRampToValueAtTime(300,t+.95);
+ f.frequency.exponentialRampToValueAtTime(260,t+1);
  var g=c.createGain();g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(.15,t+.12);
- g.gain.exponentialRampToValueAtTime(.001,t+1.1);
- o.connect(f);f.connect(g);g.connect(c.destination);o.start(t);o.stop(t+1.15);
- var s=c.createOscillator();s.type='sine';s.frequency.setValueAtTime(58,t);
- s.frequency.exponentialRampToValueAtTime(30,t+1);
- var sg=c.createGain();sg.gain.setValueAtTime(.0001,t);sg.gain.exponentialRampToValueAtTime(.45,t+.15);
- sg.gain.exponentialRampToValueAtTime(.001,t+1.2);
- s.connect(sg);sg.connect(c.destination);s.start(t);s.stop(t+1.25)}
+ g.gain.exponentialRampToValueAtTime(.001,t+1.15);
+ o.connect(f);f.connect(g);g.connect(c.destination);o.start(t);o.stop(t+1.2);
+ var s=c.createOscillator();s.type='sine';s.frequency.setValueAtTime(62,t);
+ s.frequency.exponentialRampToValueAtTime(26,t+1.05);
+ var sg=c.createGain();sg.gain.setValueAtTime(.0001,t);sg.gain.exponentialRampToValueAtTime(.48,t+.15);
+ sg.gain.exponentialRampToValueAtTime(.001,t+1.25);
+ s.connect(sg);sg.connect(c.destination);s.start(t);s.stop(t+1.3)}
 function sndPixel(){var c=ac(),t=c.currentTime;
- var n=c.createBufferSource(),b=c.createBuffer(1,c.sampleRate*.7,c.sampleRate),d=b.getChannelData(0);
+ var n=c.createBufferSource(),b=c.createBuffer(1,c.sampleRate*.75,c.sampleRate),d=b.getChannelData(0);
  for(var i=0;i<d.length;i++)d[i]=((i%97)<40?1:-1)*(Math.random()*.5+.5);n.buffer=b;
  var bp=c.createBiquadFilter();bp.type='bandpass';bp.frequency.value=1200;bp.Q.value=.8;
  var g=c.createGain();g.gain.setValueAtTime(.001,t);g.gain.exponentialRampToValueAtTime(.18,t+.05);
- g.gain.exponentialRampToValueAtTime(.001,t+.75);
- n.connect(bp);bp.connect(g);g.connect(c.destination);n.start(t);n.stop(t+.8);
+ g.gain.exponentialRampToValueAtTime(.001,t+.8);
+ n.connect(bp);bp.connect(g);g.connect(c.destination);n.start(t);n.stop(t+.85);
  [523,659,784,1047].forEach(function(f,i){var o=c.createOscillator();o.type='square';o.frequency.value=f;
   var og=c.createGain();var tt=t+i*.1;og.gain.setValueAtTime(.0001,tt);
   og.gain.exponentialRampToValueAtTime(.08,tt+.01);og.gain.exponentialRampToValueAtTime(.001,tt+.16);
@@ -151,45 +141,64 @@ function sndCandle(){var c=ac(),t=c.currentTime;
  sg.gain.exponentialRampToValueAtTime(.001,t+1.15);
  s.connect(sg);sg.connect(c.destination);s.start(t);s.stop(t+1.2)}
 
-/* ===== JS-DRIVEN ZOOM (works with Reduce Motion; no CSS animation) ===== */
+/* ===== STYLE-SPECIFIC: build decor + animate ===== */
+var DECOR=document.getElementById('decor');
+
+var CAND=[];
+(function(){
+ for(var i=0;i<28;i++){
+  var h=16+((i*37)%46);
+  var c=document.createElement('div');c.className='dec';
+  c.style.width='5px';c.style.height=h+'px';
+  c.style.marginLeft='-2.5px';c.style.marginTop=(-h/2)+'px';
+  c.style.borderRadius='2px';
+  c.style.background=(i%3===0?'#ff777d':'#b7f36b');
+  c.style.boxShadow='0 0 8px '+(i%3===0?'rgba(255,119,125,.8)':'rgba(183,243,107,.8)');
+  c.style.opacity='0.85';c.style.zIndex='8';
+  DECOR.appendChild(c);CAND.push({el:c,a:i*(Math.PI*2/28)});
+ }
+})();
+
+/* ===== zoom driver ===== */
 var busy=false;
 (function(){
  var zh=document.getElementById('zh'),zlab=document.getElementById('zlab'),
      zbar=document.getElementById('zbar'),zbarI=zbar.querySelector('i'),
-     intro=document.getElementById('intro'),voidEl=document.getElementById('void'),
-     on=document.getElementById('on');
- var MAX=16, DUR=1800;
+     voidEl=document.getElementById('void'),on=document.getElementById('on'),
+     intro=document.getElementById('intro');
+ var DUR=2000;
  intro.onclick=function(){
   if(busy)return;busy=true;
   try{sndCandle()}catch(e){}
   zlab.style.opacity='1';zbar.style.opacity='1';
   var t0=null;
-  function step(ts){
+  function frame(ts){
    if(t0===null)t0=ts;
    var p=Math.min(1,(ts-t0)/DUR);
-   /* easeInOutQuad */
    var e=p<0.5?2*p*p:1-Math.pow(-2*p+2,2)/2;
-   var sc=1+e*(MAX-1);
-   zh.style.transform='scale('+sc+')';
-   zbarI.style.width=(p*100).toFixed(1)+'%';
-   /* label berubah ikut progress */
-   if(p<0.35)zlab.textContent='ENTERING…';
-   else if(p<0.7)zlab.textContent='DEEPER…';
-   else zlab.textContent='INSIDE';
-   /* core makin terang */
+   
+   for(var i=0;i<CAND.length;i++){
+    var cd=CAND[i];
+    var ang=cd.a - p*(Math.PI*3);               /* 540 deg */
+    var rad=158*(1-p*0.96);
+    cd.el.style.transform='rotate('+(ang*57.2958).toFixed(1)+'deg) translateY('+(-rad).toFixed(1)+'px) scale('+(1-p*0.75).toFixed(2)+')';
+    cd.el.style.opacity=(p<0.04?0.85:(0.85*(1-p*0.85))).toFixed(2);
+   }
+   zh.style.transform='scale('+(1+e*14).toFixed(2)+')';
    zh.style.filter='brightness('+(1+e*1.8).toFixed(2)+')';
-   if(p<1){requestAnimationFrame(step)}
+   zbarI.style.width=(p*100).toFixed(1)+'%';
+   zlab.textContent=p<.35?'ENTERING…':(p<.72?'DEEPER…':'INSIDE');
+   if(p<1)requestAnimationFrame(frame);
    else{
     voidEl.classList.add('on');
     zlab.style.opacity='0';zbar.style.opacity='0';
     setTimeout(function(){
-     intro.style.display='none';
-     on.classList.add('show');
+     intro.style.display='none';on.classList.add('show');
      setTimeout(function(){voidEl.style.transition='opacity .6s';voidEl.classList.remove('on')},130);
-    },280);
+    },300);
    }
   }
-  requestAnimationFrame(step);
+  requestAnimationFrame(frame);
  };
 })();
 </script></body></html>

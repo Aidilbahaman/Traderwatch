@@ -1,78 +1,53 @@
 #!/usr/bin/env python3
-"""Generate 5 zoom previews — JS-driven zoom (works with Reduce Motion),
-bright core during zoom (visible on dark bg), JS progress label."""
+"""Generate 5 zoom previews — setiap satu mekanik zoom BERBEZA.
+
+Z1 Tunnel      : 9 cincin 3D lalu kamera (perspective translateZ)
+Z2 Flare       : white flash + chroma split (merah/cyan) + 18 ular cahaya
+Z3 Gravity     : 26 dot spiral mengecil + orbit berputar + core MENGEcil (implode)
+Z4 Pixel       : 448 sel pixel pop secara rawak menutup skrin (digital dissolve)
+Z5 Candle      : 28 candlestick berputar 540 deg + jatuh ke pusat
+
+Semua JS requestAnimationFrame (berfungsi dengan Reduce Motion ON).
+"""
 import pathlib
 
 OUT = pathlib.Path("/home/ubuntu/web/Traderwatch-repo/preview")
 
-STYLES = [
-    dict(key="z1", title="Z1 — Wormhole Tunnel", name="Wormhole Tunnel",
-         tagline="Enter the tunnel.", sub="Satu keputusan di hujung lorong.",
-         maxscale=20, dur=1800,
-         decor="rings", sound="tunnel",
-         desc="9 cincin perspektif lalu kamera"),
-    dict(key="z2", title="Z2 — Lens Flare Burst", name="Lens Flare Burst",
-         tagline="Burst into insight.", sub="Satu tekan, terus ke dalam data.",
-         maxscale=18, dur=1600,
-         decor="rays", sound="flare",
-         desc="White flash + chroma split + ular cahaya"),
-    dict(key="z3", title="Z3 — Gravity Suck", name="Gravity Suck",
-         tagline="Feel the pull.", sub="Data tertarik ke satu titik keputusan.",
-         maxscale=15, dur=1800,
-         decor="orbit", sound="gravity",
-         desc="Orbit berputar + dot spiral mengecil"),
-    dict(key="z4", title="Z4 — Pixel Dissolve", name="Pixel Dissolve",
-         tagline="Decode the market.", sub="Setiap data dipecah, difahami.",
-         maxscale=13, dur=1500,
-         decor="pixels", sound="pixel",
-         desc="720 pixel berpusar, chart decode"),
-    dict(key="z5", title="Z5 — Candle Cascade", name="Candle Cascade",
-         tagline="Every candle counts.", sub="Setiap lilin menuju satu keputusan.",
-         maxscale=16, dur=1800,
-         decor="candles", sound="candle",
-         desc="28 candlestick hijau/merah jatuh spiral"),
-]
-
-BASE = """<!doctype html><html lang="ms"><head><meta charset="utf-8">
+TPL = """<!doctype html><html lang="ms"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>__TITLE__</title>
+<title>%%TITLE%%</title>
 <style>
-:root{--lime:#b7f36b;--card:#111612;--card2:#171e18;--line:#222b23;--muted:#8a978c;--text:#eef3ee;--onlime:#10150b;--red:#ff777d}
+:root{--lime:#b7f36b;--card:#111612;--card2:#171e18;--line:#222b23;--muted:#8a978c;--text:#eef3ee;--onlime:#10150b;--red:#ff777d;--blue:#8ab4ff}
 *{box-sizing:border-box;margin:0}
 body{background:#0a0e0b;color:var(--text);font:14px -apple-system,sans-serif}
 .hint{position:fixed;top:0;left:0;right:0;z-index:999;background:#171e18ee;color:var(--muted);font-size:10.5px;padding:8px 14px;text-align:center;border-bottom:1px solid var(--line)}
 .hint b{color:var(--lime)}
 .replay{position:fixed;bottom:14px;right:14px;z-index:999;background:var(--card2);border:1px solid var(--line);color:var(--lime);font:700 10px inherit;padding:8px 14px;border-radius:99px;cursor:pointer}
 .phone{width:390px;max-width:100%;height:800px;max-height:100vh;margin:0 auto;position:relative;overflow:hidden;background:#050807}
-#intro{position:absolute;inset:0;z-index:10;display:grid;place-items:center;cursor:pointer;overflow:hidden;
- background:radial-gradient(ellipse at 50% 50%,#0e150f,#030604 78%)}
-/* decor layer */
-#decor{position:absolute;inset:0;z-index:2;display:grid;place-items:center;pointer-events:none}
-/* ZOOM TARGET — dibesarkan oleh JS, TERANG supaya jelas nampak */
-#zh{position:relative;width:220px;height:220px;display:grid;place-items:center;z-index:6;
- will-change:transform;transform-origin:50% 50%}
-#zh .glow{position:absolute;width:200px;height:200px;border-radius:50%;
- background:radial-gradient(circle,#b7f36b44 0%,#b7f36b14 45%,transparent 70%)}
+#intro{position:absolute;inset:0;z-index:10;display:grid;place-items:center;cursor:pointer;overflow:hidden;background:radial-gradient(ellipse at 50% 50%,#0e150f,#030604 78%)}
+#decor{position:absolute;inset:0;z-index:2;pointer-events:none;overflow:hidden}
+#decor.persp{perspective:600px;perspective-origin:50% 50%}
+.dec{position:absolute;left:50%;top:50%;will-change:transform,opacity;transform-origin:50% 50%}
+#zh{position:relative;width:200px;height:200px;display:grid;place-items:center;z-index:6;will-change:transform,filter;transform-origin:50% 50%}
+#zh .glow{position:absolute;width:190px;height:190px;border-radius:50%;background:radial-gradient(circle,#b7f36b44 0%,#b7f36b14 45%,transparent 70%)}
 #zh .core{position:relative;width:84px;height:84px;border-radius:50%;z-index:7;
  background:radial-gradient(circle,#eaffc4 0%,#b7f36b 26%,#5f9c22 55%,#000 100%);
  box-shadow:0 0 0 2px #b7f36b,0 0 44px 14px #b7f36baa,0 0 120px 44px #b7f36b44}
-#zh .wv{position:absolute;width:120px;height:120px;border-radius:50%;border:1px solid #b7f36b88}
-#zh .wv.b{width:150px;height:150px;border-color:#b7f36b55}
-#zh .wv.c{width:180px;height:180px;border-color:#b7f36b33}
-/* label JS progress */
-#zlab{position:absolute;z-index:40;top:44%;left:0;right:0;text-align:center;
+#zh .wv{position:absolute;width:118px;height:118px;border-radius:50%;border:1px solid #b7f36b88}
+#zh .wv.b{width:148px;height:148px;border-color:#b7f36b55}
+#zh .wv.c{width:178px;height:178px;border-color:#b7f36b33}
+#zlab{position:absolute;z-index:40;top:42%;left:0;right:0;text-align:center;
  font:900 15px monospace;letter-spacing:3px;color:#b7f36b;opacity:0;
  text-shadow:0 0 18px #b7f36b,0 0 40px #b7f36b88;pointer-events:none}
 #zbar{position:absolute;z-index:40;bottom:70px;left:60px;right:60px;height:4px;border-radius:99px;
  background:#b7f36b22;opacity:0;overflow:hidden}
 #zbar i{display:block;height:100%;width:0;background:linear-gradient(90deg,#b7f36b,#eaffc4);border-radius:99px}
-.brand{position:absolute;top:58px;font-size:12px;font-weight:900;letter-spacing:2px;color:var(--lime);z-index:9}
+.brand{position:absolute;top:58px;left:0;right:0;text-align:center;font-size:12px;font-weight:900;letter-spacing:2px;color:var(--lime);z-index:9}
 .brand span{color:var(--text)}
 .itxt{position:absolute;bottom:140px;text-align:center;z-index:9;padding:0 30px;left:0;right:0}
 .itxt b{display:block;font-size:24px;font-weight:900}
 .itxt small{display:block;color:var(--muted);font-size:11.5px;margin-top:8px;line-height:1.6}
-.tap{position:absolute;bottom:44px;left:0;right:0;text-align:center;font-size:10.5px;color:var(--lime);
- font-weight:800;letter-spacing:1.5px;z-index:9}
+.tap{position:absolute;bottom:44px;left:0;right:0;text-align:center;font-size:10.5px;color:var(--lime);font-weight:800;letter-spacing:1.5px;z-index:9}
 #void{position:absolute;inset:0;z-index:15;background:#000;opacity:0;transition:opacity .22s;pointer-events:none}
 #void.on{opacity:1}
 #on{position:absolute;inset:0;z-index:20;display:flex;align-items:center;justify-content:center;padding:22px;
@@ -93,23 +68,18 @@ body{background:#0a0e0b;color:var(--text);font:14px -apple-system,sans-serif}
  background:linear-gradient(135deg,var(--lime),#8ed94e);color:var(--onlime);margin-top:7px}
 .sk{display:block;margin:10px auto 0;border:0;background:none;color:var(--muted);cursor:pointer;
  font:600 10.5px inherit;text-decoration:underline;padding:5px}
-/* decor timbul perlahan (JS-driven, no CSS animation) */
-@keyframes none{}
+%%CSSX%%
 </style></head><body>
-<div class="hint"><b>__NAME__</b> — tekan blackhole → zoom masuk. 🔊 bunyi ON</div>
+<div class="hint"><b>%%NAME%%</b> — %%HINT%%</div>
 <button class="replay" onclick="location.reload()">↻ Replay</button>
 <div class="phone">
  <div id="intro">
-  <div id="decor">__DECOR__</div>
+  <div id="decor" class="%%DECORCLS%%"></div>
   <div class="brand">✦ <span>TraderWatch</span></div>
-  <div id="zh">
-   <div class="glow"></div>
-   <div class="wv"></div><div class="wv b"></div><div class="wv c"></div>
-   <div class="core"></div>
-  </div>
+  <div id="zh"><div class="glow"></div><div class="wv"></div><div class="wv b"></div><div class="wv c"></div><div class="core"></div></div>
   <div id="zlab">ENTERING…</div>
   <div id="zbar"><i></i></div>
-  <div class="itxt"><b>__TAGLINE__</b><small>__SUB__</small></div>
+  <div class="itxt"><b>%%TAG%%</b><small>%%SUB%%</small></div>
   <div class="tap">TEKAN UNTUK MASUK →</div>
  </div>
  <div id="void"></div>
@@ -122,13 +92,13 @@ body{background:#0a0e0b;color:var(--text);font:14px -apple-system,sans-serif}
  </div></div>
 </div>
 <script>
-/* ===== Web Audio (synth, no files) ===== */
+/* ===== Web Audio synth (no files) ===== */
 var AC=null;
 function ac(){if(!AC)AC=new (window.AudioContext||window.webkitAudioContext)();if(AC.state==='suspended')AC.resume();return AC}
-function noise(c,sec){var b=c.createBuffer(1,c.sampleRate*sec,c.sampleRate),d=b.getChannelData(0);
+function nz(c,sec){var b=c.createBuffer(1,c.sampleRate*sec,c.sampleRate),d=b.getChannelData(0);
  for(var i=0;i<d.length;i++)d[i]=Math.random()*2-1;return b}
 function sndTunnel(){var c=ac(),t=c.currentTime;
- var n=c.createBufferSource();n.buffer=noise(c,1.6);
+ var n=c.createBufferSource();n.buffer=nz(c,1.7);
  var bp=c.createBiquadFilter();bp.type='bandpass';bp.Q.value=1.2;
  bp.frequency.setValueAtTime(180,t);bp.frequency.exponentialRampToValueAtTime(2600,t+1.1);
  var g=c.createGain();g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(.3,t+.15);
@@ -146,30 +116,30 @@ function sndFlare(){var c=ac(),t=c.currentTime;
   var g=c.createGain();g.gain.setValueAtTime(.0001,t);
   g.gain.exponentialRampToValueAtTime(.12,t+.1+i*.03);g.gain.exponentialRampToValueAtTime(.001,t+.85);
   o.connect(g);g.connect(c.destination);o.start(t);o.stop(t+.9)});
- var n=c.createBufferSource();n.buffer=noise(c,.5);
- var hp=c.createBiquadFilter();hp.type='highpass';hp.frequency.value=2000;
- var ng=c.createGain();ng.gain.setValueAtTime(.22,t);ng.gain.exponentialRampToValueAtTime(.001,t+.45);
- n.connect(hp);hp.connect(ng);ng.connect(c.destination);n.start(t);n.stop(t+.5)}
+ var n=c.createBufferSource();n.buffer=nz(c,.6);
+ var hp=c.createBiquadFilter();hp.type='highpass';hp.frequency.value=2200;
+ var ng=c.createGain();ng.gain.setValueAtTime(.22,t);ng.gain.exponentialRampToValueAtTime(.001,t+.5);
+ n.connect(hp);hp.connect(ng);ng.connect(c.destination);n.start(t);n.stop(t+.55)}
 function sndGravity(){var c=ac(),t=c.currentTime;
  var o=c.createOscillator();o.type='sawtooth';o.frequency.setValueAtTime(620,t);
- o.frequency.exponentialRampToValueAtTime(90,t+.95);
+ o.frequency.exponentialRampToValueAtTime(80,t+1);
  var f=c.createBiquadFilter();f.type='lowpass';f.frequency.setValueAtTime(2400,t);
- f.frequency.exponentialRampToValueAtTime(300,t+.95);
+ f.frequency.exponentialRampToValueAtTime(260,t+1);
  var g=c.createGain();g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(.15,t+.12);
- g.gain.exponentialRampToValueAtTime(.001,t+1.1);
- o.connect(f);f.connect(g);g.connect(c.destination);o.start(t);o.stop(t+1.15);
- var s=c.createOscillator();s.type='sine';s.frequency.setValueAtTime(58,t);
- s.frequency.exponentialRampToValueAtTime(30,t+1);
- var sg=c.createGain();sg.gain.setValueAtTime(.0001,t);sg.gain.exponentialRampToValueAtTime(.45,t+.15);
- sg.gain.exponentialRampToValueAtTime(.001,t+1.2);
- s.connect(sg);sg.connect(c.destination);s.start(t);s.stop(t+1.25)}
+ g.gain.exponentialRampToValueAtTime(.001,t+1.15);
+ o.connect(f);f.connect(g);g.connect(c.destination);o.start(t);o.stop(t+1.2);
+ var s=c.createOscillator();s.type='sine';s.frequency.setValueAtTime(62,t);
+ s.frequency.exponentialRampToValueAtTime(26,t+1.05);
+ var sg=c.createGain();sg.gain.setValueAtTime(.0001,t);sg.gain.exponentialRampToValueAtTime(.48,t+.15);
+ sg.gain.exponentialRampToValueAtTime(.001,t+1.25);
+ s.connect(sg);sg.connect(c.destination);s.start(t);s.stop(t+1.3)}
 function sndPixel(){var c=ac(),t=c.currentTime;
- var n=c.createBufferSource(),b=c.createBuffer(1,c.sampleRate*.7,c.sampleRate),d=b.getChannelData(0);
+ var n=c.createBufferSource(),b=c.createBuffer(1,c.sampleRate*.75,c.sampleRate),d=b.getChannelData(0);
  for(var i=0;i<d.length;i++)d[i]=((i%97)<40?1:-1)*(Math.random()*.5+.5);n.buffer=b;
  var bp=c.createBiquadFilter();bp.type='bandpass';bp.frequency.value=1200;bp.Q.value=.8;
  var g=c.createGain();g.gain.setValueAtTime(.001,t);g.gain.exponentialRampToValueAtTime(.18,t+.05);
- g.gain.exponentialRampToValueAtTime(.001,t+.75);
- n.connect(bp);bp.connect(g);g.connect(c.destination);n.start(t);n.stop(t+.8);
+ g.gain.exponentialRampToValueAtTime(.001,t+.8);
+ n.connect(bp);bp.connect(g);g.connect(c.destination);n.start(t);n.stop(t+.85);
  [523,659,784,1047].forEach(function(f,i){var o=c.createOscillator();o.type='square';o.frequency.value=f;
   var og=c.createGain();var tt=t+i*.1;og.gain.setValueAtTime(.0001,tt);
   og.gain.exponentialRampToValueAtTime(.08,tt+.01);og.gain.exponentialRampToValueAtTime(.001,tt+.16);
@@ -186,84 +156,243 @@ function sndCandle(){var c=ac(),t=c.currentTime;
  sg.gain.exponentialRampToValueAtTime(.001,t+1.15);
  s.connect(sg);sg.connect(c.destination);s.start(t);s.stop(t+1.2)}
 
-/* ===== JS-DRIVEN ZOOM (works with Reduce Motion; no CSS animation) ===== */
+/* ===== STYLE-SPECIFIC: build decor + animate ===== */
+var DECOR=document.getElementById('decor');
+%%BUILD%%
+
+/* ===== zoom driver ===== */
 var busy=false;
 (function(){
  var zh=document.getElementById('zh'),zlab=document.getElementById('zlab'),
      zbar=document.getElementById('zbar'),zbarI=zbar.querySelector('i'),
-     intro=document.getElementById('intro'),voidEl=document.getElementById('void'),
-     on=document.getElementById('on');
- var MAX=__MAX__, DUR=__DUR__;
+     voidEl=document.getElementById('void'),on=document.getElementById('on'),
+     intro=document.getElementById('intro');
+ var DUR=%%DUR%%;
  intro.onclick=function(){
   if(busy)return;busy=true;
-  try{__SND__()}catch(e){}
+  try{%%SND%%()}catch(e){}
   zlab.style.opacity='1';zbar.style.opacity='1';
   var t0=null;
-  function step(ts){
+  function frame(ts){
    if(t0===null)t0=ts;
    var p=Math.min(1,(ts-t0)/DUR);
-   /* easeInOutQuad */
    var e=p<0.5?2*p*p:1-Math.pow(-2*p+2,2)/2;
-   var sc=1+e*(MAX-1);
-   zh.style.transform='scale('+sc+')';
+   %%ANIM%%
    zbarI.style.width=(p*100).toFixed(1)+'%';
-   /* label berubah ikut progress */
-   if(p<0.35)zlab.textContent='ENTERING…';
-   else if(p<0.7)zlab.textContent='DEEPER…';
-   else zlab.textContent='INSIDE';
-   /* core makin terang */
-   zh.style.filter='brightness('+(1+e*1.8).toFixed(2)+')';
-   if(p<1){requestAnimationFrame(step)}
+   zlab.textContent=p<.35?'ENTERING…':(p<.72?'DEEPER…':'INSIDE');
+   if(p<1)requestAnimationFrame(frame);
    else{
     voidEl.classList.add('on');
     zlab.style.opacity='0';zbar.style.opacity='0';
     setTimeout(function(){
-     intro.style.display='none';
-     on.classList.add('show');
+     intro.style.display='none';on.classList.add('show');
      setTimeout(function(){voidEl.style.transition='opacity .6s';voidEl.classList.remove('on')},130);
-    },280);
+    },300);
    }
   }
-  requestAnimationFrame(step);
+  requestAnimationFrame(frame);
  };
 })();
 </script></body></html>
 """
 
-DECOR = {
-    "rings": "".join(
-        f'<div style="position:absolute;width:{300-i*18}px;height:{300-i*18}px;border-radius:50%;'
-        f'border:1px solid #b7f36b{["55","44","33"][i%3]};opacity:.6"></div>' for i in range(6)),
-    "rays": "".join(
-        f'<div style="position:absolute;width:3px;height:180px;background:linear-gradient(180deg,'
-        f'transparent,#b7f36b99,transparent);transform:rotate({i*22.5}deg) translateY(-110px);'
-        f'opacity:.5"></div>' for i in range(16)),
-    "orbit": '<div style="position:absolute;width:280px;height:280px;border-radius:50%;'
-             'border:1px dashed #b7f36b44"></div>'
-             '<div style="position:absolute;width:230px;height:230px;border-radius:50%;'
-             'border:1px solid #b7f36b33"></div>'
-             '<div style="position:absolute;width:7px;height:7px;border-radius:50%;background:#eaffc4;'
-             'box-shadow:0 0 10px #b7f36b;transform:translateY(-140px)"></div>',
-    "pixels": "".join(
-        f'<div style="position:absolute;width:4px;height:4px;background:'
-        f'{["#b7f36b","#8ab4ff","#eaffc4"][i%3]};opacity:.7;'
-        f'transform:translate({((i*37)%300)-150}px,{((i*53)%300)-150}px) rotate({i*17}deg)"></div>'
-        for i in range(60)),
-    "candles": "".join(
-        f'<div style="position:absolute;width:5px;height:{14+(i*7)%44}px;border-radius:2px;'
-        f'background:{"#b7f36b" if i%3 else "#ff777d"};opacity:.75;'
-        f'transform:rotate({i*(360/28)}deg) translateY(-150px)"></div>' for i in range(28)),
-}
+STYLES = [
+    dict(key="z1-tunnel", title="Z1 — Wormhole Tunnel", name="Wormhole Tunnel",
+         tag="Enter the tunnel.", sub="Satu keputusan di hujung lorong.",
+         hint="9 cincin 3D lalu kamera. 🔊 bass drop + whoosh", dur=2000, snd="sndTunnel",
+         decorcls="persp",
+         cssx="",
+         build="""
+var RINGS=[];
+(function(){
+ for(var i=0;i<9;i++){
+  var r=document.createElement('div');
+  r.className='dec';
+  r.style.width='260px';r.style.height='260px';r.style.marginLeft='-130px';r.style.marginTop='-130px';
+  r.style.borderRadius='50%';
+  r.style.border='2px solid rgba(183,243,107,'+(0.55-i*0.05)+')';
+  r.style.boxShadow='0 0 24px rgba(183,243,107,.35) inset, 0 0 18px rgba(183,243,107,.25)';
+  r.style.opacity='0';
+  DECOR.appendChild(r);RINGS.push(r);
+ }
+})();""",
+         anim="""
+   for(var i=0;i<RINGS.length;i++){
+    var q=(p*1.55 - i*0.075);
+    if(q<0||q>1){RINGS[i].style.opacity='0';continue}
+    var z=-900+q*1500, s=0.25+q*1.9;
+    RINGS[i].style.transform='translateZ('+z.toFixed(0)+'px) scale('+s.toFixed(2)+')';
+    RINGS[i].style.opacity=(q<0.08?q/0.08:(q>0.92?(1-q)/0.08:1)).toFixed(2);
+   }
+   zh.style.transform='scale('+(1+e*17).toFixed(2)+')';
+   zh.style.filter='brightness('+(1+e*1.6).toFixed(2)+')';"""),
+
+    dict(key="z2-flare", title="Z2 — Lens Flare Burst", name="Lens Flare Burst",
+         tag="Burst into insight.", sub="Satu tekan, terus ke dalam data.",
+         hint="white flash + chroma split + 18 ular cahaya. 🔊 shimmer + burst", dur=1700, snd="sndFlare",
+         decorcls="",
+         cssx="#flash{position:absolute;inset:0;z-index:12;background:#fff;opacity:0;pointer-events:none}",
+         build="""
+var CH=[],RAYS=[];
+(function(){
+ [['#ff4d6d',0],['#4dd2ff',1],['#ffffff',2]].forEach(function(cfg){
+  var r=document.createElement('div');r.className='dec';
+  r.style.width='120px';r.style.height='120px';r.style.marginLeft='-60px';r.style.marginTop='-60px';
+  r.style.borderRadius='50%';r.style.border='3px solid '+cfg[0];r.style.opacity='0';r.style.zIndex='8';
+  DECOR.appendChild(r);CH.push(r);
+ });
+ for(var i=0;i<18;i++){
+  var s=document.createElement('div');s.className='dec';
+  s.style.width='2px';s.style.height='0px';s.style.marginLeft='-1px';
+  s.style.background='linear-gradient(180deg,transparent,#fff,#b7f36b 60%,transparent)';
+  s.style.opacity='0';s.style.transformOrigin='50% 0';
+  s.style.zIndex='9';
+  DECOR.appendChild(s);RAYS.push(s);
+ }
+ var f=document.createElement('div');f.id='flash';document.getElementById('intro').appendChild(f);
+})();""",
+         anim="""
+   var flash=document.getElementById('flash');
+   for(var i=0;i<CH.length;i++){
+    var q=Math.max(0,p*1.3-i*0.05);
+    CH[i].style.transform='scale('+(0.3+q*7).toFixed(2)+')';
+    CH[i].style.opacity=(0.9*(1-q)).toFixed(2);
+   }
+   for(var j=0;j<RAYS.length;j++){
+    var rq=Math.max(0,p*1.4-j*0.008);
+    var ang=j*(360/18);
+    var len=rq*430;
+    RAYS[j].style.height=len.toFixed(0)+'px';
+    RAYS[j].style.transform='rotate('+ang+'deg) translateY('+(-len/2)+'px)';
+    RAYS[j].style.opacity=(rq<0.95?Math.min(1,rq*3)*0.75:0).toFixed(2);
+   }
+   flash.style.opacity=p>0.55?Math.max(0,(p-0.55)/0.18).toFixed(2):'0';
+   zh.style.transform='scale('+(1+e*9).toFixed(2)+')';
+   zh.style.filter='brightness('+(1+e*3).toFixed(2)+') saturate('+(1+e*2).toFixed(1)+')';"""),
+
+    dict(key="z3-gravity", title="Z3 — Gravity Suck", name="Gravity Suck",
+         tag="Feel the pull.", sub="Data tertarik ke satu titik keputusan.",
+         hint="26 dot spiral mengecil + core IMPLODE. 🔊 vortex + sub rumble", dur=1900, snd="sndGravity",
+         decorcls="",
+         cssx="#dotwrap{position:absolute;inset:0;z-index:8;pointer-events:none}",
+         build="""
+var DOTS=[],ORB=[];
+(function(){
+ for(var i=0;i<26;i++){
+  var d=document.createElement('div');d.className='dec';
+  var sz=2+Math.random()*3;
+  d.style.width=sz+'px';d.style.height=sz+'px';d.style.marginLeft=(-sz/2)+'px';d.style.marginTop=(-sz/2)+'px';
+  d.style.borderRadius='50%';
+  d.style.background=(i%3===0?'#8ab4ff':(i%3===1?'#eaffc4':'#b7f36b'));
+  d.style.boxShadow='0 0 8px rgba(183,243,107,.9)';
+  d.style.opacity='0';d.style.zIndex='8';
+  DECOR.appendChild(d);DOTS.push({el:d,a:i*(Math.PI*2/26),r:150+Math.random()*60});
+ }
+ [280,225].forEach(function(w,k){
+  var o=document.createElement('div');o.className='dec';
+  o.style.width=w+'px';o.style.height=w+'px';o.style.marginLeft=(-w/2)+'px';o.style.marginTop=(-w/2)+'px';
+  o.style.borderRadius='50%';
+  o.style.border=k?'1px solid rgba(183,243,107,.25)':'1px dashed rgba(183,243,107,.45)';
+  o.style.opacity='0';o.style.zIndex='3';
+  DECOR.appendChild(o);ORB.push(o);
+ });
+})();""",
+         anim="""
+   for(var i=0;i<DOTS.length;i++){
+    var d=DOTS[i];
+    var ang=d.a + p*7.5;                       /* berputar makin laju */
+    var rad=d.r*(1-p*0.97);                    /* mengecil ke pusat */
+    d.el.style.transform='translate('+(Math.cos(ang)*rad).toFixed(1)+'px,'+(Math.sin(ang)*rad).toFixed(1)+'px)';
+    d.el.style.opacity=p<0.04?'0':(1-p*0.9).toFixed(2);
+   }
+   for(var k=0;k<ORB.length;k++){
+    ORB[k].style.transform='rotate('+(p*860*(k?-1:1)).toFixed(0)+'deg) scale('+(1-p*0.85).toFixed(2)+')';
+    ORB[k].style.opacity=p<0.05?'0.8':(0.8*(1-p)).toFixed(2);
+   }
+   /* IMPLODE: core mengecil ke satu titik, bukan membesar */
+   var sc=1-e*0.97;
+   zh.style.transform='scale('+sc.toFixed(3)+')';
+   zh.style.filter='brightness('+(1+e*4).toFixed(2)+') blur('+(e*2).toFixed(1)+'px)';"""),
+
+    dict(key="z4-pixel", title="Z4 — Pixel Dissolve", name="Pixel Dissolve",
+         tag="Decode the market.", sub="Setiap data dipecah, difahami.",
+         hint="448 sel pixel pop menutup skrin. 🔊 digital crunch + blip", dur=1650, snd="sndPixel",
+         decorcls="",
+         cssx="#pxwrap{position:absolute;inset:0;z-index:11;pointer-events:none;display:grid;grid-template-columns:repeat(16,1fr);grid-template-rows:repeat(28,1fr)}",
+         build="""
+var CELLS=[];
+(function(){
+ var wrap=document.createElement('div');wrap.id='pxwrap';
+ document.getElementById('intro').appendChild(wrap);
+ var cols=['#b7f36b','#8ab4ff','#eaffc4','#5f9c22'];
+ for(var i=0;i<16*28;i++){
+  var c=document.createElement('div');
+  c.style.background=cols[i%4];
+  c.style.opacity='0';
+  c.style.transform='scale(0)';
+  c.style.willChange='transform,opacity';
+  c._t=Math.random();          /* threshold rawak */
+  wrap.appendChild(c);CELLS.push(c);
+ }
+})();""",
+         anim="""
+   for(var i=0;i<CELLS.length;i++){
+    var c=CELLS[i];
+    var q=(p - c._t*0.62)/0.38;
+    if(q<=0){c.style.opacity='0';c.style.transform='scale(0)';continue}
+    if(q>1)q=1;
+    var s=q<0.55?q/0.55*1.35:(1-(q-0.55)/0.45*0.9);
+    c.style.transform='scale('+s.toFixed(2)+') rotate('+((q-0.5)*60).toFixed(0)+'deg)';
+    c.style.opacity=(q<0.8?0.9:(1-(q-0.8)/0.2)*0.9).toFixed(2);
+   }
+   zh.style.transform='scale('+(1+e*5).toFixed(2)+')';
+   zh.style.filter='brightness('+(1+e*1.2).toFixed(2)+') blur('+(e*8).toFixed(1)+'px)';"""),
+
+    dict(key="z5-candle", title="Z5 — Candle Cascade", name="Candle Cascade",
+         tag="Every candle counts.", sub="Setiap lilin menuju satu keputusan.",
+         hint="28 candlestick berputar 540° jatuh ke pusat. 🔊 tick + bass drop", dur=2000, snd="sndCandle",
+         decorcls="",
+         cssx="",
+         build="""
+var CAND=[];
+(function(){
+ for(var i=0;i<28;i++){
+  var h=16+((i*37)%46);
+  var c=document.createElement('div');c.className='dec';
+  c.style.width='5px';c.style.height=h+'px';
+  c.style.marginLeft='-2.5px';c.style.marginTop=(-h/2)+'px';
+  c.style.borderRadius='2px';
+  c.style.background=(i%3===0?'#ff777d':'#b7f36b');
+  c.style.boxShadow='0 0 8px '+(i%3===0?'rgba(255,119,125,.8)':'rgba(183,243,107,.8)');
+  c.style.opacity='0.85';c.style.zIndex='8';
+  DECOR.appendChild(c);CAND.push({el:c,a:i*(Math.PI*2/28)});
+ }
+})();""",
+         anim="""
+   for(var i=0;i<CAND.length;i++){
+    var cd=CAND[i];
+    var ang=cd.a - p*(Math.PI*3);               /* 540 deg */
+    var rad=158*(1-p*0.96);
+    cd.el.style.transform='rotate('+(ang*57.2958).toFixed(1)+'deg) translateY('+(-rad).toFixed(1)+'px) scale('+(1-p*0.75).toFixed(2)+')';
+    cd.el.style.opacity=(p<0.04?0.85:(0.85*(1-p*0.85))).toFixed(2);
+   }
+   zh.style.transform='scale('+(1+e*14).toFixed(2)+')';
+   zh.style.filter='brightness('+(1+e*1.8).toFixed(2)+')';"""),
+]
 
 for st in STYLES:
-    html = (BASE
-            .replace("__TITLE__", st["title"])
-            .replace("__NAME__", st["name"])
-            .replace("__TAGLINE__", st["tagline"])
-            .replace("__SUB__", st["sub"])
-            .replace("__DECOR__", DECOR[st["decor"]])
-            .replace("__MAX__", str(st["maxscale"]))
-            .replace("__DUR__", str(st["dur"]))
-            .replace("__SND__", "snd" + st["sound"].capitalize()))
-    (OUT / f'zoom-{st["key"]}-{st["sound"]}.html').write_text(html, encoding="utf-8")
-    print("wrote", f'zoom-{st["key"]}-{st["sound"]}.html')
+    html = (TPL
+            .replace("%%CSSX%%", st["cssx"])
+            .replace("%%TITLE%%", st["title"])
+            .replace("%%NAME%%", st["name"])
+            .replace("%%HINT%%", st["hint"])
+            .replace("%%DECORCLS%%", st["decorcls"])
+            .replace("%%TAG%%", st["tag"])
+            .replace("%%SUB%%", st["sub"])
+            .replace("%%BUILD%%", st["build"])
+            .replace("%%ANIM%%", st["anim"])
+            .replace("%%DUR%%", str(st["dur"]))
+            .replace("%%SND%%", st["snd"]))
+    assert "%%" not in html, "placeholder tinggal: " + st["key"]
+    (OUT / f'zoom-{st["key"]}.html').write_text(html, encoding="utf-8")
+    print("wrote", f'zoom-{st["key"]}.html')
