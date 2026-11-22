@@ -233,6 +233,126 @@ def parse_response(content):
     raise ValueError("tiada JSON valid dalam response")
 
 
+def swing_levels(bars, n=3):
+    """Swing high/low lokals dari bar OHLC — dipakai untuk letak SL/TP tepat.
+
+    bar = (ts, high, low, close). Return (sorted highs, sorted lows).
+    """
+    highs, lows = [], []
+    for i in range(n, len(bars) - n):
+        h, l = bars[i][1], bars[i][2]
+        if h >= max(bars[j][1] for j in range(i - n, i + n + 1)):
+            highs.append(round(h, 6))
+        if l <= min(bars[j][2] for j in range(i - n, i + n + 1)):
+            lows.append(round(l, 6))
+    return sorted(set(highs)), sorted(set(lows))
+
+
+def session_factor(hour_utc):
+    """Kekangan sesi forex (UTC). London/NY = 1.0, Asia = 0.6.
+
+    Dipakai sebagai pendarab keyakinan, bukan sekatan keras — supaya scalpers
+    masih boleh dapat signal di Asia tapi dengan conf lebih rendah.
+    """
+    if 7 <= hour_utc < 17:
+        return 1.0
+    if 17 <= hour_utc < 21:
+        return 0.85
+    if 0 <= hour_utc < 7:
+        return 0.6
+    return 0.5
+
+
+def price_from_story(story, bars, price, pip, spread_pips, prof, tf, s_hi="RANGE", s_lo="RANGE"):
+    """Terjemah output kategori vision -> SL/TP/RR tepat (semua oleh kod).
+
+    Vision hanya jawab APA yang berlaku (structure/direction/quality/location).
+    Di sini kita yang cari harga: swing terdekat di sebalik entry untuk SL,
+    swing seterusnya ke arah trade untuk TP. RR dikira mekanikal.
+
+    Raise ValueError bila tiada swing target yang memenuhi RR minimum —
+    ini fail-closed, sama seperti validator lama.
+    """
+    direction = str(story.get("direction") or story.get("bias") or "").strip().upper()
+    if direction not in ("BUY", "SELL"):
+        return {"side": "HOLD", "conf": 0.3,
+                "reason": str(story.get("reason") or "No clear structure")[:160]}
+    quality = str(story.get("quality") or "B").strip().upper()
+    quality_base = {"A": 0.82, "B": 0.66, "C": 0.5}.get(quality, 0.6)
+    structure = str(story.get("structure") or "RANGE").strip().upper()
+    pattern = str(story.get("pattern") or "").strip().upper()[:40]
+    location = str(story.get("location") or "").strip().upper()[:20]
+    choch = bool(story.get("choch"))
+    rr_min = prof["rr1_min"]
+
+    highs, lows = swing_levels(bars, n=3)
+    win_h = max(bars[j][1] for j in range(max(0, len(bars) - 50), len(bars)))
+    win_l = min(bars[j][2] for j in range(max(0, len(bars) - 50), len(bars)))
+    recent_range = win_h - win_l
+    buf = max(0.03 * recent_range, 2.0 * spread_pips * pip)
+    floor = 3.0 * spread_pips * pip
+    want = rr_min + 0.5   # sasaran RR1 (dekat minimum, bukan terlalu jauh)
+
+    if direction == "BUY":
+        below = [x for x in lows if x < price - floor]      # SL: swing bawah terdekat
+        above = [x for x in highs if x > price + floor]     # TP: swing atas
+        if not below or not above:
+            raise ValueError("tiada swing untuk SL/TP")
+        sl = max(below) - buf
+        risk = price - sl
+        if risk <= floor:
+            raise ValueError("SL terlalu dekat dengan spread")
+        want = rr_min + 0.5
+        targets = [x for x in above if (x - price) / risk >= rr_min]
+        if not targets:
+            raise ValueError(f"tiada swing target RR≥{rr_min}")
+        tp1 = min(targets, key=lambda x: abs((x - price) / risk - want))
+        tp2 = next((x for x in above if x > tp1 + risk), tp1 + risk)
+    else:
+        above = [x for x in highs if x > price + floor]
+        below = [x for x in lows if x < price - floor]
+        if not above or not below:
+            raise ValueError("tiada swing untuk SL/TP")
+        sl = min(above) + buf
+        risk = sl - price
+        if risk <= floor:
+            raise ValueError("SL terlalu dekat dengan spread")
+        targets = [x for x in below if (price - x) / risk >= rr_min]
+        if not targets:
+            raise ValueError(f"tiada swing target RR≥{rr_min}")
+        tp1 = max(targets, key=lambda x: -abs((price - x) / risk - want))
+        tp2 = next((x for x in below if x < tp1 - risk), tp1 - risk)
+
+    rr1 = abs(tp1 - price) / risk
+    rr2 = abs(tp2 - price) / risk
+
+    # Keyakinan deterministik: kualiti + persetujuan MTF + RR + sesi.
+    conf = quality_base
+    align_hi = (direction == "BUY" and s_hi == "UP") or (direction == "SELL" and s_hi == "DOWN")
+    align_lo = (direction == "BUY" and s_lo == "UP") or (direction == "SELL" and s_lo == "DOWN")
+    if align_hi:
+        conf += 0.08
+    if align_lo:
+        conf += 0.07
+    if structure == ("BOS_UP" if direction == "BUY" else "BOS_DOWN"):
+        conf += 0.05
+    if choch:
+        conf -= 0.04          # reversal lebih risiko
+    if rr1 >= rr_min + 0.5:
+        conf += 0.04
+    hour = datetime.now(timezone.utc).hour
+    conf *= session_factor(hour)
+    conf = min(0.95, max(0.2, conf))
+
+    reason = " · ".join(x for x in (structure, pattern, location,
+                        ("CHoCH" if choch else ""), ("session " + ["Asia", "London/NY", "NY"][
+                            0 if hour < 7 else (1 if hour < 17 else 2)])) if x)[:200]
+    return {"side": direction, "entry": round(price, 5), "sl": round(sl, 5),
+            "tp1": round(tp1, 5), "tp2": round(tp2, 5), "conf": round(conf, 2),
+            "reason": reason, "rr1": round(rr1, 2), "rr2": round(rr2, 2),
+            "structure": structure, "pattern": pattern, "location": location}
+
+
 def validate_verdict(j, price, pip, spread_pips, rr1_min=1.5):
     """Semak sanity jawapan LLM; pulangkan verdict bersih atau raise ValueError.
 
@@ -419,16 +539,31 @@ def analyze(pair, bars, pip, spread_pips, call=None, budget_s=None, held=None, t
         c_txt = ("YES — M15 structure flipped against higher TF (potential reversal)."
                  if choch else "No CHoCH; follow dominant BOS.")
         rr_min = prof["rr1_min"]
-        prompt = ("ICT/SMC BOS + CHoCH + FVG analyst. You are looking at the chart IMAGE (real OHLC). "
-                  f"Pair {pair} {tf}, price {price}, ATR {atr:.2f}, spread {spread_pips:g} pips. "
-                  f"Higher-TF {tf_key} swing: {s_hi}. {tf} swing/BOS: {s_lo}. CHoCH: {c_txt} "
-                  f"Unfilled FVG near price: {fvg_txt}. "
-                  f"Rules: trade IN the BOS direction; if CHoCH=YES prefer the NEW {tf} direction. "
-                  f"Entry=current price. SL beyond the last opposing swing (never inside spread). "
-                  f"TP at next liquidity/structure target. RR1 >= {rr_min:g}. "
-                  f"HOLD if structure unclear. "
-                  'Reply ONLY compact JSON: {"bias":"BUY"|"SELL"|"HOLD","sl":num,'
-                  '"tp1":num,"tp2":num,"confidence":0-10,"reason":"<10 words>"}')
+        # Vision = CERITA struktur sahaja. Model TAK bagi nombor SL/TP — itu
+        # sangat tidak tepat pada imej 200 bar (1 candle = 2-3 piksel).
+        # Kod yang cari swing sebenar dari bar & kira RR (price_from_story).
+        prompt = (
+            "You are an expert ICT/SMC chart reader. You see ONE chart image with "
+            f"{pair} {tf} candles (real OHLC) plus higher-TF context. "
+            f"Price is around {price:g}, spread {spread_pips:g} pips. "
+            f"Higher-TF {tf_key} swing: {s_hi}. {tf} swing/BOS: {s_lo}. "
+            f"Unfilled FVG near price: {fvg_txt}. "
+            "READ the image and describe WHAT you see — do NOT output any price levels. "
+            "Reply ONLY compact JSON:\n"
+            '{"structure":"BOS_UP|BOS_DOWN|RANGE|CHoCH",'
+            '"choch":true/false,'
+            '"location":"DISCOUNT|PREMIUM|EQUILIBRIUM",'
+            '"pattern":"FVG_RETEST|ORDER_BLOCK|LIQUIDITY_SWEEP|BREAKOUT|NONE",'
+            '"quality":"A|B|C",'
+            '"direction":"BUY|SELL|HOLD",'
+            '"reason":"<max 10 words>"}\n'
+            "Rules: direction BUY/SELL only when the chart shows a CLEAN structure "
+            "with a valid entry; otherwise HOLD. Quality A = textbook setup (BOS + "
+            "retracement into discount/premium + FVG/OB confirmation); B = decent; "
+            "C = marginal. Be honest — HOLD is respected. "
+            + ("SCALPING: micro sweep + displacement is enough, be opportunistic.\n"
+               if prof["role"] == "SCALPER" else
+               "SWING/POSITION: wait for a clear higher-TF-aligned structure.\n"))
         ai_meta = {"bos": bos, "choch": choch,
                    "fvg": len(fvgs) if 'fvgs' in dir() else 0,
                    "atr": round(atr, 3), "hour": datetime.now(timezone.utc).hour}
@@ -462,9 +597,11 @@ def analyze(pair, bars, pip, spread_pips, call=None, budget_s=None, held=None, t
         else:
             latency = time.time() - t0
             try:
-                verdict = validate_verdict(j, price, pip, spread_pips, rr1_min=prof["rr1_min"])
+                # Vision bagi CERITA; kod yang tukar ke harga tepat.
+                verdict = price_from_story(j, bars, price, pip, spread_pips,
+                                           prof, tf, s_hi, s_lo)
             except ValueError as e:
-                # Rejection (aras/RR tak sah) muktamad — jangan shop model lain.
+                # Tiada swing target yang sah = muktamad, jangan shop model lain.
                 log(f"{pair} {VISION_MODEL} (vision) verdict ditolak ({e})")
                 _audit({"ts": datetime.now(timezone.utc).isoformat(), "pair": pair, "tf": tf,
                         "model": VISION_MODEL, "vision": True, "verdict_rejected": str(e)[:200]})
