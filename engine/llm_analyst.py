@@ -408,6 +408,13 @@ def analyze(pair, bars, pip, spread_pips, call=None, budget_s=None, held=None, t
         return None
     price = bars[-1][3]
     atr = M.atr_s(bars)[-1]
+    # Data FLAT (market tutup / collector mati) -> tolak, jangan biar AI reka.
+    _uniq = len({(round(b[1], 6), round(b[2], 6)) for b in bars[-60:]})
+    if _uniq < 5:
+        log(f"{pair} {tf}: tolak — data flat ({_uniq} harga unik /60 bar)")
+        return {"side": "HOLD", "conf": 0.0,
+                "reason": "Market data unavailable — no price movement "
+                          "(market closed or feed stalled).", "stale_data": True}
     ctx = resample(bars, prof["ctx_factor"])
     closes_ctx = [b[4] for b in ctx]
     trend = "FLAT"
