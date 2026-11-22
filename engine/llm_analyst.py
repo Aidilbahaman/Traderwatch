@@ -39,6 +39,10 @@ try:
     import ict_filter as ICT  # noqa: E402  (BOS/CHoCH/FVG metadata untuk vision)
 except Exception:
     ICT = None
+try:
+    import ai_learn  # noqa: E402  (closed-loop: corak TP/SL sebenar client)
+except Exception:
+    ai_learn = None
 
 REPO = HERE.parent
 AUDIT_FILE = REPO / "state" / "llm-analysis-log.jsonl"
@@ -425,6 +429,23 @@ def analyze(pair, bars, pip, spread_pips, call=None, budget_s=None, held=None, t
                   f"HOLD if structure unclear. "
                   'Reply ONLY compact JSON: {"bias":"BUY"|"SELL"|"HOLD","sl":num,'
                   '"tp1":num,"tp2":num,"confidence":0-10,"reason":"<10 words>"}')
+        ai_meta = {"bos": bos, "choch": choch,
+                   "fvg": len(fvgs) if 'fvgs' in dir() else 0,
+                   "atr": round(atr, 3), "hour": datetime.now(timezone.utc).hour}
+    else:
+        ai_meta = {"bos": trend if trend in ("UP", "DOWN") else "RANGE",
+                   "choch": False, "fvg": 0, "atr": round(atr, 3),
+                   "hour": datetime.now(timezone.utc).hour}
+    # Closed-loop learning: suap statistik corak TP/SL sebenar client ke prompt.
+    # Retrieval-augmented (bukan training) — cache 1 jam, fail-safe bila tiada data.
+    if ai_learn is not None:
+        try:
+            _lessons, _ = ai_learn.lessons()
+            if _lessons:
+                prompt += ("\nLEARNED from real client outcomes (respect this): "
+                           + _lessons)
+        except Exception:
+            pass
     # Vision first: model tengok terus carta (kurang risiko prompt salah gambar).
     # Gagal vision -> jatuh ke chain text sedia ada (fail-safe).
     # Nota: `call` dioverride di atas untuk injection test; guna flag asal.
@@ -448,7 +469,7 @@ def analyze(pair, bars, pip, spread_pips, call=None, budget_s=None, held=None, t
                 _audit({"ts": datetime.now(timezone.utc).isoformat(), "pair": pair, "tf": tf,
                         "model": VISION_MODEL, "vision": True, "verdict_rejected": str(e)[:200]})
                 return None
-            verdict.update(model=VISION_MODEL, latency_s=round(latency, 1), vision=True)
+            verdict.update(model=VISION_MODEL, latency_s=round(latency, 1), vision=True, ai_meta=ai_meta)
             _audit({"ts": datetime.now(timezone.utc).isoformat(), "pair": pair, "tf": tf,
                     "model": VISION_MODEL, "vision": True, "latency_s": round(latency, 1),
                     "side": verdict["side"], "conf": verdict.get("conf")})

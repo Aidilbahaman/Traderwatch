@@ -167,7 +167,20 @@ html[data-theme="light"] .msg.me .body{background:#eaf5db;border-color:#b9d999}
 @keyframes orbPop{0%{transform:scale(1)}35%{transform:scale(1.3)}100%{transform:scale(1)}}
 .hole.result .wv{border-color:#b7f36b;animation:orbWave 1.1s ease-out 1}
 @keyframes orbReduce{}
-@media(prefers-reduced-motion:reduce){.recap,.recap .st b,.recap .best,.recap .coach{animation:none}.recap .spark polyline.line{stroke-dashoffset:0;animation:none}.recap .spark path.area,.recap .spark circle.tip{opacity:1;animation:none}.recap .wk::after{display:none}}
+/* AI Learning card — corak TP/SL sebenar client */
+.ailc{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:13px 15px;margin-bottom:12px}
+.ailc .hd{display:flex;align-items:center;gap:8px;font-size:11px;font-weight:800;letter-spacing:.2px}
+.ailc .hd .ic{width:22px;height:22px;border-radius:7px;display:grid;place-items:center;background:#8ab4ff1c;color:var(--blue)}
+.ailc .hd small{margin-left:auto;color:var(--muted);font-weight:600;font-size:10px}
+.ailc .bar{height:6px;border-radius:99px;background:#ff6b6b33;overflow:hidden;margin:11px 0 7px}
+.ailc .bar i{display:block;height:100%;background:var(--lime);border-radius:99px;transition:width .5s}
+.ailc .rate{font-size:10.5px;color:var(--muted);line-height:1.5}
+.ailc .pats{display:flex;flex-wrap:wrap;gap:5px;margin-top:9px}
+.ailc .pat{font-size:9.5px;font-weight:700;border-radius:99px;padding:4px 8px;border:1px solid var(--line);color:var(--muted)}
+.ailc .pat.g{color:var(--lime);border-color:#b7f36b55;background:#b7f36b12}
+.ailc .pat.b{color:#ff9b9b;border-color:#ff6b6b55;background:#ff6b6b10}
+.ailc .empty{font-size:10px;color:var(--muted);line-height:1.5;margin-top:8px}
+@media(prefers-reduced-motion:reduce){.ailc .bar i{transition:none}.recap,.recap .st b,.recap .best,.recap .coach{animation:none}.recap .spark polyline.line{stroke-dashoffset:0;animation:none}.recap .spark path.area,.recap .spark circle.tip{opacity:1;animation:none}.recap .wk::after{display:none}}
 .season{display:flex;align-items:center;gap:12px;background:linear-gradient(135deg,#b7f36b14,var(--card));border:1px solid #b7f36b33;border-radius:20px;padding:14px 16px;margin-bottom:12px}
 html[data-theme="light"] .season{background:linear-gradient(135deg,#eaf5db,var(--card))}
 .season .sic{width:40px;height:40px;border-radius:13px;background:#b7f36b1c;color:var(--lime);display:grid;place-items:center;flex:none}
@@ -583,6 +596,7 @@ html[data-theme="light"] .lotbadge{color:#4c7a17}
               <div class="aihub-sub" id="orbSub"></div>
             </div>
           </div>
+          <div id="aiLearnCard"></div>
           <div class="season">
             <div class="sic"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0V4Z"/><path d="M7 6H4a1 1 0 0 0-1 1c0 2.2 1.8 4 4 4M17 6h3a1 1 0 0 1 1 1c0 2.2-1.8 4-4 4"/></svg></div>
             <div class="st"><b><span id="seasonT">Weekly Season</span><span class="weekchip" id="seasonChip">Season 1</span></b><small id="seasonS">Net R decides the ranking — not raw profit.</small></div>
@@ -865,6 +879,7 @@ var DICT={
   leagueErr:'Gagal memuatkan data liga. Cuba lagi.',tradeErr:'Gagal membuka trade. Cuba lagi.',noBalance:'Baki tidak tersedia — cuba lagi.',
   mtfLab:'Alignment multi-TF',mtfAligned:'Searah',mtfMixed:'Bercampur',shareLab:'Share result',shareSaved:'Gambar disimpan 📥',shareErr:'Gagal jana gambar.',
   orbIdle:'Enjin AI sedia',orbSubIdle:'12 pair dipantau',orbOne:'AI sedang membaca',orbMany:'%n analisis berjalan',orbBy:'oleh',orbNow:'sekarang',orbLiveN:'%n client minta serentak',
+  ailTitle:'Pembelajaran AI',ailEmpty:'AI masih belajar — perlukan beberapa trade ditutup dulu sebelum corak dikenal pasti.',ailN:'%n trade',ailWin:'kadar menang',
   tdTitle:'Detail trade',livePrice:'Harga live',unreal:'P&L belum realized',finalRes:'Keputusan akhir',openedAt:'Dibuka',closedAt:'Ditutup',slTpRange:'Julat SL → TP',quoteErr:'Harga live tidak tersedia.',
   loggingOut:'Melog keluar…',langNative:'Bahasa Melayu'
  },
@@ -911,6 +926,7 @@ var DICT={
   leagueErr:'Could not load league data. Try again.',tradeErr:'Could not open the trade. Try again.',noBalance:'Balance unavailable — try again.',
   mtfLab:'Multi-TF alignment',mtfAligned:'Aligned',mtfMixed:'Mixed',shareLab:'Share result',shareSaved:'Image saved 📥',shareErr:'Could not generate image.',
   orbIdle:'AI engine ready',orbSubIdle:'12 pairs monitored',orbOne:'AI is reading',orbMany:'%n analyses running',orbBy:'by',orbNow:'now',orbLiveN:'%n clients requesting',
+  ailTitle:'AI Learning',ailEmpty:'AI is still learning — it needs a few closed trades before patterns can be identified.',ailN:'%n trades',ailWin:'win rate',
   tdTitle:'Trade detail',livePrice:'Live price',unreal:'Unrealized P&L',finalRes:'Final result',openedAt:'Opened',closedAt:'Closed',slTpRange:'SL → TP range',quoteErr:'Live price unavailable.',
   loggingOut:'Signing out…',langNative:'English'
  },
@@ -955,6 +971,7 @@ var DICT={
   leagueErr:'无法加载联赛数据，请重试。',tradeErr:'开仓失败，请重试。',noBalance:'余额不可用——请重试。',
   mtfLab:'多周期一致性',mtfAligned:'同向',mtfMixed:'分歧',shareLab:'分享战绩',shareSaved:'图片已保存 📥',shareErr:'无法生成图片。',
   orbIdle:'AI 引擎就绪',orbSubIdle:'监控 12 个货币对',orbOne:'AI 正在读取',orbMany:'%n 个分析进行中',orbBy:'来自',orbNow:'现在',orbLiveN:'%n 位客户同时请求',
+  ailTitle:'AI 学习',ailEmpty:'AI 仍在学习——需要先有几笔已平仓的交易才能识别模式。',ailN:'%n 笔交易',ailWin:'胜率',
   tdTitle:'交易详情',livePrice:'实时价格',unreal:'未实现盈亏',finalRes:'最终结果',openedAt:'开仓时间',closedAt:'平仓时间',slTpRange:'SL → TP 区间',quoteErr:'实时价格不可用。',
   loggingOut:'正在退出…',langNative:'中文'
  },
@@ -998,6 +1015,7 @@ var DICT={
   leagueErr:'Gagal memuat data liga. Coba lagi.',tradeErr:'Gagal membuka trade. Coba lagi.',noBalance:'Saldo tidak tersedia — coba lagi.',
   mtfLab:'Alignment multi-TF',mtfAligned:'Searah',mtfMixed:'Campuran',shareLab:'Bagikan hasil',shareSaved:'Gambar tersimpan 📥',shareErr:'Gagal membuat gambar.',
   orbIdle:'Mesin AI siap',orbSubIdle:'12 pasangan dipantau',orbOne:'AI sedang membaca',orbMany:'%n analisis berjalan',orbBy:'oleh',orbNow:'sekarang',orbLiveN:'%n klien meminta',
+  ailTitle:'Pembelajaran AI',ailEmpty:'AI masih belajar — perlu beberapa trade ditutup dulu sebelum pola dikenali.',ailN:'%n trade',ailWin:'tingkat menang',
   tdTitle:'Detail trade',livePrice:'Harga live',unreal:'P&L belum realized',finalRes:'Hasil akhir',openedAt:'Dibuka',closedAt:'Ditutup',slTpRange:'Rentang SL → TP',quoteErr:'Harga live tidak tersedia.',
   loggingOut:'Keluar…',langNative:'Bahasa Indonesia'
  },
@@ -1042,6 +1060,7 @@ var DICT={
   leagueErr:'லீக் தரவை ஏற்ற முடியவில்லை. மீண்டும் முயற்சிக்கவும்.',tradeErr:'வர்த்தகத்தைத் தொடங்க முடியவில்லை. மீண்டும் முயற்சிக்கவும்.',noBalance:'இருப்பு கிடைக்கவில்லை — மீண்டும் முயற்சிக்கவும்.',
   mtfLab:'பல-TF ஒருமை',mtfAligned:'ஒரே திசை',mtfMixed:'கலப்பு',shareLab:'முடிவைப் பகிர்',shareSaved:'படம் சேமிக்கப்பட்டது 📥',shareErr:'படம் உருவாக்க முடியவில்லை.',
   orbIdle:'AI இயந்திரம் தயார்',orbSubIdle:'12 ஜோடிகள் கண்காணிப்பில்',orbOne:'AI படிக்கிறது',orbMany:'%n பகுப்பாய்வுகள் இயங்குகின்றன',orbBy:'மூலம்',orbNow:'இப்போது',orbLiveN:'%n வாடிக்கையாளர்கள் கோருகிறார்கள்',
+  ailTitle:'AI கற்றல்',ailEmpty:'AI இன்னும் கற்கிறது — வடிவங்களை அடையாளம் காண சில மூடிய வர்த்தகங்கள் தேவை.',ailN:'%n வர்த்தகங்கள்',ailWin:'வெற்றி விகிதம்',
   tdTitle:'வர்த்தக விவரம்',livePrice:'நேரடி விலை',unreal:'நிறைவேறாத லாப/நஷ்டம்',finalRes:'இறுதி முடிவு',openedAt:'திறக்கப்பட்ட நேரம்',closedAt:'மூடப்பட்ட நேரம்',slTpRange:'SL → TP வரம்பு',quoteErr:'நேரடி விலை கிடைக்கவில்லை.',
   loggingOut:'வெளியேறுகிறது…',langNative:'தமிழ்'
  }
@@ -1247,7 +1266,7 @@ function metrics(c){
 /* Map verdict backend (/api/analyze) -> kad UI. Teks server di-escape. */
 function mapVerdict(d){
  var en=lang==='en',hold=d.side==='HOLD',dir=hold?'WAIT':d.side,conf=Math.round((+d.conf||0)*100);
- var a={dir:dir,conf:conf,entry:null,sl:null,tp:null,tp2:null,reasons:[],checks:[],risk:[],model:d.model||''};
+ var a={dir:dir,conf:conf,entry:null,sl:null,tp:null,tp2:null,reasons:[],checks:[],risk:[],model:d.model||'',meta:d.ai_meta||null,tf:d.tf||tf};
  var rr1=+d.rr1||0,rr2=+d.rr2||0;
  if(!hold){
   a.entry=+d.entry;a.sl=+d.sl;a.tp=+d.tp1;a.tp2=(d.tp2!=null&&isFinite(+d.tp2))?+d.tp2:null;
@@ -1871,9 +1890,33 @@ function orbStartPoll(){
 orbStartPoll();
 if(typeof window!=='undefined'){window.__orbSet=orbSet;window.__orbLive=loadAiLive;}
 
+/* AI Learning card — papar corak TP/SL yang AI dah belajar dari trade sebenar */
+function drawAiLearn(st){
+ var el=$('aiLearnCard');if(!el)return;
+ if(!st||((st.tp||0)+(st.sl||0))===0){
+  el.innerHTML='<div class="ailc"><div class="hd"><span class="ic"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a7 7 0 0 1 7 7c0 2.4-1.2 4-2.5 5.2-.9.9-1.5 1.6-1.5 2.8h-6c0-1.2-.6-1.9-1.5-2.8C6.2 13 5 11.4 5 9a7 7 0 0 1 7-7Z"/><path d="M9 21h6"/></svg></span><span>'+t('ailTitle')+'</span></div><div class="empty">'+t('ailEmpty')+'</div></div>';
+  return;
+ }
+ var tp=st.tp||0,sl=st.sl||0,n=tp+sl,wr=Math.round(100*tp/n);
+ var pats='';
+ (st.good||[]).forEach(function(p){pats+='<span class="pat g">'+esc(p.label)+' · '+Math.round(p.win*100)+'%</span>'});
+ (st.bad||[]).forEach(function(p){pats+='<span class="pat b">'+esc(p.label)+' · '+Math.round(p.win*100)+'%</span>'});
+ el.innerHTML='<div class="ailc"><div class="hd"><span class="ic"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a7 7 0 0 1 7 7c0 2.4-1.2 4-2.5 5.2-.9.9-1.5 1.6-1.5 2.8h-6c0-1.2-.6-1.9-1.5-2.8C6.2 13 5 11.4 5 9a7 7 0 0 1 7-7Z"/><path d="M9 21h6"/></svg></span><span>'+t('ailTitle')+'</span><small>'+t('ailN').replace('%n',n)+'</small></div>'
+  +'<div class="bar"><i style="width:'+wr+'%"></i></div>'
+  +'<div class="rate">'+tp+' TP · '+sl+' SL · <b>'+wr+'% '+t('ailWin')+'</b></div>'
+  +(pats?'<div class="pats">'+pats+'</div>':'')
+  +'</div>';
+}
+function loadAiLearn(){
+ apiFetch('/api/analyze/learn').then(function(r){
+  drawAiLearn(r.ok&&r.data?r.data.stats:null);
+ }).catch(function(e){if(e&&e.message==='auth')return;drawAiLearn(null)});
+}
+if(typeof window!=='undefined'){window.__aiLearn=loadAiLearn;window.__drawAiLearn=drawAiLearn;}
+
 function renderLiga(){
  drawSub();drawSeason();drawYou();drawMetric();drawLb();drawTrades();drawBadges();
- if(lsub==='lb')loadAiLive();
+ if(lsub==='lb'){loadAiLive();loadAiLearn();}
  var r=$('lgRetry');if(r)r.onclick=function(){hap(8);loadLeague(true)};
  if(LG.state==='idle'&&current==='liga')loadLeague();
  else if(LG.state==='ready'&&current==='liga'&&Date.now()-LG.at>=60000)loadLeague();
@@ -1891,10 +1934,13 @@ function lotFor(sym,entry,sl,amt){
 function lotValid(v){return isFinite(v)&&v>=0.01&&v<=100}
 function lotRiskUsd(){return riskAna?riskLot*Math.abs(riskAna.entry-riskAna.sl)*lotMult(riskAna.pair):null}
 function isOwner(){return !!(LG.me&&LG.me.is_owner)}
+function mt5Acct(){return (LG.me&&LG.me.mt5_account)||null}
+function mt5Enabled(){var a=mt5Acct();return isOwner()||!!(a&&a.can_trade===true)}
 function drawMt5Opt(){
- var on=isOwner();
+ var on=mt5Enabled();
  $('mt5Opt').classList.toggle('hidden',!on);
- $('mt5OptTxt').textContent=t('mt5Opt');
+ var a=mt5Acct();
+ $('mt5OptTxt').textContent=(a&&a.label)?t('mt5Opt').replace('MT5',a.label):t('mt5Opt');
  $('rNote').textContent=(on&&$('mt5Chk').checked)?t('mt5Note'):t('rNote');
 }
 $('mt5Chk').addEventListener('change',drawMt5Opt);
@@ -1949,7 +1995,7 @@ $('rLotInput').addEventListener('input',function(){
 function riskErr(msg){$('rErr').innerHTML='<div class="errbox" style="margin-top:0;margin-bottom:12px"><p>'+esc(msg)+'</p></div>'}
 function openRisk(a){
  if(!cur||a.entry==null||a.dir==='WAIT')return;
- riskAna={pair:cur.s,side:a.dir,entry:a.entry,sl:a.sl,tp:a.tp,conf:a.conf};
+ riskAna={pair:cur.s,side:a.dir,entry:a.entry,sl:a.sl,tp:a.tp,conf:a.conf,meta:a.meta||null,tf:a.tf||tf};
  riskPct=1;riskBusy=false;riskMode='pct';riskLot=0.05;
  riskBal=(LG.me&&isFinite(+LG.me.balance))?+LG.me.balance:null;
  $('rErr').innerHTML='';
@@ -1976,8 +2022,16 @@ function submitTrade(){
  if(riskMode==='lot'&&!lotValid(riskLot)){riskErr(t('lotInvalid'));return}
  riskBusy=true;$('rGo').disabled=true;$('rGo').textContent=t('opening');$('rErr').innerHTML='';
  var body={pair:String(riskAna.pair).replace('/',''),side:riskAna.side,entry:riskAna.entry,sl:riskAna.sl,tp:riskAna.tp};
+ var am=riskAna.meta||{};
+ if(am.bos)body.ai_bos=am.bos;if(am.choch!=null)body.ai_choch=!!am.choch;
+ if(am.fvg!=null)body.ai_fvg=+am.fvg;if(am.atr!=null)body.ai_atr=+am.atr;
+ if(am.hour!=null)body.ai_hour=+am.hour;
+ if(riskAna.tf)body.ai_tf=riskAna.tf;
+ if(riskAna.conf!=null)body.ai_conf=riskAna.conf;
+ var aRR=Math.abs(riskAna.tp-riskAna.entry)/(Math.abs(riskAna.entry-riskAna.sl)||1e-9);
+ body.ai_rr=+aRR.toFixed(2);
  if(riskMode==='lot')body.lot=riskLot;else body.risk_pct=riskPct;
- if(isOwner()&&$('mt5Chk').checked)body.mt5=true;
+ if(mt5Enabled()&&$('mt5Chk').checked)body.mt5=true;
  apiFetch('/api/league/trade',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)}).then(function(r){
   riskBusy=false;
   if(r.ok){
@@ -2248,9 +2302,29 @@ function menuAction(k){
 }
 function showAccount(){
  var nm=(ME&&ME.dispName)||'—',em=(ME&&ME.email)||'—',uid=(ME&&ME.id)||'—';
- var h='<div class="kv"><b>'+esc(t('name'))+'</b><span>'+esc(nm)+'</span><b>'+esc(t('email'))+'</b><span>'+esc(em)+'</span><b>'+esc(t('uid'))+'</b><span style="word-break:break-all;font-size:11px">'+esc(uid)+'</span><b>'+esc(t('plan'))+'</b><span>'+esc(PLAN.toUpperCase())+'</span></div><button class="again" id="altClose">'+esc(t('close'))+'</button>';
- openAlt('✦',t('account'),em,h);
- $('altClose').onclick=closeSheet;
+ var kv='<div class="kv"><b>'+esc(t('name'))+'</b><span>'+esc(nm)+'</span><b>'+esc(t('email'))+'</b><span>'+esc(em)+'</span><b>'+esc(t('uid'))+'</b><span style="word-break:break-all;font-size:11px">'+esc(uid)+'</span><b>'+esc(t('plan'))+'</b><span>'+esc(PLAN.toUpperCase())+'</span></div>';
+ function render(a){
+  var h=kv;
+  if(a&&a.ok){
+   var cur=a.login?(' · #'+a.login):'';
+   var stat=a.can_trade?(en?'Trading enabled':'Trading aktif'):(en?'Read-only — deposit & trading password pending':'Read-only — deposit & trade password belum disediakan');
+   h+='<div class="kv mt5acct" style="margin-top:12px"><b>'+(en?'MT5 account':'Akaun MT5')+'</b><span>'+esc(a.label||'RoboForex')+cur+'</span>'+
+      '<b>'+(en?'Balance':'Baki')+'</b><span>'+(a.balance!=null?esc(a.balance):'—')+'</span>'+
+      '<b>'+(en?'Equity':'Equiti')+'</b><span>'+(a.equity!=null?esc(a.equity):'—')+'</span>'+
+      '<b>'+(en?'Status':'Status')+'</b><span>'+esc(stat)+'</span></div>';
+  }
+  h+='<button class="again" id="altClose">'+esc(t('close'))+'</button>';
+  openAlt('✦',t('account'),em,h);
+  $('altClose').onclick=closeSheet;
+ }
+ var a=mt5Acct();
+ if(a||LG.me){ return render(a); }
+ // LG.me belum dimuat (client buka Akaun sebelum Liga) -> ambil dari /me
+ openAlt('✦',t('account'),em,kv+'<div class="empty" style="opacity:.6">…</div>');
+ apiFetch('/api/league/me').then(function(r){
+  if(r.ok&&r.data)LG.me=r.data;
+  render(mt5Acct());
+ }).catch(function(){render(mt5Acct())});
 }
 function showPerf(){
  var cnt=(MYPERF&&MYPERF.analyses_count>0)?String(MYPERF.analyses_count):'—';

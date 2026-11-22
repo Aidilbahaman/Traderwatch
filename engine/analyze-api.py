@@ -364,6 +364,16 @@ class Handler(BaseHTTPRequestHandler):
             return self._send(200, {"live": rows, "last": last})
         if path == "/api/analyze/health":
             return self._send(200, {"ok": True, "pairs": sorted(ALLOWED_PAIRS)})
+        if path == "/api/analyze/learn":
+            user = verify_user(self._token())
+            if not user or not user.get("id"):
+                return self._send(401, {"error": "Please sign in as a member."})
+            try:
+                import ai_learn
+                _lessons, _stats = ai_learn.lessons()
+            except Exception:
+                _lessons, _stats = "", None
+            return self._send(200, {"lessons": _lessons or "", "stats": _stats})
         if path == "/api/bars":
             user = verify_user(self._token())
             if not user or not user.get("id"):

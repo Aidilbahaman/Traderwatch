@@ -45,6 +45,12 @@ try:
 except Exception:
     MO = None
 
+# Per-member MT5 account routing (client account shown in the member app).
+try:
+    import mt5_accounts as MA
+except Exception:
+    MA = None
+
 # Live entry price from the MT5 broker tick (single data source, no Swissquote
 # fallback). Paper trades fill at the CURRENT broker price (instant entry).
 try:
@@ -355,13 +361,21 @@ class Handler(BaseHTTPRequestHandler):
                 ana = cached("ana:" + uid, 60, lambda: sb("GET", "/rest/v1/user_analyses", params={
                     "select": "count", "user_id": f"eq.{uid}"}) or [])
                 ana_count = int(ana[0]["count"]) if ana else 0
+                # Per-member MT5 account snapshot for MAPPED clients only.
+                # The owner keeps the legacy experience (is_owner flag) with no
+                # extra terminal call on /me — zero regression to the owner path.
+                mt5_info = None
+                acct = MA.account_for(uid) if MA else None
+                if acct and MO:
+                    mt5_info = MO.snapshot(acct)
                 return self._send(200, {
                     "balance": bal, "start_balance": START_BALANCE, "net_r": net_r,
                     "win_rate": round(100.0 * wins / dec, 1) if dec else None,
                     "trades_closed": len(closed), "trades_open": open_n,
                     "analyses_count": ana_count,
                     "rank": rank, "season": SEASON, "username": me,
-                    "is_owner": bool(MO and MO.is_owner(uid))})
+                    "is_owner": bool(MO and MO.is_owner(uid)),
+                    "mt5_account": mt5_info})
             if path == "/api/league/quote":
                 qs = urllib.parse.parse_qs(parsed.query)
                 pair = qs.get("pair", [""])[0].upper().replace("/", "").replace(" ", "")
@@ -454,14 +468,26 @@ class Handler(BaseHTTPRequestHandler):
                 "risk_pct": risk_pct, "risk_usd": risk_usd, "season": SEASON}
             if custom_lot is not None:
                 body["lot"] = custom_lot
+            # AI learning: ciri setup masa ambil trade (untuk analisis TP/SL nanti).
+            for k, cast in (("ai_tf", str), ("ai_bos", str), ("ai_choch", bool),
+                            ("ai_fvg", int), ("ai_rr", float), ("ai_atr", float),
+                            ("ai_hour", int), ("ai_conf", float)):
+                if k in req and req[k] not in (None, ""):
+                    try:
+                        body[k] = cast(req[k])
+                    except (TypeError, ValueError):
+                        pass
             row = sb("POST", "/rest/v1/paper_trades", body=body)
             invalidate_league(uid)   # cache segar selepas trade baru
             tr = (row or [{}])[0]
             log(f"{uid[:8]} opened {pair} {side} " + (f"lot={custom_lot}" if custom_lot is not None else f"risk {risk_pct}%"))
-            # Owner-only: also place a REAL MT5 pending order with the exact lot
-            # chosen (custom lot, or the risk-% lot). Members / mt5 absent -> paper only.
+            # Owner-only: also place a REAL MT5 market order. Mapped client
+            # accounts can opt in too, but only when trade-enabled (deposit +
+            # trade password). Everyone else -> paper only.
             mt5res = None
-            if req.get("mt5") and MO and MO.is_owner(uid):
+            acct = MA.account_for(uid) if MA else None
+            allowed = bool((MO and MO.is_owner(uid)) or (acct and acct.get("can_trade") is True))
+            if req.get("mt5") and MO and allowed:
                 if custom_lot is not None:
                     use_lot = custom_lot
                 else:
@@ -469,7 +495,7 @@ class Handler(BaseHTTPRequestHandler):
                     use_lot = round(risk_usd / (abs(entry - sl) * mult), 2)
                 verdict = {"pair": pair, "side": side, "entry": entry, "sl": sl, "tp1": tp}
                 try:
-                    mt5res = MO.sync_verdict(verdict, uid, lot=use_lot)
+                    mt5res = MO.sync_verdict(verdict, uid, lot=use_lot, account=acct)
                 except Exception as e:
                     log(f"mt5 sync error {type(e).__name__}: {str(e)[:120]}")
                     mt5res = {"synced": False, "reason": "sync-error"}
