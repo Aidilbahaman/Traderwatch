@@ -1,0 +1,75 @@
+<!doctype html><html lang="ms"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>TEST — Zoom Diagnostik</title>
+<style>
+*{box-sizing:border-box;margin:0}
+body{background:#0a0e0b;color:#eef3ee;font:14px -apple-system,sans-serif}
+.wrap{width:390px;max-width:100%;height:800px;max-height:100vh;margin:0 auto;position:relative;overflow:hidden;background:#050807}
+#stage{position:absolute;inset:0;display:grid;place-items:center;cursor:pointer}
+#ball{width:80px;height:80px;border-radius:50%;background:radial-gradient(circle,#eaffc4,#b7f36b 40%,#000 75%);
+ box-shadow:0 0 0 2px #b7f36b,0 0 40px 14px #b7f36baa;will-change:transform}
+#hud{position:absolute;top:12px;left:12px;right:12px;z-index:50;background:#111612ee;border:1px solid #b7f36b55;
+ border-radius:12px;padding:12px;font:11px/1.7 monospace;color:#b7f36b}
+#hud b{color:#eaffc4;font-size:15px}
+#hud .row{display:flex;justify-content:space-between;border-bottom:1px solid #222b23;padding:2px 0}
+#big{position:absolute;bottom:120px;left:0;right:0;text-align:center;z-index:40;
+ font:900 22px -apple-system,sans-serif;color:#b7f36b;text-shadow:0 0 20px #b7f36b}
+#btn{position:absolute;bottom:40px;left:20px;right:20px;z-index:40;border:0;border-radius:14px;padding:16px;
+ font:800 14px inherit;background:linear-gradient(135deg,#b7f36b,#8ed94e);color:#10150b;cursor:pointer}
+#layer2{position:absolute;inset:0;z-index:60;display:none;place-items:center;background:#0a0e0bee;padding:22px}
+#layer2.show{display:grid}
+.card{width:100%;max-width:340px;background:#111612;border:1px solid #b7f36b55;border-radius:20px;padding:24px;text-align:center}
+.card b{font-size:19px;display:block;margin-bottom:8px}
+.card small{color:#8a978c;font-size:11.5px;line-height:1.6;display:block}
+.card button{margin-top:16px;width:100%;border:0;border-radius:12px;padding:13px;font:800 13px inherit;background:#b7f36b;color:#10150b;cursor:pointer}
+</style></head><body>
+<div class="wrap">
+ <div id="stage"><div id="ball"></div></div>
+ <div id="hud">
+  <div class="row"><span>STATUS</span><b id="hStatus">SEDIA</b></div>
+  <div class="row"><span>KLIK DITERIMA</span><b id="hClick">0</b></div>
+  <div class="row"><span>SKALA SEMASA</span><b id="hScale">1.00×</b></div>
+  <div class="row"><span>FRAME</span><b id="hFrame">0</b></div>
+  <div class="row"><span>REDUCED MOTION</span><b id="hRM">?</b></div>
+ </div>
+ <div id="big">TEKAN BUTANG DI BAWAH</div>
+ <button id="btn">▶ MULA ZOOM (2 SAAT)</button>
+ <div id="layer2"><div class="card">
+  <b>✅ Zoom selesai!</b>
+  <small>Kalau anda nampak bola membesar dari kecil ke penuh skrin, zoom BERFUNGSI.<br><br>Kalau skala naik tapi bola tak nampak membesar, itu masalah visual (warna/kontras).<br><br>Kalau KLIK DITERIMA kekal 0, butang tak respond.</small>
+  <button onclick="location.reload()">↻ Cuba lagi</button>
+ </div></div>
+</div>
+<script>
+(function(){
+ var ball=document.getElementById('ball'),clicks=0,frames=0,running=false;
+ document.getElementById('hRM').textContent=window.matchMedia('(prefers-reduced-motion: reduce)').matches?'YA ⚠️':'TIDAK';
+ function start(){
+  if(running)return;running=true;clicks++;
+  document.getElementById('hClick').textContent=clicks;
+  document.getElementById('hStatus').textContent='ZOOM...';
+  document.getElementById('big').textContent='MEMBESAR...';
+  var t0=null,DUR=2000;
+  function step(ts){
+   if(t0===null)t0=ts;
+   var p=Math.min(1,(ts-t0)/DUR);
+   /* easing: slow start then accelerate — nampak jelas */
+   var e=p<0.5?2*p*p:1-Math.pow(-2*p+2,2)/2;
+   var sc=1+e*24;
+   ball.style.transform='scale('+sc+')';
+   frames++;
+   document.getElementById('hScale').textContent=sc.toFixed(2)+'×';
+   document.getElementById('hFrame').textContent=frames;
+   if(p<1){requestAnimationFrame(step)}
+   else{
+    document.getElementById('hStatus').textContent='SIAP';
+    document.getElementById('big').textContent='';
+    setTimeout(function(){document.getElementById('layer2').classList.add('show')},350);
+   }
+  }
+  requestAnimationFrame(step);
+ }
+ document.getElementById('btn').addEventListener('click',start);
+ document.getElementById('stage').addEventListener('click',start);
+})();
+</script></body></html>
