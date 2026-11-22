@@ -290,6 +290,43 @@ html[data-theme="light"] .lrow.me .lbadge{color:#4c7a17}
 .lrow .lbal i.dn{color:var(--red);background:#ff777d1f}
 .lrow .lbal i.fl{color:var(--muted);background:var(--card2)}
 .lrow .val{margin-left:auto;font-weight:850;font-variant-numeric:tabular-nums;font-size:14px;flex:none;letter-spacing:-.02em}
+/* ===== WINNER CARD ANIMATIONS (top 3) ===== */
+.lrow.g1,.lrow.g2,.lrow.g3{position:relative;overflow:hidden;isolation:isolate}
+/* #1 CHAMPION — aurora + gold border + sparkles + crown glow */
+.lrow.g1{background:linear-gradient(135deg,#141a12,var(--card) 60%)}
+.lrow.g1::before{content:"";position:absolute;inset:-60% -40%;z-index:-2;pointer-events:none;
+ background:linear-gradient(115deg,transparent 34%,#ffd1662b 47%,#ffffff4d 50%,#ffd1662b 53%,transparent 66%);
+ transform:translateX(-120%);animation:auroraSweep 4.8s cubic-bezier(.4,0,.2,1) infinite}
+.lrow.g1::after{content:"";position:absolute;inset:0;border-radius:16px;z-index:-1;pointer-events:none;
+ padding:1px;background:linear-gradient(120deg,#ffd16626,#ffd166d9,#ffffffe6,#ffd166d9,#ffd16626);
+ background-size:300% 100%;
+ -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);
+ -webkit-mask-composite:xor;mask-composite:exclude;animation:goldFlow 4.8s linear infinite}
+.lrow.g1 .av{box-shadow:0 0 0 2px #ffd1668c,0 0 16px #ffd16659;animation:crownGlow 2.6s ease-in-out infinite}
+.lrow.g1 .val{color:#ffd166}
+.lrow.g1 .spark{position:absolute;border-radius:50%;background:#ffd166;z-index:-1;pointer-events:none;opacity:0;
+ box-shadow:0 0 6px #ffd166,0 0 12px #ffd16699;animation:sparkRise 3.4s ease-out infinite}
+@keyframes auroraSweep{0%{transform:translateX(-120%)}55%,100%{transform:translateX(120%)}}
+@keyframes goldFlow{0%{background-position:0% 50%}100%{background-position:300% 50%}}
+@keyframes crownGlow{0%,100%{box-shadow:0 0 0 2px #ffd16666,0 0 12px #ffd16640}
+ 50%{box-shadow:0 0 0 2.5px #ffd166d9,0 0 24px #ffd1668c}}
+@keyframes sparkRise{0%{transform:translateY(6px) scale(.4);opacity:0}
+ 18%{opacity:1;transform:translateY(-2px) scale(1.1)}100%{transform:translateY(-46px) scale(.3);opacity:0}}
+/* #2 SILVER — soft sheen + value pulse */
+.lrow.g2{background:linear-gradient(115deg,transparent 42%,#cdd6e01a 50%,transparent 58%) no-repeat,var(--card);
+ background-size:280% 100%,auto;background-position:-140% 0,0 0;animation:silverSheen 7s ease-in-out infinite}
+.lrow.g2 .val{color:#cdd6e0;animation:silverPulse 3.6s ease-in-out infinite}
+.lrow.g2 .av{box-shadow:0 0 0 1.5px #cdd6e06b}
+@keyframes silverSheen{0%,40%{background-position:-140% 0,0 0}70%,100%{background-position:140% 0,0 0}}
+@keyframes silverPulse{0%,100%{opacity:.85}50%{opacity:1;text-shadow:0 0 12px #cdd6e073}}
+/* #3 BRONZE — value pulse only */
+.lrow.g3 .val{color:#e0a06b;animation:bronzePulse 4.2s ease-in-out infinite}
+.lrow.g3 .av{box-shadow:0 0 0 1.5px #e0a06b61}
+@keyframes bronzePulse{0%,100%{opacity:.85}50%{opacity:1;text-shadow:0 0 10px #e0a06b66}}
+@media(prefers-reduced-motion:reduce){
+ .lrow.g1::before,.lrow.g1::after,.lrow.g1 .av,.lrow.g1 .spark,
+ .lrow.g2,.lrow.g2 .val,.lrow.g3 .val{animation:none!important}
+ .lrow.g2{background-position:0 0,0 0}}
 .val.pos{color:var(--green)}.val.neg{color:var(--red)}.val.neu{color:var(--text)}
 .lnote{font-size:11px;color:var(--muted);text-align:center;margin:14px 0 0;opacity:.8;line-height:1.5}
 .tsum{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:14px}
@@ -1876,6 +1913,22 @@ function drawLb(){
    '<span class="lsub2">'+esc(sub)+'</span></span>'+
    '<span class="val '+cls+'">'+esc(val)+'</span></div>';
  }).join('');
+ addChampionSparks();
+}
+function addChampionSparks(){
+ var c=document.querySelector('#lb .lrow.g1');
+ if(!c||c.querySelector('.spark'))return;
+ for(var i=0;i<8;i++){
+  var sp=document.createElement('i');
+  sp.className='spark';
+  sp.setAttribute('aria-hidden','true');
+  sp.style.left=(8+Math.random()*84)+'%';
+  sp.style.top=(20+Math.random()*60)+'%';
+  sp.style.animationDelay=(-Math.random()*3.4).toFixed(2)+'s';
+  var sz=(2+Math.random()*2).toFixed(1);
+  sp.style.width=sz+'px';sp.style.height=sz+'px';
+  c.appendChild(sp);
+ }
 }
 function drawTrades(){
  var me=LG.me;
