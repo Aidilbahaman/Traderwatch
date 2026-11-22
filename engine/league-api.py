@@ -292,6 +292,52 @@ def weekly_recap(uid):
         "coach": coach_line(uid, stats)}
 
 
+ANALYSIS_LOG = pathlib.Path(__file__).resolve().parent.parent / "state" / "llm-analysis-log.jsonl"
+_AI_AGG = {"at": 0.0, "out": {}}
+_AI_AGG_TTL = 60
+
+
+def pair_ai_requests(window_s=3600):
+    """Kira berapa kali AI analyst diminta untuk setiap pair dalam 1 jam terakhir.
+
+    Sumber: state/llm-analysis-log.jsonl (setiap analisis ditulis oleh llm_analyst).
+    Cache 60s supaya tak baca fail besar pada setiap request.
+    """
+    now = time.time()
+    if now - _AI_AGG["at"] < _AI_AGG_TTL and _AI_AGG["out"]:
+        return _AI_AGG["out"]
+    out = {}
+    try:
+        if ANALYSIS_LOG.exists():
+            cutoff = now - window_s
+            size = ANALYSIS_LOG.stat().st_size
+            # Baca hanya ekor fail (max 2MB) untuk elak muat seluruh log.
+            with ANALYSIS_LOG.open("rb") as f:
+                if size > 2_000_000:
+                    f.seek(size - 2_000_000)
+                    f.readline()      # buang baris separuh
+                for raw in f:
+                    try:
+                        r = json.loads(raw)
+                    except Exception:
+                        continue
+                    ts = r.get("ts") or ""
+                    pair = str(r.get("pair") or "").upper().replace("/", "")
+                    if not pair or not ts:
+                        continue
+                    try:
+                        t = datetime.fromisoformat(ts.replace("Z", "+00:00")).timestamp()
+                    except Exception:
+                        continue
+                    if t < cutoff:
+                        continue
+                    out[pair] = out.get(pair, 0) + 1
+    except Exception:
+        out = {}
+    _AI_AGG.update(at=now, out=out)
+    return out
+
+
 class Handler(BaseHTTPRequestHandler):
     def log_message(self, fmt, *args):
         pass
@@ -336,6 +382,8 @@ class Handler(BaseHTTPRequestHandler):
                     agg.setdefault(p, set()).add(r.get("user_id"))
                 out = {p: len(s) for p, s in agg.items()}
                 return self._send(200, {"traders": out, "season": SEASON})
+            if path == "/api/league/pair-ai-requests":
+                return self._send(200, {"requests": pair_ai_requests(), "window": "1h"})
             if path == "/api/league/trades":
                 return self._send(200, {"trades": my_trades(uid), "season": SEASON})
             if path == "/api/league/recap":
