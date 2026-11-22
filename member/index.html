@@ -860,7 +860,7 @@ function refreshAndReload(){
  refreshSession().then(function(ok){ if(ok)location.reload(); else goLogin(); });
 }
 var sess=getSession();
-if(!sess||!sess.access_token){location.replace(LOGIN_URL);return}
+if(!sess||!sess.access_token){try{localStorage.removeItem('tw-welcomed-v1')}catch(e){}location.replace(LOGIN_URL);return}
 if(sessionExpired(sess)){
  if(sess.refresh_token){refreshAndReload();return}
  location.replace(LOGIN_URL);return;
@@ -870,7 +870,7 @@ if(sessionExpired(sess)){
 function maybeRefresh(){var s=getSession();if(s&&s.expires_at&&s.expires_at*1000-Date.now()<300000)refreshSession()}
 setInterval(maybeRefresh,240000);
 document.addEventListener('visibilitychange',function(){if(!document.visibilityState||document.visibilityState==='visible')maybeRefresh()});
-function goLogin(){try{localStorage.removeItem(AUTH_KEY)}catch(e){}location.replace(LOGIN_URL+'&why=signedout')}
+function goLogin(){try{localStorage.removeItem(AUTH_KEY);localStorage.removeItem('tw-welcomed-v1')}catch(e){}location.replace(LOGIN_URL+'&why=signedout')}
 function apiFetch(url,opts){
  opts=opts||{};opts.headers=Object.assign({Authorization:'Bearer '+getToken()},opts.headers||{});
  return fetch(url,opts).then(function(r){
@@ -2646,6 +2646,7 @@ $('wGo').onclick=function(){hap(8);wDone()};
 $('wSkip').onclick=function(){hap(6);wDone()};
 window.addEventListener('appinstalled',function(){drawWelcome();try{localStorage.setItem(WKEY,'1')}catch(e){}});
 if(typeof window!=='undefined'){window.__welcome=showWelcome;window.__drawWelcome=drawWelcome;}
+if(typeof window!=='undefined'){window.__forceLogout=goLogin;}
 if('serviceWorker' in navigator){window.addEventListener('load',function(){
  navigator.serviceWorker.register('sw.js',{scope:'./',updateViaCache:'none'}).then(function(reg){
   /* PWA homescreen resume instance lama tanpa navigation -> check update
