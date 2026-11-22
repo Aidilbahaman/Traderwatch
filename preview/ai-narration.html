@@ -1,0 +1,265 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AI Narration — Chatbot Style</title>
+<style>
+:root{--bg:#0a0e0b;--card:#111612;--card2:#171e18;--line:#222b23;--text:#eef3ee;--muted:#8a978c;
+ --lime:#b7f36b;--red:#ff777d;--orange:#ffc16b;--blue:#8ab4ff}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#070a08;color:var(--text);font:13px -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;padding:22px 14px 60px}
+h1{font-size:18px;font-weight:800;text-align:center;margin-bottom:4px}
+.sub{color:var(--muted);font-size:11px;text-align:center;margin-bottom:18px;line-height:1.6;max-width:520px;margin-left:auto;margin-right:auto}
+
+.lab{max-width:440px;margin:0 auto 6px;font-size:10px;font-weight:800;letter-spacing:.12em;color:var(--lime);text-transform:uppercase}
+.hint{max-width:440px;margin:0 auto 9px;font-size:10px;color:var(--muted);line-height:1.5}
+.panel{max-width:440px;margin:0 auto 24px;background:var(--bg);border:1px solid #1c2620;border-radius:16px;padding:13px}
+
+/* ===== shared: verdict line ===== */
+.vstrip{display:flex;align-items:center;gap:8px;margin-bottom:11px}
+.vstrip .l{font-size:8.5px;font-weight:800;letter-spacing:.11em;color:var(--muted);text-transform:uppercase}
+.vstrip .r{margin-left:auto;font-size:12.5px;font-weight:900;color:var(--orange)}
+.replay2{margin-left:8px;font:700 9px inherit;background:var(--card2);border:1px solid var(--line);
+ color:var(--muted);border-radius:99px;padding:3px 8px;cursor:pointer}
+
+/* ================= A: STREAMING THINK ================= */
+#a-think{display:flex;flex-direction:column;gap:9px}
+.thinkrow{display:flex;gap:8px;align-items:flex-start;opacity:0;transform:translateY(4px);
+ transition:opacity .35s,transform .35s}
+.thinkrow.in{opacity:1;transform:none}
+.ticon{width:16px;height:16px;border-radius:50%;flex:none;display:grid;place-items:center;
+ font-size:8px;font-weight:900;margin-top:1px}
+.ticon.ok{background:#b7f36b1f;color:var(--lime);border:1px solid #b7f36b44}
+.ticon.bad{background:#ff777d1f;color:var(--red);border:1px solid #ff777d44}
+.ticon.wait{background:#ffc16b1f;color:var(--orange);border:1px solid #ffc16b44}
+.ttext{font-size:11px;line-height:1.55;color:#cfd8cf;flex:1}
+.ttext b{color:var(--text)}
+.tdots{display:inline-flex;gap:3px;margin-left:2px}
+.tdots i{width:3px;height:3px;border-radius:50%;background:var(--muted);animation:blink 1.2s infinite}
+.tdots i:nth-child(2){animation-delay:.2s}.tdots i:nth-child(3){animation-delay:.4s}
+@keyframes blink{0%,100%{opacity:.2}50%{opacity:1}}
+
+/* ================= B: CHAT BUBBLES ================= */
+#b-chat{display:flex;flex-direction:column;gap:8px}
+.bub{max-width:88%;padding:8px 11px;border-radius:14px 14px 14px 4px;font-size:11px;line-height:1.5;
+ background:var(--card2);border:1px solid var(--line);color:#cfd8cf;
+ opacity:0;transform:translateX(-6px);transition:opacity .3s,transform .3s}
+.bub.in{opacity:1;transform:none}
+.bub.ai{background:linear-gradient(135deg,#141a12,var(--card));border-color:#b7f36b2e}
+.bub b{color:var(--lime)}
+.bub .who{display:block;font-size:8px;font-weight:900;letter-spacing:.1em;color:var(--muted);margin-bottom:3px}
+.typing2{display:inline-flex;gap:4px;padding:9px 12px;background:var(--card2);border:1px solid var(--line);
+ border-radius:14px 14px 14px 4px;width:fit-content}
+.typing2 i{width:5px;height:5px;border-radius:50%;background:var(--muted);animation:bounce2 1.3s infinite}
+.typing2 i:nth-child(2){animation-delay:.18s}.typing2 i:nth-child(3){animation-delay:.36s}
+@keyframes bounce2{0%,60%,100%{transform:translateY(0);opacity:.4}30%{transform:translateY(-4px);opacity:1}}
+
+/* ================= C: TERMINAL SCAN ================= */
+#c-term{font:10.5px/1.85 ui-monospace,SFMono-Regular,Menlo,monospace;color:#9fb3a3}
+#c-term .ln{opacity:0;transition:opacity .25s}
+#c-term .ln.in{opacity:1}
+#c-term .k{color:var(--lime)}
+#c-term .w{color:var(--orange)}
+#c-term .x{color:var(--red)}
+#c-term .d{color:#4a5a4e}
+#c-term .cur2{display:inline-block;width:6px;height:11px;background:var(--lime);vertical-align:-1px;
+ animation:cur2 1s steps(1) infinite}
+@keyframes cur2{0%,49%{opacity:1}50%,100%{opacity:0}}
+
+/* ================= D: NARRATIVE + ORB ================= */
+#d-orb{display:flex;gap:11px;align-items:flex-start}
+.miniorb{width:38px;height:38px;flex:none;position:relative;display:grid;place-items:center}
+.miniorb .ring2{position:absolute;inset:0;border-radius:50%;border:1.5px solid #b7f36b66;
+ animation:spin3 3s linear infinite;border-top-color:var(--lime);border-right-color:transparent}
+.miniorb .core2{width:13px;height:13px;border-radius:50%;background:#000;
+ box-shadow:0 0 0 1.2px var(--lime),0 0 10px 3px #b7f36b66;animation:pulse3 2s ease-in-out infinite}
+@keyframes spin3{to{transform:rotate(360deg)}}
+@keyframes pulse3{0%,100%{transform:scale(.92);opacity:.8}50%{transform:scale(1.08);opacity:1}}
+.narr{flex:1;font-size:11.5px;line-height:1.7;color:#cfd8cf}
+.narr .sent{opacity:0;transition:opacity .4s}
+.narr .sent.in{opacity:1}
+.narr b{color:var(--text)}
+.narr .em{color:var(--orange);font-weight:800}
+
+/* ================= E: STEP CARDS ================= */
+#e-steps{display:flex;flex-direction:column;gap:6px}
+.stp{display:flex;gap:9px;align-items:flex-start;padding:8px 10px;border-radius:11px;
+ background:var(--card);border:1px solid var(--line);
+ opacity:0;transform:translateY(5px);transition:opacity .3s,transform .3s}
+.stp.in{opacity:1;transform:none}
+.stp .n2{width:16px;height:16px;border-radius:5px;background:#b7f36b1a;border:1px solid #b7f36b3d;
+ color:var(--lime);font-size:8px;font-weight:900;display:grid;place-items:center;flex:none;margin-top:1px}
+.stp .c2{flex:1;font-size:10.5px;line-height:1.5;color:#cfd8cf}
+.stp .c2 b{color:var(--text)}
+.stp.done .n2{background:#b7f36b26;color:var(--lime)}
+.stp.warn{border-color:#ffc16b33}
+.stp.warn .n2{background:#ffc16b1a;border-color:#ffc16b3d;color:var(--orange)}
+.stp.bad{border-color:#ff777d33}
+.stp.bad .n2{background:#ff777d1a;border-color:#ff777d3d;color:var(--red)}
+
+.note{max-width:520px;margin:6px auto 0;color:var(--muted);font-size:10.5px;line-height:1.75}
+.note b{color:var(--lime)}
+</style>
+</head>
+<body>
+<h1>✦ AI Narration — 5 gaya chatbot</h1>
+<p class="sub">Bukan kad statik — AI "berfikir" dan "bercakap" live. Klik <b>↻</b> untuk main semula.</p>
+
+<!-- A -->
+<div class="lab">A · Streaming think</div>
+<p class="hint">Baris muncul satu-satu, ada dot berkelip macam sedang fikir.</p>
+<div class="panel">
+  <div class="vstrip"><span class="l">Verdict</span><span class="r">WAIT 40%</span><button class="replay2" data-r="a-think">↻</button></div>
+  <div id="a-think"></div>
+</div>
+
+<!-- B -->
+<div class="lab">B · Chat bubbles</div>
+<p class="hint">Rasa macam sembang dengan AI. Ada bubble + indikator menaip.</p>
+<div class="panel">
+  <div class="vstrip"><span class="l">Verdict</span><span class="r">WAIT 40%</span><button class="replay2" data-r="b-chat">↻</button></div>
+  <div id="b-chat"></div>
+</div>
+
+<!-- C -->
+<div class="lab">C · Terminal scan</div>
+<p class="hint">Gaya console — client nampak AI "jalankan semakan" satu-satu.</p>
+<div class="panel">
+  <div class="vstrip"><span class="l">Verdict</span><span class="r">WAIT 40%</span><button class="replay2" data-r="c-term">↻</button></div>
+  <div id="c-term"></div>
+</div>
+
+<!-- D -->
+<div class="lab">D · Narration + orb</div>
+<p class="hint">Orb hidup + ayat bercerita. Paling "AI" rasa, paling manusiawi.</p>
+<div class="panel">
+  <div class="vstrip"><span class="l">Verdict</span><span class="r">WAIT 40%</span><button class="replay2" data-r="d-orb">↻</button></div>
+  <div id="d-orb">
+    <div class="miniorb"><div class="ring2"></div><div class="core2"></div></div>
+    <div class="narr" id="d-narr"></div>
+  </div>
+</div>
+
+<!-- E -->
+<div class="lab">E · Step cards</div>
+<p class="hint">Setiap langkah jadi kad kecil — client nampak proses lengkap.</p>
+<div class="panel">
+  <div class="vstrip"><span class="l">Verdict</span><span class="r">WAIT 40%</span><button class="replay2" data-r="e-steps">↻</button></div>
+  <div id="e-steps"></div>
+</div>
+
+<p class="note"><b>Cadangan saya:</b> <b>A</b> atau <b>D</b>. <b>A</b> paling jelas proses; <b>D</b> paling hidup &amp; ringkas. Kedua-dua tak bocor nota dalaman macam sekarang.</p>
+
+<script>
+var $=function(id){return document.getElementById(id)};
+var sleep=function(ms){return new Promise(function(r){setTimeout(r,ms)})};
+
+/* ---------- A ---------- */
+var A_LINES=[
+ {ic:'ok',t:'<b>M5</b> turned bullish — momentum naik jangka pendek.'},
+ {ic:'ok',t:'Harga di atas <b>EMA20</b> dan <b>EMA50</b> — struktur sokong.'},
+ {ic:'bad',t:'<b>H1</b> dan <b>H4</b> dua-dua bearish — ini lawan trend.'},
+ {ic:'bad',t:'Timeframe tak sehaluan — tiada arah bersih.'},
+ {ic:'bad',t:'Struktur <b>range</b> — belum pecah.'},
+ {ic:'wait',t:'Corak ini kalah <b>5 daripada 6 kali</b> dalam rekod anda.'},
+];
+async function runA(){
+  var host=$('a-think'); host.innerHTML='';
+  var rows=A_LINES.map(function(d){
+    var el=document.createElement('div'); el.className='thinkrow';
+    el.innerHTML='<span class="ticon '+d.ic+'">'+(d.ic==='ok'?'✓':d.ic==='bad'?'✕':'!')+'</span><span class="ttext">'+d.t+'</span>';
+    host.appendChild(el); return el;
+  });
+  for(var i=0;i<rows.length;i++){ await sleep(420); rows[i].classList.add('in'); }
+}
+
+/* ---------- B ---------- */
+var B_LINES=[
+ 'Saya dah baca carta BTCUSD M15 — 300 bar sebenar.',
+ 'M5 nampak bullish, tapi H1 dan H4 dua-dua bearish.',
+ 'Struktur masih dalam range, belum ada pecahan bersih.',
+ 'Rekod anda: corak macam ni kalah 5 daripada 6 kali.',
+ 'Saya pilih tunggu. Tak ada entry yang berbaloi sekarang.',
+];
+async function runB(){
+  var host=$('b-chat'); host.innerHTML='';
+  for(var i=0;i<B_LINES.length;i++){
+    await sleep(300);
+    if(i>0){ // typing indicator before each
+      var ty=document.createElement('div'); ty.className='typing2'; ty.innerHTML='<i></i><i></i><i></i>';
+      host.appendChild(ty); await sleep(700); ty.remove();
+    }
+    var el=document.createElement('div'); el.className='bub ai';
+    el.innerHTML='<span class="who">TRADERWATCH AI</span>'+B_LINES[i];
+    host.appendChild(el); requestAnimationFrame(function(){el.classList.add('in')});
+    await sleep(500);
+  }
+}
+
+/* ---------- C ---------- */
+var C_LINES=[
+ '<span class="d">$</span> scan BTCUSD M15 <span class="d">… 300 bar</span>',
+ '<span class="k">ok</span>  candles loaded',
+ '<span class="k">ok</span>  EMA20 60685 · EMA50 60473',
+ '<span class="k">ok</span>  RSI 49.4 · ATR 216.4',
+ '<span class="w">warn</span> M5 bullish / H1 bearish / H4 bearish',
+ '<span class="x">err</span>  timeframes conflict',
+ '<span class="x">err</span>  structure = RANGE (no break)',
+ '<span class="w">warn</span> setup lost 5/6 in history',
+ '<span class="d">→</span> decision: <b class="w">WAIT 40%</b> <span class="cur2"></span>',
+];
+async function runC(){
+  var host=$('c-term'); host.innerHTML='';
+  for(var i=0;i<C_LINES.length;i++){
+    var el=document.createElement('div'); el.className='ln'; el.innerHTML=C_LINES[i];
+    host.appendChild(el); await sleep(120);
+    requestAnimationFrame(function(){el.classList.add('in')});
+    await sleep(360);
+  }
+}
+
+/* ---------- D ---------- */
+var D_TEXT='Saya dah baca <b>300 bar</b> BTCUSD M15. M5 nampak bullish, tapi H1 dan H4 dua-dua bearish — jadi arah belum sehaluan. Struktur masih <b>range</b>, belum pecah. Tambahan pula, corak macam ni pernah kalah <b>5 daripada 6 kali</b> dalam rekod anda. Saya pilih <span class="em">tunggu</span> — tak ada entry yang berbaloi sekarang.';
+async function runD(){
+  var host=$('d-narr'); host.innerHTML='';
+  // pecah ikut ayat
+  var sents=D_TEXT.split(/(?<=\.)\s+/);
+  var els=sents.map(function(s){var e=document.createElement('span');e.className='sent';e.innerHTML=s+' ';host.appendChild(e);return e;});
+  for(var i=0;i<els.length;i++){await sleep(520);els[i].classList.add('in');}
+}
+
+/* ---------- E ---------- */
+var E_STEPS=[
+ {c:'Baca <b>300 bar</b> sebenar BTCUSD M15',k:'done'},
+ {c:'Kira indikator — <b>EMA20/50</b>, <b>RSI14</b>, <b>ATR14</b>',k:'done'},
+ {c:'Semak <b>MTF</b> — M5 bullish, H1/H4 bearish',k:'warn'},
+ {c:'Semak struktur — <b>RANGE</b>, tiada pecahan',k:'warn'},
+ {c:'Semak rekod anda — corak kalah <b>5/6</b>',k:'bad'},
+ {c:'Keputusan: <b>tunggu</b>, tiada entry berbaloi',k:'done'},
+];
+async function runE(){
+  var host=$('e-steps'); host.innerHTML='';
+  for(var i=0;i<E_STEPS.length;i++){
+    var d=E_STEPS[i];
+    var el=document.createElement('div'); el.className='stp '+d.k;
+    el.innerHTML='<span class="n2">'+(i+1)+'</span><span class="c2">'+d.c+'</span>';
+    host.appendChild(el); await sleep(60);
+    requestAnimationFrame(function(){el.classList.add('in')});
+    await sleep(430);
+  }
+}
+
+var RUN={ 'a-think':runA,'b-chat':runB,'c-term':runC,'d-orb':runD,'e-steps':runE };
+document.querySelectorAll('.replay2').forEach(function(b){
+  b.onclick=function(){ RUN[b.dataset.r](); };
+});
+// auto main semua sekali
+setTimeout(function(){runA()},300);
+setTimeout(function(){runB()},400);
+setTimeout(function(){runC()},500);
+setTimeout(function(){runD()},600);
+setTimeout(function(){runE()},700);
+</script>
+</body>
+</html>
