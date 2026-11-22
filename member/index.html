@@ -168,15 +168,18 @@ html[data-theme="light"] .msg.me .body{background:#eaf5db;border-color:#b9d999}
 .hole.result .wv{border-color:#b7f36b;animation:orbWave 1.1s ease-out 1}
 @keyframes orbReduce{}
 /* ===== Welcome Cinematic (layer1 canvas + layer2 sheet) ===== */
-.welcome{position:fixed;inset:0;z-index:160;background:#02040a;overflow:hidden}
+.welcome{position:fixed;inset:0;z-index:160;background:#02040a;overflow:hidden;
+ width:100vw;height:100vh;height:100dvh;max-width:none;max-height:none;margin:0;border:0;border-radius:0;
+ left:0;top:0;right:0;bottom:0;transform:none}
+html:has(.welcome:not(.hidden)) body{overflow:hidden}
 .welcome.hidden{display:none!important}
-#cineWrap{position:absolute;inset:0;display:block}
-#cineCanvas{position:absolute;inset:0;width:100%;height:100%;display:block}
+#cineWrap{position:absolute;inset:0;display:block;width:100%;height:100%}
+#cineCanvas{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none}
 #cineCap{position:absolute;left:0;right:0;bottom:calc(11% + 56px);text-align:center;
  font-size:clamp(15px,4.2vw,21px);letter-spacing:.08em;color:#cfd8f5;opacity:0;transition:opacity .8s;pointer-events:none}
 #cineCap.show{opacity:1}
 .cineStage{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;
- justify-content:flex-end;text-align:center;padding:24px 24px calc(11% + 28px);pointer-events:none;transition:opacity .5s}
+ justify-content:flex-end;text-align:center;padding:24px 24px calc(11% + 28px + env(safe-area-inset-bottom));pointer-events:none;transition:opacity .5s}
 .cineStage h1{font-size:clamp(26px,7.4vw,40px);font-weight:500;letter-spacing:.2em;margin:0 0 12px -.2em;
  opacity:0;transition:opacity 1.4s;color:#eef3ee}
 .cineStage .cineTag{max-width:28ch;color:#8a978c;font-size:15px;line-height:1.5;margin:0 0 22px;
@@ -186,12 +189,12 @@ html[data-theme="light"] .msg.me .body{background:#eaf5db;border-color:#b9d999}
  cursor:pointer;opacity:0;transition:opacity 1s 1.4s,transform .15s}
 .cineStage .cineCta:active{transform:scale(.97)}
 .cineStage.on h1,.cineStage.on .cineTag,.cineStage.on .cineCta{opacity:1}
-.cinePill{position:absolute;top:max(14px,env(safe-area-inset-top));font:600 13px inherit;color:#8a978c;
+.cinePill{position:absolute;top:calc(max(14px,env(safe-area-inset-top)));font:600 13px inherit;color:#8a978c;
  background:#0d120e;border:1px solid #222b23;border-radius:999px;padding:8px 13px;cursor:pointer;z-index:5}
 .cinePill.right{right:14px}.cinePill:not(.right){left:14px}
 /* layer 2 — sheet */
 .wsheet{position:absolute;left:0;right:0;bottom:0;z-index:8;background:#111612;border-top:1px solid #222b23;
- border-radius:24px 24px 0 0;padding:24px 20px max(24px,env(safe-area-inset-bottom));
+ border-radius:24px 24px 0 0;padding:24px 20px calc(24px + env(safe-area-inset-bottom));
  transform:translateY(100%);transition:transform .5s cubic-bezier(.2,.9,.2,1);
  max-width:520px;margin:0 auto;box-shadow:0 -20px 60px #000a}
 .wsheet.open{transform:none}
@@ -783,7 +786,17 @@ html[data-theme="light"] .lotbadge{color:#4c7a17}
       <div class="tdshare"><button class="btn-share" id="tdShare" type="button">🖼 <span id="tdShareLab">Share result</span></button></div>
     </div>
 
-    <!-- ===== WELCOME CINEMATIC (2 layer) ===== -->
+
+
+    <div id="toast" role="status" aria-live="polite"></div>
+    <div id="floatAna" class="floata hidden" role="button" tabindex="0" aria-live="polite">
+      <span class="fspin" aria-hidden="true"></span><span class="ftxt" id="floatTxt"></span><span class="fx" id="floatX" role="button" aria-label="Cancel analysis">✕</span>
+    </div>
+  </div>
+  
+  <div class="stagehint">TraderWatch AI Analyst · 390 × 844</div>
+</div>
+
     <div id="welcome" class="welcome hidden" role="dialog" aria-modal="true" aria-label="Welcome">
       <!-- LAYER 1: canvas starfield sinematik -->
       <div id="cineWrap">
@@ -816,14 +829,6 @@ html[data-theme="light"] .lotbadge{color:#4c7a17}
         <button class="wskip" id="wSkip" type="button"><span id="wSkipT">Langkau dulu</span></button>
       </div>
     </div>
-
-    <div id="toast" role="status" aria-live="polite"></div>
-    <div id="floatAna" class="floata hidden" role="button" tabindex="0" aria-live="polite">
-      <span class="fspin" aria-hidden="true"></span><span class="ftxt" id="floatTxt"></span><span class="fx" id="floatX" role="button" aria-label="Cancel analysis">✕</span>
-    </div>
-  </div>
-  <div class="stagehint">TraderWatch AI Analyst · 390 × 844</div>
-</div>
 
 <script src="../sound.js?v=20261121s3"></script>
 <script src="/bridge-banner.js?v=20261121b"></script>
@@ -956,7 +961,7 @@ var DICT={
   mtfLab:'Alignment multi-TF',mtfAligned:'Searah',mtfMixed:'Bercampur',shareLab:'Share result',shareSaved:'Gambar disimpan 📥',shareErr:'Gagal jana gambar.',
   orbIdle:'Enjin AI sedia',orbSubIdle:'12 pair dipantau',orbOne:'AI sedang membaca',orbMany:'%n analisis berjalan',orbBy:'oleh',orbNow:'sekarang',orbLiveN:'%n client minta serentak',
   ailTitle:'Pembelajaran AI',ailEmpty:'AI masih belajar — perlukan beberapa trade ditutup dulu sebelum corak dikenal pasti.',ailN:'%n trade',ailWin:'kadar menang',
-  wTitle:'Selamat datang!',wSub:'Sediakan app anda sebelum mula.',wNotifT:'Hidupkan notifikasi',wNotifS:'Alert bila trade kena TP/SL & signal baru',wInstallT:'Tambah ke skrin utama',wInstallS:'Buka macam app, penuh skrin',wGoT:'Mula trade',wSkipT:'Langkau dulu',wDone:'Selesai',wTurnOn:'Hidupkan',wAdd:'Tambah',wManual:'Panduan',wWait:'Menunggu…',cineEnterT:'Masuk',cineTag:'Rasakan era baru trading AI.',cineCap1:'Pasar tak pernah tidur.',cineCap2:'Sekarang, ia berpikir.',cineEnterT:'Masuk',cineTag:'Experience the new era of AI Trading.',cineCap1:'Pasaran tak pernah tidur.',cineCap2:'Sekarang, ia berfikir.',
+  wTitle:'Selamat datang!',wSub:'Sediakan app anda sebelum mula.',wNotifT:'Hidupkan notifikasi',wNotifS:'Alert bila trade kena TP/SL & signal baru',wInstallT:'Tambah ke skrin utama',wInstallS:'Buka macam app, penuh skrin',wGoT:'Mula trade',wSkipT:'Langkau dulu',wDone:'Selesai',wTurnOn:'Hidupkan',wAdd:'Tambah',wManual:'Panduan',wWait:'Menunggu…',cineEnterT:'Masuk',cineTag:'Rasai era baru trading AI.',cineCap1:'Pasaran tak pernah tidur.',cineCap2:'Sekarang, ia berfikir.',
   tdTitle:'Detail trade',livePrice:'Harga live',unreal:'P&L belum realized',finalRes:'Keputusan akhir',openedAt:'Dibuka',closedAt:'Ditutup',slTpRange:'Julat SL → TP',quoteErr:'Harga live tidak tersedia.',
   loggingOut:'Melog keluar…',langNative:'Bahasa Melayu'
  },
@@ -1004,7 +1009,7 @@ var DICT={
   mtfLab:'Multi-TF alignment',mtfAligned:'Aligned',mtfMixed:'Mixed',shareLab:'Share result',shareSaved:'Image saved 📥',shareErr:'Could not generate image.',
   orbIdle:'AI engine ready',orbSubIdle:'12 pairs monitored',orbOne:'AI is reading',orbMany:'%n analyses running',orbBy:'by',orbNow:'now',orbLiveN:'%n clients requesting',
   ailTitle:'AI Learning',ailEmpty:'AI is still learning — it needs a few closed trades before patterns can be identified.',ailN:'%n trades',ailWin:'win rate',
-  wTitle:'Welcome!',wSub:'Set up your app before you start.',wNotifT:'Turn on notifications',wNotifS:'Alerts when trades hit TP/SL & new signals',wInstallT:'Add to home screen',wInstallS:'Open like an app, full screen',wGoT:'Start trading',wSkipT:'Skip for now',wDone:'Done',wTurnOn:'Turn on',wAdd:'Add',wManual:'Guide',wWait:'Waiting…',cineEnterT:'Enter',cineTag:'Experience the new era of AI Trading.',cineCap1:'The market never sleeps.',cineCap2:'Now, it thinks.',
+  wTitle:'Welcome!',wSub:'Two quick steps to get set up.',wNotifT:'Turn on notifications',wNotifS:'Get alerted when a trade hits TP or SL',wInstallT:'Add to home screen',wInstallS:'Full screen, no browser bar',wGoT:'Start trading',wSkipT:'Skip for now',wDone:'Done',wTurnOn:'Turn on',wAdd:'Add',wManual:'Guide',wWait:'Waiting…',cineEnterT:'Enter',cineTag:'Institutional-grade market intelligence.',cineCap1:'The market never sleeps,',cineCap2:'and now it thinks.',
   tdTitle:'Trade detail',livePrice:'Live price',unreal:'Unrealized P&L',finalRes:'Final result',openedAt:'Opened',closedAt:'Closed',slTpRange:'SL → TP range',quoteErr:'Live price unavailable.',
   loggingOut:'Signing out…',langNative:'English'
  },
@@ -2910,5 +2915,6 @@ showView(VIEWS.indexOf(iv)>-1?iv:'analyst');
 maybeWelcome();
 })();
 </script>
+    <!-- ===== WELCOME CINEMATIC (2 layer) ===== -->
 </body>
 </html>
