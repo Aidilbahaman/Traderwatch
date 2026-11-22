@@ -1,31 +1,34 @@
 <!doctype html><html lang="ms"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Z1 — Wormhole Tunnel</title>
+<title>Z1 — Event Horizon</title>
 <style>
-:root{--lime:#b7f36b;--card:#111612;--card2:#171e18;--line:#222b23;--muted:#8a978c;--text:#eef3ee;--onlime:#10150b;--red:#ff777d;--blue:#8ab4ff}
+:root{--lime:#b7f36b;--card:#111612;--card2:#171e18;--line:#222b23;--muted:#8a978c;--text:#eef3ee;--onlime:#10150b;--red:#ff777d;--blue:#8ab4ff;--orange:#ffc16b}
 *{box-sizing:border-box;margin:0}
 body{background:#0a0e0b;color:var(--text);font:14px -apple-system,sans-serif}
 .hint{position:fixed;top:0;left:0;right:0;z-index:999;background:#171e18ee;color:var(--muted);font-size:10.5px;padding:8px 14px;text-align:center;border-bottom:1px solid var(--line)}
 .hint b{color:var(--lime)}
 .replay{position:fixed;bottom:14px;right:14px;z-index:999;background:var(--card2);border:1px solid var(--line);color:var(--lime);font:700 10px inherit;padding:8px 14px;border-radius:99px;cursor:pointer}
-.phone{width:390px;max-width:100%;height:800px;max-height:100vh;margin:0 auto;position:relative;overflow:hidden;background:#050807}
-#intro{position:absolute;inset:0;z-index:10;display:grid;place-items:center;cursor:pointer;overflow:hidden;background:radial-gradient(ellipse at 50% 50%,#0e150f,#030604 78%)}
+.phone{width:390px;max-width:100%;height:800px;max-height:100vh;margin:0 auto;position:relative;overflow:hidden;background:#000}
+#intro{position:absolute;inset:0;z-index:10;display:grid;place-items:center;cursor:pointer;overflow:hidden;background:#040705}
 #decor{position:absolute;inset:0;z-index:2;pointer-events:none;overflow:hidden}
-#decor.persp{perspective:600px;perspective-origin:50% 50%}
+#decor.persp{perspective:700px;perspective-origin:50% 50%}
 .dec{position:absolute;left:50%;top:50%;will-change:transform,opacity;transform-origin:50% 50%}
-#zh{position:relative;width:200px;height:200px;display:grid;place-items:center;z-index:6;will-change:transform,filter;transform-origin:50% 50%}
-#zh .glow{position:absolute;width:190px;height:190px;border-radius:50%;background:radial-gradient(circle,#b7f36b44 0%,#b7f36b14 45%,transparent 70%)}
-#zh .core{position:relative;width:84px;height:84px;border-radius:50%;z-index:7;
- background:radial-gradient(circle,#eaffc4 0%,#b7f36b 26%,#5f9c22 55%,#000 100%);
- box-shadow:0 0 0 2px #b7f36b,0 0 44px 14px #b7f36baa,0 0 120px 44px #b7f36b44}
-#zh .wv{position:absolute;width:118px;height:118px;border-radius:50%;border:1px solid #b7f36b88}
-#zh .wv.b{width:148px;height:148px;border-color:#b7f36b55}
-#zh .wv.c{width:178px;height:178px;border-color:#b7f36b33}
+/* ===== BLACKHOLE: teras HITAM, rim cahaya nipis ===== */
+#zh{position:relative;width:200px;height:200px;display:grid;place-items:center;z-index:6;
+ will-change:transform;transform-origin:50% 50%}
+#zh .core{position:relative;width:96px;height:96px;border-radius:50%;background:#000;z-index:7;
+ box-shadow:0 0 0 1.6px #b7f36b, 0 0 14px 2px #b7f36baa, 0 0 60px 16px #b7f36b3d;
+ will-change:transform,box-shadow}
+#zh .photon{position:absolute;width:118px;height:118px;border-radius:50%;
+ border:1px solid #b7f36b66;z-index:5;will-change:transform,opacity}
+#zh .disk{position:absolute;width:164px;height:46px;border-radius:50%;z-index:4;
+ background:conic-gradient(from 0deg,transparent,#b7f36b88,transparent 40%,#8ab4ff66,transparent 70%,#b7f36b66);
+ filter:blur(7px);opacity:.65;will-change:transform,opacity}
 #zlab{position:absolute;z-index:40;top:42%;left:0;right:0;text-align:center;
- font:900 15px monospace;letter-spacing:3px;color:#b7f36b;opacity:0;
- text-shadow:0 0 18px #b7f36b,0 0 40px #b7f36b88;pointer-events:none}
-#zbar{position:absolute;z-index:40;bottom:70px;left:60px;right:60px;height:4px;border-radius:99px;
- background:#b7f36b22;opacity:0;overflow:hidden}
+ font:900 14px monospace;letter-spacing:3px;color:#b7f36b;opacity:0;
+ text-shadow:0 0 16px #b7f36b,0 0 36px #b7f36b77;pointer-events:none}
+#zbar{position:absolute;z-index:40;bottom:70px;left:60px;right:60px;height:3px;border-radius:99px;
+ background:#b7f36b1f;opacity:0;overflow:hidden}
 #zbar i{display:block;height:100%;width:0;background:linear-gradient(90deg,#b7f36b,#eaffc4);border-radius:99px}
 .brand{position:absolute;top:58px;left:0;right:0;text-align:center;font-size:12px;font-weight:900;letter-spacing:2px;color:var(--lime);z-index:9}
 .brand span{color:var(--text)}
@@ -33,16 +36,16 @@ body{background:#0a0e0b;color:var(--text);font:14px -apple-system,sans-serif}
 .itxt b{display:block;font-size:24px;font-weight:900}
 .itxt small{display:block;color:var(--muted);font-size:11.5px;margin-top:8px;line-height:1.6}
 .tap{position:absolute;bottom:44px;left:0;right:0;text-align:center;font-size:10.5px;color:var(--lime);font-weight:800;letter-spacing:1.5px;z-index:9}
-#void{position:absolute;inset:0;z-index:15;background:#000;opacity:0;transition:opacity .22s;pointer-events:none}
+#void{position:absolute;inset:0;z-index:15;background:#000;opacity:0;transition:opacity .25s;pointer-events:none}
 #void.on{opacity:1}
 #on{position:absolute;inset:0;z-index:20;display:flex;align-items:center;justify-content:center;padding:22px;
- background:rgba(4,8,5,.92);backdrop-filter:blur(10px);opacity:0;pointer-events:none;transition:opacity .5s}
+ background:rgba(0,0,0,.94);backdrop-filter:blur(10px);opacity:0;pointer-events:none;transition:opacity .5s}
 #on.show{opacity:1;pointer-events:auto}
-.card{width:100%;max-width:360px;background:var(--card);border:1px solid #b7f36b3d;border-radius:24px;
+.card{width:100%;max-width:360px;background:#0d120e;border:1px solid #b7f36b3d;border-radius:24px;
  padding:24px 20px 18px;text-align:center;box-shadow:0 24px 70px #0009}
 .clogo{font-size:12px;font-weight:900;color:var(--lime);margin-bottom:14px}.clogo span{color:var(--text)}
-.mini{width:64px;height:64px;margin:0 auto 14px;border-radius:50%;
- background:radial-gradient(circle,#eaffc4,#b7f36b 30%,#000 78%);box-shadow:0 0 0 1.5px var(--lime),0 0 22px 7px #b7f36b77}
+.mini{width:60px;height:60px;margin:0 auto 14px;border-radius:50%;background:#000;
+ box-shadow:0 0 0 1.5px var(--lime),0 0 18px 5px #b7f36b66}
 .ct{font-size:20px;font-weight:900}.cs{font-size:11px;color:var(--muted);margin:6px 0 18px;line-height:1.5}
 .opt{display:flex;align-items:center;gap:11px;width:100%;text-align:left;background:var(--card2);
  border:1px solid var(--line);border-radius:14px;padding:12px;margin-bottom:9px;color:var(--text);font:inherit;cursor:pointer}
@@ -55,16 +58,20 @@ body{background:#0a0e0b;color:var(--text);font:14px -apple-system,sans-serif}
  font:600 10.5px inherit;text-decoration:underline;padding:5px}
 
 </style></head><body>
-<div class="hint"><b>Wormhole Tunnel</b> — 9 cincin 3D lalu kamera. 🔊 bass drop + whoosh</div>
+<div class="hint"><b>Event Horizon</b> — 9 cincin 3D + teras hitam menelan skrin. 🔊 bass drop</div>
 <button class="replay" onclick="location.reload()">↻ Replay</button>
 <div class="phone">
  <div id="intro">
   <div id="decor" class="persp"></div>
   <div class="brand">✦ <span>TraderWatch</span></div>
-  <div id="zh"><div class="glow"></div><div class="wv"></div><div class="wv b"></div><div class="wv c"></div><div class="core"></div></div>
+  <div id="zh">
+   <div class="disk"></div>
+   <div class="photon"></div>
+   <div class="core"></div>
+  </div>
   <div id="zlab">ENTERING…</div>
   <div id="zbar"><i></i></div>
-  <div class="itxt"><b>Enter the tunnel.</b><small>Satu keputusan di hujung lorong.</small></div>
+  <div class="itxt"><b>Cross the horizon.</b><small>Tiada apa yang kembali dari sini.</small></div>
   <div class="tap">TEKAN UNTUK MASUK →</div>
  </div>
  <div id="void"></div>
@@ -77,95 +84,92 @@ body{background:#0a0e0b;color:var(--text);font:14px -apple-system,sans-serif}
  </div></div>
 </div>
 <script>
-/* ===== Web Audio synth (no files) ===== */
 var AC=null;
 function ac(){if(!AC)AC=new (window.AudioContext||window.webkitAudioContext)();if(AC.state==='suspended')AC.resume();return AC}
 function nz(c,sec){var b=c.createBuffer(1,c.sampleRate*sec,c.sampleRate),d=b.getChannelData(0);
  for(var i=0;i<d.length;i++)d[i]=Math.random()*2-1;return b}
 function sndTunnel(){var c=ac(),t=c.currentTime;
- var n=c.createBufferSource();n.buffer=nz(c,1.7);
- var bp=c.createBiquadFilter();bp.type='bandpass';bp.Q.value=1.2;
- bp.frequency.setValueAtTime(180,t);bp.frequency.exponentialRampToValueAtTime(2600,t+1.1);
- var g=c.createGain();g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(.3,t+.15);
+ var n=c.createBufferSource();n.buffer=nz(c,1.8);
+ var bp=c.createBiquadFilter();bp.type='bandpass';bp.Q.value=1.4;
+ bp.frequency.setValueAtTime(160,t);bp.frequency.exponentialRampToValueAtTime(2400,t+1.3);
+ var g=c.createGain();g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(.3,t+.2);
+ g.gain.exponentialRampToValueAtTime(.001,t+1.8);
+ n.connect(bp);bp.connect(g);g.connect(c.destination);n.start(t);n.stop(t+1.9);
+ var o=c.createOscillator();o.type='sine';o.frequency.setValueAtTime(96,t);
+ o.frequency.exponentialRampToValueAtTime(22,t+1.4);
+ var og=c.createGain();og.gain.setValueAtTime(.0001,t);og.gain.exponentialRampToValueAtTime(.55,t+.12);
+ og.gain.exponentialRampToValueAtTime(.001,t+1.7);
+ o.connect(og);og.connect(c.destination);o.start(t);o.stop(t+1.8)}
+function sndSwirl(){var c=ac(),t=c.currentTime;
+ for(var i=0;i<4;i++){var o=c.createOscillator();o.type='triangle';
+  var f0=520-i*90;o.frequency.setValueAtTime(f0,t);o.frequency.exponentialRampToValueAtTime(f0*0.35,t+1.4);
+  var g=c.createGain();g.gain.setValueAtTime(.0001,t+i*.06);
+  g.gain.exponentialRampToValueAtTime(.09,t+i*.06+.12);g.gain.exponentialRampToValueAtTime(.001,t+1.5);
+  o.connect(g);g.connect(c.destination);o.start(t+i*.06);o.stop(t+i*.06+1.55)}
+ var s=c.createOscillator();s.type='sine';s.frequency.setValueAtTime(70,t);
+ s.frequency.exponentialRampToValueAtTime(24,t+1.5);
+ var sg=c.createGain();sg.gain.setValueAtTime(.0001,t);sg.gain.exponentialRampToValueAtTime(.5,t+.2);
+ sg.gain.exponentialRampToValueAtTime(.001,t+1.7);
+ s.connect(sg);sg.connect(c.destination);s.start(t);s.stop(t+1.8)}
+function sndCollapse(){var c=ac(),t=c.currentTime;
+ var n=c.createBufferSource();n.buffer=nz(c,1.6);
+ var lp=c.createBiquadFilter();lp.type='lowpass';lp.frequency.setValueAtTime(2800,t);
+ lp.frequency.exponentialRampToValueAtTime(120,t+1.5);
+ var g=c.createGain();g.gain.setValueAtTime(.001,t);g.gain.exponentialRampToValueAtTime(.24,t+.3);
  g.gain.exponentialRampToValueAtTime(.001,t+1.6);
- n.connect(bp);bp.connect(g);g.connect(c.destination);n.start(t);n.stop(t+1.7);
- var o=c.createOscillator();o.type='sine';o.frequency.setValueAtTime(110,t);
- o.frequency.exponentialRampToValueAtTime(28,t+1.2);
- var og=c.createGain();og.gain.setValueAtTime(.0001,t);og.gain.exponentialRampToValueAtTime(.5,t+.1);
- og.gain.exponentialRampToValueAtTime(.001,t+1.5);
- o.connect(og);og.connect(c.destination);o.start(t);o.stop(t+1.6)}
-function sndFlare(){var c=ac(),t=c.currentTime;
- [0,7,12].forEach(function(off,i){var o=c.createOscillator();o.type='triangle';
-  var base=440*Math.pow(2,off/12);o.frequency.setValueAtTime(base,t);
-  o.frequency.exponentialRampToValueAtTime(base*4,t+.6);
-  var g=c.createGain();g.gain.setValueAtTime(.0001,t);
-  g.gain.exponentialRampToValueAtTime(.12,t+.1+i*.03);g.gain.exponentialRampToValueAtTime(.001,t+.85);
-  o.connect(g);g.connect(c.destination);o.start(t);o.stop(t+.9)});
- var n=c.createBufferSource();n.buffer=nz(c,.6);
- var hp=c.createBiquadFilter();hp.type='highpass';hp.frequency.value=2200;
- var ng=c.createGain();ng.gain.setValueAtTime(.22,t);ng.gain.exponentialRampToValueAtTime(.001,t+.5);
- n.connect(hp);hp.connect(ng);ng.connect(c.destination);n.start(t);n.stop(t+.55)}
-function sndGravity(){var c=ac(),t=c.currentTime;
- var o=c.createOscillator();o.type='sawtooth';o.frequency.setValueAtTime(620,t);
- o.frequency.exponentialRampToValueAtTime(80,t+1);
- var f=c.createBiquadFilter();f.type='lowpass';f.frequency.setValueAtTime(2400,t);
- f.frequency.exponentialRampToValueAtTime(260,t+1);
- var g=c.createGain();g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(.15,t+.12);
- g.gain.exponentialRampToValueAtTime(.001,t+1.15);
- o.connect(f);f.connect(g);g.connect(c.destination);o.start(t);o.stop(t+1.2);
- var s=c.createOscillator();s.type='sine';s.frequency.setValueAtTime(62,t);
- s.frequency.exponentialRampToValueAtTime(26,t+1.05);
- var sg=c.createGain();sg.gain.setValueAtTime(.0001,t);sg.gain.exponentialRampToValueAtTime(.48,t+.15);
- sg.gain.exponentialRampToValueAtTime(.001,t+1.25);
- s.connect(sg);sg.connect(c.destination);s.start(t);s.stop(t+1.3)}
-function sndPixel(){var c=ac(),t=c.currentTime;
- var n=c.createBufferSource(),b=c.createBuffer(1,c.sampleRate*.75,c.sampleRate),d=b.getChannelData(0);
- for(var i=0;i<d.length;i++)d[i]=((i%97)<40?1:-1)*(Math.random()*.5+.5);n.buffer=b;
- var bp=c.createBiquadFilter();bp.type='bandpass';bp.frequency.value=1200;bp.Q.value=.8;
- var g=c.createGain();g.gain.setValueAtTime(.001,t);g.gain.exponentialRampToValueAtTime(.18,t+.05);
- g.gain.exponentialRampToValueAtTime(.001,t+.8);
- n.connect(bp);bp.connect(g);g.connect(c.destination);n.start(t);n.stop(t+.85);
- [523,659,784,1047].forEach(function(f,i){var o=c.createOscillator();o.type='square';o.frequency.value=f;
-  var og=c.createGain();var tt=t+i*.1;og.gain.setValueAtTime(.0001,tt);
-  og.gain.exponentialRampToValueAtTime(.08,tt+.01);og.gain.exponentialRampToValueAtTime(.001,tt+.16);
-  o.connect(og);og.connect(c.destination);o.start(tt);o.stop(tt+.18)})}
-function sndCandle(){var c=ac(),t=c.currentTime;
- for(var i=0;i<14;i++){var o=c.createOscillator();o.type='square';
-  o.frequency.value=700+Math.random()*900;var g=c.createGain();var tt=t+i*.05;
-  g.gain.setValueAtTime(.0001,tt);g.gain.exponentialRampToValueAtTime(.05,tt+.005);
-  g.gain.exponentialRampToValueAtTime(.001,tt+.07);
-  o.connect(g);g.connect(c.destination);o.start(tt);o.stop(tt+.08)}
- var s=c.createOscillator();s.type='sine';s.frequency.setValueAtTime(120,t);
- s.frequency.exponentialRampToValueAtTime(32,t+.9);
- var sg=c.createGain();sg.gain.setValueAtTime(.0001,t);sg.gain.exponentialRampToValueAtTime(.5,t+.1);
- sg.gain.exponentialRampToValueAtTime(.001,t+1.15);
- s.connect(sg);sg.connect(c.destination);s.start(t);s.stop(t+1.2)}
+ n.connect(lp);lp.connect(g);g.connect(c.destination);n.start(t);n.stop(t+1.7);
+ var o=c.createOscillator();o.type='sine';o.frequency.setValueAtTime(58,t);
+ o.frequency.exponentialRampToValueAtTime(20,t+1.5);
+ var og=c.createGain();og.gain.setValueAtTime(.0001,t);og.gain.exponentialRampToValueAtTime(.55,t+.35);
+ og.gain.exponentialRampToValueAtTime(.001,t+1.75);
+ o.connect(og);og.connect(c.destination);o.start(t);o.stop(t+1.85)}
+function sndShadow(){var c=ac(),t=c.currentTime;
+ var o=c.createOscillator();o.type='sawtooth';o.frequency.setValueAtTime(320,t);
+ o.frequency.exponentialRampToValueAtTime(44,t+1.3);
+ var f=c.createBiquadFilter();f.type='lowpass';f.frequency.setValueAtTime(1800,t);
+ f.frequency.exponentialRampToValueAtTime(200,t+1.3);
+ var g=c.createGain();g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(.14,t+.18);
+ g.gain.exponentialRampToValueAtTime(.001,t+1.5);
+ o.connect(f);f.connect(g);g.connect(c.destination);o.start(t);o.stop(t+1.55);
+ var s=c.createOscillator();s.type='sine';s.frequency.setValueAtTime(80,t);
+ s.frequency.exponentialRampToValueAtTime(26,t+1.4);
+ var sg=c.createGain();sg.gain.setValueAtTime(.0001,t);sg.gain.exponentialRampToValueAtTime(.45,t+.25);
+ sg.gain.exponentialRampToValueAtTime(.001,t+1.65);
+ s.connect(sg);sg.connect(c.destination);s.start(t);s.stop(t+1.75)}
+function sndFold(){var c=ac(),t=c.currentTime;
+ for(var i=0;i<5;i++){var o=c.createOscillator();o.type='square';
+  o.frequency.value=180+i*70;var g=c.createGain();var tt=t+i*.14;
+  g.gain.setValueAtTime(.0001,tt);g.gain.exponentialRampToValueAtTime(.05,tt+.02);
+  g.gain.exponentialRampToValueAtTime(.001,tt+.35);
+  o.connect(g);g.connect(c.destination);o.start(tt);o.stop(tt+.38)}
+ var s=c.createOscillator();s.type='sine';s.frequency.setValueAtTime(110,t);
+ s.frequency.exponentialRampToValueAtTime(24,t+1.5);
+ var sg=c.createGain();sg.gain.setValueAtTime(.0001,t);sg.gain.exponentialRampToValueAtTime(.5,t+.3);
+ sg.gain.exponentialRampToValueAtTime(.001,t+1.75);
+ s.connect(sg);sg.connect(c.destination);s.start(t);s.stop(t+1.85)}
 
-/* ===== STYLE-SPECIFIC: build decor + animate ===== */
 var DECOR=document.getElementById('decor');
 
 var RINGS=[];
 (function(){
  for(var i=0;i<9;i++){
-  var r=document.createElement('div');
-  r.className='dec';
-  r.style.width='260px';r.style.height='260px';r.style.marginLeft='-130px';r.style.marginTop='-130px';
+  var r=document.createElement('div');r.className='dec';
+  r.style.width='250px';r.style.height='250px';
+  r.style.marginLeft='-125px';r.style.marginTop='-125px';
   r.style.borderRadius='50%';
-  r.style.border='2px solid rgba(183,243,107,'+(0.55-i*0.05)+')';
-  r.style.boxShadow='0 0 24px rgba(183,243,107,.35) inset, 0 0 18px rgba(183,243,107,.25)';
+  r.style.border='1.5px solid rgba(183,243,107,'+(0.5-i*0.045)+')';
   r.style.opacity='0';
   DECOR.appendChild(r);RINGS.push(r);
  }
 })();
 
-/* ===== zoom driver ===== */
 var busy=false;
 (function(){
- var zh=document.getElementById('zh'),zlab=document.getElementById('zlab'),
-     zbar=document.getElementById('zbar'),zbarI=zbar.querySelector('i'),
-     voidEl=document.getElementById('void'),on=document.getElementById('on'),
-     intro=document.getElementById('intro');
- var DUR=2000;
+ var zh=document.getElementById('zh'),
+     core=zh.querySelector('.core'),photon=zh.querySelector('.photon'),disk=zh.querySelector('.disk'),
+     zlab=document.getElementById('zlab'),zbar=document.getElementById('zbar'),zbarI=zbar.querySelector('i'),
+     voidEl=document.getElementById('void'),on=document.getElementById('on'),intro=document.getElementById('intro');
+ var DUR=2100;
  intro.onclick=function(){
   if(busy)return;busy=true;
   try{sndTunnel()}catch(e){}
@@ -177,24 +181,28 @@ var busy=false;
    var e=p<0.5?2*p*p:1-Math.pow(-2*p+2,2)/2;
    
    for(var i=0;i<RINGS.length;i++){
-    var q=(p*1.55 - i*0.075);
+    var q=(p*1.5 - i*0.072);
     if(q<0||q>1){RINGS[i].style.opacity='0';continue}
-    var z=-900+q*1500, s=0.25+q*1.9;
+    var z=-1000+q*1650, s=0.2+q*2.1;
     RINGS[i].style.transform='translateZ('+z.toFixed(0)+'px) scale('+s.toFixed(2)+')';
-    RINGS[i].style.opacity=(q<0.08?q/0.08:(q>0.92?(1-q)/0.08:1)).toFixed(2);
+    RINGS[i].style.opacity=(q<0.1?q/0.1:(q>0.9?(1-q)/0.1:1)*0.75).toFixed(2);
    }
-   zh.style.transform='scale('+(1+e*17).toFixed(2)+')';
-   zh.style.filter='brightness('+(1+e*1.6).toFixed(2)+')';
+   /* teras HITAM mengembang — ini yang menelan skrin */
+   core.style.transform='scale('+(1+e*26).toFixed(2)+')';
+   photon.style.transform='scale('+(1+e*13).toFixed(2)+')';
+   photon.style.opacity=(1-e).toFixed(2);
+   disk.style.transform='rotate('+(p*420).toFixed(0)+'deg) scale('+(1+e*6).toFixed(2)+')';
+   disk.style.opacity=(0.65*(1-e*0.95)).toFixed(2);
    zbarI.style.width=(p*100).toFixed(1)+'%';
-   zlab.textContent=p<.35?'ENTERING…':(p<.72?'DEEPER…':'INSIDE');
-   if(p<1)requestAnimationFrame(frame);
+   zlab.textContent=p<.3?'ENTERING…':(p<.68?'FALLING…':'SWALLOWED');
+   if(p<1){requestAnimationFrame(frame)}
    else{
     voidEl.classList.add('on');
     zlab.style.opacity='0';zbar.style.opacity='0';
     setTimeout(function(){
      intro.style.display='none';on.classList.add('show');
-     setTimeout(function(){voidEl.style.transition='opacity .6s';voidEl.classList.remove('on')},130);
-    },300);
+     setTimeout(function(){voidEl.style.transition='opacity .7s';voidEl.classList.remove('on')},140);
+    },320);
    }
   }
   requestAnimationFrame(frame);
