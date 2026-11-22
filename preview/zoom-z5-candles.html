@@ -29,7 +29,7 @@ body{background:#0a0e0b;color:var(--text);font:14px -apple-system,sans-serif}
 /* zoom: candles fall inward */
 #intro.go .candles{animation:candSpin 1.5s cubic-bezier(.35,0,.65,1) forwards}
 @keyframes candSpin{0%{transform:rotate(0) scale(1);opacity:1}100%{transform:rotate(-540deg) scale(.03);opacity:0}}
-#intro.go .bh{animation:bhZoom 1.5s cubic-bezier(.35,0,.65,1) forwards}
+#intro.go .bh{animation:bhZoom 1.5s cubic-bezier(.35,0,.65,1) forwards;filter:brightness(2)}
 @keyframes bhZoom{0%{transform:scale(1)}30%{transform:scale(1.5)}65%{transform:scale(4)}100%{transform:scale(16)}}
 #intro.go .brand,#intro.go .tap{opacity:0}
 #intro.go .itxt{opacity:0;transform:translateY(40px)}
@@ -51,6 +51,9 @@ body{background:#0a0e0b;color:var(--text);font:14px -apple-system,sans-serif}
 .ot{flex:1;display:flex;flex-direction:column;gap:2px}.ot b{font-size:12px;font-weight:800}.ot small{font-size:9.5px;color:var(--muted)}
 .go{width:100%;border:0;border-radius:13px;padding:13px;font:800 12.5px inherit;cursor:pointer;background:linear-gradient(135deg,var(--lime),#8ed94e);color:var(--onlime);margin-top:7px}
 .sk{display:block;margin:10px auto 0;border:0;background:none;color:var(--muted);cursor:pointer;font:600 10.5px inherit;text-decoration:underline}
+.zlabel{position:absolute;z-index:30;top:50%;left:50%;transform:translate(-50%,-50%);color:#b7f36b;font:900 20px monospace;letter-spacing:3px;opacity:0;pointer-events:none;text-shadow:0 0 20px #b7f36b}
+#intro.go .zlabel{animation:zlbl 1.6s ease-out forwards}
+@keyframes zlbl{0%{opacity:0;transform:translate(-50%,-50%) scale(.5)}20%{opacity:1;transform:translate(-50%,-50%) scale(1)}80%{opacity:1}100%{opacity:0;transform:translate(-50%,-50%) scale(1.5)}}
 @media(prefers-reduced-motion:reduce){*{animation:none!important}#intro.go .bh,#intro.go .candles{transform:none}}
 </style></head><body>
 <div class="hint"><b>Z5 Candle Cascade</b> — candlestick hijau/merah mengelilingi core, jatuh spiral masuk. 🔊 Bunyi "tick-tick data + bass drop"</div>
@@ -63,6 +66,7 @@ body{background:#0a0e0b;color:var(--text);font:14px -apple-system,sans-serif}
   <div class="bh"><div class="wv"></div><div class="wv b"></div><div class="wv c"></div><div class="core"></div></div>
   <div class="itxt"><b>Every candle counts.</b><small>Setiap lilin data menuju satu keputusan.</small></div>
   <div class="tap">TEKAN UNTUK MASUK →</div>
+  <div class="zlabel">ENTERING…</div>
  </div>
  <div id="void"></div>
  <div id="on"><div class="card">
