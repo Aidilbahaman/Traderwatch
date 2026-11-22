@@ -50,10 +50,27 @@ h1{font-size:20px;font-weight:800;text-align:center;margin-bottom:6px}
 .ai-tick .spark-mini{width:26px;height:10px;flex:none;opacity:.8}
 
 /* ===== Variant B: baris ringkas icon + count ===== */
+/* Variant B — inline, berdenyut bila ada aktiviti */
 .ai-tick.b{background:none;border:0;padding:0;color:var(--muted);font-size:9px;gap:4px}
-.ai-tick.b b{color:var(--blue)}
+.ai-tick.b b{color:var(--blue);font-variant-numeric:tabular-nums}
 .ai-tick.b .d{display:none}
 .ai-tick.b svg{color:var(--blue);opacity:.85}
+/* denyut penuh: hanya bila n>0 */
+.ai-tick.b.live .ico{display:inline-flex;animation:bPulse 1.8s ease-in-out infinite}
+@keyframes bPulse{
+ 0%,100%{opacity:.55;transform:scale(.92)}
+ 50%{opacity:1;transform:scale(1.12);filter:drop-shadow(0 0 6px #8ab4ffcc)}}
+.ai-tick.b.live b{animation:bCount 1.8s ease-in-out infinite}
+@keyframes bCount{0%,100%{opacity:.7}50%{opacity:1;text-shadow:0 0 8px #8ab4ff99}}
+/* dot kecil berdenyut selepas count */
+.ai-tick.b.live::after{content:"";width:3.5px;height:3.5px;border-radius:50%;background:#8ab4ff;
+ box-shadow:0 0 6px #8ab4ff;animation:bDot 1.8s ease-in-out infinite;margin-left:1px}
+@keyframes bDot{0%,100%{opacity:.25;transform:scale(.7)}50%{opacity:1;transform:scale(1.35)}}
+/* idle (n=0): statik, redup */
+.ai-tick.b.idle{opacity:.55}
+@media(prefers-reduced-motion:reduce){
+ .ai-tick.b.live .ico,.ai-tick.b.live b,.ai-tick.b.live::after{animation:none!important}
+ .ai-tick.b.live .ico{opacity:1;transform:none}}
 
 /* ===== Variant C: corner badge ===== */
 .ai-tick.c{position:absolute;top:8px;right:8px;background:#8ab4ff14;border-color:#8ab4ff3d;z-index:3}
@@ -118,7 +135,10 @@ function tickHTML(p){
       (n?sparkSVG(p.hist,26,10,'#8ab4ff'):'')+'</span>';
   }
   if(MODE==='b'){
-    return '<span class="ai-tick b">'+aiIcon(10)+'<b>'+n+'</b><span>AI'+(n?' this hour':'')+'</span></span>';
+    var live = n>0 ? ' live':' idle';
+    return '<span class="ai-tick b'+live+'">'+
+      '<span class="ico">'+aiIcon(10)+'</span>'+
+      '<b>'+n+'</b><span>Requests this hour</span></span>';
   }
   if(MODE==='c'){
     return '<span class="ai-tick c"><span class="d"></span>'+aiIcon(8)+'<b>'+n+'</b></span>';
