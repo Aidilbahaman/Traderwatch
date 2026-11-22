@@ -1777,7 +1777,7 @@ function show(a){
   '<li><b>'+esc(t('aiStruct'))+'</b><span>'+esc(ai.h1_trend||'-')+' / '+esc(ai.structure||'-')+' · '+ai.bars+' bars '+esc(ai.tf||'')+'</span></li>'+
   (ai.context?'<li><b>'+esc(t('aiCtx'))+'</b><span style="white-space:pre-line">'+esc(String(ai.context).slice(0,420))+'</span></li>':'')+
   '<li><b>'+esc(t('aiVision'))+'</b><span>'+(ai.vision?esc(t('aiVisionOn')):esc(t('aiVisionOff')))+'</span></li></ul>'}
-h+='<div class="sec">'+esc(t('risk'))+'</div><ul class="reasons">'+a.risk.map(function(x,i){return '<li style="animation-delay:'+(1.5+i*.12)+'s"><span class="dot" style="background:#ffc16b"></span><span>'+esc(x)+'</span></li>'}).join('')+'</ul>';
+ h+='<div class="sec">'+esc(t('risk'))+'</div><ul class="reasons">'+a.risk.map(function(x,i){return '<li style="animation-delay:'+(1.5+i*.12)+'s"><span class="dot" style="background:#ffc16b"></span><span>'+esc(x)+'</span></li>'}).join('')+'</ul>';
  h+='<div class="note">'+(lang==='en'?'Not financial advice. All trading decisions are your own.':'Ini bukan nasihat kewangan. Semua keputusan trading adalah tanggungjawab anda.')+'</div><button class="again" id="again">'+esc(t('again'))+'</button>';
  $('res').innerHTML=h;
  requestAnimationFrame(function(){requestAnimationFrame(function(){$('rf').style.strokeDashoffset=(213.6*(1-a.conf/100)).toFixed(1)})});
