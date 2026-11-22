@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>TraderWatch — Badge Position Fix</title>
+<style>
+:root{--bg:#0a0e0b;--card:#111612;--card2:#171e18;--line:#222b23;--text:#eef3ee;--muted:#8a978c;
+ --lime:#b7f36b;--red:#ff777d;--orange:#ffc16b;--blue:#8ab4ff}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font:13px -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;padding:24px 14px 60px}
+h1{font-size:19px;font-weight:800;text-align:center;margin-bottom:5px}
+.sub{color:var(--muted);font-size:11.5px;text-align:center;margin-bottom:20px;line-height:1.6}
+
+.opt{max-width:520px;margin:0 auto 26px}
+.opt h2{font-size:12px;font-weight:800;color:var(--lime);letter-spacing:.1em;margin-bottom:4px}
+.opt p{font-size:10.5px;color:var(--muted);margin-bottom:10px;line-height:1.5}
+.rowcard{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+
+/* ===== PAIR CARD asas ===== */
+.pair{position:relative;display:flex;flex-direction:column;gap:5px;background:var(--card);
+ border:1px solid var(--line);border-radius:15px;padding:10px 11px;text-align:left;overflow:hidden}
+.pair .top{display:flex;align-items:flex-start;justify-content:space-between;gap:6px}
+.pair .ic{width:26px;height:26px;border-radius:8px;background:#b7f36b1a;border:1px solid #b7f36b33;
+ display:grid;place-items:center;font:800 9px inherit;color:var(--lime);flex:none;letter-spacing:.03em}
+.pair .spark{width:58px;height:20px;flex:none}
+.pair .nm{font-size:13px;font-weight:850;letter-spacing:-.02em}
+.pair .ds{font-size:9.5px;color:var(--muted);margin-top:-2px}
+.pair .px{font-size:15px;font-weight:850;font-variant-numeric:tabular-nums;letter-spacing:-.03em}
+.pair .ch{font-size:9.5px;font-weight:800}
+.pair .ch.up{color:var(--lime)}
+.pair .ch.dn{color:var(--red)}
+
+/* badge asas */
+.aitick{display:inline-flex;align-items:center;gap:3.5px;font-size:8.5px;font-weight:750;
+ letter-spacing:.02em;color:var(--muted);white-space:nowrap}
+.aitick .ico{display:inline-flex;color:var(--blue)}
+.aitick b{color:var(--blue);font-variant-numeric:tabular-nums;font-weight:850}
+.aitick.live .ico{animation:p1 1.8s ease-in-out infinite}
+.aitick.live b{animation:p2 1.8s ease-in-out infinite}
+.aitick.live::after{content:"";width:3px;height:3px;border-radius:50%;background:var(--blue);
+ box-shadow:0 0 5px var(--blue);animation:p3 1.8s ease-in-out infinite}
+@keyframes p1{0%,100%{opacity:.55;transform:scale(.92)}50%{opacity:1;transform:scale(1.12)}}
+@keyframes p2{0%,100%{opacity:.7}50%{opacity:1}}
+@keyframes p3{0%,100%{opacity:.25;transform:scale(.7)}50%{opacity:1;transform:scale(1.35)}}
+.traders{display:inline-flex;align-items:center;font-size:8.5px;font-weight:800;
+ color:#ff9ba0;background:#ff777d14;border:1px solid #ff777d30;border-radius:999px;
+ padding:1.5px 7px;white-space:nowrap}
+
+/* ============ A: flex row, wrap, gap ============ */
+.a .badges{display:flex;align-items:center;flex-wrap:wrap;gap:5px;margin-top:2px}
+
+/* ============ B: space-between (AI kiri, trader kanan) ============ */
+.b .badges{display:flex;align-items:center;justify-content:space-between;gap:6px;margin-top:2px;width:100%}
+.b .badges .aitick{min-width:0;overflow:hidden;text-overflow:ellipsis}
+
+/* ============ C: kolum bertindih (AI atas, trader bawah) ============ */
+.c .badges{display:flex;flex-direction:column;align-items:flex-start;gap:4px;margin-top:2px}
+.c .badges .traders{align-self:flex-start}
+
+/* ============ D: trader di baris harga (atas), AI bawah ============ */
+.d .priceRow{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.d .priceRow .traders{margin-left:auto}
+
+/* ============ E: satu baris padat, kedua-dua kecil ============ */
+.e .badges{display:flex;align-items:center;justify-content:space-between;gap:4px;margin-top:3px;
+ padding-top:6px;border-top:1px solid #ffffff08;width:100%}
+.e .badges .aitick,.e .badges .traders{font-size:8px}
+
+@media(prefers-reduced-motion:reduce){.aitick.live .ico,.aitick.live b,.aitick.live::after{animation:none}}
+</style>
+</head>
+<body>
+<h1>✦ Badge Position — 5 Layout</h1>
+<p class="sub">Susun semula badge "AI requests" + "traders" supaya tak bertindih.</p>
+
+<div class="opt"><h2>A · FLEX ROW + WRAP</h2><p>Baris yang sama, turun baris baru bila tak cukup ruang.</p>
+ <div class="rowcard" id="rowA"></div></div>
+
+<div class="opt"><h2>B · SPACE-BETWEEN</h2><p>AI di kiri, trader di kanan. Sejajar penuh.</p>
+ <div class="rowcard" id="rowB"></div></div>
+
+<div class="opt"><h2>C · KOLUM</h2><p>AI atas, trader bawah — dua baris jelas.</p>
+ <div class="rowcard" id="rowC"></div></div>
+
+<div class="opt"><h2>D · TRADER DI BARIS HARGA</h2><p>Trader sebelah harga (kanan), AI di bawah.</p>
+ <div class="rowcard" id="rowD"></div></div>
+
+<div class="opt"><h2>E · FOOTER BAR</h2><p>Garis pemisah halus, dua badge dalam baris footer.</p>
+ <div class="rowcard" id="rowE"></div></div>
+
+<script>
+function ai(an){
+  return '<span class="aitick '+(an>0?'live':'idle')+'">'+
+   '<span class="ico"><svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M12 2v4M12 18v4M2 12h4M18 12h4"/><circle cx="12" cy="12" r="4"/></svg></span>'+
+   '<b>'+an+'</b><span>Requests this hour</span></span>';
+}
+function tr(n){ return n>0?'<span class="traders">🔥 '+n+' trader'+(n>1?'s':'')+'</span>':''; }
+function spark(up){
+  return '<svg class="spark" viewBox="0 0 58 20"><polyline points="0,14 8,9 16,12 24,5 32,8 40,3 48,7 58,2" fill="none" stroke="'+(up?'#b7f36b':'#ff777d')+'" stroke-width="1.4" stroke-linecap="round"/></svg>';
+}
+function card(cls,pair,px,ch,an,tn){
+  return '<div class="pair '+cls+'">'+
+   '<div class="top"><span class="ic">'+pair.slice(0,3)+'</span>'+spark(true)+'</div>'+
+   '<div class="nm">'+pair+'</div><div class="ds">Bitcoin</div>'+
+   '<div class="px">'+px+'</div><div class="ch up">'+ch+'</div>'+
+   '</div>';
+}
+/* A */
+document.getElementById('rowA').innerHTML=
+  card('a','BTCUSD','60749.94','▲ +1.01%',2,1)+card('a','XAUUSD','3534.88','▼ −0.12%',0,0);
+document.getElementById('rowA').innerHTML=document.getElementById('rowA').innerHTML.replace('<div class="ch up">▲ +1.01%</div>','<div class="ch up">▲ +1.01%</div><div class="badges">'+ai(2)+tr(1)+'</div>');
+/* B */
+document.getElementById('rowB').innerHTML=
+  '<div class="pair b"><div class="top"><span class="ic">BTC</span>'+spark(true)+'</div><div class="nm">BTCUSD</div><div class="ds">Bitcoin</div><div class="px">60749.94</div><div class="ch up">▲ +1.01%</div><div class="badges">'+ai(2)+tr(1)+'</div></div>'+
+  '<div class="pair b"><div class="top"><span class="ic">XAU</span>'+spark(true)+'</div><div class="nm">XAUUSD</div><div class="ds">Gold</div><div class="px">3534.88</div><div class="ch dn">▼ −0.12%</div><div class="badges">'+ai(0)+'</div></div>';
+/* C */
+document.getElementById('rowC').innerHTML=
+  '<div class="pair c"><div class="top"><span class="ic">BTC</span>'+spark(true)+'</div><div class="nm">BTCUSD</div><div class="ds">Bitcoin</div><div class="px">60749.94</div><div class="ch up">▲ +1.01%</div><div class="badges">'+ai(2)+tr(1)+'</div></div>'+
+  '<div class="pair c"><div class="top"><span class="ic">XAU</span>'+spark(true)+'</div><div class="nm">XAUUSD</div><div class="ds">Gold</div><div class="px">3534.88</div><div class="ch dn">▼ −0.12%</div><div class="badges">'+ai(0)+'</div></div>';
+/* D */
+document.getElementById('rowD').innerHTML=
+  '<div class="pair d"><div class="top"><span class="ic">BTC</span>'+spark(true)+'</div><div class="nm">BTCUSD</div><div class="ds">Bitcoin</div><div class="priceRow"><span class="px">60749.94</span>'+tr(1)+'</div><div class="ch up">▲ +1.01%</div><div class="badges">'+ai(2)+'</div></div>'+
+  '<div class="pair d"><div class="top"><span class="ic">XAU</span>'+spark(true)+'</div><div class="nm">XAUUSD</div><div class="ds">Gold</div><div class="priceRow"><span class="px">3534.88</span></div><div class="ch dn">▼ −0.12%</div><div class="badges">'+ai(0)+'</div></div>';
+/* E */
+document.getElementById('rowE').innerHTML=
+  '<div class="pair e"><div class="top"><span class="ic">BTC</span>'+spark(true)+'</div><div class="nm">BTCUSD</div><div class="ds">Bitcoin</div><div class="px">60749.94</div><div class="ch up">▲ +1.01%</div><div class="badges">'+ai(2)+tr(1)+'</div></div>'+
+  '<div class="pair e"><div class="top"><span class="ic">XAU</span>'+spark(true)+'</div><div class="nm">XAUUSD</div><div class="ds">Gold</div><div class="px">3534.88</div><div class="ch dn">▼ −0.12%</div><div class="badges">'+ai(0)+'</div></div>';
+</script>
+</body>
+</html>
