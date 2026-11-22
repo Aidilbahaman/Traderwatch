@@ -1,0 +1,178 @@
+<!doctype html><html lang="ms"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Preview — Welcome Zoom Into Blackhole</title>
+<style>
+:root{--card:#111612;--card2:#171e18;--line:#222b23;--muted:#8a978c;--lime:#b7f36b;--blue:#8ab4ff;--text:#eef3ee;--onlime:#10150b}
+*{box-sizing:border-box;margin:0}
+body{background:#0a0e0b;color:var(--text);font:14px -apple-system,sans-serif}
+.hint{position:fixed;top:0;left:0;right:0;z-index:999;background:#171e18dd;color:var(--muted);font-size:10.5px;padding:8px 14px;text-align:center;border-bottom:1px solid var(--line)}
+.hint b{color:var(--lime)}
+.phone{width:390px;max-width:100%;height:800px;max-height:100vh;margin:0 auto;position:relative;overflow:hidden;background:radial-gradient(ellipse at 50% 40%,#151d16 0%,#080c09 70%)}
+.replay{position:fixed;bottom:14px;right:14px;z-index:999;background:var(--card2);border:1px solid var(--line);color:var(--lime);font:700 10px inherit;padding:8px 14px;border-radius:99px;cursor:pointer}
+/* ===== LAYER 1 ===== */
+#intro{position:absolute;inset:0;z-index:10;display:flex;flex-direction:column;align-items:center;justify-content:center;
+ background:radial-gradient(ellipse at 50% 50%,#101810 0%,#050807 70%);cursor:pointer;overflow:hidden}
+.brand{position:absolute;top:64px;font-size:13px;font-weight:900;letter-spacing:1px;color:var(--lime);z-index:5;transition:opacity .3s,transform .5s}
+.brand span{color:var(--text)}
+/* blackhole */
+.bh{position:relative;width:280px;height:280px;display:grid;place-items:center;isolation:isolate;z-index:3;
+ transform-origin:50% 50%;will-change:transform}
+.bh .aura{position:absolute;width:210px;height:210px;border-radius:50%;background:radial-gradient(circle,#b7f36b38 0%,#b7f36b14 45%,transparent 70%);animation:spin 12s linear infinite}
+.bh .halo{position:absolute;width:250px;height:250px;border-radius:50%;background:radial-gradient(circle,transparent 55%,#b7f36b1f 62%,transparent 75%);animation:pulseHalo 4s ease-in-out infinite}
+.bh .photon{position:absolute;width:130px;height:130px;border-radius:50%;border:1.5px solid #d6ff9a;opacity:.5;animation:pulse 3s ease-in-out infinite;box-shadow:0 0 16px #b7f36b55 inset}
+.bh .core{position:relative;width:86px;height:86px;border-radius:50%;background:#000;z-index:6;
+ box-shadow:0 0 0 2px #b7f36bc9,0 0 32px 10px #b7f36b99,0 0 90px 30px #b7f36b44;animation:coreBeat 3s ease-in-out infinite}
+.bh .wv{position:absolute;width:130px;height:130px;border-radius:50%;border:1px solid #b7f36b99;z-index:2;animation:wave 3.6s ease-out infinite}
+.bh .wv.b{animation-delay:1.2s}.bh .wv.c{animation-delay:2.4s}
+.bh .scan{position:absolute;width:200px;height:200px;border-radius:50%;border:2px solid transparent;border-top-color:#b7f36b;border-right-color:#b7f36b88;z-index:7;animation:spin 2s linear infinite;box-shadow:0 0 20px #b7f36b44}
+.bh .ray{position:absolute;left:50%;top:50%;width:0;height:0;transform-origin:0 0}
+.bh .dot{position:absolute;border-radius:50%;background:#eaffc4;box-shadow:0 0 8px #b7f36bcc;animation:suck linear infinite}
+.bh .dot.b{background:#dbe7ff;box-shadow:0 0 8px #8ab4ffcc}
+.bh .dot.o{background:#ffe8c8;box-shadow:0 0 8px #ffc16bcc}
+.bh .dot.v{background:#e6dbff;box-shadow:0 0 8px #b18cffcc}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes pulse{0%,100%{transform:scale(.96);opacity:.4}50%{transform:scale(1.08);opacity:.85}}
+@keyframes pulseHalo{0%,100%{transform:scale(.96);opacity:.6}50%{transform:scale(1.06);opacity:1}}
+@keyframes coreBeat{0%,100%{box-shadow:0 0 0 2px #b7f36bc9,0 0 32px 10px #b7f36b99,0 0 90px 30px #b7f36b44}50%{box-shadow:0 0 0 2px #b7f36be6,0 0 48px 16px #b7f36bbb,0 0 130px 46px #b7f36b55}}
+@keyframes wave{0%{transform:scale(1);opacity:.8}100%{transform:scale(2.3);opacity:0}}
+@keyframes suck{0%{transform:translate3d(var(--d),0,0);opacity:0}8%{opacity:1}92%{opacity:1}100%{transform:translate3d(0,0,0);opacity:0}}
+.ititle{position:absolute;bottom:150px;text-align:center;z-index:5;transition:opacity .3s,transform .5s}
+.ititle b{display:block;font-size:24px;font-weight:900;letter-spacing:-.5px}
+.ititle small{display:block;color:var(--muted);font-size:11.5px;margin-top:8px;line-height:1.5}
+.itap{position:absolute;bottom:46px;font-size:11px;color:var(--lime);font-weight:700;letter-spacing:.4px;animation:blink 1.6s ease-in-out infinite;z-index:5;transition:opacity .25s}
+@keyframes blink{0%,100%{opacity:.35}50%{opacity:1}}
+/* ===== WARP STREAKS (muncul masa zoom) ===== */
+#warp{position:absolute;inset:0;z-index:8;pointer-events:none;opacity:0}
+#warp .streak{position:absolute;left:50%;top:50%;width:2px;height:0;transform-origin:50% 0;
+ background:linear-gradient(180deg,transparent,#b7f36b,#eaffc4);border-radius:2px;opacity:0}
+/* ===== ZOOM SEQUENCE ===== */
+/* fasa 1: anticipation — core menyala, dot laju */
+#intro.anticipate .bh .core{animation:none;box-shadow:0 0 0 3px #d6ff9a,0 0 70px 26px #b7f36bee,0 0 160px 60px #b7f36b88}
+#intro.anticipate .bh .dot{animation-duration:.7s!important}
+#intro.anticipate .bh .scan{animation-duration:.5s}
+#intro.anticipate .itap{opacity:0}
+/* fasa 2: zoom masuk — bh membesar drastik, teks terpelanting keluar */
+#intro.zooming .bh{animation:zoomIn 1.15s cubic-bezier(.55,0,.85,.35) forwards}
+@keyframes zoomIn{
+ 0%{transform:scale(1)}
+ 18%{transform:scale(1.25)}
+ 100%{transform:scale(16)}
+}
+#intro.zooming .brand{opacity:0;transform:translateY(-40px) scale(.9)}
+#intro.zooming .ititle{opacity:0;transform:translateY(60px) scale(.85)}
+#intro.zooming .itap{opacity:0}
+#intro.zooming .bh .dot{animation-duration:.35s!important}
+#intro.zooming .bh .wv{animation-duration:.6s}
+#intro.zooming #warp{opacity:1}
+#intro.zooming #warp .streak{animation:streakOut 1.1s cubic-bezier(.4,0,.9,.4) forwards}
+@keyframes streakOut{
+ 0%{height:0;opacity:0;transform:translate(-50%,0) rotate(var(--a)) scaleY(1)}
+ 15%{opacity:.9}
+ 100%{height:520px;opacity:0;transform:translate(-50%,0) rotate(var(--a)) scaleY(1)}
+}
+/* fasa 3: void — skrin hitam penuh (kita dah masuk) */
+#void{position:absolute;inset:0;z-index:15;background:#000;opacity:0;pointer-events:none;transition:opacity .28s}
+#void.on{opacity:1}
+/* ===== LAYER 2 — muncul dari kegelapan ===== */
+#on{position:absolute;inset:0;z-index:20;display:flex;align-items:center;justify-content:center;padding:22px;
+ background:rgba(4,8,5,.9);backdrop-filter:blur(10px);opacity:0;pointer-events:none;transition:opacity .5s}
+#on.show{opacity:1;pointer-events:auto}
+#on .wcard{transform:scale(.82);opacity:0;transition:transform .55s cubic-bezier(.2,1.2,.4,1),opacity .45s}
+#on.show .wcard{transform:scale(1);opacity:1}
+.wcard{width:100%;max-width:380px;background:var(--card);border:1px solid #b7f36b3d;border-radius:24px;padding:24px 20px 18px;text-align:center;box-shadow:0 24px 70px #0009}
+.wlogo{font-size:13px;font-weight:900;color:var(--lime);letter-spacing:.4px;margin-bottom:16px}
+.wlogo span{color:var(--text)}
+.wholerow{display:grid;place-items:center;margin:-4px 0 14px}
+.hole{position:relative;width:96px;height:96px;display:grid;place-items:center;isolation:isolate}
+.hole .aura{position:absolute;width:60px;height:60px;border-radius:50%;background:radial-gradient(circle,#b7f36b2e,#b7f36b12 48%,transparent 68%);animation:spin 9s linear infinite}
+.hole .photon{position:absolute;width:38px;height:38px;border-radius:50%;border:1.5px solid #d6ff9a;opacity:.5;animation:pulse 2.8s ease-in-out infinite}
+.hole .core{position:relative;width:26px;height:26px;border-radius:50%;background:#000;z-index:6;box-shadow:0 0 0 1.5px #b7f36ba6,0 0 12px 3px #b7f36b6b}
+.hole .wv{position:absolute;width:38px;height:38px;border-radius:50%;border:1px solid #b7f36b99;z-index:2;animation:wave 3.2s ease-out infinite}
+.hole .wv.b{animation-delay:1.05s}.hole .wv.c{animation-delay:2.1s}
+.hole .ray{position:absolute;left:50%;top:50%;width:0;height:0;transform-origin:0 0}
+.hole .dot{position:absolute;top:-2px;left:0;border-radius:50%;background:#eaffc4;box-shadow:0 0 6px #b7f36bcc;animation:suck linear infinite}
+.hole .dot.b{background:#dbe7ff}.hole .dot.o{background:#ffe8c8}.hole .dot.v{background:#e6dbff}
+.wttl{font-size:21px;font-weight:900;line-height:1.2}
+.wsub{font-size:11.5px;color:var(--muted);margin:7px 0 20px;line-height:1.5}
+.wopt{display:flex;align-items:center;gap:12px;width:100%;text-align:left;cursor:pointer;background:var(--card2);border:1px solid var(--line);border-radius:15px;padding:13px;margin-bottom:10px;color:var(--text);font:inherit}
+.wic{width:36px;height:36px;flex:none;border-radius:11px;display:grid;place-items:center;background:#b7f36b18;color:var(--lime)}
+.wtx{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px}
+.wtx b{font-size:12.5px;font-weight:800}.wtx small{font-size:10px;color:var(--muted)}
+.wstate{font-size:10px;font-weight:800;color:var(--muted)}
+.wgo{width:100%;border:0;border-radius:14px;padding:14px;cursor:pointer;font:800 13px inherit;background:linear-gradient(135deg,#b7f36b,#8ed94e);color:var(--onlime);margin-top:8px}
+.wskip{display:block;margin:11px auto 0;border:0;background:none;color:var(--muted);cursor:pointer;font:600 11px inherit;text-decoration:underline;padding:6px}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:opacity .2s!important}#intro.zooming .bh{transform:scale(1)}}
+</style></head><body>
+<div class="hint">Tekan <b>blackhole</b> untuk zoom masuk → Layer 2. Butang <b>↻ Replay</b> untuk ulang animasi.</div>
+<button class="replay" onclick="location.reload()">↻ Replay</button>
+<div class="phone">
+ <div id="intro">
+  <div class="brand">✦ <span>TraderWatch</span></div>
+  <div class="bh" id="bh">
+   <div class="aura"></div><div class="halo"></div>
+   <div class="wv"></div><div class="wv b"></div><div class="wv c"></div>
+   <div class="photon"></div><div class="scan"></div><div class="core"></div>
+  </div>
+  <div id="warp"></div>
+  <div class="ititle"><b>TraderWatch</b><small>Market intelligence, di hujung jari anda.</small></div>
+  <div class="itap">TEKAN UNTUK MASUK →</div>
+ </div>
+ <div id="void"></div>
+ <div id="on"><div class="wcard">
+  <div class="wlogo">✦ <span>TraderWatch</span></div>
+  <div class="wholerow"><div class="hole" id="wh"><div class="aura"></div><div class="wv"></div><div class="wv b"></div><div class="wv c"></div><div class="photon"></div><div class="core"></div></div></div>
+  <div class="wttl">Selamat datang!</div><div class="wsub">Sediakan app anda sebelum mula.</div>
+  <button class="wopt"><span class="wic"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"/><path d="M10 21h4"/></svg></span><span class="wtx"><b>Hidupkan notifikasi</b><small>Alert bila trade kena TP/SL</small></span><span class="wstate">Hidupkan</span></button>
+  <button class="wopt"><span class="wic"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="6" y="2" width="12" height="20" rx="2"/><path d="M11 18h2"/></svg></span><span class="wtx"><b>Tambah ke skrin utama</b><small>Buka macam app, penuh skrin</small></span><span class="wstate">Tambah</span></button>
+  <button class="wgo">Mula trade →</button><button class="wskip">Langkau dulu</button>
+ </div></div>
+</div>
+<script>
+(function(){
+ var bh=document.getElementById('bh'),wh=document.getElementById('wh'),warp=document.getElementById('warp');
+ var cols=['','b','','o','','v','','b','','o','','','b','','v','','o'];
+ function dots(host,n,dist){
+  for(var i=0;i<n;i++){
+   var ray=document.createElement('div');ray.className='ray';
+   ray.style.transform='rotate('+(Math.random()*360).toFixed(1)+'deg)';
+   var d=document.createElement('div');d.className='dot '+(cols[i%cols.length]||'');
+   var dur=(2+Math.random()*2.4);
+   d.style.animationDuration=dur.toFixed(2)+'s';d.style.animationDelay=(-Math.random()*dur).toFixed(2)+'s';
+   d.style.setProperty('--d',dist+'px');
+   var sz=(2.6+Math.random()*2.4).toFixed(1);d.style.width=sz+'px';d.style.height=sz+'px';d.style.top=(-parseFloat(sz)/2)+'px';
+   ray.appendChild(d);host.appendChild(ray);
+  }
+ }
+ dots(bh,18,120);dots(wh,12,44);
+ /* warp streaks — 28 garis radial dari pusat */
+ for(var i=0;i<28;i++){
+  var s=document.createElement('div');s.className='streak';
+  var a=(i/28)*360+(Math.random()*8-4);
+  s.style.setProperty('--a',a.toFixed(1)+'deg');
+  s.style.animationDelay=(Math.random()*0.25).toFixed(2)+'s';
+  s.style.width=(1+Math.random()*2).toFixed(1)+'px';
+  warp.appendChild(s);
+ }
+ var intro=document.getElementById('intro'),voidEl=document.getElementById('void'),on=document.getElementById('on');
+ var busy=false;
+ intro.addEventListener('click',function(){
+  if(busy)return;busy=true;
+  /* fasa 1: anticipation 220ms */
+  intro.classList.add('anticipate');
+  setTimeout(function(){
+   /* fasa 2: zoom 1.15s */
+   intro.classList.add('zooming');
+  },220);
+  setTimeout(function(){
+   /* fasa 3: void — kita dah masuk */
+   voidEl.classList.add('on');
+  },1180);
+  setTimeout(function(){
+   intro.style.display='none';
+   on.classList.add('show');
+   /* void fade keluar perlahan supaya layer 2 "muncul dari dalam" */
+   setTimeout(function(){voidEl.style.transition='opacity .6s';voidEl.classList.remove('on')},120);
+  },1480);
+ });
+})();
+</script></body></html>
