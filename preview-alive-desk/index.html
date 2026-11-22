@@ -1,0 +1,892 @@
+<!doctype html>
+<html lang="ms">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#171512">
+<meta name="robots" content="noindex">
+<title>TraderWatch · Night Desk</title>
+<meta name="description" content="Ruang kerja ahli TraderWatch waktu malam — signal XAU/USD, XAG/USD dan BTC dengan chart beranotasi, sebab entry dan rekod prestasi enjin. Hangat, tenang, peribadi.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='9' fill='%23211E1A'/%3E%3Cg stroke='%23FFC46B' stroke-width='2' stroke-linecap='round' fill='none'%3E%3Cpath d='M9 22h14M16 22v-5'/%3E%3Cpath d='M10 13l6-6 6 6c-2 2.4-10 2.4-12 0z' fill='%23FFC46B' stroke='none' opacity='.9'/%3E%3Cpath d='M16 4v1.5M7 7l1 1M25 7l-1 1'/%3E%3C/g%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;600;700&family=Sora:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+:root{
+  --bg:#171512; --surface:#211E1A; --surface2:#2A2620;
+  --line:rgba(240,224,200,.12); --line-soft:rgba(240,224,200,.07);
+  --text:#F5EBDC; --muted:#A99C8B;
+  --amber:#FFC46B; --coral:#FF8C66; --lime:#C6F36B; --sage:#9FBF8C;
+  --red:#E8786E; --blue:#8FB6D9;
+  --ink:#2A1E0E;
+  --r-card:18px; --r-btn:12px; --r-pill:999px;
+  --hand:'Caveat','Segoe Script','Bradley Hand',cursive;
+  --body:'Sora',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+  --mono:'IBM Plex Mono',ui-monospace,SFMono-Regular,Menlo,monospace;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%;touch-action:manipulation}
+body{
+  background:var(--bg);color:var(--text);
+  font:14px/1.55 var(--body);
+  -webkit-font-smoothing:antialiased;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  min-height:100vh;padding:26px 14px;
+}
+button,input{font:inherit;color:inherit}
+button{cursor:pointer}
+a{color:var(--amber);text-decoration:none}
+:focus-visible{outline:2px solid var(--amber);outline-offset:2px;border-radius:8px}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.mono{font-family:var(--mono);font-variant-numeric:tabular-nums}
+
+/* ---- Desk atmosphere: lamp glow + paper grain ---- */
+.lamp{
+  position:fixed;z-index:0;top:-18vh;left:-12vw;width:74vw;height:74vh;pointer-events:none;
+  background:radial-gradient(closest-side,rgba(255,196,107,.12),rgba(255,196,107,.05) 55%,transparent 75%);
+  animation:lampBreath 10s ease-in-out infinite alternate;
+}
+.lamp.small{top:auto;left:auto;right:-16vw;bottom:-24vh;width:56vw;height:56vh;
+  background:radial-gradient(closest-side,rgba(255,140,102,.06),transparent 72%);animation-delay:-5s}
+@keyframes lampBreath{from{opacity:.72;transform:scale(.98)}to{opacity:1;transform:scale(1.03)}}
+body::after{
+  content:"";position:fixed;inset:0;z-index:90;pointer-events:none;opacity:.025;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* ---- Phone frame ---- */
+.phone{
+  position:relative;z-index:1;width:390px;height:min(844px,calc(100vh - 76px));
+  display:flex;flex-direction:column;overflow:hidden;
+  border:1px solid rgba(240,224,200,.16);border-radius:34px;
+  background:var(--bg);
+  box-shadow:0 40px 90px rgba(0,0,0,.55),0 0 90px rgba(255,196,107,.07),inset 0 1px 0 rgba(240,224,200,.07);
+}
+.phone::before{
+  content:"";position:absolute;inset:0;pointer-events:none;z-index:0;
+  background:radial-gradient(ellipse 320px 240px at 88% -6%,rgba(255,196,107,.12),transparent 70%);
+  animation:lampBreath 10s ease-in-out infinite alternate;animation-delay:-3s;
+}
+.desk-note{position:relative;z-index:1;margin:16px 0 0;text-align:center}
+.desk-note .hand{font-size:19px;color:var(--muted)}
+.desk-note small{display:block;margin-top:2px;font:400 9.5px var(--mono);color:rgba(169,156,139,.6);letter-spacing:.08em}
+
+/* ---- Handwritten labels ---- */
+.hand{font-family:var(--hand);font-weight:600;color:var(--amber);letter-spacing:.01em;animation:handIn .9s ease both}
+.hand.d1{animation-delay:.15s}.hand.d2{animation-delay:.35s}.hand.d3{animation-delay:.55s}.hand.d4{animation-delay:.75s}
+@keyframes handIn{from{opacity:0;transform:translateY(5px) rotate(-1.5deg)}to{opacity:1;transform:translateY(0) rotate(0)}}
+
+/* ---- App bar ---- */
+.appbar{
+  position:relative;z-index:5;flex:none;display:flex;align-items:center;justify-content:space-between;gap:8px;
+  padding:calc(13px + env(safe-area-inset-top)) 16px 11px;
+  border-bottom:1px solid var(--line-soft);
+  background:rgba(23,21,18,.88);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+}
+.brand{display:flex;align-items:baseline;gap:7px;min-width:0}
+.wordmark{font:600 16.5px/1 var(--body);letter-spacing:-.01em;color:var(--text);white-space:nowrap}
+.brand .hand{font-size:16px;transform:rotate(-2deg);display:inline-block}
+.bar-right{display:flex;align-items:center;gap:9px}
+.clock{font:500 10px var(--mono);color:var(--muted);letter-spacing:.03em;white-space:nowrap}
+.avatar{
+  width:32px;height:32px;border-radius:50%;display:grid;place-items:center;flex:none;border:0;
+  font:600 11px var(--body);letter-spacing:.03em;color:var(--ink);
+  background:linear-gradient(145deg,var(--amber),var(--coral));
+  box-shadow:0 0 0 2px rgba(255,196,107,.18),0 4px 14px rgba(255,196,107,.22);
+}
+
+/* ---- Scroll + screens ---- */
+.scroll{position:relative;z-index:1;flex:1;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:var(--surface2) transparent;padding:16px 15px 100px}
+.screen{display:none}
+.screen.active{display:block;animation:screenIn .35s ease}
+@keyframes screenIn{from{opacity:.4;transform:translateY(5px)}to{opacity:1;transform:none}}
+
+/* ---- Generic paper cards ---- */
+.greet{display:flex;align-items:flex-end;justify-content:space-between;gap:10px;margin:2px 0 4px}
+.greet h2{margin:0;font:600 1.7rem/1.15 var(--body);letter-spacing:-.02em}
+.greet p{margin:4px 0 0;font-size:11px;color:var(--muted)}
+.greet-note{margin:2px 0 14px;font-size:18px;transform:rotate(-1deg);display:inline-block}
+.section-title{display:flex;align-items:baseline;justify-content:space-between;gap:8px;margin:22px 0 9px}
+.section-title h3{margin:0;font:600 13px var(--body);letter-spacing:.01em}
+.section-title .hand{font-size:16.5px;color:var(--muted)}
+.card{
+  position:relative;
+  background:linear-gradient(165deg,#262119 0%,var(--surface) 55%,#1E1B17 100%);
+  border:1px solid var(--line);border-radius:var(--r-card);
+  padding:15px;
+  box-shadow:0 12px 28px rgba(0,0,0,.28),inset 0 1px 0 rgba(240,224,200,.06);
+  transition:transform .25s ease,box-shadow .25s ease,border-color .25s ease;
+}
+.card:hover{transform:translateY(-2px);box-shadow:0 18px 36px rgba(0,0,0,.36),0 0 24px rgba(255,196,107,.05),inset 0 1px 0 rgba(240,224,200,.08);border-color:rgba(240,224,200,.18)}
+.card + .card{margin-top:11px}
+.card-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:11px}
+.card-head h3{margin:0;font:600 12px var(--body);letter-spacing:.02em;color:var(--text)}
+.card-head .hand{font-size:17px;transform:rotate(-2deg)}
+.chip{display:inline-flex;align-items:center;gap:5px;border:1px solid var(--line);border-radius:var(--r-pill);padding:4px 10px;font:600 9.5px var(--body);letter-spacing:.06em;white-space:nowrap;color:var(--muted);background:rgba(240,224,200,.04)}
+.chip.buy{color:var(--sage);border-color:rgba(159,191,140,.4);background:rgba(159,191,140,.09)}
+.chip.sell{color:var(--coral);border-color:rgba(255,140,102,.4);background:rgba(255,140,102,.09)}
+.chip.live{color:var(--amber);border-color:rgba(255,196,107,.42);background:rgba(255,196,107,.09)}
+.chip.amber{color:var(--amber);border-color:rgba(255,196,107,.42);background:rgba(255,196,107,.08)}
+.dot{width:6px;height:6px;border-radius:50%;background:currentColor;display:inline-block}
+.dot.pulse{animation:pulse 2.4s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:1;box-shadow:0 0 0 0 rgba(255,196,107,.45)}50%{opacity:.6;box-shadow:0 0 0 5px rgba(255,196,107,0)}}
+.pos{color:var(--sage)!important}.neg{color:var(--red)!important}.amber-t{color:var(--amber)!important}.lime-t{color:var(--lime)!important}
+.muted{color:var(--muted)}
+.tiny{font-size:10.5px;color:var(--muted);line-height:1.55}
+.disclaimer{margin:20px 0 4px;font-size:9.5px;color:rgba(169,156,139,.75);text-align:center}
+
+/* ---- Hero signal (paper card + tape) ---- */
+.hero{
+  border-color:rgba(255,196,107,.34);cursor:pointer;width:100%;text-align:left;color:inherit;
+  box-shadow:0 14px 34px rgba(0,0,0,.34),0 0 30px rgba(255,196,107,.06),inset 0 1px 0 rgba(255,196,107,.1);
+  margin-top:14px;overflow:visible;
+}
+.hero:hover{border-color:rgba(255,196,107,.5)}
+.tape{
+  position:absolute;top:-8px;left:28px;width:78px;height:17px;z-index:2;pointer-events:none;
+  background:rgba(255,196,107,.15);border:1px solid rgba(255,196,107,.2);
+  transform:rotate(-3deg);border-radius:2px;
+}
+.hero-top{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:12px}
+.pair{font:600 20px/1.1 var(--body);letter-spacing:-.02em}
+.hero-sub{font-size:10px;color:var(--muted);margin-top:3px}
+.hero-tags{display:flex;gap:6px;align-items:center}
+.level-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.level{position:relative;background:var(--surface2);border:1px solid var(--line-soft);border-radius:12px;padding:9px 11px;min-width:0}
+.level.span2{grid-column:span 2}
+.level .lab{display:block;font:600 8.5px var(--body);letter-spacing:.12em;color:var(--muted);margin-bottom:3px}
+.level .val{display:block;font:600 14px var(--mono);letter-spacing:-.02em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.level .val.big{font-size:17px}
+.level.zone{border-color:rgba(255,196,107,.38);background:rgba(255,196,107,.07)}
+.watch{
+  position:absolute;right:10px;top:7px;font-size:17px;line-height:1;
+  transform:rotate(-4deg);display:inline-flex;align-items:flex-start;gap:1px;pointer-events:none;
+}
+.watch svg{width:16px;height:19px;margin-top:8px;flex:none}
+.hero-foot{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:12px;padding-top:11px;border-top:1px dashed var(--line)}
+.rr{font:600 12px var(--mono);color:var(--amber)}
+.cta-mini{font-size:10px;color:var(--muted)}
+
+/* ---- Rows ---- */
+.rows{display:flex;flex-direction:column;gap:7px}
+.row{display:flex;align-items:center;justify-content:space-between;gap:10px;min-height:46px;padding:8px 12px;border:1px solid var(--line-soft);border-radius:14px;background:linear-gradient(165deg,#242019,var(--surface));transition:transform .25s ease,border-color .25s ease}
+.row:hover{transform:translateY(-1px);border-color:var(--line)}
+.row-l{display:flex;align-items:center;gap:8px;min-width:0}
+.row-l strong{font:600 12px var(--body)}
+.row-l small{display:block;font-size:9.5px;color:var(--muted)}
+.row-r{text-align:right;white-space:nowrap;font:600 11.5px var(--mono)}
+
+/* ---- Compact performance ---- */
+.perf-mini{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:14px;text-decoration:none;color:inherit}
+.perf-mini .nums{display:flex;align-items:baseline;gap:11px;margin:3px 0}
+.perf-mini .wr{font:600 24px/1 var(--body);letter-spacing:-.02em;color:var(--amber)}
+.perf-mini .net{font:600 13px var(--mono);color:var(--lime)}
+.perf-mini svg{width:112px;height:46px;flex:none}
+
+/* ---- Detail ---- */
+.back{display:inline-flex;align-items:center;gap:6px;margin:0 0 13px;padding:6px 12px 6px 8px;border-radius:var(--r-pill);border:1px solid var(--line);background:rgba(240,224,200,.04);font:600 11px var(--body);color:var(--text)}
+.back svg{width:15px;height:15px}
+.detail-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:12px}
+.detail-head .tags{display:flex;gap:6px}
+.chart-card{padding:10px 10px 11px}
+.chart-top{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:2px 3px 9px}
+.chart-top strong{font:600 10.5px var(--body);letter-spacing:.05em;text-transform:uppercase;color:var(--muted)}
+.reason-btn{display:inline-flex;align-items:center;gap:6px;border-radius:var(--r-pill);border:1px solid var(--line);background:rgba(240,224,200,.05);color:var(--muted);font:600 10px var(--body);padding:6px 11px;transition:color .2s,border-color .2s,background .2s}
+.reason-btn svg{width:13px;height:13px}
+.reason-btn[aria-pressed="true"]{color:var(--amber);border-color:rgba(255,196,107,.45);background:rgba(255,196,107,.1)}
+.chart-wrap{position:relative;border-radius:12px;overflow:hidden;background:linear-gradient(180deg,rgba(240,224,200,.03),transparent)}
+.chart-wrap svg{display:block;width:100%;height:auto}
+.grid-line{stroke:var(--line-soft);stroke-width:1;stroke-dasharray:2 5}
+.reason-layer{opacity:0;transition:opacity .5s ease;pointer-events:none}
+.chart-on .reason-layer{opacity:1}
+.chart-legend{display:flex;flex-wrap:wrap;gap:9px;padding:9px 4px 1px;font-size:9.5px;color:var(--muted)}
+.chart-legend i{width:7px;height:7px;border-radius:2px;display:inline-block;margin-right:4px}
+.chart-note{font-size:9.5px;color:var(--muted);padding:7px 4px 0;margin:0}
+
+/* ---- Reasons / checklist ---- */
+.reason-summary{margin:0 0 11px;font-size:12px;line-height:1.65;color:rgba(245,235,220,.85)}
+.conf{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:7px}
+.conf li{display:flex;align-items:flex-start;gap:9px;font-size:11.5px;color:rgba(245,235,220,.9)}
+.conf .tick{
+  width:18px;height:18px;flex:none;display:grid;place-items:center;margin-top:1px;
+  color:var(--amber);border:1.5px solid rgba(255,196,107,.5);background:rgba(255,196,107,.08);
+  border-radius:46% 54% 52% 48% / 52% 46% 54% 48%;
+  font-size:10px;font-weight:700;
+}
+.conf small{display:block;color:var(--muted);font-size:10px;margin-top:1px}
+.trend{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-top:13px;padding-top:12px;border-top:1px dashed var(--line)}
+.trend div{text-align:center;border:1px solid var(--line-soft);border-radius:12px;padding:8px 4px;background:var(--surface2)}
+.trend b{display:block;font:600 10px var(--mono);color:var(--muted)}
+.trend span{display:block;margin-top:3px;font:600 11px var(--body);color:var(--sage)}
+.trend span.dn{color:var(--coral)}
+.timeline{display:flex;align-items:flex-start;margin-top:4px}
+.tl{flex:1;position:relative;padding-top:19px;text-align:center}
+.tl::before{content:"";position:absolute;left:0;right:0;top:6px;height:1.5px;background:var(--line)}
+.tl:first-child::before{left:50%}.tl:last-child::before{right:50%}
+.tl i{position:absolute;top:1px;left:50%;transform:translateX(-50%);width:10px;height:10px;background:var(--bg);border:2px solid var(--amber);border-radius:48% 52% 50% 50% / 52% 48% 52% 48%}
+.tl.done i{background:var(--amber);box-shadow:0 0 10px rgba(255,196,107,.4)}
+.tl b{display:block;font:600 10.5px var(--body)}
+.tl small{display:block;font:400 9.5px var(--mono);color:var(--muted);margin-top:2px}
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:8px;width:100%;
+  border:1px solid rgba(255,196,107,.55);border-radius:var(--r-btn);padding:12px 14px;
+  background:linear-gradient(150deg,var(--amber),#F0A94E);color:var(--ink);
+  font:600 12px var(--body);box-shadow:0 10px 24px rgba(255,196,107,.18);
+  transition:transform .2s ease,box-shadow .2s ease;
+}
+.btn:hover{transform:translateY(-1px);box-shadow:0 14px 30px rgba(255,196,107,.26)}
+.btn.ghost{background:rgba(240,224,200,.05);color:var(--text);border-color:var(--line);box-shadow:none}
+.btn svg{width:15px;height:15px}
+
+/* ---- Prestasi ---- */
+.big-nums{display:flex;align-items:flex-end;justify-content:space-between;gap:12px}
+.big-r{font:600 2.3rem/1 var(--body);letter-spacing:-.02em;color:var(--lime)}
+.big-r small{font-size:1.1rem;font-weight:600}
+.wr-block{text-align:right}
+.wr-block b{display:block;font:600 1.7rem/1 var(--body);letter-spacing:-.02em;color:var(--amber)}
+.steady{position:absolute;top:-13px;right:14px;font-size:18px;transform:rotate(2deg);background:var(--bg);padding:0 7px;border-radius:6px}
+.tiles{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-top:15px}
+.tile{text-align:center;padding:10px 4px;border:1px solid var(--line-soft);border-radius:12px;background:var(--surface2)}
+.tile b{display:block;font:600 15px var(--mono)}
+.tile span{display:block;font-size:9px;color:var(--muted);margin-top:3px;letter-spacing:.05em}
+.equity svg{width:100%;height:auto;display:block}
+.equity-foot{display:flex;justify-content:space-between;font:400 9px var(--mono);color:var(--muted);padding:2px 2px 0}
+table{width:100%;border-collapse:collapse;font-size:11px}
+th,td{padding:8px 5px;text-align:right;border-bottom:1px solid var(--line-soft)}
+th:first-child,td:first-child{text-align:left}
+thead th{font:600 8.5px var(--body);color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
+tbody td{font-family:var(--mono)}
+tbody tr.hl td{color:var(--sage)}
+tbody tr:last-child td,tbody tr:last-child th{border-bottom:0}
+.method{font-size:10.5px;color:var(--muted);line-height:1.7;margin:0;padding-left:16px}
+.method li{margin-bottom:4px}
+
+/* ---- Markets ---- */
+.chips{display:flex;gap:7px;margin-bottom:11px;overflow-x:auto;padding-bottom:2px}
+.chip-select{cursor:pointer;padding:7px 13px;font-size:10.5px;transition:color .2s,border-color .2s,background .2s}
+.chip-select[aria-pressed="true"]{color:var(--amber);border-color:rgba(255,196,107,.5);background:rgba(255,196,107,.1)}
+.market-meta{display:flex;align-items:flex-end;justify-content:space-between;gap:8px;padding:2px 2px 10px}
+.market-price{font:600 1.7rem/1.1 var(--body);letter-spacing:-.02em}
+
+/* ---- Tools ---- */
+.fields{display:grid;grid-template-columns:repeat(2,1fr);gap:9px}
+.field{display:block}
+.field span{display:block;font:600 9.5px var(--body);letter-spacing:.05em;color:var(--muted);margin-bottom:5px}
+.field input{width:100%;border:1px solid var(--line);border-radius:var(--r-btn);background:var(--surface2);padding:10px 11px;font:600 13px var(--mono);outline:none;transition:border-color .2s}
+.field input:focus{border-color:rgba(255,196,107,.6)}
+.calc-out{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-top:13px}
+.calc-out div{padding:13px 10px;border:1px solid rgba(255,196,107,.35);border-radius:14px;background:rgba(255,196,107,.07);text-align:center}
+.calc-out small{display:block;font:600 8.5px var(--body);color:var(--muted);letter-spacing:.09em;text-transform:uppercase}
+.calc-out b{display:block;margin-top:5px;font:600 19px var(--mono);color:var(--amber)}
+
+/* ---- Akaun ---- */
+.profile{display:flex;align-items:center;gap:12px}
+.profile .avatar{width:46px;height:46px;font-size:14px}
+.profile h3{margin:0;font:600 15px var(--body)}
+.profile p{margin:3px 0 0;font-size:10.5px;color:var(--muted)}
+.free-card{border-color:rgba(255,196,107,.4);background:linear-gradient(160deg,rgba(255,196,107,.12),var(--surface) 60%)}
+.price{font:600 2.2rem/1 var(--body);letter-spacing:-.02em;color:var(--amber);margin:9px 0 3px}
+.free-list{list-style:none;margin:11px 0;padding:0;display:flex;flex-direction:column;gap:7px;font-size:11.5px;color:rgba(245,235,220,.88)}
+.free-list li{padding-left:18px;position:relative}
+.free-list li::before{content:"✓";position:absolute;left:0;color:var(--amber);font-weight:700}
+.setting{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:11px 0;border-bottom:1px dashed var(--line-soft)}
+.setting:last-child{border-bottom:0;padding-bottom:0}
+.setting strong{display:block;font:600 12px var(--body)}
+.setting small{display:block;color:var(--muted);font-size:10px;margin-top:2px}
+.setting .btn{width:auto;padding:8px 12px;font-size:10.5px;white-space:nowrap}
+details.faq{border-bottom:1px dashed var(--line-soft);padding:10px 0}
+details.faq:last-child{border-bottom:0;padding-bottom:0}
+details.faq summary{cursor:pointer;font:600 11.5px var(--body);color:rgba(245,235,220,.9)}
+details.faq p{margin:7px 0 0;font-size:10.5px;color:var(--muted);line-height:1.65}
+.disc h3{margin:0 0 8px;font:600 12px var(--body);letter-spacing:.03em}
+.disc p{margin:0 0 8px;font-size:10.5px;line-height:1.7;color:var(--muted)}
+.disc p:last-child{margin-bottom:0}
+
+/* ---- Bottom nav: amber underline + dot ---- */
+.dock{
+  position:absolute;z-index:8;left:10px;right:10px;bottom:10px;
+  display:grid;grid-template-columns:repeat(5,1fr);gap:3px;padding:8px 6px 7px;
+  border-radius:22px;border:1px solid var(--line);
+  background:rgba(23,21,18,.92);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
+  box-shadow:0 16px 36px rgba(0,0,0,.5),inset 0 1px 0 rgba(240,224,200,.05);
+}
+.tab{position:relative;display:flex;flex-direction:column;align-items:center;gap:3px;padding:7px 2px 8px;border:0;border-radius:14px;background:transparent;color:var(--muted);font:600 9px var(--body);letter-spacing:.02em;transition:color .2s}
+.tab svg{width:19px;height:19px}
+.tab::before{content:"";position:absolute;top:2px;left:50%;transform:translateX(-50%);width:4px;height:4px;border-radius:50%;background:var(--amber);opacity:0;transition:opacity .25s}
+.tab::after{content:"";position:absolute;bottom:2px;left:50%;transform:translateX(-50%);width:0;height:2.5px;border-radius:var(--r-pill);background:var(--amber);transition:width .25s ease}
+.tab[aria-current="page"]{color:var(--amber)}
+.tab[aria-current="page"]::before{opacity:1;box-shadow:0 0 8px rgba(255,196,107,.8)}
+.tab[aria-current="page"]::after{width:18px}
+
+/* ---- Toast ---- */
+.toast{position:absolute;z-index:20;left:50%;bottom:88px;transform:translate(-50%,12px);opacity:0;pointer-events:none;transition:opacity .25s,transform .25s;max-width:86%;text-align:center;padding:10px 14px;border-radius:14px;border:1px solid rgba(255,196,107,.4);background:rgba(33,30,26,.97);color:var(--text);font-size:11px;box-shadow:0 12px 30px rgba(0,0,0,.4)}
+.toast.on{opacity:1;transform:translate(-50%,0)}
+
+.appfoot{text-align:center;font-size:9px;color:rgba(169,156,139,.7);padding:18px 0 2px;border-top:1px dashed var(--line-soft);margin-top:20px}
+
+@media(max-width:520px){
+  body{padding:0;display:block;min-height:100dvh}
+  .lamp,.desk-note{display:none}
+  .phone{width:100%;height:100dvh;border:0;border-radius:0;box-shadow:none}
+  .dock{bottom:calc(8px + env(safe-area-inset-bottom));left:8px;right:8px}
+}
+@media(prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation:none!important;transition:none!important}
+  .hand{opacity:1}
+  html{scroll-behavior:auto}
+}
+</style>
+</head>
+<body>
+<div class="lamp" aria-hidden="true"></div>
+<div class="lamp small" aria-hidden="true"></div>
+
+<div class="phone">
+<header class="appbar">
+  <a class="brand" href="#/home" aria-label="TraderWatch — Signal">
+    <span class="wordmark">Traderwatch</span>
+    <span class="hand d1" aria-hidden="true">workspace</span>
+  </a>
+  <div class="bar-right">
+    <span class="clock" id="deskClock" aria-label="Waktu Malaysia">--:-- MYT</span>
+    <button class="avatar" id="avatarBtn" type="button" aria-label="Buka akaun">AW</button>
+  </div>
+</header>
+
+<main class="scroll" id="scroll">
+
+<!-- SIGNAL / HOME -->
+<section class="screen active" id="screen-home" data-route="home" aria-label="Signal">
+  <div class="greet">
+    <div><h2>Selamat malam,<br>Trader.</h2><p id="todayDate">Khamis · 20 November 2026</p></div>
+    <span class="chip live"><span class="dot pulse"></span>LIVE</span>
+  </div>
+  <span class="hand greet-note d1">note to self: risk first.</span>
+
+  <button class="card hero" id="heroCard" type="button" aria-label="Buka detail signal XAU/USD BUY">
+    <span class="tape" aria-hidden="true"></span>
+    <div class="hero-top">
+      <div><div class="pair">XAU/USD</div><div class="hero-sub">M15 · SMC engine · 20 Nov 2026</div></div>
+      <div class="hero-tags"><span class="chip buy">BUY</span><span class="chip live"><span class="dot pulse"></span>LIVE</span></div>
+    </div>
+    <div class="level-grid">
+      <div class="level zone span2">
+        <span class="lab">ENTRY</span>
+        <span class="val big amber-t">4008.81</span>
+        <span class="tiny">Zon POI 4007.90–4009.70</span>
+        <span class="hand watch d2" aria-hidden="true">watch this
+          <svg viewBox="0 0 16 19" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M13 2c-1.4 5-4.6 9.4-9.4 12.6"/><path d="M3.6 14.6l3.4-.6M3.6 14.6l.8-3.3"/></svg>
+        </span>
+      </div>
+      <div class="level"><span class="lab">STOP LOSS</span><span class="val neg">4003.26</span></div>
+      <div class="level"><span class="lab">TP1</span><span class="val pos">4019.28</span></div>
+      <div class="level"><span class="lab">TP2</span><span class="val pos">4024.50</span></div>
+      <div class="level"><span class="lab">TP3</span><span class="val pos">4030.00</span></div>
+    </div>
+    <div class="hero-foot">
+      <span class="rr">RR 1.89</span>
+      <span class="cta-mini">Sahkan dengan broker · ketik untuk detail →</span>
+    </div>
+  </button>
+
+  <div class="section-title"><h3>Signal anda</h3><span class="hand d2">today's watch</span></div>
+  <div class="rows">
+    <div class="row"><div class="row-l"><strong>XAU/USD</strong><span class="chip buy">BUY</span></div><div class="row-r">4008.81</div></div>
+    <div class="row"><div class="row-l"><strong>XAG/USD</strong><span class="chip buy">BUY</span></div><div class="row-r">46.32</div></div>
+    <div class="row"><div class="row-l"><strong>BTC/USD</strong><span class="chip sell">SELL</span></div><div class="row-r">61706.80</div></div>
+  </div>
+
+  <a class="card perf-mini" href="#/prestasi" aria-label="Lihat prestasi penuh">
+    <div>
+      <span class="tiny">Prestasi · sejak 19 Okt 2026</span>
+      <div class="nums"><span class="wr">34.4%</span><span class="net">+8.43R</span></div>
+      <span class="tiny">Lihat prestasi penuh →</span>
+    </div>
+    <svg viewBox="0 0 112 46" aria-hidden="true"><defs><linearGradient id="sparkG" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFC46B" stop-opacity=".32"/><stop offset="1" stop-color="#FFC46B" stop-opacity="0"/></linearGradient></defs><path d="M2 40 L14 36 L26 37 L38 30 L50 31 L62 24 L74 26 L86 17 L98 12 L110 7 L110 44 L2 44 Z" fill="url(#sparkG)"/><path d="M2 40 L14 36 L26 37 L38 30 L50 31 L62 24 L74 26 L86 17 L98 12 L110 7" fill="none" stroke="#FFC46B" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"/></svg>
+  </a>
+
+  <div class="section-title"><h3>Keputusan terkini</h3><span class="tiny">130+ signal direkod</span></div>
+  <div class="rows">
+    <div class="row"><div class="row-l"><strong>XAU/USD</strong><small>BUY · M15</small></div><div class="row-r pos">TP +179.0</div></div>
+    <div class="row"><div class="row-l"><strong>BTC/USD</strong><small>SELL · M15</small></div><div class="row-r pos">TP +217.8</div></div>
+    <div class="row"><div class="row-l"><strong>XAU/USD</strong><small>BUY · M15</small></div><div class="row-r neg">SL −5.5</div></div>
+    <div class="row"><div class="row-l"><strong>XAG/USD</strong><small>BUY · M15</small></div><div class="row-r muted">EXP 0.0</div></div>
+    <div class="row"><div class="row-l"><strong>XAU/USD</strong><small>SELL · M15</small></div><div class="row-r pos">TP +141.6</div></div>
+    <div class="row"><div class="row-l"><strong>BTC/USD</strong><small>BUY · M15</small></div><div class="row-r neg">SL −110.0</div></div>
+  </div>
+  <p class="disclaimer">Trading melibatkan risiko kerugian. Bukan nasihat kewangan.</p>
+</section>
+
+<!-- SIGNAL DETAIL -->
+<section class="screen" id="screen-signal" data-route="signal" aria-label="Detail signal">
+  <a class="back" href="#/home"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 5.5c-2.2 2-4.3 4.2-6 6.5 1.8 2.2 3.9 4.3 6.2 6.2"/></svg>Signal</a>
+  <div class="detail-head">
+    <div class="pair">XAU/USD</div>
+    <div class="tags"><span class="chip buy">BUY</span><span class="chip live"><span class="dot pulse"></span>LIVE</span></div>
+  </div>
+
+  <section class="card chart-card" aria-label="Chart beranotasi XAU/USD">
+    <div class="chart-top">
+      <strong>M15 · beranotasi</strong>
+      <button class="reason-btn" id="reasonBtn" type="button" aria-pressed="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20c.4-1.6.8-3.1 1.4-4.5L16.2 4.7c.9-.9 2.3-.9 3.1 0 .9.9.9 2.3 0 3.1L8.5 18.6c-1.4.6-2.9 1-4.5 1.4z"/></svg>
+        <span id="reasonLabel">Sebab on</span>
+      </button>
+    </div>
+    <div class="chart-wrap chart-on" id="chartWrap">
+      <svg id="signalChart" viewBox="0 0 360 220" role="img" aria-label="Chart candlestick XAU/USD dengan zon POI lorek, entry, stop loss dan tiga take profit"></svg>
+    </div>
+    <div class="chart-legend" aria-hidden="true">
+      <span><i style="background:#FFC46B"></i>POI / Entry</span>
+      <span><i style="background:#E8786E"></i>SL · risiko</span>
+      <span><i style="background:#9FBF8C"></i>TP · ganjaran</span>
+      <span><i style="background:#8FB6D9"></i>Struktur</span>
+    </div>
+    <p class="chart-note">Ketik “Sebab” untuk tunjuk atau sembunyikan nota setup pada chart.</p>
+  </section>
+
+  <section class="card" aria-label="Level signal">
+    <div class="card-head"><h3>Level penuh</h3><span class="chip amber">M15</span></div>
+    <div class="level-grid">
+      <div class="level zone span2"><span class="lab">ENTRY · ZON POI</span><span class="val big amber-t">4008.81</span><span class="tiny">Zon 4007.90–4009.70</span></div>
+      <div class="level"><span class="lab">STOP LOSS</span><span class="val neg">4003.26</span></div>
+      <div class="level"><span class="lab">RISK : REWARD</span><span class="val amber-t">1.89</span></div>
+      <div class="level"><span class="lab">TP1</span><span class="val pos">4019.28</span></div>
+      <div class="level"><span class="lab">TP2</span><span class="val pos">4024.50</span></div>
+      <div class="level span2"><span class="lab">TP3 · TARGET AKHIR</span><span class="val big pos">4030.00</span></div>
+    </div>
+    <p class="tiny" style="margin:11px 0 0">Harga mungkin berbeza sedikit antara broker — sahkan entry, SL dan TP dengan platform broker anda.</p>
+  </section>
+
+  <section class="card" aria-label="Sebab entry">
+    <div class="card-head"><h3>Sebab entry</h3><span class="hand d1">why this?</span></div>
+    <p class="reason-summary">Harga menyapu low sesi Asia (sweep) lalu menolak naik dari order block M15. Break of structure mengesahkan bias bullish; entry menunggu harga kembali ke zon POI 4007.90–4009.70 dengan risiko terhad di bawah low 4003.26 dan tiga target ganjaran.</p>
+    <ul class="conf">
+      <li><span class="tick" aria-hidden="true">✓</span><span>Sweep low<small>Liquidity grab di bawah low sesi Asia sebelum reversal.</small></span></li>
+      <li><span class="tick" aria-hidden="true">✓</span><span>POI / order block<small>Zon permintaan M15 yang belum diuji semula.</small></span></li>
+      <li><span class="tick" aria-hidden="true">✓</span><span>RR ≥ 1.5<small>Nisbah risk-reward 1.89 melepasi gate enjin.</small></span></li>
+      <li><span class="tick" aria-hidden="true">✓</span><span>News gate<small>Tiada berita berimpak tinggi dalam 30 minit akan datang.</small></span></li>
+      <li><span class="tick" aria-hidden="true">✓</span><span>Entry dalam zon<small>Harga semasa 4008.81 berada dalam POI 4007.90–4009.70.</small></span></li>
+    </ul>
+    <div class="trend" aria-label="Trend mengikut timeframe">
+      <div><b>M15</b><span>▲ Bullish</span></div>
+      <div><b>M60</b><span>▲ Bullish</span></div>
+      <div><b>H4</b><span class="dn">▼ Pullback</span></div>
+    </div>
+  </section>
+
+  <section class="card" aria-label="Timeline lifecycle signal">
+    <div class="card-head"><h3>Timeline</h3><span class="chip">MYT</span></div>
+    <div class="timeline">
+      <div class="tl done"><i aria-hidden="true"></i><b>Dihantar</b><small>20 Nov · 14:20</small></div>
+      <div class="tl done"><i aria-hidden="true"></i><b>Aktif</b><small>Harga dalam POI</small></div>
+      <div class="tl"><i aria-hidden="true"></i><b>TP / SL</b><small>Menunggu keputusan</small></div>
+    </div>
+  </section>
+
+  <button class="btn" id="toToolsBtn" type="button" style="margin-top:13px">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="5" y="3" width="14" height="18" rx="2.5"/><path d="M8.5 7.2h7M8.6 12h.01M12 12.1h.01M15.4 12h.01M8.5 16h.01M12.1 16.1h.01M15.5 16h.01"/></svg>
+    Kira saiz posisi untuk signal ini
+  </button>
+  <p class="disclaimer">Trading melibatkan risiko kerugian. Bukan nasihat kewangan.</p>
+</section>
+
+<!-- PRESTASI -->
+<section class="screen" id="screen-prestasi" data-route="prestasi" aria-label="Prestasi">
+  <div class="greet"><div><h2>Prestasi</h2><p>Rekod enjin AI · sejak 19 Okt 2026</p></div><span class="chip amber">130+ signal</span></div>
+
+  <section class="card" aria-label="Ringkasan prestasi" style="margin-top:16px">
+    <span class="hand steady d1">steady does it</span>
+    <div class="big-nums">
+      <div>
+        <span class="tiny">Net R · 131 signal diputuskan</span>
+        <div class="big-r">+8.43<small>R</small></div>
+      </div>
+      <div class="wr-block">
+        <b>34.4%</b>
+        <span class="tiny">Win rate · TP/(TP+SL)</span>
+      </div>
+    </div>
+    <div class="tiles">
+      <div class="tile"><b class="pos">45</b><span>TP</span></div>
+      <div class="tile"><b class="neg">86</b><span>SL</span></div>
+      <div class="tile"><b class="muted">14</b><span>LUPUT</span></div>
+    </div>
+  </section>
+
+  <section class="card equity" aria-label="Equity curve R terkumpul">
+    <div class="card-head"><h3>Equity curve · R terkumpul</h3><span class="chip">harian</span></div>
+    <svg viewBox="0 0 330 130" role="img" aria-label="Graf R terkumpul dari 20 Oktober hingga 20 November 2026">
+      <defs>
+        <linearGradient id="eqFill" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFC46B" stop-opacity=".3"/><stop offset="1" stop-color="#FFC46B" stop-opacity="0"/></linearGradient>
+      </defs>
+      <line x1="0" y1="30" x2="330" y2="30" class="grid-line"/>
+      <line x1="0" y1="70" x2="330" y2="70" class="grid-line"/>
+      <line x1="0" y1="104" x2="330" y2="104" class="grid-line"/>
+      <text x="2" y="26" fill="#A99C8B" font-size="8" font-family="IBM Plex Mono, monospace">+10R</text>
+      <text x="2" y="66" fill="#A99C8B" font-size="8" font-family="IBM Plex Mono, monospace">+5R</text>
+      <text x="2" y="100" fill="#A99C8B" font-size="8" font-family="IBM Plex Mono, monospace">0R</text>
+      <path id="eqArea" fill="url(#eqFill)" d=""/>
+      <path id="eqLinePath" fill="none" stroke="#FFC46B" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" d=""/>
+      <circle id="eqDot" r="3" fill="#FFC46B"/>
+    </svg>
+    <div class="equity-foot"><span>20 Okt</span><span>05 Nov</span><span>20 Nov</span></div>
+  </section>
+
+  <section class="card" aria-label="Prestasi mengikut pair">
+    <div class="card-head"><h3>Prestasi per pair</h3><span class="chip">isih Net R ↓</span></div>
+    <table>
+      <thead><tr><th scope="col">Pair</th><th scope="col">TP</th><th scope="col">SL</th><th scope="col">WR%</th><th scope="col">Net R</th></tr></thead>
+      <tbody>
+        <tr class="hl"><th scope="row">XAU/USD</th><td>22</td><td>41</td><td>35%</td><td>+22.9R</td></tr>
+        <tr><th scope="row">XAG/USD</th><td>13</td><td>26</td><td>33%</td><td class="neg">−6.4R</td></tr>
+        <tr><th scope="row">BTC/USD</th><td>10</td><td>19</td><td>34%</td><td class="neg">−8.07R</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section class="card" aria-label="Nota metodologi">
+    <div class="card-head"><h3>Nota metodologi</h3><span class="hand d2">jujur &amp; telus</span></div>
+    <ul class="method">
+      <li>Win rate = TP ÷ (TP + SL). Hanya signal yang benar-benar diputuskan dikira.</li>
+      <li>1R = risiko setiap trade; Net R ialah jumlah gandaan risiko, bukan jumlah pips.</li>
+      <li>Luput ≠ rugi — setup luput tanpa entry. Collected (exit manual) diasingkan.</li>
+      <li>Rekod bermula 19 Okt 2026; masa dipapar dalam waktu Malaysia (MYT).</li>
+    </ul>
+  </section>
+  <p class="disclaimer">Trading melibatkan risiko kerugian. Bukan nasihat kewangan.</p>
+</section>
+
+<!-- MARKETS -->
+<section class="screen" id="screen-markets" data-route="markets" aria-label="Markets">
+  <div class="greet"><div><h2>Markets</h2><p>Chart candlestick · data cache enjin</p></div></div>
+  <div class="chips" role="group" aria-label="Pilih pair" style="margin-top:14px">
+    <button class="chip chip-select" type="button" data-symbol="XAU" aria-pressed="true">XAU/USD</button>
+    <button class="chip chip-select" type="button" data-symbol="XAG" aria-pressed="false">XAG/USD</button>
+    <button class="chip chip-select" type="button" data-symbol="BTC" aria-pressed="false">BTC/USD</button>
+  </div>
+  <section class="card chart-card" aria-label="Chart market">
+    <div class="market-meta">
+      <div><span class="tiny" id="marketPairLabel">XAU/USD · M15</span><div class="market-price" id="marketPrice">4008.81</div></div>
+      <span class="chip buy" id="marketSide">BUY bias</span>
+    </div>
+    <div class="chart-wrap"><svg id="marketChart" viewBox="0 0 360 200" role="img" aria-label="Chart candlestick pair terpilih"></svg></div>
+    <div class="chips" role="group" aria-label="Pilih timeframe" style="margin:11px 0 0">
+      <button class="chip chip-select" type="button" data-tf="M15" aria-pressed="true">M15</button>
+      <button class="chip chip-select" type="button" data-tf="M60" aria-pressed="false">M60</button>
+      <button class="chip chip-select" type="button" data-tf="H4" aria-pressed="false">H4</button>
+    </div>
+    <p class="chart-note">Data: Swissquote / Coinbase · bukan quote broker anda.</p>
+  </section>
+  <p class="disclaimer">Trading melibatkan risiko kerugian. Bukan nasihat kewangan.</p>
+</section>
+
+<!-- TOOLS -->
+<section class="screen" id="screen-tools" data-route="tools" aria-label="Tools">
+  <div class="greet"><div><h2>Tools</h2><p>Alat pengurusan risiko</p></div></div>
+  <section class="card" aria-label="Kalkulator saiz posisi XAU" style="margin-top:16px">
+    <div class="card-head"><h3>Kalkulator saiz posisi · XAU</h3><span class="hand d1">risk first, always.</span></div>
+    <div class="fields">
+      <label class="field"><span>BALANCE (USD)</span><input type="number" id="calcBalance" inputmode="decimal" min="0" step="any" value="1000"></label>
+      <label class="field"><span>RISK %</span><input type="number" id="calcRisk" inputmode="decimal" min="0" max="100" step="any" value="1"></label>
+      <label class="field"><span>ENTRY</span><input type="number" id="calcEntry" inputmode="decimal" min="0" step="any" value="4008.81"></label>
+      <label class="field"><span>STOP LOSS</span><input type="number" id="calcSl" inputmode="decimal" min="0" step="any" value="4003.26"></label>
+    </div>
+    <div class="calc-out">
+      <div><small>Risk USD</small><b id="calcRiskUsd">10.00</b></div>
+      <div><small>Lot size</small><b id="calcLot">0.02</b></div>
+    </div>
+    <p class="tiny mono" style="margin:12px 0 0">lot = riskUSD ÷ (|entry − SL| × 100) · 1 lot = 100 oz</p>
+    <p class="tiny" style="margin:7px 0 0">Pengiraan rujukan sahaja — sahkan saiz posisi dan nilai pip dengan broker anda sebelum entry.</p>
+  </section>
+  <p class="disclaimer">Trading melibatkan risiko kerugian. Bukan nasihat kewangan.</p>
+</section>
+
+<!-- AKAUN -->
+<section class="screen" id="screen-akaun" data-route="akaun" aria-label="Akaun">
+  <div class="greet"><div><h2>Akaun</h2><p>Profil, pelan &amp; tetapan</p></div></div>
+
+  <section class="card profile" aria-label="Profil ahli" style="margin-top:14px">
+    <div class="avatar" aria-hidden="true">AW</div>
+    <div><h3>Ahli TraderWatch</h3><p>ahli@traderwatch.org · menyertai 19 Okt 2026</p></div>
+    <span class="chip amber" style="margin-left:auto">FREE</span>
+  </section>
+
+  <section class="card free-card" aria-label="Kad ahli Free">
+    <div class="card-head"><h3>Free Card</h3><span class="chip amber">Semua ahli</span></div>
+    <div class="price">RM0</div>
+    <span class="tiny">Akses penuh · tanpa langganan · seumur hidup ahli</span>
+    <ul class="free-list">
+      <li>Signal AI terkini — XAU/USD, XAG/USD &amp; BTC/USD</li>
+      <li>Entry + Stop Loss + TP1/TP2/TP3 lengkap</li>
+      <li>Chart beranotasi + sebab entry &amp; checklist confluence</li>
+      <li>Dashboard prestasi penuh &amp; rekod keputusan</li>
+    </ul>
+    <button class="btn" type="button" id="freeCta">Semak signal terkini</button>
+    <p class="tiny" style="margin:10px 0 0;text-align:center">Satu tier untuk semua ahli — akses penuh, tanpa bayaran.</p>
+  </section>
+
+  <section class="card" aria-label="Tetapan app">
+    <div class="card-head"><h3>Tetapan</h3></div>
+    <div class="setting"><div><strong>Install app</strong><small>Pasang di skrin utama untuk akses pantas.</small></div><button class="btn ghost" type="button" id="installBtn">Install</button></div>
+    <div class="setting"><div><strong>Prestasi signal</strong><small>Win rate, Net R &amp; equity curve enjin AI.</small></div><a class="btn ghost" href="#/prestasi">Buka</a></div>
+  </section>
+
+  <section class="card" aria-label="Soalan lazim">
+    <div class="card-head"><h3>FAQ</h3><span class="hand d2">tanya apa sahaja</span></div>
+    <details class="faq"><summary>Adakah signal dijamin untung?</summary><p>Tidak. Setiap setup membawa risiko kerugian dan keputusan lepas bukan jaminan keputusan akan datang.</p></details>
+    <details class="faq"><summary>Adakah harga sama dengan broker saya?</summary><p>Harga mungkin berbeza sedikit antara broker (spread, feed dan waktu server). Sentiasa sahkan entry, SL dan TP dengan platform broker anda.</p></details>
+    <details class="faq"><summary>Adakah ini nasihat kewangan?</summary><p>Bukan. TraderWatch ialah platform pendidikan dan signal automatik untuk tujuan pembelajaran sahaja — bukan nasihat kewangan peribadi.</p></details>
+  </section>
+
+  <section class="card disc" aria-label="Penafian risiko">
+    <h3>Penafian risiko</h3>
+    <p>Trading forex, logam dan kripto melibatkan risiko kerugian yang besar dan mungkin tidak sesuai untuk semua pelabur. Anda boleh kehilangan sebahagian atau keseluruhan modal. Prestasi lepas bukan jaminan keputusan akan datang. Signal dijana secara automatik oleh enjin AI dan mungkin lewat atau tersilap. Gunakan wang yang anda sanggup hilang dan dapatkan nasihat kewangan bebas jika perlu.</p>
+    <p>Partner disclosure: TraderWatch mungkin menerima komisen daripada pautan partner broker. Ini tidak mengubah harga yang anda bayar dan tidak mempengaruhi keputusan enjin signal.</p>
+  </section>
+
+  <button class="btn ghost" type="button" id="logoutBtn" style="margin-top:13px">Log keluar</button>
+  <p class="disclaimer">Trading melibatkan risiko kerugian. Bukan nasihat kewangan.</p>
+</section>
+
+<footer class="appfoot">© 2026 TraderWatch · Trading melibatkan risiko. Bukan nasihat kewangan.</footer>
+</main>
+
+<nav class="dock" aria-label="Navigasi utama">
+  <button class="tab" type="button" data-route="home" aria-current="page">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4.2 16.8c2-1.5 3.4-3.8 5-5.6 1.5 1 2.6 2.2 4 2.9 2.2-2.5 4-5.3 6.5-7.7"/><path d="M15.7 6.2c1.3-.2 2.7-.3 4-.2.1 1.3 0 2.7-.2 4"/></svg><span>Signal</span>
+  </button>
+  <button class="tab" type="button" data-route="markets">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M7.1 4.3v3M7 15.4v4.4"/><rect x="4.7" y="7.2" width="4.8" height="8.2" rx="1.6" transform="rotate(-1.6 7.1 11.3)"/><path d="M17 3.4v3.8M16.9 17.2v3.6"/><rect x="14.6" y="7.1" width="4.8" height="10.1" rx="1.6" transform="rotate(1.4 17 12.2)"/></svg><span>Markets</span>
+  </button>
+  <button class="tab" type="button" data-route="prestasi">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3.8 19.7c5.4.3 10.9.2 16.4-.1"/><path d="M6.6 19.4v-5.1M11.2 19.5V8.4M15.8 19.3v-7.5M20.3 19.4V5.1"/></svg><span>Prestasi</span>
+  </button>
+  <button class="tab" type="button" data-route="tools">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="3.2" width="14" height="17.8" rx="2.6" transform="rotate(-.8 12 12)"/><path d="M8.5 7.2h7M8.6 12h.01M12 12.1h.01M15.4 12h.01M8.5 16h.01M12.1 16.1h.01M15.5 16h.01"/></svg><span>Tools</span>
+  </button>
+  <button class="tab" type="button" data-route="akaun">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4.2c2.3 0 4 1.8 4 4.1 0 2.3-1.7 4.2-4 4.2s-4.1-1.9-4.1-4.2c0-2.3 1.8-4.1 4.1-4.1z"/><path d="M4.3 20.6c1.5-3.9 4.8-5.4 7.7-5.4 3 0 6.3 1.5 7.8 5.4"/></svg><span>Akaun</span>
+  </button>
+</nav>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+</div>
+
+<p class="desk-note" aria-hidden="true"><span class="hand">meja malam · lampu menyala, risiko terkawal.</span><small>TRADERWATCH · NIGHT DESK PREVIEW</small></p>
+
+<noscript><p style="text-align:center;color:#A99C8B">Aktifkan JavaScript untuk melihat chart dan navigasi app.</p></noscript>
+
+<script>
+(function(){
+'use strict';
+var $=function(s){return document.querySelector(s);};
+var $$=function(s){return Array.prototype.slice.call(document.querySelectorAll(s));};
+
+/* ---------- Toast ---------- */
+var toastEl=$('#toast'),toastT=null;
+function toast(msg){toastEl.textContent=msg;toastEl.classList.add('on');clearTimeout(toastT);toastT=setTimeout(function(){toastEl.classList.remove('on');},2600);}
+
+/* ---------- Jam meja (MYT) ---------- */
+function tickClock(){
+  try{
+    var t=new Date().toLocaleTimeString('en-GB',{timeZone:'Asia/Kuala_Lumpur',hour:'2-digit',minute:'2-digit'});
+    $('#deskClock').textContent=t+' MYT';
+  }catch(e){$('#deskClock').textContent='MYT';}
+}
+tickClock();setInterval(tickClock,15000);
+
+/* ---------- Routing ---------- */
+var ROUTES=['home','signal','prestasi','markets','tools','akaun'];
+function currentRoute(){
+  var h=(location.hash||'').replace(/^#\/?/,'');
+  return ROUTES.indexOf(h)>=0?h:'home';
+}
+function show(route){
+  $$('.screen').forEach(function(s){s.classList.toggle('active',s.dataset.route===route);});
+  $$('.tab').forEach(function(t){
+    var r=t.dataset.route;var on=(r===route)||(route==='signal'&&r==='home');
+    if(on){t.setAttribute('aria-current','page');}else{t.removeAttribute('aria-current');}
+  });
+  $('#scroll').scrollTop=0;
+}
+window.addEventListener('hashchange',function(){show(currentRoute());});
+$$('.tab').forEach(function(t){t.addEventListener('click',function(){location.hash='#/'+t.dataset.route;});});
+$('#heroCard').addEventListener('click',function(){location.hash='#/signal';});
+$('#avatarBtn').addEventListener('click',function(){location.hash='#/akaun';});
+$('#freeCta').addEventListener('click',function(){location.hash='#/home';});
+$('#installBtn').addEventListener('click',function(){toast('Gunakan menu “Add to Home Screen” pada pelayar anda.');});
+$('#logoutBtn').addEventListener('click',function(){toast('Sesi kekal aktif dalam paparan ahli ini.');});
+
+/* ---------- Tarikh BM ---------- */
+try{
+  var d=new Date();
+  var hari=['Ahad','Isnin','Selasa','Rabu','Khamis','Jumaat','Sabtu'][d.getDay()];
+  var bulan=['Januari','Februari','Mac','April','Mei','Jun','Julai','Ogos','September','Oktober','November','Disember'][d.getMonth()];
+  $('#todayDate').textContent=hari+' · '+d.getDate()+' '+bulan+' '+d.getFullYear();
+}catch(e){}
+
+/* ---------- RNG deterministik ---------- */
+function rng(seed){var s=seed>>>0;return function(){s=(s*1664525+1013904223)>>>0;return s/4294967296;};}
+function candles(seed,n,start,vol){
+  var r=rng(seed),out=[],prev=start;
+  for(var i=0;i<n;i++){
+    var c=prev+(r()-0.44)*vol;
+    var o=prev,h=Math.max(o,c)+r()*vol*0.6,l=Math.min(o,c)-r()*vol*0.6;
+    out.push({o:o,h:h,l:l,c:c});prev=c;
+  }
+  return out;
+}
+var SVGNS='http://www.w3.org/2000/svg';
+function el(name,attrs,parent){
+  var e=document.createElementNS(SVGNS,name);
+  for(var k in attrs){e.setAttribute(k,attrs[k]);}
+  if(parent)parent.appendChild(e);return e;
+}
+function txt(parent,x,y,str,fill,size,anchor,hand){
+  var t=el('text',{x:x,y:y,fill:fill||'#A99C8B','font-size':size||8,'font-family':hand?'Caveat, cursive':'IBM Plex Mono, monospace','text-anchor':anchor||'start'},parent);
+  t.textContent=str;return t;
+}
+var UP='#9FBF8C',DN='#E8786E',AMBER='#FFC46B',BLUE='#8FB6D9';
+
+/* ---------- Chart signal beranotasi ---------- */
+var SIG={entry:4008.81,sl:4003.26,tp1:4019.28,tp2:4024.50,tp3:4030.00,poiLo:4007.90,poiHi:4009.70};
+function buildSignalChart(){
+  var svg=$('#signalChart');svg.innerHTML='';
+  var W=360,plotW=292,x0=8,top=14,bot=206,pMin=3999,pMax=4033;
+  var y=function(p){return bot-(p-pMin)/(pMax-pMin)*(bot-top);};
+  var defs=el('defs',{},svg);
+  var pat=el('pattern',{id:'poiHatch',width:7,height:7,patternUnits:'userSpaceOnUse',patternTransform:'rotate(45)'},defs);
+  el('line',{x1:0,y1:0,x2:0,y2:7,stroke:'rgba(255,196,107,.34)','stroke-width':1.6},pat);
+  var base=el('g',{},svg),reason=el('g',{'class':'reason-layer'},svg);
+  [4005,4010,4015,4020,4025,4030].forEach(function(p){el('line',{x1:x0,y1:y(p),x2:x0+plotW,y2:y(p),'class':'grid-line'},base);});
+  var data=candles(7,30,4002.4,2.3),step=plotW/30;
+  var lastB=data[data.length-1];lastB.c=SIG.entry;lastB.h=Math.max(lastB.h,SIG.entry);lastB.l=Math.min(lastB.l,SIG.entry);
+  data.forEach(function(b,i){
+    var x=x0+i*step+step/2,up=b.c>=b.o,col=up?UP:DN;
+    el('line',{x1:x,y1:y(b.h),x2:x,y2:y(b.l),stroke:col,'stroke-width':1},base);
+    el('rect',{x:x-step*0.3,y:y(Math.max(b.o,b.c)),width:step*0.6,height:Math.max(1.2,Math.abs(y(b.o)-y(b.c))),fill:col,rx:1},base);
+  });
+  // zon POI lorek amber + zon risiko/ganjaran
+  el('rect',{x:x0,y:y(SIG.poiHi),width:plotW,height:y(SIG.poiLo)-y(SIG.poiHi),fill:'rgba(255,196,107,.07)'},reason);
+  el('rect',{x:x0,y:y(SIG.poiHi),width:plotW,height:y(SIG.poiLo)-y(SIG.poiHi),fill:'url(#poiHatch)',stroke:AMBER,'stroke-width':1,'stroke-dasharray':'3 3'},reason);
+  el('rect',{x:x0,y:y(SIG.entry),width:plotW,height:y(SIG.sl)-y(SIG.entry),fill:'rgba(232,120,110,.08)'},reason);
+  el('rect',{x:x0,y:y(SIG.tp3),width:plotW,height:y(SIG.entry)-y(SIG.tp3),fill:'rgba(159,191,140,.06)'},reason);
+  function level(p,color,dash,label){
+    el('line',{x1:x0,y1:y(p),x2:x0+plotW,y2:y(p),stroke:color,'stroke-width':1.3,'stroke-dasharray':dash||'none'},reason);
+    txt(reason,x0+plotW+5,y(p)+3,label,color,8);
+  }
+  level(SIG.tp3,UP,'5 4','4030.00');
+  level(SIG.tp2,UP,'5 4','4024.50');
+  level(SIG.tp1,UP,'5 4','4019.28');
+  level(SIG.entry,AMBER,'6 4','4008.81');
+  level(SIG.sl,DN,'none','4003.26');
+  txt(reason,x0+3,y(SIG.poiHi)-4,'POI',AMBER,12,'start',true);
+  txt(reason,x0+3,y(SIG.sl)+12,'risiko',DN,12,'start',true);
+  txt(reason,x0+3,y(SIG.tp3)+12,'ganjaran',UP,12,'start',true);
+  function struct(i,label){
+    var x=x0+i*step+step/2,b=data[i];
+    el('line',{x1:x,y1:y(b.h)-2,x2:x,y2:y(b.h)-12,stroke:BLUE,'stroke-width':1},reason);
+    txt(reason,x,y(b.h)-15,label,BLUE,8,'middle');
+  }
+  struct(9,'BOS');struct(16,'CHoCH');
+  el('rect',{x:x0+22*step,y:y(data[22].l)-4,width:step*2.4,height:9,fill:'rgba(143,182,217,.16)',stroke:BLUE,'stroke-width':1},reason);
+  txt(reason,x0+23.2*step,y(data[22].l)+16,'FVG',BLUE,8,'middle');
+  // harga semasa
+  el('line',{x1:x0,y1:y(SIG.entry),x2:x0+plotW,y2:y(SIG.entry),stroke:AMBER,'stroke-width':1,'stroke-dasharray':'2 3'},base);
+}
+buildSignalChart();
+
+/* ---------- Toggle sebab (manual, tenang) ---------- */
+var reasonOn=true,reasonBtn=$('#reasonBtn'),reasonLabel=$('#reasonLabel'),chartWrap=$('#chartWrap');
+function setReason(on){
+  reasonOn=on;
+  chartWrap.classList.toggle('chart-on',on);
+  reasonBtn.setAttribute('aria-pressed',on?'true':'false');
+  reasonLabel.textContent=on?'Sebab on':'Sebab off';
+}
+reasonBtn.addEventListener('click',function(){setReason(!reasonOn);});
+
+/* ---------- Equity curve ---------- */
+(function(){
+  var vals=[0,0.8,1.6,1.2,2.4,3.1,2.6,4.0,4.8,5.5,5.1,6.3,7.0,6.4,7.6,8.1,8.43];
+  var x0=8,x1=322,y0=104,yTop=24,maxR=10;
+  var pts=vals.map(function(v,i){
+    var x=x0+(x1-x0)*i/(vals.length-1);
+    var yy=y0-(v/maxR)*(y0-yTop);
+    return [x,yy];
+  });
+  var d=pts.map(function(p,i){return (i?'L':'M')+p[0].toFixed(1)+' '+p[1].toFixed(1);}).join(' ');
+  $('#eqLinePath').setAttribute('d',d);
+  $('#eqArea').setAttribute('d',d+' L'+x1+' '+y0+' L'+x0+' '+y0+' Z');
+  var last=pts[pts.length-1];
+  $('#eqDot').setAttribute('cx',last[0]);$('#eqDot').setAttribute('cy',last[1]);
+})();
+
+/* ---------- Markets ---------- */
+var MARKETS={
+  XAU:{label:'XAU/USD',price:'4008.81',base:4008.81,vol:2.4,side:'BUY bias'},
+  XAG:{label:'XAG/USD',price:'46.32',base:46.32,vol:0.16,side:'BUY bias'},
+  BTC:{label:'BTC/USD',price:'61706.80',base:61706.8,vol:210,side:'SELL bias'}
+};
+var mSymbol='XAU',mTf='M15';
+function drawMarket(){
+  var m=MARKETS[mSymbol],svg=$('#marketChart');svg.innerHTML='';
+  var seed=(mSymbol.charCodeAt(0)*31+mTf.charCodeAt(1)*7)>>>0;
+  var tfMult=mTf==='M15'?1:(mTf==='M60'?1.6:2.4);
+  var data=candles(seed,34,m.base-m.vol*2,m.vol*tfMult);
+  var lows=data.map(function(b){return b.l;}),highs=data.map(function(b){return b.h;});
+  var pMin=Math.min.apply(null,lows),pMax=Math.max.apply(null,highs),pad=(pMax-pMin)*0.12||1;
+  pMin-=pad;pMax+=pad;
+  var x0=8,plotW=292,top=12,bot=188;
+  var y=function(p){return bot-(p-pMin)/(pMax-pMin)*(bot-top);};
+  [0.25,0.5,0.75].forEach(function(f){el('line',{x1:x0,y1:top+(bot-top)*f,x2:x0+plotW,y2:top+(bot-top)*f,'class':'grid-line'},svg);});
+  var step=plotW/34;
+  data.forEach(function(b,i){
+    var x=x0+i*step+step/2,up=b.c>=b.o,col=up?UP:DN;
+    el('line',{x1:x,y1:y(b.h),x2:x,y2:y(b.l),stroke:col,'stroke-width':1},svg);
+    el('rect',{x:x-step*0.3,y:y(Math.max(b.o,b.c)),width:step*0.6,height:Math.max(1.2,Math.abs(y(b.o)-y(b.c))),fill:col,rx:1},svg);
+  });
+  var last=data[data.length-1].c;
+  el('line',{x1:x0,y1:y(last),x2:x0+plotW,y2:y(last),stroke:AMBER,'stroke-width':1,'stroke-dasharray':'2 3'},svg);
+  txt(svg,x0+plotW+5,y(last)+3,m.price,AMBER,8);
+  $('#marketPairLabel').textContent=m.label+' · '+mTf;
+  $('#marketPrice').textContent=m.price;
+  var side=$('#marketSide');side.textContent=m.side;
+  side.className='chip '+(m.side.indexOf('BUY')>=0?'buy':'sell');
+}
+$$('[data-symbol]').forEach(function(b){b.addEventListener('click',function(){
+  mSymbol=b.dataset.symbol;
+  $$('[data-symbol]').forEach(function(x){x.setAttribute('aria-pressed',x===b?'true':'false');});
+  drawMarket();
+});});
+$$('[data-tf]').forEach(function(b){b.addEventListener('click',function(){
+  mTf=b.dataset.tf;
+  $$('[data-tf]').forEach(function(x){x.setAttribute('aria-pressed',x===b?'true':'false');});
+  drawMarket();
+});});
+drawMarket();
+
+/* ---------- Kalkulator ---------- */
+function num(v){var n=parseFloat(v);return isFinite(n)?n:0;}
+function calc(){
+  var bal=num($('#calcBalance').value),riskPct=num($('#calcRisk').value);
+  var entry=num($('#calcEntry').value),sl=num($('#calcSl').value);
+  var riskUsd=bal*riskPct/100,dist=Math.abs(entry-sl);
+  var lot=dist>0?riskUsd/(dist*100):0;
+  $('#calcRiskUsd').textContent=riskUsd.toFixed(2);
+  $('#calcLot').textContent=lot>0?lot.toFixed(2):'—';
+}
+['calcBalance','calcRisk','calcEntry','calcSl'].forEach(function(id){$('#'+id).addEventListener('input',calc);});
+calc();
+$('#toToolsBtn').addEventListener('click',function(){
+  $('#calcEntry').value=String(SIG.entry);$('#calcSl').value=String(SIG.sl);
+  calc();location.hash='#/tools';toast('Entry & SL diprefill dari signal.');
+});
+
+show(currentRoute());
+})();
+</script>
+</body>
+</html>

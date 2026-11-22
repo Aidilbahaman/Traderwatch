@@ -480,7 +480,7 @@
       })
       .filter(function (r) { return r.data && closedOf(r.data); })
       .sort(function (a, b) { return new Date(closedOf(b.data)) - new Date(closedOf(a.data)); })
-      .slice(0, 6);
+      .slice(0, 3); // owner 2026-11-20: keputusan terkini = 3 sahaja
 
     if (!rows.length) {
       list.innerHTML = '<li class="results-empty">Belum ada keputusan direkodkan.</li>';

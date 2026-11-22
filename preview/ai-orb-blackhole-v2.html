@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="ms"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>PREVIEW — Black Hole BH2 · 5 variasi</title>
+<style>
+:root{--bg:#0a0e0b;--card:#111612;--card2:#171e18;--line:#222b23;--text:#eef3ee;--muted:#8a978c;--lime:#b7f36b;--green:#b7f36b;--red:#ff777d;--orange:#ffc16b;--blue:#8ab4ff;--violet:#b18cff}
+*{box-sizing:border-box}
+body{margin:0;background:#050705;font:15px/1.5 -apple-system,BlinkMacSystemFont,"Inter",sans-serif;color:var(--text)}
+.wrap{max-width:430px;margin:0 auto;background:var(--bg);min-height:100vh;padding:16px 16px 40px}
+h1{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:#5d695f;margin:0 0 4px;font-weight:700}
+.sub{font-size:12px;color:var(--muted);margin:0 0 16px}
+.sec{margin-bottom:26px}
+.sec h2{font-size:13px;font-weight:850;margin:0 0 3px}
+.sec .hint{font-size:11px;color:var(--muted);margin:0 0 9px;line-height:1.45}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:14px;display:grid;place-items:center;position:relative;overflow:hidden}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes infall{
+ 0%{opacity:0;transform:rotate(var(--a)) translate(var(--r0,80px)) rotate(calc(var(--a) * -1)) scale(1.05)}
+ 14%{opacity:1}
+ 60%{opacity:1;transform:rotate(calc(var(--a) + 160deg)) translate(44px) rotate(calc((var(--a) + 160deg) * -1)) scale(.88)}
+ 90%{transform:rotate(calc(var(--a) + 330deg)) translate(10px) rotate(calc((var(--a) + 330deg) * -1)) scale(.45);opacity:.85}
+ 100%{transform:rotate(calc(var(--a) + 390deg)) translate(1px) rotate(calc((var(--a) + 390deg) * -1)) scale(.05);opacity:0}}
+
+/* ============ V1: CLASSIC (BH2 asal, dirapikan) ============ */
+.v1{position:relative;width:186px;height:186px;display:grid;place-items:center}
+.v1 .core{width:56px;height:56px;border-radius:50%;background:#000;z-index:5;
+ box-shadow:0 0 0 2px #b7f36b8c,0 0 24px 4px #b7f36b55,0 0 64px 12px #b7f36b1e}
+.v1 .photon{position:absolute;width:74px;height:74px;border-radius:50%;border:2px solid #d6ff9a;opacity:.55;filter:blur(1.3px);animation:pulse 3s ease-in-out infinite}
+@keyframes pulse{0%,100%{transform:scale(.97);opacity:.42}50%{transform:scale(1.05);opacity:.72}}
+.v1 .jet{position:absolute;width:3px;background:linear-gradient(to top,#b7f36b00,#b7f36b88,#b7f36b00);animation:jet 2.4s ease-in-out infinite}
+.v1 .jet.t{height:64px;top:-58px}.v1 .jet.b{height:56px;bottom:-50px;background:linear-gradient(to bottom,#b7f36b00,#b7f36b66,#b7f36b00)}
+@keyframes jet{0%,100%{opacity:.32;transform:scaleY(.85)}50%{opacity:.7;transform:scaleY(1.15)}}
+.v1 .dsk{position:absolute;border-radius:50%;animation:spin linear infinite}
+.v1 .dsk i{position:absolute;inset:0;border-radius:50%;border:1px solid transparent}
+.v1 .d1{width:112px;height:112px;animation-duration:4.4s}
+.v1 .d1 i{border-top-color:#b7f36bcc;border-left-color:#8ab4ff66}
+.v1 .d2{width:146px;height:146px;animation-duration:7s;animation-direction:reverse}
+.v1 .d2 i{border-bottom-color:#ffc16b88}
+.v1 .e{position:absolute;width:7px;height:7px;border-radius:50%;left:50%;top:50%;margin:-3.5px 0 0 -3.5px;opacity:0;animation:infall 2.9s ease-in infinite}
+
+/* ============ V2: PULSAR (jet berdenyut kuat, dua arah) ============ */
+.v2{position:relative;width:186px;height:210px;display:grid;place-items:center}
+.v2 .core{width:48px;height:48px;border-radius:50%;background:#000;z-index:6;
+ box-shadow:0 0 0 2px #b7f36b95,0 0 30px 6px #b7f36b66,0 0 80px 18px #b7f36b24}
+.v2 .beam{position:absolute;width:26px;z-index:1;background:linear-gradient(to top,#b7f36b00,#b7f36b40 40%,#d6ff9a99 92%,#ffffffcc);
+ clip-path:polygon(38% 100%,62% 100%,100% 0%,0% 0%);opacity:.55;animation:beam 3.2s ease-in-out infinite}
+.v2 .beam.t{height:92px;top:-84px;transform-origin:bottom}
+.v2 .beam.b{height:92px;bottom:-84px;transform-origin:top;background:linear-gradient(to bottom,#b7f36b00,#b7f36b40 40%,#d6ff9a99 92%,#ffffffcc)}
+@keyframes beam{0%,100%{opacity:.28;transform:scaleY(.72)}45%{opacity:.62;transform:scaleY(1.1)}60%{opacity:.5;transform:scaleY(.95)}}
+.v2 .ring{position:absolute;width:66px;height:66px;border-radius:50%;border:2px solid #d6ff9a;filter:blur(1.5px);opacity:.65;animation:pulse 2.6s ease-in-out infinite}
+.v2 .dsk{position:absolute;width:104px;height:104px;border-radius:50%;animation:spin 3.6s linear infinite}
+.v2 .dsk i{position:absolute;inset:0;border-radius:50%;border:1px solid transparent;border-top-color:#b7f36bdd;border-right-color:#8ab4ff88}
+.v2 .e{position:absolute;width:6px;height:6px;border-radius:50%;left:50%;top:50%;margin:-3px 0 0 -3px;opacity:0;animation:infall 2.4s ease-in infinite}
+
+/* ============ V3: DOUBLE DISK TILTED (3D-ish) ============ */
+.v3{position:relative;width:196px;height:186px;display:grid;place-items:center;perspective:400px}
+.v3 .core{width:52px;height:52px;border-radius:50%;background:#000;z-index:5;
+ box-shadow:0 0 0 2px #b7f36b90,0 0 26px 5px #b7f36b5c,0 0 70px 14px #b7f36b1e}
+.v3 .ringtilt{position:absolute;width:150px;height:150px;border-radius:50%;border:1px solid #b7f36b40;
+ transform:rotateX(72deg) rotateZ(0deg);animation:tiltspin 9s linear infinite}
+.v3 .ringtilt i{position:absolute;inset:-2px;border-radius:50%;border:1px solid transparent;border-top-color:#8ab4ff88;border-bottom-color:#b7f36b55}
+@keyframes tiltspin{to{transform:rotateX(72deg) rotateZ(360deg)}}
+.v3 .ringtilt2{position:absolute;width:120px;height:120px;border-radius:50%;transform:rotateX(72deg) rotateZ(120deg);border:1px solid #ffc16b44;animation:tiltspin2 6s linear infinite}
+@keyframes tiltspin2{to{transform:rotateX(72deg) rotateZ(480deg)}}
+.v3 .photon{position:absolute;width:64px;height:64px;border-radius:50%;border:2px solid #d6ff9a;filter:blur(1.4px);opacity:.6;animation:pulse 3.2s ease-in-out infinite}
+.v3 .e{position:absolute;width:6px;height:6px;border-radius:50%;left:50%;top:50%;margin:-3px 0 0 -3px;opacity:0;animation:infall 3.1s ease-in infinite}
+
+/* ============ V4: MATRIX GRID (digital) ============ */
+.v4{position:relative;width:180px;height:180px;display:grid;place-items:center}
+.v4 .gridbg{position:absolute;inset:0;background-image:linear-gradient(#b7f36b12 1px,transparent 1px),linear-gradient(90deg,#b7f36b12 1px,transparent 1px);background-size:15px 15px;mask-image:radial-gradient(circle,#000 30%,transparent 74%)}
+.v4 .core{width:50px;height:50px;border-radius:50%;background:#000;z-index:5;
+ box-shadow:0 0 0 2px #b7f36b90,0 0 24px 5px #b7f36b5c,0 0 64px 12px #b7f36b1e}
+.v4 .hex{position:absolute;width:78px;height:78px;border:1px solid #b7f36b55;border-radius:14px;
+ transform:rotate(45deg);animation:rot 12s linear infinite}
+.v4 .hex2{width:112px;height:112px;border-color:#8ab4ff2e;animation-duration:18s;animation-direction:reverse}
+@keyframes rot{to{transform:rotate(405deg)}}
+.v4 .bit{position:absolute;font-size:8px;font-weight:800;color:#b7f36b99;font-family:ui-monospace,monospace;opacity:0;animation:bit 3.4s linear infinite}
+@keyframes bit{0%,72%{opacity:0;transform:translateY(6px)}78%{opacity:.9;transform:translateY(0)}100%{opacity:0;transform:translateY(-22px)}}
+.v4 .e{position:absolute;width:5px;height:5px;border-radius:1px;background:var(--lime);box-shadow:0 0 6px var(--lime);left:50%;top:50%;margin:-2.5px 0 0 -2.5px;opacity:0;animation:infall 3s ease-in infinite}
+
+/* ============ V5: SOLAR FLARE (sinar memancar) ============ */
+.v5{position:relative;width:190px;height:190px;display:grid;place-items:center}
+.v5 .core{width:54px;height:54px;border-radius:50%;background:#000;z-index:6;
+ box-shadow:0 0 0 2px #b7f36ba6,0 0 30px 8px #b7f36b70,0 0 86px 22px #b7f36b2b}
+.v5 .corona{position:absolute;width:112px;height:112px;border-radius:50%;
+ background:conic-gradient(from 0deg,#b7f36b00 0deg,#b7f36b66 12deg,#b7f36b00 26deg,#b7f36b00 60deg,#8ab4ff55 74deg,#b7f36b00 88deg,#b7f36b00 140deg,#ffc16b55 154deg,#b7f36b00 168deg,#b7f36b00 250deg,#b7f36b77 264deg,#b7f36b00 280deg,#b7f36b00 360deg);
+ filter:blur(7px);animation:spin 8s linear infinite;opacity:.9}
+.v5 .photon{position:absolute;width:70px;height:70px;border-radius:50%;border:2px solid #d6ff9a;filter:blur(1.6px);opacity:.6;animation:pulse 2.8s ease-in-out infinite}
+.v5 .flare{position:absolute;width:2px;height:26px;background:linear-gradient(to top,#b7f36b00,#d6ff9acc);animation:flare 3.6s ease-out infinite;transform-origin:bottom}
+@keyframes flare{0%,80%{opacity:0;transform:scaleY(.2)}86%{opacity:.9;transform:scaleY(1.1)}100%{opacity:0;transform:scaleY(1.5)}}
+.v5 .e{position:absolute;width:6px;height:6px;border-radius:50%;left:50%;top:50%;margin:-3px 0 0 -3px;opacity:0;animation:infall 2.8s ease-in infinite}
+
+.note{font-size:11.5px;color:var(--muted);line-height:1.65;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px;margin-top:8px}
+.note b{color:var(--text)}
+@media(prefers-reduced-motion:reduce){.card *{animation:none !important}}
+</style></head><body><div class="wrap">
+<h1>PREVIEW — BH2 · 5 VARIASI</h1>
+<p class="sub">Semua berasaskan black hole. Elektron tetap dihisap masuk.</p>
+
+<div class="sec"><h2>V1 · Classic <span style="font-size:10px;color:var(--muted)">(BH2 asal dirapikan)</span></h2>
+<p class="hint">Photon ring + 2 lapis disk + jet lembut atas/bawah.</p>
+<div class="card"><div class="v1" id="v1">
+ <div class="jet t"></div><div class="jet b"></div>
+ <div class="dsk d2"><i></i></div><div class="dsk d1"><i></i></div>
+ <div class="photon"></div><div class="core"></div></div></div></div>
+
+<div class="sec"><h2>V2 · Pulsar <span style="font-size:10px;color:var(--muted)">(beam kuat dua arah)</span></h2>
+<p class="hint">Pancaran tenaga berbentuk kon dari teras — seperti pulsar memancar data.</p>
+<div class="card"><div class="v2" id="v2">
+ <div class="beam t"></div><div class="beam b"></div>
+ <div class="dsk"><i></i></div><div class="ring"></div><div class="core"></div></div></div></div>
+
+<div class="sec"><h2>V3 · Tilted disk <span style="font-size:10px;color:var(--muted)">(3D perspective)</span></h2>
+<p class="hint">Cincin condong dengan perspective — nampak seperti cakera di angkasa, bukan bulatan rata.</p>
+<div class="card" style="padding:18px"><div class="v3" id="v3">
+ <div class="ringtilt"><i></i></div><div class="ringtilt2"><i></i></div>
+ <div class="photon"></div><div class="core"></div></div></div></div>
+
+<div class="sec"><h2>V4 · Digital core <span style="font-size:10px;color:var(--muted)">(grid + hex)</span></h2>
+<p class="hint">Rasa "AI digital" — grid halus, dua heksagon berputar, bit data naik. Elektron berbentuk petak.</p>
+<div class="card"><div class="v4" id="v4">
+ <div class="gridbg"></div><div class="hex hex2"></div><div class="hex"></div>
+ <div class="core"></div></div></div></div>
+
+<div class="sec"><h2>V5 · Corona flare <span style="font-size:10px;color:var(--muted)">(sinar memancar)</span></h2>
+<p class="hint">Korona conic-gradient berputar + flare menembak keluar sekali-sekala.</p>
+<div class="card"><div class="v5" id="v5">
+ <div class="corona"></div><div class="photon"></div><div class="core"></div></div></div></div>
+
+<div class="note">
+<b>Cadangan:</b> V1 paling selamat &amp; jelas. V2 paling "powerful" (pulsar). V3 paling berbeza visual (3D). V4 paling unik tapi paling jauh dari bahasa reka bentuk app. V5 paling halus/dramatik.<br>
+Semua guna elektron <i>dihisap masuk</i> seperti yang anda suka.
+</div>
+</div>
+<script>
+function spawnInto(id, cls, count, colors){
+  var host=document.getElementById(id); if(!host) return;
+  for(var i=0;i<count;i++){
+    var d=document.createElement('div');
+    d.className=(cls||'e')+' '+(colors?colors[i%colors.length]:'');
+    d.style.setProperty('--a',(i*(360/count)+11)+'deg');
+    d.style.animationDelay=(i*0.42)+'s';
+    if(colors&&colors[i%colors.length]) d.style.background='var(--'+colors[i%colors.length]+')';
+    host.appendChild(d);
+  }
+}
+spawnInto('v1','e',6,['lime','blue','lime','violet','blue','lime']);
+spawnInto('v2','e',5,['lime','blue','lime','lime','blue']);
+spawnInto('v3','e',6,['lime','orange','blue','lime','violet','orange']);
+spawnInto('v4','e',7,['lime','lime','blue','lime','lime','violet','lime']);
+spawnInto('v5','e',5,['lime','orange','lime','blue','lime']);
+/* V4 data bits */
+(function(){var h=document.getElementById('v4');
+ var bits=['1','0','1','1','0','A','I','1','0'];
+ bits.forEach(function(t,i){var b=document.createElement('div');b.className='bit';b.textContent=t;
+  b.style.left=(12+((i*37)%76))+'%';b.style.top=(18+((i*23)%54))+'%';b.style.animationDelay=(i*0.5)+'s';h.appendChild(b)})})();
+/* V5 flares */
+(function(){var h=document.getElementById('v5');
+ for(var i=0;i<4;i++){var f=document.createElement('div');f.className='flare';
+  f.style.left=(46+((i*13)%8))+'%';f.style.top='26%';
+  f.style.transformOrigin='bottom';f.style.transform='rotate('+(i*47-20)+'deg)';
+  f.style.animationDelay=(i*0.9)+'s';h.appendChild(f)}})();
+</script>
+</div></body></html>

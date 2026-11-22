@@ -37,8 +37,11 @@ MAGIC_BASE = int(os.environ.get("MT5_MAGIC_BASE", "20261000"))
 DEVIATION = int(os.environ.get("MT5_DEVIATION", "20"))
 # Ubah max_pending jadi lebih banyak (cth: 10) supaya banyak pending order boleh masuk serentak
 MAX_PENDING = int(os.environ.get("MT5_MAX_PENDING", "10"))
-# Turunkan sleep kepada 2 saat untuk respon yang lebih pantas (hampir instant)
-SLEEP_SEC = 2
+# Loop interval (saat). Setiap loop panggil wine bridge (~2s per call), jadi
+# nilai kecil = CPU tinggi berterusan. Signal baru datang dari cron engine
+# setiap 5 minit, jadi 15s masih "instant" untuk client (max delay 15s) tapi
+# 7x lebih ringan pada CPU. Owner 2026-11-22: optimumkan CPU untuk client.
+SLEEP_SEC = int(os.environ.get("MT5_SLEEP_SEC", "15"))
 # Senarai symbol dibenarkan (kosong = semua). Guna untuk hadkan ke BTCUSD
 # semasa ujian luar waktu forex.
 ALLOW = [x.strip().upper() for x in os.environ.get("MT5_ALLOW", "").split(",") if x.strip()]

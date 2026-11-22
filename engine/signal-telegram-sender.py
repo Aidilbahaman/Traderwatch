@@ -26,6 +26,14 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 # itu dan guna fail sent berasingan supaya state production tidak tercemar.
 TEST_CHAT_FILE = Path("/home/ubuntu/web/.sender-test-chat")
 TEST_SENT_FILE = Path("/home/ubuntu/web/.tg-sent-ids-test.json")
+# Per-chat delivery ledger: {signal_id: [chat_id, ...]}. Telegram send can
+# fail for one member (blocked bot / chat not found). Before this ledger a
+# single failed target kept the whole signal out of .tg-sent-ids.json, so the
+# next cron tick re-sent that OLD signal to every other member — the "spam
+# old messages" symptom. Now each member is recorded the moment they receive
+# it and is skipped on later runs; only the failed chat is retried.
+DELIVERED_FILE = Path("/home/ubuntu/web/.tg-delivered.json")
+TEST_DELIVERED_FILE = Path("/home/ubuntu/web/.tg-delivered-test.json")
 
 
 def test_chat():
@@ -345,11 +353,38 @@ def save_sent(sent):
     _sent_path().write_text(json.dumps(keep))
 
 
+def _delivered_path():
+    return TEST_DELIVERED_FILE if test_chat() is not None else DELIVERED_FILE
+
+
+def load_delivered():
+    p = _delivered_path()
+    if p.exists():
+        try:
+            return json.loads(p.read_text())
+        except Exception:
+            return {}
+    return {}
+
+
+def save_delivered(delivered):
+    p = _delivered_path()
+    # Bound the ledger: keep the 500 most recent signal ids.
+    try:
+        keep = dict(sorted(delivered.items(), key=lambda kv: str(kv[0]),
+                           reverse=True)[:500])
+        p.write_text(json.dumps(keep))
+    except Exception:
+        pass
+
+
 def fetch_targets():
+    # Single tier (2026-11-20): semua ahli Free yang link Telegram — tiada
+    # lagi saringan plan pro/max (tier berbayar sudah dihapuskan).
     st, rows = http_json(
         f"{SB_URL}/rest/v1/profiles"
         "?select=id,name,plan,telegram_chat_id"
-        "&plan=in.(pro,max)&telegram_chat_id=not.is.null",
+        "&telegram_chat_id=not.is.null",
         headers={"apikey": SB_KEY, "Authorization": f"Bearer {SB_KEY}"})
     if st != 200:
         raise RuntimeError(f"profiles fetch {st}")
@@ -487,6 +522,7 @@ def main():
 
 def _run():
     sent = load_sent()
+    delivered = load_delivered()
     signals = fetch_new_signals(sent)
     if not signals:
         log("no new signals")
@@ -499,20 +535,28 @@ def _run():
     log(f"{len(signals)} new signal(s) -> {len(targets)} member(s)")
     count = nudged = 0
     for s in signals:
+        sid = s["id"]
+        got = set(str(x) for x in (delivered.get(str(sid)) or []))
         # Chart PNG dengan overlay ICT (FVG+OB+sweep) — format utama.
         # MP4 ticket dimatikan (owner 2026-11-02): gambar statik lebih jelas.
         png = render_signal_chart(s)
         caption = fmt(s)
         mp4 = None
-        ok_all = True
+        pending_left = 0
         for t in targets:
             if count >= MAX_MSGS:
                 log("hit MAX_MSGS cap, remaining signals will retry next run")
+                save_delivered(delivered)
+                save_sent(sent)
                 return 1
             chat_id = t["telegram_chat_id"]
-            if is_muted(chat_id, s["id"]):
+            if is_muted(chat_id, sid):
                 continue
-            kb = build_kb(s["id"], chat_id)
+            # Already delivered to this member in a previous run — skip so
+            # we don't resend old signals.
+            if str(chat_id) in got:
+                continue
+            kb = build_kb(sid, chat_id)
             if mp4:
                 ok, needs_start = tg_send_animation(chat_id, mp4, caption, reply_markup=kb)
                 if not ok:
@@ -528,8 +572,9 @@ def _run():
                 ok, needs_start = tg_send(chat_id, fmt(s), reply_markup=kb)
             if ok:
                 count += 1
+                got.add(str(chat_id))
             else:
-                ok_all = False
+                pending_left += 1
                 # Not started in the signals bot yet: send one nudge via the
                 # link bot so the member knows what to do. At most once per
                 # run per member (nudge only on the first signal of the run).
@@ -537,14 +582,19 @@ def _run():
                     if nudge_start(chat_id):
                         nudged += 1
             time.sleep(BATCH_GAP)
-        if ok_all:
-            sent.add(s["id"])
+        delivered[str(sid)] = sorted(got)
+        # Mark the signal "sent" only once every member has received it.
+        # A blocked member keeps it in delivered so they are not retried,
+        # and the signal is retried only for the still-pending chats.
+        if pending_left == 0:
+            sent.add(sid)
         # Buang MP4 sementara supaya /tmp tidak penuh.
         if mp4:
             try:
                 Path(mp4).unlink(missing_ok=True)
             except Exception:
                 pass
+    save_delivered(delivered)
     save_sent(sent)
     log(f"DONE sent={count} nudged={nudged} marked={len(sent)}")
     return 0

@@ -1,0 +1,213 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>JARVIS HUD — concept</title>
+<style>
+:root{--bg:#02060a;--cy:#35e0f0;--cy2:#0aa8c4;--lime:#b7f36b;--gold:#e6c35c;--red:#ff4d5a;--green:#22d36b;--line:#0f3a45}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:radial-gradient(circle at 50% 0%,#06222b 0%,#02060a 60%);color:#dff6fa;font:14px/1.5 ui-monospace,Menlo,Consolas,monospace;min-height:100vh;padding:18px;-webkit-font-smoothing:antialiased}
+.wrap{max-width:520px;margin:0 auto}
+
+/* ============ HUD CORE ============ */
+.hud{position:relative;height:250px;border:1px solid var(--line);border-radius:20px;overflow:hidden;
+  background:radial-gradient(circle at 50% 55%,#073a47 0%,#02171e 45%,#010a0e 100%);
+  box-shadow:0 0 40px #0aa8c422,inset 0 0 60px #0aa8c418;margin-bottom:18px}
+/* scanline sweep */
+.hud::after{content:"";position:absolute;left:0;right:0;height:90px;pointer-events:none;
+  background:linear-gradient(180deg,transparent,#35e0f018 45%,#35e0f038 50%,#35e0f018 55%,transparent);
+  animation:scan 4.5s linear infinite}
+@keyframes scan{0%{top:-90px}100%{top:250px}}
+/* corner brackets */
+.brk{position:absolute;width:26px;height:26px;border:2px solid var(--cy);opacity:.75}
+.brk.tl{top:10px;left:10px;border-right:0;border-bottom:0;border-radius:8px 0 0 0}
+.brk.tr{top:10px;right:10px;border-left:0;border-bottom:0;border-radius:0 8px 0 0}
+.brk.bl{bottom:10px;left:10px;border-right:0;border-top:0;border-radius:0 0 0 8px}
+.brk.br{bottom:10px;right:10px;border-left:0;border-top:0;border-radius:0 0 8px 0}
+
+/* radar */
+.radar{position:absolute;left:50%;top:52%;transform:translate(-50%,-50%);width:190px;height:190px}
+.ring{position:absolute;inset:0;border:1px solid #35e0f03d;border-radius:50%}
+.ring.r2{inset:26px}.ring.r3{inset:56px}
+.ring.r4{inset:14px;border-style:dashed;opacity:.45;animation:spin 22s linear infinite reverse}
+@keyframes spin{to{transform:rotate(360deg)}}
+.cross,.cross2{position:absolute;left:50%;top:50%;background:#35e0f028}
+.cross{width:190px;height:1px;transform:translate(-50%,-50%)}
+.cross2{width:1px;height:190px;transform:translate(-50%,-50%)}
+/* sweeping beam */
+.beam{position:absolute;inset:0;border-radius:50%;overflow:hidden}
+.beam::before{content:"";position:absolute;left:50%;top:50%;width:50%;height:50%;transform-origin:0 0;
+  background:conic-gradient(from 0deg,#35e0f000 0deg,#35e0f055 42deg,#35e0f099 58deg,#35e0f000 60deg);
+  animation:spin 3.4s linear infinite}
+/* blips */
+.blip{position:absolute;width:7px;height:7px;border-radius:50%;background:var(--lime);
+  box-shadow:0 0 10px var(--lime);animation:ping 3.4s ease-out infinite}
+.blip.b2{background:var(--gold);box-shadow:0 0 10px var(--gold);animation-delay:1.2s}
+.blip.b3{background:var(--cy);box-shadow:0 0 10px var(--cy);animation-delay:2.1s}
+@keyframes ping{0%{opacity:0;transform:scale(.4)}12%{opacity:1;transform:scale(1)}100%{opacity:0;transform:scale(2.4)}}
+
+/* core readout */
+.core{position:absolute;left:50%;top:52%;transform:translate(-50%,-50%);text-align:center;z-index:3}
+.core .clock{font-size:30px;font-weight:800;letter-spacing:1px;color:#eafcff;text-shadow:0 0 16px #35e0f0aa}
+.core .lbl{font-size:9px;letter-spacing:3px;color:var(--cy);margin-top:3px}
+.core .pulse{width:8px;height:8px;border-radius:50%;background:var(--green);display:inline-block;
+  margin-right:5px;animation:pulse 1.4s infinite;vertical-align:middle}
+@keyframes pulse{50%{opacity:.25}}
+
+/* ============ TELEMETRY PANELS ============ */
+.tel{position:absolute;font-size:9.5px;letter-spacing:1.4px;color:#7fd8e6;line-height:1.9}
+.tel.tl{top:26px;left:26px}
+.tel.tr{top:26px;right:26px;text-align:right}
+.tel.bl{bottom:24px;left:26px}
+.tel.br{bottom:24px;right:26px;text-align:right}
+.tel b{color:var(--lime);font-weight:700}
+.tel i{font-style:normal;color:var(--gold)}
+.tel .dim{color:#3d7a86}
+.bar{display:inline-block;width:44px;height:5px;background:#0d3b45;border-radius:3px;overflow:hidden;vertical-align:middle;margin-left:5px}
+.bar u{display:block;height:100%;background:linear-gradient(90deg,var(--cy2),var(--cy));animation:fill 3s ease-in-out infinite alternate}
+@keyframes fill{from{width:28%}to{width:92%}}
+
+/* ============ TICKER ============ */
+.ticker{overflow:hidden;white-space:nowrap;border:1px solid var(--line);border-radius:12px;
+  background:#03141a;padding:9px 0;margin-bottom:16px;position:relative}
+.ticker::before,.ticker::after{content:"";position:absolute;top:0;bottom:0;width:34px;z-index:2}
+.ticker::before{left:0;background:linear-gradient(90deg,#03141a,transparent)}
+.ticker::after{right:0;background:linear-gradient(270deg,#03141a,transparent)}
+.ticker div{display:inline-block;animation:mq 24s linear infinite}
+.ticker span{margin:0 20px;font-size:11.5px;letter-spacing:1px}
+.ticker b{color:#8fa9b2;font-weight:400}
+.tk-live{color:var(--green)}
+.tk-live::before{content:"";display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--green);margin-right:6px;animation:pulse 1.3s infinite}
+@keyframes mq{to{transform:translateX(-50%)}}
+
+/* ============ BOTTOM STATUS STRIP ============ */
+.strip{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.st{border:1px solid var(--line);border-radius:12px;padding:10px 8px;text-align:center;background:#03141a;position:relative;overflow:hidden}
+.st::before{content:"";position:absolute;left:0;top:0;bottom:0;width:2px;background:var(--cy)}
+.st.ok::before{background:var(--green)}.st.wn::before{background:var(--gold)}.st.dn::before{background:var(--red)}
+.st small{display:block;font-size:8.5px;letter-spacing:1.6px;color:#4d8b97;margin-bottom:5px}
+.st b{font-size:16px;font-weight:800;color:#eafcff}
+.st b.ok{color:var(--green)}.st b.wn{color:var(--gold)}.st b.dn{color:var(--red)}
+
+.note{font-size:10.5px;color:#4d8b97;letter-spacing:1px;margin-top:14px;text-align:center;line-height:1.8}
+
+/* ============ MOBILE ============ */
+/* The radar is 190px and telemetry sits in the corners: below ~470px they
+   overlap. Shrink the radar, move telemetry out of the radar band, and let the
+   status strip reflow to 2x2 so nothing is clipped on a phone. */
+@media(max-width:470px){
+  body{padding:12px}
+  .hud{height:300px}
+  .radar{width:150px;height:150px;top:58%}
+  .ring.r2{inset:22px}.ring.r3{inset:48px}.ring.r4{inset:11px}
+  .cross{width:150px}.cross2{height:150px}
+  .core .clock{font-size:23px}
+  .core .lbl{font-size:8px;letter-spacing:2px}
+  /* stack the corner telemetry top / bottom, keep the middle band clear */
+  .tel{font-size:9px;letter-spacing:1px;line-height:1.7}
+  .tel.tl,.tel.tr{top:22px}
+  .tel.tl,.tel.bl{left:20px}
+  .tel.tr,.tel.br{right:20px}
+  .tel.bl,.tel.br{bottom:20px}
+  .bar{width:34px}
+  .strip{grid-template-columns:repeat(2,1fr)}
+  .st b{font-size:15px}
+  .ticker span{font-size:10.5px;margin:0 14px}
+}
+@media(max-width:340px){
+  .hud{height:320px}
+  .radar{width:132px;height:132px}
+  .ring.r2{inset:19px}.ring.r3{inset:42px}
+  .cross{width:132px}.cross2{height:132px}
+  .core .clock{font-size:20px}
+  .tel{font-size:8.5px}
+  .tel.tl,.tel.tr{top:18px}.tel.bl,.tel.br{bottom:18px}
+  .tel.tl,.tel.bl{left:16px}.tel.tr,.tel.br{right:16px}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="hud">
+    <span class="brk tl"></span><span class="brk tr"></span><span class="brk bl"></span><span class="brk br"></span>
+
+    <div class="tel tl">
+      SYS <b>ONLINE</b><br>
+      FEED <b>LIVE</b><br>
+      LAT <b id="lat">12</b>ms
+    </div>
+    <div class="tel tr">
+      XAU <b id="px1">4,054.16</b><br>
+      BTC <b id="px2">75,545.90</b><br>
+      WTI <b id="px3">89.14</b>
+    </div>
+
+    <div class="radar">
+      <span class="ring"></span><span class="ring r2"></span><span class="ring r3"></span><span class="ring r4"></span>
+      <span class="cross"></span><span class="cross2"></span>
+      <span class="beam"></span>
+      <span class="blip" style="left:30%;top:24%"></span>
+      <span class="blip b2" style="left:70%;top:34%"></span>
+      <span class="blip b3" style="left:44%;top:74%"></span>
+    </div>
+
+    <div class="core">
+      <div class="clock" id="clock">00:00:00</div>
+      <div class="lbl"><span class="pulse"></span>MYT · MARKET OPEN</div>
+    </div>
+
+    <div class="tel bl">
+      <span class="dim">SIG ACTIVE</span> <b>1</b><br>
+      <span class="dim">TP / SL</span> <b>42</b>/<i>82</i>
+    </div>
+    <div class="tel br">
+      RISK <span class="bar"><u></u></span><br>
+      <span class="dim">SESSION</span> <b>ASIA</b>
+    </div>
+  </div>
+
+  <div class="ticker"><div id="tk"></div></div>
+
+  <div class="strip">
+    <div class="st ok"><small>ENGINE</small><b class="ok">ARMED</b></div>
+    <div class="st ok"><small>MT5 LINK</small><b class="ok">LIVE</b></div>
+    <div class="st wn"><small>SPREAD</small><b class="wn">1.4p</b></div>
+    <div class="st dn"><small>NEWS</small><b class="dn">23:00</b></div>
+  </div>
+
+  <div class="note">CONCEPT PREVIEW — JARVIS-style HUD.<br>Semua nilai di atas akan datang dari data sebenar (sq-bars.db + signal-status.json + MT5 state).</div>
+</div>
+
+<script>
+/* clock in MYT (UTC+8) */
+function tick(){
+  var d=new Date(Date.now()+8*3600*1000);
+  document.getElementById('clock').textContent=
+    String(d.getUTCHours()).padStart(2,'0')+':'+
+    String(d.getUTCMinutes()).padStart(2,'0')+':'+
+    String(d.getUTCSeconds()).padStart(2,'0');
+}
+tick();setInterval(tick,1000);
+
+/* latency shimmer */
+setInterval(function(){document.getElementById('lat').textContent=8+Math.round(Math.random()*9)},2600);
+
+/* ticker — swap T with the live /ticker.json feed later */
+var T=[["XAU","4,054.16","-1.77%"],["BTC","75,545.90","-0.38%"],["WTI","89.14","-0.65%"]];
+var h="";for(var k=0;k<2;k++)T.forEach(function(t){
+  h+='<span><b>'+t[0]+'</b> '+t[1]+' <i style="font-style:normal;color:#ff4d5a">'+t[2]+'</i></span>'});
+document.getElementById('tk').innerHTML='<span class="tk-live">LIVE</span>'+h;
+
+/* very light price jitter so the demo feels alive (NOT real data) */
+var p1=4054.16,p2=75545.90,p3=89.14;
+setInterval(function(){
+  p1+=(Math.random()-.5)*0.7;p2+=(Math.random()-.5)*26;p3+=(Math.random()-.5)*0.05;
+  document.getElementById('px1').textContent=p1.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,",");
+  document.getElementById('px2').textContent=p2.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,",");
+  document.getElementById('px3').textContent=p3.toFixed(2);
+},1200);
+</script>
+</body>
+</html>

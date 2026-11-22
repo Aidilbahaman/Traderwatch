@@ -1,0 +1,78 @@
+{
+  "n_samples": 27699,
+  "n_train": 19383,
+  "n_test": 8316,
+  "base_rate": 0.4985739557384743,
+  "per_feature": [
+    {
+      "name": "ew_wave_pos",
+      "auc_is": 0.5003141554794404,
+      "auc_oos": 0.4997493867728051,
+      "flip": -1,
+      "flag": ""
+    },
+    {
+      "name": "ew_wave_dir",
+      "auc_is": 0.5003808577561439,
+      "auc_oos": 0.4958346253528949,
+      "flip": 1,
+      "flag": ""
+    },
+    {
+      "name": "ew_wave_strength",
+      "auc_is": 0.5006475391012153,
+      "auc_oos": 0.5035227009765354,
+      "flip": -1,
+      "flag": ""
+    },
+    {
+      "name": "ew_retrace_atr",
+      "auc_is": 0.5155604593588299,
+      "auc_oos": 0.5142032674596195,
+      "flip": -1,
+      "flag": ""
+    },
+    {
+      "name": "ew_ext_atr",
+      "auc_is": 0.5092600114368053,
+      "auc_oos": 0.5081353843661776,
+      "flip": -1,
+      "flag": ""
+    },
+    {
+      "name": "ew_slope_atr",
+      "auc_is": 0.5037619658188361,
+      "auc_oos": 0.5067091104734577,
+      "flip": -1,
+      "flag": ""
+    },
+    {
+      "name": "ew_pivot_age",
+      "auc_is": 0.5028441307799013,
+      "auc_oos": 0.5029901767945573,
+      "flip": 1,
+      "flag": ""
+    },
+    {
+      "name": "ew_struct_conf",
+      "auc_is": 0.5025017665722685,
+      "auc_oos": 0.4942781274586939,
+      "flip": 1,
+      "flag": ""
+    }
+  ],
+  "multicollinear": [],
+  "combo": {
+    "auc_is": 0.5161651077782095,
+    "auc_oos": 0.5167338709677419
+  },
+  "per_pair_count": {
+    "XAUUSD": 3957,
+    "EURUSD": 3957,
+    "GBPUSD": 3957,
+    "USDJPY": 3957,
+    "AUDUSD": 3957,
+    "USDCAD": 3957,
+    "NZDUSD": 3957
+  }
+}

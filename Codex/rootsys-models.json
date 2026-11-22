@@ -1,0 +1,21 @@
+{
+  "provider": "rootsys",
+  "base_url": "https://rootsys.cloud/v1",
+  "env_key": "ROOTSYS_API_KEY",
+  "primary": "rootsys/qwen4-max",
+  "models": [
+    "rootsys/deepseek-v4-flash",
+    "rootsys/deepseek-v4-pro",
+    "rootsys/deepseek-v4.1-flash",
+    "rootsys/glm-5.2",
+    "rootsys/glm-5.3-flash",
+    "rootsys/glm-5.3-flashx",
+    "rootsys/hy4flash-free",
+    "rootsys/hy4std",
+    "rootsys/mimo-v2.6-pro",
+    "rootsys/minimax-m3.1-flash",
+    "rootsys/step-5-preview",
+    "rootsys/glm-5.3-beta",
+    "rootsys/glm-5.3-flash-beta"
+  ]
+}

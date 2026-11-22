@@ -1,0 +1,1105 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TraderWatch — Enjin signal AI untuk pasaran</title>
+<meta name="description" content="Signal forex AI automatik untuk XAU/USD, XAG/USD & BTC/USD. Entry, stop loss & take profit dengan chart beranotasi dan prestasi telus. Percuma untuk semua ahli.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+/* ============ TraderWatch × animejs.com design DNA ============ */
+:root{
+  --bg:#252423;
+  --bg-deep:#1b1a19;
+  --bg-card:#1e1d1c;
+  --light:#f6f4f2;
+  --fg:#f6f4f2;
+  --gray:#DAD5D0;
+  --muted:#cccac8;
+  --ink:#252423;
+  --border:rgba(255,255,255,.12);
+  --border-light:rgba(37,36,35,.14);
+  --red:#ff4b4b;
+  --turquoise:#00ffaa;
+  --green:#8dff55;
+  --orange:#ffa828;
+  --purple:#c06ddf;
+  --pink:#ff718b;
+  --yellow:#ffcc2a;
+  /* One Dark syntax */
+  --c-fg:#abb2bf; --c-red:#e06c75; --c-orange:#d19a66; --c-yellow:#e6c07b;
+  --c-green:#98c379; --c-cyan:#56b6c2; --c-blue:#61aeee; --c-purple:#c678dd; --c-comment:#5c6370;
+  --sans:'Archivo','Helvetica Neue',Helvetica,Arial,sans-serif;
+  --mono:'JetBrains Mono',ui-monospace,SFMono-Regular,Menlo,monospace;
+  --r-sm:2px; --r-md:6px; --r-lg:8px;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+@media (prefers-reduced-motion: reduce){ html{scroll-behavior:auto} }
+body{
+  background:var(--bg); color:var(--fg);
+  font-family:var(--sans); font-size:1.0625rem; line-height:1.6;
+  -webkit-font-smoothing:antialiased; overflow-x:hidden;
+}
+::selection{background:var(--red);color:#fff}
+a{color:inherit;text-decoration:none}
+img,svg{display:block;max-width:100%}
+.container{max-width:1200px;margin:0 auto;padding:0 1.5rem}
+.mono{font-family:var(--mono)}
+h1,h2,h3{font-weight:800;line-height:1.05;letter-spacing:-.02em}
+section{position:relative}
+
+/* ---------- Header ---------- */
+.site-header{
+  position:sticky;top:0;z-index:100;
+  background:rgba(37,36,35,.86);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+  border-bottom:1px solid var(--border);
+}
+.header-inner{display:flex;align-items:center;gap:2rem;height:64px}
+.logo{display:flex;align-items:center;gap:.6rem;font-weight:800;letter-spacing:.08em;font-size:.95rem}
+.logo-mark{
+  display:inline-flex;align-items:center;justify-content:center;
+  width:28px;height:28px;border:1px solid var(--border);border-radius:var(--r-sm);
+  color:var(--green);font-weight:900;font-size:1rem;background:var(--bg-deep);
+}
+.main-nav{display:flex;gap:1.5rem;margin-left:auto}
+.main-nav a{color:var(--muted);font-size:.9375rem;font-weight:500;transition:color .2s}
+.main-nav a:hover{color:var(--fg)}
+.header-cta{display:flex;gap:.75rem;align-items:center}
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:.5rem;
+  padding:.6rem 1.25rem;border-radius:var(--r-md);font-family:var(--sans);
+  font-weight:700;font-size:.9375rem;border:1px solid transparent;cursor:pointer;
+  transition:background .2s,color .2s,border-color .2s,transform .2s;line-height:1.2;
+}
+.btn-solid{background:var(--fg);color:var(--ink)}
+.btn-solid:hover{background:#fff;transform:translateY(-1px)}
+.btn-ghost{border-color:var(--border);color:var(--fg);background:transparent}
+.btn-ghost:hover{border-color:rgba(255,255,255,.35)}
+.btn-accent{background:var(--accent,var(--fg));color:var(--ink)}
+.btn-sm{padding:.45rem 1rem;font-size:.875rem}
+.menu-toggle{
+  display:none;margin-left:auto;background:none;border:1px solid var(--border);
+  border-radius:var(--r-md);width:40px;height:40px;cursor:pointer;color:var(--fg);
+  align-items:center;justify-content:center;
+}
+.menu-toggle svg{width:18px;height:18px}
+
+/* ---------- Hero ---------- */
+.hero{padding:6rem 0 5rem;overflow:hidden}
+.hero-grid{display:grid;grid-template-columns:1.05fr .95fr;gap:3rem;align-items:center}
+.hero-title{font-size:clamp(2.5rem,5.5vw,4rem);margin-bottom:1.5rem}
+.hero-title .hw{display:inline-block}
+.red-dot{color:var(--red);display:inline-block}
+.hero-sub{color:var(--muted);font-size:clamp(1rem,1.6vw,1.1875rem);max-width:34rem;margin-bottom:2rem}
+.hero-cta{display:flex;gap:.75rem;flex-wrap:wrap;margin-bottom:1.25rem}
+.hero-risk{font-size:.8125rem;color:var(--muted);opacity:.75;font-family:var(--mono)}
+.hero-visual{position:relative;min-height:420px}
+.hero-candles{position:absolute;left:-8%;bottom:-24px;width:116%;opacity:.5;pointer-events:none}
+.code-window{
+  background:var(--bg-card);border:1px solid var(--border);border-radius:var(--r-lg);
+  overflow:hidden;box-shadow:0 24px 60px rgba(0,0,0,.35);position:relative;z-index:2;
+}
+.code-window-bar{display:flex;align-items:center;gap:.4rem;padding:.65rem .9rem;border-bottom:1px solid var(--border)}
+.code-window-bar i{width:10px;height:10px;border-radius:50%;background:rgba(255,255,255,.14)}
+.code-window-bar i:first-child{background:var(--red)}
+.code-window-bar span{margin-left:.5rem;font-family:var(--mono);font-size:.75rem;color:var(--muted)}
+.code-window pre{padding:1.25rem 1.25rem 1.4rem;font-family:var(--mono);font-size:.875rem;line-height:1.75;color:var(--c-fg);overflow-x:auto}
+.tk-kw{color:var(--c-purple)} .tk-var{color:var(--c-yellow)} .tk-prop{color:var(--c-red)}
+.tk-str{color:var(--c-green)} .tk-num{color:var(--c-orange)} .tk-fn{color:var(--c-blue)}
+.tk-cm{color:var(--c-comment)} .tk-pn{color:var(--c-fg)} .tk-cy{color:var(--c-cyan)}
+.chip{
+  position:absolute;z-index:3;display:inline-flex;align-items:center;gap:.45rem;
+  background:var(--bg-deep);border:1px solid var(--border);border-radius:var(--r-md);
+  padding:.45rem .8rem;font-family:var(--mono);font-size:.75rem;color:var(--gray);
+  box-shadow:0 12px 30px rgba(0,0,0,.35);white-space:nowrap;
+}
+.chip i{width:7px;height:7px;border-radius:50%;flex:none}
+.chip-live{top:-18px;left:-26px}
+.chip-live i{background:var(--red)}
+.chip-tp{bottom:34px;left:-38px}
+.chip-tp i{background:var(--green)}
+.chip-pair{top:44%;right:-22px}
+.chip-pair i{background:var(--turquoise)}
+
+/* ---------- Light sections ---------- */
+.section-light{background:var(--light);color:var(--ink)}
+.section-light .section-sub{color:rgba(37,36,35,.66)}
+.toolbox{padding:5.5rem 0 4.5rem}
+.section-title{font-size:clamp(2rem,4vw,3rem);margin-bottom:1rem}
+.section-sub{color:var(--muted);max-width:40rem;font-size:1.125rem}
+.toolbox-list{display:flex;flex-wrap:wrap;gap:.75rem 2rem;margin-top:2.5rem}
+.toolbox-list a{display:inline-flex;align-items:center;gap:.55rem;font-weight:600;font-size:.9375rem;color:var(--ink);opacity:.85;transition:opacity .2s}
+.toolbox-list a:hover{opacity:1}
+.toolbox-list i{width:9px;height:9px;border-radius:var(--r-sm);flex:none}
+
+/* ---------- Feature sections ---------- */
+.feature{padding:6rem 0;border-top:1px solid var(--border)}
+.feature-grid{display:grid;grid-template-columns:40% 1fr;gap:3.5rem;align-items:center}
+.feature-kicker{font-family:var(--mono);font-size:.8125rem;color:var(--accent);letter-spacing:.06em;margin-bottom:1rem;display:block}
+.feature h2{font-size:clamp(1.9rem,3.4vw,2.75rem);margin-bottom:1.25rem}
+.feature-desc{color:var(--muted);margin-bottom:2rem;max-width:26rem}
+.feature-links{list-style:none;display:flex;flex-direction:column;gap:.9rem}
+.feature-link{display:inline-flex;align-items:center;gap:.7rem;font-weight:600;font-size:.9375rem;color:var(--gray);transition:color .2s}
+.feature-link:hover{color:var(--fg)}
+.feature-link .arrow{width:14px;height:14px;flex:none;color:var(--accent);transition:transform .2s}
+.feature-link:hover .arrow{transform:translateX(4px)}
+.anim-stage{
+  background:var(--bg-deep);border:1px solid var(--border);border-radius:var(--r-lg);
+  padding:2rem;min-height:380px;display:flex;flex-direction:column;justify-content:center;
+  position:relative;overflow:hidden;
+}
+.anim-caption{margin-top:1.25rem;font-family:var(--mono);font-size:.75rem;color:var(--muted);opacity:.8;text-align:center}
+
+/* Feature 1 — signal card */
+.signal-card{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--r-lg);max-width:380px;margin:0 auto;width:100%}
+.signal-card-head{display:flex;align-items:center;justify-content:space-between;padding:1rem 1.25rem;border-bottom:1px solid var(--border)}
+.signal-pair{font-weight:800;letter-spacing:.02em}
+.signal-pair small{display:block;font-weight:500;color:var(--muted);font-size:.75rem;font-family:var(--mono)}
+.live-chip{display:inline-flex;align-items:center;gap:.4rem;font-family:var(--mono);font-size:.7rem;color:var(--red);border:1px solid rgba(255,75,75,.4);border-radius:var(--r-sm);padding:.25rem .55rem}
+.live-chip i{width:7px;height:7px;border-radius:50%;background:var(--red)}
+.signal-rows{padding:.5rem 1.25rem}
+.signal-row{display:flex;justify-content:space-between;align-items:center;padding:.65rem 0;border-bottom:1px solid rgba(255,255,255,.06);font-size:.9375rem}
+.signal-row:last-child{border-bottom:none}
+.signal-row .k{color:var(--muted)}
+.signal-row .v{font-family:var(--mono);font-weight:500}
+.v-buy{color:var(--green)} .v-sl{color:var(--red)} .v-tp{color:var(--green)}
+.signal-reason{padding:.85rem 1.25rem;border-top:1px solid var(--border);font-size:.8125rem;color:var(--muted)}
+.signal-reason b{color:var(--gray);font-weight:600}
+.signal-life{display:flex;align-items:center;gap:.6rem;padding:0 1.25rem 1.1rem;font-family:var(--mono);font-size:.7rem}
+.life-step{border:1px solid var(--border);border-radius:var(--r-sm);padding:.3rem .6rem;color:var(--muted)}
+.life-step.on{border-color:rgba(255,75,75,.5);color:var(--red)}
+.life-step.done{border-color:rgba(141,255,85,.5);color:var(--green)}
+.life-arrow{color:var(--muted);opacity:.6}
+
+/* Feature 3 — counters */
+.perf-counters{display:flex;gap:2.5rem;justify-content:center;margin-top:1.5rem;flex-wrap:wrap}
+.perf-counter{text-align:center}
+.perf-counter .num{font-family:var(--mono);font-size:1.75rem;font-weight:700;color:var(--green)}
+.perf-counter .lbl{font-size:.75rem;color:var(--muted);letter-spacing:.04em;text-transform:uppercase;margin-top:.2rem}
+
+/* Feature 4 — calculator */
+.calc-card{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--r-lg);max-width:360px;margin:0 auto;width:100%;padding:1.5rem}
+.calc-title{font-weight:800;font-size:.9375rem;margin-bottom:1.25rem;display:flex;justify-content:space-between;align-items:center}
+.calc-title span{font-family:var(--mono);font-size:.7rem;color:var(--orange);font-weight:500}
+.calc-field{margin-bottom:.9rem}
+.calc-field label{display:block;font-size:.75rem;color:var(--muted);margin-bottom:.35rem}
+.calc-input{background:var(--bg-deep);border:1px solid var(--border);border-radius:var(--r-md);padding:.6rem .8rem;font-family:var(--mono);font-size:.9375rem;color:var(--fg)}
+.calc-out{border-top:1px solid var(--border);margin-top:1.25rem;padding-top:1.25rem;text-align:center}
+.calc-lot{font-family:var(--mono);font-size:2.25rem;font-weight:700;color:var(--orange);line-height:1.1}
+.calc-risk{font-size:.8125rem;color:var(--muted);margin-top:.4rem;font-family:var(--mono)}
+
+/* Feature 5 — phone */
+.phone-wrap{display:flex;justify-content:center}
+.phone{
+  width:196px;height:352px;border:2px solid var(--purple);border-radius:26px;
+  background:var(--bg-card);position:relative;padding:2.25rem 1rem 1rem;
+  display:flex;flex-direction:column;align-items:center;gap:.8rem;
+}
+.phone-notch{position:absolute;top:10px;left:50%;transform:translateX(-50%);width:64px;height:6px;border-radius:3px;background:rgba(192,109,223,.4)}
+.phone-appicon{width:52px;height:52px;border-radius:12px;background:var(--bg-deep);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-weight:900;font-size:1.5rem;color:var(--green)}
+.phone-appname{font-weight:700;font-size:.875rem}
+.phone-appsub{font-size:.6875rem;color:var(--muted);font-family:var(--mono);margin-top:-.5rem}
+.phone-install{
+  margin-top:.4rem;background:var(--purple);color:var(--ink);font-weight:700;font-size:.8125rem;
+  border:none;border-radius:var(--r-md);padding:.55rem 1.4rem;cursor:default;font-family:var(--sans);
+}
+.phone-progress{width:100%;height:4px;border-radius:2px;background:rgba(255,255,255,.1);overflow:hidden}
+.phone-progress i{display:block;height:100%;width:100%;background:var(--purple);transform-origin:left center}
+.phone-status{font-family:var(--mono);font-size:.6875rem;color:var(--purple);min-height:1.2em}
+.phone-home{position:absolute;bottom:8px;left:50%;transform:translateX(-50%);width:56px;height:4px;border-radius:2px;background:rgba(255,255,255,.2)}
+
+/* Feature 6 — notifications */
+.notif-stack{display:flex;flex-direction:column;gap:.9rem;max-width:400px;margin:0 auto;width:100%}
+.notif{
+  display:flex;gap:.85rem;background:var(--bg-card);border:1px solid var(--border);
+  border-radius:var(--r-lg);padding:.95rem 1.1rem;align-items:flex-start;
+}
+.notif-ico{width:34px;height:34px;flex:none;border-radius:var(--r-md);background:rgba(255,113,139,.14);border:1px solid rgba(255,113,139,.4);display:flex;align-items:center;justify-content:center;color:var(--pink);font-weight:900}
+.notif b{display:block;font-size:.875rem;font-weight:700}
+.notif p{font-size:.8125rem;color:var(--muted);line-height:1.45}
+.notif time{margin-left:auto;font-family:var(--mono);font-size:.65rem;color:var(--muted);opacity:.7;flex:none}
+
+/* ---------- Clockwork ---------- */
+.clockwork{padding:6rem 0;border-top:1px solid var(--border)}
+.clock-anim{display:flex;flex-direction:column;align-items:center;gap:1.75rem}
+.clock-face{width:min(240px,60vw)}
+.clock-tick{stroke:var(--yellow);stroke-width:2;opacity:.85}
+.clock-hand-min{stroke:var(--fg);stroke-width:3;stroke-linecap:round;transform-origin:110px 110px}
+.clock-hand-hour{stroke:var(--yellow);stroke-width:4;stroke-linecap:round;transform-origin:110px 110px}
+.schedule{list-style:none;width:100%;max-width:380px;display:flex;flex-direction:column;gap:.7rem}
+.schedule li{display:flex;gap:1rem;align-items:baseline;font-size:.9rem;color:var(--gray);border-bottom:1px solid rgba(255,255,255,.06);padding-bottom:.7rem}
+.schedule li:last-child{border-bottom:none}
+.schedule .t{font-family:var(--mono);font-size:.75rem;color:var(--yellow);flex:none;width:88px}
+
+/* ---------- Modules / bar chart ---------- */
+.modules{padding:5.5rem 0 5rem}
+.bars{margin-top:3rem;max-width:860px}
+.bars-head{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:1.5rem;flex-wrap:wrap;gap:.5rem}
+.bars-head h3{font-size:1.125rem;font-weight:800}
+.bars-head span{font-family:var(--mono);font-size:.75rem;color:rgba(37,36,35,.6)}
+.bar-row{display:grid;grid-template-columns:92px 1fr 76px;align-items:center;gap:1rem;padding:.42rem 0}
+.bar-label{font-family:var(--mono);font-size:.8125rem;font-weight:500;color:var(--ink)}
+.bar-track{position:relative;height:22px}
+.bar-zero{position:absolute;left:22%;top:-6px;bottom:-6px;width:1px;background:rgba(37,36,35,.35)}
+.bar{position:absolute;top:0;height:22px;border-radius:var(--r-sm)}
+.bar-pos{left:22%;background:var(--ink);transform-origin:left center}
+.bar-neg{right:78%;background:var(--red);transform-origin:right center}
+.bar-row:hover .bar-pos{background:#000}
+.bar-val{font-family:var(--mono);font-size:.8125rem;text-align:right;color:var(--ink)}
+.bar-val.neg{color:var(--red)}
+.bars-note{margin-top:1.75rem;font-size:.875rem;color:rgba(37,36,35,.66);max-width:46rem}
+.coverage-chips{display:flex;flex-wrap:wrap;gap:.6rem;margin-top:1.5rem}
+.coverage-chips span{font-family:var(--mono);font-size:.75rem;border:1px solid var(--border-light);border-radius:var(--r-sm);padding:.35rem .7rem;color:var(--ink)}
+
+/* ---------- Stats band ---------- */
+.stats-band{padding:4.5rem 0;border-top:1px solid var(--border)}
+.stats-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:2rem;text-align:center}
+.stat-num{font-family:var(--mono);font-size:clamp(2rem,4vw,3rem);font-weight:700;line-height:1.1}
+.stat-lbl{color:var(--muted);font-size:.9375rem;margin-top:.4rem}
+.stats-disclosure{margin-top:2.5rem;text-align:center;font-size:.8125rem;color:var(--muted);opacity:.8;max-width:44rem;margin-left:auto;margin-right:auto}
+
+/* ---------- Get started ---------- */
+.get-started{padding:6rem 0;border-top:1px solid var(--border)}
+.links-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-top:2.75rem}
+.link-box{
+  display:flex;align-items:center;gap:.7rem;border:1px solid var(--border);
+  border-radius:var(--r-md);padding:1.1rem 1.15rem;font-weight:600;font-size:.9375rem;
+  transition:background .2s,border-color .2s;background:transparent;
+}
+.link-box:hover{background:rgba(255,255,255,.05);border-color:rgba(255,255,255,.3)}
+.link-box .dot{width:9px;height:9px;border-radius:var(--r-sm);flex:none}
+.link-box .arrow{width:13px;height:13px;margin-left:auto;color:var(--muted);flex:none;transition:transform .2s,color .2s}
+.link-box:hover .arrow{transform:translateX(3px);color:var(--fg)}
+
+/* ---------- Footer ---------- */
+.site-footer{border-top:1px solid var(--border);padding:4rem 0 2rem;background:var(--bg-deep)}
+.footer-grid{display:grid;grid-template-columns:1.4fr 1fr 1fr 1.6fr;gap:2.5rem}
+.footer-brand p{color:var(--muted);font-size:.875rem;margin-top:1rem;max-width:16rem}
+.footer-col h4{font-size:.8125rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:1.1rem;font-weight:700}
+.footer-col ul{list-style:none;display:flex;flex-direction:column;gap:.65rem}
+.footer-col a{color:var(--gray);font-size:.9375rem;transition:color .2s}
+.footer-col a:hover{color:var(--fg)}
+.newsletter p{color:var(--muted);font-size:.875rem;margin-bottom:1rem}
+.nl-label{display:block;font-size:.75rem;color:var(--muted);margin-bottom:.4rem}
+.newsletter-form{display:flex;gap:.6rem}
+.newsletter-form input{
+  flex:1;min-width:0;background:var(--bg);border:1px solid var(--border);border-radius:var(--r-md);
+  padding:.6rem .9rem;color:var(--fg);font-family:var(--sans);font-size:.9375rem;
+}
+.newsletter-form input:focus{outline:none;border-color:rgba(255,255,255,.4)}
+.newsletter-msg{font-size:.8125rem;color:var(--green);margin-top:.7rem;font-family:var(--mono)}
+.risk-box{
+  margin-top:3rem;border:1px solid var(--border);border-radius:var(--r-md);
+  padding:1.25rem 1.5rem;font-size:.8125rem;color:var(--muted);line-height:1.65;
+}
+.risk-box b{color:var(--gray)}
+.footer-bottom{display:flex;justify-content:space-between;gap:1rem;flex-wrap:wrap;margin-top:2rem;font-size:.8125rem;color:var(--muted);opacity:.8}
+
+/* ---------- Floating sub-nav + progress ---------- */
+.scroll-progress{position:fixed;top:0;right:0;width:3px;height:100vh;background:rgba(255,255,255,.07);z-index:90}
+.scroll-progress-fill{width:100%;height:100%;background:var(--fg);transform:scaleY(0);transform-origin:top center}
+.subnav{
+  position:fixed;right:1.5rem;bottom:1.5rem;width:302px;z-index:95;
+  background:var(--bg-card);border:1px solid var(--border);border-radius:var(--r-lg);
+  overflow:hidden;box-shadow:0 20px 50px rgba(0,0,0,.45);
+}
+.subnav .code-window-bar span{color:var(--gray)}
+.subnav pre{padding:.9rem 1rem 1rem;font-family:var(--mono);font-size:.72rem;line-height:1.7;color:var(--c-fg);white-space:pre;overflow-x:auto}
+.subnav-label{padding:.45rem 1rem;border-top:1px solid var(--border);font-family:var(--mono);font-size:.65rem;color:var(--muted);letter-spacing:.05em;text-transform:uppercase}
+
+/* ---------- Responsive ---------- */
+@media (max-width:1100px){ .subnav{display:none} }
+@media (max-width:960px){
+  .hero-grid,.feature-grid{grid-template-columns:1fr;gap:2.5rem}
+  .hero{padding:4rem 0 3.5rem}
+  .hero-visual{min-height:0;margin-top:1rem}
+  .chip-live{left:0;top:-16px}
+  .chip-tp{left:0;bottom:-14px}
+  .chip-pair{right:0}
+  .feature{padding:4rem 0}
+  .feature-desc{max-width:none}
+  .links-grid{grid-template-columns:repeat(2,1fr)}
+  .footer-grid{grid-template-columns:1fr 1fr}
+  .stats-grid{grid-template-columns:1fr;gap:1.75rem}
+}
+@media (max-width:900px){
+  .main-nav{
+    display:none;position:absolute;top:64px;left:0;right:0;flex-direction:column;gap:0;
+    background:var(--bg-deep);border-bottom:1px solid var(--border);padding:.5rem 1.5rem 1rem;
+  }
+  .main-nav a{padding:.7rem 0;border-bottom:1px solid rgba(255,255,255,.06)}
+  .site-header.nav-open .main-nav{display:flex}
+  .menu-toggle{display:inline-flex}
+  .header-cta .btn-ghost{display:none}
+  .header-inner{gap:1rem}
+}
+@media (max-width:560px){
+  .links-grid{grid-template-columns:1fr}
+  .footer-grid{grid-template-columns:1fr}
+  .bar-row{grid-template-columns:74px 1fr 62px;gap:.6rem}
+  .anim-stage{padding:1.25rem}
+  .hero-candles{display:none}
+}
+</style>
+</head>
+<body>
+
+<!-- ================= HEADER ================= -->
+<header class="site-header" id="top">
+  <div class="container header-inner">
+    <a class="logo" href="#intro" aria-label="TraderWatch">
+      <span class="logo-mark">T</span><span>TRADERWATCH</span>
+    </a>
+    <nav class="main-nav" id="main-nav" aria-label="Navigasi utama">
+      <a href="#signal">Signals</a>
+      <a href="#modules">Markets</a>
+      <a href="#prestasi">Prestasi</a>
+      <a href="#tools">Tools</a>
+      <a href="https://traderwatch.org/education.html">Learn</a>
+    </nav>
+    <div class="header-cta">
+      <a class="btn btn-ghost btn-sm" href="https://traderwatch.org/login.html">Log masuk</a>
+      <a class="btn btn-solid btn-sm" href="https://traderwatch.org/login.html?mode=signup">Daftar percuma</a>
+    </div>
+    <button class="menu-toggle" id="menu-toggle" aria-expanded="false" aria-controls="main-nav" aria-label="Buka menu">
+      <svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M2 4.5h14M2 9h14M2 13.5h14"/></svg>
+    </button>
+  </div>
+</header>
+
+<!-- ================= HERO ================= -->
+<section class="hero" id="intro" data-snippet="intro">
+  <div class="container hero-grid">
+    <div class="hero-copy">
+      <h1 class="hero-title">
+        <span class="hw">Enjin</span> <span class="hw">signal</span><br>
+        <span class="hw">AI</span> <span class="hw">untuk</span><br>
+        <span class="hw">pasaran</span><span class="red-dot">.</span>
+      </h1>
+      <p class="hero-sub">Signal automatik XAU/USD, XAG/USD &amp; BTC — entry, stop loss &amp; take profit, terus ke peranti anda.</p>
+      <div class="hero-cta">
+        <a class="btn btn-solid" href="https://traderwatch.org/login.html?mode=signup">Mula percuma</a>
+        <a class="btn btn-ghost" href="#signal">Lihat signal</a>
+      </div>
+      <p class="hero-risk">Educational only. Trading involves substantial risk.</p>
+    </div>
+    <div class="hero-visual">
+      <svg class="hero-candles" viewBox="0 0 560 150" aria-hidden="true">
+        <g stroke-width="2">
+          <g stroke="#ff4b4b"><line x1="30" y1="30" x2="30" y2="112"/><rect x="22" y="48" width="16" height="42" fill="#ff4b4b" opacity=".55"/></g>
+          <g stroke="#8dff55"><line x1="78" y1="42" x2="78" y2="126"/><rect x="70" y="60" width="16" height="44" fill="#8dff55" opacity=".55"/></g>
+          <g stroke="#ff4b4b"><line x1="126" y1="58" x2="126" y2="140"/><rect x="118" y="74" width="16" height="46" fill="#ff4b4b" opacity=".55"/></g>
+          <g stroke="#8dff55"><line x1="174" y1="46" x2="174" y2="128"/><rect x="166" y="62" width="16" height="40" fill="#8dff55" opacity=".55"/></g>
+          <g stroke="#8dff55"><line x1="222" y1="30" x2="222" y2="104"/><rect x="214" y="42" width="16" height="42" fill="#8dff55" opacity=".55"/></g>
+          <g stroke="#ff4b4b"><line x1="270" y1="24" x2="270" y2="96"/><rect x="262" y="38" width="16" height="38" fill="#ff4b4b" opacity=".55"/></g>
+          <g stroke="#8dff55"><line x1="318" y1="14" x2="318" y2="88"/><rect x="310" y="26" width="16" height="42" fill="#8dff55" opacity=".55"/></g>
+          <g stroke="#8dff55"><line x1="366" y1="8" x2="366" y2="72"/><rect x="358" y="18" width="16" height="36" fill="#8dff55" opacity=".55"/></g>
+          <g stroke="#ff4b4b"><line x1="414" y1="16" x2="414" y2="84"/><rect x="406" y="28" width="16" height="34" fill="#ff4b4b" opacity=".55"/></g>
+          <g stroke="#8dff55"><line x1="462" y1="6" x2="462" y2="66"/><rect x="454" y="14" width="16" height="34" fill="#8dff55" opacity=".55"/></g>
+          <g stroke="#8dff55"><line x1="510" y1="2" x2="510" y2="52"/><rect x="502" y="8" width="16" height="28" fill="#8dff55" opacity=".55"/></g>
+        </g>
+      </svg>
+      <div class="code-window hero-code">
+        <div class="code-window-bar"><i></i><i></i><i></i><span>xauusd.signal.js</span></div>
+        <pre><code><span class="tk-kw">signal</span> <span class="tk-var">XAU/USD</span> <span class="tk-pn">{</span>
+  <span class="tk-prop">side</span><span class="tk-pn">:</span>  <span class="tk-str">'BUY'</span><span class="tk-pn">,</span>
+  <span class="tk-prop">entry</span><span class="tk-pn">:</span> <span class="tk-num">4008.81</span><span class="tk-pn">,</span>
+  <span class="tk-prop">sl</span><span class="tk-pn">:</span>    <span class="tk-num">4003.26</span><span class="tk-pn">,</span>
+  <span class="tk-prop">tp</span><span class="tk-pn">:</span>    <span class="tk-num">4019.28</span><span class="tk-pn">,</span>
+<span class="tk-pn">}</span></code></pre>
+      </div>
+      <span class="chip chip-live"><i></i>LIVE · M15</span>
+      <span class="chip chip-tp"><i></i>TP HIT · +1.7R</span>
+      <span class="chip chip-pair"><i></i>XAG/USD · SELL</span>
+    </div>
+  </div>
+</section>
+
+<!-- ================= TOOLBOX (LIGHT) ================= -->
+<section class="section-light toolbox" id="toolbox">
+  <div class="container">
+    <h2 class="section-title reveal">Toolkit trader lengkap</h2>
+    <p class="section-sub reveal">Semua yang anda perlukan untuk trade dengan yakin, dalam satu app.</p>
+    <div class="toolbox-list reveal">
+      <a href="#signal"><i style="background:var(--red)"></i>Signal AI</a>
+      <a href="#chart"><i style="background:var(--turquoise)"></i>Chart beranotasi</a>
+      <a href="#prestasi"><i style="background:var(--green)"></i>Prestasi telus</a>
+      <a href="#tools"><i style="background:var(--orange)"></i>Risk toolkit</a>
+      <a href="#pwa"><i style="background:var(--purple)"></i>PWA offline</a>
+      <a href="#notifikasi"><i style="background:var(--pink)"></i>Notifikasi</a>
+    </div>
+  </div>
+</section>
+
+<!-- ================= FEATURE 1 — SIGNAL AI (RED) ================= -->
+<section class="feature" id="signal" style="--accent:var(--red)" data-snippet="signal">
+  <div class="container feature-grid">
+    <div class="feature-text">
+      <span class="feature-kicker reveal">01 — SIGNAL</span>
+      <h2 class="reveal">Signal AI automatik</h2>
+      <p class="feature-desc reveal">Setiap signal dijana oleh enjin AI yang menganalisis struktur pasaran — lengkap dengan entry, stop loss dan take profit, tanpa perlu anda tengok chart sepanjang hari.</p>
+      <ul class="feature-links">
+        <li><a class="feature-link" href="#get-started"><svg class="arrow" viewBox="0 0 16 16" aria-hidden="true"><polygon points="1,7 9,7 9,3 15,8 9,13 9,9 1,9" fill="currentColor"/></svg>Entry / SL / TP lengkap</a></li>
+        <li><a class="feature-link" href="#modules"><svg class="arrow" viewBox="0 0 16 16" aria-hidden="true"><polygon points="1,7 9,7 9,3 15,8 9,13 9,9 1,9" fill="currentColor"/></svg>Multi-pair XAU / XAG / BTC</a></li>
+        <li><a class="feature-link" href="#get-started"><svg class="arrow" viewBox="0 0 16 16" aria-hidden="true"><polygon points="1,7 9,7 9,3 15,8 9,13 9,9 1,9" fill="currentColor"/></svg>Status lifecycle live</a></li>
+      </ul>
+    </div>
+    <div class="anim-stage" data-anim="signal">
+      <div class="signal-card">
+        <div class="signal-card-head">
+          <div class="signal-pair">XAU/USD<small>M15 · 20 Nov 2026</small></div>
+          <span class="live-chip"><i></i>LIVE</span>
+        </div>
+        <div class="signal-rows">
+          <div class="signal-row"><span class="k">Side</span><span class="v v-buy">BUY</span></div>
+          <div class="signal-row"><span class="k">Entry</span><span class="v">4008.81</span></div>
+          <div class="signal-row"><span class="k">Stop loss</span><span class="v v-sl">4003.26</span></div>
+          <div class="signal-row"><span class="k">Take profit</span><span class="v v-tp">4019.28</span></div>
+        </div>
+        <div class="signal-reason"><b>Sebab entry:</b> POI M15 + liquidity sweep, struktur bullish disahkan.</div>
+        <div class="signal-life">
+          <span class="life-step on">ACTIVE</span><span class="life-arrow">→</span><span class="life-step life-final">TP HIT</span>
+        </div>
+      </div>
+      <p class="anim-caption">signal #423 · dijana automatik oleh enjin AI</p>
+    </div>
+  </div>
+</section>
+
+<!-- ================= FEATURE 2 — CHART (TURQUOISE) ================= -->
+<section class="feature" id="chart" style="--accent:var(--turquoise)" data-snippet="chart">
+  <div class="container feature-grid">
+    <div class="feature-text">
+      <span class="feature-kicker reveal">02 — CHART</span>
+      <h2 class="reveal">Chart beranotasi</h2>
+      <p class="feature-desc reveal">Setiap signal datang dengan chart yang sudah dilukis — zon POI, garisan entry, SL dan TP, serta sebab entry. Anda nampak terus apa yang enjin AI nampak.</p>
+      <ul class="feature-links">
+        <li><a class="feature-link" href="#get-started"><svg class="arrow" viewBox="0 0 16 16" aria-hidden="true"><polygon points="1,7 9,7 9,3 15,8 9,13 9,9 1,9" fill="currentColor"/></svg>Zon POI</a></li>
+        <li><a class="feature-link" href="#get-started"><svg class="arrow" viewBox="0 0 16 16" aria-hidden="true"><polygon points="1,7 9,7 9,3 15,8 9,13 9,9 1,9" fill="currentColor"/></svg>Garisan entry / SL / TP</a></li>
+        <li><a class="feature-link" href="#get-started"><svg class="arrow" viewBox="0 0 16 16" aria-hidden="true"><polygon points="1,7 9,7 9,3 15,8 9,13 9,9 1,9" fill="currentColor"/></svg>Sebab entry</a></li>
+      </ul>
+    </div>
+    <div class="anim-stage" data-anim="chart">
+      <svg viewBox="0 0 560 340" role="img" aria-label="Chart candlestick XAU/USD dengan garisan entry, stop loss dan take profit">
+        <g class="candles" stroke-width="2">
+          <g stroke="#ff4b4b"><line x1="40" y1="236" x2="40" y2="284"/><rect x="33" y="248" width="14" height="24" fill="#ff4b4b" opacity=".7"/></g>
+          <g stroke="#ff4b4b"><line x1="72" y1="260" x2="72" y2="302"/><rect x="65" y="272" width="14" height="18" fill="#ff4b4b" opacity=".7"/></g>
+          <g stroke="#8dff55"><line x1="104" y1="266" x2="104" y2="308"/><rect x="97" y="278" width="14" height="12" fill="#8dff55" opacity=".7"/></g>
+          <g stroke="#ff4b4b"><line x1="136" y1="272" x2="136" y2="314"/><rect x="129" y="278" width="14" height="18" fill="#ff4b4b" opacity=".7"/></g>
+          <g stroke="#8dff55"><line x1="168" y1="272" x2="168" y2="320"/><rect x="161" y="284" width="14" height="12" fill="#8dff55" opacity=".7"/></g>
+          <g stroke="#8dff55"><line x1="200" y1="248" x2="200" y2="290"/><rect x="193" y="260" width="14" height="24" fill="#8dff55" opacity=".7"/></g>
+          <g stroke="#8dff55"><line x1="232" y1="230" x2="232" y2="266"/><rect x="225" y="242" width="14" height="18" fill="#8dff55" opacity=".7"/></g>
+          <g stroke="#ff4b4b"><line x1="264" y1="224" x2="264" y2="260"/><rect x="257" y="242" width="14" height="12" fill="#ff4b4b" opacity=".7"/></g>
+          <g stroke="#8dff55"><line x1="296" y1="218" x2="296" y2="260"/><rect x="289" y="230" width="14" height="24" fill="#8dff55" opacity=".7"/></g>
+          <g stroke="#8dff55"><line x1="328" y1="200" x2="328" y2="236"/><rect x="321" y="212" width="14" height="18" fill="#8dff55" opacity=".7"/></g>
+          <g stroke="#ff4b4b"><line x1="360" y1="194" x2="360" y2="230"/><rect x="353" y="212" width="14" height="12" fill="#ff4b4b" opacity=".7"/></g>
+          <g stroke="#8dff55"><line x1="392" y1="188" x2="392" y2="224"/><rect x="385" y="200" width="14" height="24" fill="#8dff55" opacity=".7"/></g>
+          <g stroke="#8dff55"><line x1="424" y1="170" x2="424" y2="206"/><rect x="417" y="182" width="14" height="18" fill="#8dff55" opacity=".7"/></g>
+          <g stroke="#ff4b4b"><line x1="456" y1="164" x2="456" y2="200"/><rect x="449" y="182" width="14" height="12" fill="#ff4b4b" opacity=".7"/></g>
+          <g stroke="#8dff55"><line x1="488" y1="158" x2="488" y2="194"/><rect x="481" y="170" width="14" height="24" fill="#8dff55" opacity=".7"/></g>
+          <g stroke="#8dff55"><line x1="520" y1="140" x2="520" y2="176"/><rect x="513" y="152" width="14" height="18" fill="#8dff55" opacity=".7"/></g>
+        </g>
+        <g class="level-lines" stroke-width="1.5" fill="none">
+          <line class="lvl" x1="20" y1="207.1" x2="540" y2="207.1" stroke="#00ffaa"/>
+          <line class="lvl" x1="20" y1="240.4" x2="540" y2="240.4" stroke="#ff4b4b"/>
+          <line class="lvl" x1="20" y1="144.3" x2="540" y2="144.3" stroke="#8dff55"/>
+        </g>
+        <g class="level-labels" font-family="'JetBrains Mono',monospace" font-size="11">
+          <text x="24" y="200" fill="#00ffaa">ENTRY 4008.81</text>
+          <text x="24" y="254" fill="#ff4b4b">SL 4003.26</text>
+          <text x="24" y="137" fill="#8dff55">TP 4019.28</text>
+          <text x="20" y="332" fill="#cccac8">Sebab: POI M15 + liquidity sweep</text>
+        </g>
+      </svg>
+      <p class="anim-caption">anotasi dilukis automatik pada setiap signal</p>
+    </div>
+  </div>
+</section>
+
+<!-- ================= FEATURE 3 — PRESTASI (GREEN) ================= -->
+<section class="feature" id="prestasi" style="--accent:var(--green)" data-snippet="prestasi">
+  <div class="container feature-grid">
+    <div class="feature-text">
+      <span class="feature-kicker reveal">03 — PRESTASI</span>
+      <h2 class="reveal">Prestasi telus</h2>
+      <p class="feature-desc reveal">Rekod penuh dari hari pertama — 19 Okt 2026. Setiap TP dan SL direkod, win rate dikira sebagai TP/(TP+SL), dan equity curve dikemaskini harian. Tiada apa yang disembunyikan.</p>
+      <ul class="feature-links">
+        <li><a class="feature-link" href="#modules"><svg class="arrow" viewBox="0 0 16 16" aria-hidden="true"><polygon points="1,7 9,7 9,3 15,8 9,13 9,9 1,9" fill="currentColor"/></svg>Win rate TP/(TP+SL)</a></li>
+        <li><a class="feature-link" href="#modules"><svg class="arrow" viewBox="0 0 16 16" aria-hidden="true"><polygon points="1,7 9,7 9,3 15,8 9,13 9,9 1,9" fill="currentColor"/></svg>Net R multiples</a></li>
+        <li><a class="feature-link" href="#modules"><svg class="arrow" viewBox="0 0 16 16" aria-hidden="true"><polygon points="1,7 9,7 9,3 15,8 9,13 9,9 1,9" fill="currentColor"/></svg>Equity curve harian</a></li>
+      </ul>
+    </div>
+    <div class="anim-stage" data-anim="prestasi">
+      <svg viewBox="0 0 560 260" role="img" aria-label="Equity curve net R terkumpul sejak 19 Oktober 2026">
+        <g stroke="rgba(255,255,255,.09)" stroke-dasharray="3 5">
+          <line x1="20" y1="96.7" x2="540" y2="96.7"/>
+          <line x1="20" y1="163.3" x2="540" y2="163.3"/>
+        </g>
+        <g font-family="'JetBrains Mono',monospace" font-size="10" fill="#cccac8" opacity=".7">
+          <text x="544" y="100" text-anchor="end" dy="-8">+20R</text>
+          <text x="544" y="160" text-anchor="end" dy="-8">0R</text>
+        </g>
+        <path class="equity-area" d="M20.0,163.3 L40.8,166.7 L61.6,186.7 L82.4,206.7 L103.2,218.2 L124.0,184.4 L144.8,138.4 L165.6,112.8 L186.4,132.8 L207.2,152.8 L228.0,103.4 L248.8,116.8 L269.6,136.8 L290.4,139.6 L311.2,121.5 L332.0,114.7 L352.8,105.1 L373.6,110.4 L394.4,121.6 L415.2,132.9 L436.0,132.9 L456.8,146.2 L477.6,131.9 L498.4,91.9 L519.2,51.9 L540.0,38.6 L540,230 L20,230 Z" fill="rgba(141,255,85,.08)"/>
+        <path class="equity-path" d="M20.0,163.3 L40.8,166.7 L61.6,186.7 L82.4,206.7 L103.2,218.2 L124.0,184.4 L144.8,138.4 L165.6,112.8 L186.4,132.8 L207.2,152.8 L228.0,103.4 L248.8,116.8 L269.6,136.8 L290.4,139.6 L311.2,121.5 L332.0,114.7 L352.8,105.1 L373.6,110.4 L394.4,121.6 L415.2,132.9 L436.0,132.9 L456.8,146.2 L477.6,131.9 L498.4,91.9 L519.2,51.9 L540.0,38.6" fill="none" stroke="#8dff55" stroke-width="2.5" stroke-linejoin="round"/>
+        <circle class="equity-dot" cx="540" cy="38.6" r="4.5" fill="#8dff55"/>
+        <text class="equity-end" x="532" y="26" text-anchor="end" font-family="'JetBrains Mono',monospace" font-size="12" fill="#8dff55" font-weight="700">+37.4R</text>
+      </svg>
+      <div class="perf-counters">
+        <div class="perf-counter"><div class="num" data-count="40.8" data-decimals="1" data-suffix="%">40.8%</div><div class="lbl">Win rate</div></div>
+        <div class="perf-counter"><div class="num" data-count="37.4" data-decimals="1" data-prefix="+" data-suffix="R">+37.4R</div><div class="lbl">Net R</div></div>
+        <div class="perf-counter"><div class="num" data-count="147" data-decimals="0">147</div><div class="lbl">Trade ditutup</div></div>
+      </div>
+      <p class="anim-caption">equity curve sebenar · 19 Okt — 20 Nov 2026</p>
+    </div>
+  </div>
+</section>
+
+<!-- ================= FEATURE 4 — RISK TOOLKIT (ORANGE) ================= -->
+<section class="feature" id="tools" style="--accent:var(--orange)" data-snippet="tools">
+  <div class="container feature-grid">
+    <div class="feature-text">
+      <span class="feature-kicker reveal">04 — TOOLS</span>
+      <h2 class="reveal">Risk toolkit</h2>
+      <p class="feature-desc reveal">Kira saiz posisi sebelum entry. Masukkan baki akaun, peratus risiko dan jarak stop loss — kalkulator beri saiz lot yang betul untuk XAU/USD. Disiplin risiko, bukan tekaan.</p>
+      <ul class="feature-links">
+        <li><a class="feature-link" href="#get-started"><svg class="arrow" viewBox="0 0 16 16" aria-hidden="true"><polygon points="1,7 9,7 9,3 15,8 9,13 9,9 1,9" fill="currentColor"/></svg>Kalkulator lot XAU</a></li>
+        <li><a class="feature-link" href="#get-started"><svg class="arrow" viewBox="0 0 16 16" aria-hidden="true"><polygon points="1,7 9,7 9,3 15,8 9,13 9,9 1,9" fill="currentColor"/></svg>Risk % per trade</a></li>
+        <li><a class="feature-link" href="#get-started"><svg class="arrow" viewBox="0 0 16 16" aria-hidden="true"><polygon points="1,7 9,7 9,3 15,8 9,13 9,9 1,9" fill="currentColor"/></svg>Rujukan sahaja</a></li>
+      </ul>
+    </div>
+    <div class="anim-stage" data-anim="tools">
+      <div class="calc-card">
+        <div class="calc-title">Kalkulator lot <span>XAU/USD</span></div>
+        <div class="calc-field"><label>Baki akaun</label><div class="calc-input">$1,000.00</div></div>
+        <div class="calc-field"><label>Risk per trade</label><div class="calc-input">1%</div></div>
+        <div class="calc-field"><label>Jarak stop loss</label><div class="calc-input">$5.55</div></div>
+        <div class="calc-out">
+          <div class="calc-lot"><span data-count="0.02" data-decimals="2">0.02</span> lot</div>
+          <div class="calc-risk">Risiko: $<span data-count="10" data-decimals="2">10.00</span> · 1% daripada akaun</div>
+        </div>
+      </div>
+      <p class="anim-caption">pengiraan automatik · keputusan sebagai rujukan sahaja</p>
+    </div>
+  </div>
+</section>
+
+<!-- ================= FEATURE 5 — PWA (PURPLE) ================= -->
+<section class="feature" id="pwa" style="--accent:var(--purple)" data-snippet="pwa">
+  <div class="container feature-grid">
+    <div class="feature-text">
+      <span class="feature-kicker reveal">05 — PWA</span>
+      <h2 class="reveal">PWA offline</h2>
+      <p class="feature-desc reveal">Install TraderWatch seperti app native — terus dari pelayar, tanpa app store. Data signal di-cache supaya anda masih boleh semak kedudukan terakhir walaupun di luar talian.</p>
+      <ul class="feature-links">
+        <li><a class="feature-link" href="#get-started"><svg class="arrow" viewBox="0 0 16 16" aria-hidden="true"><polygon points="1,7 9,7 9,3 15,8 9,13 9,9 1,9" fill="currentColor"/></svg>Install Android / iOS</a></li>
+        <li><a class="feature-link" href="#get-started"><svg class="arrow" viewBox="0 0 16 16" aria-hidden="true"><polygon points="1,7 9,7 9,3 15,8 9,13 9,9 1,9" fill="currentColor"/></svg>Data cache offline</a></li>
+        <li><a class="feature-link" href="#notifikasi"><svg class="arrow" viewBox="0 0 16 16" aria-hidden="true"><polygon points="1,7 9,7 9,3 15,8 9,13 9,9 1,9" fill="currentColor"/></svg>Push-ready</a></li>
+      </ul>
+    </div>
+    <div class="anim-stage" data-anim="pwa">
+      <div class="phone-wrap">
+        <div class="phone">
+          <span class="phone-notch"></span>
+          <div class="phone-appicon">T</div>
+          <div class="phone-appname">TraderWatch</div>
+          <div class="phone-appsub">signal · chart · prestasi</div>
+          <button class="phone-install" type="button">Install</button>
+          <div class="phone-progress"><i></i></div>
+          <div class="phone-status">Sedia untuk dipasang</div>
+          <span class="phone-home"></span>
+        </div>
+      </div>
+      <p class="anim-caption">satu ketikan · terus ke skrin utama</p>
+    </div>
+  </div>
+</section>
+
+<!-- ================= FEATURE 6 — NOTIFIKASI (PINK) ================= -->
+<section class="feature" id="notifikasi" style="--accent:var(--pink)" data-snippet="notifikasi">
+  <div class="container feature-grid">
+    <div class="feature-text">
+      <span class="feature-kicker reveal">06 — NOTIFIKASI</span>
+      <h2 class="reveal">Notifikasi segera</h2>
+      <p class="feature-desc reveal">Signal baru sampai ke peranti anda dalam beberapa saat — bersama alert lifecycle bila TP atau SL kena. Anda tak perlu tunggu di depan chart; biarkan signal cari anda.</p>
+      <ul class="feature-links">
+        <li><a class="feature-link" href="#get-started"><svg class="arrow" viewBox="0 0 16 16" aria-hidden="true"><polygon points="1,7 9,7 9,3 15,8 9,13 9,9 1,9" fill="currentColor"/></svg>Push notification</a></li>
+        <li><a class="feature-link" href="#signal"><svg class="arrow" viewBox="0 0 16 16" aria-hidden="true"><polygon points="1,7 9,7 9,3 15,8 9,13 9,9 1,9" fill="currentColor"/></svg>Lifecycle alert</a></li>
+        <li><a class="feature-link" href="#get-started"><svg class="arrow" viewBox="0 0 16 16" aria-hidden="true"><polygon points="1,7 9,7 9,3 15,8 9,13 9,9 1,9" fill="currentColor"/></svg>Jimat masa</a></li>
+      </ul>
+    </div>
+    <div class="anim-stage" data-anim="notifikasi">
+      <div class="notif-stack">
+        <div class="notif">
+          <span class="notif-ico">T</span>
+          <div><b>Signal baru · XAU/USD</b><p>BUY @ 4008.81 · SL 4003.26 · TP 4019.28</p></div>
+          <time>baru sahaja</time>
+        </div>
+        <div class="notif">
+          <span class="notif-ico">✓</span>
+          <div><b>TP HIT · XAU/USD</b><p>Take profit dicapai · +1.7R direkodkan</p></div>
+          <time>2 min</time>
+        </div>
+        <div class="notif">
+          <span class="notif-ico">↻</span>
+          <div><b>Lifecycle · XAG/USD</b><p>SL dikemaskini ke entry · risiko sifar</p></div>
+          <time>9 min</time>
+        </div>
+      </div>
+      <p class="anim-caption">push-ready · alert sampai dalam beberapa saat</p>
+    </div>
+  </div>
+</section>
+
+<!-- ================= CLOCKWORK (YELLOW) ================= -->
+<section class="clockwork" id="clockwork" style="--accent:var(--yellow)" data-snippet="clockwork">
+  <div class="container feature-grid">
+    <div class="feature-text">
+      <span class="feature-kicker reveal">07 — ENGINE</span>
+      <h2 class="reveal">Berjalan seperti jam</h2>
+      <p class="feature-desc reveal">Enjin AI menganalisis pasaran mengikut jadual yang tetap — imbasan, analisis, penjanaan signal dan notifikasi, semuanya automatik. Konsisten setiap hari, tanpa emosi.</p>
+      <ul class="feature-links">
+        <li><a class="feature-link" href="#signal"><svg class="arrow" viewBox="0 0 16 16" aria-hidden="true"><polygon points="1,7 9,7 9,3 15,8 9,13 9,9 1,9" fill="currentColor"/></svg>Analisis berjadual M15</a></li>
+        <li><a class="feature-link" href="#signal"><svg class="arrow" viewBox="0 0 16 16" aria-hidden="true"><polygon points="1,7 9,7 9,3 15,8 9,13 9,9 1,9" fill="currentColor"/></svg>Signal dijana automatik</a></li>
+        <li><a class="feature-link" href="#prestasi"><svg class="arrow" viewBox="0 0 16 16" aria-hidden="true"><polygon points="1,7 9,7 9,3 15,8 9,13 9,9 1,9" fill="currentColor"/></svg>Rekod dikemaskini harian</a></li>
+      </ul>
+    </div>
+    <div class="anim-stage" data-anim="clockwork">
+      <div class="clock-anim">
+        <svg class="clock-face" viewBox="0 0 220 220" role="img" aria-label="Jam enjin AI">
+          <circle cx="110" cy="110" r="98" fill="none" stroke="rgba(255,204,42,.35)" stroke-width="1.5"/>
+          <g class="clock-ticks">
+            <line class="clock-tick" x1="110" y1="28" x2="110" y2="20"/>
+            <line class="clock-tick" x1="151" y1="39" x2="155" y2="32.1"/>
+            <line class="clock-tick" x1="181" y1="69" x2="187.9" y2="65"/>
+            <line class="clock-tick" x1="192" y1="110" x2="200" y2="110"/>
+            <line class="clock-tick" x1="181" y1="151" x2="187.9" y2="155"/>
+            <line class="clock-tick" x1="151" y1="181" x2="155" y2="187.9"/>
+            <line class="clock-tick" x1="110" y1="192" x2="110" y2="200"/>
+            <line class="clock-tick" x1="69" y1="181" x2="65" y2="187.9"/>
+            <line class="clock-tick" x1="39" y1="151" x2="32.1" y2="155"/>
+            <line class="clock-tick" x1="28" y1="110" x2="20" y2="110"/>
+            <line class="clock-tick" x1="39" y1="69" x2="32.1" y2="65"/>
+            <line class="clock-tick" x1="69" y1="39" x2="65" y2="32.1"/>
+          </g>
+          <line class="clock-hand-hour" x1="110" y1="110" x2="110" y2="62"/>
+          <line class="clock-hand-min" x1="110" y1="110" x2="110" y2="40"/>
+          <circle cx="110" cy="110" r="5" fill="#ffcc2a"/>
+        </svg>
+        <ul class="schedule">
+          <li><span class="t">*/15 min</span>Imbasan struktur pasaran M15</li>
+          <li><span class="t">auto</span>Signal dijana bila setup disahkan</li>
+          <li><span class="t">segera</span>Notifikasi dihantar ke semua ahli</li>
+          <li><span class="t">harian</span>Equity curve &amp; rekod dikemaskini</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= MODULES (LIGHT) ================= -->
+<section class="section-light modules" id="modules" data-snippet="modules">
+  <div class="container">
+    <h2 class="section-title reveal">Satu app, semua alat</h2>
+    <p class="section-sub reveal">Signal, chart, prestasi dan risk toolkit untuk setiap pair yang diliputi — di bawah satu bumbung.</p>
+    <div class="bars reveal" data-anim="bars">
+      <div class="bars-head">
+        <h3>Prestasi mengikut pair · Net R</h3>
+        <span>19 Okt — 20 Nov 2026 · 147 trade ditutup</span>
+      </div>
+      <div class="bar-row"><span class="bar-label">XAU/USD</span><div class="bar-track"><span class="bar-zero"></span><span class="bar bar-pos" style="width:72%"></span></div><span class="bar-val">+36.9R</span></div>
+      <div class="bar-row"><span class="bar-label">XAG/USD</span><div class="bar-track"><span class="bar-zero"></span><span class="bar bar-pos" style="width:31.2%"></span></div><span class="bar-val">+16.0R</span></div>
+      <div class="bar-row"><span class="bar-label">AUD/USD</span><div class="bar-track"><span class="bar-zero"></span><span class="bar bar-pos" style="width:3.3%"></span></div><span class="bar-val">+1.7R</span></div>
+      <div class="bar-row"><span class="bar-label">USD/CAD</span><div class="bar-track"><span class="bar-zero"></span><span class="bar bar-pos" style="width:2.3%"></span></div><span class="bar-val">+1.2R</span></div>
+      <div class="bar-row"><span class="bar-label">EUR/USD</span><div class="bar-track"><span class="bar-zero"></span><span class="bar bar-neg" style="width:4.9%"></span></div><span class="bar-val neg">−2.5R</span></div>
+      <div class="bar-row"><span class="bar-label">USD/JPY</span><div class="bar-track"><span class="bar-zero"></span><span class="bar bar-neg" style="width:4.9%"></span></div><span class="bar-val neg">−2.5R</span></div>
+      <div class="bar-row"><span class="bar-label">GBP/USD</span><div class="bar-track"><span class="bar-zero"></span><span class="bar bar-neg" style="width:5.1%"></span></div><span class="bar-val neg">−2.6R</span></div>
+      <div class="bar-row"><span class="bar-label">NZD/USD</span><div class="bar-track"><span class="bar-zero"></span><span class="bar bar-neg" style="width:7.2%"></span></div><span class="bar-val neg">−3.7R</span></div>
+      <div class="bar-row"><span class="bar-label">BTC/USD</span><div class="bar-track"><span class="bar-zero"></span><span class="bar bar-neg" style="width:13.9%"></span></div><span class="bar-val neg">−7.1R</span></div>
+      <p class="bars-note">Net R terkumpul semua pair: <b>+37.4R</b> · Win rate TP/(TP+SL): <b>40.8%</b>. Angka negatif dipaparkan sama jelas — ketelusan penuh, bukan hanya yang cantik.</p>
+      <div class="coverage-chips">
+        <span>9 pair diliputi</span><span>XAU · XAG · BTC</span><span>6 pair FX utama</span><span>180 signal dijana</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= STATS BAND ================= -->
+<section class="stats-band" id="stats">
+  <div class="container">
+    <div class="stats-grid">
+      <div class="reveal"><div class="stat-num" data-count="11" data-decimals="0">11</div><div class="stat-lbl">ahli komuniti</div></div>
+      <div class="reveal"><div class="stat-num">130+</div><div class="stat-lbl">signal dijana sejak launch</div></div>
+      <div class="reveal"><div class="stat-num">19 Okt</div><div class="stat-lbl">2026 · hari pertama rekod</div></div>
+    </div>
+    <p class="stats-disclosure reveal">TraderWatch ialah projek komuniti bebas — dibina dan disenggara oleh trader untuk trader. Signal dijana enjin AI dan dikongsi secara terbuka kepada semua ahli, tanpa tier berbayar.</p>
+  </div>
+</section>
+
+<!-- ================= GET STARTED ================= -->
+<section class="get-started" id="get-started" data-snippet="get-started">
+  <div class="container">
+    <h2 class="section-title reveal">Mula trade</h2>
+    <p class="section-sub reveal">Semua ahli mendapat Free Card penuh — signal, chart, prestasi dan tools. Tiada tiering, tiada kos.</p>
+    <div class="links-grid">
+      <a class="link-box reveal" href="#signal"><span class="dot" style="background:var(--red)"></span>Signals<svg class="arrow" viewBox="0 0 16 16" aria-hidden="true"><polygon points="1,7 9,7 9,3 15,8 9,13 9,9 1,9" fill="currentColor"/></svg></a>
+      <a class="link-box reveal" href="#modules"><span class="dot" style="background:var(--turquoise)"></span>Markets<svg class="arrow" viewBox="0 0 16 16" aria-hidden="true"><polygon points="1,7 9,7 9,3 15,8 9,13 9,9 1,9" fill="currentColor"/></svg></a>
+      <a class="link-box reveal" href="#prestasi"><span class="dot" style="background:var(--green)"></span>Prestasi<svg class="arrow" viewBox="0 0 16 16" aria-hidden="true"><polygon points="1,7 9,7 9,3 15,8 9,13 9,9 1,9" fill="currentColor"/></svg></a>
+      <a class="link-box reveal" href="#tools"><span class="dot" style="background:var(--orange)"></span>Tools<svg class="arrow" viewBox="0 0 16 16" aria-hidden="true"><polygon points="1,7 9,7 9,3 15,8 9,13 9,9 1,9" fill="currentColor"/></svg></a>
+      <a class="link-box reveal" href="https://traderwatch.org/education.html"><span class="dot" style="background:var(--purple)"></span>Learn<svg class="arrow" viewBox="0 0 16 16" aria-hidden="true"><polygon points="1,7 9,7 9,3 15,8 9,13 9,9 1,9" fill="currentColor"/></svg></a>
+      <a class="link-box reveal" href="https://traderwatch.org/login.html"><span class="dot" style="background:var(--pink)"></span>Account<svg class="arrow" viewBox="0 0 16 16" aria-hidden="true"><polygon points="1,7 9,7 9,3 15,8 9,13 9,9 1,9" fill="currentColor"/></svg></a>
+      <a class="link-box reveal" href="https://traderwatch.org/login.html"><span class="dot" style="background:var(--yellow)"></span>Log masuk<svg class="arrow" viewBox="0 0 16 16" aria-hidden="true"><polygon points="1,7 9,7 9,3 15,8 9,13 9,9 1,9" fill="currentColor"/></svg></a>
+      <a class="link-box reveal" href="https://traderwatch.org/login.html?mode=signup"><span class="dot" style="background:var(--fg)"></span>Daftar percuma<svg class="arrow" viewBox="0 0 16 16" aria-hidden="true"><polygon points="1,7 9,7 9,3 15,8 9,13 9,9 1,9" fill="currentColor"/></svg></a>
+    </div>
+  </div>
+</section>
+
+<!-- ================= FOOTER ================= -->
+<footer class="site-footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <a class="logo" href="#intro"><span class="logo-mark">T</span><span>TRADERWATCH</span></a>
+        <p>Enjin signal forex AI automatik. Telus dari hari pertama, percuma untuk semua ahli.</p>
+      </div>
+      <div class="footer-col">
+        <h4>Site</h4>
+        <ul>
+          <li><a href="https://traderwatch.org/">Home</a></li>
+          <li><a href="#signal">Signals</a></li>
+          <li><a href="#prestasi">Prestasi</a></li>
+          <li><a href="#tools">Tools</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Social</h4>
+        <ul>
+          <li><a href="https://t.me/Traderwatchmembershipbot" rel="noopener">Telegram</a></li>
+        </ul>
+      </div>
+      <div class="footer-col newsletter">
+        <h4>Dapatkan signal terkini</h4>
+        <p>Langgan ringkasan signal &amp; prestasi mingguan terus ke inbox anda.</p>
+        <label class="nl-label" for="newsletter-email">Alamat email</label>
+        <form class="newsletter-form" id="newsletter-form" novalidate>
+          <input type="email" id="newsletter-email" aria-label="Alamat email" required>
+          <button class="btn btn-solid btn-sm" type="submit">Subscribe</button>
+        </form>
+        <p class="newsletter-msg" id="newsletter-msg" role="status" hidden>Terima kasih! Anda akan menerima signal terkini.</p>
+      </div>
+    </div>
+    <div class="risk-box">
+      <b>Penafian risiko.</b> Educational only. Trading involves substantial risk. Signal, chart dan maklumat di TraderWatch adalah untuk tujuan pendidikan sahaja dan bukan nasihat kewangan. Trading forex, logam dan kripto melibatkan risiko kerugian yang besar dan mungkin tidak sesuai untuk semua pelabur. Prestasi lepas tidak menjamin keputusan masa hadapan. Sentiasa urus risiko anda sendiri dan trade hanya dengan wang yang anda sanggup rugi.
+    </div>
+    <div class="footer-bottom">
+      <span>© 2026 TraderWatch. Hak cipta terpelihara.</span>
+      <span class="mono">Educational only. Trading involves substantial risk.</span>
+    </div>
+  </div>
+</footer>
+
+<!-- ================= FLOATING SUB-NAV + PROGRESS ================= -->
+<div class="scroll-progress" aria-hidden="true"><div class="scroll-progress-fill" id="scroll-fill"></div></div>
+<aside class="subnav" id="subnav" aria-label="Kod mengikut seksyen">
+  <div class="code-window-bar"><i></i><i></i><i></i><span>traderwatch.js</span></div>
+  <pre><code id="subnav-code"><span class="tk-kw">signal</span> <span class="tk-var">XAU/USD</span> <span class="tk-pn">{</span>
+  <span class="tk-prop">side</span><span class="tk-pn">:</span> <span class="tk-str">'BUY'</span><span class="tk-pn">,</span>
+  <span class="tk-prop">entry</span><span class="tk-pn">:</span> <span class="tk-num">4008.81</span><span class="tk-pn">,</span>
+<span class="tk-pn">}</span></code></pre>
+  <div class="subnav-label" id="subnav-label">intro</div>
+</aside>
+
+<script src="./anime.min.js"></script>
+<script>
+(function(){
+  'use strict';
+  var reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var hasAnime = typeof window.anime !== 'undefined' && window.anime && typeof window.anime.animate === 'function';
+  var motion = hasAnime && !reduced;
+
+  /* ---------- Mobile menu ---------- */
+  var header = document.querySelector('.site-header');
+  var toggle = document.getElementById('menu-toggle');
+  if (toggle) {
+    toggle.addEventListener('click', function(){
+      var open = header.classList.toggle('nav-open');
+      toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+      toggle.setAttribute('aria-label', open ? 'Tutup menu' : 'Buka menu');
+    });
+    document.querySelectorAll('.main-nav a').forEach(function(a){
+      a.addEventListener('click', function(){
+        header.classList.remove('nav-open');
+        toggle.setAttribute('aria-expanded','false');
+      });
+    });
+  }
+
+  /* ---------- Newsletter ---------- */
+  var form = document.getElementById('newsletter-form');
+  if (form) {
+    form.addEventListener('submit', function(e){
+      e.preventDefault();
+      var email = document.getElementById('newsletter-email');
+      var msg = document.getElementById('newsletter-msg');
+      if (!email.value || email.value.indexOf('@') < 1) {
+        msg.textContent = 'Sila masukkan alamat email yang sah.';
+        msg.style.color = 'var(--red)';
+        msg.hidden = false;
+        return;
+      }
+      msg.textContent = 'Terima kasih! Anda akan menerima signal terkini.';
+      msg.style.color = 'var(--green)';
+      msg.hidden = false;
+      email.value = '';
+    });
+  }
+
+  /* ---------- Scroll progress bar ---------- */
+  var fill = document.getElementById('scroll-fill');
+  var ticking = false;
+  function updateProgress(){
+    var doc = document.documentElement;
+    var max = doc.scrollHeight - window.innerHeight;
+    var p = max > 0 ? Math.min(1, Math.max(0, window.scrollY / max)) : 0;
+    if (fill) fill.style.transform = 'scaleY(' + p + ')';
+    ticking = false;
+  }
+  window.addEventListener('scroll', function(){
+    if (!ticking) { ticking = true; window.requestAnimationFrame(updateProgress); }
+  }, { passive: true });
+  updateProgress();
+
+  /* ---------- Sub-nav snippet switching ---------- */
+  var snippets = {
+    intro: '<span class="tk-kw">signal</span> <span class="tk-var">XAU/USD</span> <span class="tk-pn">{</span>\n  <span class="tk-prop">side</span><span class="tk-pn">:</span> <span class="tk-str">\'BUY\'</span><span class="tk-pn">,</span>\n  <span class="tk-prop">entry</span><span class="tk-pn">:</span> <span class="tk-num">4008.81</span><span class="tk-pn">,</span>\n<span class="tk-pn">}</span>',
+    signal: '<span class="tk-kw">signal</span> <span class="tk-var">XAU/USD</span> <span class="tk-pn">{</span>\n  <span class="tk-prop">side</span><span class="tk-pn">:</span> <span class="tk-str">\'BUY\'</span><span class="tk-pn">,</span>\n  <span class="tk-prop">sl</span><span class="tk-pn">:</span> <span class="tk-num">4003.26</span><span class="tk-pn">,</span>\n  <span class="tk-prop">tp</span><span class="tk-pn">:</span> <span class="tk-num">4019.28</span><span class="tk-pn">,</span>\n<span class="tk-pn">}</span>',
+    chart: '<span class="tk-var">chart</span><span class="tk-pn">.</span><span class="tk-fn">annotate</span><span class="tk-pn">({</span>\n  <span class="tk-prop">entry</span><span class="tk-pn">:</span> <span class="tk-num">4008.81</span><span class="tk-pn">,</span>\n  <span class="tk-prop">reason</span><span class="tk-pn">:</span> <span class="tk-str">\'POI M15 + sweep\'</span><span class="tk-pn">,</span>\n<span class="tk-pn">})</span>',
+    prestasi: '<span class="tk-var">performance</span><span class="tk-pn">.</span><span class="tk-fn">since</span><span class="tk-pn">(</span><span class="tk-str">\'2026-10-19\'</span><span class="tk-pn">)</span>\n<span class="tk-cm">// winRate: 40.8% · netR: +37.4</span>',
+    tools: '<span class="tk-var">risk</span><span class="tk-pn">.</span><span class="tk-fn">lot</span><span class="tk-pn">({</span>\n  <span class="tk-prop">equity</span><span class="tk-pn">:</span> <span class="tk-num">1000</span><span class="tk-pn">,</span> <span class="tk-prop">riskPct</span><span class="tk-pn">:</span> <span class="tk-num">1</span><span class="tk-pn">,</span>\n<span class="tk-pn">})</span> <span class="tk-cm">// 0.02 lot XAU</span>',
+    pwa: '<span class="tk-kw">await</span> <span class="tk-var">pwa</span><span class="tk-pn">.</span><span class="tk-fn">install</span><span class="tk-pn">()</span>\n<span class="tk-cm">// offline cache: ready</span>',
+    notifikasi: '<span class="tk-var">push</span><span class="tk-pn">.</span><span class="tk-fn">send</span><span class="tk-pn">(</span><span class="tk-str">\'Signal baru: XAU/USD BUY\'</span><span class="tk-pn">)</span>',
+    clockwork: '<span class="tk-var">engine</span><span class="tk-pn">.</span><span class="tk-fn">schedule</span><span class="tk-pn">(</span><span class="tk-str">\'*/15 * * * *\'</span><span class="tk-pn">)</span>\n<span class="tk-cm">// analisis automatik</span>',
+    modules: '<span class="tk-var">performance</span><span class="tk-pn">.</span><span class="tk-fn">byPair</span><span class="tk-pn">()</span>\n<span class="tk-cm">// XAU +36.9R · XAG +16.0R</span>',
+    'get-started': '<span class="tk-var">account</span><span class="tk-pn">.</span><span class="tk-fn">create</span><span class="tk-pn">({</span>\n  <span class="tk-prop">plan</span><span class="tk-pn">:</span> <span class="tk-str">\'free\'</span><span class="tk-pn">,</span>\n<span class="tk-pn">})</span> <span class="tk-cm">// Free Card penuh</span>'
+  };
+  var subnavCode = document.getElementById('subnav-code');
+  var subnavLabel = document.getElementById('subnav-label');
+  var currentSnippet = 'intro';
+  function setSnippet(key){
+    if (!snippets[key] || key === currentSnippet || !subnavCode) return;
+    currentSnippet = key;
+    if (motion) {
+      window.anime.animate(subnavCode, { opacity: [1, 0], duration: 120, ease: 'out(2)',
+        onComplete: function(){
+          subnavCode.innerHTML = snippets[key];
+          if (subnavLabel) subnavLabel.textContent = key;
+          window.anime.animate(subnavCode, { opacity: [0, 1], duration: 220, ease: 'out(2)' });
+        }
+      });
+    } else {
+      subnavCode.innerHTML = snippets[key];
+      if (subnavLabel) subnavLabel.textContent = key;
+    }
+  }
+
+  /* ---------- IntersectionObserver plumbing ---------- */
+  var supportsIO = 'IntersectionObserver' in window;
+  function onView(el, cb, threshold){
+    if (!supportsIO) { cb(el); return; }
+    var io = new IntersectionObserver(function(entries){
+      entries.forEach(function(en){
+        if (en.isIntersecting) { io.unobserve(en.target); cb(en.target); }
+      });
+    }, { threshold: threshold || 0.18, rootMargin: '0px 0px -8% 0px' });
+    io.observe(el);
+  }
+
+  /* ---------- Scroll reveals (enhance only; content visible by default) ---------- */
+  if (motion) {
+    document.querySelectorAll('.reveal').forEach(function(el){
+      onView(el, function(t){
+        window.anime.animate(t, { opacity: [0, 1], translateY: [26, 0], duration: 700, ease: 'out(3)' });
+      });
+    });
+    document.querySelectorAll('.feature-links').forEach(function(list){
+      onView(list, function(t){
+        window.anime.animate(t.querySelectorAll('.feature-link'), {
+          opacity: [0, 1], translateX: [-18, 0], duration: 550,
+          delay: window.anime.stagger(90), ease: 'out(3)'
+        });
+      });
+    });
+  }
+
+  /* ---------- Section tracker for sub-nav ---------- */
+  if (supportsIO) {
+    var secIO = new IntersectionObserver(function(entries){
+      entries.forEach(function(en){
+        if (en.isIntersecting) {
+          var key = en.target.getAttribute('data-snippet');
+          if (key) setSnippet(key);
+        }
+      });
+    }, { threshold: 0.25 });
+    document.querySelectorAll('[data-snippet]').forEach(function(s){ secIO.observe(s); });
+  }
+
+  /* ---------- Hero ---------- */
+  if (motion) {
+    window.anime.animate('.hero-title .hw', {
+      opacity: [0, 1], translateY: [34, 0], duration: 800,
+      delay: window.anime.stagger(80), ease: 'out(4)'
+    });
+    window.anime.animate('.red-dot', {
+      scale: [1, 1.3], duration: 900, delay: 700,
+      direction: 'alternate', repeat: -1, ease: 'inOut(2)'
+    });
+    window.anime.animate('.hero-sub, .hero-cta, .hero-risk', {
+      opacity: [0, 1], translateY: [20, 0], duration: 700,
+      delay: window.anime.stagger(110, { start: 450 }), ease: 'out(3)'
+    });
+    window.anime.animate('.hero-code', {
+      opacity: [0, 1], translateY: [36, 0], scale: [0.97, 1],
+      duration: 900, delay: 350, ease: 'out(3)'
+    });
+    window.anime.animate('.hero-candles', { opacity: [0, 0.5], duration: 1200, delay: 600, ease: 'out(2)' });
+    window.anime.animate('.chip-live', { y: [0, -9], duration: 2600, direction: 'alternate', repeat: -1, ease: 'inOut(2)' });
+    window.anime.animate('.chip-tp',   { y: [0, 10], duration: 3100, direction: 'alternate', repeat: -1, ease: 'inOut(2)' });
+    window.anime.animate('.chip-pair', { y: [0, -12], duration: 3600, direction: 'alternate', repeat: -1, ease: 'inOut(2)' });
+    window.anime.animate('.hero-candles g g', {
+      translateY: [0, -6], duration: 2400, direction: 'alternate', repeat: -1,
+      delay: window.anime.stagger(160), ease: 'inOut(1)'
+    });
+  }
+
+  /* ---------- Feature animations ---------- */
+  function counter(el){
+    var target = parseFloat(el.getAttribute('data-count'));
+    var dec = parseInt(el.getAttribute('data-decimals') || '0', 10);
+    var prefix = el.getAttribute('data-prefix') || '';
+    var suffix = el.getAttribute('data-suffix') || '';
+    if (!motion) { el.textContent = prefix + target.toFixed(dec) + suffix; return; }
+    var obj = { v: 0 };
+    window.anime.animate(obj, {
+      v: target, duration: 1600, ease: 'out(3)',
+      onUpdate: function(){ el.textContent = prefix + obj.v.toFixed(dec) + suffix; },
+      onComplete: function(){ el.textContent = prefix + target.toFixed(dec) + suffix; }
+    });
+  }
+
+  var animFns = {
+    signal: function(stage){
+      var rows = stage.querySelectorAll('.signal-row');
+      var reason = stage.querySelector('.signal-reason');
+      var life = stage.querySelector('.signal-life');
+      var final = stage.querySelector('.life-final');
+      var chip = stage.querySelector('.live-chip i');
+      if (!motion) { final.classList.add('done'); return; }
+      window.anime.animate(stage.querySelector('.signal-card'), { opacity: [0, 1], translateY: [24, 0], duration: 600, ease: 'out(3)' });
+      window.anime.animate(rows, { opacity: [0, 1], translateX: [-16, 0], duration: 500, delay: window.anime.stagger(120, { start: 250 }), ease: 'out(3)' });
+      window.anime.animate([reason, life], { opacity: [0, 1], duration: 500, delay: window.anime.stagger(150, { start: 850 }), ease: 'out(2)' });
+      window.anime.animate(chip, { scale: [1, 1.5], opacity: [1, 0.5], duration: 800, direction: 'alternate', repeat: -1, ease: 'inOut(2)' });
+      window.anime.animate(final, {
+        opacity: [0.35, 1], duration: 400, delay: 1800, ease: 'out(2)',
+        onComplete: function(){ final.classList.add('done'); }
+      });
+    },
+    chart: function(stage){
+      var candles = stage.querySelectorAll('.candles > g');
+      var lines = stage.querySelectorAll('.lvl');
+      var labels = stage.querySelectorAll('.level-labels text');
+      if (!motion) return;
+      window.anime.animate(candles, { opacity: [0, 1], translateY: [14, 0], duration: 450, delay: window.anime.stagger(45), ease: 'out(2)' });
+      lines.forEach(function(line, i){
+        var len = 520;
+        line.setAttribute('stroke-dasharray', len);
+        window.anime.animate(line, { strokeDashoffset: [len, 0], duration: 900, delay: 600 + i * 260, ease: 'inOut(2)' });
+      });
+      window.anime.animate(labels, { opacity: [0, 1], duration: 500, delay: window.anime.stagger(180, { start: 900 }), ease: 'out(2)' });
+    },
+    prestasi: function(stage){
+      var path = stage.querySelector('.equity-path');
+      var area = stage.querySelector('.equity-area');
+      var dot = stage.querySelector('.equity-dot');
+      var end = stage.querySelector('.equity-end');
+      if (motion) {
+        var len = path.getTotalLength ? path.getTotalLength() : 1200;
+        path.setAttribute('stroke-dasharray', len);
+        window.anime.animate(path, { strokeDashoffset: [len, 0], duration: 1800, ease: 'inOut(2)' });
+        window.anime.animate(area, { opacity: [0, 1], duration: 900, delay: 900, ease: 'out(2)' });
+        window.anime.animate([dot, end], { opacity: [0, 1], scale: [0.4, 1], duration: 500, delay: 1700, ease: 'out(3)' });
+      }
+      stage.querySelectorAll('[data-count]').forEach(counter);
+    },
+    tools: function(stage){
+      if (motion) {
+        window.anime.animate(stage.querySelector('.calc-card'), { opacity: [0, 1], translateY: [24, 0], duration: 600, ease: 'out(3)' });
+        window.anime.animate(stage.querySelectorAll('.calc-field'), { opacity: [0, 1], translateX: [-14, 0], duration: 450, delay: window.anime.stagger(130, { start: 250 }), ease: 'out(3)' });
+      }
+      stage.querySelectorAll('[data-count]').forEach(function(el){
+        if (motion) { window.anime.animate(el, { opacity: [0, 1], duration: 400, delay: 800 }); }
+        counter(el);
+      });
+    },
+    pwa: function(stage){
+      var phone = stage.querySelector('.phone');
+      var btn = stage.querySelector('.phone-install');
+      var bar = stage.querySelector('.phone-progress i');
+      var status = stage.querySelector('.phone-status');
+      if (!motion) { status.textContent = 'Dipasang · sedia offline'; return; }
+      window.anime.animate(phone, { opacity: [0, 1], translateY: [30, 0], duration: 700, ease: 'out(3)' });
+      var tl = window.anime.createTimeline();
+      tl.add(btn, { scale: [1, 0.92], duration: 160, delay: 900, ease: 'inOut(2)' })
+        .add(btn, { scale: [0.92, 1], duration: 320, ease: 'out(3)' })
+        .add(bar, { scaleX: [0, 1], duration: 1100, ease: 'inOut(2)' }, '<')
+        .add(status, { opacity: [1, 0], duration: 150 }, '<')
+        .call(function(){ status.textContent = 'Memasang…'; })
+        .add(status, { opacity: [0, 1], duration: 200 })
+        .call(function(){ status.textContent = 'Dipasang · sedia offline'; })
+        .add(phone, { borderColor: ['rgba(192,109,223,1)', 'rgba(141,255,85,.9)'], duration: 500, ease: 'out(2)' });
+    },
+    notifikasi: function(stage){
+      var cards = stage.querySelectorAll('.notif');
+      if (!motion) return;
+      var spring = window.anime.createSpring ? window.anime.createSpring({ mass: 1, stiffness: 110, damping: 13 }) : null;
+      cards.forEach(function(card, i){
+        window.anime.animate(card, {
+          opacity: [0, 1], translateY: [46, 0],
+          duration: spring ? undefined : 700,
+          ease: spring || 'out(3)',
+          delay: i * 260
+        });
+      });
+    },
+    clockwork: function(stage){
+      var ticks = stage.querySelectorAll('.clock-tick');
+      var items = stage.querySelectorAll('.schedule li');
+      var min = stage.querySelector('.clock-hand-min');
+      var hour = stage.querySelector('.clock-hand-hour');
+      if (!motion) return;
+      window.anime.animate(ticks, { opacity: [0, 0.85], scale: [0.4, 1], duration: 400, delay: window.anime.stagger(55), ease: 'out(2)' });
+      window.anime.animate(items, { opacity: [0, 1], translateX: [-16, 0], duration: 500, delay: window.anime.stagger(140, { start: 500 }), ease: 'out(3)' });
+      window.anime.animate(min, { rotate: [0, 360], duration: 9000, repeat: -1, ease: 'linear' });
+      window.anime.animate(hour, { rotate: [0, 360], duration: 108000, repeat: -1, ease: 'linear' });
+    },
+    bars: function(stage){
+      var bars = stage.querySelectorAll('.bar');
+      var vals = stage.querySelectorAll('.bar-val');
+      if (!motion) return;
+      window.anime.animate(bars, { scaleX: [0, 1], duration: 800, delay: window.anime.stagger(80), ease: 'out(3)' });
+      window.anime.animate(vals, { opacity: [0, 1], duration: 400, delay: window.anime.stagger(80, { start: 300 }), ease: 'out(2)' });
+    }
+  };
+
+  document.querySelectorAll('[data-anim]').forEach(function(stage){
+    var key = stage.getAttribute('data-anim');
+    var fn = animFns[key];
+    if (!fn) return;
+    onView(stage, function(){ fn(stage); }, 0.25);
+  });
+})();
+</script>
+</body>
+</html>

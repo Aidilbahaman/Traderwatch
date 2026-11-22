@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="ms"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>PREVIEW — AI request · 4 pendekatan lain</title>
+<style>
+:root{--bg:#0a0e0b;--card:#111612;--card2:#171e18;--line:#222b23;--text:#eef3ee;--muted:#8a978c;--lime:#b7f36b;--green:#b7f36b;--red:#ff777d;--orange:#ffc16b;--blue:#8ab4ff;--violet:#b18cff}
+*{box-sizing:border-box}
+body{margin:0;background:#050705;font:15px/1.5 -apple-system,BlinkMacSystemFont,"Inter",sans-serif;color:var(--text)}
+.wrap{max-width:430px;margin:0 auto;background:var(--bg);min-height:100vh;padding:16px 16px 40px}
+h1{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:#5d695f;margin:0 0 4px;font-weight:700}
+.sub{font-size:12px;color:var(--muted);margin:0 0 18px;line-height:1.5}
+.sec{margin-bottom:28px}
+.sec h2{font-size:13.5px;font-weight:850;margin:0 0 2px}
+.sec .hint{font-size:11px;color:var(--muted);margin:0 0 9px;line-height:1.45}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:12px;overflow:hidden}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes spinrev{to{transform:rotate(-360deg)}}
+@keyframes pulse{0%,100%{transform:scale(.96);opacity:.45}50%{transform:scale(1.06);opacity:.78}}
+@keyframes wave{0%{transform:scale(1);opacity:.75}100%{transform:scale(2.1);opacity:0}}
+@keyframes blink{0%,100%{opacity:.25}50%{opacity:1}}
+
+/* ============ A: ORB + CONSOLE LOG ============ */
+.ca{display:flex;gap:12px;align-items:flex-start}
+.holeA{position:relative;width:106px;height:106px;display:grid;place-items:center;flex:none}
+.holeA .aura{position:absolute;width:62px;height:62px;border-radius:50%;
+ background:radial-gradient(circle,#b7f36b2e,#b7f36b10 50%,transparent 70%);animation:spin 9s linear infinite}
+.holeA .photon{position:absolute;width:40px;height:40px;border-radius:50%;border:1.5px solid #d6ff9a;opacity:.5;animation:pulse 2.8s ease-in-out infinite}
+.holeA .core{width:30px;height:30px;border-radius:50%;background:#000;z-index:4;
+ box-shadow:0 0 0 1.5px #b7f36ba6,0 0 18px 5px #b7f36b6b,0 0 46px 12px #b7f36b26;transition:.4s}
+.holeA .wv{position:absolute;width:42px;height:42px;border-radius:50%;border:1px solid #b7f36b99;animation:wave 3.2s ease-out infinite}
+.holeA .wv.b{animation-delay:1.05s}.holeA .wv.c{animation-delay:2.1s}
+.holeA.busy .core{box-shadow:0 0 0 1.5px #b7f36bd9,0 0 26px 9px #b7f36ba6,0 0 66px 20px #b7f36b45}
+.holeA.busy .aura{animation-duration:3.4s}
+.holeA.busy .wv{border-color:#8ab4ffcc;animation-duration:1.9s}
+.log{flex:1;min-width:0;font:10px/1.7 ui-monospace,SFMono-Regular,Menlo,monospace;color:var(--muted)}
+.log div{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.log .k{color:var(--lime)}.log .b{color:var(--blue)}.log .m{color:#5d695f}
+.log .cur::after{content:"▊";color:var(--lime);animation:blink 1s infinite}
+
+/* ============ B: ORB + RADAR LIST ============ */
+.cb{display:flex;flex-direction:column;gap:10px;align-items:center}
+.holeB{position:relative;width:150px;height:150px;display:grid;place-items:center}
+.holeB .aura{position:absolute;width:86px;height:86px;border-radius:50%;background:radial-gradient(circle,#b7f36b2e,#b7f36b10 50%,transparent 70%);animation:spin 9s linear infinite}
+.holeB .photon{position:absolute;width:54px;height:54px;border-radius:50%;border:2px solid #d6ff9a;opacity:.5;animation:pulse 2.8s ease-in-out infinite}
+.holeB .core{width:40px;height:40px;border-radius:50%;background:#000;z-index:4;box-shadow:0 0 0 2px #b7f36ba6,0 0 24px 7px #b7f36b6b,0 0 60px 16px #b7f36b26}
+.holeB .wv{position:absolute;width:56px;height:56px;border-radius:50%;border:1px solid #b7f36b99;animation:wave 3.2s ease-out infinite}
+.holeB .wv.b{animation-delay:1.05s}.holeB .wv.c{animation-delay:2.1s}
+/* radar blips */
+.blip{position:absolute;width:5px;height:5px;border-radius:50%;background:var(--orange);box-shadow:0 0 8px var(--orange);animation:blip 3.4s ease-out infinite}
+@keyframes blip{0%,72%{opacity:0;transform:scale(.4)}78%{opacity:1;transform:scale(1)}100%{opacity:0;transform:scale(2.4)}}
+.rlist{width:100%;display:flex;flex-direction:column;gap:5px}
+.ri{display:flex;align-items:center;gap:8px;background:var(--card2);border:1px solid var(--line);border-radius:11px;padding:7px 9px;font-size:11px}
+.ri .av{width:18px;height:18px;border-radius:50%;display:grid;place-items:center;font-size:7.5px;font-weight:850;color:#10150b;flex:none}
+.ri .tx{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ri .bar{height:3px;border-radius:99px;background:#222b23;width:44px;flex:none;overflow:hidden}
+.ri .bar i{display:block;height:100%;background:var(--blue);border-radius:99px;animation:fillbar 6s linear infinite}
+@keyframes fillbar{0%{width:6%}100%{width:100%}}
+
+/* ============ C: TIMELINE FEED ============ */
+.feed{display:flex;flex-direction:column;gap:0}
+.fi{display:flex;gap:10px;padding-bottom:11px;position:relative}
+.fi:not(:last-child)::before{content:"";position:absolute;left:6px;top:14px;bottom:0;width:1px;background:#222b23}
+.fi .dotm{width:13px;height:13px;border-radius:50%;flex:none;margin-top:3px;z-index:2;border:2px solid var(--bg)}
+.fi.run .dotm{background:var(--blue);box-shadow:0 0 0 3px #8ab4ff22;animation:blink 1.2s infinite}
+.fi.ok .dotm{background:var(--lime);box-shadow:0 0 0 3px #b7f36b22}
+.fi .bd{flex:1;min-width:0}
+.fi .bd .h{font-size:11.5px;font-weight:750}
+.fi .bd .s{font-size:10px;color:var(--muted);margin-top:1px}
+
+/* ============ D: LOCK/RING GAUGE ============ */
+.cd{display:flex;align-items:center;gap:14px}
+.ring{position:relative;width:96px;height:96px;flex:none;display:grid;place-items:center}
+.ring svg{transform:rotate(-90deg);position:absolute}
+.ring .bgc{stroke:#1e2620;fill:none;stroke-width:5}
+.ring .fgc{stroke:var(--lime);fill:none;stroke-width:5;stroke-linecap:round;stroke-dasharray:264;stroke-dashoffset:264;animation:sweep 6s linear infinite}
+@keyframes sweep{0%{stroke-dashoffset:264}100%{stroke-dashoffset:0}}
+.ring .in{position:relative;width:62px;height:62px;border-radius:50%;background:#000;
+ box-shadow:0 0 0 1.5px #b7f36b88,0 0 18px 5px #b7f36b55;display:grid;place-items:center;font-size:9px;font-weight:850;color:var(--lime)}
+.cdinfo{flex:1;min-width:0}
+.cdinfo b{font-size:12.5px;font-weight:850;display:block}
+.cdinfo .st{font-size:10.5px;color:var(--blue);margin-top:2px}
+.cdinfo .stp{display:flex;gap:3px;margin-top:8px}
+.cdinfo .stp i{height:3px;flex:1;border-radius:99px;background:#222b23}
+.cdinfo .stp i.on{background:var(--lime)}
+
+.note{font-size:11px;color:var(--muted);line-height:1.6;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px;margin-top:12px}
+.note b{color:var(--text)}
+@media(prefers-reduced-motion:reduce){.card *{animation:none !important}}
+</style></head><body><div class="wrap">
+<h1>PREVIEW — AI REQUEST · 4 PENDEKATAN</h1>
+<p class="sub">Sama matlamat (client nampak AI bekerja) tapi reka bentuk berbeza.</p>
+
+<div class="sec"><h2>A · Orb + console log</h2>
+<p class="hint">Orb di kiri, log terminal di kanan — nampak AI membaca langkah demi langkah.</p>
+<div class="card"><div class="ca">
+  <div class="holeA busy"><div class="aura"></div><div class="wv"></div><div class="wv b"></div><div class="wv c"></div><div class="photon"></div><div class="core"></div></div>
+  <div class="log">
+    <div><span class="k">▸</span> XAUUSD M15 · 300 bar</div>
+    <div><span class="k">▸</span> RSI 52 · ATR 26.3</div>
+    <div><span class="k">▸</span> FVG 3530–3536 dikesan</div>
+    <div><span class="b">▸</span> vision: membaca carta…</div>
+    <div class="cur"><span class="m">▸</span> menilai konfluens</div>
+  </div>
+</div></div></div>
+
+<div class="sec"><h2>B · Orb + radar list</h2>
+<p class="hint">Orb di tengah dengan blip radar, senarai client di bawah — proof sosial jelas.</p>
+<div class="card"><div class="cb">
+  <div class="holeB"><div class="aura"></div><div class="wv"></div><div class="wv b"></div><div class="wv c"></div>
+    <div class="blip" style="top:24%;left:66%"></div><div class="blip" style="top:70%;left:28%;animation-delay:1.4s"></div><div class="blip" style="top:38%;left:22%;animation-delay:2.3s"></div>
+    <div class="photon"></div><div class="core"></div></div>
+  <div class="rlist">
+    <div class="ri"><span class="av" style="background:var(--blue)">AB</span><span class="tx">Aidil · XAUUSD M15</span><span class="bar"><i></i></span></div>
+    <div class="ri"><span class="av" style="background:var(--violet)">ZH</span><span class="tx">Zara · BTCUSD H1</span><span class="bar"><i style="animation-delay:-2.4s"></i></span></div>
+  </div>
+</div></div></div>
+
+<div class="sec"><h2>C · Timeline feed</h2>
+<p class="hint">Tiada orb besar — senarai aktiviti AI dalam bentuk timeline. Paling ringan &amp; jelas.</p>
+<div class="card"><div class="feed">
+  <div class="fi run"><span class="dotm"></span><div class="bd"><div class="h">AI membaca XAUUSD M15</div><div class="s">Aidil B. · bermula 2s lalu</div></div></div>
+  <div class="fi ok"><span class="dotm"></span><div class="bd"><div class="h">Verdict: BTCUSD SELL 65%</div><div class="s">Zara H. · 41s lalu</div></div></div>
+  <div class="fi ok"><span class="dotm"></span><div class="bd"><div class="h">Verdict: XAGUSD HOLD</div><div class="s">Mikael K. · 3 min lalu</div></div></div>
+</div></div></div>
+
+<div class="sec"><h2>D · Ring gauge (progress)</h2>
+<p class="hint">Cincin mengisi semasa analisis — client nampak "berapa lama lagi".</p>
+<div class="card"><div class="cd">
+  <div class="ring"><svg width="96" height="96"><circle class="bgc" cx="48" cy="48" r="42"/><circle class="fgc" cx="48" cy="48" r="42"/></svg><div class="in">AI</div></div>
+  <div class="cdinfo"><b>Membaca XAUUSD</b><div class="st">M15 · vision AI</div>
+    <div class="stp"><i class="on"></i><i class="on"></i><i class="on"></i><i></i><i></i></div>
+    <div style="font-size:9.5px;color:var(--muted);margin-top:5px">langkah 3 / 5</div>
+  </div>
+</div></div></div>
+
+<div class="note">
+<b>A</b> — paling "AI berfikir", tapi log kecil sukar dibaca di phone.<br>
+<b>B</b> — proof sosial terbaik; orb + senarai client.<br>
+<b>C</b> — paling ringkas &amp; paling mudah baca; tiada orb (kalau anda sanggup).<br>
+<b>D</b> — memberi jangkaan masa (sangat berguna untuk LLM 20-60s).<br><br>
+<b>Cadangan saya: B + D</b> — orb radar (proof sosial) + ring gauge (jangkaan masa). Kedua-dua menjawab soalan client: <i>"ada orang lain guna ke?"</i> dan <i>"berapa lama lagi?"</i>
+</div>
+</div></body></html>

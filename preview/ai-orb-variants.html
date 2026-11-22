@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="ms"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>PREVIEW — AI Orb · 8 variasi</title>
+<style>
+:root{--bg:#0a0e0b;--card:#111612;--card2:#171e18;--line:#222b23;--text:#eef3ee;--muted:#8a978c;--lime:#b7f36b;--green:#b7f36b;--red:#ff777d;--orange:#ffc16b;--blue:#8ab4ff}
+*{box-sizing:border-box}
+body{margin:0;background:#050705;font:15px/1.5 -apple-system,BlinkMacSystemFont,"Inter",sans-serif;color:var(--text)}
+.wrap{max-width:430px;margin:0 auto;background:var(--bg);min-height:100vh;padding:16px 16px 50px}
+h1{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:#5d695f;margin:0 0 4px;font-weight:700}
+.sub{font-size:12px;color:var(--muted);margin:0 0 8px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin:10px 0 24px}
+.gi{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:12px 8px;display:flex;flex-direction:column;align-items:center;gap:8px;min-height:186px}
+.gi .nm{font-size:9px;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);font-weight:800;text-align:center;margin-top:auto}
+.stage{height:104px;display:grid;place-items:center;position:relative}
+
+/* ========== 1. PULSE (asal) ========== */
+.o1{width:66px;height:66px;border-radius:50%;background:radial-gradient(circle at 34% 30%,#e6ffb8,#b7f36b 45%,#5f9c22 80%,#1b2b10);
+ box-shadow:0 0 20px #b7f36b30,inset 0 0 18px #ffffff22;position:relative;animation:o1b 4.2s ease-in-out infinite;display:grid;place-items:center;font-size:9px;font-weight:900;color:#10150b}
+@keyframes o1b{0%,100%{transform:scale(1)}50%{transform:scale(1.08)}}
+.o1::after,.o1::before{content:"";position:absolute;inset:-9px;border-radius:50%;border:1px solid #b7f36b45;animation:o1r 4.2s ease-in-out infinite}
+.o1::before{inset:-19px;border-color:#b7f36b22;animation-delay:.6s}
+@keyframes o1r{0%,100%{transform:scale(.95);opacity:.4}50%{transform:scale(1.07);opacity:.9}}
+
+/* ========== 2. ORBIT (elektron mengelilingi) ========== */
+.o2wrap{position:relative;width:100px;height:100px;display:grid;place-items:center}
+.o2{width:54px;height:54px;border-radius:50%;background:radial-gradient(circle at 36% 32%,#f0ffd0,#b7f36b 48%,#4f8a1c);box-shadow:0 0 22px #b7f36b45;
+ animation:o2breathe 3.6s ease-in-out infinite;display:grid;place-items:center;font-size:8px;font-weight:900;color:#10150b}
+@keyframes o2breathe{0%,100%{transform:scale(1)}50%{transform:scale(1.05)}}
+.orbit{position:absolute;inset:0;animation:spin 7s linear infinite}
+.orbit2{position:absolute;inset:10px;animation:spin 4.6s linear infinite reverse}
+@keyframes spin{to{transform:rotate(360deg)}}
+.e{position:absolute;width:7px;height:7px;border-radius:50%;background:var(--lime);box-shadow:0 0 9px var(--lime);top:-3px;left:calc(50% - 3.5px)}
+.e.blue{background:var(--blue);box-shadow:0 0 9px var(--blue)}
+
+/* ========== 3. LIQUID (blob morph) ========== */
+.o3{width:70px;height:70px;background:linear-gradient(140deg,#d8ffa0,#b7f36b 55%,#4f8a1c);
+ animation:blob 8s ease-in-out infinite,o3spin 14s linear infinite;box-shadow:0 0 24px #b7f36b40;display:grid;place-items:center;font-size:9px;font-weight:900;color:#10150b}
+@keyframes blob{0%,100%{border-radius:52% 48% 45% 55%/50% 45% 55% 50%}25%{border-radius:42% 58% 62% 38%/55% 42% 58% 45%}50%{border-radius:60% 40% 38% 62%/45% 60% 40% 55%}75%{border-radius:45% 55% 52% 48%/60% 46% 54% 40%}}
+@keyframes o3spin{to{transform:rotate(360deg)}}
+.o3 span{animation:o3c 14s linear infinite reverse}
+
+/* ========== 4. AURA (gradient hidup) ========== */
+.o4{width:70px;height:70px;border-radius:50%;background:conic-gradient(from 0deg,#b7f36b,#8ab4ff,#b7f36b,#ffc16b,#b7f36b);
+ animation:spin 6s linear infinite;position:relative;box-shadow:0 0 26px #b7f36b38}
+.o4::after{content:"AI";position:absolute;inset:5px;border-radius:50%;background:#0e140f;display:grid;place-items:center;font-size:10px;font-weight:900;color:var(--lime);letter-spacing:.04em}
+.o4::before{content:"";position:absolute;inset:-6px;border-radius:50%;background:inherit;filter:blur(11px);opacity:.45}
+
+/* ========== 5. PARTICLE (zarah naik) ========== */
+.o5wrap{position:relative;width:88px;height:100px;display:grid;place-items:end center;overflow:hidden}
+.o5{width:56px;height:56px;border-radius:50%;background:radial-gradient(circle at 35% 32%,#f4ffd8,#b7f36b 50%,#4f8a1c);box-shadow:0 0 20px #b7f36b50;display:grid;place-items:center;font-size:8px;font-weight:900;color:#10150b;margin-bottom:8px;animation:o1b 4s ease-in-out infinite;z-index:2}
+.pt{position:absolute;width:3px;height:3px;border-radius:50%;background:var(--lime);bottom:20px;opacity:0;animation:rise 3.2s linear infinite}
+@keyframes rise{0%{transform:translateY(0) scale(.6);opacity:0}15%{opacity:.9}100%{transform:translateY(-78px) scale(1.15);opacity:0}}
+
+/* ========== 6. RADAR (sapuan) ========== */
+.o6wrap{position:relative;width:92px;height:92px;border-radius:50%;border:1px solid #222b23;background:radial-gradient(circle,#141c12,#0c110d);overflow:hidden;display:grid;place-items:center}
+.o6wrap::after{content:"";position:absolute;inset:0;border-radius:50%;background:conic-gradient(from 0deg,transparent 0deg,#b7f36b4a 40deg,transparent 70deg);animation:spin 2.6s linear infinite}
+.o6{width:8px;height:8px;border-radius:50%;background:var(--lime);box-shadow:0 0 10px var(--lime);z-index:2;animation:o1b 2.4s ease-in-out infinite}
+.o6blip{position:absolute;width:4px;height:4px;border-radius:50%;background:var(--orange);box-shadow:0 0 7px var(--orange);animation:blip 3.4s ease-out infinite}
+@keyframes blip{0%,70%{opacity:0}74%{opacity:1}100%{opacity:0;transform:scale(2.1)}}
+
+/* ========== 7. ECLIPSE (bulan matahari) ========== */
+.o7{width:72px;height:72px;border-radius:50%;background:linear-gradient(130deg,#ffffff18,#b7f36b12);position:relative;overflow:hidden;border:1px solid #b7f36b30}
+.o7::before{content:"";position:absolute;width:146%;height:146%;top:-16%;left:-16%;border-radius:50%;background:linear-gradient(120deg,#e9ffc4,#b7f36b 45%,#5f9c22);animation:ecl 5.4s ease-in-out infinite;z-index:1}
+.o7::after{content:"";position:absolute;width:100%;height:100%;top:0;left:0;border-radius:50%;background:#0a0e0b;animation:eclc 5.4s ease-in-out infinite;z-index:2;box-shadow:inset 0 0 22px #b7f36b45}
+@keyframes ecl{0%,100%{transform:translate(12%,10%)}50%{transform:translate(-14%,-12%)}}
+@keyframes eclc{0%,100%{transform:translate(-6%,-4%)}50%{transform:translate(8%,6%)}}
+
+/* ========== 8. WAVE RIPPLE ========== */
+.o8wrap{position:relative;width:100px;height:100px;display:grid;place-items:center}
+.o8{width:44px;height:44px;border-radius:50%;background:radial-gradient(circle,#d9ffab,#b7f36b 55%,#4f8a1c);box-shadow:0 0 20px #b7f36b55;z-index:2}
+.rp{position:absolute;width:44px;height:44px;border-radius:50%;border:1px solid #b7f36b70;animation:rp 3s ease-out infinite}
+.rp:nth-child(2){animation-delay:.75s}.rp:nth-child(3){animation-delay:1.5s}.rp:nth-child(4){animation-delay:2.25s}
+@keyframes rp{0%{transform:scale(1);opacity:.8}100%{transform:scale(2.5);opacity:0}}
+
+.note{font-size:11.5px;color:var(--muted);line-height:1.65;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px}
+.note b{color:var(--text)}
+</style></head><body><div class="wrap">
+<h1>PREVIEW — AI ORB · 8 VARIASI</h1>
+<p class="sub">Semua auto-berjalan. Perhatikan beberapa saat setiap satu.</p>
+
+<div class="grid">
+  <div class="gi"><div class="stage"><div class="o1">AI</div></div><div class="nm">1 · Pulse<br><span style="opacity:.6;text-transform:none;letter-spacing:0">asal</span></div></div>
+  <div class="gi"><div class="stage"><div class="o2wrap"><div class="o2">AI</div><div class="orbit"><div class="e"></div></div><div class="orbit2"><div class="e blue"></div></div></div></div><div class="nm">2 · Orbit</div></div>
+  <div class="gi"><div class="stage"><div class="o3"><span>AI</span></div></div><div class="nm">3 · Liquid</div></div>
+  <div class="gi"><div class="stage"><div class="o4"></div></div><div class="nm">4 · Aura</div></div>
+  <div class="gi"><div class="stage"><div class="o5wrap"><div class="o5">AI</div><div class="pt" style="left:22%"></div><div class="pt" style="left:44%;animation-delay:.9s"></div><div class="pt" style="left:62%;animation-delay:1.8s"></div><div class="pt" style="left:80%;animation-delay:2.5s"></div></div></div><div class="nm">5 · Particle</div></div>
+  <div class="gi"><div class="stage"><div class="o6wrap"><div class="o6"></div><div class="o6blip" style="top:26%;left:64%"></div><div class="o6blip" style="top:62%;left:30%;animation-delay:1.6s"></div></div></div><div class="nm">6 · Radar</div></div>
+  <div class="gi"><div class="stage"><div class="o7"></div></div><div class="nm">7 · Eclipse</div></div>
+  <div class="gi"><div class="stage"><div class="o8wrap"><div class="rp"></div><div class="rp"></div><div class="rp"></div><div class="rp"></div><div class="o8"></div></div></div><div class="nm">8 · Ripple</div></div>
+</div>
+
+<div class="note">
+<b>Panduan pilih:</b><br>
+<b>1 Pulse</b> — tenang, paling selamat (asal).<br>
+<b>2 Orbit</b> — rasa "AI berfikir/berpusing" — hidup tetapi tak hingar.<br>
+<b>3 Liquid</b> — organik, seperti sesuatu yang bernyawa.<br>
+<b>4 Aura</b> — premium, gradient warna bergerak (paling "high-tech").<br>
+<b>5 Particle</b> — tenaga keluar dari orb, macam AI memproses.<br>
+<b>6 Radar</b> — makna paling jelas: "AI sedang mengimbas pasaran".<br>
+<b>7 Eclipse</b> — misteri/elegan, kontras tinggi.<br>
+<b>8 Ripple</b> — denyutan tenang berulang, paling tak mengganggu.<br><br>
+Boleh gabung, contoh: <b>4 Aura + 6 Radar</b> (gradient hidup + sapuan scan).
+</div>
+</div></body></html>

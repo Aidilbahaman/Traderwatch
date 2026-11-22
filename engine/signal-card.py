@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/home/ubuntu/.hermes/hermes-agent/venv/bin/python3
 """TraderWatch signal card — satu gambar potret memanjang.
 
 Teks Telegram hanya: "🟢 BUY BTC/USD · M15".

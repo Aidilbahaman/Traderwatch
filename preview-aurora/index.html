@@ -1,0 +1,1106 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TraderWatch — Signal AI Automatik untuk XAU/USD, XAG/USD & BTC</title>
+<meta name="description" content="Signal forex AI automatik dengan entry, stop loss & take profit, chart beranotasi dan prestasi telus. Percuma untuk semua ahli. Install sebagai app.">
+<meta name="theme-color" content="#05060f">
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ============ AURORA GLASSMORPHISM — TraderWatch preview ============ */
+:root{
+  --bg:#05060f;--bg-2:#070812;
+  --text:#f8fafc;--text-2:#cbd5e1;--muted:#94a3b8;
+  --violet:#7c3aed;--blue:#3b82f6;--cyan:#22d3ee;--pink:#ec4899;
+  --lime:#c6f36b;--emerald:#34d399;--red:#ff817d;
+  --glass:rgba(255,255,255,0.055);--glass-2:rgba(255,255,255,0.07);
+  --border:rgba(255,255,255,0.12);--border-soft:rgba(255,255,255,0.08);
+  --radius:22px;--radius-lg:24px;--btn-r:12px;
+  --shadow:0 8px 32px rgba(0,0,0,0.35);
+  --grad-cta:linear-gradient(120deg,#7c3aed,#3b82f6 52%,#22d3ee);
+  --grad-text:linear-gradient(120deg,#c4b5fd,#93c5fd,#67e8f9);
+  --grad-brand:linear-gradient(120deg,#c6f36b,#34d399);
+  --display:"Space Grotesk",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --sans:"Inter",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+  --nav-h:68px;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:calc(var(--nav-h) + 24px)}
+body{
+  background:var(--bg);color:var(--text);
+  font-family:var(--sans);font-size:1.0625rem;line-height:1.6;
+  -webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;
+  overflow-x:hidden;
+}
+::selection{background:rgba(124,58,237,.45);color:#fff}
+a{color:inherit;text-decoration:none}
+button{font-family:inherit;cursor:pointer}
+img,svg{display:block;max-width:100%}
+:focus-visible{outline:2px solid #67e8f9;outline-offset:3px;border-radius:6px}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
+.mono{font-family:var(--mono)}
+.wrap{max-width:1160px;margin:0 auto;padding:0 24px;position:relative;z-index:2}
+
+/* Fine noise texture for depth */
+body::after{
+  content:"";position:fixed;inset:0;z-index:60;pointer-events:none;opacity:.02;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* ---------- Aurora mesh ---------- */
+.aurora{position:absolute;inset:0;overflow:hidden;pointer-events:none;z-index:0}
+.blob{position:absolute;border-radius:50%;filter:blur(110px);will-change:transform}
+.blob-violet{background:radial-gradient(circle,#7c3aed 0%,rgba(124,58,237,0) 70%)}
+.blob-blue{background:radial-gradient(circle,#3b82f6 0%,rgba(59,130,246,0) 70%)}
+.blob-cyan{background:radial-gradient(circle,#22d3ee 0%,rgba(34,211,238,0) 70%)}
+.blob-pink{background:radial-gradient(circle,#ec4899 0%,rgba(236,72,153,0) 70%)}
+.blob-lime{background:radial-gradient(circle,#c6f36b 0%,rgba(198,243,107,0) 70%)}
+.blob-emerald{background:radial-gradient(circle,#34d399 0%,rgba(52,211,153,0) 70%)}
+@keyframes drift-a{0%{transform:translate(0,0) scale(1)}50%{transform:translate(70px,-45px) scale(1.12)}100%{transform:translate(-40px,35px) scale(.94)}}
+@keyframes drift-b{0%{transform:translate(0,0) scale(1)}50%{transform:translate(-60px,50px) scale(1.08)}100%{transform:translate(45px,-30px) scale(.96)}}
+@keyframes drift-c{0%{transform:translate(0,0) scale(.95)}50%{transform:translate(35px,60px) scale(1.1)}100%{transform:translate(-55px,-40px) scale(1)}}
+.drift-a{animation:drift-a 32s ease-in-out infinite alternate}
+.drift-b{animation:drift-b 40s ease-in-out infinite alternate}
+.drift-c{animation:drift-c 45s ease-in-out infinite alternate}
+.drift-d{animation:drift-a 27s ease-in-out infinite alternate-reverse}
+.drift-e{animation:drift-b 36s ease-in-out infinite alternate-reverse}
+
+/* ---------- Glass primitives ---------- */
+.glass{
+  background:var(--glass);
+  -webkit-backdrop-filter:blur(20px) saturate(150%);backdrop-filter:blur(20px) saturate(150%);
+  border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);
+}
+@property --spin{syntax:"<angle>";initial-value:160deg;inherits:false}
+.glow-border{position:relative}
+.glow-border::before{
+  content:"";position:absolute;inset:0;border-radius:inherit;padding:1.5px;pointer-events:none;
+  background:conic-gradient(from var(--spin),#7c3aed,#3b82f6,#22d3ee,#c6f36b,#7c3aed);
+  -webkit-mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);
+  -webkit-mask-composite:xor;mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);mask-composite:exclude;
+  animation:spin 9s linear infinite;
+}
+@keyframes spin{to{--spin:520deg}}
+
+/* ---------- Buttons ---------- */
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:9px;
+  padding:13px 26px;border-radius:var(--btn-r);border:1px solid transparent;
+  font-family:var(--display);font-weight:600;font-size:.95rem;letter-spacing:.01em;
+  transition:transform .25s cubic-bezier(.16,1,.3,1),box-shadow .25s,border-color .25s,background .25s;
+  white-space:nowrap;
+}
+.btn-primary{
+  background:var(--grad-cta);color:#fff;
+  box-shadow:0 4px 24px rgba(59,130,246,.35),0 2px 10px rgba(124,58,237,.3);
+}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 8px 34px rgba(34,211,238,.4),0 4px 18px rgba(124,58,237,.4)}
+.btn-lime{background:var(--grad-brand);color:#0a1408;box-shadow:0 4px 24px rgba(198,243,107,.25)}
+.btn-lime:hover{transform:translateY(-2px);box-shadow:0 8px 34px rgba(52,211,153,.35)}
+.btn-glass{
+  background:rgba(255,255,255,0.06);color:var(--text);border-color:var(--border);
+  -webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);
+}
+.btn-glass:hover{transform:translateY(-2px);border-color:rgba(255,255,255,.28);background:rgba(255,255,255,.09)}
+.btn-sm{padding:9px 18px;font-size:.85rem}
+.btn-lg{padding:16px 34px;font-size:1.02rem}
+
+/* ---------- Reveal (translate only — content always visible) ---------- */
+.reveal{transition:transform .8s cubic-bezier(.16,1,.3,1)}
+.reveal:not(.in){transform:translateY(28px)}
+.d1{transition-delay:.08s}.d2{transition-delay:.16s}.d3{transition-delay:.24s}.d4{transition-delay:.32s}
+
+/* ---------- Nav ---------- */
+.nav{
+  position:sticky;top:0;z-index:50;height:var(--nav-h);
+  background:rgba(7,8,18,.55);
+  -webkit-backdrop-filter:blur(20px) saturate(150%);backdrop-filter:blur(20px) saturate(150%);
+  border-bottom:1px solid var(--border-soft);
+  transition:background .3s,border-color .3s;
+}
+.nav.scrolled{background:rgba(5,6,15,.78);border-bottom-color:var(--border)}
+.nav-inner{max-width:1160px;margin:0 auto;padding:0 24px;height:100%;display:flex;align-items:center;gap:28px}
+.logo{display:inline-flex;align-items:center;gap:10px;font-family:var(--display);font-weight:700;font-size:1.08rem;letter-spacing:-.02em}
+.logo-mark{
+  width:32px;height:32px;border-radius:10px;display:grid;place-items:center;flex:none;
+  background:var(--grad-cta);color:#fff;font-size:1rem;font-weight:700;
+  box-shadow:0 2px 14px rgba(124,58,237,.45);
+}
+.nav-links{display:flex;align-items:center;gap:26px;margin-left:8px}
+.nav-links a{font-size:.9rem;font-weight:500;color:var(--text-2);transition:color .2s;position:relative}
+.nav-links a:hover{color:var(--text)}
+.nav-links a::after{content:"";position:absolute;left:0;bottom:-6px;width:0;height:2px;border-radius:2px;background:var(--grad-cta);transition:width .25s}
+.nav-links a:hover::after{width:100%}
+.nav-cta{margin-left:auto;display:flex;align-items:center;gap:12px}
+.nav-burger{display:none;width:42px;height:42px;border-radius:12px;background:rgba(255,255,255,.06);border:1px solid var(--border);flex-direction:column;align-items:center;justify-content:center;gap:5px;margin-left:auto}
+.nav-burger span{display:block;width:18px;height:2px;border-radius:2px;background:var(--text);transition:transform .3s,opacity .3s}
+.nav.open .nav-burger span:nth-child(1){transform:translateY(7px) rotate(45deg)}
+.nav.open .nav-burger span:nth-child(2){opacity:0}
+.nav.open .nav-burger span:nth-child(3){transform:translateY(-7px) rotate(-45deg)}
+.nav-menu{display:none}
+
+/* ---------- Hero ---------- */
+.hero{position:relative;padding:calc(var(--nav-h) + 64px) 0 90px;overflow:hidden;
+  background:radial-gradient(1200px 600px at 70% -10%,rgba(124,58,237,.12),transparent 60%),var(--bg)}
+.hero .blob-1{width:620px;height:620px;top:-220px;left:-160px;opacity:.42}
+.hero .blob-2{width:560px;height:560px;top:-140px;right:-120px;opacity:.36}
+.hero .blob-3{width:520px;height:520px;bottom:-260px;left:32%;opacity:.3}
+.hero .blob-4{width:420px;height:420px;top:26%;right:16%;opacity:.28}
+.hero .blob-5{width:380px;height:380px;bottom:-140px;left:-100px;opacity:.3}
+.hero-grid{display:grid;grid-template-columns:1.04fr .96fr;gap:56px;align-items:center}
+.pill{
+  display:inline-flex;align-items:center;gap:9px;padding:8px 18px;border-radius:999px;
+  background:rgba(255,255,255,.06);border:1px solid var(--border);
+  -webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);
+  font-size:.8rem;font-weight:500;color:var(--text-2);letter-spacing:.02em;
+}
+.live-dot{width:8px;height:8px;border-radius:50%;background:var(--lime);flex:none;animation:pulse 2.2s ease-in-out infinite}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(198,243,107,.55)}50%{box-shadow:0 0 0 7px rgba(198,243,107,0)}}
+.hero h1{
+  font-family:var(--display);font-weight:700;letter-spacing:-.03em;line-height:1.05;
+  font-size:clamp(2.75rem,6vw,4.5rem);margin:26px 0 22px;
+}
+.grad-text{
+  background:var(--grad-text);background-size:200% 100%;
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+  animation:shimmer 8s ease-in-out infinite;
+}
+@keyframes shimmer{0%,100%{background-position:0% 50%}50%{background-position:100% 50%}}
+.hero-sub{color:var(--text-2);font-size:1.1rem;line-height:1.65;max-width:540px;margin-bottom:32px}
+.hero-cta{display:flex;flex-wrap:wrap;gap:14px;margin-bottom:22px}
+.hero-note{font-size:.84rem;color:var(--muted);display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.hero-note .sep{opacity:.5}
+
+/* Hero dashboard mockup */
+.hero-visual{position:relative}
+.hero-glow{position:absolute;inset:-12% -10%;z-index:0;filter:blur(70px);opacity:.5;
+  background:radial-gradient(45% 45% at 55% 45%,rgba(124,58,237,.5),transparent 70%),
+             radial-gradient(40% 40% at 30% 70%,rgba(34,211,238,.35),transparent 70%)}
+.dash{position:relative;z-index:1;padding:22px;border-radius:var(--radius-lg);animation:floaty 8s ease-in-out infinite}
+@keyframes floaty{0%,100%{transform:translateY(0)}50%{transform:translateY(-12px)}}
+.dash-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+.dash-title{display:flex;align-items:center;gap:9px;font-family:var(--display);font-weight:600;font-size:.9rem}
+.dash-title .logo-mark{width:24px;height:24px;border-radius:7px;font-size:.72rem}
+.live-pill{display:inline-flex;align-items:center;gap:7px;padding:4px 12px;border-radius:999px;background:rgba(198,243,107,.1);border:1px solid rgba(198,243,107,.3);font-family:var(--mono);font-size:.66rem;font-weight:600;color:var(--lime);letter-spacing:.1em}
+.dash-pair{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+.dash-pair .pair{font-family:var(--display);font-weight:700;font-size:1.25rem;letter-spacing:-.01em}
+.side-buy{padding:3px 12px;border-radius:999px;background:rgba(198,243,107,.14);border:1px solid rgba(198,243,107,.4);color:var(--lime);font-family:var(--mono);font-size:.7rem;font-weight:700;letter-spacing:.08em}
+.dash-tf{margin-left:auto;font-family:var(--mono);font-size:.68rem;color:var(--muted)}
+.dash-levels{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px}
+.lvl{background:rgba(255,255,255,.045);border:1px solid var(--border-soft);border-radius:14px;padding:10px 12px}
+.lvl .k{font-size:.62rem;font-weight:600;letter-spacing:.12em;color:var(--muted);text-transform:uppercase;margin-bottom:3px}
+.lvl .v{font-family:var(--mono);font-size:.92rem;font-weight:600}
+.lvl-entry .v{color:var(--lime)}.lvl-sl .v{color:var(--red)}.lvl-tp .v{color:var(--emerald)}
+.dash-chart{background:rgba(5,6,15,.45);border:1px solid var(--border-soft);border-radius:16px;padding:12px;margin-bottom:14px}
+.dash-reason{display:flex;gap:9px;align-items:flex-start;font-size:.78rem;color:var(--text-2);line-height:1.5}
+.dash-reason svg{flex:none;margin-top:2px}
+.dash-foot{display:flex;align-items:center;justify-content:space-between;margin-top:14px;padding-top:14px;border-top:1px solid var(--border-soft)}
+.rr-chip{font-family:var(--mono);font-size:.7rem;font-weight:600;color:var(--cyan);background:rgba(34,211,238,.08);border:1px solid rgba(34,211,238,.25);padding:4px 12px;border-radius:999px}
+.dash-status{font-family:var(--mono);font-size:.68rem;color:var(--emerald)}
+.float-chip{
+  position:absolute;z-index:2;display:flex;align-items:center;gap:8px;padding:10px 16px;border-radius:16px;
+  font-family:var(--mono);font-size:.72rem;font-weight:600;
+  animation:floaty 7s ease-in-out infinite;
+}
+.chip-tp{top:-22px;right:-14px;color:var(--emerald);animation-delay:1.2s}
+.chip-r{bottom:-20px;left:-18px;color:#93c5fd;animation-delay:2.4s}
+
+/* ---------- Stats strip ---------- */
+.stats{position:relative;padding:0 0 8px;margin-top:-34px;z-index:3}
+.stats-bar{display:grid;grid-template-columns:repeat(3,1fr);padding:28px 12px;border-radius:var(--radius-lg)}
+.stat{text-align:center;padding:6px 16px;position:relative}
+.stat + .stat::before{content:"";position:absolute;left:0;top:15%;bottom:15%;width:1px;background:var(--border-soft)}
+.stat .num{font-family:var(--mono);font-size:clamp(1.6rem,3vw,2.1rem);font-weight:700;letter-spacing:-.02em;
+  background:var(--grad-text);-webkit-background-clip:text;background-clip:text;color:transparent}
+.stat .lbl{font-size:.8rem;color:var(--muted);margin-top:4px}
+
+/* ---------- Sections ---------- */
+.section{position:relative;padding:100px 0;overflow:hidden}
+.center{text-align:center;max-width:680px;margin:0 auto 56px}
+.eyebrow{
+  display:inline-flex;align-items:center;gap:8px;padding:6px 16px;border-radius:999px;margin-bottom:18px;
+  background:rgba(255,255,255,.05);border:1px solid var(--border);
+  font-family:var(--mono);font-size:.7rem;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:#93c5fd;
+}
+.h-sec{font-family:var(--display);font-weight:700;letter-spacing:-.03em;line-height:1.12;font-size:clamp(1.9rem,3.6vw,2.7rem)}
+.lead{color:var(--text-2);margin-top:16px;font-size:1.02rem}
+
+/* ---------- Bento ---------- */
+.bento{display:grid;grid-template-columns:repeat(6,1fr);gap:18px}
+.b-card{padding:28px;border-radius:var(--radius);position:relative;overflow:hidden;
+  transition:transform .35s cubic-bezier(.16,1,.3,1),border-color .35s,box-shadow .35s}
+.b-card:hover{transform:translateY(-5px);border-color:rgba(255,255,255,.24);box-shadow:0 14px 44px rgba(0,0,0,.45),0 0 30px rgba(124,58,237,.12)}
+.b-signal{grid-column:span 3;grid-row:span 2}
+.b-chart{grid-column:span 3}
+.b-perf{grid-column:span 3}
+.b-risk,.b-pwa,.b-notif{grid-column:span 2}
+.b-ic{
+  width:46px;height:46px;border-radius:14px;display:grid;place-items:center;margin-bottom:18px;
+  background:rgba(124,58,237,.12);border:1px solid rgba(124,58,237,.3);
+}
+.b-ic svg{width:23px;height:23px}
+.b-card h3{font-family:var(--display);font-weight:600;font-size:1.16rem;letter-spacing:-.01em;margin-bottom:9px}
+.b-card p{font-size:.9rem;color:var(--text-2);line-height:1.6}
+.b-visual{margin-top:20px;background:rgba(5,6,15,.4);border:1px solid var(--border-soft);border-radius:16px;padding:14px}
+.mini-row{display:flex;align-items:center;justify-content:space-between;font-family:var(--mono);font-size:.76rem;padding:7px 2px}
+.mini-row + .mini-row{border-top:1px solid rgba(255,255,255,.05)}
+.mini-row .k{color:var(--muted);display:flex;align-items:center;gap:8px}
+.mini-row .k i{width:7px;height:7px;border-radius:50%;display:inline-block}
+.perf-nums{display:flex;gap:16px;margin-top:12px;font-family:var(--mono);font-size:.74rem;font-weight:600}
+.perf-nums .wr{color:#93c5fd}.perf-nums .nr{color:var(--emerald)}
+.risk-bars{display:flex;flex-direction:column;gap:9px}
+.risk-bar{display:flex;align-items:center;gap:10px;font-family:var(--mono);font-size:.7rem;color:var(--text-2)}
+.risk-bar .track{flex:1;height:6px;border-radius:99px;background:rgba(255,255,255,.07);overflow:hidden}
+.risk-bar .fill{height:100%;border-radius:99px;display:block}
+.pwa-chips{display:flex;flex-wrap:wrap;gap:8px}
+.pwa-chip{display:inline-flex;align-items:center;gap:7px;padding:7px 13px;border-radius:999px;background:rgba(255,255,255,.05);border:1px solid var(--border-soft);font-family:var(--mono);font-size:.68rem;color:var(--text-2)}
+.pwa-chip svg{width:13px;height:13px}
+.notif-toast{display:flex;gap:11px;align-items:flex-start}
+.notif-ic{width:34px;height:34px;border-radius:10px;background:var(--grad-cta);display:grid;place-items:center;flex:none}
+.notif-ic svg{width:16px;height:16px}
+.notif-tx .t{font-size:.76rem;font-weight:600}
+.notif-tx .s{font-size:.68rem;color:var(--muted);font-family:var(--mono);margin-top:2px}
+.notif-time{margin-left:auto;font-family:var(--mono);font-size:.62rem;color:var(--muted);flex:none}
+
+/* ---------- Showcase ---------- */
+.show-grid{display:grid;grid-template-columns:.9fr 1.1fr;gap:56px;align-items:center}
+.show-grid.rev{grid-template-columns:1.1fr .9fr}
+.show-grid.rev .show-copy{order:2}
+.show-grid.rev .show-panel{order:1}
+.show-copy .h-sec{font-size:clamp(1.8rem,3.2vw,2.4rem)}
+.bullets{list-style:none;margin-top:26px;display:flex;flex-direction:column;gap:16px}
+.bullets li{display:flex;gap:13px;align-items:flex-start;font-size:.95rem;color:var(--text-2);line-height:1.55}
+.bullets li b{color:var(--text);font-weight:600}
+.b-ic-sm{width:30px;height:30px;border-radius:9px;display:grid;place-items:center;flex:none;margin-top:1px;
+  background:rgba(34,211,238,.1);border:1px solid rgba(34,211,238,.28)}
+.b-ic-sm svg{width:15px;height:15px}
+.show-panel{padding:22px;border-radius:var(--radius-lg)}
+.vh{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px;flex-wrap:wrap}
+.vh .t{font-family:var(--display);font-weight:600;font-size:.95rem;display:flex;align-items:center;gap:10px}
+.vh .s{font-family:var(--mono);font-size:.7rem;color:var(--muted)}
+.chart-box{background:rgba(5,6,15,.45);border:1px solid var(--border-soft);border-radius:18px;padding:14px}
+.tiles{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:16px}
+.tile{background:rgba(255,255,255,.045);border:1px solid var(--border-soft);border-radius:16px;padding:16px 14px;text-align:center}
+.tile .tv{font-family:var(--mono);font-size:clamp(1.15rem,2vw,1.5rem);font-weight:700;letter-spacing:-.02em}
+.tile .tl{font-size:.7rem;color:var(--muted);margin-top:5px;line-height:1.4}
+.tile.wr .tv{color:#93c5fd}.tile.pos .tv{color:var(--emerald)}.tile.sg .tv{color:#c4b5fd}
+.show-note{margin-top:18px;font-size:.8rem;color:var(--muted);display:flex;gap:9px;align-items:flex-start;line-height:1.55}
+.show-note svg{flex:none;margin-top:2px}
+
+/* ---------- Steps ---------- */
+.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+.step{padding:30px 28px;border-radius:var(--radius);position:relative;transition:transform .35s cubic-bezier(.16,1,.3,1),border-color .35s}
+.step:hover{transform:translateY(-5px);border-color:rgba(255,255,255,.24)}
+.step-num{font-family:var(--mono);font-size:2rem;font-weight:700;letter-spacing:-.02em;
+  background:var(--grad-text);-webkit-background-clip:text;background-clip:text;color:transparent;margin-bottom:16px}
+.step h3{font-family:var(--display);font-weight:600;font-size:1.12rem;margin-bottom:9px}
+.step p{font-size:.9rem;color:var(--text-2)}
+.step-line{position:absolute;top:52px;right:-13px;width:14px;height:2px;background:var(--border);z-index:3}
+
+/* ---------- Pricing ---------- */
+.pricing-sec .blob-1{width:560px;height:560px;top:-180px;left:-140px;opacity:.34}
+.pricing-sec .blob-2{width:520px;height:520px;bottom:-220px;right:-120px;opacity:.32}
+.pricing-sec .blob-3{width:420px;height:420px;top:20%;right:22%;opacity:.26}
+.price-card{max-width:480px;margin:0 auto;padding:40px 38px;border-radius:var(--radius-lg);text-align:center;
+  box-shadow:0 8px 32px rgba(0,0,0,.35),0 0 80px rgba(124,58,237,.18)}
+.pc-badge{display:inline-flex;align-items:center;gap:8px;padding:6px 16px;border-radius:999px;
+  background:rgba(198,243,107,.1);border:1px solid rgba(198,243,107,.35);color:var(--lime);
+  font-size:.74rem;font-weight:600;letter-spacing:.06em;margin-bottom:22px}
+.pc-name{font-family:var(--display);font-weight:600;font-size:1.3rem;letter-spacing:-.01em}
+.pc-price{font-family:var(--display);font-weight:700;font-size:4rem;letter-spacing:-.04em;line-height:1.1;margin:10px 0 2px;
+  background:var(--grad-text);-webkit-background-clip:text;background-clip:text;color:transparent}
+.pc-per{font-size:.84rem;color:var(--muted);margin-bottom:28px}
+.pc-list{list-style:none;text-align:left;display:flex;flex-direction:column;gap:13px;margin-bottom:32px}
+.pc-list li{display:flex;gap:11px;align-items:flex-start;font-size:.92rem;color:var(--text-2)}
+.pc-list svg{flex:none;margin-top:3px}
+.pc-note{margin-top:20px;font-size:.8rem;color:var(--muted);line-height:1.6}
+
+/* ---------- FAQ ---------- */
+.faq{max-width:760px;margin:0 auto;display:flex;flex-direction:column;gap:12px}
+.faq-item{border-radius:18px;overflow:hidden;transition:border-color .3s,box-shadow .3s}
+.faq-item.open{border-color:rgba(147,197,253,.35);box-shadow:0 8px 32px rgba(0,0,0,.35),0 0 24px rgba(59,130,246,.1)}
+.faq-q{width:100%;display:flex;align-items:center;justify-content:space-between;gap:16px;background:none;border:none;
+  color:var(--text);text-align:left;padding:20px 24px;font-size:.98rem;font-weight:600;font-family:var(--display);letter-spacing:-.01em}
+.faq-q .ic{width:28px;height:28px;border-radius:9px;background:rgba(255,255,255,.05);border:1px solid var(--border);
+  display:grid;place-items:center;flex:none;transition:transform .3s,background .3s}
+.faq-q .ic svg{width:13px;height:13px}
+.faq-item.open .faq-q .ic{transform:rotate(45deg);background:rgba(34,211,238,.14)}
+.faq-a{display:grid;grid-template-rows:0fr;transition:grid-template-rows .35s cubic-bezier(.16,1,.3,1)}
+.faq-item.open .faq-a{grid-template-rows:1fr}
+.faq-a-inner{overflow:hidden;visibility:hidden;transition:visibility .35s}
+.faq-item.open .faq-a-inner{visibility:visible}
+.faq-a-inner p{padding:0 24px 22px;font-size:.9rem;color:var(--text-2);line-height:1.65}
+
+/* ---------- Final CTA ---------- */
+.cta-sec{padding:120px 0}
+.cta-sec .blob-1{width:640px;height:640px;top:-260px;left:14%;opacity:.4}
+.cta-sec .blob-2{width:560px;height:560px;bottom:-280px;right:8%;opacity:.36}
+.cta-sec .blob-3{width:460px;height:460px;top:10%;left:-140px;opacity:.3}
+.cta-box{text-align:center;max-width:720px;margin:0 auto}
+.cta-box .h-sec{font-size:clamp(2.1rem,4.4vw,3.2rem)}
+.cta-box .lead{margin-bottom:36px}
+.cta-actions{display:flex;flex-wrap:wrap;gap:14px;justify-content:center}
+
+/* ---------- Footer ---------- */
+.footer{position:relative;border-top:1px solid var(--border-soft);padding:64px 0 36px;
+  background:rgba(7,8,18,.6);-webkit-backdrop-filter:blur(20px);backdrop-filter:blur(20px)}
+.footer-grid{display:grid;grid-template-columns:1.4fr .8fr .8fr 1.3fr;gap:40px;margin-bottom:44px}
+.f-brand .tagline{font-size:.86rem;color:var(--muted);margin-top:16px;max-width:280px;line-height:1.6}
+.f-col h4{font-family:var(--display);font-size:.82rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--text);margin-bottom:16px}
+.f-col ul{list-style:none;display:flex;flex-direction:column;gap:11px}
+.f-col ul a{font-size:.88rem;color:var(--muted);transition:color .2s}
+.f-col ul a:hover{color:var(--text)}
+.f-col .nl-desc{font-size:.84rem;color:var(--muted);margin-bottom:14px;line-height:1.55}
+.nl-form{display:flex;gap:9px}
+.nl-form input{
+  flex:1;min-width:0;padding:11px 15px;border-radius:var(--btn-r);border:1px solid var(--border);
+  background:rgba(255,255,255,.05);color:var(--text);font-family:var(--sans);font-size:.85rem;
+}
+.nl-form input:focus{outline:none;border-color:rgba(103,232,249,.5);box-shadow:0 0 0 3px rgba(34,211,238,.12)}
+.nl-msg{display:none;margin-top:12px;font-size:.8rem;color:var(--emerald);line-height:1.5}
+.nl-msg.show{display:block}
+.nl-msg a{color:#67e8f9;text-decoration:underline}
+.footer-disc{border-top:1px solid var(--border-soft);padding-top:28px;display:flex;flex-direction:column;gap:14px}
+.disc{font-size:.72rem;color:var(--muted);line-height:1.65}
+.disc b{color:var(--text-2)}
+.footer-bottom{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-top:28px;padding-top:22px;border-top:1px solid var(--border-soft)}
+.cp{font-size:.78rem;color:var(--muted)}
+.social a{display:grid;place-items:center;width:38px;height:38px;border-radius:12px;background:rgba(255,255,255,.05);border:1px solid var(--border);color:var(--text-2);transition:color .2s,border-color .2s,transform .2s}
+.social a:hover{color:#67e8f9;border-color:rgba(103,232,249,.4);transform:translateY(-2px)}
+.social svg{width:17px;height:17px}
+
+/* ---------- Responsive ---------- */
+@media (max-width:1020px){
+  .hero-grid{grid-template-columns:1fr;gap:64px}
+  .hero-sub{max-width:640px}
+  .hero-visual{max-width:520px;margin:0 auto;width:100%}
+  .show-grid,.show-grid.rev{grid-template-columns:1fr;gap:36px}
+  .show-grid.rev .show-copy{order:1}
+  .show-grid.rev .show-panel{order:2}
+  .b-signal{grid-column:span 6;grid-row:span 1}
+  .b-chart,.b-perf{grid-column:span 6}
+  .b-risk,.b-pwa,.b-notif{grid-column:span 3}
+  .footer-grid{grid-template-columns:1fr 1fr}
+}
+@media (max-width:860px){
+  .nav-links,.nav-cta{display:none}
+  .nav-burger{display:flex}
+  .nav-menu{
+    display:none;position:absolute;top:var(--nav-h);left:0;right:0;
+    background:rgba(5,6,15,.92);-webkit-backdrop-filter:blur(24px) saturate(150%);backdrop-filter:blur(24px) saturate(150%);
+    border-bottom:1px solid var(--border);padding:20px 24px 26px;
+    flex-direction:column;gap:6px;
+  }
+  .nav.open .nav-menu{display:flex}
+  .nav-menu a{padding:12px 6px;font-size:.98rem;font-weight:500;color:var(--text-2);border-bottom:1px solid rgba(255,255,255,.05)}
+  .nav-menu .btn{margin-top:14px;width:100%}
+  .steps{grid-template-columns:1fr}
+  .step-line{display:none}
+}
+@media (max-width:640px){
+  .section{padding:76px 0}
+  .hero{padding-top:calc(var(--nav-h) + 40px)}
+  .stats-bar{grid-template-columns:1fr;gap:6px;padding:22px}
+  .stat + .stat::before{left:20%;right:20%;top:0;bottom:auto;width:auto;height:1px}
+  .stat{padding:14px 16px}
+  .b-risk,.b-pwa,.b-notif{grid-column:span 6}
+  .tiles{grid-template-columns:1fr 1fr}
+  .tiles .tile:last-child{grid-column:span 2}
+  .footer-grid{grid-template-columns:1fr;gap:32px}
+  .chip-tp{right:-4px;top:-18px}
+  .chip-r{left:-4px;bottom:-16px}
+  .price-card{padding:32px 24px}
+  .nl-form{flex-direction:column}
+  .footer-bottom{flex-direction:column;align-items:flex-start}
+}
+
+/* ---------- Reduced motion ---------- */
+@media (prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  .blob,.dash,.float-chip,.grad-text,.live-dot,.glow-border::before{animation:none !important}
+  .reveal,.reveal:not(.in){transform:none !important;transition:none !important}
+  .btn,.b-card,.step{transition:none}
+}
+</style>
+</head>
+<body id="top">
+
+<!-- Shared gradient defs -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <defs>
+    <linearGradient id="ig" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#a78bfa"/><stop offset=".5" stop-color="#60a5fa"/><stop offset="1" stop-color="#22d3ee"/>
+    </linearGradient>
+    <linearGradient id="ig-lime" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#c6f36b"/><stop offset="1" stop-color="#34d399"/>
+    </linearGradient>
+  </defs>
+</svg>
+
+<!-- ============ 1. NAV ============ -->
+<header class="nav" id="nav">
+  <div class="nav-inner">
+    <a href="#top" class="logo" aria-label="TraderWatch — kembali ke atas">
+      <span class="logo-mark" aria-hidden="true">T</span><span>TraderWatch</span>
+    </a>
+    <nav class="nav-links" aria-label="Navigasi utama">
+      <a href="#signal">Signal</a><a href="#chart">Chart</a><a href="#prestasi">Prestasi</a><a href="#tools">Tools</a><a href="#faq">Learn</a>
+    </nav>
+    <div class="nav-cta">
+      <a class="btn btn-glass btn-sm" href="https://traderwatch.org/login.html">Log masuk</a>
+      <a class="btn btn-primary btn-sm" href="https://traderwatch.org/login.html?mode=signup">Mula percuma</a>
+    </div>
+    <button class="nav-burger" id="nav-burger" aria-expanded="false" aria-controls="nav-menu" aria-label="Buka menu navigasi">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+  <nav class="nav-menu" id="nav-menu" aria-label="Navigasi mudah alih">
+    <a href="#signal">Signal</a><a href="#chart">Chart</a><a href="#prestasi">Prestasi</a><a href="#tools">Tools</a><a href="#faq">Learn</a>
+    <a class="btn btn-glass" href="https://traderwatch.org/login.html">Log masuk</a>
+    <a class="btn btn-primary" href="https://traderwatch.org/login.html?mode=signup">Mula percuma</a>
+  </nav>
+</header>
+
+<main>
+<!-- ============ 2. HERO ============ -->
+<section class="hero" aria-label="Pengenalan TraderWatch">
+  <div class="aurora" aria-hidden="true">
+    <div class="blob blob-violet blob-1 drift-a"></div>
+    <div class="blob blob-blue blob-2 drift-b"></div>
+    <div class="blob blob-cyan blob-3 drift-c"></div>
+    <div class="blob blob-pink blob-4 drift-d"></div>
+    <div class="blob blob-lime blob-5 drift-e"></div>
+  </div>
+  <div class="wrap">
+    <div class="hero-grid">
+      <div class="hero-copy">
+        <span class="pill reveal"><span class="live-dot" aria-hidden="true"></span> Signal AI automatik · XAU/USD · XAG/USD · BTC</span>
+        <h1 class="reveal d1">Signal AI.<br>Keputusan <span class="grad-text">lebih bijak</span>.</h1>
+        <p class="hero-sub reveal d2">Signal AI automatik dengan entry, stop loss &amp; take profit — chart beranotasi dan prestasi telus, dalam satu app percuma.</p>
+        <div class="hero-cta reveal d3">
+          <a class="btn btn-primary btn-lg" href="https://traderwatch.org/login.html?mode=signup">Mula percuma
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+          </a>
+          <a class="btn btn-glass btn-lg" href="#prestasi">Lihat prestasi</a>
+        </div>
+        <p class="hero-note reveal d4"><span>Percuma untuk semua</span><span class="sep" aria-hidden="true">·</span><span>Tiada kad kredit</span><span class="sep" aria-hidden="true">·</span><span>Install sebagai app</span></p>
+      </div>
+
+      <div class="hero-visual reveal d2">
+        <div class="hero-glow" aria-hidden="true"></div>
+        <div class="float-chip glass chip-tp" aria-hidden="true">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 13l4 4L19 7"/></svg>
+          +2.0R · TP dicapai
+        </div>
+        <div class="dash glass" role="img" aria-label="Mockup papan pemuka TraderWatch: signal XAU/USD BUY dengan entry 3676.40, stop loss 3662.10, take profit 3705.00 dan chart candlestick beranotasi.">
+          <div class="dash-head">
+            <span class="dash-title"><span class="logo-mark" aria-hidden="true">T</span> TraderWatch</span>
+            <span class="live-pill"><span class="live-dot" aria-hidden="true"></span>LIVE</span>
+          </div>
+          <div class="dash-pair">
+            <span class="pair">XAU/USD</span>
+            <span class="side-buy">BUY</span>
+            <span class="dash-tf">M15 · SMC</span>
+          </div>
+          <div class="dash-levels">
+            <div class="lvl lvl-entry"><div class="k">Entry</div><div class="v">3676.40</div></div>
+            <div class="lvl lvl-sl"><div class="k">Stop Loss</div><div class="v">3662.10</div></div>
+            <div class="lvl lvl-tp"><div class="k">Take Profit</div><div class="v">3705.00</div></div>
+          </div>
+          <div class="dash-chart" aria-hidden="true">
+            <svg viewBox="0 0 320 130" width="100%">
+              <g stroke="rgba(255,255,255,0.05)"><line x1="0" y1="28" x2="320" y2="28"/><line x1="0" y1="64" x2="320" y2="64"/><line x1="0" y1="100" x2="320" y2="100"/></g>
+              <g stroke-width="1.3">
+                <g stroke="#ff817d" fill="#ff817d"><line x1="26" y1="46" x2="26" y2="78"/><rect x="21" y="50" width="10" height="22" rx="1"/></g>
+                <g stroke="#ff817d" fill="#ff817d"><line x1="52" y1="58" x2="52" y2="92"/><rect x="47" y="62" width="10" height="24" rx="1"/></g>
+                <g stroke="#ff817d" fill="#ff817d"><line x1="78" y1="72" x2="78" y2="106"/><rect x="73" y="76" width="10" height="24" rx="1"/></g>
+                <g stroke="#34d399" fill="#34d399"><line x1="104" y1="66" x2="104" y2="104"/><rect x="99" y="72" width="10" height="26" rx="1"/></g>
+                <g stroke="#34d399" fill="#34d399"><line x1="130" y1="52" x2="130" y2="88"/><rect x="125" y="58" width="10" height="24" rx="1"/></g>
+                <g stroke="#ff817d" fill="#ff817d"><line x1="156" y1="56" x2="156" y2="80"/><rect x="151" y="60" width="10" height="14" rx="1"/></g>
+                <g stroke="#34d399" fill="#34d399"><line x1="182" y1="38" x2="182" y2="72"/><rect x="177" y="44" width="10" height="22" rx="1"/></g>
+                <g stroke="#34d399" fill="#34d399"><line x1="208" y1="26" x2="208" y2="58"/><rect x="203" y="32" width="10" height="20" rx="1"/></g>
+                <g stroke="#34d399" fill="#34d399"><line x1="234" y1="16" x2="234" y2="46"/><rect x="229" y="22" width="10" height="18" rx="1"/></g>
+                <g stroke="#34d399" fill="#34d399"><line x1="260" y1="10" x2="260" y2="36"/><rect x="255" y="14" width="10" height="16" rx="1"/></g>
+              </g>
+              <line x1="0" y1="28" x2="320" y2="28" stroke="#34d399" stroke-width="1.3"/>
+              <line x1="0" y1="64" x2="320" y2="64" stroke="#c6f36b" stroke-width="1.3" stroke-dasharray="5 4"/>
+              <line x1="0" y1="100" x2="320" y2="100" stroke="#ff817d" stroke-width="1.3"/>
+              <g font-family="JetBrains Mono, monospace" font-size="7.5" font-weight="600">
+                <text x="316" y="23" text-anchor="end" fill="#34d399">TP 3705.00</text>
+                <text x="316" y="59" text-anchor="end" fill="#c6f36b">ENTRY 3676.40</text>
+                <text x="316" y="112" text-anchor="end" fill="#ff817d">SL 3662.10</text>
+              </g>
+            </svg>
+          </div>
+          <div class="dash-reason">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="url(#ig)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 8v4M12 16h.01"/></svg>
+            <span><b style="color:var(--text)">Sebab entry:</b> sweep liquidity bawah Asian low + tap POI H1, entry CE 50%.</span>
+          </div>
+          <div class="dash-foot">
+            <span class="rr-chip">RR 1 : 2.0</span>
+            <span class="dash-status">● Signal aktif</span>
+          </div>
+        </div>
+        <div class="float-chip glass chip-r" aria-hidden="true">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l5-6 4 3 6-8"/><path d="M18 6h3v3"/></svg>
+          Prestasi telus · +8.43R
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 3. STATS ============ -->
+<section class="stats" aria-label="Statistik TraderWatch">
+  <div class="wrap">
+    <div class="stats-bar glass reveal">
+      <div class="stat"><div class="num" data-count="11">11</div><div class="lbl">Ahli aktif</div></div>
+      <div class="stat"><div class="num" data-count="130" data-suffix="+">130+</div><div class="lbl">Signal diterbitkan</div></div>
+      <div class="stat"><div class="num">19 Okt 2026</div><div class="lbl">Rekod prestasi sejak</div></div>
+    </div>
+  </div>
+</section><!-- ============ 4. BENTO FEATURES ============ -->
+<section class="section" id="signal" aria-label="Ciri-ciri TraderWatch">
+  <div class="aurora" aria-hidden="true">
+    <div class="blob blob-blue drift-b" style="width:460px;height:460px;top:-160px;right:-140px;opacity:.22"></div>
+    <div class="blob blob-violet drift-a" style="width:420px;height:420px;bottom:-180px;left:-120px;opacity:.24"></div>
+  </div>
+  <div class="wrap">
+    <div class="center reveal">
+      <span class="eyebrow">Features</span>
+      <h2 class="h-sec">Semua yang anda perlu,<br>dalam satu platform.</h2>
+      <p class="lead">Daripada signal AI hingga pengurusan risiko — dibina untuk trader yang mahu kejelasan, bukan kecoh.</p>
+    </div>
+    <div class="bento">
+      <article class="b-card glass glow-border b-signal reveal">
+        <span class="b-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="url(#ig)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v4M12 18v4M4.9 4.9l2.8 2.8M16.3 16.3l2.8 2.8M2 12h4M18 12h4M4.9 19.1l2.8-2.8M16.3 7.7l2.8-2.8"/><circle cx="12" cy="12" r="3.2"/></svg></span>
+        <h3>Signal AI automatik</h3>
+        <p>Enjin AI menjana signal XAU/USD, XAG/USD dan BTC secara automatik — setiap satu lengkap dengan entry, stop loss, take profit dan sebab entry yang jelas. Tiada perlu tunggu depan chart sepanjang hari.</p>
+        <div class="b-visual" aria-hidden="true">
+          <div class="mini-row"><span class="k"><i style="background:#c6f36b"></i>XAU/USD · BUY</span><span style="color:#34d399">LIVE</span></div>
+          <div class="mini-row"><span class="k">Entry</span><span style="color:#c6f36b">3676.40</span></div>
+          <div class="mini-row"><span class="k">SL / TP</span><span><span style="color:#ff817d">3662.10</span> / <span style="color:#34d399">3705.00</span></span></div>
+          <div class="mini-row"><span class="k">Sebab</span><span style="color:#94a3b8">Sweep + POI H1 · CE 50%</span></div>
+        </div>
+      </article>
+
+      <article class="b-card glass b-chart reveal d1">
+        <span class="b-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="url(#ig)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 14l3-4 3 3 5-7"/></svg></span>
+        <h3>Chart beranotasi</h3>
+        <p>Setiap signal disertakan chart candlestick dengan lukisan entry, SL dan TP — nampak di mana dan kenapa setup itu berlaku.</p>
+        <div class="b-visual" aria-hidden="true">
+          <svg viewBox="0 0 300 104" width="100%">
+            <g stroke="rgba(255,255,255,0.05)"><line x1="0" y1="26" x2="300" y2="26"/><line x1="0" y1="56" x2="300" y2="56"/><line x1="0" y1="84" x2="300" y2="84"/></g>
+            <g stroke-width="1.3">
+              <g stroke="#34d399" fill="#34d399"><line x1="30" y1="66" x2="30" y2="90"/><rect x="25" y="70" width="9" height="14" rx="1"/></g>
+              <g stroke="#34d399" fill="#34d399"><line x1="62" y1="54" x2="62" y2="82"/><rect x="57" y="58" width="9" height="18" rx="1"/></g>
+              <g stroke="#ff817d" fill="#ff817d"><line x1="94" y1="56" x2="94" y2="78"/><rect x="89" y="60" width="9" height="12" rx="1"/></g>
+              <g stroke="#34d399" fill="#34d399"><line x1="126" y1="40" x2="126" y2="70"/><rect x="121" y="44" width="9" height="20" rx="1"/></g>
+              <g stroke="#34d399" fill="#34d399"><line x1="158" y1="30" x2="158" y2="58"/><rect x="153" y="34" width="9" height="18" rx="1"/></g>
+              <g stroke="#ff817d" fill="#ff817d"><line x1="190" y1="32" x2="190" y2="54"/><rect x="185" y="36" width="9" height="12" rx="1"/></g>
+              <g stroke="#34d399" fill="#34d399"><line x1="222" y1="20" x2="222" y2="48"/><rect x="217" y="24" width="9" height="18" rx="1"/></g>
+              <g stroke="#34d399" fill="#34d399"><line x1="254" y1="12" x2="254" y2="38"/><rect x="249" y="16" width="9" height="16" rx="1"/></g>
+            </g>
+            <line x1="0" y1="26" x2="300" y2="26" stroke="#34d399" stroke-width="1.2"/>
+            <line x1="0" y1="56" x2="300" y2="56" stroke="#c6f36b" stroke-width="1.2" stroke-dasharray="4 3"/>
+            <line x1="0" y1="84" x2="300" y2="84" stroke="#ff817d" stroke-width="1.2"/>
+          </svg>
+        </div>
+      </article>
+
+      <article class="b-card glass b-perf reveal d2">
+        <span class="b-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="url(#ig)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l5-6 4 3 6-8"/><path d="M18 6h3v3"/></svg></span>
+        <h3>Prestasi telus</h3>
+        <p>Equity curve dan setiap signal direkod penuh sejak 19 Okt 2026. Menang, kalah, expired — semua dipaparkan. Tiada cherry-pick.</p>
+        <div class="b-visual" aria-hidden="true">
+          <svg viewBox="0 0 300 84" width="100%">
+            <defs>
+              <linearGradient id="spark" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#7c3aed"/><stop offset="1" stop-color="#22d3ee"/></linearGradient>
+            </defs>
+            <g stroke="rgba(255,255,255,0.05)"><line x1="0" y1="22" x2="300" y2="22"/><line x1="0" y1="46" x2="300" y2="46"/><line x1="0" y1="70" x2="300" y2="70"/></g>
+            <path d="M4 70 L34 54 L58 62 L84 70 L112 54 L140 38 L164 46 L192 30 L218 38 L246 22 L272 26 L296 14" fill="none" stroke="url(#spark)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+            <circle cx="296" cy="14" r="3.4" fill="#22d3ee"/>
+          </svg>
+          <div class="perf-nums"><span class="wr">WR 34.4%</span><span class="nr">Net +8.43R</span></div>
+        </div>
+      </article>
+
+      <article class="b-card glass b-risk reveal" id="tools">
+        <span class="b-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="url(#ig-lime)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 3v5c0 4.6-3 8.4-7 10-4-1.6-7-5.4-7-10V6z"/><path d="M9.5 12l2 2 3.5-4"/></svg></span>
+        <h3>Risk toolkit</h3>
+        <p>Kalkulator saiz lot, nisbah RR dan risiko per trade — plan dulu, baru entry.</p>
+        <div class="b-visual" aria-hidden="true">
+          <div class="risk-bars">
+            <div class="risk-bar"><span style="width:74px">Risiko 1%</span><span class="track"><span class="fill" style="width:22%;background:linear-gradient(90deg,#c6f36b,#34d399)"></span></span></div>
+            <div class="risk-bar"><span style="width:74px">RR 1:2</span><span class="track"><span class="fill" style="width:66%;background:linear-gradient(90deg,#7c3aed,#22d3ee)"></span></span></div>
+            <div class="risk-bar"><span style="width:74px">SL wajib</span><span class="track"><span class="fill" style="width:100%;background:linear-gradient(90deg,#34d399,#22d3ee)"></span></span></div>
+          </div>
+        </div>
+      </article>
+
+      <article class="b-card glass b-pwa reveal d1">
+        <span class="b-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="url(#ig)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="7" y="2.5" width="10" height="19" rx="2.5"/><path d="M11 18.5h2"/></svg></span>
+        <h3>PWA offline</h3>
+        <p>Install ke skrin utama seperti app native. Signal &amp; chart boleh diakses walaupun offline.</p>
+        <div class="b-visual" aria-hidden="true">
+          <div class="pwa-chips">
+            <span class="pwa-chip"><svg viewBox="0 0 24 24" fill="none" stroke="#c6f36b" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12M7 10l5 5 5-5"/><path d="M4 19h16"/></svg>Install</span>
+            <span class="pwa-chip"><svg viewBox="0 0 24 24" fill="none" stroke="#22d3ee" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5a10 10 0 0114 0M8.5 16a5.5 5.5 0 017 0"/><circle cx="12" cy="19" r="1" fill="#22d3ee"/></svg>Offline ready</span>
+          </div>
+        </div>
+      </article>
+
+      <article class="b-card glass b-notif reveal d2">
+        <span class="b-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="url(#ig)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 9a6 6 0 10-12 0c0 6-2.5 7-2.5 7h17S18 15 18 9"/><path d="M10 20a2.2 2.2 0 004 0"/></svg></span>
+        <h3>Notifikasi segera</h3>
+        <p>Signal baru terus ke peranti anda — tidak perlu tunggu depan chart.</p>
+        <div class="b-visual" aria-hidden="true">
+          <div class="notif-toast">
+            <span class="notif-ic"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L4.5 13.5H11L9.5 22 19 10h-6.5z"/></svg></span>
+            <span class="notif-tx"><span class="t">Signal baru · XAU/USD BUY</span><span class="s" style="display:block">Entry 3676.40 · RR 1:2</span></span>
+            <span class="notif-time">kini</span>
+          </div>
+        </div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 5. SHOWCASE: CHART ============ -->
+<section class="section" id="chart" aria-label="Chart beranotasi">
+  <div class="aurora" aria-hidden="true">
+    <div class="blob blob-cyan drift-c" style="width:480px;height:480px;top:-140px;left:-160px;opacity:.22"></div>
+    <div class="blob blob-pink drift-d" style="width:400px;height:400px;bottom:-160px;right:-100px;opacity:.2"></div>
+  </div>
+  <div class="wrap">
+    <div class="show-grid">
+      <div class="show-copy reveal">
+        <span class="eyebrow">Chart beranotasi</span>
+        <h2 class="h-sec">Nampak di mana,<br>faham kenapa.</h2>
+        <p class="lead">Setiap signal bukan sekadar nombor — ia datang dengan chart yang dilukis penuh, supaya anda faham logik setup sebelum entry.</p>
+        <ul class="bullets">
+          <li><span class="b-ic-sm" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="url(#ig)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="6" width="17" height="12" rx="2"/><path d="M3.5 12h17"/></svg></span><span><b>Zon POI &amp; entry CE 50%</b> — kawasan setup ditanda terus pada chart, entry di titik keseimbangan.</span></li>
+          <li><span class="b-ic-sm" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="url(#ig)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h16M4 16h16"/></svg></span><span><b>SL &amp; TP jelas</b> — garisan paras risiko dan ganjaran, lengkap dengan zon lorek. Bukan teka-teki.</span></li>
+          <li><span class="b-ic-sm" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="url(#ig)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l2.4 4.9 5.4.8-3.9 3.8.9 5.4-4.8-2.5-4.8 2.5.9-5.4L4.2 8.7l5.4-.8z"/></svg></span><span><b>Sebab entry + confluence</b> — setiap signal datang dengan rationale: struktur, liquidity dan POI.</span></li>
+        </ul>
+      </div>
+      <div class="show-panel glass reveal d1">
+        <div class="vh">
+          <span class="t"><span class="side-buy">BUY</span> XAU/USD · M15</span>
+          <span class="s">SMC · POI H1</span>
+        </div>
+        <div class="chart-box">
+          <svg viewBox="0 0 560 340" width="100%" role="img" aria-label="Chart candlestick XAU/USD dengan zon POI, garisan entry 3676.40 (lime putus-putus), stop loss 3662.10 (merah) dengan zon risiko lorek, dan take profit 3705.00 (emerald) dengan zon ganjaran lorek.">
+            <defs>
+              <pattern id="hatch-risk" width="7" height="7" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+                <rect width="7" height="7" fill="rgba(255,129,125,0.045)"/>
+                <line x1="0" y1="0" x2="0" y2="7" stroke="rgba(255,129,125,0.18)" stroke-width="1.4"/>
+              </pattern>
+              <pattern id="hatch-reward" width="7" height="7" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+                <rect width="7" height="7" fill="rgba(52,211,153,0.04)"/>
+                <line x1="0" y1="0" x2="0" y2="7" stroke="rgba(52,211,153,0.16)" stroke-width="1.4"/>
+              </pattern>
+            </defs>
+            <g stroke="rgba(255,255,255,0.045)">
+              <line x1="24" y1="64" x2="556" y2="64"/><line x1="24" y1="123" x2="556" y2="123"/>
+              <line x1="24" y1="182" x2="556" y2="182"/><line x1="24" y1="252" x2="556" y2="252"/>
+              <line x1="24" y1="300" x2="556" y2="300"/>
+            </g>
+            <rect x="24" y="64" width="404" height="118" fill="url(#hatch-reward)"/>
+            <rect x="24" y="182" width="404" height="70" fill="url(#hatch-risk)"/>
+            <rect x="146" y="158" width="150" height="52" rx="6" fill="rgba(124,58,237,0.12)" stroke="rgba(167,139,250,0.5)" stroke-width="1.2" stroke-dasharray="5 4"/>
+            <text x="152" y="150" font-family="JetBrains Mono, monospace" font-size="10" font-weight="600" fill="#a78bfa">POI H1 · CE 50%</text>
+            <g stroke-width="1.5">
+              <g stroke="#ff817d" fill="#ff817d"><line x1="40" y1="150" x2="40" y2="190"/><rect x="34" y="156" width="12" height="28" rx="1.5"/></g>
+              <g stroke="#ff817d" fill="#ff817d"><line x1="66" y1="168" x2="66" y2="206"/><rect x="60" y="174" width="12" height="26" rx="1.5"/></g>
+              <g stroke="#ff817d" fill="#ff817d"><line x1="92" y1="190" x2="92" y2="228"/><rect x="86" y="196" width="12" height="26" rx="1.5"/></g>
+              <g stroke="#ff817d" fill="#ff817d"><line x1="118" y1="210" x2="118" y2="244"/><rect x="112" y="216" width="12" height="24" rx="1.5"/></g>
+              <g stroke="#ff817d" fill="#ff817d"><line x1="144" y1="224" x2="144" y2="248"/><rect x="138" y="230" width="12" height="14" rx="1.5"/></g>
+              <g stroke="#34d399" fill="#34d399"><line x1="170" y1="196" x2="170" y2="244"/><rect x="164" y="204" width="12" height="34" rx="1.5"/></g>
+              <g stroke="#34d399" fill="#34d399"><line x1="196" y1="178" x2="196" y2="226"/><rect x="190" y="184" width="12" height="36" rx="1.5"/></g>
+              <g stroke="#34d399" fill="#34d399"><line x1="222" y1="160" x2="222" y2="204"/><rect x="216" y="166" width="12" height="32" rx="1.5"/></g>
+              <g stroke="#ff817d" fill="#ff817d"><line x1="248" y1="170" x2="248" y2="206"/><rect x="242" y="176" width="12" height="22" rx="1.5"/></g>
+              <g stroke="#34d399" fill="#34d399"><line x1="274" y1="140" x2="274" y2="186"/><rect x="268" y="146" width="12" height="34" rx="1.5"/></g>
+              <g stroke="#34d399" fill="#34d399"><line x1="300" y1="118" x2="300" y2="162"/><rect x="294" y="124" width="12" height="32" rx="1.5"/></g>
+              <g stroke="#ff817d" fill="#ff817d"><line x1="326" y1="128" x2="326" y2="158"/><rect x="320" y="134" width="12" height="16" rx="1.5"/></g>
+              <g stroke="#34d399" fill="#34d399"><line x1="352" y1="96" x2="352" y2="142"/><rect x="346" y="102" width="12" height="34" rx="1.5"/></g>
+              <g stroke="#34d399" fill="#34d399"><line x1="378" y1="74" x2="378" y2="118"/><rect x="372" y="80" width="12" height="32" rx="1.5"/></g>
+              <g stroke="#34d399" fill="#34d399"><line x1="404" y1="58" x2="404" y2="96"/><rect x="398" y="64" width="12" height="26" rx="1.5"/></g>
+            </g>
+            <line x1="24" y1="64" x2="556" y2="64" stroke="#34d399" stroke-width="1.6"/>
+            <line x1="24" y1="182" x2="556" y2="182" stroke="#c6f36b" stroke-width="1.6" stroke-dasharray="6 5"/>
+            <line x1="24" y1="252" x2="556" y2="252" stroke="#ff817d" stroke-width="1.6"/>
+            <g font-family="JetBrains Mono, monospace" font-size="11" font-weight="600">
+              <text x="554" y="56" text-anchor="end" fill="#34d399">TP 3705.00 · +2R</text>
+              <text x="554" y="174" text-anchor="end" fill="#c6f36b">ENTRY 3676.40</text>
+              <text x="554" y="270" text-anchor="end" fill="#ff817d">SL 3662.10 · −1R</text>
+            </g>
+            <g font-family="JetBrains Mono, monospace" font-size="9.5" fill="#94a3b8">
+              <text x="40" y="326">09:00</text><text x="170" y="326">10:00</text><text x="300" y="326">11:00</text><text x="404" y="326">12:00</text>
+            </g>
+          </svg>
+        </div>
+        <p class="show-note">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="url(#ig)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 8v4M12 16h.01"/></svg>
+          Zon lorek merah = risiko (entry ke SL), zon lorek hijau = ganjaran (entry ke TP). Nisbah ganjaran-risiko 1:2.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 6. SHOWCASE: PRESTASI ============ -->
+<section class="section" id="prestasi" aria-label="Prestasi telus">
+  <div class="aurora" aria-hidden="true">
+    <div class="blob blob-violet drift-a" style="width:520px;height:520px;top:-180px;right:-160px;opacity:.26"></div>
+    <div class="blob blob-emerald drift-e" style="width:440px;height:440px;bottom:-200px;left:-120px;opacity:.22"></div>
+  </div>
+  <div class="wrap">
+    <div class="show-grid rev">
+      <div class="show-copy reveal">
+        <span class="eyebrow">Prestasi telus</span>
+        <h2 class="h-sec">Rekod penuh.<br>Tiada cherry-pick.</h2>
+        <p class="lead">Kami rekod setiap signal sejak 19 Oktober 2026 — menang, kalah, dan expired. Tiada angka yang disembunyikan, tiada kurva yang dicipa.</p>
+        <ul class="bullets">
+          <li><span class="b-ic-sm" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="url(#ig)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 13l4 4L19 7"/></svg></span><span><b>Win rate 34.4%</b> — dikira TP berbanding TP+SL. Net R positif kerana take profit lebih besar daripada stop loss (RR ~1:2).</span></li>
+          <li><span class="b-ic-sm" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="url(#ig)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg></span><span><b>Expired ≠ rugi</b> — signal yang luput tanpa menyentuh SL atau TP tidak dikira sebagai kerugian.</span></li>
+          <li><span class="b-ic-sm" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="url(#ig)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 14l3-4 3 3 5-7"/></svg></span><span><b>Equity curve sebenar</b> — cumulative R setiap trade, termasuk drawdown. Apa yang anda lihat ialah apa yang berlaku.</span></li>
+        </ul>
+      </div>
+      <div class="show-panel glass reveal d1">
+        <div class="vh">
+          <span class="t">Equity Curve · Cumulative R</span>
+          <span class="s">19 Okt — kini</span>
+        </div>
+        <div class="chart-box">
+          <svg viewBox="0 0 560 250" width="100%" role="img" aria-label="Equity curve menunjukkan cumulative R meningkat dari 0 ke +8.43R dengan beberapa drawdown, sejak 19 Oktober 2026.">
+            <defs>
+              <linearGradient id="eq-grad" x1="0" y1="0" x2="1" y2="0">
+                <stop offset="0" stop-color="#7c3aed"/><stop offset=".55" stop-color="#3b82f6"/><stop offset="1" stop-color="#22d3ee"/>
+              </linearGradient>
+              <linearGradient id="eq-fill" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0" stop-color="rgba(34,211,238,0.22)"/><stop offset="1" stop-color="rgba(124,58,237,0)"/>
+              </linearGradient>
+            </defs>
+            <g stroke="rgba(255,255,255,0.05)">
+              <line x1="40" y1="210" x2="536" y2="210"/><line x1="40" y1="130" x2="536" y2="130"/><line x1="40" y1="50" x2="536" y2="50"/>
+            </g>
+            <g font-family="JetBrains Mono, monospace" font-size="10" fill="#94a3b8">
+              <text x="32" y="214" text-anchor="end">0R</text>
+              <text x="32" y="134" text-anchor="end">+4R</text>
+              <text x="32" y="54" text-anchor="end">+8R</text>
+            </g>
+            <path d="M40 210 L70 170 L95 190 L120 210 L150 170 L180 130 L205 150 L230 150 L260 110 L285 130 L315 90 L340 110 L370 70 L395 90 L425 50 L460 41.4 L520 41.4 L520 210 L40 210 Z" fill="url(#eq-fill)"/>
+            <path d="M40 210 L70 170 L95 190 L120 210 L150 170 L180 130 L205 150 L230 150 L260 110 L285 130 L315 90 L340 110 L370 70 L395 90 L425 50 L460 41.4 L520 41.4" fill="none" stroke="url(#eq-grad)" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+            <circle cx="520" cy="41.4" r="4.4" fill="#22d3ee"/>
+            <circle cx="520" cy="41.4" r="9" fill="none" stroke="rgba(34,211,238,0.35)" stroke-width="1.5"/>
+            <text x="512" y="28" text-anchor="end" font-family="JetBrains Mono, monospace" font-size="12" font-weight="700" fill="#22d3ee">+8.43R</text>
+            <g font-family="JetBrains Mono, monospace" font-size="9.5" fill="#94a3b8">
+              <text x="40" y="236">19 Okt</text><text x="230" y="236" text-anchor="middle">01 Nov</text><text x="430" y="236" text-anchor="middle">15 Nov</text><text x="520" y="236" text-anchor="end">Kini</text>
+            </g>
+          </svg>
+        </div>
+        <div class="tiles">
+          <div class="tile wr"><div class="tv" data-count="34.4" data-dec="1" data-suffix="%">34.4%</div><div class="tl">Win rate TP/(TP+SL)</div></div>
+          <div class="tile pos"><div class="tv" data-count="8.43" data-dec="2" data-prefix="+" data-suffix="R">+8.43R</div><div class="tl">Net R kumulatif</div></div>
+          <div class="tile sg"><div class="tv" data-count="130" data-suffix="+">130+</div><div class="tl">Signal direkod</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 7. HOW IT WORKS ============ -->
+<section class="section" id="how" aria-label="Cara ia berfungsi">
+  <div class="wrap">
+    <div class="center reveal">
+      <span class="eyebrow">Cara ia berfungsi</span>
+      <h2 class="h-sec">Tiga langkah. Mula dalam minit.</h2>
+    </div>
+    <div class="steps">
+      <article class="step glass reveal">
+        <div class="step-num" aria-hidden="true">01</div>
+        <h3>Daftar percuma</h3>
+        <p>Cipta akaun Free Card dalam seminit. Tiada kad kredit, tiada langganan — akses penuh untuk semua ahli.</p>
+        <span class="step-line" aria-hidden="true"></span>
+      </article>
+      <article class="step glass reveal d1">
+        <div class="step-num" aria-hidden="true">02</div>
+        <h3>Terima signal AI</h3>
+        <p>Signal XAU/USD, XAG/USD &amp; BTC masuk automatik — lengkap dengan entry, SL, TP, chart beranotasi dan sebab entry.</p>
+        <span class="step-line" aria-hidden="true"></span>
+      </article>
+      <article class="step glass reveal d2">
+        <div class="step-num" aria-hidden="true">03</div>
+        <h3>Trade dengan plan</h3>
+        <p>Guna chart beranotasi dan risk toolkit untuk execute dengan disiplin. Risiko terurus, keputusan lebih bijak.</p>
+      </article>
+    </div>
+  </div>
+</section><!-- ============ 8. FREE CARD ============ -->
+<section class="section pricing-sec" id="pricing" aria-label="Free Card — harga">
+  <div class="aurora" aria-hidden="true">
+    <div class="blob blob-violet blob-1 drift-a"></div>
+    <div class="blob blob-cyan blob-2 drift-c"></div>
+    <div class="blob blob-lime blob-3 drift-e"></div>
+  </div>
+  <div class="wrap">
+    <div class="center reveal">
+      <span class="eyebrow">Free Card</span>
+      <h2 class="h-sec">Satu tier. Semua dapat.</h2>
+      <p class="lead">Kami tidak menjual tier atau langganan berbayar. Setiap ahli mendapat platform yang sama — penuh, tanpa syarat.</p>
+    </div>
+    <div class="price-card glass glow-border reveal d1">
+      <span class="pc-badge">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 13l4 4L19 7"/></svg>
+        Untuk semua ahli
+      </span>
+      <div class="pc-name">Free Card</div>
+      <div class="pc-price">RM0</div>
+      <div class="pc-per">percuma selamanya · semua ahli</div>
+      <ul class="pc-list">
+        <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="url(#ig-lime)" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 13l4 4L19 7"/></svg>Signal AI automatik — XAU/USD, XAG/USD &amp; BTC</li>
+        <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="url(#ig-lime)" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 13l4 4L19 7"/></svg>Entry, stop loss &amp; take profit setiap signal</li>
+        <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="url(#ig-lime)" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 13l4 4L19 7"/></svg>Chart beranotasi + sebab entry &amp; confluence</li>
+        <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="url(#ig-lime)" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 13l4 4L19 7"/></svg>Prestasi penuh — equity curve &amp; rekod signal</li>
+        <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="url(#ig-lime)" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 13l4 4L19 7"/></svg>PWA install + akses offline</li>
+        <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="url(#ig-lime)" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 13l4 4L19 7"/></svg>Notifikasi signal segera</li>
+      </ul>
+      <a class="btn btn-primary btn-lg" href="https://traderwatch.org/login.html?mode=signup" style="width:100%">Daftar percuma</a>
+      <p class="pc-note">Satu tier untuk semua — tiada langganan, akses penuh.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 9. FAQ ============ -->
+<section class="section" id="faq" aria-label="Soalan lazim">
+  <div class="aurora" aria-hidden="true">
+    <div class="blob blob-blue drift-b" style="width:440px;height:440px;top:-160px;left:-140px;opacity:.2"></div>
+  </div>
+  <div class="wrap">
+    <div class="center reveal">
+      <span class="eyebrow">Learn · FAQ</span>
+      <h2 class="h-sec">Soalan lazim</h2>
+      <p class="lead">Jawapan jujur — termasuk yang mungkin anda tidak mahu dengar.</p>
+    </div>
+    <div class="faq">
+      <div class="faq-item glass reveal">
+        <button class="faq-q" aria-expanded="false" aria-controls="faq-a1" id="faq-q1"><span>Adakah signal dijamin untung?</span><span class="ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></span></button>
+        <div class="faq-a" id="faq-a1" role="region" aria-labelledby="faq-q1"><div class="faq-a-inner"><p>Tidak. Tiada signal yang boleh menjamin keuntungan. Win rate kami sekitar 34% (TP berbanding TP+SL), tetapi net R kekal positif kerana take profit lebih besar daripada stop loss (RR ~1:2). Trading sentiasa melibatkan risiko kerugian — gunakan pengurusan risiko yang betul dan hanya trade dengan wang yang anda mampu rugi.</p></div></div>
+      </div>
+      <div class="faq-item glass reveal d1">
+        <button class="faq-q" aria-expanded="false" aria-controls="faq-a2" id="faq-q2"><span>Adakah harga entry sama dengan broker saya?</span><span class="ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></span></button>
+        <div class="faq-a" id="faq-a2" role="region" aria-labelledby="faq-q2"><div class="faq-a-inner"><p>Harga entry, SL dan TP adalah paras rujukan berdasarkan chart kami. Harga sebenar di broker anda mungkin berbeza sedikit disebabkan spread, slippage dan perbezaan feed harga. Gunakan paras tersebut sebagai panduan plan, dan sentiasa sahkan dengan platform broker anda sebelum entry.</p></div></div>
+      </div>
+      <div class="faq-item glass reveal d2">
+        <button class="faq-q" aria-expanded="false" aria-controls="faq-a3" id="faq-q3"><span>Adakah ini nasihat kewangan?</span><span class="ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></span></button>
+        <div class="faq-a" id="faq-a3" role="region" aria-labelledby="faq-q3"><div class="faq-a-inner"><p>Tidak. TraderWatch ialah platform pendidikan dan analisis signal. Semua kandungan adalah untuk tujuan pendidikan sahaja — bukan nasihat kewangan, pelaburan atau trading peribadi. Anda bertanggungjawab sepenuhnya atas keputusan trading anda sendiri. Educational only. Trading involves substantial risk.</p></div></div>
+      </div>
+      <div class="faq-item glass reveal d3">
+        <button class="faq-q" aria-expanded="false" aria-controls="faq-a4" id="faq-q4"><span>Perlu bayar untuk akses penuh?</span><span class="ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></span></button>
+        <div class="faq-a" id="faq-a4" role="region" aria-labelledby="faq-q4"><div class="faq-a-inner"><p>Tidak. Free Card adalah RM0 untuk semua ahli — tiada tiering, tiada langganan, tiada caj tersembunyi. Setiap ahli mendapat akses penuh yang sama: signal AI, chart beranotasi, prestasi telus, risk toolkit, PWA offline dan notifikasi.</p></div></div>
+      </div>
+      <div class="faq-item glass reveal d4">
+        <button class="faq-q" aria-expanded="false" aria-controls="faq-a5" id="faq-q5"><span>Boleh install sebagai app?</span><span class="ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></span></button>
+        <div class="faq-a" id="faq-a5" role="region" aria-labelledby="faq-q5"><div class="faq-a-inner"><p>Ya. TraderWatch ialah Progressive Web App (PWA). Install terus dari pelayar ke skrin utama anda — ia berfungsi seperti app native, menyokong notifikasi, dan signal serta chart boleh diakses walaupun offline.</p></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 10. FINAL CTA ============ -->
+<section class="section cta-sec" aria-label="Daftar TraderWatch">
+  <div class="aurora" aria-hidden="true">
+    <div class="blob blob-violet blob-1 drift-a"></div>
+    <div class="blob blob-blue blob-2 drift-b"></div>
+    <div class="blob blob-pink blob-3 drift-d"></div>
+  </div>
+  <div class="wrap">
+    <div class="cta-box reveal">
+      <span class="eyebrow">Percuma untuk semua</span>
+      <h2 class="h-sec">Mula trade dengan <span class="grad-text">yakin</span> hari ini.</h2>
+      <p class="lead">Sertai 11 ahli yang trade dengan signal AI, chart beranotasi dan prestasi telus — tanpa bayaran, tanpa tiering.</p>
+      <div class="cta-actions">
+        <a class="btn btn-primary btn-lg" href="https://traderwatch.org/login.html?mode=signup">Mula percuma
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+        </a>
+        <a class="btn btn-glass btn-lg" href="#prestasi">Lihat prestasi</a>
+      </div>
+    </div>
+  </div>
+</section>
+</main>
+
+<!-- ============ 11. FOOTER ============ -->
+<footer class="footer">
+  <div class="wrap">
+    <div class="footer-grid">
+      <div class="f-brand">
+        <a href="#top" class="logo" aria-label="TraderWatch — kembali ke atas"><span class="logo-mark" aria-hidden="true">T</span><span>TraderWatch</span></a>
+        <p class="tagline">Signal forex AI automatik dengan chart beranotasi dan prestasi telus. Percuma untuk semua ahli.</p>
+      </div>
+      <div class="f-col">
+        <h4>Produk</h4>
+        <ul>
+          <li><a href="#signal">Signal AI</a></li>
+          <li><a href="#chart">Chart beranotasi</a></li>
+          <li><a href="#prestasi">Prestasi</a></li>
+          <li><a href="#pricing">Free Card</a></li>
+        </ul>
+      </div>
+      <div class="f-col">
+        <h4>Sumber</h4>
+        <ul>
+          <li><a href="#how">Cara ia berfungsi</a></li>
+          <li><a href="#faq">Learn · FAQ</a></li>
+          <li><a href="https://traderwatch.org/login.html">Log masuk</a></li>
+        </ul>
+      </div>
+      <div class="f-col">
+        <h4>Hubungi</h4>
+        <p class="nl-desc">Dapatkan signal terkini &amp; kemas kini prestasi terus ke Telegram kami.</p>
+        <form class="nl-form" id="nl-form" novalidate>
+          <label for="nl-email" class="sr-only">Alamat emel</label>
+          <input type="email" id="nl-email" name="email" aria-label="Alamat emel anda" required autocomplete="email">
+          <button type="submit" class="btn btn-primary btn-sm">Subscribe</button>
+        </form>
+        <p class="nl-msg" id="nl-msg" role="status"></p>
+        <ul style="margin-top:16px">
+          <li><a href="https://t.me/Traderwatchmembershipbot" target="_blank" rel="noopener">Telegram →</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-disc">
+      <p class="disc"><b>Penafian Risiko:</b> TraderWatch ialah platform pendidikan dan analisis signal. Semua kandungan adalah untuk tujuan pendidikan sahaja — bukan nasihat kewangan, pelaburan atau trading. Trading forex, emas, perak dan kripto melibatkan risiko kerugian yang besar dan mungkin tidak sesuai untuk semua pelabur; anda boleh kehilangan lebih daripada deposit asal. Prestasi lepas tidak menjamin keputusan masa depan. Win rate dan net R yang dipaparkan adalah rekod sebenar tetapi tidak menjanjikan keuntungan. Berdagang hanya dengan wang yang anda mampu rugi. <b>Educational only. Trading involves substantial risk.</b></p>
+      <p class="disc"><b>Penafian Rakan Kongsi:</b> TraderWatch mungkin mempunyai hubungan rakan kongsi atau affiliate dengan broker dan platform tertentu, dan boleh menerima pampasan apabila anda mendaftar melalui pautan kami — tanpa kos tambahan kepada anda. Hubungan ini tidak mempengaruhi penilaian atau signal kami. Sentiasa buat penyelidikan sendiri sebelum memilih broker.</p>
+    </div>
+    <div class="footer-bottom">
+      <span class="cp">© 2026 TraderWatch. Hak cipta terpelihara.</span>
+      <div class="social">
+        <a href="https://t.me/Traderwatchmembershipbot" target="_blank" rel="noopener" aria-label="Telegram TraderWatch"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M21.9 4.6l-3.1 14.6c-.2 1-.8 1.2-1.6.8l-4.5-3.3-2.2 2.1c-.2.2-.4.4-.9.4l.3-4.6L18.3 7c.4-.3-.1-.5-.6-.2L7.4 13.3l-4.4-1.4c-1-.3-1-1 .2-1.4L20.6 3.2c.8-.3 1.5.2 1.3 1.4z"/></svg></a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script>
+(function(){
+  "use strict";
+  var reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  /* ---------- Nav: scroll state + mobile menu ---------- */
+  var nav = document.getElementById("nav");
+  var burger = document.getElementById("nav-burger");
+  var menu = document.getElementById("nav-menu");
+  function closeMenu(){
+    nav.classList.remove("open");
+    burger.setAttribute("aria-expanded","false");
+    burger.setAttribute("aria-label","Buka menu navigasi");
+  }
+  burger.addEventListener("click",function(){
+    var open = nav.classList.toggle("open");
+    burger.setAttribute("aria-expanded", open ? "true" : "false");
+    burger.setAttribute("aria-label", open ? "Tutup menu navigasi" : "Buka menu navigasi");
+  });
+  Array.prototype.forEach.call(menu.querySelectorAll("a"),function(a){
+    a.addEventListener("click",closeMenu);
+  });
+  window.addEventListener("scroll",function(){
+    nav.classList.toggle("scrolled",window.scrollY > 10);
+  },{passive:true});
+
+  /* ---------- Scroll reveal — translate only, content always visible.
+     In-viewport elements reveal immediately; a safety net guarantees
+     nothing stays offset if observers never fire. ---------- */
+  var reveals = Array.prototype.slice.call(document.querySelectorAll(".reveal"));
+  if (!reduce && "IntersectionObserver" in window) {
+    var vh = window.innerHeight || document.documentElement.clientHeight;
+    var io = new IntersectionObserver(function(entries){
+      entries.forEach(function(e){
+        if (e.isIntersecting) { e.target.classList.add("in"); io.unobserve(e.target); }
+      });
+    }, { threshold: 0.1, rootMargin: "0px 0px -30px 0px" });
+    reveals.forEach(function(el){
+      var r = el.getBoundingClientRect();
+      if (r.top < vh && r.bottom > 0) { el.classList.add("in"); }
+      else { io.observe(el); }
+    });
+    setTimeout(function(){
+      reveals.forEach(function(el){ el.classList.add("in"); });
+    }, 2500);
+  } else {
+    reveals.forEach(function(el){ el.classList.add("in"); });
+  }
+
+  /* ---------- Animated counters ---------- */
+  function animateCount(el){
+    var target = parseFloat(el.getAttribute("data-count"));
+    var dec = parseInt(el.getAttribute("data-dec") || "0", 10);
+    var prefix = el.getAttribute("data-prefix") || "";
+    var suffix = el.getAttribute("data-suffix") || "";
+    if (reduce || isNaN(target)) {
+      el.textContent = prefix + target.toFixed(dec) + suffix;
+      return;
+    }
+    var dur = 1400, start = null;
+    function step(ts){
+      if (start === null) start = ts;
+      var p = Math.min((ts - start) / dur, 1);
+      var eased = 1 - Math.pow(1 - p, 3);
+      el.textContent = prefix + (target * eased).toFixed(dec) + suffix;
+      if (p < 1) requestAnimationFrame(step);
+    }
+    el.textContent = prefix + (0).toFixed(dec) + suffix;
+    requestAnimationFrame(step);
+  }
+  var counters = Array.prototype.slice.call(document.querySelectorAll("[data-count]"));
+  if ("IntersectionObserver" in window && !reduce) {
+    var cio = new IntersectionObserver(function(entries){
+      entries.forEach(function(e){
+        if (e.isIntersecting) { animateCount(e.target); cio.unobserve(e.target); }
+      });
+    }, { threshold: 0.4 });
+    counters.forEach(function(el){ cio.observe(el); });
+  }
+  /* Final values already present in markup for no-JS / reduced-motion. */
+
+  /* ---------- FAQ accordion ---------- */
+  Array.prototype.forEach.call(document.querySelectorAll(".faq-q"),function(btn){
+    btn.addEventListener("click",function(){
+      var item = btn.parentElement;
+      var wasOpen = item.classList.contains("open");
+      Array.prototype.forEach.call(document.querySelectorAll(".faq-item.open"),function(o){
+        o.classList.remove("open");
+        o.querySelector(".faq-q").setAttribute("aria-expanded","false");
+      });
+      if (!wasOpen) {
+        item.classList.add("open");
+        btn.setAttribute("aria-expanded","true");
+      }
+    });
+  });
+
+  /* ---------- Newsletter (front-end only; points to Telegram) ---------- */
+  var nlForm = document.getElementById("nl-form");
+  var nlMsg = document.getElementById("nl-msg");
+  nlForm.addEventListener("submit",function(ev){
+    ev.preventDefault();
+    var email = document.getElementById("nl-email").value.trim();
+    if (!email || email.indexOf("@") < 1 || email.indexOf(".") < 0) {
+      nlMsg.textContent = "Sila masukkan alamat emel yang sah.";
+      nlMsg.classList.add("show");
+      return;
+    }
+    nlMsg.innerHTML = 'Terima kasih! Signal terkini tersedia di <a href="https://t.me/Traderwatchmembershipbot" target="_blank" rel="noopener">Telegram kami</a> — sertai sekarang.';
+    nlMsg.classList.add("show");
+    nlForm.reset();
+  });
+})();
+</script>
+</body>
+</html>

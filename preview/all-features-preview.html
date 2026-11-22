@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="ms"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>PREVIEW — Semua cadangan seterusnya</title>
+<style>
+:root{--bg:#0a0e0b;--card:#111612;--card2:#171e18;--line:#222b23;--text:#eef3ee;--muted:#8a978c;--lime:#b7f36b;--green:#b7f36b;--red:#ff777d;--orange:#ffc16b;--blue:#8ab4ff}
+*{box-sizing:border-box}
+body{margin:0;background:#050705;font:15px/1.5 -apple-system,BlinkMacSystemFont,"Inter",sans-serif;color:var(--text)}
+.wrap{max-width:430px;margin:0 auto;background:var(--bg);min-height:100vh;padding:16px}
+h1{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:#5d695f;margin:0 0 16px;font-weight:700}
+h2{font-size:14px;font-weight:850;margin:28px 0 4px;display:flex;align-items:center;gap:8px}
+h2 .tag{font-size:9px;font-weight:800;padding:2px 8px;border-radius:99px;letter-spacing:.05em}
+.tag.hi{background:#b7f36b22;color:var(--lime)}.tag.md{background:#ffc16b18;color:var(--orange)}
+.hint{font-size:11.5px;color:var(--muted);margin:0 0 12px;line-height:1.5}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:14px}
+.lbl{font-size:9px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+input[type=text],input[type=number],textarea{width:100%;background:var(--bg);border:1px solid var(--line);border-radius:11px;color:var(--text);padding:10px 12px;font:inherit;font-size:13px}
+textarea{min-height:64px;resize:vertical}
+.btn{display:inline-block;background:var(--lime);color:#10150b;border:0;border-radius:12px;padding:9px 16px;font-size:13px;font-weight:850;cursor:pointer}
+.btn.ghost{background:var(--card2);color:var(--text);border:1px solid var(--line)}
+.upl{border:1.5px dashed var(--line);border-radius:14px;padding:22px;text-align:center;color:var(--muted);font-size:12px;margin-top:10px}
+.jentry{display:flex;gap:10px;margin-top:12px;padding-top:12px;border-top:1px dashed var(--line)}
+.jentry .thumb{width:74px;height:52px;border-radius:9px;background:linear-gradient(140deg,#1a2418,#0e130f);flex:none;display:grid;place-items:center;font-size:9px;color:var(--muted)}
+.jentry .tx{font-size:11.5px;color:#c9d4c9;line-height:1.5}
+.jentry .meta{font-size:9.5px;color:var(--muted);margin-top:4px}
+/* signal feed */
+.sig{display:flex;align-items:center;gap:10px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:11px 12px;margin-bottom:8px}
+.sig .sd{font-size:11px;font-weight:850;padding:3px 9px;border-radius:9px}
+.sig.buy{color:var(--lime);background:#b7f36b16;border:1px solid #b7f36b40}
+.sig.sell{color:var(--red);background:#ff777d14;border:1px solid #ff777d40}
+.sig .meta{flex:1;font-size:12px}.sig .meta small{display:block;color:var(--muted);font-size:10.5px;margin-top:1px}
+.sig .cta{font-size:11px;font-weight:800;color:var(--lime);background:#b7f36b14;border:1px solid #b7f36b45;border-radius:9px;padding:6px 10px;cursor:pointer}
+.gate{font-size:10px;color:var(--orange);margin-top:2px}
+/* risk calc */
+.rcrow{display:flex;gap:8px;margin:10px 0}
+.rcrow .f{flex:1}
+.rcrow label{display:block;font-size:9px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:4px}
+.rcout{display:flex;gap:8px;margin-top:12px}
+.rcout .o{flex:1;background:var(--card2);border-radius:12px;padding:9px 11px}
+.rcout .o b{font-size:16px;font-variant-numeric:tabular-nums;color:var(--lime)}
+.rcout .o small{display:block;font-size:8.5px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)}
+/* multi-tf */
+.mtf{display:flex;gap:6px;margin-top:10px}
+.tf{flex:1;background:var(--card2);border-radius:11px;padding:8px;text-align:center}
+.tf .k{font-size:9px;color:var(--muted);letter-spacing:.05em}
+.tf .v{font-size:12px;font-weight:850;margin-top:2px}
+.tf .v.b{color:var(--lime)}.tf .v.s{color:var(--red)}.tf .v.h{color:var(--orange)}
+.align{margin-top:8px;font-size:11px;color:var(--muted)}
+.align b{color:var(--text)}
+/* share card */
+.share{background:linear-gradient(150deg,#141c12,var(--card));border:1px solid #b7f36b35;border-radius:20px;padding:16px;position:relative;overflow:hidden}
+.share .hd{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.share .pair{font-size:17px;font-weight:850}
+.share .win{background:var(--lime);color:#10150b;font-size:11px;font-weight:850;border-radius:9px;padding:3px 10px}
+.share .big{font-size:30px;font-weight:900;color:var(--green);font-variant-numeric:tabular-nums}
+.share .sub{font-size:11px;color:var(--muted);margin-bottom:10px}
+.share .row{display:flex;gap:8px}
+.share .row .c{flex:1;background:var(--card2);border-radius:11px;padding:8px 10px;font-size:12px;font-weight:750}
+.share .row .c small{display:block;font-size:8.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
+.share .wm{position:absolute;bottom:10px;right:14px;font-size:9px;color:#5d695f;letter-spacing:.1em;font-weight:800}
+.shbtns{display:flex;gap:8px;margin-top:10px}
+.shbtns .btn{flex:1;text-align:center;padding:9px}
+</style></head><body><div class="wrap">
+<h1>PREVIEW — SEMUA CADANGAN · BELUM COMMIT</h1>
+
+<h2>📓 1. Trade journal <span class="tag hi">NILAI TINGGI</span></h2>
+<p class="hint">Setiap paper trade boleh tampal screenshot chart + nota perasan. Data member, kekal milik member.</p>
+<div class="card">
+  <div class="lbl">Nota trade (XAUUSD SELL · +1.44R)</div>
+  <textarea placeholder="Kenapa masuk? Apa yang betul/salah? Emosi masa hold?">Masuk sebab FVG H1 retest + engulfing M15. Hold sabar walaupun ada news — plan betul. Keluar di TP, tak greedy.</textarea>
+  <div class="upl">📷 + Tampal screenshot chart di sini (sekadar tekan)</div>
+  <button class="btn" style="margin-top:10px">Simpan jurnal</button>
+  <div class="jentry"><div class="thumb">screenshot</div><div><div class="tx">Masuk awal sebab FOMO breakdown — kena SL. Lain kali tunggu retest.</div><div class="meta">BTCUSD · SL · 20 Nov</div></div></div>
+  <div class="jentry"><div class="thumb">screenshot</div><div><div class="tx">FVG retest + engulfing. Sabar hold walaupun news. TP kena. ✓</div><div class="meta">XAUUSD · TP +1.44R · 22 Nov</div></div></div>
+</div>
+
+<h2>📡 4. Signal feed (copy-paper 1 klik) <span class="tag md">JAMBATAN</span></h2>
+<p class="hint">Setup AI berjadual yang lulus semua gate — member boleh paper-kan sendiri. Ada nota disiplin.</p>
+<div class="card">
+  <div class="sig"><span class="sd buy">BUY</span><div class="meta">XAUUSD · M15<small>E 3530.24 · SL 3536.30 · TP 3521.50 · conf 72%</small></div><button class="cta">Paper ▸</button></div>
+  <div class="sig"><span class="sd sell">SELL</span><div class="meta">BTCUSD · H1<small>E 59,335 · SL 59,600 · TP 58,950 · conf 65%</small></div><button class="cta">Paper ▸</button></div>
+  <div class="sig"><span class="sd buy">BUY</span><div class="meta">EURUSD · M15<small>E 1.09612 · SL 1.09481 · TP 1.09872 · conf 58%</small></div><button class="cta">Paper ▸</button></div>
+  <div class="gate">⚠️ Cadangan AI, bukan arahan. Trade atas risiko sendiri — lihat jurnal anda untuk belajar.</div>
+</div>
+
+<h2>🧮 5. Risk calculator (akaun SEBENAR) <span class="tag md">PENDIDIKAN</span></h2>
+<p class="hint">Dalam modal "Take this trade" — member tahu lot sebenar untuk baki sebenar mereka.</p>
+<div class="card">
+  <div class="rcrow">
+    <div class="f"><label>Baki akaun sebenar ($)</label><input type="number" value="850"></div>
+    <div class="f"><label>Risiko</label><input type="text" value="1% ($8.50)" readonly></div>
+  </div>
+  <div class="rcout">
+    <div class="o"><b>0.05</b><small>Lot (virtual)</small></div>
+    <div class="o"><b>0.01</b><small>Lot sebenar 1%</small></div>
+    <div class="o"><b>0.02</b><small>Lot sebenar 2%</small></div>
+  </div>
+  <div style="font-size:10.5px;color:var(--muted);margin-top:9px">Lot sebenar dikira dari jarak SL pada pair ini — panduan sahaja, konfirmasi di MT5 anda.</div>
+</div>
+
+<h2>🔍 6. Multi-TF alignment <span class="tag md">CERDLIK</span></h2>
+<p class="hint">Satu scan — semua TF sekaligus. Nampak alignment tanpa 3 kali scan.</p>
+<div class="card">
+  <div class="lbl">Alignment XAUUSD (vision scan)</div>
+  <div class="mtf">
+    <div class="tf"><div class="k">M5</div><div class="v s">SELL</div></div>
+    <div class="tf"><div class="k">M15</div><div class="v s">SELL</div></div>
+    <div class="tf"><div class="k">H1</div><div class="v h">HOLD</div></div>
+    <div class="tf"><div class="k">H4</div><div class="v h">HOLD</div></div>
+  </div>
+  <div class="align">✓ <b>M5+M15 searah</b> — H1/H4 belum jelas. Ulang H1 nanti untuk pengesahan.</div>
+</div>
+
+<h2>📤 7. Export CSV <span class="tag hi">MUDAH</span></h2>
+<p class="hint">Butang dalam League → trades. Fail turun terus ke phone.</p>
+<div class="card">
+  <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+    <button class="btn">⬇ Export 20 trade (CSV)</button>
+    <span style="font-size:11px;color:var(--muted)">pair,side,entry,sl,tp,R,risk_usd,status,buka,tutup</span>
+  </div>
+</div>
+
+<h2>🖼 10. Share result card <span class="tag md">MARKETING</span></h2>
+<p class="hint">Jana gambar hasil untuk share ke Telegram/Story — watermark TraderWatch.</p>
+<div class="share">
+  <div class="hd"><div class="pair">XAUUSD · SELL</div><span class="win">TP HIT</span></div>
+  <div class="big">+1.44R</div>
+  <div class="sub">+$147.20 · 22 Nov 2026 · TraderWatch AI</div>
+  <div class="row">
+    <div class="c"><small>Entry</small>3530.24</div>
+    <div class="c"><small>SL</small>3536.30</div>
+    <div class="c"><small>TP</small>3521.50</div>
+  </div>
+  <div class="wm">TRADERWATCH · AI ANALYST</div>
+</div>
+<div class="shbtns"><button class="btn ghost">📲 Share</button><button class="btn ghost">⬇ Simpan PNG</button></div>
+
+<div class="divider" style="height:1px;background:var(--line);margin:28px 0 20px"></div>
+<div class="card" style="font-size:11.5px;color:var(--muted);line-height:1.65">
+<b style="color:var(--text)">Susunan cadangan saya:</b><br>
+1️⃣ <b>Push + Recap</b> (preview lain, dah lulus?) — retensi terbesar<br>
+2️⃣ <b>Trade journal</b> — data milik member, tiada pesaing buat baik<br>
+3️⃣ <b>Signal feed</b> — jambatan Analyst↔League, gagal-selamat<br>
+4️⃣ <b>Risk calc + CSV</b> — kecil, cepat, member serius suka<br>
+5️⃣ <b>Share card</b> — growth percuma<br><br>
+Widget home screen (#8) perlu native — skip buat sementara. Theme auto (#9) kecil, boleh masuk mana-mana update.
+</div>
+</div></body></html>

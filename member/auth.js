@@ -230,6 +230,20 @@
       catch (e) { return Promise.resolve(); }
     };
 
+    // Live update: app.js panggil setiap 60s — segar semula senarai signal
+    // RPC tanpa reload. ready() mencetus 'tw-auth-ready' → UI render semula.
+    auth.refreshSignals = function () {
+      if (!auth.isMember) return Promise.resolve();
+      return sb.rpc('get_signals')
+        .then(function (r) {
+          if (r.error) throw r.error;
+          auth.signals = r.data || [];
+          writeCache();
+          ready();
+        })
+        .catch(function () { /* kekal data lama bila gagal */ });
+    };
+
     // Tiada session: redirect ke login SEKALI sahaja. Jika baru datang dari
     // login (atau storage disekat), papar diagnostik — jangan loop.
     function noSession() {

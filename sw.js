@@ -3,7 +3,7 @@
  * navigasi network-first fallback index.html; /api/* dan /member/* diurus
  * oleh service worker masing-masing (network sahaja di sini).
  */
-const VERSION = 'tw-landing-v1';
+const VERSION = 'tw-landing-v2';
 const SHELL_CACHE = VERSION + '-shell';
 const SHELL_ASSETS = [
   './',

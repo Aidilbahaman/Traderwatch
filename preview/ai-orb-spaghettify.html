@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="ms"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>PREVIEW — V5 · Electron Spaghettification</title>
+<style>
+:root{--bg:#0a0e0b;--card:#111612;--card2:#171e18;--line:#222b23;--text:#eef3ee;--muted:#8a978c;--lime:#b7f36b;--green:#b7f36b;--red:#ff777d;--orange:#ffc16b;--blue:#8ab4ff;--violet:#b18cff}
+*{box-sizing:border-box}
+body{margin:0;background:#050705;font:15px/1.5 -apple-system,BlinkMacSystemFont,"Inter",sans-serif;color:var(--text)}
+.wrap{max-width:430px;margin:0 auto;background:var(--bg);min-height:100vh;padding:16px 16px 40px}
+h1{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:#5d695f;margin:0 0 4px;font-weight:700}
+.sub{font-size:12px;color:var(--muted);margin:0 0 16px}
+h2{font-size:13px;font-weight:850;margin:24px 0 4px}
+.hint{font-size:11px;color:var(--muted);margin:0 0 9px;line-height:1.45}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:14px;display:grid;place-items:center;overflow:hidden}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ============ MAIN ORB ============ */
+.hole{position:relative;width:210px;height:210px;display:grid;place-items:center}
+.hole .core{width:54px;height:54px;border-radius:50%;background:#000;z-index:6;
+ box-shadow:0 0 0 2px #b7f36ba6,0 0 30px 8px #b7f36b70,0 0 86px 22px #b7f36b2b}
+.hole .corona{position:absolute;width:112px;height:112px;border-radius:50%;
+ background:conic-gradient(from 0deg,#b7f36b00 0deg,#b7f36b66 12deg,#b7f36b00 26deg,#b7f36b00 60deg,#8ab4ff55 74deg,#b7f36b00 88deg,#b7f36b00 140deg,#ffc16b55 154deg,#b7f36b00 168deg,#b7f36b00 250deg,#b7f36b77 264deg,#b7f36b00 280deg,#b7f36b00 360deg);
+ filter:blur(7px);animation:spin 8s linear infinite;opacity:.9;will-change:transform}
+.hole .photon{position:absolute;width:70px;height:70px;border-radius:50%;border:2px solid #d6ff9a;filter:blur(1.6px);opacity:.6;animation:pulse 2.8s ease-in-out infinite;will-change:transform,opacity}
+@keyframes pulse{0%,100%{transform:scale(.96);opacity:.45}50%{transform:scale(1.06);opacity:.75}}
+.hole .flare{position:absolute;width:2px;height:26px;background:linear-gradient(to top,#b7f36b00,#d6ff9acc);animation:flare 3.6s ease-out infinite;transform-origin:bottom}
+@keyframes flare{0%,80%{opacity:0;transform:scaleY(.2)}86%{opacity:.9;transform:scaleY(1.1)}100%{opacity:0;transform:scaleY(1.5)}}
+
+/* ---------- INBOUND STREAK (GPU: transform sahaja) ---------- */
+/* Setiap streak ialah bekas penuh 200px; bar dalam di-skala X (panjang) & Y
+   (tebal) dengan translateX sahaja — tiada layout reflow setiap frame. */
+.streak{position:absolute;left:50%;top:50%;width:200px;height:8px;transform-origin:0 50%;
+ margin-top:-4px;pointer-events:none;will-change:auto}
+.trail{position:absolute;top:50%;right:0;height:3px;width:100%;
+ transform-origin:100% 50%;border-radius:99px;
+ animation:fall 2.6s cubic-bezier(.42,0,.86,.28) infinite;
+ background:linear-gradient(to left,rgba(255,255,255,0),rgba(183,243,107,.9));
+ will-change:transform,opacity;backface-visibility:hidden}
+@keyframes fall{
+ 0%{transform:translate3d(0,-50%,0) scaleX(.06) scaleY(.5);opacity:0}
+ 10%{opacity:1}
+ 40%{transform:translate3d(-26px,-50%,0) scaleX(.16) scaleY(.85);opacity:1}
+ 68%{transform:translate3d(-52px,-50%,0) scaleX(.42) scaleY(.62);opacity:1}
+ 88%{transform:translate3d(-70px,-50%,0) scaleX(.68) scaleY(.36);opacity:.85}
+ 97%{transform:translate3d(-80px,-50%,0) scaleX(.84) scaleY(.16);opacity:.55}
+ 100%{transform:translate3d(-86px,-50%,0) scaleX(.9) scaleY(.05);opacity:0}
+}
+/* Kepala terang: transform sahaja, tiada shadow animasi */
+.trail::after{content:"";position:absolute;left:0;top:50%;width:7px;height:7px;margin:-3.5px 0 0 0;
+ border-radius:50%;background:#fff;box-shadow:0 0 10px #d6ff9a;
+ animation:head 2.6s cubic-bezier(.42,0,.86,.28) infinite;will-change:opacity,transform}
+@keyframes head{
+ 0%{opacity:0;transform:scale(.5)}
+ 12%{opacity:1;transform:scale(1)}
+ 76%{opacity:1;transform:scale(.92)}
+ 95%{opacity:.75;transform:scale(.5)}
+ 100%{opacity:0;transform:scale(.25)}
+}
+.trail.b{background:linear-gradient(to left,rgba(255,255,255,0),rgba(138,180,255,.9))}
+.trail.b::after{box-shadow:0 0 10px #b9d2ff}
+.trail.o{background:linear-gradient(to left,rgba(255,255,255,0),rgba(255,193,107,.9))}
+.trail.o::after{box-shadow:0 0 10px #ffe0b8}
+.trail.v{background:linear-gradient(to left,rgba(255,255,255,0),rgba(177,140,255,.9))}
+.trail.v::after{box-shadow:0 0 10px #ded0ff}
+/* absorption flash at core */
+.absorb{position:absolute;left:50%;top:50%;width:70px;height:70px;margin:-35px 0 0 -35px;border-radius:50%;
+ background:radial-gradient(circle,#b7f36b66,transparent 62%);opacity:0;animation:abs 2.6s ease-out infinite;pointer-events:none}
+@keyframes abs{0%,78%{opacity:0;transform:scale(.6)}88%{opacity:.75;transform:scale(1)}100%{opacity:0;transform:scale(1.45)}}
+
+/* ============ MINI HEADER ============ */
+.hdr{display:flex;align-items:center;gap:11px;background:var(--card);border:1px solid var(--line);border-radius:18px;padding:13px 14px}
+.mini{position:relative;width:46px;height:46px;display:grid;place-items:center;flex:none;overflow:hidden;border-radius:50%}
+.mini .mc{width:13px;height:13px;border-radius:50%;background:#000;z-index:4;
+ box-shadow:0 0 0 1.5px #b7f36baa,0 0 10px 2px #b7f36b66,0 0 24px 5px #b7f36b1c}
+.mini .ms{position:absolute;left:50%;top:50%;width:46px;height:5px;transform-origin:0 50%;margin-top:-2.5px}
+.mini .mt{position:absolute;top:50%;right:0;height:2px;width:100%;transform-origin:100% 50%;border-radius:99px;
+ background:linear-gradient(to left,rgba(255,255,255,0),rgba(183,243,107,.95));will-change:transform,opacity;
+ animation:mfall 2.4s cubic-bezier(.42,0,.86,.28) infinite}
+@keyframes mfall{0%{transform:translate3d(0,-50%,0) scaleX(.1) scaleY(.6);opacity:0}
+ 12%{opacity:1}
+ 60%{transform:translate3d(-9px,-50%,0) scaleX(.4) scaleY(.8);opacity:1}
+ 90%{transform:translate3d(-16px,-50%,0) scaleX(.8) scaleY(.35);opacity:.8}
+ 100%{transform:translate3d(-19px,-50%,0) scaleX(.9) scaleY(.1);opacity:0}}
+.mini .mt::after{content:"";position:absolute;left:0;top:50%;width:3.4px;height:3.4px;margin-top:-1.7px;border-radius:50%;background:#fff;box-shadow:0 0 5px #d6ff9a}
+.hdr .tx{flex:1;min-width:0}
+.hdr .tx b{display:block;font-size:14px;font-weight:850}
+.hdr .tx small{font-size:11px;color:var(--muted)}
+.hdr .st{margin-left:auto;font-size:9.5px;font-weight:800;color:var(--lime);background:#b7f36b14;border:1px solid #b7f36b3d;border-radius:99px;padding:3px 9px;flex:none}
+
+.note{font-size:11.5px;color:var(--muted);line-height:1.65;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px;margin-top:16px}
+.note b{color:var(--text)}
+@media(prefers-reduced-motion:reduce){.hole *,.mini *{animation:none !important}}
+</style></head><body><div class="wrap">
+<h1>PREVIEW — V5 · SPAGHETTIFICATION</h1>
+<p class="sub">Elektron masuk <b>lurus</b> dari luar, stretch memanjang & menipis, hilang di teras.</p>
+
+<h2>Saiz penuh</h2>
+<div class="card" style="padding:16px">
+  <div class="hole" id="hole">
+    <div class="corona"></div>
+    <div class="photon"></div>
+    <div class="absorb"></div>
+    <div class="core"></div>
+  </div>
+</div>
+
+<h2>Dalam konteks — header League</h2>
+<div class="hdr">
+  <div class="mini" id="mini">
+    <div class="mc"></div>
+  </div>
+  <div class="tx"><b>Enjin AI aktif</b><small>12 pair · data disedut masuk</small></div>
+  <div class="st">LIVE</div>
+</div>
+
+<div class="note">
+<b>Gerakan:</b> 12 arah sekeliling teras. Setiap garis mula sebagai <b>titik kecil jauh di luar</b>, memecut masuk <b>lurus</b> ke arah teras sambil <b>memanjang</b> (10px→92px) dan <b>menipis</b> (2.6px→0.2px) — kesan <i>spaghettification</i> graviti sebenar. Kepala terang di hujung, ekor pudar di belakang. Bila sampai teras: <b>kilat penyerapan</b>.<br><br>
+<b>Warna:</b> lime dominan, biru/oren/ungu sebagai aksen variasi.
+</div>
+</div>
+<script>
+(function(){
+  var host=document.getElementById('hole');
+  var N=12, cols=['','b','','o','','v','','b','','o','',''];
+  for(var i=0;i<N;i++){
+    var ang=(360/N)*i + 8;
+    var st=document.createElement('div');
+    st.className='streak';
+    st.style.transform='rotate('+ang+'deg)';
+    var tr=document.createElement('div');
+    tr.className='trail '+(cols[i]||'');
+    tr.style.animationDelay=(i*0.22)+'s';
+    var head=document.createElement('div'); // ::after handles head; nothing needed
+    st.appendChild(tr);
+    host.appendChild(st);
+  }
+  // mini: 5 arah
+  var m=document.getElementById('mini');
+  for(var j=0;j<5;j++){
+    var s=document.createElement('div'); s.className='ms';
+    s.style.transform='rotate('+((360/5)*j+14)+'deg)';
+    var t=document.createElement('div'); t.className='mt';
+    t.style.animationDelay=(j*0.42)+'s';
+    s.appendChild(t); m.appendChild(s);
+  }
+})();
+</script>
+</div></body></html>

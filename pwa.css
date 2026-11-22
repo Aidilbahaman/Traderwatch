@@ -1167,3 +1167,117 @@ main {
   main { scroll-behavior: auto; }
   .screen.active { animation: none; }
 }
+/* ---------- Liveness layer (2026-11-20): terminal bernafas ----------
+   Motion menyampaikan data live: glow ambien, denyut LIVE, flash angka,
+   entrance berperingkat, sweep imbasan. Transform/opacity sahaja (GPU);
+   blok prefers-reduced-motion melumpuhkan semuanya automatik. */
+
+.app-frame { isolation: isolate; }
+.app-frame::before {
+  content: "";
+  position: fixed;
+  inset: -20%;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(600px 420px at 15% 10%, rgba(198, 243, 107, 0.055), transparent 60%),
+    radial-gradient(720px 520px at 85% 90%, rgba(198, 243, 107, 0.04), transparent 60%);
+  animation: ambient-drift 36s ease-in-out infinite alternate;
+}
+@keyframes ambient-drift {
+  from { transform: translate3d(-2%, -1%, 0) scale(1); }
+  to { transform: translate3d(2%, 2%, 0) scale(1.06); }
+}
+
+/* LIVE pill: ring denyut + glow bila data baru tiba */
+.net-dot { position: relative; }
+.net-dot::after {
+  content: "";
+  position: absolute;
+  inset: -3px;
+  border-radius: 50%;
+  border: 1px solid var(--lime);
+  opacity: 0;
+  animation: dot-ring 2.4s ease-out infinite;
+}
+.net-pill.offline .net-dot::after { animation: none; }
+@keyframes dot-ring {
+  0% { transform: scale(0.6); opacity: 0.7; }
+  70%, 100% { transform: scale(1.9); opacity: 0; }
+}
+.net-pill.fresh { animation: pill-fresh 0.9s ease-out; }
+@keyframes pill-fresh {
+  0% { box-shadow: 0 0 0 0 rgba(198, 243, 107, 0.45); border-color: var(--lime); }
+  100% { box-shadow: 0 0 0 12px rgba(198, 243, 107, 0); }
+}
+
+/* Jam live + usia data di app bar */
+.appbar-clock {
+  font-size: 11px;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+.appbar-clock b { color: var(--ink); font-weight: 600; }
+@media (max-width: 430px) { .appbar-clock .clock-age { display: none; } }
+
+/* Flash perubahan angka statistik */
+.flash-up { animation: flash-up 0.9s ease-out; }
+.flash-down { animation: flash-down 0.9s ease-out; }
+@keyframes flash-up {
+  0% { color: var(--lime); text-shadow: 0 0 14px rgba(198, 243, 107, 0.55); }
+  100% { text-shadow: none; }
+}
+@keyframes flash-down {
+  0% { color: var(--red); text-shadow: 0 0 14px rgba(255, 129, 125, 0.5); }
+  100% { text-shadow: none; }
+}
+
+/* Entrance berperingkat (baris keputusan) */
+.reveal {
+  animation: reveal-in 0.4s cubic-bezier(0.2, 0.7, 0.3, 1) both;
+  animation-delay: calc(var(--i, 0) * 70ms);
+}
+@keyframes reveal-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: none; }
+}
+
+/* Signal baru tiba: ring highlight pada hero card */
+.hero-card.arrived { animation: arrived-ring 1.2s ease-out; }
+@keyframes arrived-ring {
+  0% { box-shadow: 0 0 0 0 rgba(198, 243, 107, 0.4); border-color: var(--lime); }
+  100% { box-shadow: 0 0 0 16px rgba(198, 243, 107, 0); }
+}
+
+/* Sweep imbasan enjin pada kepala hero card */
+.hero-card .card-head { position: relative; overflow: hidden; }
+.hero-card .card-head::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 40%;
+  background: linear-gradient(90deg, transparent, rgba(198, 243, 107, 0.08), transparent);
+  transform: translateX(-110%);
+  animation: scan-sweep 3.4s ease-in-out infinite;
+  pointer-events: none;
+}
+@keyframes scan-sweep {
+  0% { transform: translateX(-110%); }
+  60%, 100% { transform: translateX(260%); }
+}
+
+/* Hover lift — peranti pointer halus sahaja */
+@media (hover: hover) and (pointer: fine) {
+  .card {
+    transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
+  }
+  .card:hover {
+    transform: translateY(-2px);
+    border-color: rgba(198, 243, 107, 0.35);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.28);
+  }
+}

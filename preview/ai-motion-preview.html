@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="ms"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>PREVIEW — AI Motion</title>
+<style>
+:root{--bg:#0a0e0b;--card:#111612;--card2:#171e18;--line:#222b23;--text:#eef3ee;--muted:#8a978c;--lime:#b7f36b;--green:#b7f36b;--red:#ff777d;--orange:#ffc16b;--blue:#8ab4ff}
+*{box-sizing:border-box}
+body{margin:0;background:#050705;font:15px/1.5 -apple-system,BlinkMacSystemFont,"Inter",sans-serif;color:var(--text)}
+.wrap{max-width:430px;margin:0 auto;background:var(--bg);min-height:100vh;padding:16px 16px 40px}
+h1{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:#5d695f;margin:0 0 4px;font-weight:700}
+.sub{font-size:12px;color:var(--muted);margin:0 0 18px}
+h2{font-size:14px;font-weight:850;margin:26px 0 3px}
+.hint{font-size:11.5px;color:var(--muted);margin:0 0 11px;line-height:1.5}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:14px}
+.lbl{font-size:9px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-weight:750}
+
+/* ============ 1. AI ORB (bernafas) ============ */
+.orbwrap{display:grid;place-items:center;padding:24px 0 18px;position:relative}
+.orb{position:relative;width:118px;height:118px;border-radius:50%;
+ background:radial-gradient(circle at 35% 30%,#e6ffb8,#b7f36b 42%,#5f9c22 78%,#1b2b10);
+ box-shadow:0 0 34px #b7f36b30,inset 0 0 30px #ffffff22;
+ animation:breathe 4.2s ease-in-out infinite}
+@keyframes breathe{0%,100%{transform:scale(1);box-shadow:0 0 28px #b7f36b26,inset 0 0 26px #ffffff1c}50%{transform:scale(1.06);box-shadow:0 0 48px #b7f36b55,inset 0 0 34px #ffffff26}}
+.orb::after{content:"";position:absolute;inset:-13px;border-radius:50%;border:1px solid #b7f36b40;animation:ring 4.2s ease-in-out infinite}
+.orb::before{content:"";position:absolute;inset:-27px;border-radius:50%;border:1px solid #b7f36b1f;animation:ring 4.2s .5s ease-in-out infinite}
+@keyframes ring{0%,100%{transform:scale(.96);opacity:.45}50%{transform:scale(1.06);opacity:.9}}
+.orb .zz{position:absolute;inset:0;display:grid;place-items:center;font-size:11px;font-weight:900;color:#10150b;letter-spacing:.02em}
+.orbmsg{text-align:center;margin-top:14px;font-size:12.5px;font-weight:700;color:var(--lime);min-height:20px}
+.orbmsg span{color:var(--muted);font-weight:600;font-size:11px;display:block;margin-top:2px}
+/* thinking dots */
+.tdots{display:inline-flex;gap:3px;margin-left:5px;vertical-align:middle}
+.tdots i{width:4px;height:4px;border-radius:50%;background:var(--lime);animation:td 1.3s infinite}
+.tdots i:nth-child(2){animation-delay:.18s}.tdots i:nth-child(3){animation-delay:.36s}
+@keyframes td{0%,60%,100%{opacity:.25;transform:translateY(0)}30%{opacity:1;transform:translateY(-3px)}}
+
+/* ============ 2. SCAN RING (analisis berjalan) ============ */
+.scan{position:relative;height:132px;border-radius:16px;background:#0c110d;overflow:hidden;border:1px solid var(--line)}
+.scan .sweep{position:absolute;inset:0;background:linear-gradient(90deg,transparent,#b7f36b00 55%,#b7f36b2e);width:45%;animation:sweep 2.2s linear infinite}
+@keyframes sweep{0%{transform:translateX(-100%)}100%{transform:translateX(240%)}}
+.scan .grid{position:absolute;inset:0;background-image:linear-gradient(#222b2355 1px,transparent 1px),linear-gradient(90deg,#222b2355 1px,transparent 1px);background-size:26px 26px;opacity:.5}
+.scan .bars{position:absolute;inset:auto 0 0 0;height:70px;display:flex;align-items:flex-end;gap:2px;padding:0 6px}
+.scan .bars i{flex:1;background:#b7f36b55;border-radius:1px;animation:barGrow .6s ease both}
+@keyframes barGrow{from{transform:scaleY(.2);opacity:0}to{transform:scaleY(1);opacity:1}}
+.scan .tagline{position:absolute;top:11px;left:12px;font-size:10px;font-weight:850;letter-spacing:.06em;color:var(--lime);text-transform:uppercase;display:flex;align-items:center;gap:6px}
+.scan .tagline .dot{width:6px;height:6px;border-radius:50%;background:var(--lime);animation:blink 1.1s infinite}
+@keyframes blink{0%,100%{opacity:.3}50%{opacity:1}}
+.scan .steps{position:absolute;bottom:9px;left:12px;right:12px;font-size:10px;color:var(--muted);font-variant-numeric:tabular-nums}
+.scan .steps b{color:var(--lime)}
+
+/* ============ 3. VERDICT REVEAL ============ */
+.reveal{position:relative;border-radius:18px;background:linear-gradient(150deg,#16200f,#111612);border:1px solid #b7f36b40;padding:16px;overflow:hidden}
+.reveal::after{content:"";position:absolute;top:0;left:-40%;width:35%;height:100%;background:linear-gradient(105deg,transparent,#ffffff1f,transparent);animation:shineOnce 5.5s ease-in-out infinite}
+@keyframes shineOnce{0%,80%{left:-40%}95%,100%{left:120%}}
+.reveal .top{display:flex;align-items:center;gap:8px;margin-bottom:12px}
+.reveal .vbig{font-size:34px;font-weight:900;letter-spacing:-.03em;color:var(--red);animation:popIn .5s cubic-bezier(.2,1.5,.4,1) both}
+@keyframes popIn{from{opacity:0;transform:scale(.7)}to{opacity:1;transform:scale(1)}}
+.reveal .conf{margin-left:auto;text-align:right}
+.reveal .conf b{font-size:17px;font-weight:900;color:var(--lime);font-variant-numeric:tabular-nums}
+.reveal .conf small{display:block;font-size:8.5px;color:var(--muted);letter-spacing:.06em}
+.reveal .ringwrap{position:relative;width:54px;height:54px;flex:none}
+.reveal .ringwrap svg{transform:rotate(-90deg)}
+.reveal .ringwrap svg circle{fill:none;stroke-width:4;stroke-linecap:round}
+.reveal .ringwrap .bg{stroke:#222b23}
+.reveal .ringwrap .fg{stroke:var(--lime);stroke-dasharray:138;stroke-dashoffset:138;animation:drawRing 1.3s .25s cubic-bezier(.3,.8,.3,1) forwards}
+@keyframes drawRing{to{stroke-dashoffset:38}}
+.reveal .levels{display:flex;gap:6px}
+.reveal .levels .c{flex:1;background:var(--card2);border-radius:11px;padding:8px;opacity:0;animation:riseUp .45s ease forwards}
+.reveal .levels .c:nth-child(1){animation-delay:.35s}
+.reveal .levels .c:nth-child(2){animation-delay:.48s}
+.reveal .levels .c:nth-child(3){animation-delay:.61s}
+@keyframes riseUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.reveal .levels small{display:block;font-size:8px;letter-spacing:.06em;color:var(--muted);text-transform:uppercase}
+.reveal .levels b{font-size:13.5px;font-variant-numeric:tabular-nums}
+
+/* ============ 4. LIVE TICKER TAPE ============ */
+.tape{overflow:hidden;background:var(--card2);border:1px solid var(--line);border-radius:12px;padding:8px 0;position:relative}
+.tape .track{display:flex;gap:26px;white-space:nowrap;animation:scrollTape 22s linear infinite;width:max-content}
+@keyframes scrollTape{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+.tape .it{font-size:11.5px;font-weight:750;font-variant-numeric:tabular-nums;display:flex;gap:6px;align-items:center}
+.tape .it .u{color:var(--green)}.tape .it .d{color:var(--red)}
+
+/* ============ 5. PULSE BEACON ============ */
+.beacon{display:flex;align-items:center;gap:10px;background:var(--card2);border:1px solid var(--line);border-radius:14px;padding:11px 13px;font-size:12px}
+.beacon .bc{position:relative;width:10px;height:10px;flex:none}
+.beacon .bc i{position:absolute;inset:0;border-radius:50%;background:var(--blue)}
+.beacon .bc::after{content:"";position:absolute;inset:0;border-radius:50%;border:1px solid var(--blue);animation:beacon 2s ease-out infinite}
+@keyframes beacon{0%{transform:scale(1);opacity:.9}100%{transform:scale(3.2);opacity:0}}
+.beacon .tx{color:var(--muted)}.beacon .tx b{color:var(--text)}
+</style></head><body><div class="wrap">
+<h1>PREVIEW — AI MOTION · BELUM COMMIT</h1>
+<p class="sub">5 idea gerakan AI. Semua auto-berjalan — perhatikan sahaja.</p>
+
+<h2>1️⃣ AI Orb — "bernafas"</h2>
+<p class="hint">Nadi AI yang sentiasa hidup. Boleh letak di header League / Analyst sebagai status AI.</p>
+<div class="card"><div class="orbwrap">
+  <div class="orb"><div class="zz">AI</div></div>
+</div>
+<div class="orbmsg">AI memantau pasaran<span>12 pair · dikemas kini setiap 5 minit</span></div>
+</div>
+
+<h2>2️⃣ Scan ring — analisis berjalan</h2>
+<p class="hint">Masa AI scan: sapuan cahaya + bar terbentuk + langkah bergerak.</p>
+<div class="card"><div class="scan">
+  <div class="grid"></div>
+  <div class="sweep"></div>
+  <div class="tagline"><span class="dot"></span>AI SCANNING</div>
+  <div class="bars" id="scanbars"></div>
+  <div class="steps">Membaca struktur <b id="scanstep">M15</b> · RSI · ATR<span class="tdots"><i></i><i></i><i></i></span></div>
+</div></div>
+
+<h2>3️⃣ Verdict reveal</h2>
+<p class="hint">Bila verdict siap: SELL pop-in, ring conf dilukis, 3 level naik bergiliran.</p>
+<div class="card"><div class="reveal" id="rev">
+  <div class="top">
+    <div class="ringwrap"><svg width="54" height="54" viewBox="0 0 54 54"><circle class="bg" cx="27" cy="27" r="22"/><circle class="fg" cx="27" cy="27" r="22"/></svg></div>
+    <div class="vbig" id="vbig">SELL</div>
+    <div class="conf"><b>72%</b><small>CONF</small></div>
+  </div>
+  <div class="levels">
+    <div class="c"><small>Entry</small><b style="color:var(--blue)">3530.24</b></div>
+    <div class="c"><small>SL</small><b style="color:var(--red)">3536.30</b></div>
+    <div class="c"><small>TP</small><b style="color:var(--lime)">3521.50</b></div>
+  </div>
+</div></div>
+
+<h2>4️⃣ Live ticker tape</h2>
+<p class="hint">Reben harga berjalan tanpa henti — rasa pasaran bergerak walaupun tak buka pair.</p>
+<div class="card" style="padding:10px"><div class="tape"><div class="track" id="tape"></div></div></div>
+
+<h2>5️⃣ Pulse beacon — "AI online"</h2>
+<p class="hint">Isyarat halus bahawa enjin AI sedang hidup, bukan app mati.</p>
+<div class="card"><div class="beacon"><div class="bc"><i></i></div><div class="tx"><b>Enjin AI aktif</b> · verdict terakhir 2 min lalu</div></div></div>
+
+<div class="card" style="margin-top:16px;font-size:11.5px;color:var(--muted);line-height:1.6">
+<b style="color:var(--text)">Cadangan saya:</b> <b>1 AI Orb</b> (status AI sentiasa nampak) + <b>3 Verdict reveal</b> (momen keputusan buat app rasa hidup) + <b>5 Pulse beacon</b> (maklum enjin hidup). Tiga ini ringan, tidak mengganggu, dan semuanya menyampaikan satu mesej: <i>AI sedang bekerja untuk anda</i>.
+</div>
+</div>
+<script>
+/* scan bars */
+(function(){var c=document.getElementById('scanbars');for(var i=0;i<22;i++){(function(i){var b=document.createElement('i');
+ b.style.height=(14+Math.random()*54)+'px';b.style.animationDelay=(i*45)+'ms';c.appendChild(b)})(i)}})();
+/* scan step cycle */
+(function(){var steps=['M15','RSI 52','ATR 26','EMA 20','FVG'];var i=0;setInterval(function(){i=(i+1)%steps.length;
+ var el=document.getElementById('scanstep');if(el)el.textContent=steps[i]},1400)})();
+/* verdict re-play every 6.5s */
+(function(){var v=document.getElementById('vbig');var seq=['SELL','BUY','HOLD'];
+ var i=0;setInterval(function(){i=(i+1)%seq.length;v.textContent=seq[i];
+ v.style.color=i===0?'#ff777d':i===1?'#b7f36b':'#ffc16b';
+ v.style.animation='none';void v.offsetWidth;v.style.animation='popIn .5s cubic-bezier(.2,1.5,.4,1) both'},6500)})();
+/* ticker */
+(function(){var t=document.getElementById('tape');
+ var data=[['XAUUSD','3534.88','+0.42',1],['BTCUSD','59,139','+5.28',1],['XAGUSD','41.181','−1.83',0],['EURUSD','1.0965','−0.12',0],['GBPUSD','1.3412','+0.31',1],['USDJPY','157.42','−0.28',0]];
+ var html='';for(var k=0;k<2;k++){data.forEach(function(d){html+='<span class="it">'+d[0]+' <b>'+d[1]+'</b> <span class="'+(d[3]?'u':'d')+'">'+d[2]+'%</span></span>'})}
+ t.innerHTML=html})();
+</script>
+</div></body></html>

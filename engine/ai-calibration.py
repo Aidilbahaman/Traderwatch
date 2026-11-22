@@ -103,9 +103,10 @@ def build_rows(pair, bars):
     closes = [b[3] for b in bars]
     e20, e50 = M.ema(closes, 20), M.ema(closes, 50)
     rsi, atr = M.rsi_s(closes), M.atr_s(bars)
+    ctx = M.build_v2_ctx(pair, bars, None)  # v2 features, R-mean neutral offline
     rows = []
     for i in range(60, len(bars) - 1):
-        f = M.feature_row(pair, bars, e20, e50, rsi, atr, i)
+        f = M.feature_row_v2(pair, bars, e20, e50, rsi, atr, i, ctx)
         if f is None:
             continue
         sl_b, tp_b = T.levels(pair, "BUY", closes[i], atr[i])

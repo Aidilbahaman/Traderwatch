@@ -256,7 +256,8 @@ def fetch_all_member_targets():
 
 
 def fetch_member_targets():
-    return sb_request("profiles?select=name,telegram_chat_id&plan=in.(pro,max)"
+    # Single tier: semua ahli Free yang link Telegram (tiada lagi pro/max).
+    return sb_request("profiles?select=name,telegram_chat_id"
                       "&telegram_chat_id=not.is.null")
 
 
@@ -2909,7 +2910,7 @@ async def notify_cmd(update: Update, ctx):
     msg = ctx.message.text.split(None, 1)[1].strip()
     try:
         rows = sb_request("profiles?select=telegram_chat_id,name"
-                          "&plan=in.(pro,max)&telegram_chat_id=not.is.null")
+                          "&telegram_chat_id=not.is.null")
     except Exception as ex:
         return await say(update.effective_chat,
                          "\u274c Gagal baca senarai member: %s" % e(str(ex)[:120]))

@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="ms"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>PREVIEW — Ganti Weekly Recap</title>
+<style>
+:root{--bg:#0a0e0b;--card:#111612;--card2:#171e18;--line:#222b23;--text:#eef3ee;--muted:#8a978c;--lime:#b7f36b;--green:#b7f36b;--red:#ff777d;--orange:#ffc16b;--blue:#8ab4ff}
+*{box-sizing:border-box}
+body{margin:0;background:#050705;font:15px/1.5 -apple-system,BlinkMacSystemFont,"Inter",sans-serif;color:var(--text)}
+.wrap{max-width:430px;margin:0 auto;background:var(--bg);min-height:100vh;padding:16px}
+h1{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:#5d695f;margin:0 0 4px;font-weight:700}
+.sub{font-size:12px;color:var(--muted);margin:0 0 18px}
+h2{font-size:14px;font-weight:850;margin:26px 0 4px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.badge{font-size:9px;font-weight:800;padding:2px 8px;border-radius:99px;background:#b7f36b20;color:var(--lime);letter-spacing:.05em}
+.hint{font-size:11.5px;color:var(--muted);margin:0 0 12px;line-height:1.5}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:14px}
+.lbl{font-size:9px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-weight:750}
+/* ===== A: SETUP HARI INI ===== */
+.setup{background:linear-gradient(150deg,#16200f,#111612);border:1px solid #b7f36b40;border-radius:20px;padding:15px;position:relative;overflow:hidden}
+.setup::before{content:"";position:absolute;top:-60px;right:-40px;width:160px;height:160px;border-radius:50%;background:radial-gradient(circle,#b7f36b18,transparent 70%)}
+.setup .hd{display:flex;align-items:center;gap:8px;margin-bottom:11px;position:relative}
+.setup .hd .t{font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--lime);font-weight:850}
+.setup .hd .tf{margin-left:auto;font-size:9px;font-weight:800;background:#b7f36b1a;color:var(--lime);border:1px solid #b7f36b40;border-radius:7px;padding:2px 7px}
+.setup .pair{display:flex;align-items:center;gap:9px;margin-bottom:10px;position:relative}
+.setup .pair .nm{font-size:20px;font-weight:900;letter-spacing:-.02em}
+.setup .sd{font-size:10px;font-weight:850;padding:3px 9px;border-radius:8px}
+.sd.buy{color:var(--lime);background:#b7f36b16;border:1px solid #b7f36b45}
+.sd.sell{color:var(--red);background:#ff777d14;border:1px solid #ff777d45}
+.setup .lv{display:flex;gap:6px;margin-bottom:11px;position:relative}
+.setup .lv .c{flex:1;background:var(--card2);border-radius:11px;padding:8px 9px}
+.setup .lv .c small{display:block;font-size:8px;letter-spacing:.06em;color:var(--muted);text-transform:uppercase}
+.setup .lv .c b{font-size:14px;font-variant-numeric:tabular-nums}
+.setup .lv .e b{color:var(--blue)}.setup .lv .s b{color:var(--red)}.setup .lv .t b{color:var(--lime)}
+.setup .ft{display:flex;align-items:center;gap:9px;position:relative}
+.setup .ft .info{font-size:10.5px;color:var(--muted);line-height:1.4}
+.setup .ft .info b{color:var(--text)}
+.btn{background:var(--lime);color:#10150b;border:0;border-radius:12px;padding:10px 17px;font-size:13px;font-weight:850;cursor:pointer;margin-left:auto;flex:none}
+.btn.ghost{background:var(--card2);color:var(--text);border:1px solid var(--line)}
+/* conf bar */
+.cbar{height:4px;border-radius:99px;background:var(--card2);margin:9px 0 0;overflow:hidden;position:relative}
+.cbar i{position:absolute;inset:0;width:72%;border-radius:99px;background:linear-gradient(90deg,#ff777d,#ffc16b 55%,#b7f36b)}
+/* ===== B: POSISI TERBUKA ===== */
+.pos{display:flex;align-items:center;gap:10px;background:var(--card2);border:1px solid var(--line);border-radius:14px;padding:10px 12px;margin-bottom:7px;cursor:pointer}
+.pos:last-child{margin-bottom:0}
+.pos .av{width:30px;height:30px;border-radius:9px;background:#1c241b;display:grid;place-items:center;font-size:9.5px;font-weight:850;color:var(--lime);flex:none}
+.pos .mid{flex:1;min-width:0}
+.pos .mid b{font-size:13px;font-weight:800}
+.pos .mid .sd2{font-size:9px;font-weight:800;margin-left:5px;padding:1px 5px;border-radius:5px}
+.pos .mid .sub{font-size:10px;color:var(--muted);margin-top:1px;font-variant-numeric:tabular-nums}
+.pos .pnl{font-size:13.5px;font-weight:850;font-variant-numeric:tabular-nums;flex:none}
+.pnl.p{color:var(--green)}.pnl.n{color:var(--red)}
+.pos .arw{color:var(--muted);font-size:12px;flex:none}
+.dotlive{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--blue);margin-right:5px;animation:pl 2s infinite}
+@keyframes pl{0%,100%{opacity:.5;transform:scale(1)}50%{opacity:1;transform:scale(1.4)}}
+/* ===== C: RADAR ===== */
+.radar{display:flex;gap:7px;overflow-x:auto;padding-bottom:2px}
+.radar::-webkit-scrollbar{display:none}
+.rc{flex:0 0 96px;background:var(--card2);border:1px solid var(--line);border-radius:13px;padding:9px 10px}
+.rc .p{font-size:12px;font-weight:850}
+.rc .v{font-size:15px;font-weight:900;font-variant-numeric:tabular-nums;margin-top:3px}
+.rc .v.u{color:var(--green)}.rc .v.d{color:var(--red)}
+.rc .s{font-size:9px;color:var(--muted);margin-top:1px}
+/* ===== compare ===== */
+.cmp{display:grid;grid-template-columns:1fr;gap:10px;margin-top:8px}
+.cmprow{display:flex;gap:10px;align-items:flex-start;background:var(--card2);border-radius:12px;padding:10px 12px;font-size:11.5px;color:var(--muted);line-height:1.5}
+.cmprow b{color:var(--text);display:block;margin-bottom:2px;font-size:12px}
+.cmprow .ic{font-size:15px;flex:none}
+</style></head><body><div class="wrap">
+<h1>PREVIEW — BELUM COMMIT</h1>
+<p class="sub">3 calon ganti kad Weekly Recap. Semua guna data yang sudah wujud.</p>
+
+<h2>🥇 A. Setup Hari Ini <span class="badge">CADANGAN</span></h2>
+<p class="hint">Verdict AI terkini yang lulus semua gate — terus dari enjin berjadual. Ada butang ambil.</p>
+<div class="setup">
+  <div class="hd"><span class="t">🎯 Setup hari ini</span><span class="tf">M15</span></div>
+  <div class="pair"><span class="nm">XAUUSD</span><span class="sd sell">SELL</span></div>
+  <div class="lv">
+    <div class="c e"><small>Entry</small><b>3530.24</b></div>
+    <div class="c s"><small>SL</small><b>3536.30</b></div>
+    <div class="c t"><small>TP</small><b>3521.50</b></div>
+  </div>
+  <div class="ft">
+    <div class="info">Conf <b>72%</b> · RR <b>1:1.9</b><div style="font-size:9.5px;margin-top:2px">2 jam lalu · vision AI</div></div>
+    <button class="btn">Ambil ▸</button>
+  </div>
+  <div class="cbar"><i></i></div>
+</div>
+
+<h2>🥈 B. Posisi Terbuka <span class="badge">SENANG</span></h2>
+<p class="hint">Trade yang masih berjalan, P&L live. Tap untuk detail penuh (modal sedia ada).</p>
+<div class="card" style="padding:10px">
+  <div class="pos"><div class="av">XAU</div><div class="mid"><b>XAUUSD</b><span class="sd2" style="color:var(--red);background:#ff777d14">SELL</span><div class="sub"><span class="dotlive"></span>3530.24 → 3525.00</div></div><div class="pnl p">+1.44R</div><div class="arw">›</div></div>
+  <div class="pos"><div class="av">BTC</div><div class="mid"><b>BTCUSD</b><span class="sd2" style="color:var(--lime);background:#b7f36b16">BUY</span><div class="sub"><span class="dotlive"></span>59,120 → 59,335</div></div><div class="pnl n">−0.32R</div><div class="arw">›</div></div>
+</div>
+
+<h2>🥉 C. Market Radar <span class="badge">RINGKAS</span></h2>
+<p class="hint">Pair mana bergerak paling banyak hari ini — skrol mendatar.</p>
+<div class="card" style="padding:12px">
+  <div class="lbl" style="margin-bottom:8px">⚡ Radar volatiliti hari ini</div>
+  <div class="radar">
+    <div class="rc"><div class="p">BTC</div><div class="v u">+5.28%</div><div class="s">59,139</div></div>
+    <div class="rc"><div class="p">XAU</div><div class="v u">+2.14%</div><div class="s">3,534.88</div></div>
+    <div class="rc"><div class="p">XAG</div><div class="v d">−1.83%</div><div class="s">41.181</div></div>
+    <div class="rc"><div class="p">EUR</div><div class="v d">−0.42%</div><div class="s">1.0965</div></div>
+    <div class="rc"><div class="p">GBP</div><div class="v u">+0.31%</div><div class="s">1.3412</div></div>
+  </div>
+</div>
+
+<h2>Banding</h2>
+<div class="cmp">
+  <div class="cmprow"><span class="ic">🎯</span><div><b>A · Setup Hari Ini</b>Paling kuat tarik member masuk app setiap kali buka. Data signals sedia ada. Butang "Ambil" terus ke modal trade. Kos: rendah-sederhana.</div></div>
+  <div class="cmprow"><span class="ic">📈</span><div><b>B · Posisi Terbuka</b>Paling murah & sangat berguna — member nampak trade mereka tanpa perlu masuk tab. Tap = modal detail sedia ada. Kos: sangat rendah.</div></div>
+  <div class="cmprow"><span class="ic">⚡</span><div><b>C · Market Radar</b>Menarik tetapi pasif — tak minta tindakan. Bagus sebagai lapisan kedua, bukan ganti utama.</div></div>
+</div>
+
+<div class="card" style="margin-top:14px;font-size:11.5px;color:var(--muted);line-height:1.6">
+<b style="color:var(--text)">Cadangan saya:</b> letak <b>A</b> di atas (paling menang), dan <b>B</b> di bawahnya hanya bila ada trade terbuka. Dua-dua padat, tiada data palsu, dan menggantikan kad statistik pasif.
+</div>
+</div></body></html>

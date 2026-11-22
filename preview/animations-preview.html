@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="ms"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>PREVIEW — Live Animations (10 idea)</title>
+<style>
+:root{--bg:#0a0e0b;--card:#111612;--card2:#171e18;--line:#222b23;--text:#eef3ee;--muted:#8a978c;--lime:#b7f36b;--green:#b7f36b;--red:#ff777d;--orange:#ffc16b;--blue:#8ab4ff}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:#050705;font:15px/1.5 -apple-system,BlinkMacSystemFont,"Inter",sans-serif;color:var(--text)}
+.wrap{max-width:430px;margin:0 auto;background:var(--bg);min-height:100vh;padding:16px 16px 60px}
+h1{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:#5d695f;margin:0 0 4px;font-weight:700}
+.sub{font-size:12px;color:var(--muted);margin:0 0 18px}
+h2{font-size:13px;font-weight:800;margin:26px 0 4px;display:flex;gap:8px;align-items:center}
+h2 .n{width:20px;height:20px;border-radius:8px;background:var(--card2);display:grid;place-items:center;font-size:11px;color:var(--lime)}
+.hint{font-size:11px;color:var(--muted);margin:0 0 10px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:14px}
+.lbl{font-size:9px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+.px{font-size:26px;font-weight:850;font-variant-numeric:tabular-nums;transition:color .5s}
+.px.up{color:var(--green);transition:none}
+.px.dn{color:var(--red);transition:none}
+.btn{margin-top:10px;background:var(--card2);border:1px solid var(--line);color:var(--text);border-radius:10px;padding:7px 12px;font-size:12px;font-weight:700;cursor:pointer}
+/* 2 count-up */
+.pnl{font-size:26px;font-weight:850;font-variant-numeric:tabular-nums;color:var(--green)}
+/* 3 pulse dot */
+.dot{display:inline-block;width:9px;height:9px;border-radius:50%;background:var(--blue);margin-right:7px;animation:pulse 2s ease-in-out infinite}
+@keyframes pulse{0%,100%{transform:scale(1);box-shadow:0 0 0 0 #8ab4ff55}50%{transform:scale(1.35);box-shadow:0 0 10px 2px #8ab4ff55}}
+.row{display:flex;align-items:center;font-size:13px;font-variant-numeric:tabular-nums;color:var(--blue)}
+/* 4 shimmer */
+.traders{display:inline-block;font-size:10px;font-weight:750;color:#ff9ba0;background:#ff777d14;border:1px solid #ff777d30;border-radius:999px;padding:2px 9px;position:relative;overflow:hidden}
+.traders::after{content:"";position:absolute;top:0;left:-70%;width:50%;height:100%;background:linear-gradient(105deg,transparent,#ffffff2e,transparent);animation:shine 8s ease-in-out infinite}
+@keyframes shine{0%,86%{left:-70%}94%,100%{left:130%}}
+/* 5 skeleton */
+.skel{height:14px;border-radius:7px;background:linear-gradient(90deg,#171e18 25%,#222b23 50%,#171e18 75%);background-size:200% 100%;animation:sk 1.3s infinite}
+@keyframes sk{0%{background-position:200% 0}100%{background-position:-200% 0}}
+.skel.px{height:26px;width:120px;border-radius:8px}
+.skel.spark{height:26px;width:62px}
+/* 6 confetti */
+.confwrap{position:relative;overflow:hidden;border-radius:18px}
+.cf{position:absolute;width:7px;height:11px;top:-14px;border-radius:2px;animation:fall linear forwards}
+@keyframes fall{to{transform:translateY(320px) rotate(540deg);opacity:.2}}
+/* 7 gradient bar */
+.bar{height:8px;border-radius:99px;background:var(--card2);position:relative;overflow:hidden}
+.bar .fill{position:absolute;inset:0;width:62%;border-radius:99px;background:linear-gradient(90deg,var(--red),var(--orange) 45%,var(--green));background-size:220% 100%;animation:slide 2.4s linear infinite}
+.bar .mk{position:absolute;left:62%;top:50%;transform:translate(-50%,-50%);width:16px;height:16px;border-radius:50%;background:var(--bg);border:3px solid var(--text)}
+@keyframes slide{0%{background-position:0 0}100%{background-position:-220% 0}}
+/* 8 draw-on chart */
+.chart{position:relative;height:130px;border-radius:12px;background:var(--card2);overflow:hidden;display:flex;align-items:flex-end;gap:3px;padding:10px}
+.chart i{flex:1;background:var(--lime);opacity:0;transform:translateY(14px);animation:rise .45s ease forwards}
+.chart i.dn{background:var(--red)}
+@keyframes rise{to{opacity:.9;transform:none}}
+.replay{margin-top:8px}
+/* 9 haptic */
+.phone{font-size:12px;color:var(--muted)}
+/* 10 streak */
+.streak{display:flex;align-items:center;gap:10px;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:11px 13px;margin-top:8px}
+.streak .av{width:34px;height:34px;border-radius:50%;background:#5b7bd5;display:grid;place-items:center;font-size:12px;font-weight:800}
+.streak .fl{animation:flame 1.6s ease-in-out infinite;display:inline-block}
+@keyframes flame{0%,100%{transform:scale(1);filter:brightness(1)}50%{transform:scale(1.18);filter:brightness(1.25)}}
+</style></head><body><div class="wrap">
+<h1>PREVIEW — BELUM COMMIT</h1>
+<p class="sub">10 idea live animation. Yang berinteraksi: tekan butang untuk trigger.</p>
+
+<h2><span class="n">1</span> Price tick flash</h2>
+<p class="hint">Auto toggle setiap 1.2s — perhatikan warna nombor</p>
+<div class="card"><div class="lbl">XAUUSD</div><div class="px" id="px1">3,525.00</div></div>
+
+<h2><span class="n">2</span> P&L count-up</h2>
+<p class="hint">Tekan butang — nombor roll ke nilai baru</p>
+<div class="card"><div class="lbl">P&L belum realized</div><div class="pnl" id="pnl">+$100.00</div><button class="btn" onclick="roll()">Trigger perubahan</button></div>
+
+<h2><span class="n">3</span> Live line pulse</h2>
+<div class="card"><div class="row"><span class="dot"></span>LIVE 3,525.00</div></div>
+
+<h2><span class="n">4</span> Shimmer badge 🔥 trader</h2>
+<div class="card"><span class="traders">🔥 3 trader</span></div>
+
+<h2><span class="n">5</span> Skeleton loading</h2>
+<p class="hint">Begitu app dibuka — sebelum data sampai</p>
+<div class="card"><div class="skel px"></div><div style="display:flex;justify-content:space-between;margin-top:10px"><div class="skel" style="width:80px"></div><div class="skel spark"></div></div></div>
+
+<h2><span class="n">6</span> TP confetti (halus)</h2>
+<div class="card confwrap" id="cw"><div class="lbl">XAUUSD · SELL</div><div style="font-size:18px;font-weight:850;color:var(--green)">TP HIT +1.44R</div><button class="btn" onclick="confetti()">Ulang confetti</button></div>
+
+<h2><span class="n">7</span> SL→TP gradient bar</h2>
+<div class="card"><div class="bar"><div class="fill"></div><div class="mk"></div></div><div style="display:flex;justify-content:space-between;margin-top:6px"><span style="color:var(--red);font-size:11px">SL 3536.30</span><span style="color:var(--green);font-size:11px">TP 3521.50</span></div></div>
+
+<h2><span class="n">8</span> Chart draw-on</h2>
+<p class="hint">Tekan replay — candle terbentuk satu-satu</p>
+<div class="card"><div class="chart" id="ch"></div><button class="btn replay" onclick="draw()">▶ Replay</button></div>
+
+<h2><span class="n">9</span> Haptic pattern</h2>
+<div class="card"><button class="btn" onclick="try{navigator.vibrate([10,30,10]);this.textContent='Bergetar! ✓';setTimeout(()=>this.textContent='Test getaran TP',900)}.catch(_){};this.textContent=(navigator.vibrate?'Bergetar! ✓':'Peranti tak support')">Test getaran TP</button> <span class="phone">Android OK · iOS PWA terhad</span></div>
+
+<h2><span class="n">10</span> Streak flame</h2>
+<div class="card" style="padding:0;border:0;background:none">
+<div class="streak"><div class="av">AB</div><div style="flex:1"><b>Aidil Bahaman</b><div class="lbl">3 TP berturut</div></div><span class="fl">🔥</span></div>
+<div class="streak"><div class="av" style="background:#8a5bd5">ZH</div><div style="flex:1"><b>Zara H.</b><div class="lbl">2 TP berturut</div></div><span class="fl" style="animation-delay:.4s">🔥</span></div>
+</div>
+
+<script>
+/* 1 tick flash */
+var px1=document.getElementById('px1'),v=3525.00;
+setInterval(function(){var up=Math.random()>0.5;v+=(up?1:-1)*(Math.random()*2);
+ px1.textContent=v.toLocaleString('en-US',{minimumFractionDigits:2});
+ px1.classList.remove('up','dn');void px1.offsetWidth;
+ px1.classList.add(up?'up':'dn');
+ setTimeout(function(){px1.classList.remove('up','dn')},420)},1200);
+/* 2 count-up */
+var cur=100;
+function roll(){var to=cur+(Math.random()>0.3?1:-1)*Math.round(20+Math.random()*60);anim(cur,to);cur=to}
+function anim(from,to){var el=document.getElementById('pnl'),t0=performance.now(),d=600;
+ (function step(now){var k=Math.min(1,(now-t0)/d),val=from+(to-from)*(1-Math.pow(1-k,3));
+  el.textContent=(val>=0?'+':'-')+'$'+Math.abs(val).toLocaleString('en-US',{minimumFractionDigits:2});
+  if(k<1)requestAnimationFrame(step)})(t0)}
+/* 6 confetti */
+var cols=['#b7f36b','#ffd76b','#8ab4ff','#ff9ba0','#ffffff'];
+function confetti(){var cw=document.getElementById('cw');
+ for(var i=0;i<18;i++){(function(i){var c=document.createElement('i');c.className='cf';
+  c.style.left=(8+Math.random()*84)+'%';c.style.background=cols[i%cols.length];
+  c.style.animationDuration=(0.9+Math.random()*0.7)+'s';c.style.animationDelay=(Math.random()*0.25)+'s';
+  cw.appendChild(c);setTimeout(function(){c.remove()},1900)})(i)}}
+setTimeout(confetti,600);
+/* 8 chart */
+function draw(){var ch=document.getElementById('ch');ch.innerHTML='';
+ for(var i=0;i<26;i++){(function(i){var b=document.createElement('i');
+  var hh=18+Math.random()*70;b.style.height=hh+'px';
+  if(i>0&&Math.random()>0.55)b.className='dn';
+  b.style.animationDelay=(i*55)+'ms';ch.appendChild(b)})(i)}}
+draw();
+</script>
+</div></body></html>

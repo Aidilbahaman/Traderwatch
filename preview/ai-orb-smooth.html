@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="ms"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>PREVIEW — Dot masuk black hole (smooth)</title>
+<style>
+:root{--bg:#0a0e0b;--card:#111612;--card2:#171e18;--line:#222b23;--text:#eef3ee;--muted:#8a978c;--lime:#b7f36b;--green:#b7f36b;--red:#ff777d;--orange:#ffc16b;--blue:#8ab4ff;--violet:#b18cff}
+*{box-sizing:border-box}
+body{margin:0;background:#050705;font:15px/1.5 -apple-system,BlinkMacSystemFont,"Inter",sans-serif;color:var(--text)}
+.wrap{max-width:430px;margin:0 auto;background:var(--bg);min-height:100vh;padding:16px 16px 40px}
+h1{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:#5d695f;margin:0 0 4px;font-weight:700}
+.sub{font-size:12px;color:var(--muted);margin:0 0 16px}
+h2{font-size:13px;font-weight:850;margin:24px 0 4px}
+.hint{font-size:11px;color:var(--muted);margin:0 0 9px;line-height:1.45}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:14px;display:grid;place-items:center;overflow:hidden}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes pulse{0%,100%{transform:scale(.96);opacity:.45}50%{transform:scale(1.06);opacity:.78}}
+
+/* ================= ORB ================= */
+.hole{position:relative;width:210px;height:210px;display:grid;place-items:center;isolation:isolate}
+.hole .corona{position:absolute;width:112px;height:112px;border-radius:50%;
+ background:radial-gradient(circle,#b7f36b2e 0%,#b7f36b14 48%,transparent 68%);
+ animation:spin 9s linear infinite;will-change:transform}
+.hole .photon{position:absolute;width:70px;height:70px;border-radius:50%;border:2px solid #d6ff9a;
+ opacity:.5;animation:pulse 2.8s ease-in-out infinite;will-change:transform,opacity;box-shadow:0 0 14px #b7f36b45 inset}
+.hole .core{position:relative;width:54px;height:54px;border-radius:50%;background:#000;z-index:6;
+ box-shadow:0 0 0 2px #b7f36ba6,0 0 30px 8px #b7f36b6b,0 0 80px 20px #b7f36b26}
+
+/* ---------- DOT MASUK: transform sahaja, satu properti, lerp lancar ---------- */
+/* wrapper berpusing ikut arah; dot bergerak translateX dari luar ke 0 (teras) */
+.ray{position:absolute;left:50%;top:50%;width:0;height:0;transform-origin:0 0}
+.dot{position:absolute;top:-3px;left:0;width:6px;height:6px;border-radius:50%;
+ background:#eaffc4;box-shadow:0 0 7px #b7f36bcc;
+ will-change:transform,opacity;backface-visibility:hidden;
+ animation:suction 3.2s linear infinite}
+@keyframes suction{
+ 0%{transform:translate3d(var(--d,96px),0,0);opacity:0}
+ 6%{opacity:1}
+ 94%{opacity:1}
+ 100%{transform:translate3d(0,0,0);opacity:0}
+}
+.dot.b{background:#dbe7ff;box-shadow:0 0 7px #8ab4ffcc}
+.dot.o{background:#ffe8c8;box-shadow:0 0 7px #ffc16bcc}
+.dot.v{background:#e6dbff;box-shadow:0 0 7px #b18cffcc}
+
+/* ================= MINI ================= */
+.hdr{display:flex;align-items:center;gap:11px;background:var(--card);border:1px solid var(--line);border-radius:18px;padding:13px 14px}
+.mini{position:relative;width:46px;height:46px;display:grid;place-items:center;flex:none;overflow:hidden;border-radius:50%}
+.mini .ray{position:absolute;left:50%;top:50%;width:0;height:0}
+.mini .dot{width:3.4px;height:3.4px;top:-1.7px;animation-name:msuction;animation-duration:2.8s}
+@keyframes msuction{0%{transform:translate3d(22px,0,0) scale(1);opacity:0}10%{opacity:1}90%{opacity:1}100%{transform:translate3d(0,0,0) scale(.4);opacity:0}}
+.mini .mc{width:13px;height:13px;border-radius:50%;background:#000;z-index:4;
+ box-shadow:0 0 0 1.5px #b7f36baa,0 0 10px 2px #b7f36b66}
+.hdr .tx{flex:1;min-width:0}
+.hdr .tx b{display:block;font-size:14px;font-weight:850}
+.hdr .tx small{font-size:11px;color:var(--muted)}
+.hdr .st{margin-left:auto;font-size:9.5px;font-weight:800;color:var(--lime);background:#b7f36b14;border:1px solid #b7f36b3d;border-radius:99px;padding:3px 9px;flex:none}
+
+.note{font-size:11.5px;color:var(--muted);line-height:1.65;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px;margin-top:16px}
+.note b{color:var(--text)}
+@media(prefers-reduced-motion:reduce){.hole *,.mini *{animation:none !important}}
+</style></head><body><div class="wrap">
+<h1>PREVIEW — DOT MASUK · SMOOTH</h1>
+<p class="sub">Dot bulat bergerak lurus masuk ke teras. Tiada stretch, tiada gimmick.</p>
+
+<h2>Saiz penuh</h2>
+<div class="card" style="padding:16px">
+  <div class="hole" id="hole">
+    <div class="corona"></div>
+    <div class="photon"></div>
+    <div class="core"></div>
+  </div>
+</div>
+
+<h2>Dalam konteks — header League</h2>
+<div class="hdr">
+  <div class="mini" id="mini"><div class="mc"></div></div>
+  <div class="tx"><b>Enjin AI aktif</b><small>12 pair · data disedut masuk</small></div>
+  <div class="st">LIVE</div>
+</div>
+
+<div class="note">
+<b>Kenapa lebih licin:</b> setiap dot guna <b>satu transform</b> sahaja (<code>translate3d</code>) dengan <b>linear</b> timing — tiada re-layout, tiada scale berganda, tiada shadow animasi. 12 dot serentak, setiap satu pada layer GPU sendiri (<code>will-change</code>).<br><br>
+<b>Gerakan:</b> dot muncul di luar (96px), bergerak lurus masuk, mengecil sedikit (1 → .35) dan hilang di teras. Teras telan tanpa kilat — bersih.
+</div>
+</div>
+<script>
+(function(){
+  var host=document.getElementById('hole');
+  var cols=['','b','','o','','v','','b','','o','','','v','b'];
+  var N=14;
+  for(var i=0;i<N;i++){
+    var ray=document.createElement('div');
+    ray.className='ray';
+    /* sudut rawak penuh 0-360, tiada grid */
+    var ang=Math.random()*360;
+    var dist=94+Math.random()*16;               /* jarak mula rawak */
+    ray.style.transform='rotate('+ang.toFixed(1)+'deg)';
+    var d=document.createElement('div');
+    d.className='dot '+(cols[i%cols.length]||'');
+    var dur=(2.4+Math.random()*2.6).toFixed(2); /* tempoh rawak 2.4-5.0s */
+    d.style.animationDuration=dur+'s';
+    d.style.animationDelay=(-Math.random()*parseFloat(dur)).toFixed(2)+'s'; /* fasa rawak, langkau masa mula */
+    d.style.setProperty('--d',dist.toFixed(0)+'px');
+    var sz=(4.5+Math.random()*3.5).toFixed(1);  /* saiz rawak 4.5-8px */
+    d.style.width=sz+'px'; d.style.height=sz+'px';
+    d.style.top=(-parseFloat(sz)/2).toFixed(1)+'px';
+    ray.appendChild(d); host.appendChild(ray);
+  }
+  var m=document.getElementById('mini');
+  for(var j=0;j<7;j++){
+    var r=document.createElement('div');
+    r.className='ray';
+    r.style.transform='rotate('+(Math.random()*360).toFixed(1)+'deg)';
+    var dd=document.createElement('div'); dd.className='dot';
+    var md=(2.2+Math.random()*2.0).toFixed(2);
+    dd.style.animationDuration=md+'s';
+    dd.style.animationDelay=(-Math.random()*parseFloat(md)).toFixed(2)+'s';
+    var ms=(2.6+Math.random()*2).toFixed(1);
+    dd.style.width=ms+'px'; dd.style.height=ms+'px';
+    dd.style.top=(-parseFloat(ms)/2).toFixed(1)+'px';
+    r.appendChild(dd); m.appendChild(r);
+  }
+})();
+</script>
+</div></body></html>

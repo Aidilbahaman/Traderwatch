@@ -1,0 +1,1215 @@
+<!doctype html>
+<html lang="ms">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#000000">
+<meta name="robots" content="noindex">
+<!-- Tema dipilih sebelum halaman dicat, supaya tidak berkelip -->
+<script>try{if(localStorage.getItem('tw-theme')==='light'){document.documentElement.dataset.theme='light';document.querySelector('meta[name="theme-color"]').content='#f2f2f5';}}catch(e){}</script>
+<title>TraderWatch · Signal trading, betul-betul jadi.</title>
+<meta name="description" content="Signal forex AI automatik untuk gold, silver dan bitcoin. Entry zone, stop loss & tiga take profit berserta sebabnya, di telefon anda sebaik harga menyentuh zon. Percuma untuk semua ahli.">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="TraderWatch">
+<meta property="og:title" content="TraderWatch · Signal trading, betul-betul jadi.">
+<meta property="og:description" content="Setup di telefon anda sebaik harga menyentuh zon. Entry, stop loss & tiga take profit — berserta sebabnya. Risiko anda, setiap keputusan direkod.">
+<meta property="og:url" content="https://traderwatch.org/preview-traxa/">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='9' fill='%23e3bc57'/%3E%3Cg stroke='%23120f07' stroke-width='2.2' stroke-linecap='round'%3E%3Cpath d='M10 7v18M16 5v22M22 9v14'/%3E%3C/g%3E%3Crect x='7.4' y='12' width='5.2' height='7' rx='1.2' fill='%23120f07'/%3E%3Crect x='13.4' y='9' width='5.2' height='9' rx='1.2' fill='%23120f07'/%3E%3Crect x='19.4' y='14' width='5.2' height='6' rx='1.2' fill='%23120f07'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;800;900&family=Inter:wght@400;800&family=Fraunces:ital,wght@0,400;0,600;1,500;1,600&family=JetBrains+Mono:wght@400;700&display=swap">
+<style>
+/* ============ Token reka bentuk (DNA TRAXA) ============ */
+:root{
+  --bg:#000000; --line:#26262b; --text:#f4f4f5; --muted:#8e8e96; --text-soft:#d6d6dc;
+  --accent:#d4af37; --gold:#e3bc57; --gold-ink:#e3bc57; --radius:14px;
+  --card-a:rgba(24,24,29,.86); --card-b:rgba(11,11,14,.9);
+  --bg-rgb:0,0,0; --fg-rgb:255,255,255; --surface:#0b0b0e; --surface-2:#0d0d11;
+  --neon-buy:#2bf5a0;
+  --lx-gold:#e3bc57; --lx-line:rgba(255,255,255,.08); --lx-card:rgba(14,14,18,.72);
+  --lx-head:#ffffff; --lx-body:#9a9aa2; --lx-faint:#6b6b73;
+  --ghost-bg:rgba(255,255,255,.04); --ghost-line:rgba(255,255,255,.14);
+  --kick-bg:rgba(12,12,16,.8); --facts-bg:rgba(10,10,13,.86);
+  --trio-a:rgba(20,20,26,.92); --trio-b:rgba(9,9,12,.96);
+  --dock-a:rgba(5,5,6,0); --dock-b:rgba(5,5,6,.92);
+  --float-shadow:0 12px 30px rgba(0,0,0,.5), 0 0 22px rgba(var(--k),.12);
+  --glow-op:1; --grid-op:.5;
+  --gold-hi:#ffe08a; --gold-lo:#b8862c;
+  color-scheme:dark;
+}
+:root[data-theme="light"]{
+  --bg:#f2f2f5; --line:#dadae1; --text:#17171d; --muted:#676772; --text-soft:#3a3a45;
+  --gold-ink:#9a7316;
+  --card-a:rgba(255,255,255,.94); --card-b:rgba(250,250,252,.94);
+  --bg-rgb:242,242,245; --fg-rgb:22,22,32; --surface:#ffffff; --surface-2:#f7f7f9;
+  --neon-buy:#0d9e63;
+  --lx-line:rgba(23,23,29,.1); --lx-card:rgba(255,255,255,.82);
+  --lx-head:#17171d; --lx-body:#55555f; --lx-faint:#77777f;
+  --ghost-bg:rgba(23,23,29,.04); --ghost-line:rgba(23,23,29,.16);
+  --kick-bg:rgba(255,255,255,.88); --facts-bg:rgba(255,255,255,.92);
+  --trio-a:rgba(255,255,255,.96); --trio-b:rgba(247,247,250,.96);
+  --dock-a:rgba(242,242,245,0); --dock-b:rgba(242,242,245,.94);
+  --float-shadow:0 12px 26px rgba(23,23,29,.12), 0 0 22px rgba(var(--k),.1);
+  --glow-op:.45; --grid-op:.35;
+  --gold-hi:#c99a2e; --gold-lo:#8a6512;
+  color-scheme:light;
+}
+*{box-sizing:border-box}
+html,body{margin:0;touch-action:manipulation}
+html{scroll-behavior:smooth}
+body{
+  background:var(--bg); color:var(--text);
+  font:15px/1.45 'Inter',system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  min-height:100vh; padding-bottom:env(safe-area-inset-bottom);
+  -webkit-font-smoothing:antialiased;
+}
+::selection{background:rgba(227,188,87,.35)}
+:focus-visible{outline:2px solid var(--gold-ink);outline-offset:2px;border-radius:4px}
+img{max-width:100%}
+a{color:var(--gold-ink)}
+.skip{position:absolute;left:-9999px;top:0;z-index:99;padding:10px 16px;background:var(--gold);color:#0b0b0d;font-weight:800;border-radius:0 0 10px 0}
+.skip:focus{left:0}
+
+/* ============ Bar atas ============ */
+.bar{
+  position:sticky;top:0;z-index:50;
+  background:rgba(var(--bg-rgb),.9);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+  border-bottom:1px solid var(--line);
+}
+.bar-in{
+  display:flex;align-items:center;justify-content:space-between;gap:10px;
+  max-width:1160px;margin:0 auto;
+  padding:calc(10px + env(safe-area-inset-top)) 16px 10px;
+}
+.brand{display:flex;align-items:center;gap:10px;text-decoration:none}
+.brand svg{width:30px;height:30px;flex:none}
+.wordmark{font:800 19px 'Orbitron',system-ui,sans-serif;letter-spacing:.02em;color:var(--text);white-space:nowrap}
+.wordmark i{font:600 italic 21px 'Fraunces',Georgia,serif;color:var(--gold-ink);text-shadow:0 0 12px rgba(227,188,87,.45);padding:0 1px}
+.bar-end{display:flex;align-items:center;gap:8px}
+.ld-nav{display:none;align-items:center;gap:6px;margin-right:4px}
+.ld-nav a{text-decoration:none;font-size:14px;font-weight:600;border-radius:999px;padding:9px 16px;transition:background .2s,color .2s}
+.ld-nav-in{color:var(--text-soft)}
+.ld-nav-in:hover{color:var(--lx-head);background:var(--ghost-bg)}
+.ld-nav-go{color:#0b0b0d;background:var(--gold);font-weight:800}
+.ld-nav-go:hover{background:#f0cd6e}
+.icon-btn{
+  display:grid;place-items:center;width:38px;height:38px;border-radius:12px;cursor:pointer;
+  background:var(--ghost-bg);border:1px solid var(--ghost-line);color:var(--text-soft);
+  transition:border-color .2s,color .2s;
+}
+.icon-btn:hover{border-color:rgba(227,188,87,.5);color:var(--gold-ink)}
+.icon-btn svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.to-dark{display:none}
+:root[data-theme="light"] .to-light{display:none}
+:root[data-theme="light"] .to-dark{display:block}
+.lang-badge{
+  display:flex;align-items:center;gap:6px;height:38px;padding:0 12px;border-radius:12px;
+  background:var(--ghost-bg);border:1px solid var(--ghost-line);
+  font:700 12px 'JetBrains Mono',ui-monospace,monospace;letter-spacing:.08em;color:var(--text-soft);
+}
+.lang-badge svg{width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round}
+/* Ticker harga (desktop sahaja) */
+.tkr{display:none;border-top:1px solid var(--lx-line);background:rgba(var(--bg-rgb),.6)}
+.tkr-in{
+  display:flex;align-items:center;justify-content:center;gap:26px;
+  max-width:1160px;margin:0 auto;padding:6px 16px;
+  font:400 11.5px 'JetBrains Mono',ui-monospace,monospace;color:var(--muted);
+}
+.tkr-in b{font-weight:700;color:var(--text-soft);letter-spacing:.04em}
+.tkr-in .up{color:#34d399}
+.tkr-in .dn{color:#f87171}
+:root[data-theme="light"] .tkr-in .up{color:#0d9e63}
+:root[data-theme="light"] .tkr-in .dn{color:#d92b2d}
+.tkr-dot{width:6px;height:6px;border-radius:50%;background:var(--neon-buy);box-shadow:0 0 8px var(--neon-buy);animation:twPulse 1.6s ease-in-out infinite}
+
+/* ============ Susun atur utama ============ */
+main{position:relative;z-index:1;max-width:1160px;margin:0 auto;padding:0 16px;overflow-x:clip}
+.lx-sec{margin-top:72px}
+.lx-head{text-align:center;max-width:720px;margin:0 auto 28px}
+.lx-k{
+  display:inline-block;font:700 12px 'JetBrains Mono',ui-monospace,monospace;letter-spacing:.26em;text-transform:uppercase;
+  color:var(--gold-ink);padding:7px 13px;border:1px solid color-mix(in srgb,var(--gold-ink) 35%,transparent);
+  border-radius:999px;background:color-mix(in srgb,var(--gold-ink) 7%,transparent);
+}
+.lx-head h2{margin:16px 0 0;font:900 clamp(24px,4.6vw,46px)/1.12 'Orbitron',system-ui,sans-serif;color:var(--lx-head);text-wrap:balance}
+
+/* ============ Hero ============ */
+.ld-hero{position:relative;display:grid;grid-template-columns:1fr;gap:26px;align-items:center;padding:24px 0 8px}
+.ld-hero::after{
+  content:"";position:absolute;inset:-10% -20% -20%;z-index:-2;pointer-events:none;opacity:var(--grid-op);
+  background-image:linear-gradient(rgba(227,188,87,.07) 1px,transparent 1px),linear-gradient(90deg,rgba(227,188,87,.07) 1px,transparent 1px);
+  background-size:56px 56px;
+  -webkit-mask-image:radial-gradient(60% 55% at 50% 45%,#000,transparent);mask-image:radial-gradient(60% 55% at 50% 45%,#000,transparent);
+}
+.ld-ribbon{
+  position:absolute;top:-40px;bottom:-60px;left:calc(50% - 50vw);width:100vw;height:calc(100% + 100px);
+  z-index:-1;pointer-events:none;opacity:.9;
+  -webkit-mask-image:linear-gradient(180deg,transparent,#000 14%,#000 80%,transparent);
+  mask-image:linear-gradient(180deg,transparent,#000 14%,#000 80%,transparent);
+  filter:drop-shadow(0 0 12px rgba(255,159,67,.25));
+}
+.ld-copy{text-align:center;display:flex;flex-direction:column;align-items:center}
+.ld-kick{
+  display:inline-flex;align-items:center;gap:8px;margin-bottom:18px;padding:7px 13px 7px 11px;border-radius:999px;
+  font:700 10.5px/1 'JetBrains Mono',ui-monospace,monospace;letter-spacing:.14em;text-transform:uppercase;color:var(--text-soft);
+  background:var(--kick-bg);border:1px solid rgba(52,211,153,.35);box-shadow:0 0 24px rgba(52,211,153,.12);
+}
+.ld-kick i{width:7px;height:7px;flex:none;border-radius:50%;background:#34d399;box-shadow:0 0 10px #34d399;animation:twPulse 1.4s infinite}
+.ld-kick span{color:#34d399}
+:root[data-theme="light"] .ld-kick span{color:#0d9e63}
+:root[data-theme="light"] .ld-kick i{background:#0d9e63;box-shadow:0 0 10px rgba(13,158,99,.6)}
+.ld-kick b{font-weight:700;color:var(--muted)}
+.ld-title{
+  font:900 clamp(36px,9vw,58px)/1.04 'Orbitron',system-ui,sans-serif;letter-spacing:-.01em;
+  margin:0 0 14px;color:var(--lx-head);text-wrap:balance;
+}
+.ld-title span{
+  background:linear-gradient(92deg,var(--gold-hi),var(--gold) 45%,var(--gold-lo));
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+}
+.ld-sub{font-size:15.5px;line-height:1.6;color:var(--lx-body);max-width:420px;margin:0}
+.ld-live{
+  display:flex;align-items:center;justify-content:center;gap:16px;width:fit-content;margin:20px auto 0;padding:10px 20px;
+  border-radius:999px;background:linear-gradient(135deg,var(--card-a),var(--card-b));
+  border:1px solid var(--lx-line);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+}
+.ld-live>div{display:flex;align-items:baseline;gap:7px}
+.ld-live b{font:800 19px/1 'Orbitron',system-ui,sans-serif;font-variant-numeric:tabular-nums;color:var(--gold-ink);letter-spacing:.02em}
+.ld-live>div:last-child b{color:var(--neon-buy)}
+.ld-live span{display:flex;align-items:center;gap:6px;font-size:12.5px;color:var(--muted);white-space:nowrap}
+.ld-live>i{width:1px;align-self:stretch;background:var(--line)}
+.ld-live-dot{width:7px;height:7px;flex:none;border-radius:50%;background:var(--neon-buy);box-shadow:0 0 8px var(--neon-buy);animation:twPulse 1.6s ease-in-out infinite}
+.ld-ctas{display:flex;flex-direction:column;align-items:center;gap:12px;margin-top:24px;width:100%}
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:8px;
+  border:1px solid transparent;border-radius:999px;cursor:pointer;text-decoration:none;
+  font:800 15px 'Inter',system-ui,sans-serif;transition:background .2s,border-color .2s,transform .15s;
+}
+.btn:active{transform:scale(.98)}
+.btn.primary{background:var(--gold);color:#0b0b0d;box-shadow:0 8px 28px rgba(227,188,87,.28)}
+.btn.primary:hover{background:#f0cd6e}
+.btn.ghost{background:var(--ghost-bg);border-color:var(--ghost-line);color:var(--text-soft)}
+.btn.ghost:hover{border-color:rgba(227,188,87,.5);color:var(--lx-head)}
+.ld-go{width:100%;max-width:340px;min-height:56px;padding:14px 26px;font-size:16.5px}
+.ld-in{min-height:46px;padding:0 20px;font-size:14px}
+.ld-tg{
+  display:flex;align-items:center;justify-content:center;gap:8px;width:100%;max-width:340px;min-height:46px;margin-top:0;
+  padding:0 18px;border-radius:999px;text-decoration:none;font-size:13.5px;font-weight:700;color:var(--text-soft);
+  background:var(--ghost-bg);border:1px solid var(--ghost-line);transition:border-color .2s,color .2s;
+}
+.ld-tg:hover{border-color:rgba(41,169,235,.55);color:var(--lx-head)}
+.ld-tg .tg-logo{width:18px;height:18px;flex:none;color:#29a9eb;fill:currentColor}
+.ld-qr{
+  display:flex;align-items:center;gap:16px;margin-top:26px;padding:14px 18px 14px 14px;max-width:420px;text-align:left;
+  border-radius:18px;background:var(--surface-2);border:1px solid rgba(var(--fg-rgb),.08);
+}
+.ld-qr img{flex:0 0 96px;width:96px;height:96px;border-radius:10px;background:#fff}
+.ld-qr b{display:block;font-size:14px;color:var(--text)}
+.ld-qr span{display:block;margin-top:4px;font-size:13px;line-height:1.5;color:var(--muted)}
+/* Telefon + kad terapung */
+.ld-phone{position:relative;display:grid;grid-template-columns:1fr;justify-items:center;gap:20px;padding:26px 0 10px;perspective:1200px}
+.ld-phone::before{
+  content:"";position:absolute;left:50%;top:46%;width:min(560px,120%);aspect-ratio:1;transform:translate(-50%,-50%);
+  z-index:-1;pointer-events:none;opacity:var(--glow-op);
+  background:radial-gradient(circle,rgba(227,188,87,.22),rgba(167,139,250,.12) 35%,transparent 62%);
+}
+.ld-device{
+  position:relative;width:min(262px,68vw);aspect-ratio:9/19.5;border-radius:38px;padding:8px;background:#141417;
+  box-shadow:0 0 0 1px rgba(var(--fg-rgb),.1),0 24px 60px rgba(0,0,0,.6);
+  transform-style:preserve-3d;animation:twTilt 10s ease-in-out infinite;
+}
+.ld-notch{position:absolute;top:14px;left:50%;transform:translateX(-50%);width:86px;height:20px;border-radius:999px;background:#000;z-index:3;box-shadow:inset 0 0 0 1px rgba(255,255,255,.06)}
+.ld-screen{
+  position:relative;width:100%;height:100%;border-radius:31px;overflow:hidden;display:flex;flex-direction:column;
+  background:linear-gradient(180deg,#0c0d12,#07080c 60%,#0a0b10);color:#f4f4f5;
+  font-family:'Inter',system-ui,sans-serif;
+}
+.ph-status{display:flex;align-items:center;justify-content:space-between;padding:10px 16px 4px;font:700 10px 'JetBrains Mono',monospace;color:#d6d6dc}
+.ph-status svg{width:34px;height:10px;fill:#d6d6dc}
+.ph-head{display:flex;align-items:center;justify-content:space-between;padding:6px 12px}
+.ph-word{font:800 11px 'Orbitron',sans-serif;letter-spacing:.02em;color:#f4f4f5}
+.ph-word i{font:600 italic 12px 'Fraunces',serif;color:#e3bc57}
+.ph-live{display:flex;align-items:center;gap:5px;font:700 8px 'JetBrains Mono',monospace;letter-spacing:.14em;color:#34d399}
+.ph-live i{width:5px;height:5px;border-radius:50%;background:#34d399;box-shadow:0 0 6px #34d399;animation:twPulse 1.4s infinite}
+.ph-tabs{display:flex;gap:5px;padding:2px 12px 7px}
+.ph-tab{flex:1;text-align:center;padding:5px 2px;border-radius:8px;font:700 8.5px 'JetBrains Mono',monospace;color:#8e8e96;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06)}
+.ph-tab.on{color:#e3bc57;background:rgba(227,188,87,.1);border-color:rgba(227,188,87,.45)}
+.ph-card{margin:0 10px;padding:9px 10px;border-radius:12px;background:linear-gradient(135deg,rgba(24,24,29,.9),rgba(11,11,14,.94));border:1px solid rgba(227,188,87,.28)}
+.ph-row{display:flex;align-items:center;gap:6px}
+.ph-pair{font:800 11px 'Orbitron',sans-serif;color:#f4f4f5}
+.ph-tf{font:700 7.5px 'JetBrains Mono',monospace;color:#8e8e96;padding:2px 5px;border-radius:5px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08)}
+.ph-buy{margin-left:auto;font:800 8.5px 'Inter',sans-serif;letter-spacing:.08em;color:#34d399;padding:3px 8px;border-radius:6px;background:rgba(52,211,153,.12);border:1px solid rgba(52,211,153,.4)}
+.ph-price{display:flex;align-items:baseline;gap:6px;margin-top:6px}
+.ph-price b{font:700 17px 'JetBrains Mono',monospace;color:#e3bc57;font-variant-numeric:tabular-nums}
+.ph-price span{font:700 8px 'Inter',sans-serif;color:#34d399}
+.ph-zone{margin-top:6px;padding:6px 8px;border-radius:8px;background:rgba(227,188,87,.07);border:1px dashed rgba(227,188,87,.4)}
+.ph-zone small{display:block;font:700 7px 'JetBrains Mono',monospace;letter-spacing:.12em;text-transform:uppercase;color:#8e8e96}
+.ph-zone b{font:700 10.5px 'JetBrains Mono',monospace;color:#f5d98a}
+.ph-levels{display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-top:6px}
+.ph-lv{display:flex;align-items:center;justify-content:space-between;padding:4px 7px;border-radius:7px;background:rgba(255,255,255,.035);border:1px solid rgba(255,255,255,.06)}
+.ph-lv small{font:700 7.5px 'JetBrains Mono',monospace;letter-spacing:.06em}
+.ph-lv b{font:700 9px 'JetBrains Mono',monospace;font-variant-numeric:tabular-nums}
+.ph-lv.sl small,.ph-lv.sl b{color:#f87171}
+.ph-lv.tp small{color:#34d399}.ph-lv.tp b{color:#d6d6dc}
+.ph-risk{display:flex;gap:4px;margin-top:6px}
+.ph-risk span{flex:1;text-align:center;font:700 7.5px 'Inter',sans-serif;padding:4px 2px;border-radius:6px;color:#8e8e96;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07)}
+.ph-risk span.on{color:#60a5fa;background:rgba(96,165,250,.12);border-color:rgba(96,165,250,.45)}
+.ph-why{display:flex;gap:6px;align-items:flex-start;margin-top:7px;padding:6px 8px;border-radius:8px;border-left:2px solid #e3bc57;background:rgba(227,188,87,.06);font-size:8px;line-height:1.45;color:#d6d6dc}
+.ph-why b{color:#e3bc57;font-size:7.5px;letter-spacing:.1em;text-transform:uppercase;font-family:'JetBrains Mono',monospace;flex:none}
+.ph-chart{margin:8px 10px 0;border-radius:12px;overflow:hidden;border:1px solid rgba(255,255,255,.07);background:linear-gradient(180deg,rgba(10,14,24,.96),rgba(6,8,14,.98))}
+.ph-chart svg{display:block;width:100%;height:auto}
+.ph-trend{display:flex;gap:4px;padding:7px 12px 4px}
+.ph-trend span{flex:1;display:flex;align-items:center;justify-content:center;gap:3px;font:700 7.5px 'JetBrains Mono',monospace;padding:3px 0;border-radius:6px;background:rgba(255,255,255,.035);border:1px solid rgba(255,255,255,.06);color:#8e8e96}
+.ph-trend .u{color:#34d399}.ph-trend .d{color:#f87171}
+.ph-nav{margin-top:auto;display:flex;border-top:1px solid rgba(255,255,255,.07);background:rgba(8,8,11,.9)}
+.ph-nav span{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;padding:7px 0 9px;font:700 6.5px 'Inter',sans-serif;color:#6b6b73}
+.ph-nav span.on{color:#e3bc57}
+.ph-nav svg{width:13px;height:13px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+/* Kad terapung */
+.ld-floats{display:grid;grid-template-columns:1fr 1fr;gap:10px;width:100%;max-width:420px}
+.ld-float{
+  --k:227,188,87;display:flex;align-items:center;gap:9px;padding:9px 12px 9px 9px;border-radius:16px;min-width:0;
+  background:linear-gradient(135deg,rgba(var(--k),.14),rgba(var(--fg-rgb),.02) 60%),linear-gradient(135deg,var(--card-a),var(--card-b));
+  border:1px solid rgba(var(--k),.35);box-shadow:var(--float-shadow);
+  backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+  animation:twFloat 6s ease-in-out infinite;
+}
+.ld-float .ld-pi{display:grid;place-items:center;flex:0 0 32px;width:32px;height:32px;border-radius:11px;color:rgb(var(--k));background:rgba(var(--k),.14);border:1px solid rgba(var(--k),.4)}
+.ld-float .ld-pi svg{width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+.ld-float b{display:block;font-size:12px;font-weight:800;color:var(--text);line-height:1.2}
+.ld-float span{display:block;margin-top:2px;font-size:10.5px;line-height:1.35;color:var(--muted)}
+.ld-float.gold{--k:227,188,87}.ld-float.blue{--k:96,165,250}.ld-float.green{--k:52,211,153}
+.ld-float.red{--k:248,113,113}.ld-float.violet{--k:167,139,250}.ld-float.teal{--k:45,212,191}
+.ld-float.f2{animation-delay:-1s}.ld-float.f3{animation-delay:-2s}.ld-float.f4{animation-delay:-3s}.ld-float.f5{animation-delay:-4s}.ld-float.f6{animation-delay:-5s}
+
+/* ============ Facts ============ */
+.lx-facts{display:grid;grid-template-columns:repeat(2,1fr);gap:1px;margin:44px 0 0;border:1px solid var(--lx-line);border-radius:20px;overflow:hidden;background:var(--lx-line)}
+.lx-facts div{padding:22px 16px;background:var(--facts-bg);text-align:center}
+.lx-facts b{
+  display:block;font:900 clamp(22px,4vw,34px)/1.1 'Orbitron',system-ui,sans-serif;
+  background:linear-gradient(180deg,var(--gold-hi),var(--gold) 60%,var(--gold-lo));
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+}
+.lx-facts span{display:block;margin-top:6px;font-size:12.5px;color:var(--lx-body)}
+
+/* ============ Marquee ============ */
+.lx-marquee{margin:36px calc(50% - 50vw) 0;padding:15px 0;border-block:1px solid rgba(227,188,87,.18);overflow:hidden;
+  background:linear-gradient(90deg,rgba(227,188,87,.06),rgba(96,165,250,.05),rgba(227,188,87,.06))}
+.lx-mq-run{display:flex;align-items:center;gap:26px;width:max-content;animation:twMq 40s linear infinite}
+.lx-mq-run span{font:800 13px 'Orbitron',system-ui,sans-serif;letter-spacing:.16em;text-transform:uppercase;color:var(--text-soft);white-space:nowrap}
+.lx-mq-run i{width:7px;height:7px;flex:none;transform:rotate(45deg);background:var(--lx-gold);box-shadow:0 0 10px rgba(227,188,87,.8)}
+
+/* ============ Cara ia berfungsi ============ */
+.lx-steps{display:grid;gap:14px}
+.lx-step{position:relative;padding:26px 22px 24px;border:1px solid var(--lx-line);border-radius:22px;background:var(--lx-card);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);overflow:hidden}
+.lx-step::before{content:"";position:absolute;inset:0 0 auto;height:2px;background:linear-gradient(90deg,transparent,var(--lx-gold),transparent);opacity:.7}
+.lx-step em{font:900 italic 42px/1 'Orbitron',system-ui,sans-serif;color:transparent;-webkit-text-stroke:1.2px color-mix(in srgb,var(--gold-ink) 70%,transparent)}
+.lx-step h3{margin:16px 0 8px;font-size:19px;font-weight:800;color:var(--lx-head);letter-spacing:-.01em}
+.lx-step p{margin:0;font-size:15px;line-height:1.6;color:var(--lx-body)}
+
+/* ============ Bento "Dalam app" ============ */
+.lx-bento{display:grid;gap:14px;grid-template-columns:1fr}
+.lx-tile{
+  position:relative;display:flex;flex-direction:column;padding:22px;border:1px solid var(--lx-line);border-radius:24px;
+  background:var(--lx-card);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);overflow:hidden;
+  transition:border-color .25s,transform .25s;
+}
+.lx-tile:hover{border-color:rgba(227,188,87,.4);transform:translateY(-3px)}
+.lx-tag{align-self:flex-start;display:inline-flex;align-items:center;gap:8px;font:700 11px 'JetBrains Mono',ui-monospace,monospace;letter-spacing:.2em;text-transform:uppercase;color:var(--gold-ink)}
+.lx-tile h3{margin:12px 0 8px;font-size:19px;font-weight:800;color:var(--lx-head);letter-spacing:-.01em}
+.lx-tile p{margin:0;font-size:14.5px;line-height:1.6;color:var(--lx-body)}
+.lx-tx{display:flex;flex-direction:column}
+.lx-big{display:grid;gap:20px;align-content:start;align-self:stretch}
+.lx-big h3{font-size:22px}
+/* Reason flip */
+.lx-flip{
+  position:relative;justify-self:center;width:100%;max-width:300px;border-radius:22px;overflow:hidden;
+  border:1px solid rgba(227,188,87,.28);box-shadow:0 20px 50px rgba(0,0,0,.55),0 0 40px rgba(227,188,87,.12);background:#0b0f17;
+}
+.lx-flip svg{display:block;width:100%;height:auto}
+.rf-on{opacity:0;transform-origin:50% 50%;animation:twFlip 6s ease-in-out infinite}
+.lx-flip-k{display:inline-grid;margin-top:16px;font:700 12px 'JetBrains Mono',ui-monospace,monospace;letter-spacing:.18em;text-transform:uppercase}
+.lx-flip-k span{grid-area:1/1;padding:8px 14px;border-radius:999px;border:1px solid}
+.lx-flip-k .off{color:var(--muted);border-color:var(--ghost-line);animation:twKOff 6s linear infinite}
+.lx-flip-k .on{color:var(--gold-ink);border-color:color-mix(in srgb,var(--gold-ink) 55%,transparent);background:color-mix(in srgb,var(--gold-ink) 10%,transparent);animation:twKOn 6s linear infinite}
+/* Chart mini + reasons mini */
+.lx-shot{margin:20px -22px -22px;padding:0 22px;flex:1;display:flex;align-items:flex-start;justify-content:center;overflow:hidden;min-height:200px;
+  background:radial-gradient(60% 70% at 50% 0%,rgba(227,188,87,.16),transparent 70%)}
+.lx-shot-in{width:100%;max-width:380px;border-radius:18px 18px 0 0;border:1px solid rgba(255,255,255,.1);border-bottom:0;overflow:hidden;
+  background:linear-gradient(180deg,rgba(10,14,24,.96),rgba(6,8,14,.98));box-shadow:0 -10px 40px rgba(0,0,0,.5)}
+.lx-shot-in svg{display:block;width:100%;height:auto}
+.lx-tfs{display:flex;gap:5px;padding:10px 12px;border-bottom:1px solid rgba(255,255,255,.07)}
+.lx-tfs span{font:700 9px 'JetBrains Mono',monospace;padding:4px 9px;border-radius:6px;color:#8e8e96;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07)}
+.lx-tfs span.on{color:#e3bc57;background:rgba(227,188,87,.1);border-color:rgba(227,188,87,.45)}
+.lx-reasons{padding:14px;display:grid;gap:8px}
+.lx-reason{display:flex;gap:9px;align-items:flex-start;padding:9px 11px;border-radius:10px;background:rgba(255,255,255,.035);border:1px solid rgba(255,255,255,.07)}
+.lx-reason i{flex:none;display:grid;place-items:center;width:17px;height:17px;margin-top:1px;border-radius:50%;font-style:normal;font-size:9px;color:#34d399;background:rgba(52,211,153,.12);border:1px solid rgba(52,211,153,.4)}
+.lx-reason b{display:block;font-size:11.5px;font-weight:800;color:#f4f4f5}
+.lx-reason span{display:block;margin-top:2px;font-size:10.5px;line-height:1.45;color:#8e8e96}
+/* Kad kecil berwarna */
+.lx-ic{display:grid;place-items:center;width:46px;height:46px;border-radius:14px;--c:227,188,87;background:rgba(var(--c),.12);border:1px solid rgba(var(--c),.4);box-shadow:0 0 24px rgba(var(--c),.18)}
+.lx-ic svg{width:22px;height:22px;fill:none;stroke:rgb(var(--c));stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.lx-ic.green{--c:52,211,153}.lx-ic.red{--c:248,113,113}.lx-ic.teal{--c:45,212,191}.lx-ic.blue{--c:96,165,250}.lx-ic.violet{--c:167,139,250}
+.lx-sm h3{font-size:16px;margin-top:14px}
+.lx-sm p{font-size:13.5px}
+/* ============ Trio "Lagi di TraderWatch" ============ */
+@property --twA{syntax:'<angle>';inherits:false;initial-value:0deg}
+.lx-trio{display:grid;gap:16px}
+.lx-card{
+  --c:227,188,87;--c-ink:rgb(var(--c));
+  position:relative;display:flex;flex-direction:column;min-width:0;border-radius:26px;overflow:hidden;isolation:isolate;
+  background:linear-gradient(180deg,var(--trio-a),var(--trio-b));box-shadow:0 30px 70px rgba(0,0,0,.55);
+  transition:transform .35s cubic-bezier(.2,.7,.2,1),box-shadow .35s;
+}
+:root[data-theme="light"] .lx-card{box-shadow:0 24px 60px rgba(23,23,29,.14)}
+.lx-card.green{--c:52,211,153;--c-ink:#34d399}
+.lx-card.gold{--c:227,188,87;--c-ink:#e3bc57}
+.lx-card.violet{--c:167,139,250;--c-ink:#a78bfa}
+:root[data-theme="light"] .lx-card.green{--c-ink:#0d9e63}
+:root[data-theme="light"] .lx-card.gold{--c-ink:#9a7316}
+:root[data-theme="light"] .lx-card.violet{--c-ink:#6a4bd6}
+.lx-card::before{
+  content:"";position:absolute;inset:0;z-index:3;pointer-events:none;border-radius:inherit;padding:1px;
+  background:conic-gradient(from var(--twA),rgba(var(--c),.08) 0deg,rgba(var(--c),.9) 60deg,rgba(var(--c),.08) 120deg,rgba(var(--fg-rgb),.06) 240deg,rgba(var(--c),.08) 360deg);
+  -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;
+  animation:twSpin 6s linear infinite;
+}
+.lx-card::after{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;opacity:0;transition:opacity .3s;
+  background:radial-gradient(320px circle at var(--mx,50%) var(--my,30%),rgba(var(--c),.16),transparent 70%)}
+.lx-card:hover{transform:translateY(-6px);box-shadow:0 40px 90px rgba(0,0,0,.65),0 0 50px rgba(var(--c),.14)}
+.lx-card:hover::after{opacity:1}
+.lx-vis{position:relative;height:210px;overflow:hidden;border-bottom:1px solid rgba(255,255,255,.06);
+  background:radial-gradient(70% 90% at 50% 0%,rgba(var(--c),.16),transparent 70%),
+  linear-gradient(rgba(255,255,255,.025) 1px,transparent 1px) 0 0/22px 22px,
+  linear-gradient(90deg,rgba(255,255,255,.025) 1px,transparent 1px) 0 0/22px 22px,#07070a}
+.lx-cx{display:flex;flex-direction:column;flex:1;padding:22px 24px 24px}
+.lx-dot{width:7px;height:7px;flex:none;border-radius:50%;background:rgb(var(--c));box-shadow:0 0 10px rgb(var(--c));animation:twBlink 2s infinite}
+.lx-cx .lx-tag{color:var(--c-ink)}
+.lx-cx h3{margin:12px 0 0;font:900 22px/1.15 'Orbitron',system-ui,sans-serif;color:var(--lx-head);letter-spacing:-.01em}
+.lx-cx h3 span{display:block;color:var(--c-ink);text-shadow:0 0 24px rgba(var(--c),.35)}
+.lx-cx p{margin:12px 0 0;flex:1;font-size:14.5px;line-height:1.6;color:var(--lx-body)}
+.lx-pills{display:flex;flex-wrap:wrap;gap:6px;margin:18px 0 0;padding:0;list-style:none}
+.lx-pills li{padding:6px 11px;border-radius:999px;font-size:12px;font-weight:700;color:var(--text-soft);background:rgba(var(--c),.08);border:1px solid rgba(var(--c),.28)}
+.lx-swipe{display:none;margin:6px 0 0;text-align:center;font:700 11px 'JetBrains Mono',monospace;letter-spacing:.2em;text-transform:uppercase;color:var(--lx-faint)}
+.lx-swipe span{display:inline-block;animation:twNudge 1.6s ease-in-out infinite}
+/* Visual prestasi */
+.lxv-perf{padding:14px 16px}
+.lxv-mo{display:flex;justify-content:space-between;align-items:center;font-size:13px;font-weight:800;color:#fff}
+.lxv-mo span{font:900 15px 'Orbitron',sans-serif;color:#34d399;text-shadow:0 0 14px rgba(52,211,153,.5)}
+.lxv-eq{display:block;width:100%;height:74px;margin-top:8px}
+.lxv-eq .area{fill:url(#twEqFill)}
+.lxv-eq .line{fill:none;stroke:#34d399;stroke-width:2;stroke-dasharray:1;stroke-dashoffset:1;animation:twDraw 5s ease-in-out infinite;filter:drop-shadow(0 0 4px rgba(52,211,153,.7))}
+.lxv-week{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;margin-top:8px}
+.lxv-week i{display:grid;place-items:center;height:24px;border-radius:6px;font-style:normal;font-size:9px;font-weight:700;color:#8a8a92;background:#111116}
+.lxv-week i.g{color:#34d399;background:rgba(52,211,153,.12);box-shadow:inset 0 0 0 1px rgba(52,211,153,.5)}
+.lxv-week i.r{color:#f87171;background:rgba(248,113,113,.1);box-shadow:inset 0 0 0 1px rgba(248,113,113,.45)}
+.lxv-week i.t{color:#fff;box-shadow:inset 0 0 0 1.5px #e3bc57;animation:twBlink 1.6s infinite}
+.lxv-week i.g,.lxv-week i.r{animation:twPop 6s ease-out infinite both}
+.lxv-week i:nth-child(2){animation-delay:.15s}.lxv-week i:nth-child(3){animation-delay:.3s}.lxv-week i:nth-child(4){animation-delay:.45s}
+.lxv-week i:nth-child(5){animation-delay:.6s}.lxv-week i:nth-child(6){animation-delay:.75s}.lxv-week i:nth-child(7){animation-delay:.9s}
+.lxv-stats{display:flex;gap:6px;margin-top:10px}
+.lxv-stats div{flex:1;padding:7px 10px;border-radius:10px;background:rgba(16,16,21,.9);border:1px solid rgba(52,211,153,.3)}
+.lxv-stats b{display:block;font:900 14px 'Orbitron',sans-serif;color:#34d399}
+.lxv-stats span{font-size:9.5px;font-weight:700;color:#8a8a92;letter-spacing:.06em;text-transform:uppercase}
+/* Visual belajar */
+.lxv-live svg{position:absolute;inset:14px 0 0;width:100%;height:calc(100% - 14px)}
+.lxv-line{stroke-dasharray:1;stroke-dashoffset:1;animation:twDraw 5s ease-in-out infinite;filter:drop-shadow(0 0 4px rgba(227,188,87,.7))}
+.lxv-badge{position:absolute;left:14px;top:12px;z-index:2;display:flex;align-items:center;gap:6px;padding:3px 8px;border-radius:6px;font-size:10px;font-weight:800;color:#fff;background:#ef4444}
+.lxv-badge::before{content:"";width:6px;height:6px;border-radius:50%;background:#fff;animation:twBlink 1.4s infinite}
+.lxv-lag{position:absolute;left:70px;top:14px;z-index:2;font:700 10px 'JetBrains Mono',monospace;color:#f5d98a}
+.lxv-poster{position:absolute;left:12px;right:12px;bottom:12px;z-index:2;display:flex;align-items:center;gap:10px;padding:9px 10px 9px 12px;border-radius:14px;
+  background:rgba(14,13,10,.9);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border:1px solid rgba(227,188,87,.35)}
+.lxv-nx{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font:700 9px/1.3 'JetBrains Mono',monospace;letter-spacing:.14em;text-transform:uppercase;color:#e3bc57}
+.lxv-cd{display:flex;align-items:center;gap:2px;font:900 14px 'Orbitron',sans-serif;color:#f5d98a;font-variant-numeric:tabular-nums}
+.lxv-cd i{font-style:normal;color:#6b6b73}
+.lxv-remind{padding:7px 10px;border-radius:9px;font-size:11px;font-weight:800;color:#120f07;white-space:nowrap;background:linear-gradient(135deg,#ffe08a,#e3bc57 55%,#c99a2e)}
+/* Visual komuniti */
+.lxv-net svg{position:absolute;left:50%;top:8px;width:300px;height:170px;margin-left:-150px;overflow:visible}
+.lxv-net .ln{stroke:rgba(227,188,87,.28);stroke-width:1}
+.lxv-net .pulse{fill:#ffe08a;filter:drop-shadow(0 0 5px #e3bc57)}
+.lxv-net .fr circle{fill:#101016;stroke:rgba(255,255,255,.18);stroke-width:1}
+.lxv-net .fr.on circle{stroke:#34d399}
+.lxv-net text{font:800 10px 'Orbitron',system-ui,sans-serif;fill:#f4f1e8;text-anchor:middle;dominant-baseline:central}
+.lxv-net .me circle.c{fill:url(#twGg)}
+.lxv-net .me text{font-size:11px;font-weight:900;fill:#120f07}
+.lxv-net .ring{fill:none;stroke:rgba(227,188,87,.55);transform-box:fill-box;transform-origin:center;animation:twRing 3s ease-out infinite}
+.lxv-meter{position:absolute;right:10px;bottom:10px;z-index:2;width:150px;padding:8px 10px;border-radius:12px;background:rgba(16,16,21,.92);border:1px solid rgba(167,139,250,.4)}
+.lxv-meter span{font-size:10px;font-weight:700;color:#d9d2f5}
+.lxv-dots{display:grid;grid-template-columns:repeat(11,1fr);gap:3px;margin-top:6px}
+.lxv-dots i{aspect-ratio:1;border-radius:50%;background:#1b1b22;box-shadow:inset 0 0 0 1px rgba(255,255,255,.1)}
+.lxv-dots i.on{background:#34d399;box-shadow:0 0 6px rgba(52,211,153,.6)}
+
+/* ============ FAQ ============ */
+.lx-faq-l{display:grid;gap:10px;margin:0 auto;max-width:1000px;align-items:start}
+.lx-faq-l details{border-radius:16px;background:var(--lx-card);border:1px solid var(--lx-line);transition:border-color .2s}
+.lx-faq-l details[open]{border-color:rgba(227,188,87,.35)}
+.lx-faq-l summary{display:flex;justify-content:space-between;gap:16px;padding:16px 18px;cursor:pointer;font-size:14.5px;font-weight:700;color:var(--lx-head);list-style:none}
+.lx-faq-l summary::-webkit-details-marker{display:none}
+.lx-faq-l summary::after{content:"+";flex:none;font:400 20px/1 'Inter',sans-serif;color:var(--gold-ink);transition:transform .2s}
+.lx-faq-l details[open] summary::after{transform:rotate(45deg)}
+.lx-faq-l details p{margin:0;padding:0 18px 16px;font-size:14px;line-height:1.6;color:var(--lx-body)}
+.lx-note{max-width:820px;margin:18px auto 0;font-size:12.5px;line-height:1.6;text-align:center;color:var(--lx-faint)}
+
+/* ============ Kaki ============ */
+.lx-foot{display:grid;gap:14px;justify-items:center;margin-top:64px;padding:26px 0 30px;border-top:1px solid var(--lx-line);text-align:center}
+.lx-foot-b{display:flex;align-items:center;gap:10px;color:var(--text)}
+.lx-foot-b svg{width:26px;height:26px}
+.lx-foot-b b{font:800 15px 'Orbitron',system-ui,sans-serif;letter-spacing:.1em}
+.lx-foot-b b i{font:600 italic 16px 'Fraunces',serif;color:var(--gold-ink)}
+.lx-foot-b span{font-size:13px;color:var(--lx-faint)}
+.ld-fine{margin:0;font-size:12.5px;font-weight:700;color:var(--muted)}
+.lx-disc{max-width:860px;margin:0;font-size:11.5px;line-height:1.65;color:var(--lx-faint)}
+.lx-disc b{color:var(--muted)}
+
+/* ============ Dock mudah alih ============ */
+.ld-dock{
+  position:fixed;left:0;right:0;bottom:0;z-index:40;display:none;align-items:center;gap:10px;
+  padding:12px max(16px,env(safe-area-inset-right,0px)) calc(12px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px));
+  background:linear-gradient(180deg,var(--dock-a),var(--dock-b) 30%);
+  transform:translateY(110%);transition:transform .35s cubic-bezier(.2,.7,.2,1);pointer-events:none;
+}
+.ld-dock.on{transform:none;pointer-events:auto}
+.ld-dock .ld-go{flex:1;max-width:none;min-height:52px;font-size:16px}
+.ld-dock-in{min-height:52px;padding:0 20px;border-radius:999px;font:700 14px 'Inter',system-ui,sans-serif;color:var(--text-soft);cursor:pointer;text-decoration:none;
+  display:inline-flex;align-items:center;background:var(--card-a);border:1px solid var(--ghost-line);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+
+/* ============ Reveal (konten kelihatan secara lalai; JS menambah .rv) ============ */
+.rv .lx-rv{opacity:0;transform:translateY(26px);transition:opacity .7s ease,transform .7s cubic-bezier(.2,.7,.2,1)}
+.rv .lx-rv.in{opacity:1;transform:none}
+
+/* ============ Animasi ============ */
+@keyframes twPulse{0%,100%{opacity:1}50%{opacity:.35}}
+@keyframes twBlink{50%{opacity:.25}}
+@keyframes twFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-7px)}}
+@keyframes twTilt{0%,100%{transform:rotateX(8deg) rotateY(-14deg) rotateZ(2deg) translateY(0)}50%{transform:rotateX(5deg) rotateY(11deg) rotateZ(-1deg) translateY(-9px)}}
+@keyframes twMq{to{transform:translateX(-50%)}}
+@keyframes twFlip{0%,38%{opacity:0;transform:scale(.985)}46%,88%{opacity:1;transform:none}96%,100%{opacity:0;transform:scale(.985)}}
+@keyframes twKOn{0%,41.9%{opacity:0}42%,91.9%{opacity:1}92%,100%{opacity:0}}
+@keyframes twKOff{0%,41.9%{opacity:1}42%,91.9%{opacity:0}92%,100%{opacity:1}}
+@keyframes twDraw{0%{stroke-dashoffset:1}30%,90%{stroke-dashoffset:0;opacity:1}100%{stroke-dashoffset:0;opacity:0}}
+@keyframes twPop{0%{transform:scale(.4);opacity:0}8%,92%{transform:none;opacity:1}100%{opacity:0}}
+@keyframes twRing{from{transform:scale(1);opacity:.9}to{transform:scale(2.2);opacity:0}}
+@keyframes twSpin{to{--twA:360deg}}
+@keyframes twNudge{50%{transform:translateX(5px)}}
+
+/* ============ Tablet ============ */
+@media (min-width:601px){
+  .lx-facts{grid-template-columns:repeat(4,1fr)}
+  .lx-steps{grid-template-columns:repeat(3,1fr);gap:18px}
+  .lx-bento{grid-template-columns:repeat(2,1fr)}
+  .lx-faq-l{grid-template-columns:1fr 1fr}
+  .ld-title{font-size:clamp(48px,7vw,64px)}
+  .ld-sub{font-size:17px;max-width:480px}
+  .ld-ctas{flex-direction:row;justify-content:center;flex-wrap:wrap}
+  .ld-go{width:auto;min-width:230px}
+  .ld-in,.ld-tg{width:auto;min-width:190px}
+  .ld-phone{grid-template-columns:1fr;padding:34px 0 16px}
+  .ld-floats{grid-template-columns:repeat(3,1fr);max-width:640px;gap:12px}
+  .ld-float b{font-size:13px}
+  .ld-float span{font-size:11.5px}
+  .lx-trio{grid-template-columns:repeat(3,1fr)}
+}
+/* ============ Desktop ============ */
+@media (min-width:980px){
+  .lx-bento{grid-template-columns:repeat(4,1fr)}
+}
+@media (min-width:900px){
+  .bar-in{padding-left:max(24px,calc((100vw - 1160px)/2));padding-right:max(24px,calc((100vw - 1160px)/2))}
+  .ld-nav{display:flex}
+  .tkr{display:block}
+  .ld-hero{grid-template-columns:1.15fr .85fr;gap:40px;padding:56px 0 26px}
+  .ld-copy{text-align:left;align-items:flex-start}
+  .ld-live{margin-left:0}
+  .ld-ctas{justify-content:flex-start}
+  .ld-title{font-size:clamp(52px,5.4vw,72px)}
+  .ld-sub{font-size:18px}
+  .ld-qr{margin-top:34px}
+  .lx-sec{margin-top:84px}
+  .lx-head{margin-bottom:34px}
+  .lx-big{grid-column:span 2;grid-row:span 2;padding:30px;grid-template-columns:1fr 260px;align-items:center}
+  .lx-big .lx-flip{max-width:260px}
+  .lx-big h3{font-size:26px}
+  .lx-foot{grid-template-columns:auto 1fr;justify-items:start;text-align:left;align-items:center;column-gap:24px}
+  .lx-foot .ld-fine{grid-column:1/-1}
+  .lx-disc{grid-column:1/-1}
+}
+/* ============ Skrin lebar: 6 kad terapung di sisi telefon (gaya TRAXA) ============ */
+@media (min-width:1180px){
+  .ld-hero{grid-template-columns:.88fr 1.12fr;gap:20px;overflow-x:clip}
+  .ld-title{font-size:62px}
+  .ld-phone{display:block;position:relative;height:600px;padding:0;max-width:none}
+  .ld-phone::before{top:50%}
+  .ld-device{position:absolute;left:50%;top:50%;width:260px;margin:0;animation-name:twTiltW}
+  .ld-floats{display:contents}
+  .ld-float{position:absolute;width:162px;max-width:162px;margin:0}
+  .ld-float.f1,.ld-float.f3,.ld-float.f5{right:calc(50% + 140px)}
+  .ld-float.f2,.ld-float.f4,.ld-float.f6{left:calc(50% + 140px)}
+  .ld-float.f1,.ld-float.f2{top:14%}
+  .ld-float.f3,.ld-float.f4{top:43%}
+  .ld-float.f5,.ld-float.f6{top:72%}
+  .ld-float span{white-space:normal}
+}
+@keyframes twTiltW{0%,100%{transform:translate(-50%,-50%) rotateX(8deg) rotateY(-14deg) rotateZ(2deg)}50%{transform:translate(-50%,calc(-50% - 9px)) rotateX(5deg) rotateY(11deg) rotateZ(-1deg)}}
+/* ============ Telefon ============ */
+@media (max-width:600px){
+  .lx-sec{margin-top:64px}
+  .lx-head h2{font-size:23px;line-height:1.2}
+  .ld-hero{gap:8px;padding-top:18px}
+  .ld-kick{letter-spacing:.1em}
+  .ld-title{font-size:clamp(34px,10.4vw,46px)}
+  .ld-live{gap:12px;padding:9px 16px}
+  .ld-live b{font-size:17px}
+  .ld-live span{font-size:11.5px}
+  .ld-qr{display:none}
+  .ld-phone{padding:30px 0 6px}
+  .ld-device{width:min(250px,64vw)}
+  .lx-trio{grid-auto-flow:column;grid-auto-columns:min(84%,380px);overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;padding:4px 0 10px}
+  .lx-trio::-webkit-scrollbar{display:none}
+  .lx-card{scroll-snap-align:center}
+  .lx-swipe{display:block}
+  .lx-facts div{padding:18px 12px}
+  .lx-facts span{font-size:11.5px}
+  .ld-dock{display:flex}
+  main{padding-bottom:86px}
+  .lx-foot{margin-top:44px;padding-bottom:20px}
+}
+/* ============ Gerakan dikurangkan ============ */
+@media (prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  .rv .lx-rv{opacity:1;transform:none;transition:none}
+  .lx-mq-run,.ld-float,.ld-device,.ld-kick i,.ld-live-dot,.tkr-dot,.ph-live i,
+  .lx-card::before,.lx-dot,.lxv-badge::before,.lxv-line,.lxv-eq .line,.lxv-week i,.lxv-net .ring,.lx-swipe span{animation:none}
+  .lxv-line,.lxv-eq .line{stroke-dashoffset:0}
+  .lxv-net .pulse{display:none}
+  .rf-on{animation:none;opacity:1}
+  .lx-flip-k .off{display:none}
+  .lx-flip-k .on{animation:none}
+  .lx-tile,.lx-card,.btn{transition:none}
+}
+</style>
+</head>
+<body>
+<a class="skip" href="#kandungan">Langkau ke kandungan</a>
+
+<!-- Definisi SVG dikongsi (gradien emas & kumpulan candle) -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <linearGradient id="twGold" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#ffe08a"/><stop offset=".55" stop-color="#e3bc57"/><stop offset="1" stop-color="#c99a2e"/>
+    </linearGradient>
+    <radialGradient id="twGg" cx="35%" cy="30%">
+      <stop offset="0" stop-color="#fff1bf"/><stop offset=".55" stop-color="#e3bc57"/><stop offset="1" stop-color="#a87a1c"/>
+    </radialGradient>
+    <linearGradient id="twEqFill" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="rgba(52,211,153,.35)"/><stop offset="1" stop-color="rgba(52,211,153,0)"/>
+    </linearGradient>
+    <!-- Candle untuk carta Reason (300x420): junam ke zon POI, kemudian reversal menaik -->
+    <g id="twCandles">
+      <g stroke-width="1.2">
+        <g stroke="#f87171" fill="#f87171">
+          <line x1="21.5" y1="70" x2="21.5" y2="100"/><rect x="18" y="76" width="7" height="18" rx="1"/>
+          <line x1="33" y1="82" x2="33" y2="112"/><rect x="29.5" y="88" width="7" height="18" rx="1"/>
+          <line x1="44.5" y1="96" x2="44.5" y2="128"/><rect x="41" y="102" width="7" height="20" rx="1"/>
+          <line x1="56" y1="110" x2="56" y2="140"/><rect x="52.5" y="116" width="7" height="18" rx="1"/>
+          <line x1="67.5" y1="126" x2="67.5" y2="156"/><rect x="64" y="132" width="7" height="18" rx="1"/>
+          <line x1="79" y1="140" x2="79" y2="172"/><rect x="75.5" y="146" width="7" height="20" rx="1"/>
+          <line x1="90.5" y1="158" x2="90.5" y2="186"/><rect x="87" y="164" width="7" height="16" rx="1"/>
+          <line x1="102" y1="172" x2="102" y2="204"/><rect x="98.5" y="178" width="7" height="20" rx="1"/>
+          <line x1="113.5" y1="190" x2="113.5" y2="222"/><rect x="110" y="196" width="7" height="20" rx="1"/>
+          <line x1="125" y1="208" x2="125" y2="238"/><rect x="121.5" y="214" width="7" height="18" rx="1"/>
+          <line x1="136.5" y1="226" x2="136.5" y2="258"/><rect x="133" y="232" width="7" height="20" rx="1"/>
+          <line x1="148" y1="244" x2="148" y2="276"/><rect x="144.5" y="250" width="7" height="20" rx="1"/>
+          <line x1="159.5" y1="262" x2="159.5" y2="296"/><rect x="156" y="268" width="7" height="22" rx="1"/>
+          <line x1="171" y1="280" x2="171" y2="312"/><rect x="167.5" y="286" width="7" height="20" rx="1"/>
+          <line x1="182.5" y1="292" x2="182.5" y2="318"/><rect x="179" y="298" width="7" height="14" rx="1"/>
+        </g>
+        <g stroke="#34d399" fill="#34d399">
+          <line x1="194" y1="286" x2="194" y2="314"/><rect x="190.5" y="292" width="7" height="14" rx="1"/>
+          <line x1="205.5" y1="268" x2="205.5" y2="300"/><rect x="202" y="274" width="7" height="20" rx="1"/>
+          <line x1="217" y1="246" x2="217" y2="280"/><rect x="213.5" y="252" width="7" height="22" rx="1"/>
+          <line x1="228.5" y1="226" x2="228.5" y2="262"/><rect x="225" y="232" width="7" height="24" rx="1"/>
+          <line x1="240" y1="206" x2="240" y2="244"/><rect x="236.5" y="212" width="7" height="26" rx="1"/>
+          <line x1="251.5" y1="196" x2="251.5" y2="232"/><rect x="248" y="202" width="7" height="24" rx="1"/>
+          <line x1="263" y1="188" x2="263" y2="224"/><rect x="259.5" y="194" width="7" height="24" rx="1"/>
+          <line x1="274.5" y1="182" x2="274.5" y2="216"/><rect x="271" y="188" width="7" height="22" rx="1"/>
+          <line x1="286" y1="176" x2="286" y2="210"/><rect x="282.5" y="182" width="7" height="22" rx="1"/>
+        </g>
+      </g>
+    </g>
+  </defs>
+</svg>
+
+<header class="bar">
+  <div class="bar-in">
+    <a class="brand" href="#hero" aria-label="TraderWatch — halaman utama">
+      <svg viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="9" fill="url(#twGold)"/><g stroke="#120f07" stroke-width="2.2" stroke-linecap="round"><path d="M10 7v18M16 5v22M22 9v14"/></g><rect x="7.4" y="12" width="5.2" height="7" rx="1.2" fill="#120f07"/><rect x="13.4" y="9" width="5.2" height="9" rx="1.2" fill="#120f07"/><rect x="19.4" y="14" width="5.2" height="6" rx="1.2" fill="#120f07"/></svg>
+      <span class="wordmark">Trader<i>W</i>atch</span>
+    </a>
+    <div class="bar-end">
+      <nav class="ld-nav" aria-label="Akaun">
+        <a class="ld-nav-in" href="https://traderwatch.org/login.html">Log masuk</a>
+        <a class="ld-nav-go" href="https://traderwatch.org/login.html?mode=signup">Mula percuma</a>
+      </nav>
+      <button class="icon-btn" id="themeBtn" type="button" aria-label="Tukar ke mod cerah" title="Mod cerah">
+        <svg class="to-light" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+        <svg class="to-dark" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/></svg>
+      </button>
+      <span class="lang-badge" role="status" aria-label="Bahasa: Bahasa Melayu">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.6 3.8 5.6 3.8 9s-1.3 6.4-3.8 9c-2.5-2.6-3.8-5.6-3.8-9S9.5 5.6 12 3z"/></svg>
+        <b>BM</b>
+      </span>
+    </div>
+  </div>
+  <div class="tkr" aria-label="Harga pasaran">
+    <div class="tkr-in">
+      <span class="tkr-dot" aria-hidden="true"></span>
+      <span><b>XAU/USD</b> 4,008.81 <span class="up" aria-hidden="true">▲</span></span>
+      <span><b>XAG/USD</b> 41.803 <span class="up" aria-hidden="true">▲</span></span>
+      <span><b>BTC/USD</b> 63,408 <span class="dn" aria-hidden="true">▼</span></span>
+    </div>
+  </div>
+</header>
+
+<main id="kandungan">
+  <!-- ============ Hero ============ -->
+  <section class="ld-hero" id="hero" aria-labelledby="ldTitle">
+    <canvas class="ld-ribbon" id="ldRibbon" aria-hidden="true"></canvas>
+    <div class="ld-copy">
+      <div class="ld-kick"><i aria-hidden="true"></i><span>Signal langsung</span><b>Gold · Silver · Bitcoin</b></div>
+      <h1 class="ld-title" id="ldTitle">Signal trading,<br><span>betul-betul jadi.</span></h1>
+      <p class="ld-sub">Setup di telefon anda sebaik harga menyentuh zon. Entry, stop loss &amp; tiga take profit — berserta sebabnya. Risiko anda, setiap keputusan direkod.</p>
+      <div class="ld-live" role="status" aria-label="11 ahli di TraderWatch, 11 aktif hari ini">
+        <div><b data-count="11">11</b><span>ahli di TraderWatch</span></div>
+        <i aria-hidden="true"></i>
+        <div><b data-count="11">11</b><span><em class="ld-live-dot" aria-hidden="true"></em>aktif hari ini</span></div>
+      </div>
+      <div class="ld-ctas">
+        <a class="btn primary ld-go" id="heroGo" href="https://traderwatch.org/login.html?mode=signup">Mula percuma</a>
+        <a class="btn ghost ld-in" href="https://traderwatch.org/login.html">Saya ada akaun</a>
+        <a class="ld-tg" href="https://t.me/Traderwatchmembershipbot" target="_blank" rel="noopener">
+          <svg class="tg-logo" viewBox="3 5 15.5 15" aria-hidden="true"><path d="M16.906 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg>
+          <span>Ikuti TraderWatch di Telegram</span>
+        </a>
+      </div>
+      <div class="ld-qr">
+        <img src="./qr.png" alt="Kod QR untuk membuka TraderWatch di telefon" width="96" height="96">
+        <div><b>Terbaik di telefon</b><span>Imbas untuk buka TraderWatch, kemudian tambah ke skrin utama untuk alert segera.</span></div>
+      </div>
+    </div>
+    <div class="ld-phone">
+      <div class="ld-device" role="img" aria-label="Skrin app TraderWatch: signal XAU/USD BUY dengan zon entry, stop loss, tiga take profit dan chart beranotasi">
+        <div class="ld-notch" aria-hidden="true"></div>
+        <div class="ld-screen" aria-hidden="true">
+          <div class="ph-status"><span>9:41</span><svg viewBox="0 0 34 10"><rect x="0" y="5" width="2.5" height="5" rx=".6"/><rect x="4" y="3.5" width="2.5" height="6.5" rx=".6"/><rect x="8" y="2" width="2.5" height="8" rx=".6"/><rect x="12" y="0" width="2.5" height="10" rx=".6"/><path d="M19 4.2a6 6 0 0 1 7 0l-1.2 1.5a4 4 0 0 0-4.6 0zM21 6.8a2.6 2.6 0 0 1 3 0l-1.5 2z"/><rect x="28" y="1.5" width="5.5" height="7" rx="1.4" fill="none" stroke="#d6d6dc" stroke-width=".9"/><rect x="29" y="2.5" width="3" height="5" rx=".7"/></svg></div>
+          <div class="ph-head"><span class="ph-word">Trader<i>W</i>atch</span><span class="ph-live"><i></i>LIVE</span></div>
+          <div class="ph-tabs"><span class="ph-tab on">XAU/USD</span><span class="ph-tab">XAG/USD</span><span class="ph-tab">BTC/USD</span></div>
+          <div class="ph-card">
+            <div class="ph-row"><span class="ph-pair">XAU/USD</span><span class="ph-tf">M15</span><span class="ph-buy">BUY</span></div>
+            <div class="ph-price"><b>4,008.81</b><span>▲ dalam zon</span></div>
+            <div class="ph-zone"><small>Zon entry</small><b>4,006.50 – 4,009.00</b></div>
+            <div class="ph-levels">
+              <div class="ph-lv sl"><small>SL</small><b>3,998.20</b></div>
+              <div class="ph-lv tp"><small>TP1</small><b>4,019.30</b></div>
+              <div class="ph-lv tp"><small>TP2</small><b>4,028.60</b></div>
+              <div class="ph-lv tp"><small>TP3</small><b>4,041.00</b></div>
+            </div>
+            <div class="ph-risk"><span>Tinggi</span><span class="on">Sederhana</span><span>Rendah</span></div>
+            <div class="ph-why"><b>Sebab</b><span>POI M15 · CHoCH bullish · FVG sedang diisi</span></div>
+          </div>
+          <div class="ph-chart">
+            <svg viewBox="0 0 260 140">
+              <g stroke="rgba(255,255,255,.05)" stroke-width="1">
+                <line x1="0" y1="28" x2="260" y2="28"/><line x1="0" y1="56" x2="260" y2="56"/><line x1="0" y1="84" x2="260" y2="84"/><line x1="0" y1="112" x2="260" y2="112"/>
+              </g>
+              <rect x="118" y="88" width="142" height="16" fill="rgba(227,188,87,.14)"/>
+              <line x1="118" y1="88" x2="260" y2="88" stroke="rgba(227,188,87,.5)" stroke-dasharray="3 3" stroke-width=".8"/>
+              <line x1="118" y1="104" x2="260" y2="104" stroke="rgba(227,188,87,.5)" stroke-dasharray="3 3" stroke-width=".8"/>
+              <line x1="118" y1="118" x2="260" y2="118" stroke="#f87171" stroke-dasharray="4 3" stroke-width=".9"/>
+              <line x1="118" y1="64" x2="260" y2="64" stroke="#34d399" stroke-dasharray="4 3" stroke-width=".9"/>
+              <line x1="118" y1="44" x2="260" y2="44" stroke="#34d399" stroke-dasharray="4 3" stroke-width=".9"/>
+              <line x1="118" y1="24" x2="260" y2="24" stroke="#34d399" stroke-dasharray="4 3" stroke-width=".9"/>
+              <g font-family="JetBrains Mono, monospace" font-size="6.5" font-weight="700">
+                <text x="121" y="116" fill="#f87171">SL 3,998.20</text>
+                <text x="121" y="62" fill="#34d399">TP1 4,019.30</text>
+                <text x="121" y="42" fill="#34d399">TP2 4,028.60</text>
+                <text x="121" y="22" fill="#34d399">TP3 4,041.00</text>
+                <text x="121" y="86" fill="#e3bc57">ZON ENTRY</text>
+              </g>
+              <g stroke-width="1">
+                <g stroke="#f87171" fill="#f87171">
+                  <line x1="13" y1="14" x2="13" y2="30"/><rect x="10" y="18" width="6" height="8" rx="1"/>
+                  <line x1="26.5" y1="22" x2="26.5" y2="40"/><rect x="23.5" y="26" width="6" height="10" rx="1"/>
+                  <line x1="40" y1="32" x2="40" y2="52"/><rect x="37" y="36" width="6" height="12" rx="1"/>
+                  <line x1="53.5" y1="44" x2="53.5" y2="64"/><rect x="50.5" y="48" width="6" height="12" rx="1"/>
+                  <line x1="67" y1="56" x2="67" y2="76"/><rect x="64" y="60" width="6" height="12" rx="1"/>
+                  <line x1="80.5" y1="68" x2="80.5" y2="88"/><rect x="77.5" y="72" width="6" height="12" rx="1"/>
+                  <line x1="94" y1="80" x2="94" y2="100"/><rect x="91" y="84" width="6" height="12" rx="1"/>
+                  <line x1="107.5" y1="88" x2="107.5" y2="108"/><rect x="104.5" y="92" width="6" height="12" rx="1"/>
+                  <line x1="121" y1="94" x2="121" y2="112"/><rect x="118" y="98" width="6" height="10" rx="1"/>
+                </g>
+                <g stroke="#34d399" fill="#34d399">
+                  <line x1="134.5" y1="90" x2="134.5" y2="110"/><rect x="131.5" y="94" width="6" height="12" rx="1"/>
+                  <line x1="148" y1="78" x2="148" y2="100"/><rect x="145" y="82" width="6" height="14" rx="1"/>
+                  <line x1="161.5" y1="66" x2="161.5" y2="90"/><rect x="158.5" y="70" width="6" height="16" rx="1"/>
+                  <line x1="175" y1="56" x2="175" y2="78"/><rect x="172" y="60" width="6" height="14" rx="1"/>
+                  <line x1="188.5" y1="46" x2="188.5" y2="68"/><rect x="185.5" y="50" width="6" height="14" rx="1"/>
+                  <line x1="202" y1="84" x2="202" y2="102"/><rect x="199" y="88" width="6" height="10" rx="1"/>
+                  <line x1="215.5" y1="80" x2="215.5" y2="100"/><rect x="212.5" y="84" width="6" height="12" rx="1"/>
+                </g>
+                <g stroke="#f87171" fill="#f87171"><line x1="229" y1="82" x2="229" y2="102"/><rect x="226" y="86" width="6" height="12" rx="1"/></g>
+                <g stroke="#34d399" fill="#34d399"><line x1="242.5" y1="78" x2="242.5" y2="100"/><rect x="239.5" y="82" width="6" height="14" rx="1"/></g>
+              </g>
+              <line x1="245" y1="96" x2="260" y2="96" stroke="#e3bc57" stroke-width=".9" stroke-dasharray="2 2"/>
+              <rect x="222" y="90" width="38" height="11" rx="3" fill="#e3bc57"/>
+              <text x="241" y="98" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="6.5" font-weight="700" fill="#120f07">4,008.81</text>
+            </svg>
+          </div>
+          <div class="ph-trend"><span>M15 <b class="u">▲</b></span><span>H1 <b class="u">▲</b></span><span>H4 <b class="d">▼</b></span><span>D1 <b class="u">▲</b></span></div>
+          <div class="ph-nav">
+            <span class="on"><svg viewBox="0 0 24 24"><path d="M13 2 4 14h7l-1 8 9-12h-7z"/></svg>Signal</span>
+            <span><svg viewBox="0 0 24 24"><path d="M3 17l5-5 4 4 8-8M15 8h5v5"/></svg>Chart</span>
+            <span><svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/><path d="M4 20h16"/></svg>Rekod</span>
+            <span><svg viewBox="0 0 24 24"><circle cx="12" cy="8.5" r="4"/><path d="M4 20.5c1.3-4 4.4-6 8-6s6.7 2 8 6"/></svg>Saya</span>
+          </div>
+        </div>
+      </div>
+      <div class="ld-floats">
+        <div class="ld-float f1 gold"><i class="ld-pi"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M13 2 4 14h7l-1 8 9-12h-7z"/></svg></i><div><b>Setup segera</b><span>Dihantar sebaik harga menyentuh zon</span></div></div>
+        <div class="ld-float f2 blue"><i class="ld-pi"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 18h4V9H4zM10 18h4V5h-4zM16 18h4v-6h-4z"/></svg></i><div><b>Risiko anda</b><span>Entry tinggi, sederhana atau rendah</span></div></div>
+        <div class="ld-float f3 green"><i class="ld-pi"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></i><div><b>Tiada dipadam</b><span>Setiap keputusan direkod</span></div></div>
+        <div class="ld-float f4 red"><i class="ld-pi"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h13v14H6a2 2 0 0 1-2-2zM17 9h3v8a2 2 0 0 1-2 2M7 9h7M7 13h7M7 16h4"/></svg></i><div><b>Sebab entry</b><span>Fahami struktur di sebalik setup</span></div></div>
+        <div class="ld-float f5 violet"><i class="ld-pi"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 17l5-5 4 4 8-8M15 8h5v5"/></svg></i><div><b>Trend langsung</b><span>Setiap timeframe sepintas lalu</span></div></div>
+        <div class="ld-float f6 teal"><i class="ld-pi"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v10m0 0 4-4m-4 4-4-4M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg></i><div><b>PWA offline</b><span>Install &amp; guna tanpa internet</span></div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ Facts ============ -->
+  <div class="lx-facts lx-rv">
+    <div><b>3</b><span>pasaran: gold, silver, bitcoin</span></div>
+    <div><b>130+</b><span>signal diterbitkan</span></div>
+    <div><b>M1–D1</b><span>setiap timeframe</span></div>
+    <div><b>19 Okt</b><span>2026 · rekod bermula</span></div>
+  </div>
+
+  <!-- ============ Marquee ============ -->
+  <div class="lx-marquee" aria-hidden="true"><div class="lx-mq-run">
+    <span>Setup segera</span><i></i><span>Entry zone, SL, TP1–TP3</span><i></i><span>Sebab di sebalik setiap setup</span><i></i><span>Chart langsung</span><i></i><span>Perlindungan break even</span><i></i><span>Tiada dipadam</span><i></i>
+    <span>Setup segera</span><i></i><span>Entry zone, SL, TP1–TP3</span><i></i><span>Sebab di sebalik setiap setup</span><i></i><span>Chart langsung</span><i></i><span>Perlindungan break even</span><i></i><span>Tiada dipadam</span><i></i>
+  </div></div>
+
+  <!-- ============ Cara ia berfungsi ============ -->
+  <section class="lx-sec lx-how" id="cara" aria-labelledby="lxHowT">
+    <div class="lx-head lx-rv"><span class="lx-k">Cara ia berfungsi</span><h2 id="lxHowT">Dari chart ke telefon anda dalam beberapa saat</h2></div>
+    <div class="lx-steps">
+      <article class="lx-step lx-rv"><em>01</em><h3>Harga menyentuh zon</h3><p>TraderWatch mengawasi gold, silver dan bitcoin pada setiap timeframe, dari M1 hingga D1, sepanjang hari.</p></article>
+      <article class="lx-step lx-rv"><em>02</em><h3>Setup tiba di telefon</h3><p>Entry zone, stop loss dan tiga take profit, berserta sebab ia dihantar. Pilih entry tinggi, sederhana atau rendah mengikut risiko anda.</p></article>
+      <article class="lx-step lx-rv"><em>03</em><h3>Direkod hingga akhir</h3><p>Untung, break even atau SL — setiap keputusan kekal dalam rekod. Tiada yang dipadam.</p></article>
+    </div>
+  </section>
+  <!-- ============ Bento: Dalam app ============ -->
+  <section class="lx-sec" id="app" aria-labelledby="lxFtT">
+    <div class="lx-head lx-rv"><span class="lx-k">Dalam app</span><h2 id="lxFtT">Semua yang anda perlukan untuk trade dengan plan</h2></div>
+    <div class="lx-bento">
+      <article class="lx-tile lx-big lx-rv">
+        <div class="lx-tx">
+          <span class="lx-tag">Reason</span>
+          <h3>Lihat kenapa, bukan sekadar apa</h3>
+          <p>Hidupkan Reason dan chart menunjukkan struktur di sebalik setup: break, change of character, dan zon yang harga sedang isi.</p>
+          <div class="lx-flip-k" aria-hidden="true"><span class="off">Reason off</span><span class="on">Reason on</span></div>
+        </div>
+        <div class="lx-flip">
+          <svg viewBox="0 0 300 420" role="img" aria-label="Chart XAU/USD: Reason off memaparkan candlestick polos; Reason on menambah zon POI, garisan struktur, entry, SL dan TP berlabel">
+            <rect width="300" height="420" fill="#0b0f17"/>
+            <g stroke="rgba(255,255,255,.045)" stroke-width="1">
+              <line x1="0" y1="60" x2="300" y2="60"/><line x1="0" y1="120" x2="300" y2="120"/><line x1="0" y1="180" x2="300" y2="180"/><line x1="0" y1="240" x2="300" y2="240"/><line x1="0" y1="300" x2="300" y2="300"/><line x1="0" y1="360" x2="300" y2="360"/>
+              <line x1="60" y1="0" x2="60" y2="420"/><line x1="120" y1="0" x2="120" y2="420"/><line x1="180" y1="0" x2="180" y2="420"/><line x1="240" y1="0" x2="240" y2="420"/>
+            </g>
+            <text x="8" y="16" font-family="JetBrains Mono, monospace" font-size="9" fill="#5b5b66">XAU/USD · M15</text>
+            <!-- Reason off: candle polos + harga semasa -->
+            <g class="rf-off">
+              <use href="#twCandles"/>
+              <line x1="286" y1="204" x2="300" y2="204" stroke="#d6d6dc" stroke-width="1" stroke-dasharray="3 3"/>
+            </g>
+            <!-- Reason on: struktur + zon + aras berlabel -->
+            <g class="rf-on">
+              <rect x="150" y="280" width="150" height="34" fill="rgba(227,188,87,.13)"/>
+              <line x1="150" y1="280" x2="300" y2="280" stroke="rgba(227,188,87,.55)" stroke-dasharray="4 3"/>
+              <line x1="150" y1="314" x2="300" y2="314" stroke="rgba(227,188,87,.55)" stroke-dasharray="4 3"/>
+              <line x1="20" y1="64" x2="172" y2="282" stroke="rgba(214,214,220,.5)" stroke-dasharray="5 4" stroke-width="1.2"/>
+              <line x1="104" y1="252" x2="216" y2="252" stroke="#a78bfa" stroke-width="1.2" stroke-dasharray="5 4"/>
+              <rect x="196" y="246" width="20" height="24" fill="rgba(167,139,250,.14)" stroke="rgba(167,139,250,.5)" stroke-width=".8"/>
+              <line x1="140" y1="292" x2="300" y2="292" stroke="#e3bc57" stroke-width="1.2" stroke-dasharray="5 4"/>
+              <line x1="140" y1="330" x2="300" y2="330" stroke="#f87171" stroke-width="1.2" stroke-dasharray="5 4"/>
+              <line x1="140" y1="220" x2="300" y2="220" stroke="#34d399" stroke-width="1.2" stroke-dasharray="5 4"/>
+              <line x1="140" y1="170" x2="300" y2="170" stroke="#34d399" stroke-width="1.2" stroke-dasharray="5 4"/>
+              <line x1="140" y1="120" x2="300" y2="120" stroke="#34d399" stroke-width="1.2" stroke-dasharray="5 4"/>
+              <use href="#twCandles"/>
+              <g font-family="JetBrains Mono, monospace" font-size="8.5" font-weight="700">
+                <text x="154" y="276" fill="#e3bc57">POI M15</text>
+                <text x="106" y="248" fill="#a78bfa">CHoCH</text>
+                <text x="219" y="243" fill="#a78bfa">FVG</text>
+                <text x="144" y="288" fill="#e3bc57">ENTRY 4,008.80</text>
+                <text x="144" y="326" fill="#f87171">SL 3,998.20</text>
+                <text x="144" y="216" fill="#34d399">TP1 4,019.30</text>
+                <text x="144" y="166" fill="#34d399">TP2 4,028.60</text>
+                <text x="144" y="116" fill="#34d399">TP3 4,041.00</text>
+              </g>
+              <line x1="286" y1="204" x2="300" y2="204" stroke="#34d399" stroke-width="1" stroke-dasharray="3 3"/>
+              <rect x="244" y="197" width="52" height="13" rx="3" fill="#34d399"/>
+              <text x="270" y="206.5" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="8" font-weight="700" fill="#06281c">4,019.30</text>
+            </g>
+          </svg>
+        </div>
+      </article>
+      <article class="lx-tile lx-rv">
+        <div class="lx-tx"><span class="lx-tag">Live</span><h3>Chart langsung, setiap timeframe</h3><p>Zon, target dan harga bergerak masa nyata, dari M1 hingga D1.</p></div>
+        <div class="lx-shot"><div class="lx-shot-in">
+          <div class="lx-tfs"><span>M5</span><span class="on">M15</span><span>H1</span><span>H4</span><span>D1</span></div>
+          <svg viewBox="0 0 340 190" role="img" aria-label="Chart langsung XAU/USD dengan zon entry dan tiga target">
+            <rect width="340" height="190" fill="rgba(8,11,19,.6)"/>
+            <g stroke="rgba(255,255,255,.05)"><line x1="0" y1="40" x2="340" y2="40"/><line x1="0" y1="80" x2="340" y2="80"/><line x1="0" y1="120" x2="340" y2="120"/><line x1="0" y1="160" x2="340" y2="160"/></g>
+            <rect x="180" y="118" width="160" height="22" fill="rgba(227,188,87,.13)"/>
+            <line x1="180" y1="118" x2="340" y2="118" stroke="rgba(227,188,87,.5)" stroke-dasharray="4 3"/>
+            <line x1="180" y1="140" x2="340" y2="140" stroke="rgba(227,188,87,.5)" stroke-dasharray="4 3"/>
+            <line x1="180" y1="162" x2="340" y2="162" stroke="#f87171" stroke-dasharray="4 3"/>
+            <line x1="180" y1="86" x2="340" y2="86" stroke="#34d399" stroke-dasharray="4 3"/>
+            <line x1="180" y1="56" x2="340" y2="56" stroke="#34d399" stroke-dasharray="4 3"/>
+            <line x1="180" y1="26" x2="340" y2="26" stroke="#34d399" stroke-dasharray="4 3"/>
+            <g font-family="JetBrains Mono, monospace" font-size="8" font-weight="700">
+              <text x="184" y="158" fill="#f87171">SL</text>
+              <text x="184" y="82" fill="#34d399">TP1</text>
+              <text x="184" y="52" fill="#34d399">TP2</text>
+              <text x="184" y="22" fill="#34d399">TP3</text>
+              <text x="184" y="114" fill="#e3bc57">ZON ENTRY</text>
+            </g>
+            <g stroke-width="1.1">
+              <g stroke="#f87171" fill="#f87171">
+                <line x1="16" y1="20" x2="16" y2="44"/><rect x="12" y="26" width="8" height="12" rx="1"/>
+                <line x1="34" y1="32" x2="34" y2="58"/><rect x="30" y="38" width="8" height="14" rx="1"/>
+                <line x1="52" y1="46" x2="52" y2="72"/><rect x="48" y="52" width="8" height="14" rx="1"/>
+                <line x1="70" y1="60" x2="70" y2="88"/><rect x="66" y="66" width="8" height="16" rx="1"/>
+                <line x1="88" y1="76" x2="88" y2="104"/><rect x="84" y="82" width="8" height="16" rx="1"/>
+                <line x1="106" y1="92" x2="106" y2="120"/><rect x="102" y="98" width="8" height="16" rx="1"/>
+                <line x1="124" y1="106" x2="124" y2="134"/><rect x="120" y="112" width="8" height="16" rx="1"/>
+                <line x1="142" y1="116" x2="142" y2="142"/><rect x="138" y="122" width="8" height="14" rx="1"/>
+                <line x1="160" y1="122" x2="160" y2="146"/><rect x="156" y="128" width="8" height="12" rx="1"/>
+              </g>
+              <g stroke="#34d399" fill="#34d399">
+                <line x1="178" y1="118" x2="178" y2="144"/><rect x="174" y="124" width="8" height="14" rx="1"/>
+                <line x1="196" y1="102" x2="196" y2="132"/><rect x="192" y="108" width="8" height="18" rx="1"/>
+                <line x1="214" y1="88" x2="214" y2="118"/><rect x="210" y="94" width="8" height="18" rx="1"/>
+                <line x1="232" y1="74" x2="232" y2="104"/><rect x="228" y="80" width="8" height="18" rx="1"/>
+                <line x1="250" y1="62" x2="250" y2="92"/><rect x="246" y="68" width="8" height="18" rx="1"/>
+                <line x1="268" y1="104" x2="268" y2="130"/><rect x="264" y="110" width="8" height="14" rx="1"/>
+                <line x1="286" y1="100" x2="286" y2="128"/><rect x="282" y="106" width="8" height="16" rx="1"/>
+              </g>
+              <g stroke="#f87171" fill="#f87171"><line x1="304" y1="104" x2="304" y2="130"/><rect x="300" y="110" width="8" height="14" rx="1"/></g>
+              <g stroke="#34d399" fill="#34d399"><line x1="322" y1="98" x2="322" y2="128"/><rect x="318" y="104" width="8" height="18" rx="1"/></g>
+            </g>
+            <polyline class="lxv-line" pathLength="1" fill="none" stroke="#e3bc57" stroke-width="1.6" points="16,32 34,45 52,59 70,74 88,90 106,106 124,120 142,129 160,134 178,131 196,117 214,103 232,89 250,77 268,117 286,114 304,117 322,113"/>
+            <line x1="326" y1="113" x2="340" y2="113" stroke="#e3bc57" stroke-width="1" stroke-dasharray="3 3"/>
+          </svg>
+        </div></div>
+      </article>
+      <article class="lx-tile lx-rv">
+        <div class="lx-tx"><span class="lx-tag">Jelas</span><h3>Setiap setup dijelaskan</h3><p>Trend pada setiap timeframe, struktur dan confluence, dalam bahasa mudah.</p></div>
+        <div class="lx-shot"><div class="lx-shot-in">
+          <div class="lx-reasons">
+            <div class="lx-reason"><i>✓</i><div><b>Trend H1 menaik</b><span>Higher high &amp; higher low sesi London.</span></div></div>
+            <div class="lx-reason"><i>✓</i><div><b>CHoCH M15 dalam zon POI</b><span>Struktur berubah di zon permintaan.</span></div></div>
+            <div class="lx-reason"><i>✓</i><div><b>FVG sedang diisi</b><span>Jurang nilai saksama belum diisi.</span></div></div>
+            <div class="lx-reason"><i>✓</i><div><b>Confluence D1</b><span>Support harian belum diuji.</span></div></div>
+          </div>
+        </div></div>
+      </article>
+      <article class="lx-tile lx-sm lx-rv"><i class="lx-ic"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M13 2 4 14h7l-1 8 9-12h-7z"/></svg></i><h3>Setup push segera</h3><p>Di telefon anda sebaik harga sampai ke zon.</p></article>
+      <article class="lx-tile lx-sm lx-rv"><i class="lx-ic green"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l8 3v6c0 4.5-3.4 8.3-8 9-4.6-.7-8-4.5-8-9V6l8-3z"/><path d="M8.5 12.5l2.5 2.5 4.5-5"/></svg></i><h3>Tiada dipadam</h3><p>Untung, break even dan rugi semua kekal dalam sejarah.</p></article>
+      <article class="lx-tile lx-sm lx-rv"><i class="lx-ic red"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h13v14H6a2 2 0 0 1-2-2zM17 9h3v8a2 2 0 0 1-2 2M7 9h7M7 13h7M7 16h4"/></svg></i><h3>Sebab entry</h3><p>Struktur dan confluence di sebalik setiap setup, dalam bahasa mudah.</p></article>
+      <article class="lx-tile lx-sm lx-rv"><i class="lx-ic violet"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 17l5-5 4 4 8-8M15 8h5v5"/></svg></i><h3>Trend langsung</h3><p>Arah setiap timeframe, dari M1 hingga D1, sepintas lalu.</p></article>
+      <article class="lx-tile lx-sm lx-rv"><i class="lx-ic blue"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 18h4V9H4zM10 18h4V5h-4zM16 18h4v-6h-4z"/></svg></i><h3>Risiko anda</h3><p>Entry tinggi, sederhana atau rendah — setiap satu dengan SL sendiri.</p></article>
+      <article class="lx-tile lx-sm lx-rv"><i class="lx-ic teal"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v10m0 0 4-4m-4 4-4-4M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg></i><h3>PWA offline</h3><p>Install di skrin utama, guna walaupun tanpa internet.</p></article>
+    </div>
+  </section>
+  <!-- ============ Trio: Lagi di TraderWatch ============ -->
+  <section class="lx-sec lx-more" id="lagi" aria-labelledby="lxMoreT">
+    <div class="lx-head lx-rv"><span class="lx-k">Lagi di TraderWatch</span><h2 id="lxMoreT">Prestasi, belajar dan komuniti</h2></div>
+    <div class="lx-trio">
+      <article class="lx-card green lx-rv">
+        <div class="lx-vis lxv-perf" aria-hidden="true">
+          <div class="lxv-mo">November<span>+8.43R</span></div>
+          <svg class="lxv-eq" viewBox="0 0 300 74" preserveAspectRatio="none">
+            <path class="area" d="M0,62 L20,58 40,60 60,50 80,54 100,42 120,46 140,34 160,40 180,28 200,32 220,22 240,26 260,16 280,20 300,10 L300,74 L0,74 Z"/>
+            <polyline class="line" pathLength="1" points="0,62 20,58 40,60 60,50 80,54 100,42 120,46 140,34 160,40 180,28 200,32 220,22 240,26 260,16 280,20 300,10"/>
+          </svg>
+          <div class="lxv-week"><i class="g">✓</i><i class="r">✗</i><i class="g">✓</i><i class="g">✓</i><i class="r">✗</i><i class="g">✓</i><i class="t">●</i></div>
+          <div class="lxv-stats"><div><b>34.4%</b><span>Win rate</span></div><div><b>130+</b><span>Signal</span></div></div>
+        </div>
+        <div class="lx-cx">
+          <span class="lx-tag"><i class="lx-dot"></i>Prestasi</span>
+          <h3>Keputusan anda. <span>Hari demi hari.</span></h3>
+          <p>Rekod prestasi telus sejak 19 Oktober 2026. Untung, break even dan SL — semua dikira, tiada yang disembunyi.</p>
+          <ul class="lx-pills"><li>Equity curve</li><li>Win rate</li><li>Telus</li></ul>
+        </div>
+      </article>
+      <article class="lx-card gold lx-rv">
+        <div class="lx-vis lxv-live" aria-hidden="true">
+          <span class="lxv-badge">LIVE</span><span class="lxv-lag">Modul 4</span>
+          <svg viewBox="0 0 300 150" preserveAspectRatio="none">
+            <rect x="0" y="18" width="300" height="20" fill="rgba(248,113,113,.14)"/>
+            <line x1="0" y1="18" x2="300" y2="18" stroke="#f87171" stroke-dasharray="5 4"/><line x1="0" y1="38" x2="300" y2="38" stroke="#f87171" stroke-dasharray="5 4"/>
+            <line x1="150" y1="74" x2="300" y2="74" stroke="#34d399"/><line x1="150" y1="98" x2="300" y2="98" stroke="#34d399"/><line x1="150" y1="122" x2="300" y2="122" stroke="#34d399"/>
+            <text x="154" y="70" fill="#34d399" font-size="8" font-family="JetBrains Mono, monospace">TP1</text><text x="154" y="94" fill="#34d399" font-size="8" font-family="JetBrains Mono, monospace">TP2</text><text x="154" y="118" fill="#34d399" font-size="8" font-family="JetBrains Mono, monospace">TP3</text>
+            <polyline class="lxv-line" pathLength="1" fill="none" stroke="#e3bc57" stroke-width="2" points="0,140 20,130 35,134 55,110 70,116 90,90 105,94 125,66 140,72 160,42 175,30 190,38 205,26 220,50 235,44 250,72 265,68 280,88 300,82"/>
+          </svg>
+          <div class="lxv-poster">
+            <span class="lxv-nx">Modul seterusnya</span>
+            <div class="lxv-cd"><span data-cd="d">00</span><i>:</i><span data-cd="h">00</span><i>:</i><span data-cd="m">00</span><i>:</i><span data-cd="s">00</span></div>
+            <span class="lxv-remind">Sabtu 21:00</span>
+          </div>
+        </div>
+        <div class="lx-cx">
+          <span class="lx-tag"><i class="lx-dot"></i>Belajar</span>
+          <h3>Belajar asas. <span>Trade dengan plan.</span></h3>
+          <p>Modul struktur pasaran, zon POI dan pengurusan risiko — fahami cara setup dibina, bukan sekadar mengikut.</p>
+          <ul class="lx-pills"><li>Modul</li><li>Struktur</li><li>Risiko</li></ul>
+        </div>
+      </article>
+      <article class="lx-card violet lx-rv">
+        <div class="lx-vis lxv-net" aria-hidden="true">
+          <svg viewBox="0 0 300 170">
+            <line class="ln" x1="150" y1="85" x2="150" y2="18"/><line class="ln" x1="150" y1="85" x2="250" y2="40"/><line class="ln" x1="150" y1="85" x2="250" y2="130"/>
+            <line class="ln" x1="150" y1="85" x2="150" y2="152"/><line class="ln" x1="150" y1="85" x2="50" y2="130"/><line class="ln" x1="150" y1="85" x2="50" y2="40"/>
+            <circle class="pulse" r="3"><animateMotion dur="2.4s" repeatCount="indefinite" path="M150,18 L150,85"/></circle>
+            <circle class="pulse" r="3"><animateMotion dur="2.4s" begin=".8s" repeatCount="indefinite" path="M250,130 L150,85"/></circle>
+            <circle class="pulse" r="3"><animateMotion dur="2.4s" begin="1.6s" repeatCount="indefinite" path="M50,40 L150,85"/></circle>
+            <g class="fr on"><circle cx="150" cy="18" r="14"/><text x="150" y="18">A</text></g>
+            <g class="fr on"><circle cx="250" cy="40" r="14"/><text x="250" y="40">M</text></g>
+            <g class="fr on"><circle cx="250" cy="130" r="14"/><text x="250" y="130">S</text></g>
+            <g class="fr"><circle cx="150" cy="152" r="14"/><text x="150" y="152">R</text></g>
+            <g class="fr on"><circle cx="50" cy="130" r="14"/><text x="50" y="130">F</text></g>
+            <g class="fr"><circle cx="50" cy="40" r="14"/><text x="50" y="40">K</text></g>
+            <g class="me"><circle class="ring" cx="150" cy="85" r="28"/><circle class="c" cx="150" cy="85" r="28"/><text x="150" y="85">YOU</text></g>
+          </svg>
+          <div class="lxv-meter"><span>11 ahli · aktif hari ini</span><div class="lxv-dots"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i></div></div>
+        </div>
+        <div class="lx-cx">
+          <span class="lx-tag"><i class="lx-dot"></i>Komuniti</span>
+          <h3>Sertai komuniti <span>trader.</span></h3>
+          <p>Kongsi setup, tanya soalan dan belajar bersama trader lain di Telegram. Sokongan terus daripada pasukan TraderWatch.</p>
+          <ul class="lx-pills"><li>Telegram</li><li>Perkongsian</li><li>Sokongan</li></ul>
+        </div>
+      </article>
+    </div>
+    <p class="lx-swipe" aria-hidden="true">Leret <span>→</span></p>
+  </section>
+
+  <!-- ============ FAQ ============ -->
+  <section class="lx-sec" id="faq" aria-labelledby="lxFaqT">
+    <div class="lx-head lx-rv"><span class="lx-k">Soalan lazim</span><h2 id="lxFaqT">Jawapan sebelum anda mula</h2></div>
+    <div class="lx-faq-l lx-rv">
+      <details><summary>Adakah signal dijamin untung?</summary><p>Tidak. Tiada siapa boleh menjamin keuntungan dalam trading. Prestasi TraderWatch dipaparkan secara telus — termasuk kerugian — supaya anda boleh menilai sendiri sebelum mengikut. Trading melibatkan risiko.</p></details>
+      <details><summary>Adakah harga sama dengan broker saya?</summary><p>Harga mungkin berbeza sedikit antara broker kerana spread dan sumber feed. Zon entry, SL dan TP dikira daripada feed TraderWatch; semak harga broker anda sebelum masuk.</p></details>
+      <details><summary>Perlu bayar untuk guna TraderWatch?</summary><p>Tidak. Free Card — semua ahli mendapat akses penuh secara percuma: signal, chart beranotasi, sebab entry dan rekod prestasi. Tiada kad kredit diperlukan.</p></details>
+      <details><summary>Bagaimana cara install app?</summary><p>TraderWatch ialah PWA. Buka di pelayar telefon, kemudian pilih "Tambah ke Skrin Utama" (Android) atau "Add to Home Screen" (iOS). Ia berfungsi seperti app biasa, dengan sokongan offline dan push notification.</p></details>
+      <details><summary>Adakah ini nasihat kewangan?</summary><p>Tidak. TraderWatch ialah alat pendidikan. Semua signal adalah untuk tujuan pembelajaran dan bukan nasihat kewangan. Keputusan trade dan risiko adalah tanggungjawab anda sendiri.</p></details>
+    </div>
+    <p class="lx-note lx-rv">Visual antara muka di atas adalah ilustrasi. Signal dan prestasi sebenar dipaparkan dalam app. Educational only. Trading involves substantial risk.</p>
+  </section>
+  <!-- ============ Kaki ============ -->
+  <footer class="lx-foot">
+    <div class="lx-foot-b">
+      <svg viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="9" fill="url(#twGold)"/><g stroke="#120f07" stroke-width="2.2" stroke-linecap="round"><path d="M10 7v18M16 5v22M22 9v14"/></g><rect x="7.4" y="12" width="5.2" height="7" rx="1.2" fill="#120f07"/><rect x="13.4" y="9" width="5.2" height="9" rx="1.2" fill="#120f07"/><rect x="19.4" y="14" width="5.2" height="6" rx="1.2" fill="#120f07"/></svg>
+      <b>Trader<i>W</i>atch</b><span>© 2026 TraderWatch</span>
+    </div>
+    <p class="ld-fine">Trading involves risk. Not financial advice.</p>
+    <p class="lx-disc"><b>Penafian risiko:</b> Trading forex, logam precious dan kripto melibatkan risiko substantial dan mungkin tidak sesuai untuk semua pelabur. Anda boleh kehilangan sebahagian atau keseluruhan modal anda. Prestasi lepas bukan jaminan keputusan masa depan. Signal diterbitkan untuk tujuan pendidikan sahaja — Educational only. Trading involves substantial risk. <b>Pendedahan rakan kongsi:</b> TraderWatch mungkin menerima pampasan daripada broker rakan kongsi apabila anda membuka akaun melalui pautan kami; ini tidak mempengaruhi signal atau rekod prestasi yang diterbitkan.</p>
+  </footer>
+</main>
+
+<!-- ============ Dock mudah alih ============ -->
+<div class="ld-dock" id="ldDock">
+  <a class="btn primary ld-go" href="https://traderwatch.org/login.html?mode=signup">Mula percuma</a>
+  <a class="ld-dock-in" href="https://traderwatch.org/login.html">Log masuk</a>
+</div>
+
+<script>
+(function(){
+'use strict';
+var d=document,root=d.documentElement;
+var reduced=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+/* ---- Tema gelap/cerah (disimpan dalam localStorage) ---- */
+var themeBtn=d.getElementById('themeBtn'),metaTheme=d.querySelector('meta[name="theme-color"]');
+function applyTheme(light){
+  if(light){root.dataset.theme='light';}else{delete root.dataset.theme;}
+  if(metaTheme)metaTheme.content=light?'#f2f2f5':'#000000';
+  if(themeBtn){
+    themeBtn.setAttribute('aria-label',light?'Tukar ke mod gelap':'Tukar ke mod cerah');
+    themeBtn.title=light?'Mod gelap':'Mod cerah';
+  }
+}
+applyTheme(root.dataset.theme==='light');
+if(themeBtn)themeBtn.addEventListener('click',function(){
+  var light=root.dataset.theme!=='light';
+  applyTheme(light);
+  try{localStorage.setItem('tw-theme',light?'light':'dark');}catch(e){}
+});
+
+/* ---- Ribbon emas mengalir (canvas, algoritma gaya TRAXA) ---- */
+(function(){
+  var cv=d.getElementById('ldRibbon');
+  if(!cv||!cv.getContext)return;
+  var ctx=cv.getContext('2d');
+  if(!ctx)return;
+  var W=0,H=0,raf=0,t0=performance.now();
+  function size(){
+    var r=cv.getBoundingClientRect(),dpr=Math.min(window.devicePixelRatio||1,2);
+    W=r.width;H=r.height;
+    cv.width=Math.max(1,Math.round(W*dpr));cv.height=Math.max(1,Math.round(H*dpr));
+    ctx.setTransform(dpr,0,0,dpr,0,0);
+  }
+  function draw(now){
+    var t=(now-t0)/1000*.35;
+    var lines=window.innerWidth<700?38:64;
+    var light=root.dataset.theme==='light';
+    ctx.clearRect(0,0,W,H);
+    var g=ctx.createLinearGradient(0,0,W,0);
+    if(light){
+      g.addColorStop(0,'rgba(154,115,22,0)');
+      g.addColorStop(.18,'rgba(176,131,31,.22)');
+      g.addColorStop(.4,'rgba(154,115,22,.3)');
+      g.addColorStop(.55,'rgba(201,106,46,.28)');
+      g.addColorStop(.7,'rgba(106,75,214,.24)');
+      g.addColorStop(.9,'rgba(29,111,201,.22)');
+      g.addColorStop(1,'rgba(29,111,201,0)');
+      ctx.globalCompositeOperation='source-over';
+    }else{
+      g.addColorStop(0,'rgba(227,188,87,0)');
+      g.addColorStop(.18,'rgba(255,214,107,.16)');
+      g.addColorStop(.4,'rgba(255,190,90,.22)');
+      g.addColorStop(.55,'rgba(255,107,154,.5)');
+      g.addColorStop(.7,'rgba(167,139,250,.5)');
+      g.addColorStop(.9,'rgba(59,158,255,.45)');
+      g.addColorStop(1,'rgba(59,158,255,0)');
+      ctx.globalCompositeOperation='lighter';
+    }
+    ctx.strokeStyle=g;ctx.lineWidth=1;
+    var wide=window.innerWidth>=900;
+    var cy=wide?.62*H:.76*H;
+    var amp=wide?.12*H:Math.min(.06*H,70);
+    var spread=Math.min(.0045*H,3.4);
+    for(var i=0;i<lines;i++){
+      var o=i-lines/2;
+      ctx.globalAlpha=.25+.55*(1-Math.abs(o)/(lines/2));
+      ctx.beginPath();
+      for(var x=-20;x<=W+20;x+=14){
+        var p=x/W;
+        var y=cy+amp*Math.sin(4.2*p+t+.012*i)*.9+.55*amp*Math.sin(2.1*p-.8*t)
+          +o*spread*(1.2+Math.cos(5*p+1.1*t+.01*i))-p*(wide?.18*H:.25*W);
+        if(x<-10)ctx.moveTo(x,y);else ctx.lineTo(x,y);
+      }
+      ctx.stroke();
+    }
+    ctx.globalAlpha=1;ctx.globalCompositeOperation='source-over';
+  }
+  function loop(now){
+    if(!d.hidden)draw(now);
+    raf=requestAnimationFrame(loop);
+  }
+  size();
+  window.addEventListener('resize',function(){size();if(reduced)draw(t0+4000);});
+  if(reduced){draw(t0+4000);}else{raf=requestAnimationFrame(loop);}
+})();
+
+/* ---- Reveal on scroll (konten kelihatan secara lalai tanpa JS) ---- */
+(function(){
+  var els=[].slice.call(d.querySelectorAll('.lx-rv'));
+  if(!els.length)return;
+  if(reduced||!('IntersectionObserver' in window)){els.forEach(function(e){e.classList.add('in');});return;}
+  d.body.classList.add('rv');
+  var io=new IntersectionObserver(function(entries){
+    entries.forEach(function(en){
+      if(en.isIntersecting){en.target.classList.add('in');io.unobserve(en.target);}
+    });
+  },{rootMargin:'0px 0px -8% 0px'});
+  els.forEach(function(e){io.observe(e);});
+  /* Jaring keselamatan: tiada kandungan kekal tersembunyi */
+  setTimeout(function(){els.forEach(function(e){e.classList.add('in');});},3500);
+})();
+
+/* ---- Kaunter langsung (0 -> 11) ---- */
+(function(){
+  var nums=[].slice.call(d.querySelectorAll('[data-count]'));
+  if(!nums.length)return;
+  if(reduced){nums.forEach(function(e){e.textContent=e.dataset.count;});return;}
+  var start=null,dur=1100;
+  function step(ts){
+    if(start===null)start=ts;
+    var k=Math.min(1,(ts-start)/dur);
+    var ease=1-Math.pow(1-k,3);
+    nums.forEach(function(e){e.textContent=Math.round(ease*(+e.dataset.count));});
+    if(k<1)requestAnimationFrame(step);
+  }
+  nums.forEach(function(e){e.textContent='0';});
+  requestAnimationFrame(step);
+})();
+
+/* ---- Countdown modul seterusnya (Sabtu 21:00 waktu tempatan) ---- */
+(function(){
+  var cd=d.querySelector('.lxv-cd');
+  if(!cd)return;
+  var spans={d:cd.querySelector('[data-cd="d"]'),h:cd.querySelector('[data-cd="h"]'),m:cd.querySelector('[data-cd="m"]'),s:cd.querySelector('[data-cd="s"]')};
+  function nextClass(){
+    var n=new Date(),t=new Date(n);
+    t.setHours(21,0,0,0);
+    t.setDate(n.getDate()+((6-n.getDay()+7)%7));
+    if(t<=n)t.setDate(t.getDate()+7);
+    return t;
+  }
+  var target=nextClass();
+  function pad(v){return String(v).padStart(2,'0');}
+  function tick(){
+    var ms=target-new Date();
+    if(ms<=0){target=nextClass();ms=target-new Date();}
+    var s=Math.floor(ms/1000);
+    spans.d.textContent=pad(Math.floor(s/86400));
+    spans.h.textContent=pad(Math.floor(s%86400/3600));
+    spans.m.textContent=pad(Math.floor(s%3600/60));
+    spans.s.textContent=pad(s%60);
+  }
+  tick();
+  setInterval(tick,1000);
+})();
+
+/* ---- Dock mudah alih: muncul selepas CTA hero hilang dari pandangan ---- */
+(function(){
+  var dock=d.getElementById('ldDock');
+  var go=d.getElementById('heroGo');
+  var foot=d.querySelector('.lx-foot');
+  if(!dock||!go||!foot||!('IntersectionObserver' in window))return;
+  var visible=new Set();
+  var io=new IntersectionObserver(function(entries){
+    entries.forEach(function(en){
+      if(en.isIntersecting)visible.add(en.target);else visible.delete(en.target);
+    });
+    dock.classList.toggle('on',visible.size===0&&window.scrollY>200);
+  });
+  io.observe(go);io.observe(foot);
+})();
+
+/* ---- Glow mengikut pointer pada kad trio ---- */
+(function(){
+  if(reduced)return;
+  [].slice.call(d.querySelectorAll('.lx-card')).forEach(function(card){
+    card.addEventListener('pointermove',function(ev){
+      var r=card.getBoundingClientRect();
+      card.style.setProperty('--mx',((ev.clientX-r.left)/r.width*100)+'%');
+      card.style.setProperty('--my',((ev.clientY-r.top)/r.height*100)+'%');
+    });
+  });
+})();
+})();
+</script>
+</body>
+</html>

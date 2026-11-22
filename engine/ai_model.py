@@ -9,7 +9,8 @@ import math
 from datetime import datetime, timezone
 from pathlib import Path
 
-PIP = {"XAU/USD": 0.1, "USD/JPY": 0.01}
+PIP = {"XAU/USD": 0.1, "XAG/USD": 0.001, "USD/JPY": 0.01,
+       "BTCUSD": 1.0, "BTC/USD": 1.0}
 DEFAULT_PIP = 0.0001
 BAR_MIN = 15
 FEATURE_VERSION = 1

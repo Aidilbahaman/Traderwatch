@@ -1,0 +1,217 @@
+[
+ {
+  "t": "2026-11-19T02:00:00",
+  "model": "deepseek-v4.1-flash",
+  "price": 3751.41,
+  "bos": "RANGE",
+  "choch": false,
+  "lat": 1.6,
+  "side": "HOLD",
+  "conf": 0.3,
+  "sl": null,
+  "tp": null,
+  "reason": "Range, no BOS/CHoCH, mid-range price"
+ },
+ {
+  "t": "2026-11-19T02:00:00",
+  "model": "glm-5.3-flash-mod",
+  "price": 3751.41,
+  "bos": "RANGE",
+  "choch": false,
+  "lat": 14.0,
+  "error": "ValueError:content kosong"
+ },
+ {
+  "t": "2026-11-19T06:00:00",
+  "model": "deepseek-v4.1-flash",
+  "price": 3739.78,
+  "bos": "RANGE",
+  "choch": false,
+  "lat": 2.2,
+  "side": "HOLD",
+  "conf": 0.4,
+  "sl": null,
+  "tp": null,
+  "reason": "Ranging, no clear BOS or CHoCH"
+ },
+ {
+  "t": "2026-11-19T06:00:00",
+  "model": "glm-5.3-flash-mod",
+  "price": 3739.78,
+  "bos": "RANGE",
+  "choch": false,
+  "lat": 14.8,
+  "error": "ValueError:content kosong"
+ },
+ {
+  "t": "2026-11-19T10:00:00",
+  "model": "deepseek-v4.1-flash",
+  "price": 3730.41,
+  "bos": "RANGE",
+  "choch": false,
+  "lat": 2.0,
+  "side": "HOLD",
+  "conf": 0.3,
+  "sl": null,
+  "tp": null,
+  "reason": "Ranged, no BOS/CHoCH, price mid-range"
+ },
+ {
+  "t": "2026-11-19T10:00:00",
+  "model": "glm-5.3-flash-mod",
+  "price": 3730.41,
+  "bos": "RANGE",
+  "choch": false,
+  "lat": 13.3,
+  "error": "ValueError:content kosong"
+ },
+ {
+  "t": "2026-11-19T14:00:00",
+  "model": "deepseek-v4.1-flash",
+  "price": 3711.46,
+  "bos": "RANGE",
+  "choch": false,
+  "lat": 3.2,
+  "side": "HOLD",
+  "conf": 0.2,
+  "sl": null,
+  "tp": null,
+  "reason": "Ranging, no BOS/CHoCH, price mid-range"
+ },
+ {
+  "t": "2026-11-19T14:00:00",
+  "model": "glm-5.3-flash-mod",
+  "price": 3711.46,
+  "bos": "RANGE",
+  "choch": false,
+  "lat": 9.6,
+  "side": "HOLD",
+  "conf": 0.3,
+  "sl": null,
+  "tp": null,
+  "reason": "Range-bound, no BOS or CHoCH edge"
+ },
+ {
+  "t": "2026-11-19T18:00:00",
+  "model": "deepseek-v4.1-flash",
+  "price": 3676.06,
+  "bos": "DOWN",
+  "choch": false,
+  "lat": 3.2,
+  "side": "SELL",
+  "conf": 0.7,
+  "sl": 3692.0,
+  "tp": 3640.0,
+  "reason": "BOS down, bearish momentum, short at pullback",
+  "outcome": "TP"
+ },
+ {
+  "t": "2026-11-19T18:00:00",
+  "model": "glm-5.3-flash-mod",
+  "price": 3676.06,
+  "bos": "DOWN",
+  "choch": false,
+  "lat": 14.2,
+  "error": "ValueError:content kosong"
+ },
+ {
+  "t": "2026-11-19T22:00:00",
+  "model": "deepseek-v4.1-flash",
+  "price": 3623.17,
+  "bos": "DOWN",
+  "choch": false,
+  "lat": 2.6,
+  "error": "ValueError:RR1 1.06 below 1.5"
+ },
+ {
+  "t": "2026-11-19T22:00:00",
+  "model": "glm-5.3-flash-mod",
+  "price": 3623.17,
+  "bos": "DOWN",
+  "choch": false,
+  "lat": 13.3,
+  "error": "ValueError:RR1 1.50 below 1.5"
+ },
+ {
+  "t": "2026-11-20T02:00:00",
+  "model": "deepseek-v4.1-flash",
+  "price": 3553.07,
+  "bos": "DOWN",
+  "choch": false,
+  "lat": 3.1,
+  "error": "ValueError:RR1 1.19 below 1.5"
+ },
+ {
+  "t": "2026-11-20T02:00:00",
+  "model": "glm-5.3-flash-mod",
+  "price": 3553.07,
+  "bos": "DOWN",
+  "choch": false,
+  "lat": 8.8,
+  "side": "SELL",
+  "conf": 0.7,
+  "sl": 3572.0,
+  "tp": 3520.0,
+  "reason": "BOS down continuation; SL above last swing, targets prior structure lo",
+  "outcome": "NONE"
+ },
+ {
+  "t": "2026-11-20T06:00:00",
+  "model": "deepseek-v4.1-flash",
+  "price": 3552.53,
+  "bos": "DOWN",
+  "choch": false,
+  "lat": 2.1,
+  "error": "ValueError:RR1 1.11 below 1.5"
+ },
+ {
+  "t": "2026-11-20T06:00:00",
+  "model": "glm-5.3-flash-mod",
+  "price": 3552.53,
+  "bos": "DOWN",
+  "choch": false,
+  "lat": 8.2,
+  "error": "ValueError:content kosong"
+ },
+ {
+  "t": "2026-11-20T10:00:00",
+  "model": "deepseek-v4.1-flash",
+  "price": 3576.05,
+  "bos": "DOWN",
+  "choch": false,
+  "lat": 1.7,
+  "side": "SELL",
+  "conf": 0.6,
+  "sl": 3592.5,
+  "tp": 3545.0,
+  "reason": "Bearish BOS,H1 down; short retracement into supply",
+  "outcome": "TP"
+ },
+ {
+  "t": "2026-11-20T10:00:00",
+  "model": "glm-5.3-flash-mod",
+  "price": 3576.05,
+  "bos": "DOWN",
+  "choch": false,
+  "lat": 8.5,
+  "error": "ValueError:content kosong"
+ },
+ {
+  "t": "2026-11-20T14:00:00",
+  "model": "deepseek-v4.1-flash",
+  "price": 3579.65,
+  "bos": "DOWN",
+  "choch": false,
+  "lat": 1.8,
+  "error": "ValueError:RR1 1.41 below 1.5"
+ },
+ {
+  "t": "2026-11-20T14:00:00",
+  "model": "glm-5.3-flash-mod",
+  "price": 3579.65,
+  "bos": "DOWN",
+  "choch": false,
+  "lat": 13.1,
+  "error": "ValueError:content kosong"
+ }
+]

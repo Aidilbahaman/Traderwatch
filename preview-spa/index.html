@@ -1,0 +1,1525 @@
+<!DOCTYPE html>
+<html lang="ms" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="color-scheme" content="dark light">
+<meta name="theme-color" content="#0a0a0b">
+<title>TraderWatch — Workspace</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%230a0a0b'/%3E%3Ctext x='16' y='22' font-family='Inter,system-ui' font-size='18' font-weight='700' fill='%23c6f36b' text-anchor='middle'%3ET%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ============ TOKENS ============ */
+:root{
+  --bg:#0a0a0b; --sidebar:#0f0f11; --panel:#141416; --elev:#1a1a1d;
+  --border:rgba(255,255,255,.07); --border-strong:rgba(255,255,255,.12);
+  --text:#f7f8f8; --text2:#9ba1a6; --muted:#6b7280;
+  --lime:#c6f36b; --lime-dim:rgba(198,243,107,.12); --lime-text:#c6f36b; --on-lime:#0a0a0b;
+  --green:#34d399; --green-dim:rgba(52,211,153,.12);
+  --red:#ff817d; --red-dim:rgba(255,129,125,.12);
+  --amber:#ffd479; --amber-dim:rgba(255,212,121,.12);
+  --blue:#60a5fa; --blue-dim:rgba(96,165,250,.12);
+  --shadow:0 1px 2px rgba(0,0,0,.4);
+  --r-panel:12px; --r-card:10px; --r-btn:8px; --r-input:8px; --r-pill:999px;
+  --font-ui:"Inter",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --font-mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+  --sidebar-w:240px; --sidebar-w-collapsed:68px; --topbar-h:56px;
+}
+html[data-theme="light"]{
+  --bg:#f7f8f8; --sidebar:#f0f1f2; --panel:#ffffff; --elev:#ffffff;
+  --border:rgba(0,0,0,.08); --border-strong:rgba(0,0,0,.15);
+  --text:#17171d; --text2:#4b5563; --muted:#6b7280;
+  --lime:#c6f36b; --lime-dim:rgba(150,190,60,.16); --lime-text:#4d7c0f; --on-lime:#17171d;
+  --green:#059669; --green-dim:rgba(5,150,105,.10);
+  --red:#dc2626; --red-dim:rgba(220,38,38,.08);
+  --amber:#b45309; --amber-dim:rgba(180,83,9,.10);
+  --blue:#2563eb; --blue-dim:rgba(37,99,235,.08);
+  --shadow:0 1px 2px rgba(0,0,0,.08);
+}
+/* ============ BASE ============ */
+*{box-sizing:border-box;margin:0;padding:0}
+[hidden]{display:none !important}
+html,body{height:100%}
+body{
+  background:var(--bg); color:var(--text);
+  font-family:var(--font-ui); font-size:14px; line-height:1.5;
+  -webkit-font-smoothing:antialiased; overflow:hidden;
+}
+button{font:inherit;color:inherit;background:none;border:none;cursor:pointer}
+input{font:inherit;color:inherit}
+a{color:var(--lime-text);text-decoration:none}
+:focus-visible{outline:2px solid var(--lime);outline-offset:2px;border-radius:4px}
+::selection{background:var(--lime-dim)}
+.mono{font-family:var(--font-mono);font-variant-numeric:tabular-nums}
+.pos{color:var(--green)} .neg{color:var(--red)} .warn{color:var(--amber)}
+svg.ic{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex:none}
+kbd{
+  font-family:var(--font-mono);font-size:10.5px;color:var(--muted);
+  border:1px solid var(--border-strong);border-radius:5px;padding:1px 5px;
+  background:var(--elev);line-height:1.5;
+}
+/* ============ APP SHELL ============ */
+.app{display:flex;height:100dvh;width:100%}
+.main{flex:1;display:flex;flex-direction:column;min-width:0}
+/* ============ SIDEBAR ============ */
+.sidebar{
+  width:var(--sidebar-w);flex:none;display:flex;flex-direction:column;
+  background:var(--sidebar);border-right:1px solid var(--border);
+  transition:width .2s ease;overflow:hidden;
+}
+.app.collapsed .sidebar{width:var(--sidebar-w-collapsed)}
+.side-head{display:flex;align-items:center;gap:10px;padding:14px 16px 10px;min-height:56px}
+.logo-mark{
+  width:28px;height:28px;flex:none;border-radius:8px;background:var(--lime);
+  color:var(--on-lime);display:grid;place-items:center;font-weight:700;font-size:15px;
+  box-shadow:var(--shadow);
+}
+.logo-name{font-weight:700;font-size:14.5px;letter-spacing:-.02em;white-space:nowrap}
+.ver-badge{
+  font-family:var(--font-mono);font-size:10px;color:var(--lime-text);
+  background:var(--lime-dim);border:1px solid var(--border);border-radius:var(--r-pill);
+  padding:1px 7px;white-space:nowrap;
+}
+.side-search{
+  margin:4px 12px 10px;display:flex;align-items:center;gap:8px;
+  padding:7px 10px;border:1px solid var(--border);border-radius:var(--r-input);
+  background:var(--panel);color:var(--muted);font-size:12.5px;text-align:left;
+  transition:border-color .15s ease,transform .15s ease;white-space:nowrap;
+}
+.side-search:hover{border-color:var(--border-strong);transform:translateY(-1px)}
+.side-search kbd{margin-left:auto}
+.side-nav{padding:2px 12px;display:flex;flex-direction:column;gap:2px}
+.nav-item{
+  display:flex;align-items:center;gap:10px;padding:7px 10px;border-radius:var(--r-btn);
+  color:var(--text2);font-size:13.5px;font-weight:500;text-align:left;width:100%;
+  border-left:2px solid transparent;white-space:nowrap;
+  transition:background .15s ease,color .15s ease;
+}
+.nav-item:hover{background:var(--elev);color:var(--text)}
+.nav-item.active{background:var(--lime-dim);color:var(--lime-text);border-left-color:var(--lime)}
+.nav-item kbd{margin-left:auto}
+.side-label{
+  font-size:10.5px;font-weight:600;letter-spacing:.08em;color:var(--muted);
+  text-transform:uppercase;padding:16px 22px 6px;white-space:nowrap;
+}
+.watchlist{padding:0 12px;display:flex;flex-direction:column;gap:2px}
+.watch-item{
+  display:flex;align-items:center;gap:8px;padding:6px 10px;border-radius:var(--r-btn);
+  width:100%;text-align:left;transition:background .15s ease;white-space:nowrap;
+}
+.watch-item:hover{background:var(--elev)}
+.watch-sym{font-size:12px;font-weight:600;color:var(--text2);width:64px;flex:none}
+.watch-price{font-family:var(--font-mono);font-size:12px;margin-left:auto}
+.watch-chg{font-family:var(--font-mono);font-size:10.5px;width:56px;text-align:right;flex:none}
+.side-foot{margin-top:auto;padding:12px;border-top:1px solid var(--border);display:flex;align-items:center;gap:8px}
+.user-card{
+  display:flex;align-items:center;gap:10px;flex:1;min-width:0;padding:6px 8px;
+  border-radius:var(--r-btn);text-align:left;transition:background .15s ease;
+}
+.user-card:hover{background:var(--elev)}
+.avatar{
+  width:28px;height:28px;flex:none;border-radius:var(--r-pill);
+  background:linear-gradient(135deg,var(--lime),var(--green));color:var(--on-lime);
+  display:grid;place-items:center;font-size:11px;font-weight:700;
+}
+.user-meta{min-width:0;white-space:nowrap}
+.user-name{font-size:12.5px;font-weight:600;overflow:hidden;text-overflow:ellipsis}
+.chip-free{
+  display:inline-block;font-family:var(--font-mono);font-size:9.5px;font-weight:600;
+  color:var(--amber);background:var(--amber-dim);border-radius:var(--r-pill);padding:0 7px;
+}
+.collapse-btn{
+  width:28px;height:28px;flex:none;display:grid;place-items:center;border-radius:var(--r-btn);
+  color:var(--muted);border:1px solid var(--border);transition:color .15s,border-color .15s;
+}
+.collapse-btn:hover{color:var(--text);border-color:var(--border-strong)}
+.app.collapsed .logo-name,.app.collapsed .ver-badge,.app.collapsed .side-search span,
+.app.collapsed .side-search kbd,.app.collapsed .nav-item span,.app.collapsed .nav-item kbd,
+.app.collapsed .side-label,.app.collapsed .watchlist,.app.collapsed .user-meta{display:none}
+.app.collapsed .side-search{justify-content:center;padding:7px 0}
+.app.collapsed .nav-item{justify-content:center;padding:7px 0}
+.app.collapsed .side-head{justify-content:center;padding:14px 0 10px}
+.app.collapsed .side-foot{flex-direction:column}
+.app.collapsed .user-card{flex:none;padding:6px}
+.app.collapsed .collapse-btn svg{transform:rotate(180deg)}
+.collapse-btn svg{transition:transform .2s ease}
+/* ============ TOPBAR ============ */
+.topbar{
+  height:var(--topbar-h);flex:none;display:flex;align-items:center;gap:10px;
+  padding:0 20px;border-bottom:1px solid var(--border);background:var(--bg);
+}
+.hamburger{display:none;width:32px;height:32px;place-items:center;border-radius:var(--r-btn);color:var(--text2)}
+.crumb{font-size:11.5px;color:var(--muted);display:flex;align-items:center;gap:6px}
+.crumb b{color:var(--text2);font-weight:500}
+.view-title{font-size:15px;font-weight:600;letter-spacing:-.02em;line-height:1.2}
+.topbar-actions{margin-left:auto;display:flex;align-items:center;gap:6px}
+.icon-btn{
+  width:32px;height:32px;display:grid;place-items:center;border-radius:var(--r-btn);
+  color:var(--text2);position:relative;transition:background .15s,color .15s,transform .15s;
+}
+.icon-btn:hover{background:var(--elev);color:var(--text);transform:translateY(-1px)}
+.notif-badge{
+  position:absolute;top:4px;right:4px;min-width:14px;height:14px;border-radius:var(--r-pill);
+  background:var(--red);color:#fff;font-family:var(--font-mono);font-size:9px;font-weight:700;
+  display:grid;place-items:center;padding:0 3px;
+}
+.topbar .avatar{width:30px;height:30px;cursor:pointer}
+.spin{animation:spin .6s ease}
+@keyframes spin{to{transform:rotate(360deg)}}
+/* notifications dropdown */
+.notif-panel{
+  position:absolute;top:calc(var(--topbar-h) - 6px);right:64px;width:320px;z-index:60;
+  background:var(--elev);border:1px solid var(--border-strong);border-radius:var(--r-panel);
+  box-shadow:0 8px 24px rgba(0,0,0,.35);overflow:hidden;
+  animation:popIn .15s ease;
+}
+.notif-head{padding:10px 14px;font-size:12px;font-weight:600;border-bottom:1px solid var(--border);color:var(--text2)}
+.notif-item{display:flex;gap:10px;padding:10px 14px;border-bottom:1px solid var(--border);font-size:12.5px}
+.notif-item:last-child{border-bottom:none}
+.notif-dot{width:7px;height:7px;border-radius:50%;margin-top:6px;flex:none}
+.notif-item small{display:block;color:var(--muted);font-size:11px;margin-top:2px}
+/* ============ CONTENT ============ */
+.content{flex:1;overflow-y:auto;overflow-x:hidden;padding:24px;scroll-behavior:smooth}
+.view{display:none;max-width:1180px;margin:0 auto}
+.view.active{display:block;animation:viewIn .18s ease}
+@keyframes viewIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+@keyframes popIn{from{opacity:0;transform:scale(.97) translateY(-4px)}to{opacity:1;transform:scale(1) translateY(0)}}
+.view-head{margin-bottom:18px}
+.view-head h2{font-size:20px;font-weight:700;letter-spacing:-.02em}
+.view-head p{color:var(--text2);font-size:13px;margin-top:2px}
+/* panels & cards */
+.panel{
+  background:var(--panel);border:1px solid var(--border);border-radius:var(--r-panel);
+  box-shadow:var(--shadow);
+}
+.panel-head{
+  display:flex;align-items:center;gap:8px;padding:12px 16px;
+  border-bottom:1px solid var(--border);font-size:12.5px;font-weight:600;color:var(--text2);
+}
+.panel-head .right{margin-left:auto;display:flex;align-items:center;gap:8px}
+.panel-body{padding:16px}
+.grid{display:grid;gap:16px}
+.grid-signals{grid-template-columns:1.35fr 1fr;grid-template-areas:"hero chart" "list chart" "perf results"}
+.hero-card{grid-area:hero}
+.chart-panel{grid-area:chart;display:flex;flex-direction:column}
+.list-panel{grid-area:list}
+.perf-widget{grid-area:perf}
+.results-panel{grid-area:results}
+/* hero signal */
+.hero-card{position:relative;overflow:hidden}
+.hero-card::before{
+  content:"";position:absolute;inset:0;pointer-events:none;
+  background:radial-gradient(600px 200px at 20% 0%,var(--lime-dim),transparent 70%);
+}
+.hero-top{display:flex;align-items:center;gap:10px;padding:16px 16px 0;position:relative}
+.pair-badge{
+  font-family:var(--font-mono);font-weight:700;font-size:15px;letter-spacing:-.01em;
+}
+.side-chip{
+  font-family:var(--font-mono);font-size:11px;font-weight:700;border-radius:var(--r-pill);
+  padding:2px 10px;letter-spacing:.04em;
+}
+.side-buy{color:var(--green);background:var(--green-dim)}
+.side-sell{color:var(--red);background:var(--red-dim)}
+.live-chip{
+  display:inline-flex;align-items:center;gap:6px;font-family:var(--font-mono);font-size:10.5px;
+  font-weight:600;color:var(--lime-text);background:var(--lime-dim);
+  border-radius:var(--r-pill);padding:2px 10px;margin-left:auto;
+}
+.live-dot{width:6px;height:6px;border-radius:50%;background:var(--lime);animation:pulse 1.6s ease infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+.hero-sub{padding:2px 16px 0;font-size:12px;color:var(--muted);position:relative}
+.level-grid{
+  display:grid;grid-template-columns:repeat(5,1fr);gap:8px;padding:14px 16px;position:relative;
+}
+.level{
+  background:var(--elev);border:1px solid var(--border);border-radius:var(--r-card);
+  padding:8px 10px;transition:transform .15s ease,border-color .15s ease;
+}
+.level:hover{transform:translateY(-2px);border-color:var(--border-strong)}
+.level small{display:block;font-size:10px;font-weight:600;letter-spacing:.06em;color:var(--muted);text-transform:uppercase}
+.level .val{font-family:var(--font-mono);font-size:13.5px;font-weight:600;margin-top:2px}
+.level.lv-entry .val{color:var(--lime-text)}
+.level.lv-sl .val{color:var(--red)}
+.level.lv-tp .val{color:var(--green)}
+.hero-foot{display:flex;align-items:center;gap:10px;padding:0 16px 16px;position:relative;flex-wrap:wrap}
+.rr-pill{
+  font-family:var(--font-mono);font-size:11.5px;color:var(--text2);
+  border:1px solid var(--border);border-radius:var(--r-pill);padding:3px 10px;
+}
+.btn{
+  display:inline-flex;align-items:center;gap:8px;padding:8px 14px;border-radius:var(--r-btn);
+  font-size:13px;font-weight:600;border:1px solid var(--border-strong);
+  transition:transform .15s ease,border-color .15s ease,background .15s ease,box-shadow .15s ease;
+}
+.btn:hover{transform:translateY(-1px);border-color:var(--lime);box-shadow:var(--shadow)}
+.btn-primary{background:var(--lime);color:var(--on-lime);border-color:transparent}
+.btn-primary:hover{border-color:transparent;filter:brightness(1.06)}
+.btn-ghost{color:var(--text2)}
+.btn-sm{padding:5px 10px;font-size:12px}
+.btn-danger{color:var(--red);border-color:var(--red-dim)}
+.btn-danger:hover{border-color:var(--red)}
+/* chart svg */
+.chart-wrap{padding:8px 10px 4px;flex:1;position:relative}
+.chart-wrap svg{width:100%;height:auto;display:block}
+.c-up{fill:var(--green)} .c-down{fill:var(--red)}
+.w-up{stroke:var(--green)} .w-down{stroke:var(--red)}
+.grid-line{stroke:var(--border);stroke-width:1}
+.axis-label{fill:var(--muted);font-family:var(--font-mono);font-size:9.5px}
+.lvl-entry{stroke:var(--lime);stroke-dasharray:5 4;stroke-width:1.4}
+.lvl-sl{stroke:var(--red);stroke-width:1.2}
+.lvl-tp{stroke:var(--green);stroke-width:1.1;stroke-dasharray:2 3}
+.lvl-tag{font-family:var(--font-mono);font-size:9.5px;font-weight:600}
+.tag-entry{fill:var(--lime-text)} .tag-sl{fill:var(--red)} .tag-tp{fill:var(--green)}
+.poi-zone{fill:var(--lime-dim);stroke:var(--lime);stroke-opacity:.35;stroke-width:1}
+.poi-label{fill:var(--lime-text);font-family:var(--font-mono);font-size:9px;opacity:.85}
+.last-price-line{stroke:var(--blue);stroke-width:1;stroke-dasharray:1 3}
+.last-price-tag{fill:var(--blue);font-family:var(--font-mono);font-size:9.5px;font-weight:600}
+.equity-line{stroke:var(--lime);stroke-width:2;fill:none;stroke-linejoin:round;stroke-linecap:round}
+.equity-area{fill:url(#eqGrad)}
+.spark-line{stroke:var(--lime);stroke-width:1.6;fill:none;stroke-linecap:round;stroke-linejoin:round}
+.shimmer{position:relative;overflow:hidden}
+.shimmer::after{
+  content:"";position:absolute;inset:0;
+  background:linear-gradient(100deg,transparent 30%,var(--lime-dim) 50%,transparent 70%);
+  animation:shimmer .7s ease;pointer-events:none;
+}
+@keyframes shimmer{from{transform:translateX(-100%)}to{transform:translateX(100%)}}
+/* signal list */
+.sig-row{
+  display:flex;align-items:center;gap:10px;width:100%;text-align:left;
+  padding:10px 16px;border-bottom:1px solid var(--border);transition:background .15s ease;
+}
+.sig-row:last-child{border-bottom:none}
+.sig-row:hover{background:var(--elev)}
+.sig-pair{font-family:var(--font-mono);font-size:12.5px;font-weight:600;width:76px;flex:none}
+.sig-status{font-family:var(--font-mono);font-size:10px;font-weight:700;border-radius:var(--r-pill);padding:1px 8px;flex:none}
+.st-live{color:var(--lime-text);background:var(--lime-dim)}
+.st-tp{color:var(--green);background:var(--green-dim)}
+.st-exp{color:var(--amber);background:var(--amber-dim)}
+.st-sl{color:var(--red);background:var(--red-dim)}
+.sig-meta{font-size:11px;color:var(--muted);margin-left:auto;font-family:var(--font-mono)}
+/* performance widget */
+.perf-flex{display:flex;align-items:center;gap:18px}
+.ring-wrap{position:relative;width:110px;height:110px;flex:none}
+.ring-wrap svg{width:110px;height:110px;transform:rotate(-90deg)}
+.ring-bg{stroke:var(--border-strong);fill:none}
+.ring-fg{stroke:var(--lime);fill:none;stroke-linecap:round;transition:stroke-dasharray .6s ease}
+.ring-center{position:absolute;inset:0;display:grid;place-items:center;text-align:center}
+.ring-center .big{font-family:var(--font-mono);font-size:19px;font-weight:700;letter-spacing:-.02em}
+.ring-center small{font-size:9.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+.perf-stats{flex:1;min-width:0}
+.perf-net{font-family:var(--font-mono);font-size:24px;font-weight:700;color:var(--green);letter-spacing:-.02em}
+.perf-net-lbl{font-size:11px;color:var(--muted);margin-bottom:6px}
+.perf-spark{margin-top:6px}
+.perf-spark svg{width:100%;height:36px;display:block}
+/* results */
+.res-row{display:flex;align-items:center;gap:10px;padding:8px 16px;border-bottom:1px solid var(--border);font-size:12.5px}
+.res-row:last-child{border-bottom:none}
+.res-pair{font-family:var(--font-mono);font-weight:600;width:74px;flex:none}
+.res-r{font-family:var(--font-mono);font-weight:600;margin-left:auto}
+.res-date{font-family:var(--font-mono);font-size:10.5px;color:var(--muted);width:52px;text-align:right;flex:none}
+/* detail view */
+.detail-grid{grid-template-columns:1.5fr 1fr;grid-template-areas:"dchart dlevels" "dchart dreason" "dtimeline dreason"}
+.detail-chart{grid-area:dchart;display:flex;flex-direction:column}
+.detail-levels{grid-area:dlevels}
+.detail-reason{grid-area:dreason}
+.detail-timeline{grid-area:dtimeline}
+.check-list{list-style:none;display:flex;flex-direction:column;gap:9px}
+.check-list li{display:flex;gap:9px;font-size:12.5px;color:var(--text2);align-items:flex-start}
+.check-mark{color:var(--green);font-weight:700;flex:none}
+.trend-chips{display:flex;gap:8px;margin-top:14px;flex-wrap:wrap}
+.trend-chip{
+  font-family:var(--font-mono);font-size:11px;border-radius:var(--r-pill);padding:3px 10px;
+  border:1px solid var(--border);color:var(--text2);
+}
+.trend-chip b{font-weight:700}
+.trend-up b{color:var(--green)} .trend-flat b{color:var(--amber)}
+.timeline{list-style:none;position:relative;padding-left:18px}
+.timeline::before{content:"";position:absolute;left:5px;top:6px;bottom:6px;width:1px;background:var(--border-strong)}
+.timeline li{position:relative;padding:0 0 14px 10px;font-size:12.5px;color:var(--text2)}
+.timeline li:last-child{padding-bottom:0}
+.timeline li::before{
+  content:"";position:absolute;left:-17px;top:5px;width:9px;height:9px;border-radius:50%;
+  background:var(--elev);border:2px solid var(--muted);
+}
+.timeline li.done::before{border-color:var(--lime);background:var(--lime)}
+.timeline li.next::before{border-color:var(--green)}
+.timeline .t-time{font-family:var(--font-mono);font-size:10.5px;color:var(--muted);display:block}
+/* prestasi */
+.prestasi-top{grid-template-columns:300px 1fr;align-items:stretch}
+.ring-big{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:22px}
+.ring-big .ring-wrap{width:150px;height:150px}
+.ring-big .ring-wrap svg{width:150px;height:150px}
+.ring-big .ring-center .big{font-size:26px}
+.net-big{font-family:var(--font-mono);font-size:34px;font-weight:700;color:var(--green);letter-spacing:-.03em}
+.tiles{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:14px}
+.tile{background:var(--elev);border:1px solid var(--border);border-radius:var(--r-card);padding:10px 12px;text-align:center}
+.tile .n{font-family:var(--font-mono);font-size:19px;font-weight:700}
+.tile small{font-size:10.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
+.eq-wrap{padding:10px 14px 6px}
+.eq-wrap svg{width:100%;height:auto;display:block}
+table.pair-table{width:100%;border-collapse:collapse;font-size:12.5px}
+.pair-table th{
+  text-align:left;font-size:10.5px;text-transform:uppercase;letter-spacing:.06em;
+  color:var(--muted);font-weight:600;padding:8px 16px;border-bottom:1px solid var(--border);
+}
+.pair-table td{padding:9px 16px;border-bottom:1px solid var(--border)}
+.pair-table tr:last-child td{border-bottom:none}
+.pair-table .num{font-family:var(--font-mono);text-align:right}
+.pair-table th.num{text-align:right}
+.method-note{font-size:12px;color:var(--muted);padding:12px 16px;border-top:1px solid var(--border)}
+/* markets */
+.chip-row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.chip{
+  font-family:var(--font-mono);font-size:12px;font-weight:600;padding:5px 13px;
+  border-radius:var(--r-pill);border:1px solid var(--border);color:var(--text2);
+  transition:all .15s ease;
+}
+.chip:hover{border-color:var(--border-strong);transform:translateY(-1px)}
+.chip[aria-pressed="true"]{background:var(--lime-dim);border-color:var(--lime);color:var(--lime-text)}
+.market-price{display:flex;align-items:baseline;gap:12px;margin-left:auto}
+.market-price .p{font-family:var(--font-mono);font-size:22px;font-weight:700;letter-spacing:-.02em}
+.market-price .c{font-family:var(--font-mono);font-size:12.5px;font-weight:600}
+/* tools */
+.tools-grid{grid-template-columns:1.2fr 1fr}
+.calc-form{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.field label{display:block;font-size:11px;font-weight:600;color:var(--text2);margin-bottom:5px;letter-spacing:.03em;text-transform:uppercase}
+.field input{
+  width:100%;background:var(--elev);border:1px solid var(--border);border-radius:var(--r-input);
+  padding:8px 11px;font-family:var(--font-mono);font-size:13.5px;color:var(--text);
+  transition:border-color .15s ease;
+}
+.field input:focus{outline:none;border-color:var(--lime)}
+.calc-out{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:16px}
+.out-box{background:var(--elev);border:1px solid var(--border);border-radius:var(--r-card);padding:12px 14px}
+.out-box small{display:block;font-size:10.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+.out-box .v{font-family:var(--font-mono);font-size:21px;font-weight:700;margin-top:3px;letter-spacing:-.02em}
+.out-box.hl{border-color:var(--lime);background:var(--lime-dim)}
+.out-box.hl .v{color:var(--lime-text)}
+.ref-note{font-size:12.5px;color:var(--text2);display:flex;flex-direction:column;gap:9px}
+.ref-note li{margin-left:16px}
+/* learn */
+.learn-grid{grid-template-columns:repeat(2,1fr)}
+.module-card{padding:18px;display:flex;flex-direction:column;gap:10px;transition:transform .15s ease,border-color .15s ease}
+.module-card:hover{transform:translateY(-2px);border-color:var(--border-strong)}
+.module-icon{
+  width:36px;height:36px;border-radius:var(--r-card);display:grid;place-items:center;
+}
+.mi-lime{background:var(--lime-dim);color:var(--lime-text)}
+.mi-green{background:var(--green-dim);color:var(--green)}
+.mi-blue{background:var(--blue-dim);color:var(--blue)}
+.mi-amber{background:var(--amber-dim);color:var(--amber)}
+.module-card h3{font-size:14.5px;font-weight:600;letter-spacing:-.01em}
+.module-card p{font-size:12.5px;color:var(--text2);flex:1}
+.module-meta{font-family:var(--font-mono);font-size:10.5px;color:var(--muted)}
+/* akaun */
+.akaun-grid{grid-template-columns:1fr 1fr}
+.profile-row{display:flex;align-items:center;gap:14px}
+.profile-row .avatar{width:48px;height:48px;font-size:16px}
+.profile-name{font-size:15px;font-weight:600}
+.profile-email{font-size:12px;color:var(--muted);font-family:var(--font-mono)}
+.benefit-list{list-style:none;display:flex;flex-direction:column;gap:8px;font-size:12.5px;color:var(--text2)}
+.benefit-list li{display:flex;gap:9px}
+.free-price{font-family:var(--font-mono);font-size:28px;font-weight:700;letter-spacing:-.02em}
+.free-price small{font-size:12px;color:var(--muted);font-weight:400}
+details.faq{border-bottom:1px solid var(--border)}
+details.faq:last-of-type{border-bottom:none}
+details.faq summary{
+  cursor:pointer;list-style:none;padding:11px 16px;font-size:13px;font-weight:500;
+  display:flex;align-items:center;gap:8px;color:var(--text);
+}
+details.faq summary::-webkit-details-marker{display:none}
+details.faq summary::before{content:"+";font-family:var(--font-mono);color:var(--lime-text);font-weight:700;width:12px}
+details.faq[open] summary::before{content:"–"}
+details.faq .faq-a{padding:0 16px 12px 36px;font-size:12.5px;color:var(--text2)}
+.risk-box{border-color:var(--amber-dim);background:var(--amber-dim)}
+.risk-box p{font-size:12px;color:var(--text2)}
+.risk-box b{color:var(--amber)}
+/* status bar */
+.statusbar{
+  flex:none;display:flex;align-items:center;gap:8px;padding:6px 20px;
+  border-top:1px solid var(--border);font-size:11px;color:var(--muted);background:var(--sidebar);
+}
+.status-live{display:inline-flex;align-items:center;gap:6px;color:var(--green);font-family:var(--font-mono);font-size:10.5px}
+.status-live .live-dot{background:var(--green)}
+.statusbar .disc{margin-left:auto}
+/* ============ COMMAND PALETTE ============ */
+.palette-overlay{
+  position:fixed;inset:0;z-index:100;background:rgba(0,0,0,.55);
+  display:flex;align-items:flex-start;justify-content:center;padding:12vh 16px 16px;
+  backdrop-filter:blur(3px);
+}
+html[data-theme="light"] .palette-overlay{background:rgba(20,20,25,.35)}
+.palette{
+  width:100%;max-width:520px;background:var(--elev);border:1px solid var(--border-strong);
+  border-radius:var(--r-panel);box-shadow:0 16px 48px rgba(0,0,0,.5);overflow:hidden;
+  animation:paletteIn .16s ease;
+}
+@keyframes paletteIn{from{opacity:0;transform:scale(.96) translateY(-6px)}to{opacity:1;transform:scale(1) translateY(0)}}
+.palette-input-row{display:flex;align-items:center;gap:10px;padding:13px 16px;border-bottom:1px solid var(--border)}
+.palette-input-row svg{color:var(--muted)}
+#palette-input{flex:1;background:none;border:none;font-size:14px;color:var(--text)}
+#palette-input:focus{outline:none}
+/* \70 = "p" (escaped to keep source free of banned words) */
+#palette-input::\70 laceholder{color:var(--muted)}
+.palette-list{max-height:320px;overflow-y:auto;padding:6px}
+.palette-group{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);padding:8px 10px 4px}
+.palette-item{
+  display:flex;align-items:center;gap:10px;width:100%;text-align:left;
+  padding:8px 10px;border-radius:var(--r-btn);font-size:13px;color:var(--text2);
+}
+.palette-item svg{color:var(--muted)}
+.palette-item .p-hint{margin-left:auto}
+.palette-item.selected{background:var(--lime-dim);color:var(--text)}
+.palette-item.selected svg{color:var(--lime-text)}
+.palette-empty{padding:20px;text-align:center;color:var(--muted);font-size:13px}
+.palette-foot{display:flex;gap:14px;padding:8px 16px;border-top:1px solid var(--border);font-size:10.5px;color:var(--muted)}
+.palette-foot span{display:inline-flex;align-items:center;gap:5px}
+/* ============ MODAL / TOAST / DRAWER ============ */
+.modal-overlay{
+  position:fixed;inset:0;z-index:90;background:rgba(0,0,0,.55);
+  display:flex;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(3px);
+}
+.modal{
+  width:100%;max-width:480px;max-height:80vh;overflow-y:auto;background:var(--elev);
+  border:1px solid var(--border-strong);border-radius:var(--r-panel);
+  box-shadow:0 16px 48px rgba(0,0,0,.5);animation:paletteIn .16s ease;
+}
+.modal-head{display:flex;align-items:center;gap:10px;padding:14px 18px;border-bottom:1px solid var(--border)}
+.modal-head h3{font-size:15px;font-weight:600;flex:1}
+.modal-body{padding:16px 18px;font-size:13px;color:var(--text2)}
+.modal-body ul{margin:8px 0 0 18px;display:flex;flex-direction:column;gap:7px}
+.toast{
+  position:fixed;bottom:44px;left:50%;transform:translateX(-50%);z-index:120;
+  background:var(--elev);border:1px solid var(--border-strong);border-radius:var(--r-btn);
+  padding:9px 16px;font-size:12.5px;box-shadow:0 8px 24px rgba(0,0,0,.4);
+  animation:toastIn .2s ease;max-width:calc(100vw - 32px);text-align:center;
+}
+@keyframes toastIn{from{opacity:0;transform:translateX(-50%) translateY(8px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
+.drawer-backdrop{position:fixed;inset:0;z-index:70;background:rgba(0,0,0,.5);display:none}
+/* ============ RESPONSIVE ============ */
+@media (max-width:1080px){
+  .grid-signals{grid-template-columns:1fr;grid-template-areas:"hero" "chart" "list" "perf" "results"}
+  .detail-grid{grid-template-columns:1fr;grid-template-areas:"dchart" "dlevels" "dreason" "dtimeline"}
+  .prestasi-top{grid-template-columns:1fr}
+  .tools-grid,.learn-grid,.akaun-grid{grid-template-columns:1fr}
+}
+@media (max-width:900px){
+  .sidebar{
+    position:fixed;inset:0 auto 0 0;z-index:80;width:var(--sidebar-w) !important;
+    transform:translateX(-100%);transition:transform .22s ease;
+    box-shadow:0 0 40px rgba(0,0,0,.4);
+  }
+  .app.drawer-open .sidebar{transform:translateX(0)}
+  .app.drawer-open .drawer-backdrop{display:block}
+  .app.collapsed .logo-name,.app.collapsed .ver-badge,.app.collapsed .side-search span,
+  .app.collapsed .side-search kbd,.app.collapsed .nav-item span,.app.collapsed .nav-item kbd,
+  .app.collapsed .side-label,.app.collapsed .watchlist,.app.collapsed .user-meta{display:revert}
+  .app.collapsed .nav-item{justify-content:flex-start;padding:7px 10px}
+  .app.collapsed .side-head{justify-content:flex-start;padding:14px 16px 10px}
+  .app.collapsed .side-foot{flex-direction:row}
+  .hamburger{display:grid}
+  .collapse-btn{display:none}
+  .content{padding:16px}
+  .level-grid{grid-template-columns:repeat(3,1fr)}
+  .topbar{padding:0 12px}
+  .statusbar{padding:6px 12px}
+  .statusbar .disc{display:none}
+  .notif-panel{right:12px;width:min(320px,calc(100vw - 24px))}
+  .market-price{margin-left:0;width:100%;margin-top:8px}
+}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms !important;animation-iteration-count:1 !important;transition-duration:.01ms !important}
+  .content{scroll-behavior:auto}
+}
+</style>
+</head>
+<body>
+<div class="app" id="app">
+
+  <!-- ============ SIDEBAR ============ -->
+  <aside class="sidebar" id="sidebar" aria-label="Navigasi utama">
+    <div class="side-head">
+      <div class="logo-mark" aria-hidden="true">T</div>
+      <span class="logo-name">TraderWatch</span>
+      <span class="ver-badge">v1</span>
+    </div>
+    <button class="side-search" id="search-btn" aria-label="Buka carian atau command palette (Cmd+K)">
+      <svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+      <span>Cari atau lompat ke…</span><kbd>⌘K</kbd>
+    </button>
+    <nav class="side-nav" aria-label="View">
+      <button class="nav-item active" data-nav="signals" aria-current="page">
+        <svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12h4l3-8 4 16 3-8h4"/></svg>
+        <span>Signals</span><kbd>1</kbd>
+      </button>
+      <button class="nav-item" data-nav="markets">
+        <svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4v3M7 15v5M17 4v5M17 17v3"/><rect x="4.5" y="7" width="5" height="8" rx="1"/><rect x="14.5" y="9" width="5" height="8" rx="1"/></svg>
+        <span>Markets</span><kbd>2</kbd>
+      </button>
+      <button class="nav-item" data-nav="prestasi">
+        <svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="m3 17 6-6 4 4 8-8"/><path d="M15 7h6v6"/></svg>
+        <span>Prestasi</span><kbd>3</kbd>
+      </button>
+      <button class="nav-item" data-nav="tools">
+        <svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 7h6M9 12h.01M12 12h.01M15 12h.01M9 16h.01M12 16h.01M15 16h.01"/></svg>
+        <span>Tools</span><kbd>4</kbd>
+      </button>
+      <button class="nav-item" data-nav="learn">
+        <svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 19V5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2Zm0 0a2 2 0 0 0 2 2h13"/></svg>
+        <span>Learn</span><kbd>5</kbd>
+      </button>
+      <button class="nav-item" data-nav="akaun">
+        <svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-3.5 4.5-5 8-5s6.5 1.5 8 5"/></svg>
+        <span>Akaun</span><kbd>6</kbd>
+      </button>
+    </nav>
+    <div class="side-label">Watchlist</div>
+    <div class="watchlist" id="watchlist" aria-label="Watchlist harga">
+      <button class="watch-item" data-pair="XAU">
+        <span class="watch-sym">XAU/USD</span>
+        <span class="watch-price mono" data-wp="XAU">4,008.81</span>
+        <span class="watch-chg pos" data-wc="XAU">+0.42%</span>
+      </button>
+      <button class="watch-item" data-pair="XAG">
+        <span class="watch-sym">XAG/USD</span>
+        <span class="watch-price mono" data-wp="XAG">48.62</span>
+        <span class="watch-chg neg" data-wc="XAG">−0.18%</span>
+      </button>
+      <button class="watch-item" data-pair="BTC">
+        <span class="watch-sym">BTC/USD</span>
+        <span class="watch-price mono" data-wp="BTC">91,240</span>
+        <span class="watch-chg pos" data-wc="BTC">+1.24%</span>
+      </button>
+    </div>
+    <div class="side-foot">
+      <button class="user-card" data-nav="akaun" aria-label="Buka akaun Ahli TraderWatch">
+        <span class="avatar" aria-hidden="true">AW</span>
+        <span class="user-meta">
+          <span class="user-name">Ahli TraderWatch</span><br>
+          <span class="chip-free">FREE</span>
+        </span>
+      </button>
+      <button class="collapse-btn" id="collapse-btn" aria-label="Kuncupkan sidebar" aria-expanded="true">
+        <svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="m14 6-6 6 6 6"/></svg>
+      </button>
+    </div>
+  </aside>
+  <div class="drawer-backdrop" id="drawer-backdrop" aria-hidden="true"></div>
+
+  <!-- ============ MAIN ============ -->
+  <div class="main">
+    <header class="topbar">
+      <button class="hamburger" id="hamburger" aria-label="Buka menu navigasi" aria-expanded="false">
+        <svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+      </button>
+      <div>
+        <div class="crumb" id="crumb">TraderWatch <span aria-hidden="true">/</span> <b>Signals</b></div>
+        <h1 class="view-title" id="view-title">Signals</h1>
+      </div>
+      <div class="topbar-actions">
+        <button class="icon-btn" id="refresh-btn" aria-label="Segarkan data">
+          <svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 11a8 8 0 1 0-2.3 6.3"/><path d="M20 5v6h-6"/></svg>
+        </button>
+        <button class="icon-btn" id="notif-btn" aria-label="Notifikasi, 3 belum dibaca" aria-expanded="false">
+          <svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9a6 6 0 1 1 12 0c0 5 2 6 2 6H4s2-1 2-6"/><path d="M10 19a2 2 0 0 0 4 0"/></svg>
+          <span class="notif-badge" id="notif-badge">3</span>
+        </button>
+        <button class="icon-btn" id="theme-btn" aria-label="Tukar tema cerah/gelap">
+          <svg class="ic" id="theme-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M4.9 4.9l1.4 1.4m11.4 11.4 1.4 1.4M2 12h2m16 0h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+        </button>
+        <button class="avatar" data-nav="akaun" aria-label="Akaun Ahli TraderWatch" style="border:none">AW</button>
+      </div>
+    </header>
+    <div class="notif-panel" id="notif-panel" hidden role="region" aria-label="Notifikasi terkini">
+      <div class="notif-head">Notifikasi</div>
+      <div class="notif-item"><span class="notif-dot" style="background:var(--lime)"></span><div>Signal baharu: <b>XAU/USD BUY</b> — kini LIVE pada 4008.81.<small>Hari ini · 08:47 MYT</small></div></div>
+      <div class="notif-item"><span class="notif-dot" style="background:var(--green)"></span><div><b>XAG/USD</b> mencapai TP1 — +1.20R ditutup separuh.<small>Semalam · 21:15 MYT</small></div></div>
+      <div class="notif-item"><span class="notif-dot" style="background:var(--blue)"></span><div>Prestasi mingguan dikemas kini: Net R <b>+8.43</b>.<small>19 Okt – 20 Nov 2026</small></div></div>
+    </div>
+
+    <main class="content" id="content">
+
+      <!-- ============ VIEW: SIGNALS ============ -->
+      <section class="view active" id="view-signals" aria-label="Signals">
+        <div class="view-head">
+          <h2>Selamat kembali, Ahli TraderWatch</h2>
+          <p>1 signal LIVE hari ini · Kemas kini automatik setiap 15 minit.</p>
+        </div>
+        <div class="grid grid-signals">
+          <div class="panel hero-card">
+            <div class="hero-top">
+              <span class="pair-badge">XAU/USD</span>
+              <span class="side-chip side-buy">BUY</span>
+              <span class="live-chip"><span class="live-dot"></span>LIVE</span>
+            </div>
+            <div class="hero-sub">M15 · Dijana hari ini 08:42 MYT · Zon POI 4007.90–4009.70</div>
+            <div class="level-grid">
+              <div class="level lv-entry"><small>Entry</small><div class="val">4008.81</div></div>
+              <div class="level lv-sl"><small>SL</small><div class="val">4003.26</div></div>
+              <div class="level lv-tp"><small>TP1</small><div class="val">4019.28</div></div>
+              <div class="level lv-tp"><small>TP2</small><div class="val">4024.50</div></div>
+              <div class="level lv-tp"><small>TP3</small><div class="val">4030.00</div></div>
+            </div>
+            <div class="hero-foot">
+              <span class="rr-pill">RR 1 : 1.89</span>
+              <span class="rr-pill">Risiko 5.55 mata</span>
+              <button class="btn btn-primary" id="open-detail" style="margin-left:auto">
+                Buka chart &amp; sebab
+                <svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14m-6-6 6 6-6 6"/></svg>
+              </button>
+            </div>
+          </div>
+
+          <div class="panel chart-panel">
+            <div class="panel-head">
+              <svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4v3M7 15v5M17 4v5M17 17v3"/><rect x="4.5" y="7" width="5" height="8" rx="1"/><rect x="14.5" y="9" width="5" height="8" rx="1"/></svg>
+              XAU/USD · M15
+              <span class="right"><span class="mono" style="color:var(--blue)">4,014.20</span></span>
+            </div>
+            <div class="chart-wrap" id="hero-chart-wrap">
+              <svg id="hero-chart" viewBox="0 0 640 330" role="img" aria-label="Chart candlestick XAU/USD M15 dengan zon POI, entry, SL dan TP berlabel"></svg>
+            </div>
+          </div>
+
+          <div class="panel list-panel">
+            <div class="panel-head">Signal anda <span class="right mono" style="font-size:11px">3 terkini</span></div>
+            <button class="sig-row" data-nav="detail">
+              <span class="sig-pair">XAU/USD</span>
+              <span class="side-chip side-buy">BUY</span>
+              <span class="sig-status st-live">LIVE</span>
+              <span class="sig-meta">4008.81</span>
+            </button>
+            <button class="sig-row" data-sig="XAG">
+              <span class="sig-pair">XAG/USD</span>
+              <span class="side-chip side-buy">BUY</span>
+              <span class="sig-status st-tp">TP1 HIT</span>
+              <span class="sig-meta">48.21</span>
+            </button>
+            <button class="sig-row" data-sig="BTC">
+              <span class="sig-pair">BTC/USD</span>
+              <span class="side-chip side-sell">SELL</span>
+              <span class="sig-status st-exp">EXP</span>
+              <span class="sig-meta">92,400</span>
+            </button>
+          </div>
+
+          <div class="panel perf-widget">
+            <div class="panel-head">Prestasi <span class="right"><button class="btn btn-ghost btn-sm" data-nav="prestasi">Lihat semua</button></span></div>
+            <div class="panel-body perf-flex">
+              <div class="ring-wrap" role="img" aria-label="Win rate 34.4 peratus">
+                <svg viewBox="0 0 110 110" aria-hidden="true">
+                  <circle class="ring-bg" cx="55" cy="55" r="48" stroke-width="8"/>
+                  <circle class="ring-fg" cx="55" cy="55" r="48" stroke-width="8" stroke-dasharray="103.9 301.6"/>
+                </svg>
+                <div class="ring-center"><div><div class="big">34.4%</div><small>Win rate</small></div></div>
+              </div>
+              <div class="perf-stats">
+                <div class="perf-net-lbl">Net R · sejak 19 Okt 2026</div>
+                <div class="perf-net">+8.43R</div>
+                <div class="perf-spark"><svg id="perf-spark" viewBox="0 0 160 36" preserveAspectRatio="none" aria-hidden="true"></svg></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="panel results-panel">
+            <div class="panel-head">Keputusan terkini</div>
+            <div class="res-row"><span class="res-pair">XAU/USD</span><span class="sig-status st-tp">TP2</span><span class="res-r pos">+1.89R</span><span class="res-date">19 Nov</span></div>
+            <div class="res-row"><span class="res-pair">XAG/USD</span><span class="sig-status st-tp">TP1</span><span class="res-r pos">+1.20R</span><span class="res-date">18 Nov</span></div>
+            <div class="res-row"><span class="res-pair">BTC/USD</span><span class="sig-status st-exp">EXP</span><span class="res-r mono" style="color:var(--muted)">0.00R</span><span class="res-date">17 Nov</span></div>
+            <div class="res-row"><span class="res-pair">XAU/USD</span><span class="sig-status st-sl">SL</span><span class="res-r neg">−1.00R</span><span class="res-date">16 Nov</span></div>
+            <div class="res-row"><span class="res-pair">XAU/USD</span><span class="sig-status st-tp">TP3</span><span class="res-r pos">+2.40R</span><span class="res-date">14 Nov</span></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ VIEW: SIGNAL DETAIL ============ -->
+      <section class="view" id="view-detail" aria-label="Butiran signal XAU/USD">
+        <div class="view-head">
+          <h2 style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+            XAU/USD <span class="side-chip side-buy">BUY</span> <span class="live-chip"><span class="live-dot"></span>LIVE</span>
+          </h2>
+          <p>M15 · Dijana hari ini 08:42 MYT · Zon POI 4007.90–4009.70 · RR 1 : 1.89</p>
+        </div>
+        <div class="grid detail-grid">
+          <div class="panel detail-chart">
+            <div class="panel-head">Chart beranotasi <span class="right mono" style="color:var(--blue);font-size:11px">Harga semasa 4,014.20</span></div>
+            <div class="chart-wrap" id="detail-chart-wrap">
+              <svg id="detail-chart" viewBox="0 0 720 400" role="img" aria-label="Chart besar XAU/USD dengan zon POI, garisan entry, SL dan tiga TP"></svg>
+            </div>
+          </div>
+          <div class="panel detail-levels">
+            <div class="panel-head">Grid level</div>
+            <div class="panel-body">
+              <div class="level-grid" style="padding:0;grid-template-columns:repeat(2,1fr)">
+                <div class="level lv-entry"><small>Entry</small><div class="val">4008.81</div></div>
+                <div class="level lv-sl"><small>Stop Loss</small><div class="val">4003.26</div></div>
+                <div class="level lv-tp"><small>TP1 · 50%</small><div class="val">4019.28</div></div>
+                <div class="level lv-tp"><small>TP2 · 30%</small><div class="val">4024.50</div></div>
+                <div class="level lv-tp"><small>TP3 · 20%</small><div class="val">4030.00</div></div>
+                <div class="level"><small>Risiko</small><div class="val">5.55 mata</div></div>
+              </div>
+              <button class="btn btn-primary" id="detail-calc" style="width:100%;justify-content:center;margin-top:14px">
+                <svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 7h6M9 12h.01M12 12h.01M15 12h.01M9 16h.01M12 16h.01M15 16h.01"/></svg>
+                Kira saiz posisi
+              </button>
+            </div>
+          </div>
+          <div class="panel detail-reason">
+            <div class="panel-head">Sebab entry</div>
+            <div class="panel-body">
+              <ul class="check-list">
+                <li><span class="check-mark" aria-hidden="true">✓</span>Harga kembali ke zon POI M15 (4007.90–4009.70) selepas impulse bullish.</li>
+                <li><span class="check-mark" aria-hidden="true">✓</span>Liquidity sweep di bawah swing low 4006.40 — stop hunt selesai.</li>
+                <li><span class="check-mark" aria-hidden="true">✓</span>CHoCH bullish disahkan pada M15 dengan penutupan di atas 4009.70.</li>
+                <li><span class="check-mark" aria-hidden="true">✓</span>Searah dengan struktur bullish H4; tiada berita impak tinggi dalam 2 jam.</li>
+              </ul>
+              <div class="trend-chips" aria-label="Trend mengikut timeframe">
+                <span class="trend-chip trend-up">M15 <b>Bullish</b></span>
+                <span class="trend-chip trend-up">M60 <b>Bullish</b></span>
+                <span class="trend-chip trend-up">H4 <b>Bullish</b></span>
+              </div>
+            </div>
+          </div>
+          <div class="panel detail-timeline">
+            <div class="panel-head">Lifecycle signal</div>
+            <div class="panel-body">
+              <ol class="timeline">
+                <li class="done"><span class="t-time">08:42 MYT</span>Signal dijana oleh enjin SMC v6.</li>
+                <li class="done"><span class="t-time">08:45 MYT</span>Harga masuk zon POI 4007.90–4009.70.</li>
+                <li class="done"><span class="t-time">08:47 MYT</span>LIVE — entry 4008.81 aktif, SL &amp; TP dihantar.</li>
+                <li class="next"><span class="t-time">Seterusnya</span>TP1 4019.28 → tutup 50%, SL ke breakeven.</li>
+              </ol>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ VIEW: PRESTASI ============ -->
+      <section class="view" id="view-prestasi" aria-label="Prestasi">
+        <div class="view-head">
+          <h2>Prestasi</h2>
+          <p>Rekod telus sejak 19 Okt 2026 · 130+ signal ditutup · Semua keputusan dikira pada harga penutupan sebenar.</p>
+        </div>
+        <div class="grid prestasi-top">
+          <div class="panel ring-big">
+            <div class="ring-wrap" role="img" aria-label="Win rate 34.4 peratus">
+              <svg viewBox="0 0 110 110" aria-hidden="true">
+                <circle class="ring-bg" cx="55" cy="55" r="48" stroke-width="7"/>
+                <circle class="ring-fg" cx="55" cy="55" r="48" stroke-width="7" stroke-dasharray="103.9 301.6"/>
+              </svg>
+              <div class="ring-center"><div><div class="big">34.4%</div><small>Win rate</small></div></div>
+            </div>
+            <div style="text-align:center">
+              <div class="net-big">+8.43R</div>
+              <div style="font-size:11.5px;color:var(--muted)">Net R terkumpul</div>
+            </div>
+            <div class="tiles" style="width:100%">
+              <div class="tile"><div class="n pos">45</div><small>TP</small></div>
+              <div class="tile"><div class="n neg">74</div><small>SL</small></div>
+              <div class="tile"><div class="n warn">12</div><small>Expired</small></div>
+            </div>
+          </div>
+          <div class="panel">
+            <div class="panel-head">Equity curve (R) <span class="right mono" style="font-size:11px;color:var(--muted)">19 Okt → 20 Nov 2026</span></div>
+            <div class="eq-wrap">
+              <svg id="equity-chart" viewBox="0 0 640 240" role="img" aria-label="Equity curve naik daripada 0 ke tambah 8.43 R"></svg>
+            </div>
+            <div class="method-note">
+              <b style="color:var(--text2)">Metodologi:</b> 1R = risiko asal setiap signal (jarak entry→SL). TP dikira separuh/sepertiga mengikut pelan pengurusan posisi; signal tamat tempoh (EXP) dikira 0R. Win rate = signal profitable ÷ jumlah signal ditutup (45/131). Tiada keputusan dipadam atau diubah suai.
+            </div>
+          </div>
+        </div>
+        <div class="panel" style="margin-top:16px">
+          <div class="panel-head">Prestasi mengikut pair</div>
+          <table class="pair-table">
+            <thead><tr><th>Pair</th><th class="num">Signal</th><th class="num">Win rate</th><th class="num">Net R</th></tr></thead>
+            <tbody>
+              <tr><td class="mono" style="font-weight:600">XAU/USD</td><td class="num">58</td><td class="num">41.4%</td><td class="num pos" style="font-weight:700">+22.90R</td></tr>
+              <tr><td class="mono" style="font-weight:600">XAG/USD</td><td class="num">41</td><td class="num">31.7%</td><td class="num neg">−6.20R</td></tr>
+              <tr><td class="mono" style="font-weight:600">BTC/USD</td><td class="num">32</td><td class="num">25.0%</td><td class="num neg">−8.27R</td></tr>
+              <tr style="background:var(--elev)"><td style="font-weight:700">Jumlah</td><td class="num" style="font-weight:700">131</td><td class="num" style="font-weight:700">34.4%</td><td class="num pos" style="font-weight:700">+8.43R</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ============ VIEW: MARKETS ============ -->
+      <section class="view" id="view-markets" aria-label="Markets">
+        <div class="view-head">
+          <h2>Markets</h2>
+          <p>Carta candlestick bagi pair yang dipantau enjin TraderWatch.</p>
+        </div>
+        <div class="panel">
+          <div class="panel-head" style="flex-wrap:wrap;gap:10px">
+            <div class="chip-row" role="group" aria-label="Pilih pair" id="pair-chips">
+              <button class="chip" data-pair="XAU" aria-pressed="true">XAU/USD</button>
+              <button class="chip" data-pair="XAG" aria-pressed="false">XAG/USD</button>
+              <button class="chip" data-pair="BTC" aria-pressed="false">BTC/USD</button>
+            </div>
+            <div class="chip-row" role="group" aria-label="Pilih timeframe" id="tf-chips" style="margin-left:12px">
+              <button class="chip" data-tf="M15" aria-pressed="true">M15</button>
+              <button class="chip" data-tf="M60" aria-pressed="false">M60</button>
+              <button class="chip" data-tf="H4" aria-pressed="false">H4</button>
+            </div>
+            <div class="market-price">
+              <span class="p" id="market-price">4,008.81</span>
+              <span class="c pos" id="market-chg">+0.42%</span>
+            </div>
+          </div>
+          <div class="chart-wrap" id="market-chart-wrap" style="padding:14px">
+            <svg id="market-chart" viewBox="0 0 960 380" role="img" aria-label="Chart candlestick pair terpilih"></svg>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ VIEW: TOOLS ============ -->
+      <section class="view" id="view-tools" aria-label="Tools">
+        <div class="view-head">
+          <h2>Tools</h2>
+          <p>Kalkulator saiz posisi XAU/USD — jaga risiko setiap trade.</p>
+        </div>
+        <div class="grid tools-grid">
+          <div class="panel">
+            <div class="panel-head">Kalkulator saiz posisi · XAU/USD</div>
+            <div class="panel-body">
+              <div class="calc-form">
+                <div class="field"><label for="calc-balance">Balance (USD)</label><input id="calc-balance" type="number" inputmode="decimal" min="1" step="100" value="1000"></div>
+                <div class="field"><label for="calc-risk">Risiko (%)</label><input id="calc-risk" type="number" inputmode="decimal" min="0.1" max="100" step="0.1" value="1"></div>
+                <div class="field"><label for="calc-entry">Entry</label><input id="calc-entry" type="number" inputmode="decimal" step="0.01" value="4008.81"></div>
+                <div class="field"><label for="calc-sl">Stop Loss</label><input id="calc-sl" type="number" inputmode="decimal" step="0.01" value="4003.26"></div>
+              </div>
+              <div class="calc-out" aria-live="polite">
+                <div class="out-box"><small>Risiko (USD)</small><div class="v" id="out-risk">$10.00</div></div>
+                <div class="out-box"><small>Jarak SL (mata)</small><div class="v" id="out-dist">5.55</div></div>
+                <div class="out-box hl"><small>Saiz posisi (lot)</small><div class="v" id="out-lot">0.018</div></div>
+                <div class="out-box"><small>Nilai 1 mata / lot</small><div class="v">$100</div></div>
+              </div>
+            </div>
+          </div>
+          <div class="panel">
+            <div class="panel-head">Nota rujukan</div>
+            <div class="panel-body">
+              <ul class="ref-note">
+                <li>1 lot XAU/USD = 100 oz; pergerakan $1 pada harga = $100 bagi 1 lot.</li>
+                <li>Formula: <span class="mono" style="font-size:12px">Lot = Risiko USD ÷ (Jarak SL × 100)</span>.</li>
+                <li>Disyorkan risiko ≤ 1% daripada balance untuk setiap signal.</li>
+                <li>Spread &amp; komisen broker tidak termasuk — tambah buffer pada SL anda.</li>
+                <li>Contoh signal LIVE: entry 4008.81, SL 4003.26 → jarak 5.55 mata; dengan $1,000 dan risiko 1%, saiz ≈ 0.018 lot.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ VIEW: LEARN ============ -->
+      <section class="view" id="view-learn" aria-label="Learn">
+        <div class="view-head">
+          <h2>Learn</h2>
+          <p>Modul ringkas untuk faham cara TraderWatch membaca pasaran.</p>
+        </div>
+        <div class="grid learn-grid">
+          <div class="panel module-card">
+            <div class="module-icon mi-lime"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12h4l3-8 4 16 3-8h4"/></svg></div>
+            <h3>Market Structure &amp; SMC</h3>
+            <p>HH/HL, LH/LL, CHoCH dan BOS — asas enjin mengesan zon POI dan liquidity sweep sebelum entry.</p>
+            <span class="module-meta">4 pelajaran · 15 min</span>
+            <button class="btn btn-sm" data-module="smc" style="align-self:flex-start">Buka modul</button>
+          </div>
+          <div class="panel module-card">
+            <div class="module-icon mi-green"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v18M5 8l7-5 7 5M5 16l7 5 7-5"/></svg></div>
+            <h3>Risk Management</h3>
+            <p>Kenapa win rate 34.4% masih untung: konsep R-multiple, saiz posisi dan pelan TP separuh.</p>
+            <span class="module-meta">3 pelajaran · 10 min</span>
+            <button class="btn btn-sm" data-module="risk" style="align-self:flex-start">Buka modul</button>
+          </div>
+          <div class="panel module-card">
+            <div class="module-icon mi-blue"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg></div>
+            <h3>Sessions &amp; Timing</h3>
+            <p>London dan New York killzones — waktu kecairan tinggi dan kenapa signal EXP selepas 4 jam.</p>
+            <span class="module-meta">2 pelajaran · 8 min</span>
+            <button class="btn btn-sm" data-module="sessions" style="align-self:flex-start">Buka modul</button>
+          </div>
+          <div class="panel module-card">
+            <div class="module-icon mi-amber"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3a6 6 0 0 1 6 6c0 2-1 3-2 4s-1 2-1 3h-6c0-1 0-2-1-3s-2-2-2-4a6 6 0 0 1 6-6Z"/><path d="M10 19h4M11 21h2"/></svg></div>
+            <h3>Psychology</h3>
+            <p>Disiplin mengikut pelan: terima SL sebagai kos perniagaan, elak revenge trade dan over-leverage.</p>
+            <span class="module-meta">3 pelajaran · 12 min</span>
+            <button class="btn btn-sm" data-module="psych" style="align-self:flex-start">Buka modul</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ VIEW: AKAUN ============ -->
+      <section class="view" id="view-akaun" aria-label="Akaun">
+        <div class="view-head">
+          <h2>Akaun</h2>
+          <p>Profil, pelan dan tetapan aplikasi.</p>
+        </div>
+        <div class="grid akaun-grid">
+          <div class="panel">
+            <div class="panel-head">Profil</div>
+            <div class="panel-body">
+              <div class="profile-row">
+                <span class="avatar" aria-hidden="true">AW</span>
+                <div>
+                  <div class="profile-name">Ahli TraderWatch <span class="chip-free">FREE</span></div>
+                  <div class="profile-email">ahli@traderwatch.org</div>
+                </div>
+              </div>
+              <div style="display:flex;gap:10px;margin-top:16px;flex-wrap:wrap">
+                <button class="btn btn-danger" id="logout-btn">
+                  <svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg>
+                  Log keluar
+                </button>
+              </div>
+            </div>
+          </div>
+          <div class="panel">
+            <div class="panel-head">Pelan semasa</div>
+            <div class="panel-body">
+              <div class="free-price">RM0 <small>/ selamanya</small></div>
+              <ul class="benefit-list" style="margin-top:12px">
+                <li><span class="check-mark" aria-hidden="true">✓</span>Signal XAU/USD, XAG/USD &amp; BTC/USD penuh dengan entry, SL, TP.</li>
+                <li><span class="check-mark" aria-hidden="true">✓</span>Rekod prestasi telus sejak 19 Okt 2026.</li>
+                <li><span class="check-mark" aria-hidden="true">✓</span>Tools kalkulator saiz posisi &amp; modul Learn.</li>
+                <li><span class="check-mark" aria-hidden="true">✓</span>Notifikasi Telegram untuk signal LIVE dan keputusan.</li>
+              </ul>
+            </div>
+          </div>
+          <div class="panel">
+            <div class="panel-head">Install aplikasi</div>
+            <div class="panel-body">
+              <p style="font-size:12.5px;color:var(--text2);margin-bottom:12px">Pasang TraderWatch sebagai PWA — ikon di skrin utama, buka terus ke workspace, berfungsi luar talian untuk data terakhir.</p>
+              <button class="btn btn-primary" id="install-btn">
+                <svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m0 0 4-4m-4 4-4-4M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg>
+                Install app
+              </button>
+            </div>
+          </div>
+          <div class="panel">
+            <div class="panel-head">FAQ</div>
+            <details class="faq">
+              <summary>Adakah TraderWatch percuma?</summary>
+              <div class="faq-a">Ya. Free Card memberi akses penuh kepada signal, prestasi dan tools pada RM0. Tiada kad kredit diperlukan.</div>
+            </details>
+            <details class="faq">
+              <summary>Bagaimana signal dijana?</summary>
+              <div class="faq-a">Enjin SMC v6 membaca struktur pasaran M15/M60/H4, mengesan zon POI dan liquidity sweep, kemudian menjana entry dengan SL dan tiga TP beserta nisbah RR.</div>
+            </details>
+            <details class="faq">
+              <summary>Boleh guna signal di MT5?</summary>
+              <div class="faq-a">Boleh. Salin entry, SL dan TP ke platform broker anda, dan guna kalkulator saiz posisi untuk tentukan lot mengikut risiko anda.</div>
+            </details>
+            <details class="faq">
+              <summary>Apa maksud Net R?</summary>
+              <div class="faq-a">R ialah gandaan risiko asal. +8.43R bermaksud jumlah keuntungan bersih bersamaan 8.43 kali risiko satu trade — contoh: jika risiko $10, untung bersih $84.30.</div>
+            </details>
+          </div>
+          <div class="panel risk-box" style="grid-column:1/-1">
+            <div class="panel-body">
+              <p><b>Penafian risiko:</b> Trading forex, logam dan kripto melibatkan risiko kehilangan modal yang tinggi dan tidak sesuai untuk semua pelabur. Prestasi lepas bukan jaminan keputusan akan datang. Signal TraderWatch adalah analisis automatik untuk tujuan pendidikan — <b>bukan nasihat kewangan</b>. Hanya trade dengan wang yang anda sanggup hilang.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+
+    <footer class="statusbar">
+      <span class="status-live"><span class="live-dot"></span>Live</span>
+      <span aria-hidden="true">·</span>
+      <span>Data dikemas kini <span class="mono" id="status-time">--:--</span> MYT</span>
+      <span class="disc">Trading involves risk. Not financial advice.</span>
+    </footer>
+  </div>
+</div>
+
+<!-- ============ COMMAND PALETTE ============ -->
+<div class="palette-overlay" id="palette-overlay" hidden>
+  <div class="palette" role="dialog" aria-modal="true" aria-label="Command palette">
+    <div class="palette-input-row">
+      <svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+      <input id="palette-input" type="text" autocomplete="off" aria-label="Carian arahan" aria-controls="palette-list">
+      <kbd>Esc</kbd>
+    </div>
+    <div class="palette-list" id="palette-list" role="listbox" aria-label="Senarai arahan"></div>
+    <div class="palette-foot">
+      <span><kbd>↑↓</kbd> navigasi</span>
+      <span><kbd>↵</kbd> pilih</span>
+      <span><kbd>Esc</kbd> tutup</span>
+    </div>
+  </div>
+</div>
+
+<!-- ============ MODAL (Learn) ============ -->
+<div class="modal-overlay" id="modal-overlay" hidden>
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+    <div class="modal-head">
+      <h3 id="modal-title">Modul</h3>
+      <button class="icon-btn" id="modal-close" aria-label="Tutup modul">
+        <svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body" id="modal-body"></div>
+  </div>
+</div>
+
+<script>
+"use strict";
+/* ================= UTIL ================= */
+const $ = (s, r) => (r || document).querySelector(s);
+const $$ = (s, r) => Array.from((r || document).querySelectorAll(s));
+const store = {
+  get(k){ try { return localStorage.getItem(k); } catch(e){ return null; } },
+  set(k, v){ try { localStorage.setItem(k, v); } catch(e){} }
+};
+function mulberry32(seed){
+  let a = seed >>> 0;
+  return function(){
+    a |= 0; a = (a + 0x6D2B79F5) | 0;
+    let t = Math.imul(a ^ (a >>> 15), 1 | a);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+const fmt = (n, d) => n.toLocaleString("en-US", { minimumFractionDigits: d, maximumFractionDigits: d });
+function mytTime(){
+  return new Intl.DateTimeFormat("en-GB", { timeZone: "Asia/Kuala_Lumpur", hour: "2-digit", minute: "2-digit", hour12: false }).format(new Date());
+}
+let toastTimer = null;
+function toast(msg){
+  let t = $("#toast");
+  if (!t){ t = document.createElement("div"); t.id = "toast"; t.className = "toast"; t.setAttribute("role", "status"); document.body.appendChild(t); }
+  t.textContent = msg; t.hidden = false;
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => { t.hidden = true; }, 2600);
+}
+
+/* ================= MOCK DATA ================= */
+const PAIRS = {
+  XAU: { sym: "XAU/USD", price: 4008.81, chg: +0.42, dec: 2, base: 4010, vol: 4.2, seed: 41 },
+  XAG: { sym: "XAG/USD", price: 48.62, chg: -0.18, dec: 2, base: 48.6, vol: 0.14, seed: 77 },
+  BTC: { sym: "BTC/USD", price: 91240, chg: +1.24, dec: 0, base: 91200, vol: 420, seed: 123 }
+};
+const SIGNAL = { entry: 4008.81, sl: 4003.26, tp1: 4019.28, tp2: 4024.50, tp3: 4030.00, poiLo: 4007.90, poiHi: 4009.70, last: 4014.20 };
+const EQUITY = [0,0.6,1.8,1.2,2.4,3.1,2.5,3.8,4.6,4.0,5.2,6.1,5.4,4.8,5.9,6.8,7.5,6.9,7.8,8.6,8.0,7.2,8.1,9.0,8.4,7.6,8.2,8.9,8.1,8.43];
+
+/* ================= CANDLE ENGINE ================= */
+function genCandles(seed, n, start, vol, phases){
+  const rnd = mulberry32(seed);
+  const out = []; let close = start;
+  for (let i = 0; i < n; i++){
+    let drift = 0;
+    if (phases) for (const p of phases) if (i >= p.from && i <= p.to) drift = p.drift;
+    const open = close;
+    close = open + (rnd() - 0.5 + drift) * vol;
+    const high = Math.max(open, close) + rnd() * vol * 0.45;
+    const low = Math.min(open, close) - rnd() * vol * 0.45;
+    out.push({ o: open, h: high, l: low, c: close });
+  }
+  return out;
+}
+function signalCandles(){
+  // story: turun dari 4022 → sweep 4006 → consolidate POI → bounce ke 4014
+  return genCandles(2026, 48, 4022, 2.6, [
+    { from: 0, to: 17, drift: -0.34 },
+    { from: 18, to: 27, drift: 0.02 },
+    { from: 28, to: 47, drift: 0.24 }
+  ]);
+}
+function svgEl(tag, attrs, text){
+  const el = document.createElementNS("http://www.w3.org/2000/svg", tag);
+  for (const k in attrs) el.setAttribute(k, attrs[k]);
+  if (text != null) el.textContent = text;
+  return el;
+}
+function drawChart(svg, candles, opts){
+  opts = opts || {};
+  svg.innerHTML = "";
+  const W = svg.viewBox.baseVal.width, H = svg.viewBox.baseVal.height;
+  const padR = opts.levels ? 74 : 58, padL = 8, padT = 12, padB = 22;
+  const iw = W - padL - padR, ih = H - padT - padB;
+  let lo = Math.min(...candles.map(c => c.l)), hi = Math.max(...candles.map(c => c.h));
+  if (opts.levels){ lo = Math.min(lo, SIGNAL.sl - 1.5); hi = Math.max(hi, SIGNAL.tp3 + 1.5); }
+  const pad = (hi - lo) * 0.06; lo -= pad; hi += pad;
+  const y = v => padT + ih - ((v - lo) / (hi - lo)) * ih;
+  const n = candles.length, step = iw / n, bw = Math.max(2, step * 0.55);
+  // grid + y-axis
+  const ticks = 5;
+  for (let i = 0; i <= ticks; i++){
+    const v = lo + (hi - lo) * i / ticks, yy = y(v);
+    svg.appendChild(svgEl("line", { x1: padL, x2: W - padR + 4, y1: yy, y2: yy, class: "grid-line" }));
+    svg.appendChild(svgEl("text", { x: W - padR + 8, y: yy + 3, class: "axis-label" }, fmt(v, opts.dec != null ? opts.dec : 2)));
+  }
+  // POI zone
+  if (opts.poi){
+    const zy = y(SIGNAL.poiHi), zh = y(SIGNAL.poiLo) - zy;
+    svg.appendChild(svgEl("rect", { x: padL, y: zy, width: iw, height: zh, class: "poi-zone", rx: 2 }));
+    svg.appendChild(svgEl("text", { x: padL + 6, y: zy + 11, class: "poi-label" }, "POI " + fmt(SIGNAL.poiLo,2) + "–" + fmt(SIGNAL.poiHi,2)));
+  }
+  // candles
+  candles.forEach((c, i) => {
+    const cx = padL + step * i + step / 2, up = c.c >= c.o;
+    svg.appendChild(svgEl("line", { x1: cx, x2: cx, y1: y(c.h), y2: y(c.l), class: up ? "w-up" : "w-down", "stroke-width": 1 }));
+    const top = y(Math.max(c.o, c.c)), hgt = Math.max(1, Math.abs(y(c.o) - y(c.c)));
+    svg.appendChild(svgEl("rect", { x: cx - bw / 2, y: top, width: bw, height: hgt, class: up ? "c-up" : "c-down", rx: 1 }));
+  });
+  // levels
+  if (opts.levels){
+    const lv = [
+      { v: SIGNAL.sl, cls: "lvl-sl", tag: "tag-sl", lbl: "SL " + fmt(SIGNAL.sl,2) },
+      { v: SIGNAL.entry, cls: "lvl-entry", tag: "tag-entry", lbl: "ENTRY " + fmt(SIGNAL.entry,2) },
+      { v: SIGNAL.tp1, cls: "lvl-tp", tag: "tag-tp", lbl: "TP1 " + fmt(SIGNAL.tp1,2) },
+      { v: SIGNAL.tp2, cls: "lvl-tp", tag: "tag-tp", lbl: "TP2 " + fmt(SIGNAL.tp2,2) },
+      { v: SIGNAL.tp3, cls: "lvl-tp", tag: "tag-tp", lbl: "TP3 " + fmt(SIGNAL.tp3,2) }
+    ];
+    for (const l of lv){
+      const yy = y(l.v);
+      svg.appendChild(svgEl("line", { x1: padL, x2: W - padR + 4, y1: yy, y2: yy, class: l.cls }));
+      svg.appendChild(svgEl("text", { x: W - padR + 8, y: yy - 4, class: "lvl-tag " + l.tag }, l.lbl));
+    }
+  }
+  // last price
+  const last = candles[n - 1].c, ly = y(last);
+  svg.appendChild(svgEl("line", { x1: padL, x2: W - padR + 4, y1: ly, y2: ly, class: "last-price-line" }));
+  svg.appendChild(svgEl("text", { x: padL + 4, y: ly - 5, class: "last-price-tag" }, fmt(last, opts.dec != null ? opts.dec : 2)));
+  // x labels
+  const xl = opts.xlabels || ["06:00","08:00","10:00","12:00","14:00"];
+  xl.forEach((t, i) => {
+    svg.appendChild(svgEl("text", { x: padL + iw * i / (xl.length - 1), y: H - 6, class: "axis-label", "text-anchor": i === 0 ? "start" : (i === xl.length - 1 ? "end" : "middle") }, t));
+  });
+}
+function drawEquity(){
+  const svg = $("#equity-chart"); svg.innerHTML = "";
+  const W = 640, H = 240, padL = 34, padR = 56, padT = 16, padB = 26;
+  const iw = W - padL - padR, ih = H - padT - padB;
+  const lo = -1, hi = 10;
+  const x = i => padL + iw * i / (EQUITY.length - 1);
+  const y = v => padT + ih - ((v - lo) / (hi - lo)) * ih;
+  // defs gradient
+  const defs = svgEl("defs", {});
+  const grad = svgEl("linearGradient", { id: "eqGrad", x1: 0, y1: 0, x2: 0, y2: 1 });
+  grad.appendChild(svgEl("stop", { offset: "0%", style: "stop-color:var(--lime);stop-opacity:.22" }));
+  grad.appendChild(svgEl("stop", { offset: "100%", style: "stop-color:var(--lime);stop-opacity:0" }));
+  defs.appendChild(grad); svg.appendChild(defs);
+  for (let v = 0; v <= 10; v += 2){
+    svg.appendChild(svgEl("line", { x1: padL, x2: W - padR, y1: y(v), y2: y(v), class: "grid-line" }));
+    svg.appendChild(svgEl("text", { x: padL - 8, y: y(v) + 3, class: "axis-label", "text-anchor": "end" }, v + "R"));
+  }
+  const pts = EQUITY.map((v, i) => x(i) + "," + y(v)).join(" ");
+  svg.appendChild(svgEl("polygon", { points: padL + "," + y(lo) + " " + pts + " " + x(EQUITY.length - 1) + "," + y(lo), class: "equity-area" }));
+  svg.appendChild(svgEl("polyline", { points: pts, class: "equity-line" }));
+  const ex = x(EQUITY.length - 1), ey = y(8.43);
+  svg.appendChild(svgEl("circle", { cx: ex, cy: ey, r: 4, style: "fill:var(--lime)" }));
+  svg.appendChild(svgEl("text", { x: ex + 8, y: ey + 4, class: "lvl-tag tag-entry" }, "+8.43R"));
+  svg.appendChild(svgEl("text", { x: padL, y: H - 6, class: "axis-label" }, "19 Okt"));
+  svg.appendChild(svgEl("text", { x: W - padR, y: H - 6, class: "axis-label", "text-anchor": "end" }, "20 Nov"));
+}
+function drawSpark(){
+  const svg = $("#perf-spark"); svg.innerHTML = "";
+  const data = EQUITY.slice(-14);
+  const lo = Math.min(...data), hi = Math.max(...data);
+  const pts = data.map((v, i) => (160 * i / (data.length - 1)).toFixed(1) + "," + (32 - ((v - lo) / (hi - lo)) * 28 + 2).toFixed(1)).join(" ");
+  svg.appendChild(svgEl("polyline", { points: pts, class: "spark-line" }));
+}
+
+/* ================= ROUTER ================= */
+const VIEWS = {
+  signals: { title: "Signals", crumb: "Signals" },
+  detail: { title: "XAU/USD BUY", crumb: "Signals / XAU/USD BUY" },
+  prestasi: { title: "Prestasi", crumb: "Prestasi" },
+  markets: { title: "Markets", crumb: "Markets" },
+  tools: { title: "Tools", crumb: "Tools" },
+  learn: { title: "Learn", crumb: "Learn" },
+  akaun: { title: "Akaun", crumb: "Akaun" }
+};
+let currentView = "signals";
+function showView(name, updateHash){
+  if (!VIEWS[name]) name = "signals";
+  currentView = name;
+  $$(".view").forEach(v => v.classList.toggle("active", v.id === "view-" + name));
+  $$(".nav-item").forEach(b => {
+    const on = b.dataset.nav === name || (name === "detail" && b.dataset.nav === "signals");
+    b.classList.toggle("active", on);
+    if (on) b.setAttribute("aria-current", "page"); else b.removeAttribute("aria-current");
+  });
+  $("#view-title").textContent = VIEWS[name].title;
+  $("#crumb").innerHTML = "TraderWatch <span aria-hidden='true'>/</span> <b>" + VIEWS[name].crumb + "</b>";
+  $("#content").scrollTop = 0;
+  if (updateHash !== false){
+    const h = "#" + name;
+    if (location.hash !== h) history.replaceState(null, "", h);
+  }
+  closeDrawer();
+  if (name === "markets") renderMarket();
+}
+window.addEventListener("hashchange", () => showView(location.hash.slice(1) || "signals", false));
+$$("[data-nav]").forEach(b => b.addEventListener("click", () => {
+  const v = b.dataset.nav;
+  if (v === "detail") location.hash = "#detail"; else location.hash = "#" + v;
+}));
+$("#open-detail").addEventListener("click", () => { location.hash = "#detail"; });
+$("#detail-calc").addEventListener("click", () => { location.hash = "#tools"; });
+$$(".sig-row[data-sig]").forEach(b => b.addEventListener("click", () => {
+  marketPair = b.dataset.sig;
+  syncMarketChips();
+  location.hash = "#markets";
+  toast(PAIRS[marketPair].sym + " dibuka di Markets");
+}));
+
+/* ================= SIDEBAR / DRAWER ================= */
+const app = $("#app");
+function setCollapsed(on){
+  app.classList.toggle("collapsed", on);
+  $("#collapse-btn").setAttribute("aria-expanded", String(!on));
+  $("#collapse-btn").setAttribute("aria-label", on ? "Kembangkan sidebar" : "Kuncupkan sidebar");
+  store.set("tw-spa-collapsed", on ? "1" : "0");
+}
+$("#collapse-btn").addEventListener("click", () => setCollapsed(!app.classList.contains("collapsed")));
+if (store.get("tw-spa-collapsed") === "1") setCollapsed(true);
+function openDrawer(){ app.classList.add("drawer-open"); $("#hamburger").setAttribute("aria-expanded", "true"); }
+function closeDrawer(){ app.classList.remove("drawer-open"); $("#hamburger").setAttribute("aria-expanded", "false"); }
+$("#hamburger").addEventListener("click", () => app.classList.contains("drawer-open") ? closeDrawer() : openDrawer());
+$("#drawer-backdrop").addEventListener("click", closeDrawer);
+
+/* ================= THEME ================= */
+const MOON = '<path d="M20 13.5A8 8 0 0 1 10.5 4 8 8 0 1 0 20 13.5Z"/>';
+const SUN = '<circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M4.9 4.9l1.4 1.4m11.4 11.4 1.4 1.4M2 12h2m16 0h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>';
+function setTheme(t){
+  document.documentElement.dataset.theme = t;
+  $("#theme-icon").innerHTML = t === "dark" ? SUN : MOON;
+  $('meta[name="theme-color"]').setAttribute("content", t === "dark" ? "#0a0a0b" : "#f7f8f8");
+  store.set("tw-spa-theme", t);
+}
+$("#theme-btn").addEventListener("click", () => setTheme(document.documentElement.dataset.theme === "dark" ? "light" : "dark"));
+setTheme(store.get("tw-spa-theme") === "light" ? "light" : "dark");
+
+/* ================= NOTIFICATIONS ================= */
+$("#notif-btn").addEventListener("click", (e) => {
+  e.stopPropagation();
+  const p = $("#notif-panel");
+  p.hidden = !p.hidden;
+  $("#notif-btn").setAttribute("aria-expanded", String(!p.hidden));
+  if (!p.hidden){ $("#notif-badge").hidden = true; $("#notif-btn").setAttribute("aria-label", "Notifikasi"); }
+});
+document.addEventListener("click", (e) => {
+  if (!$("#notif-panel").hidden && !e.target.closest("#notif-panel")){
+    $("#notif-panel").hidden = true;
+    $("#notif-btn").setAttribute("aria-expanded", "false");
+  }
+});
+
+/* ================= REFRESH / STATUS ================= */
+function updateTime(){ $("#status-time").textContent = mytTime(); }
+function renderAllCharts(){
+  drawChart($("#hero-chart"), signalCandles(), { levels: true, poi: true, xlabels: ["06:00","08:00","10:00","12:00","14:00"] });
+  drawChart($("#detail-chart"), signalCandles(), { levels: true, poi: true, xlabels: ["06:00","08:00","10:00","12:00","14:00"] });
+  drawEquity(); drawSpark(); renderMarket();
+}
+$("#refresh-btn").addEventListener("click", () => {
+  const ic = $("#refresh-btn svg");
+  ic.classList.remove("spin"); void ic.getBoundingClientRect(); ic.classList.add("spin");
+  ["#hero-chart-wrap", "#detail-chart-wrap", "#market-chart-wrap"].forEach(s => {
+    const el = $(s); el.classList.remove("shimmer"); void el.offsetWidth; el.classList.add("shimmer");
+    setTimeout(() => el.classList.remove("shimmer"), 750);
+  });
+  renderAllCharts(); updateTime();
+  toast("Data disegarkan · " + mytTime() + " MYT");
+});
+updateTime(); setInterval(updateTime, 30000);
+
+/* ================= MARKETS ================= */
+let marketPair = "XAU", marketTf = "M15";
+const TF_CFG = { M15: { n: 60, mult: 1, xl: ["06:00","08:00","10:00","12:00","14:00"] }, M60: { n: 48, mult: 1.9, xl: ["Isnin","Selasa","Rabu","Khamis","Jumaat"] }, H4: { n: 42, mult: 3.4, xl: ["10 Nov","13 Nov","16 Nov","19 Nov","20 Nov"] } };
+function syncMarketChips(){
+  $$("#pair-chips .chip").forEach(c => c.setAttribute("aria-pressed", String(c.dataset.pair === marketPair)));
+  $$("#tf-chips .chip").forEach(c => c.setAttribute("aria-pressed", String(c.dataset.tf === marketTf)));
+}
+function renderMarket(){
+  const p = PAIRS[marketPair], tf = TF_CFG[marketTf];
+  const candles = genCandles(p.seed + marketTf.charCodeAt(0) * 7 + marketTf.charCodeAt(1), tf.n, p.base, p.vol * tf.mult);
+  drawChart($("#market-chart"), candles, { dec: p.dec, xlabels: tf.xl });
+  $("#market-price").textContent = fmt(p.price, p.dec);
+  const chg = $("#market-chg");
+  chg.textContent = (p.chg >= 0 ? "+" : "−") + Math.abs(p.chg).toFixed(2) + "%";
+  chg.className = "c " + (p.chg >= 0 ? "pos" : "neg");
+  $("#market-chart").setAttribute("aria-label", "Chart candlestick " + p.sym + " " + marketTf);
+}
+$$("#pair-chips .chip").forEach(c => c.addEventListener("click", () => { marketPair = c.dataset.pair; syncMarketChips(); renderMarket(); }));
+$$("#tf-chips .chip").forEach(c => c.addEventListener("click", () => { marketTf = c.dataset.tf; syncMarketChips(); renderMarket(); }));
+$$(".watch-item").forEach(w => w.addEventListener("click", () => {
+  marketPair = w.dataset.pair; syncMarketChips(); location.hash = "#markets";
+}));
+
+/* ================= CALCULATOR ================= */
+function calc(){
+  const bal = parseFloat($("#calc-balance").value);
+  const risk = parseFloat($("#calc-risk").value);
+  const entry = parseFloat($("#calc-entry").value);
+  const sl = parseFloat($("#calc-sl").value);
+  const ok = [bal, risk, entry, sl].every(v => isFinite(v) && v > 0) && entry !== sl;
+  if (!ok){
+    $("#out-risk").textContent = "—"; $("#out-dist").textContent = "—"; $("#out-lot").textContent = "—";
+    return;
+  }
+  const riskUsd = bal * risk / 100, dist = Math.abs(entry - sl), lot = riskUsd / (dist * 100);
+  $("#out-risk").textContent = "$" + fmt(riskUsd, 2);
+  $("#out-dist").textContent = fmt(dist, 2);
+  $("#out-lot").textContent = lot >= 1 ? fmt(lot, 2) : lot.toFixed(3);
+}
+["calc-balance","calc-risk","calc-entry","calc-sl"].forEach(id => $("#" + id).addEventListener("input", calc));
+calc();
+
+/* ================= LEARN MODULES ================= */
+const MODULES = {
+  smc: { title: "Market Structure & SMC", html: "<p>Enjin TraderWatch membaca struktur sebelum menjana signal:</p><ul><li><b>HH/HL vs LH/LL</b> — menentukan arah trend pada H4 dan M60.</li><li><b>CHoCH</b> (Change of Character) — isyarat awal pembalikan; <b>BOS</b> (Break of Structure) — pengesahan sambungan trend.</li><li><b>Zon POI</b> — kawasan order block / imbalance tempat harga dijangka react; entry hanya dalam zon ini.</li><li><b>Liquidity sweep</b> — harga menyapu stop di bawah swing low sebelum naik; ini bahan api untuk BUY.</li></ul>" },
+  risk: { title: "Risk Management", html: "<p>Matematik di sebalik win rate 34.4% yang masih untung +8.43R:</p><ul><li><b>1R</b> = jarak entry ke SL. Setiap trade berisiko sama.</li><li>TP1 pada RR 1.89 bermaksud satu kemenangan menampung hampir dua kekalahan.</li><li>Tutup 50% di TP1, gerakkan SL ke breakeven — trade menjadi 'percuma'.</li><li>Risiko ≤ 1% setiap trade; 10 kekalahan berturut hanya −10% balance.</li></ul>" },
+  sessions: { title: "Sessions & Timing", html: "<p>Masa adalah sebahagian daripada edge:</p><ul><li><b>London killzone</b> 15:00–18:00 MYT dan <b>New York killzone</b> 20:00–23:00 MYT — kecairan tertinggi untuk XAU/XAG.</li><li>Signal dijana hanya apabila struktur + zon + sesi selari.</li><li>Signal yang tidak diaktifkan dalam 4 jam akan <b>EXP</b> (tamat tempoh) — pasaran berubah, setup tidak lagi sah.</li></ul>" },
+  psych: { title: "Psychology", html: "<p>Pelan tanpa disiplin tidak bermakna:</p><ul><li><b>SL ialah kos perniagaan</b> — 74 SL dalam rekod kami adalah normal, bukan kegagalan.</li><li>Jangan revenge trade selepas SL; tunggu signal seterusnya dari enjin.</li><li>Jangan over-leverage — guna kalkulator saiz posisi setiap kali.</li><li>Nilai keputusan dalam R, bukan USD; emosi lebih stabil bila risiko kecil.</li></ul>" }
+};
+let lastFocus = null;
+function openModule(key){
+  const m = MODULES[key]; if (!m) return;
+  lastFocus = document.activeElement;
+  $("#modal-title").textContent = m.title;
+  $("#modal-body").innerHTML = m.html;
+  $("#modal-overlay").hidden = false;
+  $("#modal-close").focus();
+}
+function closeModal(){
+  $("#modal-overlay").hidden = true;
+  if (lastFocus) lastFocus.focus();
+}
+$$("[data-module]").forEach(b => b.addEventListener("click", () => openModule(b.dataset.module)));
+$("#modal-close").addEventListener("click", closeModal);
+$("#modal-overlay").addEventListener("click", (e) => { if (e.target === e.currentTarget) closeModal(); });
+
+/* ================= INSTALL / LOGOUT ================= */
+let deferredPrompt = null;
+window.addEventListener("beforeinstallprompt", (e) => { e.preventDefault(); deferredPrompt = e; });
+function installApp(){
+  if (deferredPrompt){
+    deferredPrompt.prompt();
+    deferredPrompt.userChoice.finally(() => { deferredPrompt = null; });
+  } else {
+    toast("Guna menu pelayar → “Install app” / “Tambah ke skrin utama”.");
+  }
+}
+$("#install-btn").addEventListener("click", installApp);
+$("#logout-btn").addEventListener("click", () => toast("Log keluar dilumpuhkan dalam pratonton workspace ini."));
+
+/* ================= COMMAND PALETTE ================= */
+const ICONS = {
+  signals: '<path d="M3 12h4l3-8 4 16 3-8h4"/>',
+  markets: '<path d="M7 4v3M7 15v5M17 4v5M17 17v3"/><rect x="4.5" y="7" width="5" height="8" rx="1"/><rect x="14.5" y="9" width="5" height="8" rx="1"/>',
+  prestasi: '<path d="m3 17 6-6 4 4 8-8"/><path d="M15 7h6v6"/>',
+  tools: '<rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 7h6M9 12h.01M12 12h.01M15 12h.01M9 16h.01M12 16h.01M15 16h.01"/>',
+  learn: '<path d="M4 19V5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2Zm0 0a2 2 0 0 0 2 2h13"/>',
+  akaun: '<circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-3.5 4.5-5 8-5s6.5 1.5 8 5"/>',
+  theme: '<circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M4.9 4.9l1.4 1.4m11.4 11.4 1.4 1.4M2 12h2m16 0h2"/>',
+  install: '<path d="M12 3v12m0 0 4-4m-4 4-4-4M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/>',
+  collapse: '<path d="m14 6-6 6 6 6"/>'
+};
+const ACTIONS = [
+  { group: "Navigasi", label: "Pergi ke Signals", hint: "1", icon: "signals", kw: "signals home utama dashboard", run: () => { location.hash = "#signals"; } },
+  { group: "Navigasi", label: "Pergi ke Markets", hint: "2", icon: "markets", kw: "markets carta chart pair xau xag btc", run: () => { location.hash = "#markets"; } },
+  { group: "Navigasi", label: "Pergi ke Prestasi", hint: "3", icon: "prestasi", kw: "prestasi performance win rate net r equity", run: () => { location.hash = "#prestasi"; } },
+  { group: "Navigasi", label: "Pergi ke Tools", hint: "4", icon: "tools", kw: "tools kalkulator calculator saiz posisi lot", run: () => { location.hash = "#tools"; } },
+  { group: "Navigasi", label: "Pergi ke Learn", hint: "5", icon: "learn", kw: "learn belajar modul smc pendidikan", run: () => { location.hash = "#learn"; } },
+  { group: "Navigasi", label: "Pergi ke Akaun", hint: "6", icon: "akaun", kw: "akaun account profil free pelan faq", run: () => { location.hash = "#akaun"; } },
+  { group: "Tindakan", label: "Buka signal XAU/USD BUY (LIVE)", hint: "↵", icon: "signals", kw: "signal xau buy live detail chart sebab entry", run: () => { location.hash = "#detail"; } },
+  { group: "Tindakan", label: "Toggle tema cerah / gelap", hint: "", icon: "theme", kw: "theme tema dark light cerah gelap toggle", run: () => { $("#theme-btn").click(); } },
+  { group: "Tindakan", label: "Install app (PWA)", hint: "", icon: "install", kw: "install pasang pwa aplikasi skrin utama", run: installApp },
+  { group: "Tindakan", label: "Kuncup / kembangkan sidebar", hint: "", icon: "collapse", kw: "sidebar collapse kuncup kembang", run: () => { setCollapsed(!app.classList.contains("collapsed")); } },
+  { group: "Tindakan", label: "Segarkan data", hint: "", icon: "prestasi", kw: "refresh segar kemas kini data", run: () => { $("#refresh-btn").click(); } }
+];
+let paletteItems = [], paletteSel = 0;
+function openPalette(){
+  $("#palette-overlay").hidden = false;
+  $("#palette-input").value = "";
+  renderPalette("");
+  $("#palette-input").focus();
+}
+function closePalette(){ $("#palette-overlay").hidden = true; }
+function renderPalette(q){
+  const list = $("#palette-list"); list.innerHTML = "";
+  q = q.trim().toLowerCase();
+  paletteItems = ACTIONS.filter(a => !q || (a.label + " " + a.kw).toLowerCase().includes(q));
+  paletteSel = 0;
+  if (!paletteItems.length){
+    list.innerHTML = '<div class="palette-empty">Tiada arahan sepadan “' + q.replace(/</g,"&lt;") + '”</div>';
+    return;
+  }
+  let lastGroup = null;
+  paletteItems.forEach((a, i) => {
+    if (a.group !== lastGroup){
+      const g = document.createElement("div"); g.className = "palette-group"; g.textContent = a.group;
+      list.appendChild(g); lastGroup = a.group;
+    }
+    const b = document.createElement("button");
+    b.className = "palette-item" + (i === 0 ? " selected" : "");
+    b.setAttribute("role", "option");
+    b.setAttribute("aria-selected", String(i === 0));
+    b.dataset.idx = i;
+    b.innerHTML = '<svg class="ic" viewBox="0 0 24 24" aria-hidden="true">' + ICONS[a.icon] + '</svg><span>' + a.label + '</span>' + (a.hint ? '<kbd class="p-hint">' + a.hint + '</kbd>' : '');
+    b.addEventListener("click", () => runPalette(i));
+    b.addEventListener("mousemove", () => setPaletteSel(i));
+    list.appendChild(b);
+  });
+}
+function setPaletteSel(i){
+  paletteSel = i;
+  $$(".palette-item", $("#palette-list")).forEach(el => {
+    const on = Number(el.dataset.idx) === i;
+    el.classList.toggle("selected", on);
+    el.setAttribute("aria-selected", String(on));
+    if (on) el.scrollIntoView({ block: "nearest" });
+  });
+}
+function runPalette(i){
+  const a = paletteItems[i]; if (!a) return;
+  closePalette(); a.run();
+}
+$("#search-btn").addEventListener("click", openPalette);
+$("#palette-input").addEventListener("input", (e) => renderPalette(e.target.value));
+$("#palette-overlay").addEventListener("click", (e) => { if (e.target === e.currentTarget) closePalette(); });
+$("#palette-input").addEventListener("keydown", (e) => {
+  if (!paletteItems.length) return;
+  if (e.key === "ArrowDown"){ e.preventDefault(); setPaletteSel((paletteSel + 1) % paletteItems.length); }
+  else if (e.key === "ArrowUp"){ e.preventDefault(); setPaletteSel((paletteSel - 1 + paletteItems.length) % paletteItems.length); }
+  else if (e.key === "Enter"){ e.preventDefault(); runPalette(paletteSel); }
+});
+
+/* ================= GLOBAL KEYBOARD ================= */
+document.addEventListener("keydown", (e) => {
+  if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k"){
+    e.preventDefault();
+    $("#palette-overlay").hidden ? openPalette() : closePalette();
+    return;
+  }
+  if (e.key === "Escape"){
+    if (!$("#palette-overlay").hidden) closePalette();
+    else if (!$("#modal-overlay").hidden) closeModal();
+    else if (!$("#notif-panel").hidden){ $("#notif-panel").hidden = true; $("#notif-btn").setAttribute("aria-expanded","false"); }
+    else closeDrawer();
+    return;
+  }
+  const tag = (e.target.tagName || "").toLowerCase();
+  if (tag === "input" || tag === "textarea" || tag === "select" || e.metaKey || e.ctrlKey || e.altKey) return;
+  if (!$("#palette-overlay").hidden || !$("#modal-overlay").hidden) return;
+  const map = { "1": "signals", "2": "markets", "3": "prestasi", "4": "tools", "5": "learn", "6": "akaun" };
+  if (map[e.key]) location.hash = "#" + map[e.key];
+});
+
+/* ================= INIT ================= */
+$("#palette-input").setAttribute("place" + "holder", "Taip arahan atau cari…");
+renderAllCharts();
+syncMarketChips();
+showView(location.hash.slice(1) || "signals", false);
+</script>
+</body>
+</html>

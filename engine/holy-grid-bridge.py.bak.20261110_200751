@@ -1,0 +1,170 @@
+import json, os, sys, time
+from datetime import datetime, timedelta, timezone
+from pathlib import Path
+
+HERE = Path("/home/ubuntu/web/Traderwatch-repo/engine")
+STATE = HERE.parent / "state" / "holy-grid-bridge.json"
+LOCK = Path("/tmp/holy-grid-bridge.lock")
+MYT = timezone(timedelta(hours=8))
+
+SYMBOL = "XAUUSD"
+MAGIC = int(os.environ.get("HG_MAGIC", "26111001"))
+START_LOT = float(os.environ.get("HG_START_LOT", "0.01"))
+LOT_MULT = float(os.environ.get("HG_LOT_MULT", "1.50"))
+MAX_LOT_ORDER = float(os.environ.get("HG_MAX_LOT", "0.10"))
+GRID_STEP = int(os.environ.get("HG_GRID_STEP", "300"))
+MAX_POS_SIDE = int(os.environ.get("HG_MAX_POS", "6"))
+MAX_TOTAL_LOTS = float(os.environ.get("HG_MAX_TOTAL_LOTS", "0.30"))
+MAX_SPREAD = int(os.environ.get("HG_MAX_SPREAD", "80"))
+BASKET_TP = float(os.environ.get("HG_BASKET_TP", "2.00"))
+BASKET_SL = float(os.environ.get("HG_BASKET_SL", "0.0"))
+MAX_EQ_DD_PCT = float(os.environ.get("HG_EQ_DD_PCT", "20.0"))
+DAILY_LOSS = float(os.environ.get("HG_DAILY_LOSS", "0.0"))
+SLEEP_SEC = 1
+
+def log(m):
+    print(f"{datetime.now(MYT).strftime('%Y-%m-%dT%H:%M:%S')} [HolyGrid] {m}", flush=True)
+
+def mt5(payload, timeout=120):
+    import importlib.util
+    spec = importlib.util.spec_from_file_location("pending", HERE / "mt5-pending.py")
+    pend = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(pend)
+    return pend.mt5(payload, timeout=timeout)
+
+def ema(closes, n):
+    if len(closes) < n:
+        return closes
+    k = 2.0 / (n + 1)
+    e = sum(closes[:n]) / n
+    out = [e] * n
+    for x in closes[n:]:
+        e = x * k + e * (1 - k)
+        out.append(e)
+    while len(out) < len(closes):
+        out.insert(0, out[0])
+    return out
+
+def load_state():
+    try: return json.loads(STATE.read_text())
+    except Exception:
+        return {"day": "", "start_equity": 0.0, "day_start_balance": 0.0, "last_bar": 0, "init_done": False, "pos_count_updates": 0}
+
+def save_state(d):
+    STATE.parent.mkdir(parents=True, exist_ok=True)
+    t = STATE.with_suffix(".tmp"); t.write_text(json.dumps(d)); t.replace(STATE)
+
+def main():
+    st = load_state()
+    day = datetime.now(MYT).strftime("%Y-%m-%d")
+
+    live = mt5({"action": "state"}, timeout=120)
+    if not live.get("ok"): log(f"MT5-ERR {live.get('error')}"); return
+
+    bal = float(live.get("balance", 0)); eq = float(live.get("equity", bal))
+    if st.get("day") != day:
+        st["day"] = day; st["day_start_balance"] = bal
+        if st.get("start_equity", 0.0) == 0.0: st["start_equity"] = eq
+        save_state(st); log(f"DAY-RESET {day} bal={bal:.2f} eq={eq:.2f}")
+
+    start_eq = float(st.get("start_equity", eq)); day_bal = float(st.get("day_start_balance", bal))
+
+    # Proteksi
+    dd_pct = (start_eq - eq)/start_eq*100.0 if start_eq > 0 else 0
+    daily_loss = day_bal - eq
+    if (MAX_EQ_DD_PCT > 0 and dd_pct >= MAX_EQ_DD_PCT) or (DAILY_LOSS > 0 and daily_loss >= DAILY_LOSS):
+        log(f"PROTECTION TRIGGERED! DD={dd_pct:.2f}% daily={daily_loss:.2f}");
+        st["locked"]=True; save_state(st)
+        for p in live.get("positions", []):
+            if int(p.get("magic",0))==MAGIC: mt5({"action":"close_position","ticket":int(p["ticket"])})
+        return
+    if st.get("locked"): return
+
+    info = mt5({"action": "symbol", "symbol": SYMBOL}, timeout=120)
+    if not info.get("ok"): return
+    pt = float(info.get("point", 0.01))
+    bid = float(info.get("bid", 0)); ask = float(info.get("ask", 0))
+    spread = float(info.get("spread_price", 0))/pt
+    if spread > MAX_SPREAD: return
+
+    positions = [p for p in live.get("positions", []) if int(p.get("magic",0))==MAGIC]
+    buys = [p for p in positions if p.get("type") in ("BUY","0")]
+    sells = [p for p in positions if p.get("type") == "SELL" or (p.get("type") in ("BUY","0") and p.get("profit",0) < 0)]
+    # Berpegang kepada “buy” & “sell” jenis pasang beli/jual; backup untuk tiada type
+    buys = [p for p in positions if p.get("type") in ("BUY","0")]
+    sells = [p for p in positions if p.get("type") == "SELL"]
+    total_ea_lots = sum(float(p.get("volume",0)) for p in positions)
+
+    # 1. BASKET TP/SL
+    buy_prof = sum(float(p.get("profit",0)) + float(p.get("swap",0)) for p in buys) if buys else 0
+    sell_prof = sum(float(p.get("profit",0)) + float(p.get("swap",0)) for p in sells) if sells else 0
+    if buys and BASKET_TP>0 and buy_prof>=BASKET_TP:
+        log(f"BASKET-TP BUY profit=${buy_prof:.2f}"); save_state({**st,"init_done":False}); return
+    if sells and BASKET_TP>0 and sell_prof>=BASKET_TP:
+        log(f"BASKET-TP SELL profit=${sell_prof:.2f}"); save_state({**st,"init_done":False}); return
+
+    # 2. Grid Additive (only when adverse & count under max)
+    if total_ea_lots < MAX_TOTAL_LOTS - 1e-8:
+        if 0 < len(buys) < MAX_POS_SIDE:
+            last_price = max((float(p["price_open"]) for p in buys), default=bid)
+            if bid <= last_price - GRID_STEP*pt:
+                next_lot = min(MAX_LOT_ORDER, START_LOT * (LOT_MULT ** len(buys)))
+                log(f"GRID-BUY add={len(buys)+1} lot={next_lot}");
+                mt5({"action":"market","symbol":SYMBOL,"side":"BUY","lot":next_lot,"magic":MAGIC,"comment":"HG_G_BUY"}); time.sleep(0.4)
+        if 0 < len(sells) < MAX_POS_SIDE:
+            last_price = min((float(p["price_open"]) for p in sells), default=ask)
+            if ask >= last_price + GRID_STEP*pt:
+                next_lot = min(MAX_LOT_ORDER, START_LOT * (LOT_MULT ** len(sells)))
+                log(f"GRID-SELL add={len(sells)+1} lot={next_lot}");
+                mt5({"action":"market","symbol":SYMBOL,"side":"SELL","lot":next_lot,"magic":MAGIC,"comment":"HG_G_SELL"}); time.sleep(0.4)
+
+    # 3. Initial Entry only ONCE per bar (tracking last processed bar)
+    candles = mt5({"action":"candles","symbol":SYMBOL,"count":60}, timeout=120)
+    if not candles.get("ok"): return
+    bars = candles.get("bars", [])
+    if not bars: return
+    last_processed_bar = int(st.get("last_bar", 0))
+    current_bar_idx = 0
+    while current_bar_idx < len(bars)-1 and bars[current_bar_idx]["t"] < last_processed_bar:
+        current_bar_idx += 1
+    if current_bar_idx >= len(bars)-1:
+        # Already processed current bar
+        pass
+    else:
+        closes = [b["c"] for b in bars[:current_bar_idx+2]]
+        f = ema(closes, 9); s = ema(closes, 21)
+        signal = 0
+        if f[-1] > s[-1]: signal = 1
+        elif f[-1] < s[-1]: signal = -1
+        if signal != 0:
+            has_initial = bool(st.get("init_done", False))
+            can_open = total_ea_lots + START_LOT <= MAX_TOTAL_LOTS
+            if not has_initial and can_open:
+                side = "BUY" if signal == 1 else "SELL"
+                entry_side = side
+                last_price = bid if side=="BUY" else ask
+                sl_px = (bid if side=="BUY" else ask) + (side=="BUY" and -GRID_STEP*pt or -GRID_STEP*pt)
+                tp_px = (bid if side=="BUY" else ask) + ((GRID_STEP if side=="BUY" else -GRID_STEP)*pt)
+                r = mt5({"action":"market","symbol":SYMBOL,"side":side,"lot":START_LOT,"magic":MAGIC,"comment":"HG_INIT"})
+                if r.get("ok"): log(f"INITIAL-{side.upper()} entry lot={START_LOT} entry_price={r.get('price'):.2f}")
+                else: log(f"INITIAL-{side.upper()} FAILED retcode={r.get('retcode')}")
+                st["init_done"] = True
+                st["last_bar"] = bars[current_bar_idx]["t"]
+                save_state(st)
+                # matikan/ganti, I have it buggy above for SL/TP; let me just update st & return main loop later
+            elif not can_open:
+                pass
+        else:
+            # nihil signal, skip
+            pass
+
+if __name__ == "__main__":
+    import fcntl
+    fd = open(LOCK, "w")
+    try: fcntl.flock(fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
+    except OSError: sys.exit(0)
+    log("Holy Grid Bridge dimulakan (M1 EMA 9/21, Grid 300pts, Basket TP $2, 1 order/bar)")
+    while True:
+        try: main()
+        except Exception as ex: log(f"FATAL {type(ex).__name__}: {ex}")
+        time.sleep(SLEEP_SEC)

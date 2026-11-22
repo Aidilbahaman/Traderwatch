@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="ms"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>PREVIEW — Orbit · 12 elektron</title>
+<style>
+:root{--bg:#0a0e0b;--card:#111612;--card2:#171e18;--line:#222b23;--text:#eef3ee;--muted:#8a978c;--lime:#b7f36b;--green:#b7f36b;--red:#ff777d;--orange:#ffc16b;--blue:#8ab4ff}
+*{box-sizing:border-box}
+body{margin:0;background:#050705;font:15px/1.5 -apple-system,BlinkMacSystemFont,"Inter",sans-serif;color:var(--text)}
+.wrap{max-width:430px;margin:0 auto;background:var(--bg);min-height:100vh;padding:16px 16px 40px}
+h1{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:#5d695f;margin:0 0 4px;font-weight:700}
+.sub{font-size:12px;color:var(--muted);margin:0 0 18px}
+h2{font-size:13px;font-weight:850;margin:24px 0 6px}
+.hint{font-size:11.5px;color:var(--muted);margin:0 0 10px;line-height:1.5}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:14px;display:grid;place-items:center}
+
+/* ===== ORBIT MATRIX — 3 rings x 4 = 12 ===== */
+.orbwrap{position:relative;width:196px;height:196px;display:grid;place-items:center}
+.core{width:56px;height:56px;border-radius:50%;
+ background:radial-gradient(circle at 36% 32%,#f6ffdf,#b7f36b 45%,#4f8a1c 82%,#16210a);
+ box-shadow:0 0 24px #b7f36b50,inset 0 0 14px #ffffff22;
+ animation:corePulse 4s ease-in-out infinite;display:grid;place-items:center;z-index:4;
+ font-size:9px;font-weight:900;color:#10150b;letter-spacing:.03em}
+@keyframes corePulse{0%,100%{transform:scale(1);box-shadow:0 0 20px #b7f36b38,inset 0 0 12px #ffffff1e}50%{transform:scale(1.07);box-shadow:0 0 42px #b7f36b78,inset 0 0 22px #ffffff2e}}
+
+.ring{position:absolute;border-radius:50%;border:1px solid #b7f36b1c;pointer-events:none}
+.ring.a{width:104px;height:104px;border-color:#b7f36b26}
+.ring.b{width:148px;height:148px;border-color:#b7f36b1e}
+.ring.c{width:192px;height:192px;border-color:#b7f36b16}
+
+/* each track: a rotating circle; electrons placed via rotate(angle) translateY(-r) */
+.orb{position:absolute;border-radius:50%;animation:spin linear infinite}
+.orb.a{width:104px;height:104px;animation-duration:6.5s}
+.orb.b{width:148px;height:148px;animation-duration:9.5s;animation-direction:reverse}
+.orb.c{width:192px;height:192px;animation-duration:13s}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+.e{position:absolute;width:7px;height:7px;border-radius:50%;left:calc(50% - 3.5px);top:calc(50% - 3.5px);
+ transform-origin:50% 50%;background:var(--lime);box-shadow:0 0 8px var(--lime)}
+.orb.b .e{background:var(--blue);box-shadow:0 0 8px var(--blue)}
+.orb.c .e{background:var(--orange);box-shadow:0 0 7px var(--orange)}
+
+/* ===== mini header ===== */
+.hdr{display:flex;align-items:center;gap:11px;background:var(--card);border:1px solid var(--line);border-radius:18px;padding:13px 14px}
+.mini{position:relative;width:48px;height:48px;display:grid;place-items:center;flex:none}
+.mini .c2{width:16px;height:16px;border-radius:50%;background:radial-gradient(circle at 36% 32%,#f4ffd8,#b7f36b 50%,#4f8a1c);box-shadow:0 0 9px #b7f36b55;z-index:3;animation:corePulse 4s ease-in-out infinite}
+.mini .mo{position:absolute;border-radius:50%;animation:spin linear infinite}
+.mini .mo.a{width:28px;height:28px;animation-duration:6.5s}
+.mini .mo.b{width:38px;height:38px;animation-duration:9.5s;animation-direction:reverse}
+.mini .mo.c{width:46px;height:46px;animation-duration:13s}
+.mini .me{position:absolute;width:3px;height:3px;border-radius:50%;left:calc(50% - 1.5px);top:calc(50% - 1.5px);background:var(--lime);box-shadow:0 0 4px var(--lime)}
+.mini .mo.b .me{background:var(--blue);box-shadow:0 0 4px var(--blue)}
+.mini .mo.c .me{background:var(--orange);box-shadow:0 0 4px var(--orange)}
+.hdr .tx{flex:1;min-width:0}
+.hdr .tx b{display:block;font-size:14px;font-weight:850}
+.hdr .tx small{font-size:11px;color:var(--muted)}
+.hdr .st{margin-left:auto;font-size:9.5px;font-weight:800;color:var(--lime);background:#b7f36b14;border:1px solid #b7f36b3d;border-radius:99px;padding:3px 9px;flex:none}
+
+.note{font-size:11.5px;color:var(--muted);line-height:1.65;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px;margin-top:16px}
+.note b{color:var(--text)}
+@media(prefers-reduced-motion:reduce){.core,.mini .c2{animation:none}.orb,.orb.a,.orb.b,.orb.c,.mini .mo,.mini .mo.a,.mini .mo.b,.mini .mo.c{animation:none}}
+</style></head><body><div class="wrap">
+<h1>PREVIEW — ORBIT · 12 ELEKTRON</h1>
+<p class="sub">3 orbit × 4 elektron = 12. Arah putaran berselang-seli.</p>
+
+<h2>Saiz besar (196px)</h2>
+<div class="card" style="padding:18px">
+  <div class="orbwrap">
+    <div class="ring a"></div><div class="ring b"></div><div class="ring c"></div>
+    <div class="orb a" id="oa"></div>
+    <div class="orb b" id="ob"></div>
+    <div class="orb c" id="oc"></div>
+    <div class="core">AI</div>
+  </div>
+</div>
+
+<h2>Dalam konteks — header League (48px)</h2>
+<div class="hdr">
+  <div class="mini">
+    <div class="mo a" id="ma"></div>
+    <div class="mo b" id="mb"></div>
+    <div class="mo c" id="mc"></div>
+    <div class="c2"></div>
+  </div>
+  <div class="tx"><b>Enjin AI aktif</b><small>12 pair · verdict terakhir 2 min lalu</small></div>
+  <div class="st">LIVE</div>
+</div>
+
+<div class="note">
+<b>Struktur:</b> orbit dalam 104px (6.5s, 4 lime) · tengah 148px (9.5s terbalik, 4 biru) · luar 192px (13s, 4 oren).<br><br>
+<b>Kesan:</b> padat dan sibuk — seperti atom penuh elektron. Nampak "kuat memproses" tetapi perlu dinilai: pada saiz kecil ia boleh jadi bintik berdenyut.<br><br>
+<b>Nota:</b> 12 elektron pada 48px mini = 3px setiap satu. Masih kelihatan, tetapi fokus visual berkurangan berbanding 4 elektron.
+</div>
+</div>
+<script>
+function fill(track, n, cls){
+  if(!track) return;
+  for(var i=0;i<n;i++){
+    var a=(360/n)*i, r=track.offsetWidth/2;
+    var d=document.createElement('div');
+    d.className='e';
+    d.style.transform='rotate('+a+'deg) translateY(-'+r+'px)';
+    track.appendChild(d);
+  }
+}
+['oa','ob','oc'].forEach(function(id){ fill(document.getElementById(id),4); });
+['ma','mb','mc'].forEach(function(id){
+  var t=document.getElementById(id); if(!t) return;
+  for(var i=0;i<4;i++){
+    var a=90*i, r=t.offsetWidth/2;
+    var d=document.createElement('div'); d.className='me';
+    d.style.transform='rotate('+a+'deg) translateY(-'+r+'px)';
+    t.appendChild(d);
+  }
+});
+</script>
+</div></body></html>

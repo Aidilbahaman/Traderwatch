@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="ms"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>PREVIEW — AI request · 5 lagi pendekatan</title>
+<style>
+:root{--bg:#0a0e0b;--card:#111612;--card2:#171e18;--line:#222b23;--text:#eef3ee;--muted:#8a978c;--lime:#b7f36b;--green:#b7f36b;--red:#ff777d;--orange:#ffc16b;--blue:#8ab4ff;--violet:#b18cff}
+*{box-sizing:border-box}
+body{margin:0;background:#050705;font:15px/1.5 -apple-system,BlinkMacSystemFont,"Inter",sans-serif;color:var(--text)}
+.wrap{max-width:430px;margin:0 auto;background:var(--bg);min-height:100vh;padding:16px 16px 40px}
+h1{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:#5d695f;margin:0 0 4px;font-weight:700}
+.sub{font-size:12px;color:var(--muted);margin:0 0 18px;line-height:1.5}
+.sec{margin-bottom:28px}
+.sec h2{font-size:13.5px;font-weight:850;margin:0 0 2px}
+.sec .hint{font-size:11px;color:var(--muted);margin:0 0 9px;line-height:1.45}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:12px;overflow:hidden;position:relative}
+.lbl{font-size:8.5px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-weight:800}
+@keyframes blink{0%,100%{opacity:.25}50%{opacity:1}}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ===== E: NEURAL WEB (node + garisan bergerak) ===== */
+.neural{position:relative;height:140px;display:grid;place-items:center}
+.neural svg{position:absolute;inset:0;width:100%;height:100%}
+.neural .ln{stroke:#b7f36b33;stroke-width:1;fill:none;stroke-dasharray:3 6;animation:dash 3s linear infinite}
+@keyframes dash{to{stroke-dashoffset:-36}}
+.neural .nd{fill:#b7f36b;opacity:.85}
+.neural .nd.blue{fill:#8ab4ff}
+.neural .nd.core{fill:#eaffc4;filter:drop-shadow(0 0 6px #b7f36b)}
+.neural .nd{animation:ndp 2.4s ease-in-out infinite}
+@keyframes ndp{0%,100%{opacity:.45;r:2.4}50%{opacity:1;r:3.6}}
+.neural .pkt{fill:#ffffff;filter:drop-shadow(0 0 4px #b7f36b);animation:pkt 2.8s linear infinite}
+@keyframes pkt{0%{opacity:0}10%{opacity:1}90%{opacity:1}100%{opacity:0}}
+.neural .ctr{font-size:9px;font-weight:850;color:var(--lime);text-align:center;z-index:3;line-height:1.3}
+
+/* ===== F: TICKER BAR (horizontal marquee aktiviti) ===== */
+.ticker{display:flex;align-items:center;gap:9px;background:var(--card2);border:1px solid #8ab4ff3d;border-radius:12px;padding:9px 11px;overflow:hidden}
+.ticker .tag{font-size:8px;font-weight:900;letter-spacing:.06em;color:#10150b;background:var(--blue);border-radius:5px;padding:2px 6px;flex:none}
+.ticker .mv{flex:1;overflow:hidden;position:relative;height:16px}
+.ticker .mv div{position:absolute;white-space:nowrap;animation:slide 9s linear infinite;font-size:11px;font-weight:700;color:var(--blue)}
+@keyframes slide{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+
+/* ===== G: STEP TIMELINE HORIZONTAL (progress steps) ===== */
+.steps{display:flex;align-items:flex-start;gap:0;margin-top:6px}
+.st{flex:1;display:flex;flex-direction:column;align-items:center;text-align:center;position:relative}
+.st .b{width:22px;height:22px;border-radius:50%;display:grid;place-items:center;font-size:9px;font-weight:900;
+ background:var(--card2);border:1px solid var(--line);color:#4d5950;z-index:2}
+.st.done .b{background:#b7f36b22;border-color:#b7f36b80;color:var(--lime)}
+.st.run .b{background:var(--lime);border-color:var(--lime);color:#10150b;animation:pulseb 1.4s ease-in-out infinite}
+@keyframes pulseb{0%,100%{box-shadow:0 0 0 0 #b7f36b55}50%{box-shadow:0 0 0 6px #b7f36b00}}
+.st .l{font-size:8px;color:var(--muted);margin-top:5px;line-height:1.2;font-weight:700}
+.st.run .l{color:var(--lime)}
+.st::before{content:"";position:absolute;top:10px;left:-50%;width:100%;height:1px;background:#222b23;z-index:1}
+.st:first-child::before{display:none}
+.st.done::before,.st.run::before{background:#b7f36b66}
+
+/* ===== H: ORB DARI SISI (bukan tengah) + CHIP BAR ===== */
+.side{display:flex;align-items:center;gap:11px}
+.sorb{position:relative;width:44px;height:44px;flex:none;display:grid;place-items:center}
+.sorb .c{width:16px;height:16px;border-radius:50%;background:#000;z-index:3;
+ box-shadow:0 0 0 1.5px #b7f36b,0 0 14px 4px #b7f36b66,0 0 34px 10px #b7f36b22}
+.sorb .r{position:absolute;width:30px;height:30px;border-radius:50%;animation:spin 4s linear infinite}
+.sorb .r i{position:absolute;width:3px;height:3px;border-radius:50%;background:var(--lime);box-shadow:0 0 6px var(--lime);top:-1.5px;left:calc(50% - 1.5px)}
+.sorb .r.b{width:42px;height:42px;animation-duration:7s;animation-direction:reverse}
+.sorb .r.b i{background:var(--blue);box-shadow:0 0 6px var(--blue)}
+.sinx{flex:1;min-width:0}
+.sinx b{font-size:12px;font-weight:850;display:block}
+.sinx small{font-size:10px;color:var(--blue)}
+.chipbar{display:flex;gap:5px;margin-top:7px;flex-wrap:wrap}
+.cp{font-size:8.5px;font-weight:800;padding:2px 7px;border-radius:99px;background:var(--card2);border:1px solid var(--line);color:var(--muted)}
+.cp.on{background:#b7f36b18;border-color:#b7f36b4d;color:var(--lime)}
+
+/* ===== I: AURA GLOW SEKELILING KAD (ambient) ===== */
+.auraCard{position:relative;overflow:hidden}
+.auraCard::before{content:"";position:absolute;inset:-40%;background:conic-gradient(from 0deg,#b7f36b00,#b7f36b2e,#8ab4ff26,#b7f36b00);
+ animation:spin 6s linear infinite;opacity:.7}
+.auraCard::after{content:"";position:absolute;inset:1px;border-radius:17px;background:var(--card)}
+.auraCard>*{position:relative;z-index:2}
+.auraIn{display:flex;align-items:center;gap:10px}
+.auraIn .ai{width:26px;height:26px;border-radius:9px;background:#b7f36b1a;display:grid;place-items:center;font-size:11px;font-weight:900;color:var(--lime);flex:none}
+.auraIn .tx b{font-size:12px;font-weight:850;display:block}
+.auraIn .tx small{font-size:10px;color:var(--muted)}
+.auraIn .dots{margin-left:auto;display:flex;gap:3px;flex:none}
+.auraIn .dots i{width:4px;height:4px;border-radius:50%;background:var(--lime);animation:blink 1.2s infinite}
+.auraIn .dots i:nth-child(2){animation-delay:.2s}.auraIn .dots i:nth-child(3){animation-delay:.4s}
+
+.note{font-size:11px;color:var(--muted);line-height:1.6;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px;margin-top:12px}
+.note b{color:var(--text)}
+@media(prefers-reduced-motion:reduce){.card *{animation:none !important}}
+</style></head><body><div class="wrap">
+<h1>PREVIEW — AI REQUEST · 5 LAGI</h1>
+<p class="sub">Pendekatan lain (E–I) — bukan orb besar.</p>
+
+<div class="sec"><h2>E · Neural web</h2>
+<p class="hint">Node + garisan bersambung, paket data bergerak dari luar ke tengah. Metafora "AI neural network".</p>
+<div class="card"><div class="neural">
+  <svg viewBox="0 0 400 140" preserveAspectRatio="none">
+    <path class="ln" d="M20,110 C90,80 120,60 200,70"/>
+    <path class="ln" d="M30,30 C100,50 140,60 200,70"/>
+    <path class="ln" d="M380,110 C310,80 280,60 200,70"/>
+    <path class="ln" d="M370,30 C300,50 260,60 200,70"/>
+    <path class="ln" d="M200,10 L200,70"/><path class="ln" d="M200,130 L200,70"/>
+    <circle class="nd" cx="20" cy="110" r="2.6"/><circle class="nd blue" cx="30" cy="30" r="2.6"/>
+    <circle class="nd" cx="380" cy="110" r="2.6"/><circle class="nd blue" cx="370" cy="30" r="2.6"/>
+    <circle class="nd" cx="200" cy="10" r="2.6"/><circle class="nd blue" cx="200" cy="130" r="2.6"/>
+    <circle class="nd core" cx="200" cy="70" r="5"/>
+    <circle class="pkt" r="2"><animateMotion dur="2.2s" repeatCount="indefinite" path="M20,110 C90,80 120,60 200,70"/></circle>
+    <circle class="pkt" r="2"><animateMotion dur="2.8s" begin="0.6s" repeatCount="indefinite" path="M380,110 C310,80 280,60 200,70"/></circle>
+    <circle class="pkt" r="2"><animateMotion dur="2.5s" begin="1.2s" repeatCount="indefinite" path="M30,30 C100,50 140,60 200,70"/></circle>
+  </svg>
+  <div class="ctr">AI membaca<br><span style="color:var(--muted);font-weight:700">XAUUSD M15</span></div>
+</div></div></div>
+
+<div class="sec"><h2>F · Ticker bar aktiviti</h2>
+<p class="hint">Satu baris berjalan — paling ringan, muat di mana-mana (header/sheet).</p>
+<div class="card" style="padding:0;border:0;background:none"><div class="ticker">
+  <span class="tag">LIVE</span>
+  <span class="mv"><div>Aidil minta XAUUSD M15 · Zara minta BTCUSD H1 · Verdict XAGUSD HOLD siap · Mikael minta EURUSD M5 ·&nbsp;</div>
+  <div style="left:100%">Aidil minta XAUUSD M15 · Zara minta BTCUSD H1 · Verdict XAGUSD HOLD siap · Mikael minta EURUSD M5 ·&nbsp;</div></span>
+</div></div></div>
+
+<div class="sec"><h2>G · Langkah horizontal</h2>
+<p class="hint">5 langkah AI jelas — client tahu di mana ia berada.</p>
+<div class="card"><div class="lbl" style="margin-bottom:6px">Analisis XAUUSD · M15</div>
+<div class="steps">
+  <div class="st done"><div class="b">✓</div><div class="l">Bars</div></div>
+  <div class="st done"><div class="b">✓</div><div class="l">Indikator</div></div>
+  <div class="st run"><div class="b">●</div><div class="l">Carta</div></div>
+  <div class="st"><div class="b">4</div><div class="l">Konfluens</div></div>
+  <div class="st"><div class="b">5</div><div class="l">Verdict</div></div>
+</div></div></div>
+
+<div class="sec"><h2>H · Orb sisi + chip bar</h2>
+<p class="hint">Orb kecil di kiri (tak makan ruang), chip status di bawah. Padat.</p>
+<div class="card"><div class="side">
+  <div class="sorb"><div class="r"><i></i></div><div class="r b"><i></i></div><div class="c"></div></div>
+  <div class="sinx"><b>AI sedang analisis</b><small>XAUUSD M15 · vision</small>
+    <div class="chipbar"><span class="cp on">bars 300</span><span class="cp on">RSI 52</span><span class="cp on">FVG ✓</span><span class="cp">konfluens</span></div>
+  </div>
+</div></div></div>
+
+<div class="sec"><h2>I · Aura ambient kad</h2>
+<p class="hint">Tiada animasi orb — kad itu sendiri bercahaya berputar di sempadan. Sangat halus.</p>
+<div class="card auraCard" style="padding:0;border:0;background:none">
+  <div style="padding:12px;border-radius:17px;background:var(--card)"><div class="auraIn">
+    <div class="ai">AI</div>
+    <div class="tx"><b>3 analisis sedang berjalan</b><small>XAUUSD · BTCUSD · XAGUSD</small></div>
+    <div class="dots"><i></i><i></i><i></i></div>
+  </div></div>
+</div></div>
+
+<div class="note">
+<b>E</b> — paling "AI" secara visual; berat sedikit (SVG animateMotion).<br>
+<b>F</b> — paling ringan; bagus sebagai jalur status di header.<br>
+<b>G</b> — paling jelas jangkaan masa &amp; kemajuan.<br>
+<b>H</b> — kompromi: orb comel + maklumat padat.<br>
+<b>I</b> — paling halus; cahaya ambient tanpa gerakan elemen.<br><br>
+<b>Cadangan saya: H</b> (padat, tak makan ruang, ada orb) atau <b>G</b> (paling informatif). Gabungan <b>H + G</b> juga padan.
+</div>
+</div></body></html>

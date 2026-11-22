@@ -128,14 +128,14 @@ def send(text, dry=False):
     if not me.get("ok"):
         raise RuntimeError(f"bot token tidak sah: {me.get('description')}")
 
-    # Member aktif = plan pro/max yang ada telegram_chat_id.
+    # Member aktif = semua ahli (single tier Free) yang ada telegram_chat_id.
     sb = dict(l.split("=", 1) for l in
               SECRETS.joinpath("supabase.env").read_text().splitlines()
               if "=" in l and not l.startswith("#"))
     H = {"apikey": sb["SUPABASE_SERVICE_KEY"],
          "Authorization": "Bearer " + sb["SUPABASE_SERVICE_KEY"]}
     q = (_u.Request(sb["SUPABASE_URL"] +
-                    "/rest/v1/profiles?select=telegram_chat_id,plan&plan=in.(pro,max)",
+                    "/rest/v1/profiles?select=telegram_chat_id,plan",
                     headers=H))
     rows = json.loads(_u.urlopen(q, timeout=20).read())
     chats = sorted({int(r["telegram_chat_id"]) for r in rows

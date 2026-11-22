@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="ms"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>PREVIEW — Push Alert + Weekly Recap</title>
+<style>
+:root{--bg:#0a0e0b;--card:#111612;--card2:#171e18;--line:#222b23;--text:#eef3ee;--muted:#8a978c;--lime:#b7f36b;--green:#b7f36b;--red:#ff777d;--orange:#ffc16b;--blue:#8ab4ff}
+*{box-sizing:border-box}
+body{margin:0;background:#050705;font:15px/1.5 -apple-system,BlinkMacSystemFont,"Inter",sans-serif;color:var(--text)}
+.wrap{max-width:430px;margin:0 auto;background:var(--bg);min-height:100vh;padding:16px}
+h1{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:#5d695f;margin:0 0 16px;font-weight:700}
+h2{font-size:14px;font-weight:850;margin:26px 0 4px}
+.hint{font-size:11.5px;color:var(--muted);margin:0 0 12px;line-height:1.5}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:14px}
+/* ===== 1. Lock-screen push mock ===== */
+.phone{background:#000;border-radius:26px;padding:18px 14px 22px;position:relative;border:1px solid #2a342a}
+.pnoti{background:rgba(28,28,32,.92);border-radius:16px;padding:11px 13px;margin-bottom:9px;display:flex;gap:11px;align-items:flex-start;backdrop-filter:blur(10px)}
+.pnoti .ic{width:34px;height:34px;border-radius:9px;background:var(--lime);display:grid;place-items:center;font-weight:900;color:#10150b;font-size:13px;flex:none}
+.pnoti .t{font-size:12.5px;font-weight:800;line-height:1.25}
+.pnoti .b{font-size:12px;color:#cfd6cf;line-height:1.4;margin-top:2px}
+.pnoti .time{font-size:10px;color:#8a978c;margin-left:auto;flex:none}
+.pnoti.win .ic{background:var(--lime)}
+.pnoti.lose .ic{background:var(--red);color:#fff}
+.clock{text-align:center;color:#fff;margin-bottom:16px}
+.clock .hm{font-size:44px;font-weight:300;letter-spacing:-.02em}
+.clock .dt{font-size:12px;color:#cfd6cf}
+/* ===== 2. Permission flow ===== */
+.flow{display:flex;flex-direction:column;gap:8px}
+.step{display:flex;gap:10px;align-items:flex-start;font-size:12px;color:var(--muted);line-height:1.5}
+.step .no{width:20px;height:20px;border-radius:50%;background:var(--card2);color:var(--lime);display:grid;place-items:center;font-size:11px;font-weight:800;flex:none;margin-top:1px}
+.btn{display:block;width:100%;background:var(--lime);color:#10150b;border:0;border-radius:14px;padding:13px;font-size:14px;font-weight:850;margin-top:12px;cursor:pointer}
+.btn.ghost{background:var(--card2);color:var(--text);border:1px solid var(--line)}
+/* ===== 3. Weekly recap card ===== */
+.recap{background:linear-gradient(150deg,#141c12,var(--card));border:1px solid #b7f36b30;border-radius:20px;padding:16px;margin-top:4px}
+.recap .wk{font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--lime);font-weight:800}
+.recap h3{margin:4px 0 14px;font-size:16px;font-weight:850}
+.recap .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:14px}
+.recap .st b{display:block;font-size:17px;font-weight:850;font-variant-numeric:tabular-nums}
+.recap .st b.g{color:var(--green)}.recap .st b.r{color:var(--red)}
+.recap .st small{font-size:8.5px;letter-spacing:.05em;text-transform:uppercase;color:var(--muted)}
+.recap .best{display:flex;align-items:center;gap:9px;background:var(--card2);border-radius:12px;padding:9px 11px;margin-bottom:10px;font-size:12px}
+.recap .best .em{font-size:18px}
+.recap .coach{font-size:11.5px;color:#c9d4c9;font-style:italic;border-top:1px dashed var(--line);padding-top:10px;line-height:1.55}
+.recap .coach b{color:var(--lime);font-style:normal}
+.recap .spark{margin-top:10px;height:38px}
+.recap .spark svg{width:100%;height:38px}
+/* ===== 4. Settings toggle mock ===== */
+.tog{display:flex;align-items:center;gap:10px;margin-top:10px;font-size:12.5px}
+.sw{width:40px;height:23px;border-radius:99px;background:var(--lime);position:relative;flex:none}
+.sw::after{content:"";position:absolute;right:2.5px;top:2.5px;width:18px;height:18px;border-radius:50%;background:#10150b}
+.divider{height:1px;background:var(--line);margin:26px 0}
+</style></head><body><div class="wrap">
+<h1>PREVIEW — BELUM COMMIT</h1>
+
+<h2>1️⃣ Push alert — lock screen (macam WhatsApp)</h2>
+<p class="hint">Sampai walaupun app TERTUTUP. Resolver detect TP/SL setiap minit → push ke phone.</p>
+<div class="phone">
+  <div class="clock"><div class="hm">03:41</div><div class="dt">Ahad, 22 November</div></div>
+  <div class="pnoti win"><div class="ic">TW</div><div><div class="t">🎉 XAUUSD — TP HIT!</div><div class="b">+1.44R · +$147.20 · Modal: $10,775</div></div><div class="time">now</div></div>
+  <div class="pnoti lose"><div class="ic">TW</div><div><div class="t">BTCUSD — SL</div><div class="b">−1R · −$104 · Buka semula app untuk recap</div></div><div class="time">2j</div></div>
+  <div class="pnoti"><div class="ic" style="background:var(--blue);color:#0a0e0b">TW</div><div><div class="t">Verdict baru: XAUUSD</div><div class="b">M15 SELL · conf 72% — buka app untuk chart</div></div><div class="time">semalam</div></div>
+</div>
+
+<h2>2️⃣ Permission flow (sekali sahaja)</h2>
+<p class="hint">Kaart dalam Settings → "Alert trade" — browser minta kebenaran standard.</p>
+<div class="card">
+  <div class="flow">
+    <div class="step"><span class="no">1</span><span>Buka <b>Settings → Alert trade</b>, tekan butang aktif</span></div>
+    <div class="step"><span class="no">2</span><span>Browser papar dialog "Izinkan notifikasi?" — tekan <b>Allow</b></span></div>
+    <div class="step"><span class="no">3</span><span>Selesai — TP/SL/verdict sampai ke lock screen</span></div>
+  </div>
+  <button class="btn">🔔 Aktifkan alert trade</button>
+  <div class="tog"><div class="sw"></div> TP/SL sahaja <span style="margin-left:auto;color:var(--muted);font-size:11px">+ verdict: off</span></div>
+</div>
+
+<div class="divider"></div>
+
+<h2>3️⃣ Weekly Recap — kad automatik setiap Isnin</h2>
+<p class="hint">Dijana dari data sebenar member + ayat coach LLM (infra sedia ada).</p>
+<div class="recap">
+  <div class="wk">📅 Recap mingguan · 16–22 Nov</div>
+  <h3>Prestasi anda minggu ini</h3>
+  <div class="stats">
+    <div class="st"><b class="g">+2.4R</b><small>Net R</small></div>
+    <div class="st"><b>60%</b><small>Win rate</small></div>
+    <div class="st"><b>5</b><small>Trade</small></div>
+    <div class="st"><b class="g">3</b><small>Streak 🔥</small></div>
+  </div>
+  <div class="best"><span class="em">🥇</span><div><b>Pair terbaik: XAUUSD</b><div style="font-size:11px;color:var(--muted)">2/2 TP · +2.1R</div></div></div>
+  <div class="spark"><svg viewBox="0 0 340 38"><polyline points="0,30 40,26 80,32 120,20 160,24 200,14 240,18 280,10 340,6" fill="none" stroke="#b7f36b" stroke-width="2" stroke-linecap="round"/><line x1="0" y1="20" x2="340" y2="20" stroke="#222b23" stroke-dasharray="3,4"/></svg></div>
+  <div class="coach"><b>Coach:</b> "Discipline anda minggu ini cemerlang — 2/2 pada XAUUSD. Kekalkan saiz risiko, jangan ganjar kemenangan dengan lot lebih besar."</div>
+</div>
+
+<div class="divider"></div>
+<h2>Nota pelaksanaan</h2>
+<div class="card" style="font-size:11.5px;color:var(--muted);line-height:1.65">
+<b style="color:var(--text)">Push alert:</b> Web Push PWA (VAPID) + subscribe disimpan per-akaun. Resolver (cron 1 minit) detect TP/SL → hantar push. Tiada server luar; semua dalam infra sedia ada. iOS 16.4+ sokong (kena install PWA dulu).<br><br>
+<b style="color:var(--text)">Weekly recap:</b> Cron Isnin 8am MYT jana recap per-member dari paper_trades + coach ayat glm-5.2 (cache). Papar sebagai kad atas tab League + optional push "Recap mingguan sedia 📊".
+</div>
+</div></body></html>

@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="ms"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>PREVIEW — Cadangan lain (bukan orb)</title>
+<style>
+:root{--bg:#0a0e0b;--card:#111612;--card2:#171e18;--line:#222b23;--text:#eef3ee;--muted:#8a978c;--lime:#b7f36b;--green:#b7f36b;--red:#ff777d;--orange:#ffc16b;--blue:#8ab4ff;--violet:#b18cff}
+*{box-sizing:border-box}
+body{margin:0;background:#050705;font:15px/1.5 -apple-system,BlinkMacSystemFont,"Inter",sans-serif;color:var(--text)}
+.wrap{max-width:430px;margin:0 auto;background:var(--bg);min-height:100vh;padding:16px 16px 40px}
+h1{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:#5d695f;margin:0 0 4px;font-weight:700}
+.sub{font-size:12px;color:var(--muted);margin:0 0 18px}
+.sec{margin-bottom:26px}
+.sec h2{font-size:13.5px;font-weight:850;margin:0 0 2px}
+.sec .hint{font-size:11px;color:var(--muted);margin:0 0 9px;line-height:1.45}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:13px}
+.lbl{font-size:8.5px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-weight:800}
+
+/* ===== 1. ACHIEVEMENT UNLOCK TOAST ===== */
+.ach{display:flex;align-items:center;gap:11px;background:linear-gradient(135deg,#1a2418,#141c12);border:1px solid #b7f36b5c;border-radius:14px;padding:11px 13px;position:relative;overflow:hidden}
+.ach::after{content:"";position:absolute;inset:0;background:linear-gradient(105deg,transparent 30%,#b7f36b22 50%,transparent 70%);animation:sh 3s ease-in-out infinite}
+@keyframes sh{0%,70%{transform:translateX(-100%)}100%{transform:translateX(100%)}}
+.ach .ic{width:34px;height:34px;border-radius:11px;background:#b7f36b1c;display:grid;place-items:center;font-size:17px;flex:none}
+.ach .tx b{display:block;font-size:12.5px;font-weight:850;color:var(--lime)}
+.ach .tx small{font-size:10.5px;color:var(--muted)}
+.ach .xp{margin-left:auto;font-size:10px;font-weight:850;color:var(--lime);background:#b7f36b14;border:1px solid #b7f36b40;border-radius:99px;padding:2px 8px;flex:none}
+
+/* ===== 2. STREAK CALENDAR ===== */
+.cal{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-top:8px}
+.cal i{aspect-ratio:1;border-radius:5px;background:var(--card2);display:grid;place-items:center;font-size:8px;color:#4d5950;font-weight:700}
+.cal i.on{background:#b7f36b28;color:var(--lime);box-shadow:inset 0 0 0 1px #b7f36b55}
+.cal i.tp{background:var(--lime);color:#10150b}
+.cal i.sl{background:#ff777d2e;color:#ff9ba0}
+.calhead{display:flex;justify-content:space-between;align-items:baseline}
+.calhead b{font-size:11px;font-weight:800}
+.calhead span{font-size:10px;color:var(--muted)}
+
+/* ===== 3. RISK GUARD BAR ===== */
+.guard{margin-top:6px}
+.guard .g{display:flex;align-items:center;gap:9px;font-size:11.5px;padding:7px 0;border-bottom:1px solid #1a211b}
+.guard .g:last-child{border:0}
+.guard .g .tick{width:16px;height:16px;border-radius:50%;display:grid;place-items:center;font-size:9px;font-weight:900;flex:none}
+.tick.ok{background:#b7f36b22;color:var(--lime)}
+.tick.no{background:#ff777d22;color:var(--red)}
+.guard .g .tx{flex:1;color:var(--muted)}
+.guard .g .tx b{color:var(--text);font-weight:750}
+
+/* ===== 4. QUICK ACTIONS FAB ===== */
+.fabwrap{position:relative;height:104px;display:flex;align-items:center;justify-content:center}
+.fab{width:52px;height:52px;border-radius:50%;background:var(--lime);display:grid;place-items:center;font-size:22px;color:#10150b;font-weight:900;box-shadow:0 6px 24px #b7f36b40;position:relative;z-index:3;animation:fabp 3s ease-in-out infinite}
+@keyframes fabp{0%,100%{transform:scale(1)}50%{transform:scale(1.04)}}
+.fabit{position:absolute;width:38px;height:38px;border-radius:50%;background:var(--card2);border:1px solid var(--line);display:grid;place-items:center;font-size:15px;z-index:2}
+.fabit.a{transform:translate(-58px,-18px)}
+.fabit.b{transform:translate(0,-64px)}
+.fabit.c{transform:translate(58px,-18px)}
+
+/* ===== 5. INLINE SIGNAL CHIP pada kad pair ===== */
+.pc{background:var(--card2);border:1px solid var(--line);border-radius:14px;padding:11px 12px;position:relative}
+.pc .top{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+.pc .ic{width:26px;height:26px;border-radius:8px;background:#1c241b;display:grid;place-items:center;font-size:9px;font-weight:850;color:var(--lime)}
+.pc .nm{font-size:14px;font-weight:850}
+.pc .px{font-size:15px;font-weight:750;font-variant-numeric:tabular-nums;margin-top:6px}
+.pc .sg{margin-top:8px;display:inline-flex;align-items:center;gap:5px;font-size:9.5px;font-weight:850;
+ border-radius:7px;padding:2px 7px}
+.sg.b{color:var(--lime);background:#b7f36b16;border:1px solid #b7f36b40}
+.sg.s{color:var(--red);background:#ff777d14;border:1px solid #ff777d40}
+.sg.h{color:var(--orange);background:#ffc16b14;border:1px solid #ffc16b40}
+
+/* ===== 6. DAILY CHECK-IN ===== */
+.checkin{display:flex;align-items:center;gap:10px;background:linear-gradient(135deg,#16200f,var(--card));border:1px solid #b7f36b3d;border-radius:14px;padding:12px}
+.checkin .d{width:32px;height:32px;border-radius:10px;background:#b7f36b1c;display:grid;place-items:center;font-size:15px;flex:none}
+.checkin .tx{flex:1}
+.checkin .tx b{display:block;font-size:12px;font-weight:850}
+.checkin .tx small{font-size:10px;color:var(--muted)}
+.checkin .btn{background:var(--lime);color:#10150b;border:0;border-radius:9px;padding:6px 12px;font-size:11px;font-weight:850;flex:none}
+
+.note{font-size:11.5px;color:var(--muted);line-height:1.65;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px;margin-top:10px}
+.note b{color:var(--text)}
+</style></head><body><div class="wrap">
+<h1>PREVIEW — CADANGAN LAIN</h1>
+<p class="sub">Bukan orb. Idea retention, disiplin &amp; growth.</p>
+
+<div class="sec"><h2>1 · Achievement unlock toast</h2>
+<p class="hint">Bila client capai milestone (TP pertama, 5 trade disiplin, streak) — toast muncul dengan shine sweep.</p>
+<div class="card"><div class="ach"><div class="ic">🏆</div><div class="tx"><b>Lencana dibuka: TP Hunter</b><small>5 TP berturut-turut · dicapai hari ini</small></div><div class="xp">+50 XP</div></div></div></div>
+
+<div class="sec"><h2>2 · Streak calendar</h2>
+<p class="hint">Grid 4 minggu — client nampak konsistensi sendiri. Hijau = TP, merah = SL, kelabu = tiada trade.</p>
+<div class="card"><div class="calhead"><b>Disiplin 28 hari</b><span>🔥 4 hari berturut</span></div>
+<div class="cal">
+ <i class="tp">1</i><i class="tp">2</i><i class="sl">3</i><i class="on">4</i><i class="on">5</i><i class="tp">6</i><i class="tp">7</i>
+ <i class="sl">8</i><i class="on">9</i><i class="tp">10</i><i class="tp">11</i><i class="on">12</i><i class="tp">13</i><i class="sl">14</i>
+ <i class="tp">15</i><i class="tp">16</i><i class="on">17</i><i class="tp">18</i><i class="tp">19</i><i class="tp">20</i><i class="sl">21</i>
+ <i class="on">22</i><i class="tp">23</i><i class="tp">24</i><i class="on">25</i><i class="on">26</i><i class="on">27</i><i class="on">28</i>
+</div></div></div>
+
+<div class="sec"><h2>3 · Risk guard checklist</h2>
+<p class="hint">Dalam modal "Take this trade" — semak disiplin SEBELUM masuk. Bukan larang, cuma peringatkan.</p>
+<div class="card"><div class="guard">
+ <div class="g"><span class="tick ok">✓</span><span class="tx">Risiko <b>2.08%</b> dalam had 2%</span></div>
+ <div class="g"><span class="tick ok">✓</span><span class="tx">SL <b>291 pts</b> &gt; 3× spread</span></div>
+ <div class="g"><span class="tick no">✕</span><span class="tx">Sudah ada <b>1 trade XAUUSD</b> terbuka</span></div>
+ <div class="g"><span class="tick ok">✓</span><span class="tx">R:R <b>1:1.9</b> diterima</span></div>
+</div></div></div>
+
+<div class="sec"><h2>4 · Quick actions FAB</h2>
+<p class="hint">Butang terapung: Analisis pantas · Journal · Share result. Satu tap, tiada scroll.</p>
+<div class="card"><div class="fabwrap">
+ <div class="fabit a">⚡</div><div class="fabit b">📓</div><div class="fabit c">🖼</div>
+ <div class="fab">+</div>
+</div></div></div>
+
+<div class="sec"><h2>5 · Inline signal chip pada kad pair</h2>
+<p class="hint">Kad pair tunjuk verdict AI terkini terus — tanpa buka sheet.</p>
+<div class="card"><div class="pc">
+ <div class="top"><div class="ic">XAU</div><span class="lbl">M15</span></div>
+ <div class="nm">XAUUSD</div>
+ <div class="px">3,534.88</div>
+ <div class="sg s">▲ AI: SELL 72%</div>
+</div></div></div>
+
+<div class="sec"><h2>6 · Daily check-in</h2>
+<p class="hint">Satu tap sehari — bangun tabiat. Streak naik, XP naik.</p>
+<div class="card"><div class="checkin"><div class="d">🗓</div>
+ <div class="tx"><b>Check-in hari ini</b><small>Streak 4 hari · +10 XP</small></div>
+ <button class="btn">Daftar</button>
+</div></div></div>
+
+<div class="note">
+<b>Cadangan saya:</b> <b>2 Streak calendar</b> (paling berkesan untuk tabiat) + <b>3 Risk guard</b> (paling berguna secara praktikal — halang trade teruk) + <b>5 Inline signal chip</b> (nilai segera, tiada tap). Tiga ini kongsi tema sama: <i>disiplin, bukan hiburan</i>.
+</div>
+</div></body></html>

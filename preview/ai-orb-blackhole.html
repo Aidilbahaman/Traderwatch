@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="ms"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>PREVIEW — Black Hole Orb (electron dihisap)</title>
+<style>
+:root{--bg:#0a0e0b;--card:#111612;--card2:#171e18;--line:#222b23;--text:#eef3ee;--muted:#8a978c;--lime:#b7f36b;--green:#b7f36b;--red:#ff777d;--orange:#ffc16b;--blue:#8ab4ff;--violet:#b18cff}
+*{box-sizing:border-box}
+body{margin:0;background:#050705;font:15px/1.5 -apple-system,BlinkMacSystemFont,"Inter",sans-serif;color:var(--text)}
+.wrap{max-width:430px;margin:0 auto;background:var(--bg);min-height:100vh;padding:16px 16px 40px}
+h1{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:#5d695f;margin:0 0 4px;font-weight:700}
+.sub{font-size:12px;color:var(--muted);margin:0 0 16px}
+h2{font-size:13px;font-weight:850;margin:26px 0 6px}
+.hint{font-size:11.5px;color:var(--muted);margin:0 0 10px;line-height:1.5}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:14px;display:grid;place-items:center}
+
+/* ================= BH1: ACCRETION DISK (disk berputar dihisap) ================= */
+.bh{position:relative;width:210px;height:210px;display:grid;place-items:center}
+/* event horizon: black core with lime rim glow */
+.bh .horizon{position:relative;width:64px;height:64px;border-radius:50%;
+ background:radial-gradient(circle at 50% 50%,#000 58%,#050805 72%,#0d1409 84%);
+ box-shadow:0 0 0 1px #b7f36b55,0 0 22px 3px #b7f36b44,0 0 60px 10px #b7f36b1a,inset 0 0 20px #b7f36b22;
+ z-index:6;display:grid;place-items:center}
+.bh .horizon::after{content:"";position:absolute;inset:-9px;border-radius:50%;
+ background:conic-gradient(from 0deg,#b7f36b00 0deg,#b7f36b88 40deg,#b7f36b22 90deg,#8ab4ff66 160deg,#b7f36b00 220deg,#b7f36baa 300deg,#b7f36b00 360deg);
+ filter:blur(6px);animation:spin 3.6s linear infinite;z-index:-1}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* disk rings rotating at different speeds: the "accretion" look */
+.disk{position:absolute;border-radius:50%;pointer-events:none}
+.disk i{position:absolute;inset:0;border-radius:50%;border:1px solid transparent}
+.d1{width:96px;height:96px;animation:spin 5.5s linear infinite}
+.d1 i{border-top-color:#b7f36b99;border-right-color:#b7f36b33;filter:drop-shadow(0 0 4px #b7f36b66)}
+.d2{width:130px;height:130px;animation:spin 8s linear infinite reverse}
+.d2 i{border-top-color:#8ab4ff77;border-left-color:#8ab4ff22}
+.d3{width:166px;height:166px;animation:spin 12s linear infinite}
+.d3 i{border-bottom-color:#ffc16b66;border-right-color:#ffc16b1a}
+.d4{width:200px;height:200px;animation:spin 17s linear infinite reverse}
+.d4 i{border-top-color:#b18cff44}
+
+/* inbound electrons: spiral inward then get consumed */
+.consumed{position:absolute;width:8px;height:8px;border-radius:50%;left:50%;top:50%;margin:-4px 0 0 -4px;
+ background:var(--lime);box-shadow:0 0 12px var(--lime),0 0 3px #fff;opacity:0;
+ animation:infall 3.4s cubic-bezier(.55,.03,.85,.2) infinite}
+.consumed.b{background:var(--blue);box-shadow:0 0 12px var(--blue),0 0 3px #fff}
+.consumed.v{background:var(--violet);box-shadow:0 0 12px var(--violet),0 0 3px #fff}
+.consumed.o{background:var(--orange);box-shadow:0 0 12px var(--orange),0 0 3px #fff}
+@keyframes infall{
+ 0%{opacity:0;transform:rotate(var(--a)) translate(86px) rotate(calc(var(--a) * -1)) scale(1.05)}
+ 12%{opacity:1}
+ 55%{transform:rotate(calc(var(--a) + 150deg)) translate(48px) rotate(calc((var(--a) + 150deg) * -1)) scale(.9);opacity:1}
+ 88%{transform:rotate(calc(var(--a) + 320deg)) translate(11px) rotate(calc((var(--a) + 320deg) * -1)) scale(.5);opacity:.9}
+ 100%{transform:rotate(calc(var(--a) + 380deg)) translate(2px) rotate(calc((var(--a) + 380deg) * -1)) scale(.1);opacity:0}}
+
+/* absorption flash when electron is eaten */
+.absorb{position:absolute;left:50%;top:50%;width:76px;height:76px;margin:-38px 0 0 -38px;border-radius:50%;
+ background:radial-gradient(circle,#b7f36b55,transparent 65%);opacity:0;animation:abs 3.4s ease-out infinite}
+@keyframes abs{0%,80%{opacity:0;transform:scale(.6)}86%{opacity:.9;transform:scale(1)}100%{opacity:0;transform:scale(1.5)}}
+
+/* ================= BH2: LENSING VERSION (dengan lens flare) ================= */
+.bh2{position:relative;width:190px;height:190px;display:grid;place-items:center}
+.bh2 .core2{width:58px;height:58px;border-radius:50%;background:#000;z-index:5;
+ box-shadow:0 0 0 2px #b7f36b88,0 0 26px 4px #b7f36b55,0 0 70px 14px #b7f36b22}
+.bh2 .photon{position:absolute;width:78px;height:78px;border-radius:50%;border:2px solid #d6ff9a;opacity:.55;
+ filter:blur(1.4px);animation:photonPulse 3s ease-in-out infinite}
+@keyframes photonPulse{0%,100%{transform:scale(.97);opacity:.42}50%{transform:scale(1.05);opacity:.72}}
+.bh2 .jet{position:absolute;width:3px;height:80px;background:linear-gradient(to top,#b7f36b00,#b7f36b88,#b7f36b00);top:-72px;opacity:.5;animation:jet 2.4s ease-in-out infinite}
+@keyframes jet{0%,100%{height:64px;opacity:.35}50%{height:92px;opacity:.7}}
+.bh2 .jet.b{top:auto;bottom:-72px;background:linear-gradient(to bottom,#b7f36b00,#b7f36b66,#b7f36b00)}
+.bh2 .accl{position:absolute;width:120px;height:120px;border-radius:50%;animation:spin 4.4s linear infinite}
+.bh2 .accl i{position:absolute;inset:0;border-radius:50%;border:1px solid transparent;border-top-color:#b7f36bcc;border-left-color:#8ab4ff66}
+.bh2 .accl2{position:absolute;width:152px;height:152px;border-radius:50%;animation:spin 7s linear infinite reverse}
+.bh2 .accl2 i{position:absolute;inset:0;border-radius:50%;border:1px solid transparent;border-bottom-color:#ffc16b88}
+.bh2 .dying{position:absolute;width:7px;height:7px;border-radius:50%;left:50%;top:50%;margin:-3.5px 0 0 -3.5px;
+ background:var(--lime);box-shadow:0 0 10px var(--lime);opacity:0;animation:infall 2.9s ease-in infinite}
+.bh2 .dying.b{background:var(--blue);box-shadow:0 0 10px var(--blue)}
+.bh2 .dying.v{background:var(--violet);box-shadow:0 0 10px var(--violet)}
+
+/* ================= mini ================= */
+.hdr{display:flex;align-items:center;gap:11px;background:var(--card);border:1px solid var(--line);border-radius:18px;padding:13px 14px}
+.mini{position:relative;width:46px;height:46px;display:grid;place-items:center;flex:none}
+.mini .mc{width:15px;height:15px;border-radius:50%;background:#000;z-index:4;
+ box-shadow:0 0 0 1.5px #b7f36bb0,0 0 12px 2px #b7f36b77,0 0 28px 5px #b7f36b1f}
+.mini .md{position:absolute;width:32px;height:32px;border-radius:50%;animation:spin 4s linear infinite}
+.mini .md i{position:absolute;inset:0;border-radius:50%;border:1px solid transparent;border-top-color:#b7f36bcc}
+.mini .md2{position:absolute;width:43px;height:43px;border-radius:50%;animation:spin 6.5s linear infinite reverse}
+.mini .md2 i{position:absolute;inset:0;border-radius:50%;border:1px solid transparent;border-bottom-color:#8ab4ff88}
+.mini .msuck{position:absolute;width:3px;height:3px;border-radius:50%;background:var(--lime);box-shadow:0 0 4px var(--lime);left:50%;top:50%;margin:-1.5px 0 0 -1.5px;opacity:0;animation:minisuck 2.6s ease-in infinite}
+@keyframes minisuck{0%{opacity:0;transform:rotate(20deg) translate(20px) scale(1)}20%{opacity:1}80%{opacity:.9;transform:rotate(300deg) translate(4px) scale(.4)}100%{opacity:0;transform:rotate(360deg) translate(0) scale(.1)}}
+.hdr .tx{flex:1;min-width:0}
+.hdr .tx b{display:block;font-size:14px;font-weight:850}
+.hdr .tx small{font-size:11px;color:var(--muted)}
+.hdr .st{margin-left:auto;font-size:9.5px;font-weight:800;color:var(--lime);background:#b7f36b14;border:1px solid #b7f36b3d;border-radius:99px;padding:3px 9px;flex:none}
+
+.note{font-size:11.5px;color:var(--muted);line-height:1.65;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px;margin-top:16px}
+.note b{color:var(--text)}
+@media(prefers-reduced-motion:reduce){
+ .bh .horizon::after,.disk,.d1,.d2,.d3,.d4,.consumed,.absorb,.bh2 .photon,.bh2 .jet,.bh2 .accl,.bh2 .accl2,.bh2 .dying,.mini .md,.mini .md2,.mini .msuck{animation:none}
+}
+</style></head><body><div class="wrap">
+<h1>PREVIEW — BLACK HOLE ORB</h1>
+<p class="sub">Elektron dihisap masuk ke dalam orb — AI menyedut input.</p>
+
+<h2>BH1 · Accretion disk</h2>
+<p class="hint">Elektron masuk berpilin (spiral), terhisap ke teras hitam, hilang dengan kilat penyerapan.</p>
+<div class="card" style="padding:16px">
+  <div class="bh" id="bh">
+    <div class="disk d4"><i></i></div>
+    <div class="disk d3"><i></i></div>
+    <div class="disk d2"><i></i></div>
+    <div class="disk d1"><i></i></div>
+    <div class="absorb"></div>
+    <div class="horizon"></div>
+  </div>
+</div>
+
+<h2>BH2 · Dengan photon ring &amp; jet</h2>
+<p class="hint">Versi lebih drama: cincin foton berdenyut, jet tenaga atas/bawah, dua lapis disk.</p>
+<div class="card" style="padding:16px">
+  <div class="bh2" id="bh2">
+    <div class="jet"></div>
+    <div class="jet b"></div>
+    <div class="accl"><i></i></div>
+    <div class="accl2"><i></i></div>
+    <div class="photon"></div>
+    <div class="core2"></div>
+  </div>
+</div>
+
+<h2>Dalam konteks — header League</h2>
+<div class="hdr">
+  <div class="mini">
+    <div class="md2"><i></i></div>
+    <div class="md"><i></i></div>
+    <div class="msuck"></div>
+    <div class="mc"></div>
+  </div>
+  <div class="tx"><b>Enjin AI aktif</b><small>12 pair · menyedut data pasaran</small></div>
+  <div class="st">LIVE</div>
+</div>
+
+<div class="note">
+<b>Maksud:</b> teras hitam (event horizon) + rim lime = lubang hitam. Elektron <b>berpilin masuk</b> (bukan orbit) dan <b>hilang</b> bila sampai teras — metafora <i>AI menelan input</i>.<br><br>
+<b>BH1</b> ringkas &amp; boleh dibaca walaupun kecil. <b>BH2</b> lebih dramatik (jet), sesuai saiz besar sahaja.
+<br><br><b>Prestasi:</b> ~12 elemen, CSS sahaja; berhenti bila tab hidden, dihormati reduced-motion.
+</div>
+</div>
+<script>
+/* spawn inbound electrons with random-ish start angles */
+(function(){
+  var bh=document.getElementById('bh');
+  var cols=['','b','v','o',''];
+  for(var i=0;i<7;i++){
+    var d=document.createElement('div');
+    d.className='consumed '+cols[i%cols.length];
+    d.style.setProperty('--a',(i*51+13)+'deg');
+    d.style.animationDelay=(i*0.48)+'s';
+    bh.appendChild(d);
+  }
+  var b2=document.getElementById('bh2');
+  var c2=['','b','v',''];
+  for(var j=0;j<6;j++){
+    var e=document.createElement('div');
+    e.className='dying '+c2[j%c2.length];
+    e.style.setProperty('--a',(j*60+20)+'deg');
+    e.style.animationDelay=(j*0.45)+'s';
+    b2.appendChild(e);
+  }
+})();
+</script>
+</div></body></html>

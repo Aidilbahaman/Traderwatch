@@ -1,5 +1,11 @@
 #!/usr/bin/env python3
-"""Weekly retrain gate for the M15 Fully-AI model.
+"""Hourly retrain gate for the M15 Fully-AI model (fallback path).
+
+Nota 2026-11-20: keputusan signal live kini dibuat oleh LLM (Qwen4 Max,
+AI_DECISION=llm). Model logistic ini dilatih semula setiap jam supaya
+laluan rollback (AI_DECISION=model) sentiasa segar. LLM sendiri tidak
+dilatih semula — ia model API; pembelajaran laluan LLM melalui
+learning-memo.py (5 minit) + log audit llm-analysis-log.jsonl.
 
   1. Snapshot the deployed model (state/ai-m15-model.json) as baseline.
   2. Re-run train-ai-model.py on the latest cached data.
@@ -15,8 +21,8 @@ Never touches live inference (signal-engine-ai.py), feature code
 Usage:
   python3 engine/ai-weekly-retrain.py [--bars N]
 
-Weekly cron (runs Mondays 01:17 UTC, outside session hours):
-  17 1 * * 1 /usr/bin/python3.12 /home/ubuntu/web/Traderwatch-repo/engine/ai-weekly-retrain.py >> /tmp/ai-weekly-retrain.log 2>&1
+Hourly cron (setiap jam pada :17, flock elak bertindih):
+  17 * * * * /usr/bin/flock -n /tmp/tw-ai-retrain.lock /usr/bin/python3.12 /home/ubuntu/web/Traderwatch-repo/engine/ai-weekly-retrain.py >> /tmp/ai-weekly-retrain.log 2>&1
 """
 import argparse
 import json
@@ -32,8 +38,7 @@ CALIB = REPO / "state" / "ai-calibration.json"
 CACHE_DIR = Path("/home/ubuntu/web/state/ai-m1")
 TMP_BASE = Path("/tmp/ai-weekly-baseline.json")
 
-PAIRS = ["XAU/USD", "EUR/USD", "GBP/USD", "USD/JPY", "AUD/USD", "USD/CAD",
-         "NZD/USD"]
+PAIRS = ["XAU/USD", "XAG/USD", "BTCUSD"]
 
 
 def cache_status(pair):
@@ -68,6 +73,13 @@ def main():
         print(f"BASELINE_SNAPSHOT={TMP_BASE}", flush=True)
     else:
         print("BASELINE_SNAPSHOT=none (no deployed model yet)", flush=True)
+
+    # Refresh the M1 cache from MT5 (VPS) before retraining — no API credits.
+    print("FETCH source=mt5 pairs=" + ",".join(PAIRS), flush=True)
+    frc = subprocess.call([sys.executable, str(HERE / "fetch-ai-candles-mt5.py"),
+                           "--pairs", "all", "--bars", "20000"])
+    if frc != 0:
+        print(f"FETCH_MT5 rc={frc}; continuing with existing cache", flush=True)
 
     usable = 0
     for pair in PAIRS:

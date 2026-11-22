@@ -1,20 +1,20 @@
 {
  "period": "last_28_days",
  "period_label": "last 28 days",
- "as_of": "2026-11-08",
+ "as_of": "2026-11-22",
  "source": "Cloudflare analytics - real visitor page requests (browser user agents only; scanner and crawler traffic excluded)",
- "fetched_at": "2026-11-08T07:23:01.834608+00:00",
- "total_visits": 1180,
- "country_count": 10,
+ "fetched_at": "2026-11-22T19:23:01.629271+00:00",
+ "total_visits": 2550,
+ "country_count": 16,
  "excluded": {
-  "scanner_requests": 85720,
-  "crawler_requests": 1140
+  "scanner_requests": 127310,
+  "crawler_requests": 2940
  },
  "countries": [
   {
    "c": "Malaysia",
    "code": "MY",
-   "v": 460,
+   "v": 1040,
    "lat": 3.14,
    "lon": 101.69,
    "flag": "MY"
@@ -22,7 +22,7 @@
   {
    "c": "United States",
    "code": "US",
-   "v": 230,
+   "v": 430,
    "lat": 38.9,
    "lon": -77.04,
    "flag": "US"
@@ -30,10 +30,18 @@
   {
    "c": "Netherlands",
    "code": "NL",
-   "v": 150,
+   "v": 190,
    "lat": 52.37,
    "lon": 4.9,
    "flag": "NL"
+  },
+  {
+   "c": "Hong Kong",
+   "code": "HK",
+   "v": 170,
+   "lat": 22.32,
+   "lon": 114.17,
+   "flag": "HK"
   },
   {
    "c": "Canada",
@@ -44,12 +52,52 @@
    "flag": "CA"
   },
   {
+   "c": "Singapore",
+   "code": "SG",
+   "v": 80,
+   "lat": 1.35,
+   "lon": 103.82,
+   "flag": "SG"
+  },
+  {
+   "c": "Poland",
+   "code": "PL",
+   "v": 80,
+   "lat": 52.23,
+   "lon": 21.01,
+   "flag": "PL"
+  },
+  {
+   "c": "Belgium",
+   "code": "BE",
+   "v": 70,
+   "lat": 50.85,
+   "lon": 4.35,
+   "flag": "BE"
+  },
+  {
+   "c": "United Kingdom",
+   "code": "GB",
+   "v": 70,
+   "lat": 51.51,
+   "lon": -0.13,
+   "flag": "GB"
+  },
+  {
    "c": "Taiwan",
    "code": "TW",
    "v": 60,
    "lat": 25.03,
    "lon": 121.56,
    "flag": "TW"
+  },
+  {
+   "c": "Brazil",
+   "code": "BR",
+   "v": 60,
+   "lat": -15.79,
+   "lon": -47.88,
+   "flag": "BR"
   },
   {
    "c": "Australia",
@@ -68,6 +116,14 @@
    "flag": "ID"
   },
   {
+   "c": "Germany",
+   "code": "DE",
+   "v": 50,
+   "lat": 52.52,
+   "lon": 13.4,
+   "flag": "DE"
+  },
+  {
    "c": "Italy",
    "code": "IT",
    "v": 40,
@@ -82,14 +138,6 @@
    "lat": 46.95,
    "lon": 7.45,
    "flag": "CH"
-  },
-  {
-   "c": "Singapore",
-   "code": "SG",
-   "v": 30,
-   "lat": 1.35,
-   "lon": 103.82,
-   "flag": "SG"
   }
  ],
  "sampled": true,

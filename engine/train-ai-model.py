@@ -28,9 +28,10 @@ REPO = HERE.parent
 M1DIR = Path("/home/ubuntu/web/state/ai-m1")
 OUT = REPO / "state" / "ai-m15-model.json"
 
-PAIRS = ["XAU/USD", "EUR/USD", "GBP/USD", "USD/JPY", "AUD/USD", "USD/CAD", "NZD/USD"]
+PAIRS = ["XAU/USD", "XAG/USD", "BTCUSD"]
 SPREAD = {"EUR/USD": 1.0, "GBP/USD": 1.3, "AUD/USD": 1.3, "NZD/USD": 1.5,
-          "USD/CAD": 1.5, "USD/JPY": 1.5, "XAU/USD": 3.0}
+          "USD/CAD": 1.5, "USD/JPY": 1.5, "XAU/USD": 3.0,
+          "XAG/USD": 3.0, "BTCUSD": 30.0}
 SCALP_MIN_SL_PIPS = 12.0
 SCALP_RR = 2.0
 MAX_HOLD_BARS = 16
@@ -111,10 +112,14 @@ def main():
         closes = [b[3] for b in bars]
         e20, e50 = M.ema(closes, 20), M.ema(closes, 50)
         rsi, atr = M.rsi_s(closes), M.atr_s(bars)
+        # v2 (SMC/sesi): H1 trend + POI/liquidity + sesi KL + ATR percentile.
+        # R-mean neutral (0) semasa latihan offline (tiada lookahead); live
+        # inference guna R-history sebenar via signal-status.json.
+        ctx = M.build_v2_ctx(pair, bars, None)
 
         rows = []
         for i in range(60, len(bars) - 1):
-            f = M.feature_row(pair, bars, e20, e50, rsi, atr, i)
+            f = M.feature_row_v2(pair, bars, e20, e50, rsi, atr, i, ctx)
             if f is None:
                 continue
             sl_b, tp_b = levels(pair, "BUY", closes[i], atr[i])
@@ -131,7 +136,8 @@ def main():
         wL, mL, sL = M.fit(rows, "y_long")
         wS, mS, sS = M.fit(rows, "y_short")
         models[pair] = {"long": {"w": wL, "mu": mL, "sd": sL},
-                        "short": {"w": wS, "mu": mS, "sd": sS}}
+                        "short": {"w": wS, "mu": mS, "sd": sS},
+                        "feat_idx": list(range(len(M.V2_FEATURE_NAMES)))}
         days = (bars[-1][0] - bars[0][0]) / 86400000
         base_long = sum(r["y_long"] for r in rows) / len(rows)
         base_short = sum(r["y_short"] for r in rows) / len(rows)
@@ -145,8 +151,9 @@ def main():
         print("no models trained", file=sys.stderr)
         return 1
 
-    payload = {"version": M.FEATURE_VERSION,
+    payload = {"version": M.FEATURE_VERSION_V2,
                "timeframe": "M15",
+               "feature_names": M.V2_FEATURE_NAMES,
                "trained_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
                "ticket": {"sl": f"max(1.5*ATR,{SCALP_MIN_SL_PIPS}p)",
                           "tp": f"{SCALP_RR}xSL", "max_hold_bars": MAX_HOLD_BARS},

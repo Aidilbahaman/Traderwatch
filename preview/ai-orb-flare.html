@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="ms"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>PREVIEW — Flare variants</title>
+<style>
+:root{--bg:#0a0e0b;--card:#111612;--card2:#171e18;--line:#222b23;--text:#eef3ee;--muted:#8a978c;--lime:#b7f36b;--green:#b7f36b;--red:#ff777d;--orange:#ffc16b;--blue:#8ab4ff;--violet:#b18cff}
+*{box-sizing:border-box}
+body{margin:0;background:#050705;font:15px/1.5 -apple-system,BlinkMacSystemFont,"Inter",sans-serif;color:var(--text)}
+.wrap{max-width:430px;margin:0 auto;background:var(--bg);min-height:100vh;padding:16px 16px 40px}
+h1{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:#5d695f;margin:0 0 4px;font-weight:700}
+.sub{font-size:12px;color:var(--muted);margin:0 0 16px}
+.sec{margin-bottom:24px}
+.sec h2{font-size:12.5px;font-weight:850;margin:0 0 2px;display:flex;gap:7px;align-items:center}
+.sec .tag{font-size:8.5px;font-weight:800;padding:1px 7px;border-radius:99px;background:#b7f36b18;color:var(--lime);letter-spacing:.04em}
+.sec .hint{font-size:10.5px;color:var(--muted);margin:0 0 8px;line-height:1.4}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:10px;display:grid;place-items:center;overflow:hidden}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes pulse{0%,100%{transform:scale(.96);opacity:.45}50%{transform:scale(1.06);opacity:.78}}
+
+/* ---------- ORB BERSAMA ---------- */
+.hole{position:relative;width:200px;height:200px;display:grid;place-items:center;isolation:isolate}
+.aura{position:absolute;width:112px;height:112px;border-radius:50%;
+ background:radial-gradient(circle,#b7f36b2e 0%,#b7f36b14 48%,transparent 68%);
+ animation:spin 9s linear infinite;will-change:transform}
+.photon{position:absolute;width:70px;height:70px;border-radius:50%;border:2px solid #d6ff9a;
+ opacity:.5;animation:pulse 2.8s ease-in-out infinite;will-change:transform,opacity;box-shadow:0 0 14px #b7f36b45 inset}
+.core{position:relative;width:54px;height:54px;border-radius:50%;background:#000;z-index:6;
+ box-shadow:0 0 0 2px #b7f36ba6,0 0 30px 8px #b7f36b6b,0 0 80px 20px #b7f36b26}
+.ray{position:absolute;left:50%;top:50%;width:0;height:0;transform-origin:0 0}
+.dot{position:absolute;top:-3px;left:0;width:6px;height:6px;border-radius:50%;
+ background:#eaffc4;box-shadow:0 0 7px #b7f36bcc;will-change:transform,opacity;backface-visibility:hidden;
+ animation:suction linear infinite}
+@keyframes suction{
+ 0%{transform:translate3d(var(--d,96px),0,0);opacity:0}
+ 6%{opacity:1}94%{opacity:1}
+ 100%{transform:translate3d(0,0,0);opacity:0}}
+.dot.b{background:#dbe7ff;box-shadow:0 0 7px #8ab4ffcc}
+.dot.o{background:#ffe8c8;box-shadow:0 0 7px #ffc16bcc}
+.dot.v{background:#e6dbff;box-shadow:0 0 7px #b18cffcc}
+
+/* ========== F1: ROTATING FLARE (sinar berpusing) ========== */
+.f1{position:absolute;width:150px;height:150px;z-index:2;animation:spin 12s linear infinite;will-change:transform}
+.f1 i{position:absolute;left:50%;top:0;width:2px;height:22px;margin-left:-1px;border-radius:99px;
+ background:linear-gradient(to top,#b7f36b00,#d6ff9acc);transform-origin:50% 100%}
+/* ========== F2: FLARE BURST (pancutan keluar sekali sekala, rawak arah) ========== */
+.f2{position:absolute;left:50%;top:50%;width:0;height:0;z-index:2}
+.f2 i{position:absolute;width:2px;height:18px;left:0;top:0;border-radius:99px;
+ background:linear-gradient(to top,#b7f36b00,#d6ff9ae6);transform-origin:50% 100%;opacity:0;
+ animation:burst 3.4s ease-out infinite;will-change:transform,opacity}
+@keyframes burst{0%,82%{opacity:0;transform:rotate(var(--a)) translateY(-52px) scaleY(.3)}
+ 86%{opacity:1;transform:rotate(var(--a)) translateY(-58px) scaleY(1.15)}
+ 100%{opacity:0;transform:rotate(var(--a)) translateY(-74px) scaleY(1.5)}}
+/* ========== F3: ORBITING SPARK RING (titik cahaya mengorbit) ========== */
+.f3{position:absolute;width:120px;height:120px;z-index:2;animation:spin 5.6s linear infinite;will-change:transform}
+.f3 i{position:absolute;width:4px;height:4px;border-radius:50%;background:#eaffc4;
+ box-shadow:0 0 8px #d6ff9a;top:-2px;left:calc(50% - 2px)}
+.f3 i:nth-child(2){top:auto;bottom:-2px;background:#dbe7ff;box-shadow:0 0 8px #8ab4ff}
+/* ========== F4: PULSING RING WAVE (gelombang cahaya keluar) ========== */
+.f4{position:absolute;width:74px;height:74px;border-radius:50%;border:1px solid #b7f36b99;z-index:2;
+ animation:wave 3.2s ease-out infinite;will-change:transform,opacity}
+.f4.b{animation-delay:1.05s}.f4.c{animation-delay:2.1s}
+@keyframes wave{0%{transform:scale(1);opacity:.75}100%{transform:scale(2.1);opacity:0}}
+/* ========== F5: LENSING ARC (lengkung cahaya melengkung, macam graviti) ========== */
+.f5{position:absolute;width:96px;height:96px;border-radius:50%;z-index:2;border:2px solid transparent;
+ border-top-color:#b7f36bcc;border-right-color:#b7f36b55;
+ animation:spin 4.2s linear infinite;will-change:transform;filter:drop-shadow(0 0 4px #b7f36b88)}
+.f5.b{width:126px;height:126px;animation-duration:7s;animation-direction:reverse;
+ border-top-color:#8ab4ff99;border-left-color:#8ab4ff44;filter:drop-shadow(0 0 4px #8ab4ff77)}
+
+.note{font-size:11.5px;color:var(--muted);line-height:1.65;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px;margin-top:6px}
+.note b{color:var(--text)}
+@media(prefers-reduced-motion:reduce){.card *{animation:none !important}}
+</style></head><body><div class="wrap">
+<h1>PREVIEW — FLARE DI BLACK HOLE</h1>
+<p class="sub">Semua guna orb smooth yang sama. Beza hanya pada flare.</p>
+
+<div class="sec"><h2>F1 · Rotating flare <span class="tag">HALUS</span></h2>
+<p class="hint">6 sinar halus berputar mengelilingi teras, 12s perlahan.</p>
+<div class="card"><div class="hole" data-dots="1"><div class="aura"></div><div class="f1" id="f1"></div><div class="photon"></div><div class="core"></div></div></div></div>
+
+<div class="sec"><h2>F2 · Flare burst <span class="tag">DRAMATIK</span></h2>
+<p class="hint">Pancutan cahaya keluar sekejap (rawak arah), kemudian senyap. Setiap ~3.4s.</p>
+<div class="card"><div class="hole" data-dots="1"><div class="aura"></div><div class="f2" id="f2"></div><div class="photon"></div><div class="core"></div></div></div></div>
+
+<div class="sec"><h2>F3 · Orbiting sparks <span class="tag">HIDUP</span></h2>
+<p class="hint">2 titik cahaya terang mengorbit (lawan arah), bukan sinar.</p>
+<div class="card"><div class="hole" data-dots="1"><div class="aura"></div><div class="f3"><i></i><i></i></div><div class="photon"></div><div class="core"></div></div></div></div>
+
+<div class="sec"><h2>F4 · Pulse waves <span class="tag">TENANG</span></h2>
+<p class="hint">3 gelombang bulat memancar berperingkat — seperti nadi tenaga.</p>
+<div class="card"><div class="hole" data-dots="1"><div class="aura"></div><div class="f4"></div><div class="f4 b"></div><div class="f4 c"></div><div class="photon"></div><div class="core"></div></div></div></div>
+
+<div class="sec"><h2>F5 · Lensing arcs <span class="tag">ELEGAN</span></h2>
+<p class="hint">Dua lengkung cahaya berputar lawan arah — meniru gravitational lensing.</p>
+<div class="card"><div class="hole" data-dots="1"><div class="aura"></div><div class="f5"></div><div class="f5 b"></div><div class="photon"></div><div class="core"></div></div></div></div>
+
+<div class="note">
+<b>Cadangan saya:</b> <b>F1</b> (paling seimbang — jelas "berpusing" tapi tidak bising) atau <b>F5</b> (paling elegan &amp; saintifik). <b>F3</b> pula paling "hidup" jika anda mahu ia nampak aktif sepanjang masa.<br><br>
+Boleh gabung: <b>F1 + F4</b> (sinar berpusing + gelombang nadi) atau <b>F5 + F3</b>.
+</div>
+</div>
+<script>
+/* isi sinar F1 */
+(function(){var h=document.getElementById('f1');for(var i=0;i<6;i++){var s=document.createElement('i');
+ s.style.transform='rotate('+(60*i)+'deg)';s.style.opacity=(0.35+i*0.1).toFixed(2);h.appendChild(s)}})();
+/* isi burst F2 */
+(function(){var h=document.getElementById('f2');for(var i=0;i<7;i++){var s=document.createElement('i');
+ s.style.setProperty('--a',(Math.random()*360).toFixed(0)+'deg');
+ s.style.animationDelay=(-Math.random()*3.4).toFixed(2)+'s';
+ h.appendChild(s)}})();
+/* isi dot masuk rawak pada setiap orb */
+(function(){
+ var cols=['','b','','o','','v','','b','','o','','','v','b'];
+ document.querySelectorAll('.hole[data-dots]').forEach(function(host){
+  for(var i=0;i<14;i++){
+   var ray=document.createElement('div'); ray.className='ray';
+   ray.style.transform='rotate('+(Math.random()*360).toFixed(1)+'deg)';
+   var d=document.createElement('div'); d.className='dot '+(cols[i%cols.length]||'');
+   var dur=(2.4+Math.random()*2.6);
+   d.style.animationDuration=dur.toFixed(2)+'s';
+   d.style.animationDelay=(-Math.random()*dur).toFixed(2)+'s';
+   d.style.setProperty('--d',(94+Math.random()*16).toFixed(0)+'px');
+   var sz=(4.5+Math.random()*3).toFixed(1);
+   d.style.width=sz+'px'; d.style.height=sz+'px'; d.style.top=(-parseFloat(sz)/2).toFixed(1)+'px';
+   ray.appendChild(d); host.appendChild(ray);
+  }
+ });
+})();
+</script>
+</div></body></html>

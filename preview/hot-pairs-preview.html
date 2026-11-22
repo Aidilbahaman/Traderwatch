@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="ms"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>PREVIEW — Hot Pairs strip</title>
+<style>
+:root{--bg:#0a0e0b;--card:#111612;--card2:#171e18;--text:#eef3ee;--muted:#8a978c;--line:#222b23;--lime:#b7f36b;--green:#b7f36b;--red:#ff777d;--orange:#ffc16b;--glass:rgba(10,14,11,.82)}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:#050705;font:15px/1.5 -apple-system,BlinkMacSystemFont,"Inter",sans-serif;color:var(--text)}
+.wrap{max-width:430px;margin:0 auto;background:var(--bg);min-height:100vh;padding:16px}
+h1{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#5d695f;margin:0 0 14px;font-weight:700}
+.hd{display:flex;align-items:baseline;gap:8px;margin:18px 0 10px}
+.hd h2{margin:0;font-size:15px;font-weight:850;letter-spacing:-.02em}
+.hd span{font-size:11px;color:var(--muted)}
+/* ---- strip ---- */
+.strip{display:flex;gap:10px;overflow-x:auto;padding:2px 0 10px;scrollbar-width:none}
+.strip::-webkit-scrollbar{display:none}
+.hot{flex:0 0 132px;position:relative;background:linear-gradient(150deg,#1a2418,var(--card));border:1px solid #b7f36b40;border-radius:18px;padding:12px}
+.hot.rank1{border-color:#ffd76b80;box-shadow:0 0 24px #ffd76b18}
+.hot.rank2{border-color:#cdd6e060}
+.hot.rank3{border-color:#e0a06b60}
+.hot .rk{position:absolute;top:10px;right:11px;font-size:13px}
+.hot .sym{font-size:16px;font-weight:850;letter-spacing:-.02em}
+.hot .nm{font-size:10px;color:var(--muted);margin-bottom:8px}
+.hot .wr{font-size:20px;font-weight:850;font-variant-numeric:tabular-nums;line-height:1}
+.hot .wr.good{color:var(--green)}.hot .wr.bad{color:var(--red)}
+.hot .lab{font-size:9px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-top:2px}
+.hot .meta{display:flex;gap:6px;margin-top:9px;flex-wrap:wrap}
+.pill{font-size:9.5px;font-weight:750;padding:2px 7px;border-radius:999px;background:var(--card2);color:var(--muted);border:1px solid var(--line)}
+.pill.fire{background:#ff777d18;color:#ff9ba0;border-color:#ff777d40}
+.pill.new{background:#ffc16b18;color:var(--orange);border-color:#ffc16b40}
+.pill.up{background:#b7f36b18;color:var(--green);border-color:#b7f36b40}
+.toggle{display:inline-flex;background:var(--card);border:1px solid var(--line);border-radius:999px;padding:3px;gap:3px;margin-left:auto}
+.toggle button{border-radius:999px;padding:4px 12px;font-size:11px;font-weight:750;color:var(--muted);border:0;background:none}
+.toggle button.on{background:#b7f36b22;color:var(--lime)}
+.hot .insight{margin-top:9px;font-size:10.5px;line-height:1.5;color:#c9d4c9;font-style:italic;border-top:1px dashed var(--line);padding-top:8px}
+.hot .insight b{color:var(--lime);font-style:normal}
+/* ---- grid card ---- */
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:6px}
+.pair{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:12px;position:relative}
+.pair.hotring{border-color:#b7f36b55}
+.pair .top{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.pair .ic{width:30px;height:30px;border-radius:10px;background:var(--card2);display:grid;place-items:center;font-size:10px;font-weight:850;color:var(--lime)}
+.pair .nm{font-size:14px;font-weight:850}
+.pair .ds{font-size:10px;color:var(--muted)}
+.pair .px{font-size:15px;font-weight:750;font-variant-numeric:tabular-nums;margin-top:8px}
+.pair .ch{font-size:11px;font-weight:700}
+.pair .ch.dn{color:var(--red)}.pair .ch.up{color:var(--green)}
+.pair .spark{width:62px;height:26px}
+.badge{position:absolute;top:9px;right:9px;font-size:9px;font-weight:800;padding:2px 6px;border-radius:999px;background:#ff777d1f;color:#ff9ba0;border:1px solid #ff777d45}
+.note{margin-top:22px;padding:12px;border-radius:14px;background:var(--card2);border:1px solid var(--line);font-size:11.5px;color:var(--muted);line-height:1.6}
+.note b{color:var(--text)}
+</style></head><body><div class="wrap">
+<h1>PREVIEW — belum commit</h1>
+
+<div class="hd" style="flex-wrap:wrap"><h2>🔥 Hot Pairs</h2><span>berdasarkan aktiviti member</span><div class="toggle"><button class="on">🔥 Popular</button><button>💰 Untung</button></div></div>
+<div class="strip">
+  <div class="hot rank1"><span class="rk">🥇</span><div class="sym">BTCUSD</div><div class="nm">Bitcoin</div><div class="wr bad">23.1%</div><div class="lab">Win rate</div><div class="meta"><span class="pill fire">🔥 3 member</span><span class="pill">13 trade</span></div><div class="insight"><b>Coach:</b> "13 trade tapi hanya 3 menang — hentikan FOMO, tunggu setup bersih sebelum masuk."</div></div>
+  <div class="hot rank2"><span class="rk">🥈</span><div class="sym">XAUUSD</div><div class="nm">Gold / USD</div><div class="wr good">50.0%</div><div class="lab">Win rate</div><div class="meta"><span class="pill fire">🔥 1 member</span><span class="pill">8 trade</span><span class="pill up">+4.4R</span></div><div class="insight"><b>Coach:</b> "Separuh menang dan R positif — kekal disiplin, jangan tambah saiz kosong."</div></div>
+  <div class="hot rank3"><span class="rk">🥉</span><!-- v2 --><div class="sym">XAGUSD</div><div class="nm">Silver / USD</div><div class="wr bad">0.0%</div><div class="lab">Win rate</div><div class="meta"><span class="pill new">Baru</span><span class="pill">1 trade</span></div></div>
+</div>
+
+<div class="hd"><h2>All pairs</h2><span>badge = jumlah member ambil</span></div>
+<div class="grid">
+  <div class="pair hotring"><span class="badge">🔥 3</span><div class="top"><div class="ic">BTC</div><svg class="spark" viewBox="0 0 62 26"><polyline points="2,20 12,14 22,17 32,9 42,12 52,5 60,8" fill="none" stroke="#ff777d" stroke-width="1.8" stroke-linecap="round"/></svg></div><div class="nm">BTCUSD</div><div class="ds">Bitcoin</div><div class="px">57,876.13</div><div class="ch dn">▼ 2.31%</div></div>
+  <div class="pair hotring"><span class="badge">🔥 1</span><div class="top"><div class="ic">XAU</div><svg class="spark" viewBox="0 0 62 26"><polyline points="2,18 12,20 22,12 32,15 42,10 52,13 60,7" fill="none" stroke="#b7f36b" stroke-width="1.8" stroke-linecap="round"/></svg></div><div class="nm">XAUUSD</div><div class="ds">Gold / USD</div><div class="px">3,534.88</div><div class="ch up">▲ 0.41%</div></div>
+  <div class="pair"><div class="top"><div class="ic">XAG</div><svg class="spark" viewBox="0 0 62 26"><polyline points="2,12 12,15 22,11 32,17 42,14 52,18 60,16" fill="none" stroke="#ff777d" stroke-width="1.8" stroke-linecap="round"/></svg></div><div class="nm">XAGUSD</div><div class="ds">Silver / USD</div><div class="px">41.213</div><div class="ch dn">▼ 1.02%</div></div>
+  <div class="pair"><div class="top"><div class="ic">EUR</div><svg class="spark" viewBox="0 0 62 26"><polyline points="2,10 12,13 22,9 32,12 42,8 52,11 60,9" fill="none" stroke="#b7f36b" stroke-width="1.8" stroke-linecap="round"/></svg></div><div class="nm">EURUSD</div><div class="ds">Euro / USD</div><div class="px">1.0966</div><div class="ch up">▲ 0.12%</div></div>
+</div>
+
+<div class="note">
+<b>Cara skor Hot (sebenar dari data, bukan rekaan):</b><br>
+• <b>Pemakaian member</b> 40% — berapa ramai member berbeza ambil pair ini<br>
+• <b>Win rate</b> 40% — % trade yang kena TP<br>
+• <b>Net R</b> 20% — prestasi keseluruhan pair<br><br>
+Pair dengan &lt;3 trade dilabel <b>Baru</b> (tak masuk ranking hot) supaya tak menipu bila data tipis.<br>
+Badge 🔥 pada kad pair = bilangan member yang ambil. Warna hijau/merah = win rate.
+</div>
+</div></body></html>

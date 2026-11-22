@@ -37,10 +37,10 @@ def fetch_latest():
     )
     with urllib.request.urlopen(req, timeout=25) as r:
         rows = json.loads(r.read())
-    # Tapis signal private daripada landing page
-    from engine.private_signals import is_private
-    if rows and is_private(rows[0].get("id")):
-        return None  # Sembunyikan signal private daripada landing page
+    # Single tier (Automation Trade): semua signal verified dipaparkan,
+    # selaras migration 20261119_automation_single_tier.sql (tiada tapisan
+    # private/plan/pair pada RPC). Signal terbaru mana-mana focus pair
+    # (XAU/USD, XAG/USD, BTCUSD) boleh muncul di landing.
     return rows[0] if rows else None
 
 def status_of(pair, sid, posted_at):
@@ -98,5 +98,5 @@ def main():
         print("landing-signal error:", e)
         raise SystemExit(1)
 
-if __name__ == "__main":
+if __name__ == "__main__":
     main()

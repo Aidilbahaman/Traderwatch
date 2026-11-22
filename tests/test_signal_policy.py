@@ -2,6 +2,7 @@
 """Regression tests for TraderWatch signal lifecycle and pair dedupe."""
 import importlib.util
 import json
+import os
 import tempfile
 import unittest
 from datetime import datetime, timezone
@@ -60,7 +61,10 @@ class SignalPolicyTests(unittest.TestCase):
         spec.loader.exec_module(mod)
         self.assertEqual(mod.TIMEFRAME, 'M15')
         self.assertEqual(mod.TD_INTERVAL, '15min')
-        self.assertGreaterEqual(mod.THRESHOLD, 0.5)
+        # Gate seragam 0.30 (owner turunkan dari 0.50, commit dad51a9c);
+        # boleh laras via env AI_THRESHOLD.
+        self.assertEqual(mod.THRESHOLD,
+                         float(os.environ.get('AI_THRESHOLD', '0.30')))
 
     def test_m15_stop_floor_beats_thin_atr(self):
         engine = load_engine()

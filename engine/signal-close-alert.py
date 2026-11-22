@@ -22,7 +22,11 @@ from pathlib import Path
 
 BASE = Path.home() / ".secrets"
 STATUS = Path("/home/ubuntu/web/Traderwatch-repo/signal-status.json")
-STATE = Path("/tmp/traderwatch-signal-closed-alerts.json")
+# Persistent dedupe state. This used to live in /tmp, which meant every
+# reboot re-alerted every closed setup in signal-status.json — a burst of
+# ~150 stale Telegram + email notifications. Keep it in state/ so it
+# survives restarts.
+STATE = Path("/home/ubuntu/web/Traderwatch-repo/state/closed-alerts.json")
 TZ_OFFSET = 8  # Malaysia
 
 

@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="ms"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>PREVIEW — Quantum Orb (elektron bergaduh)</title>
+<style>
+:root{--bg:#0a0e0b;--card:#111612;--card2:#171e18;--line:#222b23;--text:#eef3ee;--muted:#8a978c;--lime:#b7f36b;--green:#b7f36b;--red:#ff777d;--orange:#ffc16b;--blue:#8ab4ff;--violet:#b18cff}
+*{box-sizing:border-box}
+body{margin:0;background:#050705;font:15px/1.5 -apple-system,BlinkMacSystemFont,"Inter",sans-serif;color:var(--text)}
+.wrap{max-width:430px;margin:0 auto;background:var(--bg);min-height:100vh;padding:16px 16px 40px}
+h1{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:#5d695f;margin:0 0 4px;font-weight:700}
+.sub{font-size:12px;color:var(--muted);margin:0 0 16px}
+h2{font-size:13px;font-weight:850;margin:26px 0 6px}
+.hint{font-size:11.5px;color:var(--muted);margin:0 0 10px;line-height:1.5}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:14px;display:grid;place-items:center}
+
+/* ================= Q1: CHAOS ORBIT (electron bergaduh) ================= */
+.qwrap{position:relative;width:200px;height:200px;display:grid;place-items:center}
+.qcore{width:50px;height:50px;border-radius:50%;z-index:5;
+ background:radial-gradient(circle at 36% 32%,#ffffff,#e9ffc4 25%,#b7f36b 55%,#4f8a1c 88%);
+ box-shadow:0 0 32px #b7f36b66,0 0 70px #b7f36b28,inset 0 0 16px #fff8;
+ animation:qcorePulse 1.9s ease-in-out infinite}
+@keyframes qcorePulse{0%,100%{transform:scale(.96);box-shadow:0 0 24px #b7f36b50,0 0 56px #b7f36b1c}50%{transform:scale(1.09);box-shadow:0 0 46px #b7f36baa,0 0 96px #b7f36b3d}}
+/* field turbulence rings - 3 rings pulsing out of phase */
+.qring{position:absolute;border-radius:50%;border:1px solid #b7f36b2e;animation:qring 3.1s ease-out infinite}
+.qring.r1{width:74px;height:74px}
+.qring.r2{width:104px;height:104px;animation-delay:.55s}
+.qring.r3{width:138px;height:138px;animation-delay:1.1s}
+.qring.r4{width:176px;height:176px;animation-delay:1.65s}
+@keyframes qring{0%{transform:scale(.72);opacity:.85}70%{opacity:.15}100%{transform:scale(1.16);opacity:0}}
+
+/* orbitals: each is a rotating container; electrons wobble along it */
+.orb{position:absolute;border-radius:50%;animation:spin linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.orb.p{width:96px;height:96px;animation-duration:4.7s}
+.orb.q{width:132px;height:132px;animation-duration:6.3s;animation-direction:reverse}
+.orb.r{width:168px;height:168px;animation-duration:8.9s;transform:rotate(33deg)}
+.orb.s{width:168px;height:168px;animation-duration:7.1s;animation-direction:reverse;transform:rotate(-57deg)}
+
+/* electron: travels orbit but wobbles (jitter) = "bergaduh" */
+.el{position:absolute;width:9px;height:9px;border-radius:50%;left:calc(50% - 4.5px);top:calc(50% - 4.5px);
+ transform-origin:50% 50%;will-change:transform}
+.el span{display:block;width:100%;height:100%;border-radius:50%;
+ background:var(--lime);box-shadow:0 0 12px var(--lime),0 0 3px #fff;
+ animation:jitter .75s ease-in-out infinite alternate}
+@keyframes jitter{
+ 0%{transform:translate(-2.4px,-1.6px) scale(.86);opacity:.82}
+ 50%{transform:translate(1.9px,2.2px) scale(1.18);opacity:1}
+ 100%{transform:translate(-1.2px,2.6px) scale(.94);opacity:.9}}
+.el.b span{background:var(--blue);box-shadow:0 0 12px var(--blue),0 0 3px #fff}
+.el.v span{background:var(--violet);box-shadow:0 0 12px var(--violet),0 0 3px #fff}
+.el.o span{background:var(--orange);box-shadow:0 0 12px var(--orange),0 0 3px #fff}
+
+/* energy sparks: tiny flashes near core = collisions */
+.spark{position:absolute;width:14px;height:14px;border-radius:50%;background:radial-gradient(circle,#ffffff,#b7f36b00 70%);
+ opacity:0;animation:spark 2.3s ease-out infinite;pointer-events:none}
+@keyframes spark{0%{opacity:0;transform:scale(.2)}8%{opacity:.95;transform:scale(.8)}40%{opacity:.25;transform:scale(1.6)}100%{opacity:0;transform:scale(2.4)}}
+
+/* ================= Q2: COLLISION PAIR ================= */
+.cwrap{position:relative;width:200px;height:150px;display:grid;place-items:center;overflow:hidden}
+.ccore{width:40px;height:40px;border-radius:50%;background:radial-gradient(circle at 36% 32%,#ffffff,#e9ffc4 30%,#b7f36b 62%,#3f7314);
+ box-shadow:0 0 26px #b7f36b70;z-index:3;animation:qcorePulse 1.6s ease-in-out infinite}
+.clash{position:absolute;height:2px;width:100%;top:50%;background:linear-gradient(90deg,transparent,#b7f36b33,#b7f36b88,#b7f36b33,transparent);opacity:.4}
+.pair{position:absolute;top:50%;width:200px;height:26px;transform:translateY(-50%)}
+.p1{position:absolute;left:0;top:50%;transform:translateY(-50%);animation:sideL 2.6s cubic-bezier(.6,0,.4,1) infinite}
+.p2{position:absolute;right:0;top:50%;transform:translateY(-50%);animation:sideR 2.6s cubic-bezier(.6,0,.4,1) infinite}
+.p1 span,.p2 span{display:block;width:11px;height:11px;border-radius:50%;background:var(--lime);box-shadow:0 0 14px var(--lime),0 0 4px #fff}
+.p2 span{background:var(--blue);box-shadow:0 0 14px var(--blue),0 0 4px #fff}
+@keyframes sideL{0%,12%{transform:translate(0,-50%)}46%,54%{transform:translate(74px,-50%)}88%,100%{transform:translate(0,-50%)}}
+@keyframes sideR{0%,12%{transform:translate(0,-50%)}46%,54%{transform:translate(-74px,-50%)}88%,100%{transform:translate(0,-50%)}}
+.impact{position:absolute;left:50%;top:50%;width:60px;height:60px;margin:-30px 0 0 -30px;border-radius:50%;
+ background:radial-gradient(circle,#ffffffcc,#b7f36b88 35%,transparent 70%);opacity:0;animation:impact 2.6s ease-out infinite}
+@keyframes impact{0%,44%{opacity:0;transform:scale(.2)}50%{opacity:1;transform:scale(1)}60%{opacity:.5;transform:scale(1.9)}70%,100%{opacity:0;transform:scale(2.4)}}
+
+/* ================= mini header ================= */
+.hdr{display:flex;align-items:center;gap:11px;background:var(--card);border:1px solid var(--line);border-radius:18px;padding:13px 14px}
+.mini{position:relative;width:46px;height:46px;display:grid;place-items:center;flex:none}
+.mini .mc{width:14px;height:14px;border-radius:50%;background:radial-gradient(circle at 36% 32%,#fff,#e9ffc4 30%,#b7f36b 60%,#4f8a1c);box-shadow:0 0 10px #b7f36b60;z-index:3;animation:qcorePulse 1.9s ease-in-out infinite}
+.mini .mo{position:absolute;border-radius:50%;animation:spin linear infinite}
+.mini .mo.p{width:26px;height:26px;animation-duration:4.7s}
+.mini .mo.q{width:36px;height:36px;animation-duration:6.3s;animation-direction:reverse}
+.mini .mo.r{width:44px;height:44px;animation-duration:8.9s}
+.mini .me{position:absolute;width:3.4px;height:3.4px;border-radius:50%;left:calc(50% - 1.7px);top:calc(50% - 1.7px)}
+.mini .me span{display:block;width:100%;height:100%;border-radius:50%;background:var(--lime);box-shadow:0 0 5px var(--lime);animation:mjitter .75s ease-in-out infinite alternate}
+.mini .mo.q .me span{background:var(--blue);box-shadow:0 0 5px var(--blue)}
+.mini .mo.r .me span{background:var(--violet);box-shadow:0 0 5px var(--violet)}
+@keyframes mjitter{0%{transform:translate(-.8px,-.6px) scale(.8)}100%{transform:translate(.9px,.8px) scale(1.15)}}
+.hdr .tx{flex:1;min-width:0}
+.hdr .tx b{display:block;font-size:14px;font-weight:850}
+.hdr .tx small{font-size:11px;color:var(--muted)}
+.hdr .st{margin-left:auto;font-size:9.5px;font-weight:800;color:var(--lime);background:#b7f36b14;border:1px solid #b7f36b3d;border-radius:99px;padding:3px 9px;flex:none}
+
+.note{font-size:11.5px;color:var(--muted);line-height:1.65;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px;margin-top:16px}
+.note b{color:var(--text)}
+@media(prefers-reduced-motion:reduce){
+ .qcore,.ccore,.mini .mc{animation:none}
+ .orb,.qring,.el span,.spark,.p1,.p2,.impact,.mini .mo,.mini .me span{animation:none}
+ .el span{transform:none;opacity:1}
+}
+</style></head><body><div class="wrap">
+<h1>PREVIEW — QUANTUM ORB</h1>
+<p class="sub">Elektron tidak mengorbit kemas — ia bergelut, melompat, berlanggar.</p>
+
+<h2>Q1 · Chaos orbit <span style="font-size:10px;color:var(--muted);font-weight:600">(4 orbital, jitter, spark)</span></h2>
+<p class="hint">Setiap elektron bergetar (jitter 0.75s), orbital berputar berbeza arah/kelajuan, cincin tenaga memancar, spark berkelip dekat teras.</p>
+<div class="card" style="padding:18px">
+  <div class="qwrap" id="qw">
+    <div class="qring r1"></div><div class="qring r2"></div><div class="qring r3"></div><div class="qring r4"></div>
+    <div class="spark" style="left:22%;top:26%;animation-delay:.3s"></div>
+    <div class="spark" style="left:70%;top:30%;animation-delay:1.1s"></div>
+    <div class="spark" style="left:62%;top:74%;animation-delay:1.7s"></div>
+    <div class="spark" style="left:28%;top:70%;animation-delay:.8s"></div>
+    <div class="orb p" id="op"><div class="el"><span></span></div><div class="el b"><span></span></div></div>
+    <div class="orb q" id="oq"><div class="el b"><span></span></div><div class="el"><span></span></div></div>
+    <div class="orb r" id="orr"><div class="el v"><span></span></div></div>
+    <div class="orb s" id="ors"><div class="el o"><span></span></div></div>
+    <div class="qcore"></div>
+  </div>
+</div>
+
+<h2>Q2 · Collision pair <span style="font-size:10px;color:var(--muted);font-weight:600">(2 elektron berlanggar)</span></h2>
+<p class="hint">Dua elektron ditolak-menarik; setiap ~2.6s mereka langgar di tengah dan meletup kilat.</p>
+<div class="card" style="padding:16px">
+  <div class="cwrap">
+    <div class="clash"></div>
+    <div class="pair"><div class="p1"><span></span></div><div class="p2"><span></span></div></div>
+    <div class="impact"></div>
+    <div class="ccore"></div>
+  </div>
+</div>
+
+<h2>Dalam konteks — header League</h2>
+<div class="hdr">
+  <div class="mini">
+    <div class="mo p" id="mp"></div>
+    <div class="mo q" id="mq"></div>
+    <div class="mo r" id="mr"></div>
+    <div class="mc"></div>
+  </div>
+  <div class="tx"><b>Enjin AI aktif</b><small>12 pair · gelombang kuantum stabil</small></div>
+  <div class="st">LIVE</div>
+</div>
+
+<div class="note">
+<b>Maksud "bergaduh":</b> elektron bukan mengorbit kemas — ia <b>bergetar</b> (jitter), <b>bertukar orbital</b> (dua orbital bertentangan), ada <b>spark perlanggaran</b> dekat teras, dan cincin tenaga memancar tak segerak. Ini meniru ketidakpastian kuantum — nampak "hidup" dan bergelut, bukan pusing mekanikal.<br><br>
+<b>Nota prestasi:</b> ~14 elemen beranimasi. Semua CSS transform/opacity (GPU). Berhenti bila tab hidden + <code>prefers-reduced-motion</code>.
+</div>
+</div>
+<script>
+/* fill electrons around each orbital at different angles */
+function fill(id,angles){
+  var t=document.getElementById(id); if(!t) return;
+  var r=t.offsetWidth/2;
+  t.querySelectorAll('.el').forEach(function(el,i){
+    var a=angles[i]||0;
+    el.style.transform='rotate('+a+'deg) translateY(-'+r+'px)';
+    el.querySelector('span').style.animationDelay=(i*0.31)+'s';
+  });
+}
+fill('op',[0,180]);
+fill('oq',[70,250]);
+fill('orr',[20]);
+fill('ors',[200]);
+/* mini */
+function mfill(id,angles){
+  var t=document.getElementById(id); if(!t) return;
+  var r=t.offsetWidth/2;
+  angles.forEach(function(a,i){
+    var d=document.createElement('div'); d.className='me';
+    d.style.transform='rotate('+a+'deg) translateY(-'+r+'px)';
+    var s=document.createElement('span'); s.style.animationDelay=(i*0.27)+'s';
+    d.appendChild(s); t.appendChild(d);
+  });
+}
+mfill('mp',[0,180]);
+mfill('mq',[70,250]);
+mfill('mr',[200]);
+</script>
+</div></body></html>

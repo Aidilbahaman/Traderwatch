@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="ms"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>PREVIEW — Blackhole × AI interaction</title>
+<style>
+:root{--bg:#0a0e0b;--card:#111612;--card2:#171e18;--line:#222b23;--text:#eef3ee;--muted:#8a978c;--lime:#b7f36b;--green:#b7f36b;--red:#ff777d;--orange:#ffc16b;--blue:#8ab4ff;--violet:#b18cff}
+*{box-sizing:border-box}
+body{margin:0;background:#050705;font:15px/1.5 -apple-system,BlinkMacSystemFont,"Inter",sans-serif;color:var(--text)}
+.wrap{max-width:430px;margin:0 auto;background:var(--bg);min-height:100vh;padding:16px 16px 40px}
+h1{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:#5d695f;margin:0 0 4px;font-weight:700}
+.sub{font-size:12px;color:var(--muted);margin:0 0 16px;line-height:1.5}
+h2{font-size:12.5px;font-weight:850;margin:22px 0 3px;display:flex;gap:7px;align-items:center;flex-wrap:wrap}
+.tag{font-size:8.5px;font-weight:800;padding:1px 7px;border-radius:99px;background:#b7f36b18;color:var(--lime);letter-spacing:.04em}
+.tag.blue{background:#8ab4ff18;color:var(--blue)}
+.tag.orange{background:#ffc16b18;color:var(--orange)}
+.hint{font-size:10.5px;color:var(--muted);margin:0 0 8px;line-height:1.45}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:12px;display:flex;flex-direction:column;align-items:center;gap:10px}
+
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes spinRev{to{transform:rotate(-360deg)}}
+@keyframes pulse{0%,100%{transform:scale(.96);opacity:.45}50%{transform:scale(1.06);opacity:.78}}
+@keyframes wave{0%{transform:scale(1);opacity:.75}100%{transform:scale(2.1);opacity:0}}
+
+/* ================= ORB ================= */
+.hole{position:relative;width:196px;height:196px;display:grid;place-items:center;isolation:isolate}
+.aura{position:absolute;width:110px;height:110px;border-radius:50%;
+ background:radial-gradient(circle,#b7f36b2e 0%,#b7f36b12 48%,transparent 68%);
+ animation:spin 9s linear infinite;will-change:transform}
+.photon{position:absolute;width:68px;height:68px;border-radius:50%;border:2px solid #d6ff9a;opacity:.5;
+ animation:pulse 2.8s ease-in-out infinite;box-shadow:0 0 14px #b7f36b45 inset;will-change:transform,opacity}
+.core{position:relative;width:52px;height:52px;border-radius:50%;background:#000;z-index:6;
+ box-shadow:0 0 0 2px #b7f36ba6,0 0 28px 8px #b7f36b6b,0 0 74px 18px #b7f36b26;transition:box-shadow .5s,width .4s,height .4s}
+.ray{position:absolute;left:50%;top:50%;width:0;height:0;transform-origin:0 0}
+.dot{position:absolute;top:-3px;left:0;width:6px;height:6px;border-radius:50%;background:#eaffc4;
+ box-shadow:0 0 7px #b7f36bcc;will-change:transform,opacity;animation:suction linear infinite}
+@keyframes suction{0%{transform:translate3d(var(--d,92px),0,0);opacity:0}6%{opacity:1}94%{opacity:1}100%{transform:translate3d(0,0,0);opacity:0}}
+.dot.b{background:#dbe7ff;box-shadow:0 0 7px #8ab4ffcc}
+.dot.o{background:#ffe8c8;box-shadow:0 0 7px #ffc16bcc}
+.dot.v{background:#e6dbff;box-shadow:0 0 7px #b18cffcc}
+
+/* F4 waves */
+.wv{position:absolute;width:72px;height:72px;border-radius:50%;border:1px solid #b7f36b99;z-index:2;
+ animation:wave 3.2s ease-out infinite;will-change:transform,opacity}
+.wv.b{animation-delay:1.05s}.wv.c{animation-delay:2.1s}
+
+/* ============ FASA 1: IDLE ============ */
+/* default: 14 dots, 3 waves */
+
+/* ============ FASA 2: ANALYSING ============ */
+.hole.analysing .aura{animation-duration:3.4s}
+.hole.analysing .core{box-shadow:0 0 0 2px #b7f36bd9,0 0 40px 14px #b7f36ba6,0 0 110px 34px #b7f36b45}
+.hole.analysing .wv{border-color:#8ab4ffcc;animation-duration:1.9s}
+.hole.analysing .wv.b{animation-delay:.63s}.hole.analysing .wv.c{animation-delay:1.26s}
+.hole.analysing .dot{animation-duration:1.5s}
+/* scanning arc */
+.scanarc{position:absolute;width:150px;height:150px;border-radius:50%;border:2px solid transparent;
+ border-top-color:#b7f36b;border-right-color:#b7f36b88;z-index:7;opacity:0;transition:opacity .3s;
+ animation:spin 1.5s linear infinite;will-change:transform}
+.hole.analysing .scanarc{opacity:1}
+/* ringgel */
+.rippleBig{position:absolute;width:100px;height:100px;border-radius:50%;border:1.5px solid #8ab4ff;opacity:0;z-index:1}
+.hole.analysing .rippleBig{animation:wave 2.4s ease-out infinite}
+.hole.analysing .rippleBig.b{animation-delay:.8s}
+
+/* ============ FASA 3: RESULT PULSE ============ */
+.hole.result .core{box-shadow:0 0 0 2px #b7f36b,0 0 52px 20px #b7f36bb3,0 0 130px 46px #b7f36b59;animation:resultPop .9s cubic-bezier(.2,1.4,.4,1) 1}
+@keyframes resultPop{0%{transform:scale(1)}35%{transform:scale(1.28)}100%{transform:scale(1)}}
+.hole.result .wv{border-color:#b7f36b;animation:wave 1.1s ease-out 1}
+.hole.result .wv.b{animation-delay:.18s}.hole.result .wv.c{animation-delay:.36s}
+.hole.result .dot{animation-duration:4.2s;opacity:.5}
+
+/* status chip */
+.chip{display:flex;align-items:center;gap:7px;font-size:10.5px;font-weight:800;letter-spacing:.02em;
+ border-radius:99px;padding:5px 12px}
+.chip .p{width:6px;height:6px;border-radius:50%}
+.chip.idle{color:var(--muted);background:var(--card2);border:1px solid var(--line)}
+.chip.idle .p{background:var(--lime);opacity:.6}
+.chip.run{color:var(--blue);background:#8ab4ff12;border:1px solid #8ab4ff45}
+.chip.run .p{background:var(--blue);animation:blink 1s infinite}
+.chip.done{color:var(--lime);background:#b7f36b14;border:1px solid #b7f36b4d}
+.chip.done .p{background:var(--lime)}
+@keyframes blink{0%,100%{opacity:.25}50%{opacity:1}}
+/* who ticker */
+.who{display:flex;align-items:center;gap:8px;width:100%;background:var(--card2);border:1px solid var(--line);
+ border-radius:12px;padding:8px 11px;font-size:11px;overflow:hidden}
+.who .av{width:20px;height:20px;border-radius:50%;display:grid;place-items:center;font-size:8px;font-weight:850;flex:none;color:#10150b}
+.who .tx{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.who .tx b{font-weight:800}
+.who .tm{font-size:9.5px;color:var(--muted);flex:none}
+.who.run{border-color:#8ab4ff40}
+.who.run .tx{color:var(--blue)}
+
+/* TERSEMBUNYI utk demo only */
+.demo{font-size:9.5px;color:#5d695f;text-align:center}
+
+.note{font-size:11px;color:var(--muted);line-height:1.6;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px;margin-top:14px}
+.note b{color:var(--text)}
+@media(prefers-reduced-motion:reduce){.card *{animation:none !important}}
+</style></head><body><div class="wrap">
+<h1>PREVIEW — BLACKHOLE × AI REQUEST</h1>
+<p class="sub">Bila client minta analisis, blackhole berubah jadi status hidup: <b>semua client nampak</b> ia bekerja.</p>
+
+<h2>1 · Idle <span class="tag">DEFAULT</span></h2>
+<p class="hint">Tiada permintaan. Dot masuk rawak + gelombang nadi perlahan.</p>
+<div class="card">
+  <div class="hole"><div class="aura"></div><div class="wv"></div><div class="wv b"></div><div class="wv c"></div><div class="photon"></div><div class="core"></div></div>
+  <div class="chip idle"><span class="p"></span>Enjin AI sedia</div>
+</div>
+
+<h2>2 · Sedang analisis <span class="tag blue">LIVE</span></h2>
+<p class="hint">Teras membesar &amp; terang, aura laju, gelombang biru pantas, arc scan berputar, dot masuk deras. Ada baris "siapa sedang minta".</p>
+<div class="card">
+  <div class="hole analysing"><div class="aura"></div>
+    <div class="rippleBig"></div><div class="rippleBig b"></div>
+    <div class="wv"></div><div class="wv b"></div><div class="wv c"></div>
+    <div class="scanarc"></div>
+    <div class="photon"></div><div class="core"></div></div>
+  <div class="chip run"><span class="p"></span>AI sedang membaca XAUUSD M15</div>
+  <div class="who run"><span class="av" style="background:var(--blue)">AB</span><span class="tx"><b>Aidil B.</b> minta analisis XAUUSD · M15</span><span class="tm">sekarang</span></div>
+</div>
+
+<h2>3 · Verdict siap <span class="tag">PULSE</span></h2>
+<p class="hint">Teras "pop" sekali, gelombang lime memancar, dot perlahan semula — isyarat jelas kerja selesai.</p>
+<div class="card">
+  <div class="hole result"><div class="aura"></div><div class="wv"></div><div class="wv b"></div><div class="wv c"></div><div class="photon"></div><div class="core"></div></div>
+  <div class="chip done"><span class="p"></span>Verdict siap · XAUUSD SELL</div>
+  <div class="who"><span class="av" style="background:var(--lime)">AB</span><span class="tx"><b>Aidil B.</b> — SELL conf 72%</span><span class="tm">2s</span></div>
+</div>
+
+<h2>4 · Ramai client serentak <span class="tag orange">SOSIAL</span></h2>
+<p class="hint">Bila lebih dari seorang minta, teras lebih terang &amp; senarai orang bergilir (proof sosial).</p>
+<div class="card">
+  <div class="hole analysing"><div class="aura"></div>
+    <div class="rippleBig"></div><div class="rippleBig b"></div>
+    <div class="wv"></div><div class="wv b"></div><div class="wv c"></div>
+    <div class="scanarc"></div><div class="photon"></div><div class="core"></div></div>
+  <div class="chip run"><span class="p"></span>3 analisis sedang berjalan</div>
+  <div class="who run"><span class="av" style="background:var(--blue)">AB</span><span class="tx"><b>Aidil B.</b> · XAUUSD M15</span><span class="tm">sekarang</span></div>
+  <div class="who run"><span class="av" style="background:var(--violet)">ZH</span><span class="tx"><b>Zara H.</b> · BTCUSD H1</span><span class="tm">4s</span></div>
+  <div class="who run"><span class="av" style="background:var(--orange)">MK</span><span class="tx"><b>Mikael K.</b> · XAGUSD M5</span><span class="tm">7s</span></div>
+</div>
+
+<div class="note">
+<b>Persoalan privasi:</b> tunjuk nama penuh boleh jadi isu. Pilihan lebih selamat: tunjuk <b>inisial sahaja</b> ("A.B.") atau <b>tanpa nama langsung</b> ("2 analisis sedang berjalan") — cukup untuk proof sosial tanpa dedah identiti.<br><br>
+<b>Teknikal:</b> status disimpan ringan dalam backend (siapa minta apa, tamat masa 60s), client poll setiap 5s. Tiada WebSocket perlu.
+</div>
+</div>
+<script>
+(function(){
+  var cols=['','b','','o','','v','','b','','o','','','v','b'];
+  document.querySelectorAll('.hole').forEach(function(host){
+    for(var i=0;i<14;i++){
+      var ray=document.createElement('div'); ray.className='ray';
+      ray.style.transform='rotate('+(Math.random()*360).toFixed(1)+'deg)';
+      var d=document.createElement('div'); d.className='dot '+(cols[i%cols.length]||'');
+      var dur=(2.4+Math.random()*2.6);
+      d.style.animationDuration=dur.toFixed(2)+'s';
+      d.style.animationDelay=(-Math.random()*dur).toFixed(2)+'s';
+      d.style.setProperty('--d',(90+Math.random()*16).toFixed(0)+'px');
+      var sz=(4.5+Math.random()*3).toFixed(1);
+      d.style.width=sz+'px'; d.style.height=sz+'px'; d.style.top=(-parseFloat(sz)/2).toFixed(1)+'px';
+      ray.appendChild(d); host.appendChild(ray);
+    }
+  });
+})();
+</script>
+</div></body></html>

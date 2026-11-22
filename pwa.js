@@ -20,6 +20,7 @@
     online: navigator.onLine,
     signal: null,
     status: null,
+    livePrice: null,
     dataFromCache: false,
     chartSymbol: 'OANDA:XAUUSD',
     chartMounted: false,
@@ -238,7 +239,7 @@
   function registerSW() {
     if (!('serviceWorker' in navigator)) return;
     window.addEventListener('load', function () {
-      navigator.serviceWorker.register('./sw.js?v=20261120r4', { scope: './' })
+      navigator.serviceWorker.register('./sw.js?v=20261120r9', { scope: './' })
         .then(function (reg) { state.swReg = reg; })
         .catch(function () { /* SW gagal daftar — app masih berfungsi online */ });
     });
@@ -325,8 +326,9 @@
 
   // Bars melalui fetch('data/...') supaya SW stale-while-revalidate berfungsi offline.
   // SW fallback boleh pulangkan JSON null — sahkan bentuk data.
-  function fetchBars(slug) {
-    if (state.barsCache[slug]) return Promise.resolve(state.barsCache[slug]);
+  // force=true: langkau cache supaya chart detail segar semasa polling 60s.
+  function fetchBars(slug, force) {
+    if (!force && state.barsCache[slug]) return Promise.resolve(state.barsCache[slug]);
     var file = 'data/bars-' + slug + '.json';
     return fetchJSON(file)
       .then(function (data) {
@@ -363,20 +365,114 @@
     });
   }
 
+  /* ---------- Liveness: jam live, usia data, flash, angka, reveal ---------- */
+
+  var liveState = { lastFresh: 0, prevStats: {}, prevSignalId: null };
+
+  function startLiveTicks() {
+    var clock = $('#liveClock');
+    if (!clock) return;
+    var tf = new Intl.DateTimeFormat('en-GB', {
+      timeZone: MYT, hour: '2-digit', minute: '2-digit', second: '2-digit', hourCycle: 'h23'
+    });
+    function tick() {
+      var t = tf.format(new Date());
+      var ageTxt = '';
+      if (liveState.lastFresh) {
+        var age = Math.max(0, Math.round((Date.now() - liveState.lastFresh) / 1000));
+        ageTxt = age < 60 ? age + 's lalu' : Math.floor(age / 60) + 'm lalu';
+      }
+      clock.innerHTML = '<b>' + t + '</b> MYT' +
+        (ageTxt ? ' <span class="clock-age">· ' + ageTxt + '</span>' : '');
+    }
+    tick();
+    setInterval(tick, 1000);
+  }
+
+  function markDataFresh() {
+    liveState.lastFresh = Date.now();
+    var pill = $('#netPill');
+    if (pill && state.online) {
+      pill.classList.remove('fresh');
+      void pill.offsetWidth;
+      pill.classList.add('fresh');
+    }
+  }
+
+  function flashEl(el, delta) {
+    if (!el) return;
+    el.classList.remove('flash-up', 'flash-down');
+    void el.offsetWidth;
+    el.classList.add(delta >= 0 ? 'flash-up' : 'flash-down');
+  }
+
+  function animateNumber(el, to) {
+    if (!el) return;
+    var from = parseFloat(el.dataset.val);
+    el.dataset.val = String(to);
+    if (!isFinite(from) || from === to) { el.textContent = String(to); return; }
+    var t0 = performance.now(), dur = 600;
+    function step(t) {
+      var p = Math.min(1, (t - t0) / dur);
+      var e = 1 - Math.pow(1 - p, 3);
+      el.textContent = String(Math.round(from + (to - from) * e));
+      if (p < 1) requestAnimationFrame(step);
+    }
+    requestAnimationFrame(step);
+  }
+
+  function revealRows(selector) {
+    var els = document.querySelectorAll(selector);
+    for (var i = 0; i < els.length; i++) {
+      els[i].style.setProperty('--i', String(i));
+      els[i].classList.add('reveal');
+    }
+  }
+
+  function noteSignalArrival() {
+    var sig = state.signal;
+    var id = sig && (sig.id || sig.pair + '|' + sig.posted_at);
+    if (!id) return;
+    if (liveState.prevSignalId && liveState.prevSignalId !== id) {
+      var hero = $('#heroCard');
+      if (hero) {
+        hero.classList.remove('arrived');
+        void hero.offsetWidth;
+        hero.classList.add('arrived');
+      }
+    }
+    liveState.prevSignalId = id;
+  }
+
   function loadData() {
     state.dataFromCache = !state.online;
     return Promise.all([
       fetchJSON('data/landing-signal.json').catch(function () { return null; }),
-      fetchJSON('data/signal-status.json').catch(function () { return null; })
+      fetchJSON('data/signal-status.json').catch(function () { return null; }),
+      fetchJSON('data/live-price.json?t=' + Date.now()).catch(function () { return null; })
     ]).then(function (results) {
       state.signal = results[0];
       state.status = results[1];
+      state.livePrice = results[2] && results[2].prices;
       renderStats();
       renderSignal();
       renderResults();
       renderHomePerf();
       if (state.route === 'performance') renderPerformance();
+      if (state.route === 'signal' && state.detail && state.signal && state.signal.pair) {
+        // Detail signal: segar semula level/status + timeline + chart bars.
+        // Sebelum ini loadData tidak menyentuh skrin detail langsung.
+        var sig = withOfficialStatus(state.signal);
+        state.detail = sig;
+        fetchBars(pairSlug(sig.pair), true).then(function (data) {
+          if (state.route !== 'signal') return;
+          state.detailBars = data ? data.bars : null;
+          renderSignalDetail(sig, state.detailBars);
+        });
+      }
       updateCacheBadges();
+      markDataFresh();
+      noteSignalArrival();
     });
   }
 
@@ -398,8 +494,18 @@
       return s === 'active' || s === 'pending';
     }).length;
 
-    $('#statActive').textContent = state.status ? activeCount : '–';
-    $('#statClosed').textContent = state.status ? closedCount : '–';
+    var aEl = $('#statActive'), cEl = $('#statClosed');
+    if (state.status) {
+      var pa = liveState.prevStats.active, pc = liveState.prevStats.closed;
+      animateNumber(aEl, activeCount);
+      animateNumber(cEl, closedCount);
+      if (pa != null && pa !== activeCount) flashEl(aEl, activeCount - pa);
+      if (pc != null && pc !== closedCount) flashEl(cEl, closedCount - pc);
+      liveState.prevStats.active = activeCount;
+      liveState.prevStats.closed = closedCount;
+    } else {
+      aEl.textContent = '–'; cEl.textContent = '–';
+    }
   }
 
   /* ---------- Chips side/status ---------- */
@@ -480,7 +586,7 @@
       })
       .filter(function (r) { return r.data && closedOf(r.data); })
       .sort(function (a, b) { return new Date(closedOf(b.data)) - new Date(closedOf(a.data)); })
-      .slice(0, 6);
+      .slice(0, 3); // owner 2026-11-20: keputusan terkini = 3 sahaja
 
     if (!rows.length) {
       list.innerHTML = '<li class="results-empty">Belum ada keputusan direkodkan.</li>';
@@ -512,6 +618,7 @@
 
       return '<li class="result-row">' + inner + '</li>';
     }).join('');
+    revealRows('#resultsList .result-row');
   }
 
   /* ---------- Markets: chart app (TWChart) + TradingView ---------- */
@@ -543,7 +650,10 @@
 
     var slug = pairSlug(state.chartSymbol.split(':')[1] || state.chartSymbol);
     $('#marketPairChip').textContent = fmtPair(slug) + ' · M15';
-    $('#marketDisclaimer').textContent = 'Data: Swissquote/Coinbase · bukan quote broker anda.';
+    var live = (state.livePrice || {})[slug];
+    $('#marketDisclaimer').textContent = live
+      ? 'Harga: MT5 live (broker anda) · carta: M15.'
+      : 'Data: Swissquote/Coinbase · bukan quote broker anda.';
 
     fetchBars(slug).then(function (data) {
       if (state.route !== 'markets' || state.marketMode !== 'app') return;
@@ -557,16 +667,22 @@
       empty.hidden = true;
       var bars = data.bars;
       var lastClose = bars[bars.length - 1][4];
+      var px = live || lastClose;
       if (window.TWChart) {
-        state.marketChart = TWChart.render(canvas, { bars: bars, lastPrice: { price: lastClose } });
+        state.marketChart = TWChart.render(canvas, {
+          bars: bars, lastPrice: { price: px, label: live ? 'LIVE' : 'CLOSE' }
+        });
       }
       // Badge: kemas kini MYT dari updated (UTC naive) · sumber; offline = data cache.
       var stamp = data.updated ? fmtTime(toDate(data.updated)) : '';
+      var liveStamp = (state.livePrice && state.livePrice.updated)
+        ? fmtTime(toDate(state.livePrice.updated)) : '';
       if (!state.online) {
         badge.textContent = 'Data cache' + (stamp ? ' · ' + stamp + ' MYT' : '');
         badge.classList.add('cache');
       } else {
-        badge.textContent = 'Kemas kini ' + (stamp ? stamp + ' MYT' : '—') + ' · ' + marketSourceLabel(data);
+        badge.textContent = live ? 'LIVE ' + (liveStamp ? liveStamp + ' MYT' : '')
+          : 'Kemas kini ' + (stamp ? stamp + ' MYT' : '—') + ' · ' + marketSourceLabel(data);
         badge.classList.remove('cache');
       }
       badge.hidden = false;
@@ -675,6 +791,36 @@
 
   /* ---------- Signal: detail + chart beranotasi ---------- */
 
+  // Key signal-status.json = PAIR + tarikh siaran MYT (corak dashboard lama).
+  function statusKeyFor(pair, iso) {
+    try {
+      var d = toDate(iso);
+      if (!d || isNaN(d.getTime())) return '';
+      var q = new Intl.DateTimeFormat('en-CA', {
+        timeZone: MYT, year: 'numeric', month: '2-digit', day: '2-digit',
+        hour: '2-digit', minute: '2-digit', second: '2-digit', hourCycle: 'h23'
+      }).formatToParts(d).reduce(function (a, x) { a[x.type] = x.value; return a; }, {});
+      return String(pair || '').toUpperCase().replace(/[^A-Z0-9]/g, '') + '_' +
+        q.year + q.month + q.day + '_' + q.hour + q.minute + q.second;
+    } catch (e) { return ''; }
+  }
+
+  // Merge status rasmi dari signal-status.json ke signal landing supaya
+  // timeline detail penuh (closed/entry_at), bukan sekadar status landing.
+  function withOfficialStatus(sig) {
+    if (!sig || !sig.pair) return null;
+    var out = Object.assign({}, sig);
+    var st = state.status && state.status.signals &&
+      state.status.signals[statusKeyFor(sig.pair, sig.posted_at)];
+    if (st) {
+      out.status = st.status || out.status;
+      out.closed = st.closed || null;
+      out.entry_at = st.entry_at || null;
+      out.expired_at = st.expired_at || null;
+    }
+    return out;
+  }
+
   function openSignal(query) {
     state.signalQuery = query || {};
     // Skrin signal hanya untuk signal live; query legacy → kembali ke home.
@@ -700,6 +846,7 @@
       }
       return fetchBars(pairSlug(sig.pair)).then(function (data) {
         if (state.route !== 'signal') return;
+        sig = withOfficialStatus(sig);
         state.detail = sig;
         state.detailBars = data ? data.bars : null;
         renderSignalDetail(sig, state.detailBars);
@@ -879,11 +1026,13 @@
     var canvas = $('#signalCanvas');
     if (bars && window.TWChart) {
       canvas.hidden = false;
+      var sp = String(sig.pair || '').replace(/[^A-Za-z0-9]/gi, '').toLowerCase();
+      var lv = (state.livePrice || {})[sp];
       state.signalChart = TWChart.render(canvas, {
         bars: bars,
         overlays: buildOverlays(sig),
         markers: buildMarkers(sig),
-        lastPrice: { price: bars[bars.length - 1][4] }
+        lastPrice: { price: lv || bars[bars.length - 1][4], label: lv ? 'LIVE' : 'CLOSE' }
       });
     } else {
       canvas.hidden = true;
@@ -1276,6 +1425,7 @@
 
   function init() {
     registerSW();
+    startLiveTicks();
 
     // Tarikh Malaysia (jika elemen wujud) + tahun footer
     var gd = $('#greetDate');
@@ -1310,6 +1460,12 @@
     });
 
     loadData();
+    // Live update: segar semula feed status + signal setiap 60 saat tanpa
+    // reload. Sebelum ini data hanya difetch sekali masa boot.
+    setInterval(function () {
+      if (!state.online) return;
+      loadData();
+    }, 60000);
   }
 
   if (document.readyState === 'loading') {

@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="ms"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>PREVIEW — Orbit · 4 elektron</title>
+<style>
+:root{--bg:#0a0e0b;--card:#111612;--card2:#171e18;--line:#222b23;--text:#eef3ee;--muted:#8a978c;--lime:#b7f36b;--green:#b7f36b;--red:#ff777d;--orange:#ffc16b;--blue:#8ab4ff}
+*{box-sizing:border-box}
+body{margin:0;background:#050705;font:15px/1.5 -apple-system,BlinkMacSystemFont,"Inter",sans-serif;color:var(--text)}
+.wrap{max-width:430px;margin:0 auto;background:var(--bg);min-height:100vh;padding:16px 16px 40px}
+h1{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:#5d695f;margin:0 0 4px;font-weight:700}
+.sub{font-size:12px;color:var(--muted);margin:0 0 18px}
+h2{font-size:13px;font-weight:850;margin:24px 0 6px}
+.hint{font-size:11.5px;color:var(--muted);margin:0 0 10px;line-height:1.5}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:14px;display:grid;place-items:center}
+
+/* ===== ORBIT 4 ELECTRON ===== */
+.orbwrap{position:relative;width:170px;height:170px;display:grid;place-items:center}
+.core{width:62px;height:62px;border-radius:50%;
+ background:radial-gradient(circle at 36% 32%,#f2ffd6,#b7f36b 46%,#4f8a1c 82%,#182409);
+ box-shadow:0 0 26px #b7f36b50,inset 0 0 16px #ffffff22;
+ animation:corePulse 4s ease-in-out infinite;display:grid;place-items:center;z-index:3;
+ font-size:9px;font-weight:900;color:#10150b;letter-spacing:.03em}
+@keyframes corePulse{0%,100%{transform:scale(1);box-shadow:0 0 22px #b7f36b3d,inset 0 0 14px #ffffff20}50%{transform:scale(1.06);box-shadow:0 0 40px #b7f36b70,inset 0 0 22px #ffffff2b}}
+
+/* orbit rings (visible faint circles) */
+.ring{position:absolute;border-radius:50%;border:1px solid #b7f36b20;pointer-events:none}
+.ring.r1{width:104px;height:104px}
+.ring.r2{width:152px;height:152px}
+
+/* 4 orbiters: 2 tracks x 2 electrons (opposite phase) */
+.orbit{position:absolute;width:104px;height:104px;animation:spin 7.2s linear infinite}
+.orbit.b{width:152px;height:152px;animation:spin 11s linear infinite reverse}
+@keyframes spin{to{transform:rotate(360deg)}}
+.e{position:absolute;width:8px;height:8px;border-radius:50%;top:-4px;left:calc(50% - 4px);
+ background:var(--lime);box-shadow:0 0 10px var(--lime),0 0 3px #fff8}
+.e.opp{top:auto;bottom:-4px;background:var(--blue);box-shadow:0 0 10px var(--blue),0 0 3px #fff8}
+.e.wait{background:var(--orange);box-shadow:0 0 10px var(--orange),0 0 3px #fff8}
+/* counter-rotate electron label so dot stays round is fine (dot is round) */
+/* wrap electron in orbit without extra transform needed for a dot */
+
+/* ===== IN-CONTEXT: header League ===== */
+.hdr{display:flex;align-items:center;gap:11px;background:var(--card);border:1px solid var(--line);border-radius:18px;padding:13px 14px}
+.hdr .mini{position:relative;width:46px;height:46px;display:grid;place-items:center;flex:none}
+.mini .c2{width:20px;height:20px;border-radius:50%;background:radial-gradient(circle at 36% 32%,#f2ffd6,#b7f36b 50%,#4f8a1c);box-shadow:0 0 10px #b7f36b55;animation:corePulse 4s ease-in-out infinite;z-index:2}
+.mini .o{position:absolute;width:32px;height:32px;animation:spin 6s linear infinite;border-radius:50%;border:1px solid #b7f36b1f}
+.mini .o.b{width:44px;height:44px;animation:spin 9.5s linear infinite reverse;border-color:#b7f36b14}
+.mini .o i{position:absolute;width:4px;height:4px;border-radius:50%;background:var(--lime);box-shadow:0 0 5px var(--lime);top:-2px;left:calc(50% - 2px)}
+.mini .o i.opp{bottom:-2px;top:auto;background:var(--blue);box-shadow:0 0 5px var(--blue)}
+.hdr .tx{flex:1;min-width:0}
+.hdr .tx b{display:block;font-size:14px;font-weight:850}
+.hdr .tx small{font-size:11px;color:var(--muted)}
+.hdr .st{margin-left:auto;font-size:9.5px;font-weight:800;color:var(--lime);background:#b7f36b14;border:1px solid #b7f36b3d;border-radius:99px;padding:3px 9px;flex:none}
+
+.note{font-size:11.5px;color:var(--muted);line-height:1.65;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px;margin-top:16px}
+.note b{color:var(--text)}
+@media(prefers-reduced-motion:reduce){.core,.mini .c2{animation:none}.orbit,.orbit.b,.mini .o,.mini .o.b{animation:none}}
+</style></head><body><div class="wrap">
+<h1>PREVIEW — ORBIT · 4 ELEKTRON</h1>
+<p class="sub">2 orbit, 2 elektron setiap satu (lime + biru), arah bertentangan.</p>
+
+<h2>Saiz besar (status AI)</h2>
+<div class="card" style="padding:22px">
+  <div class="orbwrap">
+    <div class="ring r1"></div>
+    <div class="ring r2"></div>
+    <div class="orbit"><div class="e"></div><div class="e opp"></div></div>
+    <div class="orbit b"><div class="e wait"></div><div class="e opp"></div></div>
+    <div class="core">AI</div>
+  </div>
+</div>
+
+<h2>Dalam konteks — header League</h2>
+<p class="hint">Versi mini yang akan dipasang di header (saiz sebenar).</p>
+<div class="hdr">
+  <div class="mini">
+    <div class="o"><i></i><i class="opp"></i></div>
+    <div class="o b"><i style="background:var(--orange);box-shadow:0 0 5px var(--orange)"></i><i class="opp"></i></div>
+    <div class="c2"></div>
+  </div>
+  <div class="tx"><b>Enjin AI aktif</b><small>12 pair · verdict terakhir 2 min lalu</small></div>
+  <div class="st">LIVE</div>
+</div>
+
+<div class="note">
+<b>4 elektron:</b> orbit dalam = lime + biru, orbit luar = oren + biru. Arah putaran bertentangan (7.2s / 11s) supaya nampak organik, bukan mekanikal.<br><br>
+<b>Kesan:</b> macam atom / elektron mengorbit teras — metafora "AI memproses pelbagai pair serentak".<br><br>
+<b>Prestasi:</b> CSS transform sahaja (GPU), berhenti bila tab tak aktif + dihormati <code>prefers-reduced-motion</code>.
+</div>
+</div></body></html>

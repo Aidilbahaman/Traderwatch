@@ -1,0 +1,1434 @@
+<!doctype html>
+<html lang="ms">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>TraderWatch — Signal AI automatik untuk XAU/USD, XAG/USD &amp; BTC</title>
+  <meta name="description" content="Signal AI untuk XAU/USD, XAG/USD dan BTC — entry, stop loss & take profit, chart beranotasi dan prestasi telus. Percuma untuk semua. PWA install, boleh offline.">
+  <meta name="theme-color" content="#0a0e0b">
+  <meta property="og:title" content="TraderWatch — Read the market. Trade dengan plan.">
+  <meta property="og:description" content="Signal AI automatik, chart beranotasi dan prestasi telus sejak 19 Okt 2026. Percuma untuk semua ahli.">
+  <meta property="og:type" content="website">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='9' fill='%23c6f36b'/%3E%3Ctext x='16' y='23' font-family='Inter,system-ui,sans-serif' font-size='19' font-weight='800' text-anchor='middle' fill='%2310170b'%3ET%3C/text%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    /* ============================================================
+       TraderWatch — landing preview dalam gaya PWA app.
+       Tokens & komponen dipetakan terus dari pwa.css (app live).
+       ============================================================ */
+    :root {
+      --bg: #0a0e0b;
+      --surface: #121813;
+      --surface2: #18211a;
+      --line: #26332a;
+      --ink: #f2f5ef;
+      --muted: #93a096;
+      --lime: #c6f36b;
+      --lime-ink: #10170b;
+      --red: #ff817d;
+      --amber: #ffd479;
+      --r-card: 20px;
+      --r-chip: 999px;
+      --r-btn: 14px;
+      --font: Inter, system-ui, -apple-system, "Segoe UI", sans-serif;
+      --mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      --safe-bottom: env(safe-area-inset-bottom, 0px);
+    }
+
+    * { box-sizing: border-box; }
+    [hidden] { display: none !important; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: var(--font);
+      font-size: 15px;
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    h1, h2, h3, h4, p, ul, ol { margin: 0; }
+    ul, ol { padding: 0; list-style: none; }
+    a { color: var(--lime); text-decoration: none; }
+    button { font-family: inherit; }
+    img, svg { vertical-align: middle; }
+
+    :focus-visible {
+      outline: 2px solid var(--lime);
+      outline-offset: 2px;
+      border-radius: 4px;
+    }
+
+    .stat-value, .plan-amount, .level-value, .result-pips, .net-pill,
+    .chart-badge, .sig-pair, .reason-mono, .perf-wr, .perf-netr,
+    .perf-netr-big, .perf-ring-text, .perf-bar-count, .mono {
+      font-variant-numeric: tabular-nums;
+    }
+    .mono { font-family: var(--mono); }
+
+    .skip-link {
+      position: absolute;
+      left: -9999px;
+      top: 0;
+      z-index: 200;
+      background: var(--lime);
+      color: var(--lime-ink);
+      font-weight: 700;
+      padding: 10px 16px;
+      border-radius: 0 0 12px 0;
+    }
+    .skip-link:focus { left: 0; }
+
+    .container { width: min(1120px, 100% - 32px); margin-inline: auto; }
+
+    /* ---------- App bar (komponen app) ---------- */
+    .appbar {
+      position: sticky;
+      top: 0;
+      z-index: 40;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      padding: 10px 16px;
+      padding-top: calc(10px + env(safe-area-inset-top, 0px));
+      background: rgba(10, 14, 11, 0.9);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border-bottom: 1px solid var(--line);
+    }
+    .appbar-inner {
+      width: min(1120px, 100%);
+      margin-inline: auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+    .appbar-brand { display: flex; align-items: center; gap: 8px; color: var(--ink); flex: none; }
+    .brand-mark {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+      border-radius: 9px;
+      background: var(--lime);
+      color: var(--lime-ink);
+      font-weight: 800;
+      font-size: 16px;
+      flex: none;
+    }
+    .brand-name { font-size: 13px; font-weight: 800; letter-spacing: 0.14em; }
+
+    .appbar-nav { display: none; align-items: center; gap: 2px; }
+    .appbar-nav a {
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 600;
+      padding: 7px 12px;
+      border-radius: var(--r-chip);
+      transition: background 0.15s ease, color 0.15s ease;
+    }
+    .appbar-nav a:hover { color: var(--ink); background: var(--surface2); }
+
+    .appbar-actions { display: flex; align-items: center; gap: 8px; }
+    .appbar-auth { display: none; align-items: center; gap: 8px; }
+
+    .icon-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 36px;
+      height: 36px;
+      border-radius: 12px;
+      border: 1px solid var(--line);
+      background: var(--surface);
+      color: var(--ink);
+      cursor: pointer;
+      transition: background 0.15s ease;
+    }
+    .icon-btn:hover { background: var(--surface2); }
+    .icon-btn svg { width: 18px; height: 18px; }
+
+    .mobile-menu {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      padding: 10px 16px 14px;
+      background: rgba(10, 14, 11, 0.98);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border-bottom: 1px solid var(--line);
+    }
+    .mobile-menu a:not(.btn) {
+      color: var(--ink);
+      font-size: 14px;
+      font-weight: 600;
+      padding: 10px 12px;
+      border-radius: 12px;
+    }
+    .mobile-menu a:not(.btn):hover { background: var(--surface2); }
+    .mobile-menu-auth { display: flex; gap: 8px; margin-top: 8px; }
+    .mobile-menu-auth .btn { flex: 1; }
+
+    /* ---------- Install banner (motif app PWA) ---------- */
+    .install-banner {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 12px 10px 16px;
+      background: var(--surface);
+      border-bottom: 1px solid var(--line);
+    }
+    .install-banner > svg { width: 20px; height: 20px; color: var(--lime); flex: none; }
+    .install-banner-text { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+    .install-banner-text strong { font-size: 13px; }
+    .install-banner-text span { font-size: 12px; color: var(--muted); }
+
+    /* ---------- Buttons (komponen app) ---------- */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      border-radius: var(--r-btn);
+      border: 1px solid transparent;
+      font-weight: 700;
+      font-size: 14px;
+      padding: 11px 18px;
+      cursor: pointer;
+      transition: filter 0.15s ease, background 0.15s ease;
+      text-align: center;
+    }
+    .btn svg { width: 17px; height: 17px; }
+    .btn-primary { background: var(--lime); color: var(--lime-ink); }
+    .btn-primary:hover { filter: brightness(1.06); }
+    .btn-ghost { background: var(--surface2); color: var(--ink); border-color: var(--line); }
+    .btn-ghost:hover { background: var(--line); }
+    .btn-sm { padding: 7px 14px; font-size: 13px; border-radius: 12px; }
+    .btn-lg { padding: 14px 24px; font-size: 15px; }
+    .btn-block { display: flex; width: 100%; }
+    .btn-row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
+
+    /* ---------- Chips (komponen app) ---------- */
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      border-radius: var(--r-chip);
+      padding: 3px 10px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      border: 1px solid transparent;
+      white-space: nowrap;
+    }
+    .chip-buy { background: rgba(198, 243, 107, 0.14); color: var(--lime); border-color: rgba(198, 243, 107, 0.35); }
+    .chip-sell { background: rgba(255, 129, 125, 0.12); color: var(--red); border-color: rgba(255, 129, 125, 0.35); }
+    .chip-live { background: var(--lime); color: var(--lime-ink); animation: live-pulse 2.6s ease-in-out infinite; }
+    .chip-closed { background: var(--surface2); color: var(--muted); border-color: var(--line); }
+    .chip-lime { background: rgba(198, 243, 107, 0.14); color: var(--lime); border-color: rgba(198, 243, 107, 0.35); }
+    .chip-muted { background: var(--surface2); color: var(--muted); border-color: var(--line); }
+    .chip-tp { background: rgba(198, 243, 107, 0.14); color: var(--lime); }
+    .chip-sl { background: rgba(255, 129, 125, 0.12); color: var(--red); }
+    .chip-exp { background: var(--surface2); color: var(--muted); }
+    .chip-amber { background: rgba(255, 212, 121, 0.14); color: var(--amber); border-color: rgba(255, 212, 121, 0.4); }
+
+    @keyframes live-pulse {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(198, 243, 107, 0.35); }
+      50% { box-shadow: 0 0 0 5px rgba(198, 243, 107, 0); }
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.35; }
+    }
+
+    .eyebrow-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--lime);
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    /* ---------- Cards & stat tiles (komponen app) ---------- */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: var(--r-card);
+      padding: 16px;
+    }
+    .card-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+    .card-head h3 { font-size: 14px; font-weight: 700; }
+
+    .stat-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+    .stat-tile {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: var(--r-card);
+      padding: 12px 14px;
+    }
+    .stat-value { font-size: 22px; font-weight: 800; letter-spacing: -0.01em; }
+    .stat-value.lime { color: var(--lime); }
+    .stat-value.red { color: var(--red); }
+    .stat-value.amber { color: var(--amber); }
+    .stat-label { font-size: 11.5px; color: var(--muted); font-weight: 600; }
+
+    /* ---------- Signal card (komponen app) ---------- */
+    .signal-top { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 4px; }
+    .signal-pair { font-size: 18px; font-weight: 800; letter-spacing: 0.01em; }
+    .signal-tf { font-size: 12px; color: var(--muted); font-weight: 600; }
+
+    .levels { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 12px; }
+    .level {
+      background: var(--surface2);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .level-label { font-size: 10px; font-weight: 700; letter-spacing: 0.08em; color: var(--muted); }
+    .level-value { font-size: 15px; font-weight: 700; font-family: var(--mono); }
+    .level-value.sl { color: var(--red); }
+    .level-value.tp { color: var(--lime); }
+
+    .reason-mono {
+      margin-top: 12px;
+      padding: 8px 10px;
+      background: var(--surface2);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--muted);
+      overflow-wrap: anywhere;
+    }
+
+    .warn-note {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      margin-top: 10px;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--amber);
+    }
+    .warn-note svg { width: 15px; height: 15px; flex: none; }
+
+    .disclaimer { font-size: 11.5px; color: var(--muted); text-align: center; margin-top: 12px; }
+
+    /* ---------- Chart badges & legend (komponen app) ---------- */
+    .chart-badge {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--muted);
+      background: var(--surface2);
+      border: 1px solid var(--line);
+      border-radius: var(--r-chip);
+      padding: 2px 8px;
+      white-space: nowrap;
+    }
+    .chart-badge.cache { color: var(--amber); background: rgba(255, 212, 121, 0.1); border-color: rgba(255, 212, 121, 0.3); }
+    .chart-meta { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 8px; }
+    .chart-legend { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 10px; }
+    .legend-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 2px 9px;
+      border-radius: var(--r-chip);
+      background: var(--surface2);
+      border: 1px solid var(--line);
+      font-size: 10.5px;
+      font-weight: 700;
+      color: var(--muted);
+    }
+    .dot { width: 8px; height: 8px; border-radius: 50%; flex: none; }
+    .dot-lime { background: var(--lime); }
+    .dot-red { background: var(--red); }
+    .dot-poi { background: rgba(198, 243, 107, 0.25); border: 1px solid var(--lime); }
+
+    .chart-svg {
+      display: block;
+      width: 100%;
+      height: auto;
+      border-radius: 14px;
+      background: var(--surface2);
+      border: 1px solid var(--line);
+    }
+
+    /* ---------- Prestasi (komponen app) ---------- */
+    .perf-hero { display: flex; align-items: center; gap: 16px; margin-bottom: 14px; }
+    .perf-ring { position: relative; width: 84px; height: 84px; flex: none; }
+    .perf-ring svg { display: block; width: 84px; height: 84px; }
+    .perf-ring-text {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 17px;
+      font-weight: 800;
+      letter-spacing: -0.01em;
+    }
+    .perf-hero-nums { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+    .perf-netr-big { font-size: 30px; font-weight: 800; letter-spacing: -0.02em; line-height: 1.15; }
+    .perf-netr-big.pos { color: var(--lime); }
+    .perf-netr-big.neg { color: var(--red); }
+    .perf-tiles { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+    .perf-tile {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      background: var(--surface2);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 10px 12px;
+    }
+    .perf-tile .stat-value { font-size: 17px; }
+    .perf-note { margin-top: 12px; font-size: 11.5px; color: var(--muted); }
+    .perf-method-list { display: flex; flex-direction: column; gap: 10px; }
+    .perf-method-list li {
+      position: relative;
+      padding-left: 18px;
+      font-size: 13.5px;
+      color: var(--muted);
+      line-height: 1.55;
+    }
+    .perf-method-list li::before {
+      content: "";
+      position: absolute;
+      left: 2px;
+      top: 7px;
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--lime);
+    }
+    .perf-method-list strong { color: var(--ink); }
+    .perf-spark { display: block; }
+
+    /* ---------- Plan card (komponen app) ---------- */
+    .plan-card { border-color: rgba(198, 243, 107, 0.35); }
+    .plan-price { display: flex; align-items: baseline; gap: 8px; margin: 10px 0 12px; }
+    .plan-amount { font-size: 32px; font-weight: 800; color: var(--lime); letter-spacing: -0.02em; }
+    .plan-period { font-size: 13px; color: var(--muted); font-weight: 600; }
+    .plan-list { display: flex; flex-direction: column; gap: 7px; margin-bottom: 14px; }
+    .plan-list li { position: relative; padding-left: 22px; font-size: 13px; color: var(--ink); }
+    .plan-list li::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 5px;
+      width: 12px;
+      height: 7px;
+      border-left: 2px solid var(--lime);
+      border-bottom: 2px solid var(--lime);
+      transform: rotate(-45deg);
+    }
+    .plan-note { margin-top: 10px; font-size: 12px; color: var(--muted); text-align: center; }
+
+    /* ---------- FAQ (komponen app) ---------- */
+    .faq { border-bottom: 1px solid var(--line); }
+    .faq:last-child { border-bottom: none; }
+    .faq summary {
+      cursor: pointer;
+      padding: 12px 0;
+      font-size: 13.5px;
+      font-weight: 600;
+      list-style: none;
+      position: relative;
+      padding-right: 24px;
+    }
+    .faq summary::-webkit-details-marker { display: none; }
+    .faq summary::after {
+      content: "+";
+      position: absolute;
+      right: 2px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--lime);
+      font-size: 17px;
+      font-weight: 700;
+    }
+    .faq[open] summary::after { content: "–"; }
+    .faq p { font-size: 13px; color: var(--muted); padding-bottom: 12px; }
+
+    /* ---------- Toast (komponen app) ---------- */
+    .toast {
+      position: fixed;
+      left: 50%;
+      bottom: calc(24px + var(--safe-bottom));
+      transform: translateX(-50%);
+      z-index: 120;
+      max-width: min(90vw, 380px);
+      background: var(--surface2);
+      border: 1px solid var(--line);
+      color: var(--ink);
+      font-size: 13px;
+      font-weight: 600;
+      padding: 10px 16px;
+      border-radius: var(--r-chip);
+      text-align: center;
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.45);
+    }
+
+    /* ============================================================
+       Landing layout — sambungan gaya app
+       ============================================================ */
+    main { display: block; }
+    section { scroll-margin-top: 84px; }
+
+    .section { padding: 52px 0; }
+    .section-head { max-width: 640px; margin-bottom: 26px; }
+    .section-head.center { margin-inline: auto; text-align: center; }
+    .section-eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--lime);
+      margin-bottom: 10px;
+    }
+    .section-title { font-size: 26px; font-weight: 800; letter-spacing: -0.02em; line-height: 1.15; }
+    .section-sub { color: var(--muted); font-size: 14.5px; margin-top: 10px; }
+
+    /* ---------- Hero ---------- */
+    .hero { position: relative; padding: 44px 0 52px; overflow: clip; }
+    .hero::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(560px 420px at 82% 24%, rgba(198, 243, 107, 0.09), transparent 70%),
+        radial-gradient(480px 380px at 8% 90%, rgba(198, 243, 107, 0.05), transparent 70%);
+      pointer-events: none;
+    }
+    .hero-grid { position: relative; display: grid; gap: 32px; align-items: center; }
+    .hero-eyebrow { margin-bottom: 16px; }
+    .hero-title {
+      font-size: clamp(34px, 6vw, 52px);
+      font-weight: 800;
+      letter-spacing: -0.025em;
+      line-height: 1.06;
+      margin-bottom: 16px;
+    }
+    .hero-title .accent { color: var(--lime); }
+    .hero-sub { color: var(--muted); font-size: 15.5px; max-width: 480px; margin-bottom: 22px; }
+    .hero-cta { display: flex; gap: 10px; flex-wrap: wrap; }
+    .hero-note { margin-top: 14px; font-size: 12.5px; color: var(--muted); font-weight: 600; }
+
+    .hero-visual { position: relative; display: flex; flex-direction: column; gap: 10px; }
+    .hero-visual::before {
+      content: "";
+      position: absolute;
+      inset: -28px -20px;
+      background: radial-gradient(closest-side, rgba(198, 243, 107, 0.13), transparent);
+      pointer-events: none;
+    }
+    .hero-signal { position: relative; box-shadow: 0 24px 60px rgba(0, 0, 0, 0.4); }
+    .hero-stats { position: relative; }
+
+    /* ---------- Trust strip ---------- */
+    .trust { padding: 8px 0 4px; }
+    .trust-line { text-align: center; color: var(--muted); font-size: 13px; font-weight: 600; margin-top: 14px; }
+
+    /* ---------- Features ---------- */
+    .feature-grid { display: grid; gap: 12px; }
+    .feature-card {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      transition: transform 0.18s ease, border-color 0.18s ease;
+    }
+    .feature-card:hover { transform: translateY(-3px); border-color: rgba(198, 243, 107, 0.45); }
+    .feature-icon {
+      width: 42px;
+      height: 42px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      background: var(--surface2);
+      border: 1px solid var(--line);
+      color: var(--lime);
+      flex: none;
+    }
+    .feature-icon svg { width: 20px; height: 20px; }
+    .feature-card h3 { font-size: 15px; font-weight: 700; }
+    .feature-card > p { font-size: 13px; color: var(--muted); }
+    .feature-mini { margin-top: auto; padding-top: 6px; }
+    .mini-signal { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+    .mini-signal .signal-pair { font-size: 13px; }
+    .mini-tiles { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .mini-tile {
+      display: flex;
+      flex-direction: column;
+      gap: 1px;
+      background: var(--surface2);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 8px 10px;
+    }
+    .mini-tile .stat-label { font-size: 10px; }
+    .mini-tile .stat-value { font-size: 14px; font-family: var(--mono); }
+    .mini-toast {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      background: var(--surface2);
+      border: 1px solid var(--line);
+      border-radius: var(--r-chip);
+      padding: 6px 12px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+    .mini-toast svg { width: 14px; height: 14px; color: var(--lime); flex: none; }
+    .mini-spark-row { display: flex; align-items: center; gap: 10px; }
+    .mini-spark-row .mono { font-size: 12px; font-weight: 700; color: var(--lime); }
+
+    /* ---------- Showcase ---------- */
+    .showcase-grid { display: grid; gap: 26px; align-items: center; }
+    .showcase-copy .perf-method-list { margin-top: 16px; }
+    .showcase-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      margin-top: 18px;
+      font-size: 13.5px;
+      font-weight: 700;
+    }
+    .showcase-link svg { width: 15px; height: 15px; }
+    .showcase-link:hover { text-decoration: underline; }
+    .showcase-card { box-shadow: 0 24px 60px rgba(0, 0, 0, 0.35); }
+    .equity-wrap { margin-top: 4px; }
+    .equity-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 8px; }
+    .equity-head h4 { font-size: 12.5px; font-weight: 700; }
+
+    /* ---------- Steps ---------- */
+    .step-grid { display: grid; gap: 12px; }
+    .step-card { transition: transform 0.18s ease, border-color 0.18s ease; }
+    .step-card:hover { transform: translateY(-3px); border-color: rgba(198, 243, 107, 0.45); }
+    .step-num {
+      font-family: var(--mono);
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--lime);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 38px;
+      height: 38px;
+      border-radius: 12px;
+      background: rgba(198, 243, 107, 0.1);
+      border: 1px solid rgba(198, 243, 107, 0.28);
+      margin-bottom: 12px;
+    }
+    .step-card h3 { font-size: 15px; font-weight: 700; margin-bottom: 6px; }
+    .step-card p { font-size: 13px; color: var(--muted); }
+
+    /* ---------- Free card section ---------- */
+    .free-wrap { max-width: 460px; margin-inline: auto; }
+    .free-wrap .plan-card { box-shadow: 0 24px 60px rgba(0, 0, 0, 0.35), 0 0 80px rgba(198, 243, 107, 0.06); }
+
+    /* ---------- FAQ section ---------- */
+    .faq-wrap { max-width: 720px; margin-inline: auto; }
+
+    /* ---------- CTA ---------- */
+    .cta-card {
+      position: relative;
+      background: var(--surface2);
+      border: 1px solid rgba(198, 243, 107, 0.3);
+      border-radius: var(--r-card);
+      padding: 36px 22px;
+      text-align: center;
+      overflow: clip;
+    }
+    .cta-card::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(420px 240px at 50% 0%, rgba(198, 243, 107, 0.14), transparent 75%);
+      pointer-events: none;
+    }
+    .cta-card > * { position: relative; }
+    .cta-title { font-size: clamp(24px, 4vw, 34px); font-weight: 800; letter-spacing: -0.02em; line-height: 1.15; margin-bottom: 10px; }
+    .cta-sub { color: var(--muted); font-size: 14.5px; max-width: 520px; margin: 0 auto 22px; }
+    .cta-row { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+
+    /* ---------- Footer ---------- */
+    .site-footer { border-top: 1px solid var(--line); background: var(--surface); padding: 36px 0 24px; margin-top: 20px; }
+    .footer-grid { display: grid; gap: 26px; margin-bottom: 26px; }
+    .footer-brand p { color: var(--muted); font-size: 13px; margin-top: 12px; max-width: 300px; }
+    .footer-col h4 {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.09em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 12px;
+    }
+    .footer-col ul { display: flex; flex-direction: column; gap: 8px; }
+    .footer-col a, .footer-col button.linklike {
+      color: var(--ink);
+      font-size: 13px;
+      font-weight: 600;
+      background: none;
+      border: none;
+      padding: 0;
+      cursor: pointer;
+      text-align: left;
+    }
+    .footer-col a:hover, .footer-col button.linklike:hover { color: var(--lime); }
+    .disclosure-card { margin-bottom: 20px; }
+    .disclosure-card h3 { font-size: 13.5px; font-weight: 700; margin-bottom: 8px; }
+    .disclosure-card p { font-size: 12px; color: var(--muted); }
+    .partner-note { margin-top: 8px; }
+    .footer-bottom { border-top: 1px solid var(--line); padding-top: 16px; text-align: center; }
+    .footer-bottom p { font-size: 12px; color: var(--muted); }
+
+    /* ---------- Reveal motion (content SENTIASA visible — tiada opacity:0) ---------- */
+    .reveal.in { animation: rise-in 0.5s ease both; }
+    @keyframes rise-in {
+      from { transform: translateY(14px); }
+      to { transform: none; }
+    }
+
+    /* ---------- Responsive ---------- */
+    @media (min-width: 600px) {
+      .feature-grid { grid-template-columns: repeat(2, 1fr); }
+      .footer-grid { grid-template-columns: 1.4fr 1fr 1fr; }
+    }
+    @media (min-width: 760px) {
+      .step-grid { grid-template-columns: repeat(3, 1fr); }
+      .section { padding: 68px 0; }
+      .section-title { font-size: 30px; }
+      .footer-grid { grid-template-columns: 1.6fr 1fr 1fr 1fr; }
+    }
+    @media (min-width: 900px) {
+      .appbar-nav { display: flex; }
+      .appbar-auth { display: flex; }
+      #menuToggle { display: none; }
+      .mobile-menu { display: none !important; }
+    }
+    @media (min-width: 960px) {
+      .hero { padding: 64px 0 72px; }
+      .hero-grid { grid-template-columns: 1.05fr 0.95fr; gap: 48px; }
+      .feature-grid { grid-template-columns: repeat(3, 1fr); }
+      .showcase-grid { grid-template-columns: 0.9fr 1.1fr; gap: 44px; }
+      .showcase-grid.reverse { grid-template-columns: 1.1fr 0.9fr; }
+      .showcase-grid.reverse .showcase-copy { order: 2; }
+      .showcase-grid.reverse .showcase-card { order: 1; }
+    }
+
+    /* ---------- Reduced motion ---------- */
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+      .reveal.in { animation: none; }
+    }
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#main">Langkau ke kandungan</a>
+
+  <!-- ============ 1. APP BAR ============ -->
+  <header class="appbar">
+    <div class="appbar-inner">
+      <a class="appbar-brand" href="#signal" aria-label="TraderWatch — halaman utama">
+        <span class="brand-mark" aria-hidden="true">T</span>
+        <span class="brand-name">TRADERWATCH</span>
+      </a>
+      <nav class="appbar-nav" aria-label="Navigasi utama">
+        <a href="#signal">Signal</a>
+        <a href="#chart">Chart</a>
+        <a href="#prestasi">Prestasi</a>
+        <a href="#tools">Tools</a>
+        <a href="https://traderwatch.org/education.html">Learn</a>
+      </nav>
+      <div class="appbar-actions">
+        <div class="appbar-auth">
+          <a class="btn btn-ghost btn-sm" href="https://traderwatch.org/login.html">Log masuk</a>
+          <a class="btn btn-primary btn-sm" href="https://traderwatch.org/login.html?mode=signup">Daftar percuma</a>
+        </div>
+        <button class="icon-btn" id="menuToggle" type="button" aria-label="Buka menu" aria-controls="mobileMenu" aria-expanded="false">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16"/><path d="M4 12h16"/><path d="M4 17h16"/></svg>
+        </button>
+      </div>
+    </div>
+    <nav class="mobile-menu" id="mobileMenu" aria-label="Menu mobile" hidden>
+      <a href="#signal">Signal</a>
+      <a href="#chart">Chart</a>
+      <a href="#prestasi">Prestasi</a>
+      <a href="#tools">Tools</a>
+      <a href="https://traderwatch.org/education.html">Learn</a>
+      <div class="mobile-menu-auth">
+        <a class="btn btn-ghost btn-sm" href="https://traderwatch.org/login.html">Log masuk</a>
+        <a class="btn btn-primary btn-sm" href="https://traderwatch.org/login.html?mode=signup">Daftar percuma</a>
+      </div>
+    </nav>
+  </header>
+
+  <!-- ============ 12. INSTALL BANNER (motif app PWA) ============ -->
+  <div class="install-banner" id="installBanner">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M4 19h16"/></svg>
+    <div class="install-banner-text">
+      <strong>Pasang TraderWatch</strong>
+      <span>Akses pantas + offline di skrin utama.</span>
+    </div>
+    <button class="btn btn-primary btn-sm" id="installBannerBtn" type="button">Install</button>
+    <button class="icon-btn" id="installDismiss" type="button" aria-label="Tutup banner install">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="m6 6 12 12"/><path d="m18 6-12 12"/></svg>
+    </button>
+  </div>
+
+  <main id="main">
+
+    <!-- ============ 2. HERO ============ -->
+    <section class="hero" id="signal" aria-label="Pengenalan TraderWatch">
+      <div class="container hero-grid">
+        <div class="hero-copy">
+          <span class="chip chip-lime hero-eyebrow"><span class="eyebrow-dot" aria-hidden="true"></span>SIGNAL AI AUTOMATIK</span>
+          <h1 class="hero-title">Read the market.<br>Trade dengan <span class="accent">plan</span>.</h1>
+          <p class="hero-sub">Signal AI untuk XAU/USD, XAG/USD &amp; BTC — entry, stop loss &amp; take profit, chart beranotasi dan prestasi telus. Percuma untuk semua.</p>
+          <div class="hero-cta">
+            <a class="btn btn-primary btn-lg" href="https://traderwatch.org/login.html?mode=signup">Mula percuma</a>
+            <button class="btn btn-ghost btn-lg" id="heroInstall" type="button">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M4 19h16"/></svg>
+              Install app
+            </button>
+          </div>
+          <p class="hero-note">Percuma · Tiada kad kredit · Offline-ready</p>
+        </div>
+
+        <div class="hero-visual">
+          <!-- Kad signal: komponen app sebenar (signal-top + levels + reason-mono) -->
+          <section class="card hero-signal" id="heroSignalCard" aria-label="Contoh signal semasa">
+            <div class="card-head">
+              <h3>Signal semasa</h3>
+              <span class="chart-badge">XAU/USD · M15</span>
+            </div>
+            <div class="signal-top">
+              <span class="signal-pair">XAU/USD</span>
+              <span class="signal-tf">M15</span>
+              <span class="chip chip-buy">BUY</span>
+              <span class="chip chip-live">LIVE</span>
+            </div>
+            <div class="levels">
+              <div class="level"><span class="level-label">ENTRY</span><span class="level-value">3629.00</span></div>
+              <div class="level"><span class="level-label">STOP LOSS</span><span class="level-value sl">3618.90</span></div>
+              <div class="level"><span class="level-label">TAKE PROFIT</span><span class="level-value tp">3651.20</span></div>
+            </div>
+            <p class="reason-mono">poi_m15: 3622.00–3636.00 · ce50: 3629.00 · bos: confirmed · rr: 2.20</p>
+            <p class="warn-note">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 2.5 20h19L12 3z"/><path d="M12 10v4"/><circle cx="12" cy="17" r="0.5" fill="currentColor"/></svg>
+              Sahkan dengan broker anda.
+            </p>
+          </section>
+
+          <div class="stat-grid hero-stats" aria-label="Statistik platform">
+            <div class="stat-tile">
+              <span class="stat-value lime">11</span>
+              <span class="stat-label">Ahli</span>
+            </div>
+            <div class="stat-tile">
+              <span class="stat-value">1</span>
+              <span class="stat-label">Signal aktif</span>
+            </div>
+            <div class="stat-tile">
+              <span class="stat-value">158</span>
+              <span class="stat-label">Setup ditutup</span>
+            </div>
+          </div>
+          <p class="disclaimer">Educational only. Trading involves substantial risk.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 3. STRIP KEPERCAYAAN ============ -->
+    <section class="trust" aria-label="Rekod platform">
+      <div class="container">
+        <div class="stat-grid reveal">
+          <div class="stat-tile">
+            <span class="stat-value">11</span>
+            <span class="stat-label">Ahli berdaftar</span>
+          </div>
+          <div class="stat-tile">
+            <span class="stat-value lime">130+</span>
+            <span class="stat-label">Signal diterbitkan</span>
+          </div>
+          <div class="stat-tile">
+            <span class="stat-value">19 Okt</span>
+            <span class="stat-label">Mula rekod · 2026</span>
+          </div>
+        </div>
+        <p class="trust-line reveal">11 ahli · 130+ signal · Rekod sejak 19 Okt 2026 — telus, tiada cherry-pick.</p>
+      </div>
+    </section>
+
+    <!-- ============ 4. FEATURES ============ -->
+    <section class="section" id="features" aria-label="Ciri-ciri TraderWatch">
+      <div class="container">
+        <div class="section-head center reveal">
+          <span class="section-eyebrow">Satu app, semua alat</span>
+          <h2 class="section-title">Semua dalam satu app</h2>
+          <p class="section-sub">Dari signal ke chart ke pengurusan risiko — semuanya dalam gaya app yang sama, terus di telefon anda.</p>
+        </div>
+        <div class="feature-grid">
+          <article class="card feature-card reveal">
+            <span class="feature-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 4.5 13.5H11L9.5 22 19 10h-6.5L13 2z"/></svg>
+            </span>
+            <h3>Signal AI automatik</h3>
+            <p>Enjin AI mengimbas XAU/USD, XAG/USD &amp; BTC sepanjang sesi dan menyiarkan setup lengkap — entry, SL, TP dan sebab entry.</p>
+            <div class="feature-mini mini-signal" aria-hidden="true">
+              <span class="signal-pair">XAU/USD</span>
+              <span class="chip chip-buy">BUY</span>
+              <span class="chip chip-live">LIVE</span>
+            </div>
+          </article>
+
+          <article class="card feature-card reveal">
+            <span class="feature-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 4v3"/><path d="M7 15v5"/><rect x="4.5" y="7" width="5" height="8" rx="1"/><path d="M17 3v4"/><path d="M17 17v4"/><rect x="14.5" y="7" width="5" height="10" rx="1"/></svg>
+            </span>
+            <h3>Chart beranotasi</h3>
+            <p>Zon POI, garisan entry/SL/TP serta zon risiko &amp; ganjaran dilukis terus pada candlestick — nampak plan sebelum trade.</p>
+            <div class="feature-mini" aria-hidden="true">
+              <svg viewBox="0 0 120 44" width="120" height="44" role="img" aria-label="Mini chart dengan garisan entry">
+                <rect x="0" y="0" width="120" height="44" rx="8" fill="#18211a"/>
+                <line x1="14" y1="10" x2="14" y2="30" stroke="#ff817d" stroke-width="1.2"/><rect x="11" y="14" width="6" height="10" rx="1" fill="#ff817d"/>
+                <line x1="34" y1="16" x2="34" y2="36" stroke="#ff817d" stroke-width="1.2"/><rect x="31" y="20" width="6" height="12" rx="1" fill="#ff817d"/>
+                <line x1="54" y1="22" x2="54" y2="38" stroke="#c6f36b" stroke-width="1.2"/><rect x="51" y="26" width="6" height="8" rx="1" fill="#c6f36b"/>
+                <line x1="74" y1="14" x2="74" y2="32" stroke="#c6f36b" stroke-width="1.2"/><rect x="71" y="18" width="6" height="10" rx="1" fill="#c6f36b"/>
+                <line x1="94" y1="8" x2="94" y2="26" stroke="#c6f36b" stroke-width="1.2"/><rect x="91" y="12" width="6" height="9" rx="1" fill="#c6f36b"/>
+                <line x1="6" y1="26" x2="114" y2="26" stroke="#c6f36b" stroke-width="1.2" stroke-dasharray="4 3"/>
+              </svg>
+            </div>
+          </article>
+
+          <article class="card feature-card reveal">
+            <span class="feature-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l5-6 4 3 6-8"/><path d="M18 6h3v3"/><path d="M3 21h18"/></svg>
+            </span>
+            <h3>Prestasi telus</h3>
+            <p>Win rate, Net R dan equity curve dari rekod sebenar enjin sejak 19 Okt 2026. Semua setup dikira — bukan yang menang sahaja.</p>
+            <div class="feature-mini mini-spark-row" aria-hidden="true">
+              <svg class="perf-spark" viewBox="0 0 96 34" width="96" height="34">
+                <polyline points="2.0,29.0 6.2,31.0 10.4,26.9 14.5,28.8 18.7,24.7 22.9,26.7 27.1,18.4 31.3,24.3 35.5,20.2 39.6,16.0 43.8,20.0 48.0,11.7 52.2,13.6 56.4,17.6 60.5,9.3 64.7,5.2 68.9,7.1 73.1,3.0 77.3,10.5 81.5,6.5 85.6,8.5 89.8,4.3 94.0,6.5" fill="none" stroke="#c6f36b" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+                <circle cx="94.0" cy="6.5" r="2.5" fill="#c6f36b"/>
+              </svg>
+              <span class="mono">+8.43R</span>
+            </div>
+          </article>
+
+          <article class="card feature-card reveal" id="tools">
+            <span class="feature-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M8.5 7h7"/><path d="M8.5 12h.01"/><path d="M12 12h.01"/><path d="M15.5 12h.01"/><path d="M8.5 16h.01"/><path d="M12 16h.01"/><path d="M15.5 16h.01"/></svg>
+            </span>
+            <h3>Risk toolkit</h3>
+            <p>Kalkulator saiz posisi — masukkan balance, risk %, entry &amp; SL; dapat risk USD dan lot yang betul sebelum entry.</p>
+            <div class="feature-mini mini-tiles" aria-hidden="true">
+              <div class="mini-tile"><span class="stat-label">Risk USD</span><span class="stat-value lime">$10.00</span></div>
+              <div class="mini-tile"><span class="stat-label">Lot size</span><span class="stat-value lime">0.10</span></div>
+            </div>
+          </article>
+
+          <article class="card feature-card reveal">
+            <span class="feature-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M4 19h16"/></svg>
+            </span>
+            <h3>PWA offline</h3>
+            <p>Install di skrin utama seperti app native. Data bar dicache — chart dan signal terakhir tetap dipaparkan tanpa internet.</p>
+            <div class="feature-mini" aria-hidden="true">
+              <span class="chart-badge cache">Data dicache · offline-ready</span>
+            </div>
+          </article>
+
+          <article class="card feature-card reveal">
+            <span class="feature-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9a6 6 0 0 1 12 0c0 5 2 6 2 6H4s2-1 2-6"/><path d="M10 19a2 2 0 0 0 4 0"/></svg>
+            </span>
+            <h3>Notifikasi segera</h3>
+            <p>Signal baru dan keputusan TP/SL dihantar serta-merta melalui Telegram — anda tak perlu menghadap chart sepanjang hari.</p>
+            <div class="feature-mini" aria-hidden="true">
+              <span class="mini-toast">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9a6 6 0 0 1 12 0c0 5 2 6 2 6H4s2-1 2-6"/><path d="M10 19a2 2 0 0 0 4 0"/></svg>
+                Signal baru · XAU/USD BUY
+              </span>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 5. SHOWCASE: CHART BERANOTASI ============ -->
+    <section class="section" id="chart" aria-label="Chart beranotasi">
+      <div class="container showcase-grid">
+        <div class="showcase-copy reveal">
+          <span class="section-eyebrow">Chart beranotasi</span>
+          <h2 class="section-title">Plan dilukis terus pada chart.</h2>
+          <p class="section-sub">Setiap signal datang dengan chart candlestick beranotasi — zon POI, entry CE 50%, garisan SL &amp; TP serta zon risiko dan ganjaran. Anda nampak keseluruhan plan sebelum membuat keputusan.</p>
+          <ul class="perf-method-list">
+            <li><strong>Zon POI &amp; entry CE 50%</strong> — kawasan entry ditanda tepat pada candlestick.</li>
+            <li><strong>SL &amp; TP jelas</strong> — zon risiko (lorek merah) dan ganjaran (lorek lime) supaya nisbah R:R nampak serta-merta.</li>
+            <li><strong>Sebab entry + confluence</strong> — ringkasan Bahasa Melayu dan checklist gate enjin bagi setiap setup.</li>
+          </ul>
+          <a class="showcase-link" href="https://traderwatch.org/login.html?mode=signup">Lihat chart signal terkini
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7"/><path d="M9 7h8v8"/></svg>
+          </a>
+        </div>
+
+        <section class="card showcase-card reveal" aria-label="Contoh chart beranotasi XAU/USD">
+          <div class="chart-meta">
+            <span class="chip chip-muted">XAU/USD · M15</span>
+            <span class="chart-badge">Contoh setup · BUY</span>
+          </div>
+          <svg class="chart-svg" viewBox="0 0 640 340" role="img" aria-label="Chart candlestick XAU/USD M15 dengan zon POI 3622 hingga 3636, entry 3629.00, stop loss 3618.90 dan take profit 3651.20">
+            <defs>
+              <pattern id="hatchRed" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+                <rect width="6" height="6" fill="rgba(255,129,125,0.05)"/>
+                <line x1="0" y1="0" x2="0" y2="6" stroke="rgba(255,129,125,0.35)" stroke-width="1.2"/>
+              </pattern>
+              <pattern id="hatchLime" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+                <rect width="6" height="6" fill="rgba(198,243,107,0.05)"/>
+                <line x1="0" y1="0" x2="0" y2="6" stroke="rgba(198,243,107,0.3)" stroke-width="1.2"/>
+              </pattern>
+            </defs>
+
+            <!-- grid + label harga -->
+            <g font-family="JetBrains Mono, ui-monospace, Menlo, Consolas, monospace" font-size="10.5">
+              <line x1="16" y1="20" x2="556" y2="20" stroke="#26332a" stroke-width="1"/>
+              <line x1="16" y1="113.75" x2="556" y2="113.75" stroke="#26332a" stroke-width="1"/>
+              <line x1="16" y1="176.25" x2="556" y2="176.25" stroke="#26332a" stroke-width="1"/>
+              <line x1="16" y1="301.25" x2="556" y2="301.25" stroke="#26332a" stroke-width="1"/>
+              <text x="564" y="24" fill="#93a096">3660.00</text>
+              <text x="564" y="117.75" fill="#93a096">3645.00</text>
+              <text x="564" y="180.25" fill="#93a096">3635.00</text>
+              <text x="564" y="305.25" fill="#93a096">3615.00</text>
+            </g>
+
+            <!-- zon risiko & ganjaran -->
+            <rect x="250" y="75" width="306" height="138.75" fill="url(#hatchLime)"/>
+            <rect x="250" y="213.75" width="306" height="63.12" fill="url(#hatchRed)"/>
+
+            <!-- zon POI -->
+            <rect x="16" y="170" width="290" height="87.5" rx="6" fill="rgba(198,243,107,0.07)" stroke="rgba(198,243,107,0.4)" stroke-width="1" stroke-dasharray="4 3"/>
+            <text x="24" y="184" font-family="JetBrains Mono, ui-monospace, Menlo, Consolas, monospace" font-size="10" font-weight="700" letter-spacing="1" fill="#c6f36b">ZON POI</text>
+            <line x1="16" y1="213.75" x2="306" y2="213.75" stroke="rgba(198,243,107,0.55)" stroke-width="1" stroke-dasharray="2 3"/>
+            <text x="24" y="250" font-family="JetBrains Mono, ui-monospace, Menlo, Consolas, monospace" font-size="9.5" fill="#93a096">CE 50%</text>
+
+            <!-- candlestick -->
+            <g>
+              <line x1="28" y1="57.5" x2="28" y2="88.75" stroke="#ff817d" stroke-width="1.4"/><rect x="23" y="70.0" width="10" height="12.5" rx="1.5" fill="#ff817d"/>
+              <line x1="50" y1="76.25" x2="50" y2="113.75" stroke="#ff817d" stroke-width="1.4"/><rect x="45" y="82.5" width="10" height="25.0" rx="1.5" fill="#ff817d"/>
+              <line x1="72" y1="95.0" x2="72" y2="132.5" stroke="#ff817d" stroke-width="1.4"/><rect x="67" y="107.5" width="10" height="18.75" rx="1.5" fill="#ff817d"/>
+              <line x1="94" y1="120.0" x2="94" y2="157.5" stroke="#ff817d" stroke-width="1.4"/><rect x="89" y="126.25" width="10" height="25.0" rx="1.5" fill="#ff817d"/>
+              <line x1="116" y1="138.75" x2="116" y2="176.25" stroke="#ff817d" stroke-width="1.4"/><rect x="111" y="151.25" width="10" height="18.75" rx="1.5" fill="#ff817d"/>
+              <line x1="138" y1="163.75" x2="138" y2="201.25" stroke="#ff817d" stroke-width="1.4"/><rect x="133" y="170.0" width="10" height="25.0" rx="1.5" fill="#ff817d"/>
+              <line x1="160" y1="182.5" x2="160" y2="220.0" stroke="#ff817d" stroke-width="1.4"/><rect x="155" y="195.0" width="10" height="18.75" rx="1.5" fill="#ff817d"/>
+              <line x1="182" y1="201.25" x2="182" y2="245.0" stroke="#ff817d" stroke-width="1.4"/><rect x="177" y="213.75" width="10" height="25.0" rx="1.5" fill="#ff817d"/>
+              <line x1="204" y1="226.25" x2="204" y2="254.38" stroke="#c6f36b" stroke-width="1.4"/><rect x="199" y="232.5" width="10" height="6.25" rx="1.5" fill="#c6f36b"/>
+              <line x1="226" y1="220.0" x2="226" y2="251.25" stroke="#ff817d" stroke-width="1.4"/><rect x="221" y="232.5" width="10" height="12.5" rx="1.5" fill="#ff817d"/>
+              <line x1="248" y1="213.75" x2="248" y2="248.12" stroke="#c6f36b" stroke-width="1.4"/><rect x="243" y="220.0" width="10" height="25.0" rx="1.5" fill="#c6f36b"/>
+              <line x1="270" y1="188.75" x2="270" y2="226.25" stroke="#c6f36b" stroke-width="1.4"/><rect x="265" y="195.0" width="10" height="25.0" rx="1.5" fill="#c6f36b"/>
+              <line x1="292" y1="176.25" x2="292" y2="207.5" stroke="#c6f36b" stroke-width="1.4"/><rect x="287" y="182.5" width="10" height="12.5" rx="1.5" fill="#c6f36b"/>
+              <line x1="314" y1="170.0" x2="314" y2="201.25" stroke="#ff817d" stroke-width="1.4"/><rect x="309" y="182.5" width="10" height="6.25" rx="1.5" fill="#ff817d"/>
+              <line x1="336" y1="163.75" x2="336" y2="195.0" stroke="#c6f36b" stroke-width="1.4"/><rect x="331" y="170.0" width="10" height="18.75" rx="1.5" fill="#c6f36b"/>
+              <line x1="358" y1="151.25" x2="358" y2="176.25" stroke="#c6f36b" stroke-width="1.4"/><rect x="353" y="157.5" width="10" height="12.5" rx="1.5" fill="#c6f36b"/>
+              <line x1="380" y1="145.0" x2="380" y2="170.0" stroke="#ff817d" stroke-width="1.4"/><rect x="375" y="157.5" width="10" height="6.25" rx="1.5" fill="#ff817d"/>
+              <line x1="402" y1="138.75" x2="402" y2="166.88" stroke="#c6f36b" stroke-width="1.4"/><rect x="397" y="145.0" width="10" height="18.75" rx="1.5" fill="#c6f36b"/>
+              <line x1="424" y1="132.5" x2="424" y2="157.5" stroke="#ff817d" stroke-width="1.4"/><rect x="419" y="145.0" width="10" height="6.25" rx="1.5" fill="#ff817d"/>
+              <line x1="446" y1="126.25" x2="446" y2="154.38" stroke="#c6f36b" stroke-width="1.4"/><rect x="441" y="132.5" width="10" height="18.75" rx="1.5" fill="#c6f36b"/>
+              <line x1="468" y1="120.0" x2="468" y2="145.0" stroke="#ff817d" stroke-width="1.4"/><rect x="463" y="132.5" width="10" height="6.25" rx="1.5" fill="#ff817d"/>
+              <line x1="490" y1="113.75" x2="490" y2="141.88" stroke="#c6f36b" stroke-width="1.4"/><rect x="485" y="120.0" width="10" height="18.75" rx="1.5" fill="#c6f36b"/>
+              <line x1="512" y1="107.5" x2="512" y2="132.5" stroke="#ff817d" stroke-width="1.4"/><rect x="507" y="120.0" width="10" height="6.25" rx="1.5" fill="#ff817d"/>
+              <line x1="534" y1="116.88" x2="534" y2="145.0" stroke="#ff817d" stroke-width="1.4"/><rect x="529" y="126.25" width="10" height="6.25" rx="1.5" fill="#ff817d"/>
+            </g>
+
+            <!-- garisan TP / ENTRY / SL + label mono -->
+            <line x1="16" y1="75" x2="556" y2="75" stroke="#c6f36b" stroke-width="1.6"/>
+            <line x1="16" y1="213.75" x2="556" y2="213.75" stroke="#c6f36b" stroke-width="1.6" stroke-dasharray="6 4"/>
+            <line x1="16" y1="276.87" x2="556" y2="276.87" stroke="#ff817d" stroke-width="1.6"/>
+            <g font-family="JetBrains Mono, ui-monospace, Menlo, Consolas, monospace" font-size="10.5" font-weight="700">
+              <rect x="560" y="65" width="76" height="18" rx="6" fill="rgba(198,243,107,0.14)"/>
+              <text x="566" y="78" fill="#c6f36b">TP 3651.20</text>
+              <rect x="560" y="203.75" width="76" height="18" rx="6" fill="rgba(198,243,107,0.14)"/>
+              <text x="566" y="216.75" fill="#c6f36b">EN 3629.00</text>
+              <rect x="560" y="266.87" width="76" height="18" rx="6" fill="rgba(255,129,125,0.12)"/>
+              <text x="566" y="279.87" fill="#ff817d">SL 3618.90</text>
+            </g>
+
+            <!-- harga semasa -->
+            <line x1="16" y1="132.5" x2="556" y2="132.5" stroke="rgba(242,245,239,0.3)" stroke-width="1" stroke-dasharray="2 4"/>
+            <circle cx="534" cy="126.25" r="3" fill="#c6f36b"/>
+            <text x="564" y="136.5" font-family="JetBrains Mono, ui-monospace, Menlo, Consolas, monospace" font-size="10.5" fill="#f2f5ef">3642.00</text>
+
+            <!-- label masa MYT -->
+            <g font-family="JetBrains Mono, ui-monospace, Menlo, Consolas, monospace" font-size="10" fill="#93a096">
+              <text x="60" y="334">14:00</text>
+              <text x="192" y="334">16:00</text>
+              <text x="324" y="334">18:00</text>
+              <text x="456" y="334">20:00</text>
+            </g>
+          </svg>
+          <div class="chart-legend" aria-hidden="true">
+            <span class="legend-chip"><span class="dot dot-lime"></span>Entry</span>
+            <span class="legend-chip"><span class="dot dot-red"></span>SL</span>
+            <span class="legend-chip"><span class="dot dot-lime"></span>TP</span>
+            <span class="legend-chip"><span class="dot dot-poi"></span>Zon POI</span>
+          </div>
+          <p class="perf-note">Harga contoh untuk ilustrasi komponen chart. Data sebenar: feed Swissquote/Coinbase — bukan quote broker anda.</p>
+        </section>
+      </div>
+    </section>
+
+    <!-- ============ 6. SHOWCASE: PRESTASI TELUS ============ -->
+    <section class="section" id="prestasi" aria-label="Prestasi telus">
+      <div class="container showcase-grid reverse">
+        <div class="showcase-copy reveal">
+          <span class="section-eyebrow">Prestasi telus</span>
+          <h2 class="section-title">Rekod penuh, bukan cherry-pick.</h2>
+          <p class="section-sub">Setiap signal yang diterbitkan sejak 19 Okt 2026 direkodkan dan dikira secara terbuka — termasuk yang rugi. Anda boleh semak win rate, Net R dan equity curve penuh dalam app.</p>
+          <ul class="perf-method-list">
+            <li><strong>Rekod penuh dari 19 Okt 2026</strong> — semua setup disiarkan, tiada yang disembunyikan.</li>
+            <li><strong>Win rate = TP ÷ (TP + SL)</strong> — hanya signal yang benar-benar diputuskan dikira.</li>
+            <li><strong>Expired ≠ rugi</strong> — setup luput tanpa entry, diasingkan dari win rate.</li>
+            <li><strong>Net R</strong> — jumlah gandaan risiko merentas semua pair, bukan jumlah pips.</li>
+          </ul>
+          <a class="showcase-link" href="https://traderwatch.org/login.html?mode=signup">Lihat prestasi penuh dalam app
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7"/><path d="M9 7h8v8"/></svg>
+          </a>
+        </div>
+
+        <section class="card showcase-card reveal" aria-label="Ringkasan prestasi enjin AI">
+          <div class="card-head">
+            <h3>Prestasi · Sejak 19 Okt 2026</h3>
+            <span class="chip chip-muted">Semua</span>
+          </div>
+          <div class="perf-hero">
+            <div class="perf-ring">
+              <svg viewBox="0 0 84 84" aria-hidden="true">
+                <circle cx="42" cy="42" r="34" fill="none" stroke="rgba(242, 245, 239, 0.12)" stroke-width="8"/>
+                <circle cx="42" cy="42" r="34" fill="none" stroke="#c6f36b" stroke-width="8" stroke-linecap="round" stroke-dasharray="73.5 213.6" transform="rotate(-90 42 42)"/>
+              </svg>
+              <span class="perf-ring-text">34.4%</span>
+            </div>
+            <div class="perf-hero-nums">
+              <span class="stat-label">Win rate · TP/(TP+SL)</span>
+              <span class="perf-netr-big pos">+8.43R</span>
+              <span class="stat-label">Net R · 125 signal diputuskan</span>
+            </div>
+          </div>
+
+          <div class="equity-wrap">
+            <div class="equity-head">
+              <h4>Equity curve · R terkumpul</h4>
+              <span class="chart-badge">harian · MYT</span>
+            </div>
+            <svg class="chart-svg" viewBox="0 0 640 240" role="img" aria-label="Equity curve R terkumpul dari 20 Okt hingga 19 Nov 2026, berakhir pada +8.43R">
+              <defs>
+                <linearGradient id="eqFill" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0" stop-color="rgba(198,243,107,0.16)"/>
+                  <stop offset="1" stop-color="rgba(198,243,107,0)"/>
+                </linearGradient>
+              </defs>
+              <g font-family="JetBrains Mono, ui-monospace, Menlo, Consolas, monospace" font-size="10.5">
+                <line x1="44" y1="27.5" x2="596" y2="27.5" stroke="#26332a" stroke-width="1"/>
+                <line x1="44" y1="85" x2="596" y2="85" stroke="#26332a" stroke-width="1"/>
+                <line x1="44" y1="142.5" x2="596" y2="142.5" stroke="rgba(147,160,150,0.4)" stroke-width="1"/>
+                <line x1="44" y1="200" x2="596" y2="200" stroke="#26332a" stroke-width="1"/>
+                <text x="36" y="31" fill="#93a096" text-anchor="end">+10R</text>
+                <text x="36" y="88.5" fill="#93a096" text-anchor="end">+5R</text>
+                <text x="36" y="146" fill="#93a096" text-anchor="end">0</text>
+                <text x="36" y="203.5" fill="#93a096" text-anchor="end">−5R</text>
+              </g>
+              <path d="M44.0,177.0 L69.09,188.5 L94.18,164.35 L119.27,175.85 L144.36,151.7 L169.45,163.2 L194.55,114.9 L219.64,149.4 L244.73,125.25 L269.82,101.1 L294.91,124.1 L320.0,75.8 L345.09,87.3 L370.18,110.3 L395.27,62.0 L420.36,37.85 L445.45,49.35 L470.55,25.2 L495.64,68.9 L520.73,45.56 L545.82,57.06 L570.91,32.91 L596.0,45.56 L596.0,200 L44.0,200 Z" fill="url(#eqFill)"/>
+              <polyline points="44.0,177.0 69.09,188.5 94.18,164.35 119.27,175.85 144.36,151.7 169.45,163.2 194.55,114.9 219.64,149.4 244.73,125.25 269.82,101.1 294.91,124.1 320.0,75.8 345.09,87.3 370.18,110.3 395.27,62.0 420.36,37.85 445.45,49.35 470.55,25.2 495.64,68.9 520.73,45.56 545.82,57.06 570.91,32.91 596.0,45.56" fill="none" stroke="#c6f36b" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+              <circle cx="596.0" cy="45.56" r="3.5" fill="#c6f36b"/>
+              <text x="590" y="36" font-family="JetBrains Mono, ui-monospace, Menlo, Consolas, monospace" font-size="11" font-weight="700" fill="#c6f36b" text-anchor="end">+8.43R</text>
+              <g font-family="JetBrains Mono, ui-monospace, Menlo, Consolas, monospace" font-size="10" fill="#93a096">
+                <text x="44" y="222">20 Okt</text>
+                <text x="596" y="222" text-anchor="end">19 Nov</text>
+              </g>
+            </svg>
+          </div>
+
+          <div class="perf-tiles" style="margin-top:12px">
+            <div class="perf-tile"><span class="stat-value lime">43</span><span class="stat-label">TP</span></div>
+            <div class="perf-tile"><span class="stat-value red">82</span><span class="stat-label">SL</span></div>
+            <div class="perf-tile"><span class="stat-value amber">25</span><span class="stat-label">Expired</span></div>
+          </div>
+          <p class="perf-note">Expired ≠ rugi — setup luput tanpa entry. Collected (exit manual) diasingkan dari win rate. Keputusan lepas bukan jaminan keputusan akan datang.</p>
+        </section>
+      </div>
+    </section>
+
+    <!-- ============ 7. CARA IA BERFUNGSI ============ -->
+    <section class="section" id="how" aria-label="Cara ia berfungsi">
+      <div class="container">
+        <div class="section-head center reveal">
+          <span class="section-eyebrow">Cara ia berfungsi</span>
+          <h2 class="section-title">Tiga langkah. Tiada komplikasi.</h2>
+        </div>
+        <div class="step-grid">
+          <article class="card step-card reveal">
+            <span class="step-num" aria-hidden="true">01</span>
+            <h3>Daftar percuma</h3>
+            <p>Cipta akaun dalam seminit. Tiada kad kredit, tiada langganan — Free Card untuk semua ahli.</p>
+          </article>
+          <article class="card step-card reveal">
+            <span class="step-num" aria-hidden="true">02</span>
+            <h3>Terima signal AI</h3>
+            <p>Enjin mengimbas XAU/USD, XAG/USD &amp; BTC dan menyiarkan setup lengkap — entry, SL, TP, sebab entry dan chart beranotasi.</p>
+          </article>
+          <article class="card step-card reveal">
+            <span class="step-num" aria-hidden="true">03</span>
+            <h3>Trade dengan plan</h3>
+            <p>Semak chart, kira saiz posisi dengan risk toolkit, sahkan harga dengan broker anda — dan trade mengikut plan, bukan emosi.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 8. FREE CARD ============ -->
+    <section class="section" id="free" aria-label="Pelan Free Card">
+      <div class="container">
+        <div class="section-head center reveal">
+          <span class="section-eyebrow">Free Card</span>
+          <h2 class="section-title">Satu kad. Semua akses.</h2>
+          <p class="section-sub">Tiada tiering, tiada upsell — setiap ahli mendapat akses penuh yang sama.</p>
+        </div>
+        <div class="free-wrap reveal">
+          <section class="card plan-card" aria-label="Kad ahli Free">
+            <span class="chip chip-lime">FREE CARD</span>
+            <div class="plan-price"><span class="plan-amount">RM0</span><span class="plan-period">/ semua ahli</span></div>
+            <ul class="plan-list">
+              <li>Signal AI terkini — XAU/USD, XAG/USD &amp; BTC</li>
+              <li>Entry + Stop Loss + Take Profit lengkap</li>
+              <li>Chart beranotasi + sebab entry &amp; confluence</li>
+              <li>Prestasi telus + equity curve penuh</li>
+              <li>Risk toolkit + modul pendidikan</li>
+              <li>PWA install — akses pantas &amp; offline</li>
+            </ul>
+            <a class="btn btn-primary btn-block" href="https://traderwatch.org/login.html?mode=signup">Daftar percuma</a>
+            <p class="plan-note">Satu tier untuk semua — tiada langganan, akses penuh.</p>
+          </section>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 9. FAQ ============ -->
+    <section class="section" id="faq" aria-label="Soalan lazim">
+      <div class="container">
+        <div class="section-head center reveal">
+          <span class="section-eyebrow">FAQ</span>
+          <h2 class="section-title">Soalan lazim</h2>
+        </div>
+        <div class="faq-wrap reveal">
+          <section class="card" aria-label="Soalan lazim">
+            <details class="faq">
+              <summary>Adakah signal dijamin untung?</summary>
+              <p>Tidak. Tiada signal yang dijamin untung. Setiap setup membawa risiko kerugian dan keputusan lepas bukan jaminan keputusan akan datang. Win rate enjin dikira secara telus dari rekod sebenar — termasuk signal yang terkena SL.</p>
+            </details>
+            <details class="faq">
+              <summary>Adakah harga sama dengan broker saya?</summary>
+              <p>Harga mungkin berbeza sedikit antara broker (spread, feed dan waktu server). Sentiasa sahkan entry, SL dan TP dengan platform broker anda sendiri sebelum trade.</p>
+            </details>
+            <details class="faq">
+              <summary>Adakah ini nasihat kewangan?</summary>
+              <p>Bukan. TraderWatch ialah platform pendidikan dan signal automatik untuk tujuan pembelajaran sahaja — bukan nasihat kewangan peribadi. Dapatkan nasihat kewangan bebas jika perlu.</p>
+            </details>
+            <details class="faq">
+              <summary>Perlu bayar untuk akses penuh?</summary>
+              <p>Tidak. Semua ahli mendapat Free Card — akses penuh signal, chart beranotasi, prestasi, risk toolkit dan pendidikan. Satu tier untuk semua, tiada langganan dan tiada kad kredit diperlukan.</p>
+            </details>
+            <details class="faq">
+              <summary>Bagaimana install app?</summary>
+              <p>Android &amp; desktop: klik butang Install dan terima prompt pelayar. iPhone/iPad: buka di Safari, ketik Share, pilih Add to Home Screen. Selepas install, TraderWatch berfungsi seperti app native — data terakhir dicache untuk kegunaan offline.</p>
+            </details>
+          </section>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 10. CTA ============ -->
+    <section class="section" id="cta" aria-label="Daftar TraderWatch">
+      <div class="container">
+        <div class="cta-card reveal">
+          <h2 class="cta-title">Mula trade dengan yakin hari ini.</h2>
+          <p class="cta-sub">Sertai TraderWatch — signal AI, chart beranotasi dan prestasi telus, percuma untuk semua. Daftar dalam seminit, terus di telefon anda.</p>
+          <div class="cta-row">
+            <a class="btn btn-primary btn-lg" href="https://traderwatch.org/login.html?mode=signup">Daftar percuma</a>
+            <a class="btn btn-ghost btn-lg" href="https://traderwatch.org/login.html">Log masuk</a>
+          </div>
+          <p class="disclaimer">Educational only. Trading involves substantial risk.</p>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ============ 11. FOOTER ============ -->
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <a class="appbar-brand" href="#signal" aria-label="TraderWatch — kembali ke atas">
+            <span class="brand-mark" aria-hidden="true">T</span>
+            <span class="brand-name">TRADERWATCH</span>
+          </a>
+          <p>Signal AI automatik untuk XAU/USD, XAG/USD &amp; BTC. Read the market. Trade dengan plan.</p>
+        </div>
+        <nav class="footer-col" aria-label="Pautan produk">
+          <h4>Produk</h4>
+          <ul>
+            <li><a href="#signal">Signal</a></li>
+            <li><a href="#chart">Chart beranotasi</a></li>
+            <li><a href="#prestasi">Prestasi</a></li>
+            <li><a href="#free">Free Card</a></li>
+          </ul>
+        </nav>
+        <nav class="footer-col" aria-label="Pautan sumber">
+          <h4>Sumber</h4>
+          <ul>
+            <li><a href="#how">Cara ia berfungsi</a></li>
+            <li><a href="#faq">FAQ</a></li>
+            <li><a href="https://traderwatch.org/education.html">Modul education</a></li>
+            <li><button class="linklike" id="footerInstall" type="button">Install app</button></li>
+          </ul>
+        </nav>
+        <nav class="footer-col" aria-label="Pautan hubungi">
+          <h4>Hubungi</h4>
+          <ul>
+            <li><a href="https://t.me/Traderwatchmembershipbot" rel="noopener" target="_blank">Telegram bot</a></li>
+            <li><a href="https://traderwatch.org/login.html">Log masuk</a></li>
+            <li><a href="https://traderwatch.org/login.html?mode=signup">Daftar percuma</a></li>
+          </ul>
+        </nav>
+      </div>
+
+      <section class="card disclosure-card" aria-label="Penafian risiko">
+        <h3>Penafian risiko</h3>
+        <p>Trading forex, logam dan kripto melibatkan risiko kerugian yang besar dan mungkin tidak sesuai untuk semua pelabur. Anda boleh kehilangan sebahagian atau keseluruhan modal. Prestasi lepas bukan jaminan keputusan akan datang. Signal dijana secara automatik oleh enjin AI dan mungkin lewat atau tersilap. Gunakan wang yang anda sanggup hilang dan dapatkan nasihat kewangan bebas jika perlu.</p>
+        <p class="partner-note">Partner disclosure: TraderWatch mungkin menerima komisen daripada pautan partner broker. Ini tidak mengubah harga yang anda bayar dan tidak mempengaruhi keputusan enjin signal.</p>
+      </section>
+
+      <div class="footer-bottom">
+        <p>© 2026 TraderWatch · traderwatch.org</p>
+        <p class="disclaimer">Educational only. Trading involves substantial risk.</p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Toast (komponen app) -->
+  <div class="toast" id="toast" role="status" hidden></div>
+
+  <script>
+    (function () {
+      'use strict';
+      var $ = function (s) { return document.querySelector(s); };
+
+      /* ---------- Menu mobile ---------- */
+      var menuToggle = $('#menuToggle');
+      var mobileMenu = $('#mobileMenu');
+      function setMenu(open) {
+        mobileMenu.hidden = !open;
+        menuToggle.setAttribute('aria-expanded', String(open));
+        menuToggle.setAttribute('aria-label', open ? 'Tutup menu' : 'Buka menu');
+      }
+      menuToggle.addEventListener('click', function () { setMenu(mobileMenu.hidden); });
+      mobileMenu.addEventListener('click', function (e) {
+        if (e.target.closest('a')) setMenu(false);
+      });
+      document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' && !mobileMenu.hidden) { setMenu(false); menuToggle.focus(); }
+      });
+      document.addEventListener('click', function (e) {
+        if (!mobileMenu.hidden && !e.target.closest('.appbar')) setMenu(false);
+      });
+
+      /* ---------- Toast (gaya app) ---------- */
+      var toastEl = $('#toast');
+      var toastTimer = null;
+      function toast(msg) {
+        toastEl.textContent = msg;
+        toastEl.hidden = false;
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(function () { toastEl.hidden = true; }, 3800);
+      }
+
+      /* ---------- Install PWA (motif banner app) ---------- */
+      var deferredPrompt = null;
+      window.addEventListener('beforeinstallprompt', function (e) {
+        e.preventDefault();
+        deferredPrompt = e;
+      });
+      function doInstall() {
+        if (deferredPrompt) {
+          deferredPrompt.prompt();
+          deferredPrompt.userChoice.then(function () { deferredPrompt = null; });
+          return;
+        }
+        toast('iPhone/iPad: Safari → Share → Add to Home Screen. Android/desktop: menu pelayar → Install app.');
+      }
+      $('#installBannerBtn').addEventListener('click', doInstall);
+      $('#heroInstall').addEventListener('click', doInstall);
+      $('#footerInstall').addEventListener('click', doInstall);
+      $('#installDismiss').addEventListener('click', function () {
+        $('#installBanner').hidden = true;
+      });
+      window.addEventListener('appinstalled', function () {
+        $('#installBanner').hidden = true;
+        toast('TraderWatch dipasang — akses pantas dari skrin utama.');
+      });
+
+      /* ---------- Reveal on scroll (content visible by default) ----------
+         Tiada keadaan opacity:0 — elemen sentiasa kelihatan; IO cuma
+         memainkan animasi translate halus bila elemen masuk viewport. */
+      var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      if (!reduce && 'IntersectionObserver' in window) {
+        var els = Array.prototype.slice.call(document.querySelectorAll('.reveal'));
+        var io = new IntersectionObserver(function (entries) {
+          entries.forEach(function (en) {
+            if (en.isIntersecting) {
+              en.target.classList.add('in');
+              io.unobserve(en.target);
+            }
+          });
+        }, { threshold: 0.06, rootMargin: '0px 0px -6% 0px' });
+        els.forEach(function (el) { io.observe(el); });
+      }
+    })();
+  </script>
+</body>
+</html>

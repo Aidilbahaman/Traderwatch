@@ -1,0 +1,851 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TraderWatch — Signal AI Automatik untuk XAU/USD, XAG/USD & BTC</title>
+<meta name="description" content="Signal forex AI automatik dengan entry, stop loss & take profit, chart beranotasi dan prestasi telus. Percuma untuk semua ahli. Install sebagai app.">
+<meta name="theme-color" content="#08090a">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#08090a;--surface:#101214;--surface-2:#15181b;--elevated:#1a1d21;
+  --text:#f7f8f8;--text-2:#9ba1a6;--muted:#6b7280;
+  --border:rgba(255,255,255,0.07);--border-strong:rgba(255,255,255,0.12);
+  --lime:#c6f36b;--emerald:#34d399;--teal:#2dd4bf;--red:#ff817d;--dark:#0a0b0d;
+  --grad:linear-gradient(100deg,var(--lime),var(--emerald) 55%,var(--teal));
+  --glass:rgba(255,255,255,0.03);
+  --radius:16px;--radius-sm:14px;--btn-r:8px;
+  --shadow:0 1px 2px rgba(0,0,0,.4);--shadow-hover:0 8px 30px rgba(0,0,0,.35);
+  --mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+  --sans:"Inter",system-ui,-apple-system,"Segoe UI",sans-serif;--nav-h:64px;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:calc(var(--nav-h) + 20px)}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:1.0625rem;line-height:1.6;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;overflow-x:hidden}
+::selection{background:rgba(198,243,107,.25);color:#fff}
+a{color:inherit;text-decoration:none}
+img,svg{display:block;max-width:100%}
+svg[width="100%"]{height:auto}
+button{font-family:inherit;cursor:pointer}
+:focus-visible{outline:2px solid var(--emerald);outline-offset:3px;border-radius:4px}
+.mono{font-family:var(--mono);font-variant-numeric:tabular-nums}
+.wrap{max-width:1120px;margin:0 auto;padding:0 24px}
+.section{padding:112px 0;position:relative}
+.eyebrow{display:inline-flex;align-items:center;gap:8px;font-size:.8125rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--emerald);margin-bottom:18px}
+.eyebrow::before{content:"";width:20px;height:1px;background:var(--grad)}
+h1,h2,h3{font-weight:700;letter-spacing:-.02em;line-height:1.12;color:var(--text)}
+.h-sec{font-size:clamp(1.75rem,3.5vw,2.75rem);font-weight:700;letter-spacing:-.02em;line-height:1.12}
+.lead{color:var(--text-2);max-width:620px;margin-top:16px}
+.grad-text{background:var(--grad);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent}
+.center{text-align:center}
+.center .lead{margin-left:auto;margin-right:auto}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
+
+/* reveal — progressive enhancement */
+.reveal{transition:opacity .7s cubic-bezier(.16,1,.3,1),transform .7s cubic-bezier(.16,1,.3,1)}
+html.js-reveal .reveal{opacity:0;transform:translateY(16px)}
+html.js-reveal .reveal.in{opacity:1;transform:none}
+html.js-reveal .reveal.d1{transition-delay:.06s}
+html.js-reveal .reveal.d2{transition-delay:.12s}
+html.js-reveal .reveal.d3{transition-delay:.18s}
+html.js-reveal .reveal.d4{transition-delay:.24s}
+@media (prefers-reduced-motion:reduce){
+  html.js-reveal .reveal{opacity:1;transform:none;transition:none}
+  *{animation:none!important;transition:none!important}
+}
+
+/* buttons */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;font-weight:600;font-size:.9375rem;line-height:1;padding:13px 22px;border-radius:var(--btn-r);border:1px solid transparent;transition:transform .2s ease,box-shadow .25s ease,border-color .25s ease,background .25s ease;white-space:nowrap}
+.btn svg{width:16px;height:16px;flex:none}
+.btn-primary{position:relative;overflow:hidden;background:var(--grad);color:var(--dark);box-shadow:0 1px 2px rgba(0,0,0,.4),0 0 24px rgba(52,211,153,.18)}
+.btn-primary::after{content:"";position:absolute;inset:0;background:linear-gradient(110deg,transparent 30%,rgba(255,255,255,.35) 50%,transparent 70%);transform:translateX(-120%);animation:shimmer 3.4s ease-in-out infinite;pointer-events:none}
+@keyframes shimmer{0%,60%{transform:translateX(-120%)}100%{transform:translateX(120%)}}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 6px 24px rgba(0,0,0,.4),0 0 36px rgba(52,211,153,.3)}
+.btn-ghost{background:rgba(255,255,255,0.02);color:var(--text);border-color:var(--border-strong)}
+.btn-ghost:hover{transform:translateY(-2px);border-color:rgba(255,255,255,0.22);background:rgba(255,255,255,0.05)}
+.btn-lg{padding:16px 28px;font-size:1rem}
+.btn-block{width:100%}
+
+/* nav */
+.nav{position:fixed;top:0;left:0;right:0;z-index:100;height:var(--nav-h);background:rgba(8,9,10,.7);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);border-bottom:1px solid var(--border)}
+.nav-inner{max-width:1120px;margin:0 auto;height:100%;padding:0 24px;display:flex;align-items:center;gap:28px}
+.logo{display:inline-flex;align-items:center;gap:10px;font-weight:700;font-size:1.0625rem;letter-spacing:-.02em}
+.logo-mark{width:30px;height:30px;border-radius:8px;background:var(--grad);display:grid;place-items:center;color:var(--dark);font-weight:800;font-size:1rem;box-shadow:0 0 18px rgba(52,211,153,.3)}
+.nav-links{display:flex;align-items:center;gap:4px;margin-left:8px}
+.nav-links a{font-size:.9rem;font-weight:500;color:var(--text-2);padding:8px 12px;border-radius:8px;transition:color .2s,background .2s}
+.nav-links a:hover{color:var(--text);background:rgba(255,255,255,0.04)}
+.nav-cta{margin-left:auto;display:flex;align-items:center;gap:10px}
+.nav-cta .btn{padding:9px 16px;font-size:.875rem}
+.nav-toggle{display:none;margin-left:auto;width:40px;height:40px;border-radius:8px;background:rgba(255,255,255,0.03);border:1px solid var(--border);place-items:center;color:var(--text)}
+.nav-toggle svg{width:20px;height:20px}
+.mobile-menu{position:fixed;top:var(--nav-h);left:0;right:0;z-index:99;background:rgba(8,9,10,.96);-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);border-bottom:1px solid var(--border);padding:16px 24px 24px;display:none;flex-direction:column;gap:4px}
+.mobile-menu.open{display:flex}
+.mobile-menu a{padding:12px;border-radius:8px;color:var(--text-2);font-weight:500}
+.mobile-menu a:hover{color:var(--text);background:rgba(255,255,255,0.04)}
+.mobile-menu .btn{margin-top:10px}
+@media (max-width:900px){.nav-links,.nav-cta{display:none}.nav-toggle{display:grid}}
+
+/* hero */
+.hero{position:relative;padding:calc(var(--nav-h) + 76px) 0 96px;overflow:hidden}
+.hero-grid-bg{position:absolute;inset:0;pointer-events:none;background-image:linear-gradient(rgba(255,255,255,0.025) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,0.025) 1px,transparent 1px);background-size:48px 48px;-webkit-mask-image:radial-gradient(ellipse 90% 70% at 50% 0%,#000 30%,transparent 75%);mask-image:radial-gradient(ellipse 90% 70% at 50% 0%,#000 30%,transparent 75%)}
+.glow{position:absolute;border-radius:50%;filter:blur(10px);pointer-events:none}
+.hero-glow-1{top:-180px;left:50%;transform:translateX(-50%);width:760px;height:520px;background:radial-gradient(circle,rgba(198,243,107,.10),rgba(52,211,153,.06) 45%,transparent 70%)}
+.hero-glow-2{top:220px;right:-160px;width:520px;height:520px;background:radial-gradient(circle,rgba(45,212,191,.08),transparent 65%)}
+.hero-inner{position:relative;z-index:1;text-align:center}
+.pill{display:inline-flex;align-items:center;gap:9px;padding:7px 16px;border-radius:999px;background:rgba(255,255,255,0.03);border:1px solid var(--border);font-size:.8125rem;font-weight:500;color:var(--text-2);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px)}
+.pill .dot{width:7px;height:7px;border-radius:50%;background:var(--lime);box-shadow:0 0 10px var(--lime);animation:pulse 2.4s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(.8)}}
+.hero h1{font-size:clamp(2.75rem,6vw,4.5rem);font-weight:800;letter-spacing:-.03em;line-height:1.05;margin:26px auto 0;max-width:820px}
+.hero-sub{color:var(--text-2);font-size:clamp(1.0625rem,2vw,1.25rem);max-width:640px;margin:24px auto 0;line-height:1.6}
+.hero-cta{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;margin-top:36px}
+.hero-note{margin-top:22px;font-size:.875rem;color:var(--muted)}
+.hero-note span{color:var(--text-2)}
+.hero-visual{position:relative;margin:64px auto 0;max-width:920px}
+.hero-visual-glow{position:absolute;inset:-40px -60px;background:radial-gradient(ellipse 60% 60% at 50% 40%,rgba(52,211,153,.12),transparent 70%);pointer-events:none}
+.mockup{position:relative;background:linear-gradient(180deg,rgba(255,255,255,0.04),rgba(255,255,255,0.015));border:1px solid var(--border-strong);border-radius:20px;-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);box-shadow:0 1px 2px rgba(0,0,0,.4),0 24px 80px rgba(0,0,0,.5);padding:18px}
+.mockup-bar{display:flex;align-items:center;gap:8px;padding:2px 4px 16px}
+.mockup-bar .td{width:10px;height:10px;border-radius:50%;background:rgba(255,255,255,0.1)}
+.mockup-bar .td:nth-child(1){background:rgba(255,129,125,.5)}
+.mockup-bar .td:nth-child(2){background:rgba(198,243,107,.4)}
+.mockup-bar .td:nth-child(3){background:rgba(52,211,153,.4)}
+.mockup-bar .url{margin-left:12px;font-family:var(--mono);font-size:.7rem;color:var(--muted);background:rgba(255,255,255,0.03);border:1px solid var(--border);padding:4px 12px;border-radius:6px}
+.mockup-body{display:grid;grid-template-columns:300px 1fr;gap:16px}
+@media (max-width:760px){.mockup-body{grid-template-columns:1fr}}
+.signal-card{background:var(--surface-2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:18px;display:flex;flex-direction:column;gap:14px}
+.signal-top{display:flex;align-items:center;justify-content:space-between}
+.signal-pair{display:flex;align-items:center;gap:10px}
+.pair-ic{width:34px;height:34px;border-radius:9px;background:rgba(198,243,107,.1);border:1px solid rgba(198,243,107,.2);display:grid;place-items:center}
+.pair-ic svg{width:18px;height:18px}
+.signal-pair .nm{font-weight:700;font-size:.9375rem;letter-spacing:-.01em}
+.signal-pair .tf{font-family:var(--mono);font-size:.6875rem;color:var(--muted)}
+.chip{display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:.6875rem;font-weight:600;padding:4px 10px;border-radius:999px}
+.chip-buy{background:rgba(52,211,153,.12);color:var(--emerald);border:1px solid rgba(52,211,153,.25)}
+.chip-live{background:rgba(198,243,107,.1);color:var(--lime);border:1px solid rgba(198,243,107,.25)}
+.chip-live .dot{width:6px;height:6px;border-radius:50%;background:var(--lime);animation:pulse 2s infinite}
+.signal-levels{display:flex;flex-direction:column;gap:8px}
+.lvl{display:flex;align-items:center;justify-content:space-between;padding:9px 12px;border-radius:9px;background:rgba(255,255,255,0.02);border:1px solid var(--border)}
+.lvl .k{display:flex;align-items:center;gap:8px;font-size:.75rem;font-weight:600;color:var(--text-2)}
+.lvl .k i{width:8px;height:8px;border-radius:2px;display:inline-block}
+.lvl .v{font-family:var(--mono);font-size:.8125rem;font-weight:600}
+.lvl-entry .k i{background:var(--lime)}.lvl-entry .v{color:var(--lime)}
+.lvl-sl .k i{background:var(--red)}.lvl-sl .v{color:var(--red)}
+.lvl-tp .k i{background:var(--emerald)}.lvl-tp .v{color:var(--emerald)}
+.signal-reason{font-size:.75rem;color:var(--text-2);line-height:1.5;border-top:1px solid var(--border);padding-top:12px}
+.signal-reason b{color:var(--text);font-weight:600}
+.rr-tag{display:flex;align-items:center;justify-content:space-between;font-family:var(--mono);font-size:.7rem;color:var(--muted)}
+.rr-tag b{color:var(--teal)}
+.chart-panel{background:var(--surface-2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:16px;position:relative}
+.chart-panel .cp-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.cp-head .t{font-size:.8125rem;font-weight:600;color:var(--text-2)}
+.cp-head .lg{display:flex;gap:12px;font-family:var(--mono);font-size:.625rem;color:var(--muted)}
+.cp-head .lg i{display:inline-block;width:8px;height:2px;margin-right:4px;vertical-align:middle}
+
+/* stats */
+.stats{border-top:1px solid var(--border);border-bottom:1px solid var(--border);background:rgba(255,255,255,0.012)}
+.stats-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;padding:44px 0}
+.stat{text-align:center;position:relative}
+.stat + .stat::before{content:"";position:absolute;left:-12px;top:15%;bottom:15%;width:1px;background:var(--border)}
+.stat .num{font-family:var(--mono);font-size:clamp(1.75rem,3.5vw,2.5rem);font-weight:700;letter-spacing:-.02em;background:var(--grad);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.stat .lbl{margin-top:6px;font-size:.875rem;color:var(--text-2)}
+@media (max-width:640px){.stats-grid{grid-template-columns:1fr;gap:28px}.stat + .stat::before{display:none}}
+
+/* bento */
+.bento{display:grid;grid-template-columns:repeat(12,1fr);gap:18px;margin-top:56px}
+.b-card{position:relative;background:var(--glass);border:1px solid var(--border);border-radius:var(--radius);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);padding:26px;overflow:hidden;transition:transform .3s ease,box-shadow .3s ease,border-color .3s ease;display:flex;flex-direction:column;gap:14px}
+.b-card:hover{transform:translateY(-3px);box-shadow:var(--shadow-hover);border-color:var(--border-strong)}
+.b-lg{grid-column:span 6}
+.b-sm{grid-column:span 3}
+.b-featured{border:1px solid transparent;background:linear-gradient(var(--surface-2),var(--surface-2)) padding-box,conic-gradient(from 200deg,rgba(198,243,107,.5),rgba(198,243,107,.06) 30%,rgba(52,211,153,.35) 55%,rgba(45,212,191,.08) 80%,rgba(198,243,107,.5)) border-box}
+.b-ic{width:42px;height:42px;border-radius:11px;background:rgba(52,211,153,.08);border:1px solid rgba(52,211,153,.18);display:grid;place-items:center;flex:none}
+.b-ic svg{width:22px;height:22px}
+.b-card h3{font-size:1.125rem;font-weight:700;letter-spacing:-.01em}
+.b-card p{font-size:.9rem;color:var(--text-2);line-height:1.55}
+.b-visual{margin-top:auto;border-radius:10px;overflow:hidden}
+@media (max-width:900px){.b-lg{grid-column:span 12}.b-sm{grid-column:span 6}}
+@media (max-width:600px){.b-sm{grid-column:span 12}}
+.mini-signal{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px;display:flex;flex-direction:column;gap:8px}
+.mini-row{display:flex;justify-content:space-between;align-items:center;font-family:var(--mono);font-size:.7rem}
+.mini-row .k{color:var(--muted);display:flex;align-items:center;gap:6px}
+.mini-row .k i{width:7px;height:7px;border-radius:2px}
+.mini-calc{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px;display:flex;flex-direction:column;gap:8px}
+.calc-field{display:flex;justify-content:space-between;align-items:center;font-size:.7rem;color:var(--text-2);background:rgba(255,255,255,0.02);border:1px solid var(--border);border-radius:6px;padding:7px 10px}
+.calc-field .mono{color:var(--text)}
+.calc-out{display:flex;justify-content:space-between;align-items:center;font-size:.75rem;font-weight:600;background:rgba(52,211,153,.08);border:1px solid rgba(52,211,153,.2);border-radius:6px;padding:8px 10px;color:var(--emerald)}
+.mini-notif{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px;display:flex;gap:10px;align-items:flex-start}
+.mini-notif .nic{width:30px;height:30px;border-radius:8px;background:rgba(198,243,107,.1);display:grid;place-items:center;flex:none}
+.mini-notif .nic svg{width:16px;height:16px}
+.mini-notif .nt{font-size:.72rem;font-weight:600}
+.mini-notif .nb{font-size:.68rem;color:var(--text-2);line-height:1.4}
+.phone-wrap{display:flex;justify-content:center;padding:6px 0}
+
+/* showcase */
+.showcase{display:grid;grid-template-columns:1fr 1fr;gap:64px;align-items:center}
+.showcase.rev .sc-text{order:2}
+.showcase.rev .sc-visual{order:1}
+@media (max-width:900px){.showcase{grid-template-columns:1fr;gap:40px}.showcase.rev .sc-text{order:1}.showcase.rev .sc-visual{order:2}}
+.sc-list{list-style:none;margin-top:28px;display:flex;flex-direction:column;gap:16px}
+.sc-list li{display:flex;gap:14px;align-items:flex-start}
+.sc-list .ck{width:24px;height:24px;border-radius:7px;background:rgba(52,211,153,.1);border:1px solid rgba(52,211,153,.22);display:grid;place-items:center;flex:none;margin-top:2px}
+.sc-list .ck svg{width:13px;height:13px}
+.sc-list b{display:block;font-weight:600;font-size:.9375rem;color:var(--text)}
+.sc-list span{font-size:.875rem;color:var(--text-2)}
+.sc-visual{position:relative;background:linear-gradient(180deg,rgba(255,255,255,0.035),rgba(255,255,255,0.012));border:1px solid var(--border-strong);border-radius:var(--radius);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);padding:22px;box-shadow:var(--shadow-hover)}
+.sc-visual .vh{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+.sc-visual .vh .t{font-size:.875rem;font-weight:600}
+.sc-visual .vh .s{font-family:var(--mono);font-size:.6875rem;color:var(--muted)}
+.stat-tiles{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:18px}
+.tile{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px;text-align:center}
+.tile .tv{font-family:var(--mono);font-size:1.25rem;font-weight:700;letter-spacing:-.01em}
+.tile .tl{font-size:.6875rem;color:var(--muted);margin-top:4px}
+.tile.pos .tv{color:var(--emerald)}
+.tile.wr .tv{color:var(--lime)}
+.tile.sg .tv{color:var(--teal)}
+
+/* steps */
+.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:56px}
+@media (max-width:800px){.steps{grid-template-columns:1fr}}
+.step{background:var(--glass);border:1px solid var(--border);border-radius:var(--radius);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);padding:28px;position:relative;transition:transform .3s,border-color .3s,box-shadow .3s}
+.step:hover{transform:translateY(-3px);border-color:var(--border-strong);box-shadow:var(--shadow-hover)}
+.step .no{font-family:var(--mono);font-size:.8125rem;font-weight:700;color:var(--emerald);letter-spacing:.05em}
+.step .sic{width:46px;height:46px;border-radius:12px;background:rgba(52,211,153,.08);border:1px solid rgba(52,211,153,.18);display:grid;place-items:center;margin:18px 0}
+.step .sic svg{width:24px;height:24px}
+.step h3{font-size:1.125rem;margin-bottom:8px}
+.step p{font-size:.9rem;color:var(--text-2)}
+
+/* pricing */
+.pricing-wrap{display:flex;justify-content:center;margin-top:56px}
+.pricing-card{width:100%;max-width:460px;position:relative;border:1px solid transparent;border-radius:20px;background:linear-gradient(var(--surface-2),var(--surface-2)) padding-box,conic-gradient(from 160deg,var(--lime),rgba(198,243,107,.12) 28%,var(--emerald) 52%,rgba(45,212,191,.15) 76%,var(--lime)) border-box;padding:38px 34px;box-shadow:0 24px 70px rgba(0,0,0,.45)}
+.pc-glow{position:absolute;inset:-30px;background:radial-gradient(circle at 50% 0%,rgba(52,211,153,.12),transparent 65%);pointer-events:none;z-index:-1}
+.pc-badge{display:inline-flex;align-items:center;gap:7px;font-size:.75rem;font-weight:600;color:var(--lime);background:rgba(198,243,107,.08);border:1px solid rgba(198,243,107,.22);padding:5px 13px;border-radius:999px}
+.pc-name{font-size:1.375rem;font-weight:700;margin-top:18px}
+.pc-price{display:flex;align-items:baseline;gap:8px;margin-top:8px}
+.pc-price .amt{font-family:var(--mono);font-size:3rem;font-weight:700;letter-spacing:-.03em;background:var(--grad);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.pc-price .per{color:var(--text-2);font-size:.9375rem}
+.pc-sub{color:var(--text-2);font-size:.9rem;margin-top:6px}
+.pc-list{list-style:none;margin:26px 0;display:flex;flex-direction:column;gap:13px}
+.pc-list li{display:flex;gap:12px;align-items:flex-start;font-size:.9rem;color:var(--text-2)}
+.pc-list li b{color:var(--text);font-weight:500}
+.pc-list .ck{width:20px;height:20px;border-radius:6px;background:rgba(52,211,153,.12);display:grid;place-items:center;flex:none;margin-top:1px}
+.pc-list .ck svg{width:12px;height:12px}
+.pc-note{margin-top:18px;text-align:center;font-size:.8125rem;color:var(--muted);line-height:1.5}
+
+/* faq */
+.faq{max-width:760px;margin:56px auto 0;display:flex;flex-direction:column;gap:12px}
+.faq-item{background:var(--glass);border:1px solid var(--border);border-radius:var(--radius-sm);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);overflow:hidden;transition:border-color .3s}
+.faq-item.open{border-color:var(--border-strong)}
+.faq-q{width:100%;display:flex;align-items:center;justify-content:space-between;gap:16px;background:none;border:none;color:var(--text);text-align:left;padding:20px 22px;font-size:1rem;font-weight:600;letter-spacing:-.01em}
+.faq-q .ic{width:26px;height:26px;border-radius:7px;background:rgba(255,255,255,0.04);border:1px solid var(--border);display:grid;place-items:center;flex:none;transition:transform .3s,background .3s}
+.faq-q .ic svg{width:14px;height:14px}
+.faq-item.open .faq-q .ic{transform:rotate(45deg);background:rgba(52,211,153,.12)}
+.faq-a{display:grid;grid-template-rows:0fr;transition:grid-template-rows .35s cubic-bezier(.16,1,.3,1)}
+.faq-item.open .faq-a{grid-template-rows:1fr}
+.faq-a-inner{overflow:hidden;visibility:hidden;transition:visibility .35s}
+.faq-item.open .faq-a-inner{visibility:visible}
+.faq-a-inner p{padding:0 22px 22px;font-size:.9rem;color:var(--text-2);line-height:1.65}
+
+/* cta */
+.cta-section{position:relative;overflow:hidden;text-align:center}
+.cta-glow{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:820px;height:520px;background:radial-gradient(ellipse,rgba(198,243,107,.10),rgba(52,211,153,.07) 45%,transparent 72%);pointer-events:none}
+.cta-box{position:relative;z-index:1;max-width:680px;margin:0 auto}
+.cta-box h2{font-size:clamp(2rem,4.5vw,3.25rem);font-weight:800;letter-spacing:-.03em;line-height:1.08}
+.cta-box .lead{margin:20px auto 34px}
+
+/* footer */
+.footer{border-top:1px solid var(--border);background:var(--surface);padding:72px 0 40px;position:relative}
+.footer-grid{display:grid;grid-template-columns:1.6fr 1fr 1fr 1.4fr;gap:40px}
+@media (max-width:900px){.footer-grid{grid-template-columns:1fr 1fr;gap:36px}}
+@media (max-width:560px){.footer-grid{grid-template-columns:1fr}}
+.footer .tagline{color:var(--text-2);font-size:.9rem;margin-top:16px;max-width:280px}
+.f-col h4{font-size:.8125rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--text);margin-bottom:18px}
+.f-col ul{list-style:none;display:flex;flex-direction:column;gap:12px}
+.f-col a{color:var(--text-2);font-size:.9rem;transition:color .2s}
+.f-col a:hover{color:var(--lime)}
+.newsletter p{font-size:.875rem;color:var(--text-2);margin-bottom:14px}
+.nl-form{display:flex;gap:8px}
+.nl-form input{flex:1;min-width:0;background:rgba(255,255,255,0.03);border:1px solid var(--border-strong);border-radius:8px;padding:11px 14px;color:var(--text);font-family:inherit;font-size:.875rem}
+.nl-form input:focus{outline:none;border-color:var(--emerald)}
+.nl-form .btn{padding:11px 16px;font-size:.875rem}
+.nl-msg{margin-top:10px;font-size:.8125rem;color:var(--emerald);display:none}
+.nl-msg.show{display:block}
+.footer-disc{margin-top:56px;padding-top:32px;border-top:1px solid var(--border);display:flex;flex-direction:column;gap:16px}
+.disc{font-size:.75rem;color:var(--muted);line-height:1.65;max-width:900px}
+.disc b{color:var(--text-2);font-weight:600}
+.footer-bottom{margin-top:28px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.footer-bottom .cp{font-size:.8125rem;color:var(--muted)}
+.footer-bottom .social{display:flex;gap:10px}
+.footer-bottom .social a{width:34px;height:34px;border-radius:8px;background:rgba(255,255,255,0.03);border:1px solid var(--border);display:grid;place-items:center;color:var(--text-2);transition:color .2s,border-color .2s}
+.footer-bottom .social a:hover{color:var(--lime);border-color:var(--border-strong)}
+.footer-bottom .social svg{width:16px;height:16px}
+</style>
+</head>
+<body>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <defs>
+    <linearGradient id="gw" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#c6f36b"/><stop offset="0.55" stop-color="#34d399"/><stop offset="1" stop-color="#2dd4bf"/>
+    </linearGradient>
+    <linearGradient id="eqStroke" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#c6f36b"/><stop offset="0.5" stop-color="#34d399"/><stop offset="1" stop-color="#2dd4bf"/>
+    </linearGradient>
+    <linearGradient id="eqFill" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#34d399" stop-opacity="0.22"/><stop offset="1" stop-color="#34d399" stop-opacity="0"/>
+    </linearGradient>
+    <pattern id="hatchRisk" width="7" height="7" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+      <rect width="7" height="7" fill="#ff817d" fill-opacity="0.04"/>
+      <line x1="0" y1="0" x2="0" y2="7" stroke="#ff817d" stroke-opacity="0.22" stroke-width="1.4"/>
+    </pattern>
+    <pattern id="hatchReward" width="7" height="7" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+      <rect width="7" height="7" fill="#34d399" fill-opacity="0.04"/>
+      <line x1="0" y1="0" x2="0" y2="7" stroke="#34d399" stroke-opacity="0.2" stroke-width="1.4"/>
+    </pattern>
+  </defs>
+</svg>
+
+<header class="nav">
+  <div class="nav-inner">
+    <a href="#top" class="logo" aria-label="TraderWatch halaman utama"><span class="logo-mark" aria-hidden="true">T</span><span>TraderWatch</span></a>
+    <nav class="nav-links" aria-label="Navigasi utama">
+      <a href="#features">Features</a><a href="#signal">Signal</a><a href="#prestasi">Prestasi</a><a href="#tools">Tools</a><a href="#faq">Learn</a>
+    </nav>
+    <div class="nav-cta">
+      <a href="/login.html" class="btn btn-ghost">Log masuk</a>
+      <a href="/login.html" class="btn btn-primary">Mula percuma</a>
+    </div>
+    <button class="nav-toggle" aria-label="Buka menu" aria-expanded="false" aria-controls="mobile-menu">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="17" x2="20" y2="17"/></svg>
+    </button>
+  </div>
+</header>
+<nav class="mobile-menu" id="mobile-menu" aria-label="Navigasi mudah alih">
+  <a href="#features">Features</a><a href="#signal">Signal</a><a href="#prestasi">Prestasi</a><a href="#tools">Tools</a><a href="#faq">Learn</a>
+  <a href="/login.html" class="btn btn-ghost btn-block">Log masuk</a>
+  <a href="/login.html" class="btn btn-primary btn-block">Mula percuma</a>
+</nav>
+
+<main id="top">
+
+<section class="hero" aria-label="Pengenalan TraderWatch">
+  <div class="hero-grid-bg" aria-hidden="true"></div>
+  <div class="glow hero-glow-1" aria-hidden="true"></div>
+  <div class="glow hero-glow-2" aria-hidden="true"></div>
+  <div class="wrap hero-inner">
+    <span class="pill reveal"><span class="dot" aria-hidden="true"></span> Signal AI automatik · XAU/USD · XAG/USD · BTC</span>
+    <h1 class="reveal d1">Trade dengan <span class="grad-text">yakin</span>,<br>bukan tekaan.</h1>
+    <p class="hero-sub reveal d2">Signal AI automatik dengan entry, stop loss &amp; take profit — disertai chart beranotasi dan prestasi telus. Semua dalam satu app, percuma.</p>
+    <div class="hero-cta reveal d3">
+      <a href="/login.html" class="btn btn-primary btn-lg">Mula percuma <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+      <a href="#prestasi" class="btn btn-ghost btn-lg">Lihat prestasi <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17L17 7M9 7h8v8"/></svg></a>
+    </div>
+    <p class="hero-note reveal d4"><span>Percuma untuk semua ahli</span> · Tiada kad kredit · Install sebagai app</p>
+
+    <div class="hero-visual reveal d4">
+      <div class="hero-visual-glow" aria-hidden="true"></div>
+      <div class="mockup" role="img" aria-label="Pratonton dashboard TraderWatch: kad signal XAU/USD BUY dengan entry, stop loss dan take profit, di sebelah chart candlestick beranotasi.">
+        <div class="mockup-bar" aria-hidden="true"><span class="td"></span><span class="td"></span><span class="td"></span><span class="url">app.traderwatch.org</span></div>
+        <div class="mockup-body">
+          <div class="signal-card">
+            <div class="signal-top">
+              <div class="signal-pair">
+                <span class="pair-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="url(#gw)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8"/><path d="M9 12l2 2 4-4"/></svg></span>
+                <span><span class="nm">XAU/USD</span><br><span class="tf">Gold · M15</span></span>
+              </div>
+              <span class="chip chip-live"><span class="dot" aria-hidden="true"></span>LIVE</span>
+            </div>
+            <div><span class="chip chip-buy">▲ BUY</span></div>
+            <div class="signal-levels">
+              <div class="lvl lvl-entry"><span class="k"><i aria-hidden="true"></i>Entry</span><span class="v">3676.40</span></div>
+              <div class="lvl lvl-sl"><span class="k"><i aria-hidden="true"></i>Stop Loss</span><span class="v">3662.10</span></div>
+              <div class="lvl lvl-tp"><span class="k"><i aria-hidden="true"></i>Take Profit</span><span class="v">3705.00</span></div>
+            </div>
+            <div class="rr-tag"><span>Risk : Reward</span><b>1 : 2.0</b></div>
+            <p class="signal-reason"><b>Sebab entry:</b> Harga react di zon POI demand M15 dengan bullish engulfing + confluence struktur higher-low.</p>
+          </div>
+          <div class="chart-panel">
+            <div class="cp-head"><span class="t">XAU/USD · M15</span>
+              <span class="lg" aria-hidden="true"><span><i style="background:#c6f36b"></i>Entry</span><span><i style="background:#ff817d"></i>SL</span><span><i style="background:#34d399"></i>TP</span></span>
+            </div>
+            <svg viewBox="0 0 300 200" width="100%" role="img" aria-label="Chart candlestick mini dengan garisan entry, stop loss dan take profit berlabel.">
+              <g stroke="rgba(255,255,255,0.04)" stroke-width="1"><line x1="0" y1="60" x2="300" y2="60"/><line x1="0" y1="120" x2="300" y2="120"/><line x1="0" y1="150" x2="300" y2="150"/></g>
+              <g stroke-width="1.4">
+                <g stroke="#ff817d" fill="#ff817d"><line x1="20" y1="150" x2="20" y2="168"/><rect x="15" y="154" width="10" height="10" rx="1"/></g>
+                <g stroke="#34d399" fill="#34d399"><line x1="42" y1="140" x2="42" y2="166"/><rect x="37" y="144" width="10" height="18" rx="1"/></g>
+                <g stroke="#34d399" fill="#34d399"><line x1="64" y1="128" x2="64" y2="158"/><rect x="59" y="132" width="10" height="22" rx="1"/></g>
+                <g stroke="#ff817d" fill="#ff817d"><line x1="86" y1="130" x2="86" y2="152"/><rect x="81" y="134" width="10" height="14" rx="1"/></g>
+                <g stroke="#34d399" fill="#34d399"><line x1="108" y1="112" x2="108" y2="146"/><rect x="103" y="116" width="10" height="26" rx="1"/></g>
+                <g stroke="#34d399" fill="#34d399"><line x1="130" y1="100" x2="130" y2="134"/><rect x="125" y="104" width="10" height="26" rx="1"/></g>
+                <g stroke="#ff817d" fill="#ff817d"><line x1="152" y1="104" x2="152" y2="126"/><rect x="147" y="108" width="10" height="14" rx="1"/></g>
+                <g stroke="#34d399" fill="#34d399"><line x1="174" y1="88" x2="174" y2="120"/><rect x="169" y="92" width="10" height="24" rx="1"/></g>
+                <g stroke="#34d399" fill="#34d399"><line x1="196" y1="76" x2="196" y2="108"/><rect x="191" y="80" width="10" height="24" rx="1"/></g>
+                <g stroke="#34d399" fill="#34d399"><line x1="218" y1="64" x2="218" y2="96"/><rect x="213" y="68" width="10" height="24" rx="1"/></g>
+                <g stroke="#ff817d" fill="#ff817d"><line x1="240" y1="68" x2="240" y2="90"/><rect x="235" y="72" width="10" height="14" rx="1"/></g>
+                <g stroke="#34d399" fill="#34d399"><line x1="262" y1="54" x2="262" y2="84"/><rect x="257" y="58" width="10" height="22" rx="1"/></g>
+              </g>
+              <line x1="0" y1="60" x2="300" y2="60" stroke="#34d399" stroke-width="1.4"/>
+              <line x1="0" y1="120" x2="300" y2="120" stroke="#c6f36b" stroke-width="1.4" stroke-dasharray="5 4"/>
+              <line x1="0" y1="150" x2="300" y2="150" stroke="#ff817d" stroke-width="1.4"/>
+              <g font-family="JetBrains Mono, monospace" font-size="8" font-weight="600">
+                <text x="298" y="55" text-anchor="end" fill="#34d399">TP 3705.00</text>
+                <text x="298" y="115" text-anchor="end" fill="#c6f36b">ENTRY 3676.40</text>
+                <text x="298" y="162" text-anchor="end" fill="#ff817d">SL 3662.10</text>
+              </g>
+            </svg>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="stats" aria-label="Statistik TraderWatch">
+  <div class="wrap">
+    <div class="stats-grid">
+      <div class="stat reveal"><div class="num" data-count="11">11</div><div class="lbl">Ahli aktif</div></div>
+      <div class="stat reveal d1"><div class="num" data-count="130" data-suffix="+">130+</div><div class="lbl">Signal diterbitkan</div></div>
+      <div class="stat reveal d2"><div class="num mono">19 Okt 2026</div><div class="lbl">Rekod prestasi sejak</div></div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="features" aria-label="Ciri-ciri TraderWatch">
+  <div class="wrap">
+    <div class="center reveal">
+      <span class="eyebrow">Features</span>
+      <h2 class="h-sec">Semua yang anda perlu,<br>dalam satu platform.</h2>
+      <p class="lead">Daripada signal AI hingga pengurusan risiko — dibina untuk trader yang mahu kejelasan, bukan kecoh.</p>
+    </div>
+    <div class="bento">
+      <article class="b-card b-lg b-featured reveal">
+        <span class="b-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="url(#gw)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v4M12 18v4M4.9 4.9l2.8 2.8M16.3 16.3l2.8 2.8M2 12h4M18 12h4M4.9 19.1l2.8-2.8M16.3 7.7l2.8-2.8"/><circle cx="12" cy="12" r="3.2"/></svg></span>
+        <h3>Signal AI automatik</h3>
+        <p>Enjin AI menjana signal XAU/USD, XAG/USD dan BTC secara automatik — setiap satu lengkap dengan entry, stop loss, take profit dan sebab entry yang jelas.</p>
+        <div class="b-visual mini-signal" aria-hidden="true">
+          <div class="mini-row"><span class="k"><i style="background:#c6f36b"></i>XAU/USD · BUY</span><span style="color:#34d399">LIVE</span></div>
+          <div class="mini-row"><span class="k">Entry</span><span style="color:#c6f36b">3676.40</span></div>
+          <div class="mini-row"><span class="k">SL / TP</span><span><span style="color:#ff817d">3662.10</span> / <span style="color:#34d399">3705.00</span></span></div>
+        </div>
+      </article>
+      <article class="b-card b-lg b-featured reveal d1">
+        <span class="b-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="url(#gw)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 14l3-4 3 3 5-7"/></svg></span>
+        <h3>Chart beranotasi</h3>
+        <p>Setiap signal disertakan chart candlestick dengan lukisan entry, SL dan TP — supaya anda nampak di mana dan kenapa setup itu berlaku.</p>
+        <div class="b-visual" aria-hidden="true">
+          <svg viewBox="0 0 300 110" width="100%">
+            <g stroke="rgba(255,255,255,0.04)"><line x1="0" y1="30" x2="300" y2="30"/><line x1="0" y1="60" x2="300" y2="60"/><line x1="0" y1="88" x2="300" y2="88"/></g>
+            <g stroke-width="1.3">
+              <g stroke="#34d399" fill="#34d399"><line x1="30" y1="70" x2="30" y2="92"/><rect x="25" y="74" width="9" height="14" rx="1"/></g>
+              <g stroke="#34d399" fill="#34d399"><line x1="60" y1="58" x2="60" y2="84"/><rect x="55" y="62" width="9" height="18" rx="1"/></g>
+              <g stroke="#ff817d" fill="#ff817d"><line x1="90" y1="60" x2="90" y2="80"/><rect x="85" y="64" width="9" height="12" rx="1"/></g>
+              <g stroke="#34d399" fill="#34d399"><line x1="120" y1="44" x2="120" y2="72"/><rect x="115" y="48" width="9" height="20" rx="1"/></g>
+              <g stroke="#34d399" fill="#34d399"><line x1="150" y1="34" x2="150" y2="60"/><rect x="145" y="38" width="9" height="18" rx="1"/></g>
+              <g stroke="#ff817d" fill="#ff817d"><line x1="180" y1="36" x2="180" y2="56"/><rect x="175" y="40" width="9" height="12" rx="1"/></g>
+              <g stroke="#34d399" fill="#34d399"><line x1="210" y1="24" x2="210" y2="50"/><rect x="205" y="28" width="9" height="18" rx="1"/></g>
+              <g stroke="#34d399" fill="#34d399"><line x1="240" y1="16" x2="240" y2="40"/><rect x="235" y="20" width="9" height="16" rx="1"/></g>
+            </g>
+            <line x1="0" y1="30" x2="300" y2="30" stroke="#34d399" stroke-width="1.2"/>
+            <line x1="0" y1="60" x2="300" y2="60" stroke="#c6f36b" stroke-width="1.2" stroke-dasharray="4 3"/>
+            <line x1="0" y1="88" x2="300" y2="88" stroke="#ff817d" stroke-width="1.2"/>
+          </svg>
+        </div>
+      </article>
+      <article class="b-card b-sm reveal">
+        <span class="b-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="url(#gw)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l5-6 4 3 6-8"/><path d="M18 6h3v3"/></svg></span>
+        <h3>Prestasi telus</h3>
+        <p>Equity curve &amp; setiap signal direkod penuh. Tiada cherry-pick.</p>
+        <div class="b-visual" aria-hidden="true">
+          <svg viewBox="0 0 200 60" width="100%">
+            <path d="M5 50 L25 44 L45 47 L65 36 L85 39 L105 28 L125 31 L145 20 L165 23 L195 10" fill="none" stroke="url(#eqStroke)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <circle cx="195" cy="10" r="3" fill="#2dd4bf"/>
+          </svg>
+        </div>
+      </article>
+      <article class="b-card b-sm reveal d1" id="tools">
+        <span class="b-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="url(#gw)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="18" rx="2"/><line x1="8" y1="7" x2="16" y2="7"/><line x1="8" y1="12" x2="8" y2="12.01"/><line x1="12" y1="12" x2="12" y2="12.01"/><line x1="16" y1="12" x2="16" y2="12.01"/><line x1="8" y1="16" x2="8" y2="16.01"/><line x1="12" y1="16" x2="12" y2="16.01"/><line x1="16" y1="16" x2="16" y2="16.01"/></svg></span>
+        <h3>Risk toolkit</h3>
+        <p>Kalkulator lot untuk saiz posisi ikut risiko anda.</p>
+        <div class="b-visual mini-calc" aria-hidden="true">
+          <div class="calc-field"><span>Risiko</span><span class="mono">1.0%</span></div>
+          <div class="calc-field"><span>SL (pips)</span><span class="mono">143</span></div>
+          <div class="calc-out"><span>Lot</span><span class="mono">0.07</span></div>
+        </div>
+      </article>
+      <article class="b-card b-sm reveal d2">
+        <span class="b-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="url(#gw)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="7" y="2" width="10" height="20" rx="2.5"/><line x1="11" y1="18" x2="13" y2="18"/><path d="M12 6v5M9.5 8.5L12 11l2.5-2.5"/></svg></span>
+        <h3>PWA offline</h3>
+        <p>Install sebagai app. Signal &amp; chart boleh diakses offline.</p>
+        <div class="b-visual phone-wrap" aria-hidden="true">
+          <svg viewBox="0 0 120 70" width="120" height="70">
+            <rect x="30" y="5" width="40" height="60" rx="7" fill="rgba(255,255,255,0.03)" stroke="rgba(255,255,255,0.14)"/>
+            <line x1="44" y1="58" x2="56" y2="58" stroke="rgba(255,255,255,0.2)" stroke-width="2" stroke-linecap="round"/>
+            <path d="M50 20v16M43 29l7 7 7-7" fill="none" stroke="url(#gw)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M84 35h18M96 29l6 6-6 6" fill="none" stroke="#34d399" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" opacity="0.7"/>
+          </svg>
+        </div>
+      </article>
+      <article class="b-card b-sm reveal d3">
+        <span class="b-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="url(#gw)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg></span>
+        <h3>Notifikasi segera</h3>
+        <p>Signal baru terus ke peranti anda — tiada lagi terlepas setup.</p>
+        <div class="b-visual mini-notif" aria-hidden="true">
+          <span class="nic"><svg viewBox="0 0 24 24" fill="none" stroke="#c6f36b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/></svg></span>
+          <span><span class="nt">Signal baru · XAU/USD</span><br><span class="nb">BUY @ 3676.40 · SL 3662.10 · TP 3705.00</span></span>
+        </div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="signal" aria-label="Chart beranotasi">
+  <div class="wrap">
+    <div class="showcase">
+      <div class="sc-text reveal">
+        <span class="eyebrow">Signal &amp; Chart</span>
+        <h2 class="h-sec">Chart beranotasi,<br>bukan sekadar nombor.</h2>
+        <p class="lead">Setiap signal dilukis terus pada chart — zon POI, garisan entry, stop loss dan take profit. Anda faham setup sebelum menekan butang trade.</p>
+        <ul class="sc-list">
+          <li><span class="ck" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 13l4 4L19 7"/></svg></span><span><b>Zon POI &amp; entry CE 50%</b><span>Entry ditentukan di zon point-of-interest dengan confirmation entry 50% untuk precision.</span></span></li>
+          <li><span class="ck" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 13l4 4L19 7"/></svg></span><span><b>Garisan SL / TP jelas</b><span>Stop loss dan take profit dilukis dengan zon risiko &amp; ganjaran berlorek — nampak RR sebelum entry.</span></span></li>
+          <li><span class="ck" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 13l4 4L19 7"/></svg></span><span><b>Sebab entry + confluence</b><span>Setiap signal menerangkan logik di sebaliknya — struktur, candlestick confirmation dan confluence.</span></span></li>
+        </ul>
+      </div>
+      <div class="sc-visual reveal d2">
+        <div class="vh"><span class="t">XAU/USD · M15 · BUY</span><span class="s">RR 1 : 2.0</span></div>
+        <svg viewBox="0 0 560 380" width="100%" role="img" aria-label="Chart candlestick beranotasi dengan zon POI, garisan entry lime, stop loss merah dengan zon risiko berlorek, dan take profit emerald dengan zon ganjaran berlorek, berserta label harga.">
+          <g stroke="rgba(255,255,255,0.04)" stroke-width="1">
+            <line x1="40" y1="110" x2="500" y2="110"/><line x1="40" y1="210" x2="500" y2="210"/><line x1="40" y1="270" x2="500" y2="270"/>
+            <line x1="120" y1="40" x2="120" y2="330"/><line x1="240" y1="40" x2="240" y2="330"/><line x1="360" y1="40" x2="360" y2="330"/><line x1="480" y1="40" x2="480" y2="330"/>
+          </g>
+          <rect x="200" y="110" width="300" height="100" fill="url(#hatchReward)"/>
+          <rect x="200" y="210" width="300" height="60" fill="url(#hatchRisk)"/>
+          <rect x="150" y="200" width="120" height="34" fill="#c6f36b" fill-opacity="0.06" stroke="#c6f36b" stroke-opacity="0.3" stroke-dasharray="4 3"/>
+          <text x="156" y="196" font-family="JetBrains Mono, monospace" font-size="10" fill="#c6f36b" fill-opacity="0.8">ZON POI</text>
+          <g stroke-width="1.6">
+            <g stroke="#ff817d" fill="#ff817d"><line x1="70" y1="110" x2="70" y2="140"/><rect x="64" y="115" width="12" height="20" rx="1.5"/></g>
+            <g stroke="#ff817d" fill="#ff817d"><line x1="92" y1="125" x2="92" y2="158"/><rect x="86" y="130" width="12" height="22" rx="1.5"/></g>
+            <g stroke="#ff817d" fill="#ff817d"><line x1="114" y1="140" x2="114" y2="175"/><rect x="108" y="145" width="12" height="25" rx="1.5"/></g>
+            <g stroke="#ff817d" fill="#ff817d"><line x1="136" y1="160" x2="136" y2="195"/><rect x="130" y="165" width="12" height="25" rx="1.5"/></g>
+            <g stroke="#ff817d" fill="#ff817d"><line x1="158" y1="180" x2="158" y2="215"/><rect x="152" y="185" width="12" height="25" rx="1.5"/></g>
+            <g stroke="#ff817d" fill="#ff817d"><line x1="180" y1="200" x2="180" y2="232"/><rect x="174" y="205" width="12" height="23" rx="1.5"/></g>
+            <g stroke="#34d399" fill="#34d399"><line x1="202" y1="205" x2="202" y2="235"/><rect x="196" y="210" width="12" height="20" rx="1.5"/></g>
+            <g stroke="#34d399" fill="#34d399"><line x1="224" y1="185" x2="224" y2="228"/><rect x="218" y="190" width="12" height="34" rx="1.5"/></g>
+            <g stroke="#34d399" fill="#34d399"><line x1="246" y1="170" x2="246" y2="210"/><rect x="240" y="175" width="12" height="30" rx="1.5"/></g>
+            <g stroke="#ff817d" fill="#ff817d"><line x1="268" y1="175" x2="268" y2="200"/><rect x="262" y="180" width="12" height="15" rx="1.5"/></g>
+            <g stroke="#34d399" fill="#34d399"><line x1="290" y1="155" x2="290" y2="192"/><rect x="284" y="160" width="12" height="28" rx="1.5"/></g>
+            <g stroke="#34d399" fill="#34d399"><line x1="312" y1="140" x2="312" y2="178"/><rect x="306" y="145" width="12" height="27" rx="1.5"/></g>
+            <g stroke="#34d399" fill="#34d399"><line x1="334" y1="128" x2="334" y2="165"/><rect x="328" y="132" width="12" height="28" rx="1.5"/></g>
+            <g stroke="#ff817d" fill="#ff817d"><line x1="356" y1="132" x2="356" y2="158"/><rect x="350" y="138" width="12" height="14" rx="1.5"/></g>
+            <g stroke="#34d399" fill="#34d399"><line x1="378" y1="118" x2="378" y2="150"/><rect x="372" y="122" width="12" height="24" rx="1.5"/></g>
+            <g stroke="#34d399" fill="#34d399"><line x1="400" y1="105" x2="400" y2="140"/><rect x="394" y="110" width="12" height="25" rx="1.5"/></g>
+            <g stroke="#34d399" fill="#34d399"><line x1="422" y1="95" x2="422" y2="128"/><rect x="416" y="100" width="12" height="24" rx="1.5"/></g>
+            <g stroke="#ff817d" fill="#ff817d"><line x1="444" y1="100" x2="444" y2="122"/><rect x="438" y="105" width="12" height="13" rx="1.5"/></g>
+            <g stroke="#34d399" fill="#34d399"><line x1="466" y1="88" x2="466" y2="116"/><rect x="460" y="92" width="12" height="20" rx="1.5"/></g>
+            <g stroke="#34d399" fill="#34d399"><line x1="488" y1="78" x2="488" y2="104"/><rect x="482" y="82" width="12" height="18" rx="1.5"/></g>
+          </g>
+          <line x1="40" y1="110" x2="500" y2="110" stroke="#34d399" stroke-width="1.8"/>
+          <line x1="40" y1="210" x2="500" y2="210" stroke="#c6f36b" stroke-width="1.8" stroke-dasharray="6 5"/>
+          <line x1="40" y1="217" x2="500" y2="217" stroke="#c6f36b" stroke-opacity="0.35" stroke-width="1" stroke-dasharray="2 4"/>
+          <line x1="40" y1="270" x2="500" y2="270" stroke="#ff817d" stroke-width="1.8"/>
+          <g font-family="JetBrains Mono, monospace" font-size="10" font-weight="600">
+            <rect x="40" y="100" width="34" height="16" rx="4" fill="#34d399" fill-opacity="0.15"/><text x="57" y="112" text-anchor="middle" fill="#34d399">TP</text>
+            <rect x="40" y="200" width="52" height="16" rx="4" fill="#c6f36b" fill-opacity="0.15"/><text x="66" y="212" text-anchor="middle" fill="#c6f36b">ENTRY</text>
+            <rect x="40" y="262" width="34" height="16" rx="4" fill="#ff817d" fill-opacity="0.15"/><text x="57" y="274" text-anchor="middle" fill="#ff817d">SL</text>
+            <text x="98" y="222" fill="#c6f36b" fill-opacity="0.6" font-size="9">CE 50%</text>
+          </g>
+          <g font-family="JetBrains Mono, monospace" font-size="11" font-weight="600">
+            <text x="512" y="114" fill="#34d399">3705.00</text><text x="512" y="214" fill="#c6f36b">3676.40</text><text x="512" y="274" fill="#ff817d">3662.10</text>
+          </g>
+          <g font-family="JetBrains Mono, monospace" font-size="9" fill-opacity="0.7">
+            <text x="470" y="130" text-anchor="end" fill="#34d399">ZON GANJARAN +2R</text>
+            <text x="470" y="262" text-anchor="end" fill="#ff817d">ZON RISIKO −1R</text>
+          </g>
+        </svg>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="prestasi" aria-label="Prestasi telus">
+  <div class="wrap">
+    <div class="showcase rev">
+      <div class="sc-text reveal">
+        <span class="eyebrow">Prestasi</span>
+        <h2 class="h-sec">Prestasi telus,<br>dari hari pertama.</h2>
+        <p class="lead">Kami rekod setiap signal sejak 19 Oktober 2026 — menang, kalah, dan expired. Tiada cherry-pick, tiada angka yang disembunyikan. Signal expired tidak dikira sebagai rugi.</p>
+        <ul class="sc-list">
+          <li><span class="ck" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 13l4 4L19 7"/></svg></span><span><b>Win rate TP/(TP+SL)</b><span>Dikira hanya dari signal yang closed — telus dan boleh disemak.</span></span></li>
+          <li><span class="ck" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 13l4 4L19 7"/></svg></span><span><b>Net R multiples</b><span>Keuntungan diukur dalam gandaan risiko (R), bukan pip kosong — positif walaupun win rate ~34%.</span></span></li>
+          <li><span class="ck" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 13l4 4L19 7"/></svg></span><span><b>Equity curve harian</b><span>Kumulatif R dipaparkan hari demi hari — termasuk drawdown, supaya anda nampak realiti.</span></span></li>
+        </ul>
+      </div>
+      <div class="sc-visual reveal d2">
+        <div class="vh"><span class="t">Equity Curve · Cumulative R</span><span class="s">19 Okt — kini</span></div>
+        <svg viewBox="0 0 560 260" width="100%" role="img" aria-label="Equity curve menunjukkan cumulative R meningkat dari 0 ke +8.43R dengan beberapa drawdown, sejak 19 Oktober 2026.">
+          <g stroke="rgba(255,255,255,0.05)" stroke-width="1"><line x1="40" y1="60" x2="540" y2="60"/><line x1="40" y1="120" x2="540" y2="120"/><line x1="40" y1="180" x2="540" y2="180"/></g>
+          <g font-family="JetBrains Mono, monospace" font-size="10" fill="#6b7280"><text x="8" y="64">8R</text><text x="8" y="124">4R</text><text x="8" y="184">0R</text></g>
+          <line x1="40" y1="180" x2="540" y2="180" stroke="rgba(255,255,255,0.12)" stroke-width="1" stroke-dasharray="3 4"/>
+          <path d="M40 180 L65 168 L90 156 L115 162 L140 144 L165 133.5 L190 141 L215 123 L240 112.5 L265 118.5 L290 102 L315 91.5 L340 99 L365 85.5 L390 76.5 L415 82.5 L440 72 L465 63 L490 69 L515 60 L540 53.5 L540 210 L40 210 Z" fill="url(#eqFill)"/>
+          <path d="M40 180 L65 168 L90 156 L115 162 L140 144 L165 133.5 L190 141 L215 123 L240 112.5 L265 118.5 L290 102 L315 91.5 L340 99 L365 85.5 L390 76.5 L415 82.5 L440 72 L465 63 L490 69 L515 60 L540 53.5" fill="none" stroke="url(#eqStroke)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+          <circle cx="540" cy="53.5" r="4.5" fill="#2dd4bf"/>
+          <circle cx="540" cy="53.5" r="9" fill="#2dd4bf" fill-opacity="0.18"/>
+          <g font-family="JetBrains Mono, monospace" font-size="12" font-weight="700">
+            <rect x="466" y="30" width="72" height="20" rx="6" fill="#2dd4bf" fill-opacity="0.12"/>
+            <text x="502" y="44" text-anchor="middle" fill="#2dd4bf">+8.43R</text>
+          </g>
+        </svg>
+        <div class="stat-tiles">
+          <div class="tile wr"><div class="tv" data-count="34.4" data-dec="1" data-suffix="%">34.4%</div><div class="tl">Win rate TP/(TP+SL)</div></div>
+          <div class="tile pos"><div class="tv" data-count="8.43" data-dec="2" data-prefix="+" data-suffix="R">+8.43R</div><div class="tl">Net R kumulatif</div></div>
+          <div class="tile sg"><div class="tv" data-count="130" data-suffix="+">130+</div><div class="tl">Signal direkod</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="cara" aria-label="Cara ia berfungsi">
+  <div class="wrap">
+    <div class="center reveal">
+      <span class="eyebrow">Cara ia berfungsi</span>
+      <h2 class="h-sec">Tiga langkah untuk mula.</h2>
+      <p class="lead">Tiada keluk pembelajaran yang curam. Daftar, terima signal, trade dengan plan.</p>
+    </div>
+    <div class="steps">
+      <article class="step reveal">
+        <span class="no">01</span>
+        <span class="sic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="url(#gw)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M19 8v6M22 11h-6"/></svg></span>
+        <h3>Daftar percuma</h3>
+        <p>Cipta akaun Free Card dalam seminit. Tiada kad kredit, tiada langganan — akses penuh untuk semua ahli.</p>
+      </article>
+      <article class="step reveal d1">
+        <span class="no">02</span>
+        <span class="sic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="url(#gw)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2L11 13"/><path d="M22 2l-7 20-4-9-9-4 20-7z"/></svg></span>
+        <h3>Terima signal AI</h3>
+        <p>Signal XAU/XAG/BTC dihantar automatik dengan entry, SL, TP, chart beranotasi dan sebab entry — terus ke peranti anda.</p>
+      </article>
+      <article class="step reveal d2">
+        <span class="no">03</span>
+        <span class="sic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="url(#gw)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></span>
+        <h3>Trade dengan plan</h3>
+        <p>Ikut plan yang jelas, saizkan posisi dengan kalkulator lot, dan pantau prestasi telus untuk terus belajar.</p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="pricing" aria-label="Harga Free Card">
+  <div class="wrap">
+    <div class="center reveal">
+      <span class="eyebrow">Harga</span>
+      <h2 class="h-sec">Satu kad. Semua akses. Percuma.</h2>
+      <p class="lead">Kami tidak menjual tier atau langganan berbayar. Setiap ahli mendapat platform yang sama — penuh, tanpa syarat.</p>
+    </div>
+    <div class="pricing-wrap">
+      <div class="pricing-card reveal d1">
+        <div class="pc-glow" aria-hidden="true"></div>
+        <span class="pc-badge"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 13l4 4L19 7"/></svg> Untuk semua ahli</span>
+        <div class="pc-name">Free Card</div>
+        <div class="pc-price"><span class="amt">RM0</span><span class="per">/ selamanya</span></div>
+        <p class="pc-sub">Akses penuh ke seluruh platform TraderWatch.</p>
+        <ul class="pc-list">
+          <li><span class="ck" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 13l4 4L19 7"/></svg></span><span><b>Signal AI</b> XAU/USD, XAG/USD &amp; BTC/USD</span></li>
+          <li><span class="ck" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 13l4 4L19 7"/></svg></span><span><b>Entry + SL + TP</b> lengkap setiap signal</span></li>
+          <li><span class="ck" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 13l4 4L19 7"/></svg></span><span><b>Chart beranotasi</b> + sebab entry</span></li>
+          <li><span class="ck" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 13l4 4L19 7"/></svg></span><span><b>Prestasi penuh</b> — equity curve &amp; rekod signal</span></li>
+          <li><span class="ck" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 13l4 4L19 7"/></svg></span><span><b>PWA offline</b> — install sebagai app</span></li>
+          <li><span class="ck" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 13l4 4L19 7"/></svg></span><span><b>Notifikasi segera</b> signal baru</span></li>
+        </ul>
+        <a href="/login.html" class="btn btn-primary btn-lg btn-block">Daftar percuma <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+        <p class="pc-note">Tiada tiering. Tiada langganan.<br>Semua ahli dapat akses penuh.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="faq" aria-label="Soalan lazim">
+  <div class="wrap">
+    <div class="center reveal">
+      <span class="eyebrow">Learn · FAQ</span>
+      <h2 class="h-sec">Soalan lazim.</h2>
+      <p class="lead">Jawapan jujur — kerana kepercayaan dibina dengan ketelusan.</p>
+    </div>
+    <div class="faq">
+      <div class="faq-item reveal">
+        <button class="faq-q" aria-expanded="false" aria-controls="faq-a1" id="faq-q1"><span>Adakah signal dijamin untung?</span><span class="ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></span></button>
+        <div class="faq-a" id="faq-a1" role="region" aria-labelledby="faq-q1"><div class="faq-a-inner"><p>Tidak. Tiada signal yang boleh menjamin keuntungan. Win rate kami sekitar 34% (TP berbanding TP+SL), tetapi net R kekal positif kerana take profit lebih besar daripada stop loss (RR ~1:2). Trading sentiasa melibatkan risiko kerugian — gunakan pengurusan risiko yang betul dan hanya trade dengan wang yang anda mampu rugi.</p></div></div>
+      </div>
+      <div class="faq-item reveal d1">
+        <button class="faq-q" aria-expanded="false" aria-controls="faq-a2" id="faq-q2"><span>Adakah harga entry sama dengan broker saya?</span><span class="ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></span></button>
+        <div class="faq-a" id="faq-a2" role="region" aria-labelledby="faq-q2"><div class="faq-a-inner"><p>Harga entry, SL dan TP adalah paras rujukan berdasarkan chart kami. Harga sebenar di broker anda mungkin berbeza sedikit disebabkan spread, slippage dan perbezaan feed harga. Gunakan paras tersebut sebagai panduan plan, dan sentiasa sahkan dengan platform broker anda sebelum entry.</p></div></div>
+      </div>
+      <div class="faq-item reveal d2">
+        <button class="faq-q" aria-expanded="false" aria-controls="faq-a3" id="faq-q3"><span>Adakah ini nasihat kewangan?</span><span class="ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></span></button>
+        <div class="faq-a" id="faq-a3" role="region" aria-labelledby="faq-q3"><div class="faq-a-inner"><p>Tidak. TraderWatch ialah platform pendidikan dan analisis signal. Semua kandungan adalah untuk tujuan pendidikan sahaja — bukan nasihat kewangan, pelaburan atau trading peribadi. Anda bertanggungjawab sepenuhnya atas keputusan trading anda sendiri. Educational only. Trading involves substantial risk.</p></div></div>
+      </div>
+      <div class="faq-item reveal d3">
+        <button class="faq-q" aria-expanded="false" aria-controls="faq-a4" id="faq-q4"><span>Perlu bayar untuk akses penuh?</span><span class="ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></span></button>
+        <div class="faq-a" id="faq-a4" role="region" aria-labelledby="faq-q4"><div class="faq-a-inner"><p>Tidak. Free Card adalah RM0 untuk semua ahli — tiada tiering, tiada langganan, tiada caj tersembunyi. Setiap ahli mendapat akses penuh yang sama: signal AI, chart beranotasi, prestasi telus, risk toolkit, PWA offline dan notifikasi.</p></div></div>
+      </div>
+      <div class="faq-item reveal d4">
+        <button class="faq-q" aria-expanded="false" aria-controls="faq-a5" id="faq-q5"><span>Boleh install sebagai app?</span><span class="ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></span></button>
+        <div class="faq-a" id="faq-a5" role="region" aria-labelledby="faq-q5"><div class="faq-a-inner"><p>Ya. TraderWatch ialah Progressive Web App (PWA). Install terus dari pelayar ke skrin utama anda — ia berfungsi seperti app native, menyokong notifikasi, dan signal serta chart boleh diakses walaupun offline.</p></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section cta-section" aria-label="Daftar TraderWatch">
+  <div class="cta-glow" aria-hidden="true"></div>
+  <div class="wrap">
+    <div class="cta-box reveal">
+      <span class="eyebrow" style="justify-content:center">Percuma untuk semua</span>
+      <h2>Mula trade dengan <span class="grad-text">yakin</span> hari ini.</h2>
+      <p class="lead">Sertai TraderWatch dan terima signal AI dengan entry, SL, TP dan chart beranotasi — bersama prestasi yang telus. Tiada kad kredit diperlukan.</p>
+      <a href="/login.html" class="btn btn-primary btn-lg">Daftar percuma <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer class="footer" aria-label="Laman bawah">
+  <div class="wrap">
+    <div class="footer-grid">
+      <div class="f-brand">
+        <a href="#top" class="logo" aria-label="TraderWatch"><span class="logo-mark" aria-hidden="true">T</span><span>TraderWatch</span></a>
+        <p class="tagline">Signal forex AI automatik dengan chart beranotasi dan prestasi telus. Percuma untuk semua ahli.</p>
+      </div>
+      <div class="f-col">
+        <h4>Produk</h4>
+        <ul><li><a href="#signal">Signal</a></li><li><a href="#features">Markets</a></li><li><a href="#prestasi">Prestasi</a></li><li><a href="#tools">Tools</a></li></ul>
+      </div>
+      <div class="f-col">
+        <h4>Sumber</h4>
+        <ul><li><a href="#faq">Learn</a></li><li><a href="#faq">FAQ</a></li><li><a href="/login.html">Log masuk</a></li></ul>
+      </div>
+      <div class="f-col newsletter">
+        <h4>Hubungi</h4>
+        <p>Dapatkan signal terkini &amp; kemas kini prestasi terus ke Telegram kami.</p>
+        <form class="nl-form" id="nl-form" novalidate>
+          <label for="nl-email" class="sr-only">Alamat emel</label>
+          <input type="email" id="nl-email" name="email" aria-label="Alamat emel anda" required autocomplete="email">
+          <button type="submit" class="btn btn-primary">Subscribe</button>
+        </form>
+        <p class="nl-msg" id="nl-msg" role="status">Terima kasih! Signal terkini dihantar ke Telegram kami.</p>
+        <ul style="margin-top:16px"><li><a href="https://t.me/Traderwatchmembershipbot" target="_blank" rel="noopener">Telegram →</a></li></ul>
+      </div>
+    </div>
+    <div class="footer-disc">
+      <p class="disc"><b>Penafian Risiko:</b> TraderWatch ialah platform pendidikan dan analisis signal. Semua kandungan adalah untuk tujuan pendidikan sahaja — bukan nasihat kewangan, pelaburan atau trading. Trading forex, emas, perak dan kripto melibatkan risiko kerugian yang besar dan mungkin tidak sesuai untuk semua pelabur; anda boleh kehilangan lebih daripada deposit asal. Prestasi lepas tidak menjamin keputusan masa depan. Win rate dan net R yang dipaparkan adalah rekod sebenar tetapi tidak menjanjikan keuntungan. Berdagang hanya dengan wang yang anda mampu rugi. <b>Educational only. Trading involves substantial risk.</b></p>
+      <p class="disc"><b>Penafian Rakan Kongsi:</b> TraderWatch mungkin mempunyai hubungan rakan kongsi atau affiliate dengan broker dan platform tertentu, dan boleh menerima pampasan apabila anda mendaftar melalui pautan kami — tanpa kos tambahan kepada anda. Hubungan ini tidak mempengaruhi penilaian atau signal kami. Sentiasa buat penyelidikan sendiri sebelum memilih broker.</p>
+    </div>
+    <div class="footer-bottom">
+      <span class="cp">© 2026 TraderWatch. Hak cipta terpelihara.</span>
+      <div class="social">
+        <a href="https://t.me/Traderwatchmembershipbot" target="_blank" rel="noopener" aria-label="Telegram TraderWatch"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M21.9 4.6l-3.1 14.6c-.2 1-.8 1.2-1.6.8l-4.5-3.3-2.2 2.1c-.2.2-.4.4-.9.4l.3-4.6L18.3 7c.4-.3-.1-.5-.6-.2L7.4 13.3l-4.4-1.4c-1-.3-1-1 .2-1.4L20.6 3.2c.8-.3 1.5.2 1.3 1.4z"/></svg></a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script>
+(function(){
+  "use strict";
+  var reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  /* Scroll reveal — content visible by default. Initial-viewport elements are
+     revealed immediately (never hidden); below-fold elements animate on scroll.
+     A safety net guarantees nothing stays hidden if observers never fire. */
+  var reveals = Array.prototype.slice.call(document.querySelectorAll(".reveal"));
+  if (!reduce && "IntersectionObserver" in window) {
+    document.documentElement.classList.add("js-reveal");
+    var vh = window.innerHeight || document.documentElement.clientHeight;
+    var io = new IntersectionObserver(function(entries){
+      entries.forEach(function(e){
+        if (e.isIntersecting) { e.target.classList.add("in"); io.unobserve(e.target); }
+      });
+    }, { threshold: 0.12, rootMargin: "0px 0px -40px 0px" });
+    reveals.forEach(function(el){
+      var r = el.getBoundingClientRect();
+      if (r.top < vh && r.bottom > 0) { el.classList.add("in"); }
+      else { io.observe(el); }
+    });
+    setTimeout(function(){ reveals.forEach(function(el){ el.classList.add("in"); }); }, 1800);
+  }
+
+  /* Animated counters — final value already in HTML for no-JS / reduced-motion */
+  function animateCount(el){
+    var target = parseFloat(el.getAttribute("data-count"));
+    var dec = parseInt(el.getAttribute("data-dec") || "0", 10);
+    var suffix = el.getAttribute("data-suffix") || "";
+    var prefix = el.getAttribute("data-prefix") || "";
+    function fmt(v){ return prefix + v.toFixed(dec) + suffix; }
+    if (reduce || !window.requestAnimationFrame) { el.textContent = fmt(target); return; }
+    var dur = 1400, start = null;
+    function step(ts){
+      if (start === null) start = ts;
+      var p = Math.min((ts - start) / dur, 1);
+      var eased = 1 - Math.pow(1 - p, 3);
+      el.textContent = fmt(target * eased);
+      if (p < 1) requestAnimationFrame(step); else el.textContent = fmt(target);
+    }
+    requestAnimationFrame(step);
+  }
+  var counters = document.querySelectorAll("[data-count]");
+  if ("IntersectionObserver" in window && !reduce) {
+    var cio = new IntersectionObserver(function(entries){
+      entries.forEach(function(e){
+        if (e.isIntersecting) { animateCount(e.target); cio.unobserve(e.target); }
+      });
+    }, { threshold: 0.4 });
+    counters.forEach(function(el){ cio.observe(el); });
+  } else {
+    counters.forEach(animateCount);
+  }
+
+  /* Mobile nav */
+  var toggle = document.querySelector(".nav-toggle");
+  var menu = document.getElementById("mobile-menu");
+  function setMenu(open){
+    menu.classList.toggle("open", open);
+    toggle.setAttribute("aria-expanded", String(open));
+    toggle.setAttribute("aria-label", open ? "Tutup menu" : "Buka menu");
+  }
+  if (toggle && menu) {
+    toggle.addEventListener("click", function(){ setMenu(!menu.classList.contains("open")); });
+    menu.querySelectorAll("a").forEach(function(a){ a.addEventListener("click", function(){ setMenu(false); }); });
+    document.addEventListener("keydown", function(e){ if (e.key === "Escape") setMenu(false); });
+  }
+
+  /* FAQ accordion (single open) */
+  document.querySelectorAll(".faq-q").forEach(function(btn){
+    btn.addEventListener("click", function(){
+      var item = btn.closest(".faq-item");
+      var willOpen = !item.classList.contains("open");
+      document.querySelectorAll(".faq-item.open").forEach(function(o){
+        if (o !== item) { o.classList.remove("open"); o.querySelector(".faq-q").setAttribute("aria-expanded", "false"); }
+      });
+      item.classList.toggle("open", willOpen);
+      btn.setAttribute("aria-expanded", String(willOpen));
+    });
+  });
+
+  /* Newsletter — graceful inline confirmation (preview, no backend) */
+  var nlForm = document.getElementById("nl-form");
+  var nlMsg = document.getElementById("nl-msg");
+  if (nlForm && nlMsg) {
+    nlForm.addEventListener("submit", function(e){
+      e.preventDefault();
+      var input = document.getElementById("nl-email");
+      if (!input.value || !input.checkValidity()) { input.focus(); input.reportValidity && input.reportValidity(); return; }
+      nlMsg.classList.add("show");
+      nlForm.reset();
+    });
+  }
+})();
+</script>
+</body>
+</html>
