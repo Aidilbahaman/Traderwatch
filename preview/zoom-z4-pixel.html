@@ -28,14 +28,14 @@ body{background:#0a0e0b;color:var(--text);font:14px -apple-system,sans-serif}
 #pixels{position:absolute;inset:0;z-index:8;display:grid;pointer-events:none;opacity:0}
 #pixels i{background:var(--lime);border-radius:1px;transform:scale(0)}
 #intro.go #pixels{opacity:1}
-#intro.go #pixels i{animation:pix .85s ease-in forwards}
+#intro.go #pixels i{animation:pix 1.2s ease-in forwards}
 @keyframes pix{
  0%{transform:scale(0) rotate(0);opacity:1}
  35%{transform:scale(1.4) rotate(45deg);opacity:.9}
  100%{transform:scale(0) rotate(180deg);opacity:0}
 }
-#intro.go .bh{animation:bhZoom .7s cubic-bezier(.7,0,.9,.4) forwards}
-@keyframes bhZoom{0%{transform:scale(1);filter:blur(0)}100%{transform:scale(13);filter:blur(14px)}}
+#intro.go .bh{animation:bhZoom 1.2s cubic-bezier(.35,0,.65,1) forwards}
+@keyframes bhZoom{0%{transform:scale(1);filter:blur(0)}30%{transform:scale(1.4);filter:blur(1px)}65%{transform:scale(3.5);filter:blur(5px)}100%{transform:scale(13);filter:blur(14px)}}
 #intro.go .brand,#intro.go .tap,#intro.go .itxt{opacity:0}
 #void{position:absolute;inset:0;z-index:15;background:#050807;opacity:0;transition:opacity .2s}
 #void.on{opacity:1}
@@ -104,9 +104,9 @@ function pixelSound(){
  intro.onclick=function(){
   if(busy)return;busy=true;try{pixelSound()}catch(e){}
   intro.classList.add('go');
-  setTimeout(function(){document.getElementById('void').classList.add('on')},700);
+  setTimeout(function(){document.getElementById('void').classList.add('on')},1150);
   setTimeout(function(){intro.style.display='none';document.getElementById('on').classList.add('show');
-   setTimeout(function(){var v=document.getElementById('void');v.style.transition='opacity .5s';v.classList.remove('on')},120)},980);
+   setTimeout(function(){var v=document.getElementById('void');v.style.transition='opacity .5s';v.classList.remove('on')},120)},1450);
  };
 })();
 </script></body></html>

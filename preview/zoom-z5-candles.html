@@ -27,15 +27,15 @@ body{background:#0a0e0b;color:var(--text);font:14px -apple-system,sans-serif}
 .tap{position:absolute;bottom:44px;font-size:10.5px;color:var(--lime);font-weight:800;letter-spacing:1px;animation:bl 1.6s infinite;z-index:7}
 @keyframes bl{0%,100%{opacity:.3}50%{opacity:1}}
 /* zoom: candles fall inward */
-#intro.go .candles{animation:candSpin .9s cubic-bezier(.6,0,.9,.4) forwards}
+#intro.go .candles{animation:candSpin 1.5s cubic-bezier(.35,0,.65,1) forwards}
 @keyframes candSpin{0%{transform:rotate(0) scale(1);opacity:1}100%{transform:rotate(-540deg) scale(.03);opacity:0}}
-#intro.go .bh{animation:bhZoom .9s cubic-bezier(.6,0,.9,.4) forwards}
-@keyframes bhZoom{0%{transform:scale(1)}100%{transform:scale(16)}}
+#intro.go .bh{animation:bhZoom 1.5s cubic-bezier(.35,0,.65,1) forwards}
+@keyframes bhZoom{0%{transform:scale(1)}30%{transform:scale(1.5)}65%{transform:scale(4)}100%{transform:scale(16)}}
 #intro.go .brand,#intro.go .tap{opacity:0}
 #intro.go .itxt{opacity:0;transform:translateY(40px)}
 /* price line sweep */
 #pline{position:absolute;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--lime),transparent);z-index:6;opacity:0;top:50%}
-#intro.go #pline{animation:psweep .8s ease-in-out forwards}
+#intro.go #pline{animation:psweep 1.4s ease-in-out forwards}
 @keyframes psweep{0%{opacity:0;transform:scaleX(0)}30%{opacity:1;transform:scaleX(1)}100%{opacity:0;transform:scaleX(1.4)}}
 #void{position:absolute;inset:0;z-index:15;background:#000;opacity:0;transition:opacity .25s}
 #void.on{opacity:1}
@@ -113,9 +113,9 @@ function candleSound(){
  intro.onclick=function(){
   if(busy)return;busy=true;try{candleSound()}catch(e){}
   intro.classList.add('go');
-  setTimeout(function(){document.getElementById('void').classList.add('on')},900);
+  setTimeout(function(){document.getElementById('void').classList.add('on')},1450);
   setTimeout(function(){intro.style.display='none';document.getElementById('on').classList.add('show');
-   setTimeout(function(){var v=document.getElementById('void');v.style.transition='opacity .6s';v.classList.remove('on')},120)},1200);
+   setTimeout(function(){var v=document.getElementById('void');v.style.transition='opacity .6s';v.classList.remove('on')},120)},1750);
  };
 })();
 </script></body></html>

@@ -34,12 +34,12 @@ body{background:#0a0e0b;color:var(--text);font:14px -apple-system,sans-serif}
 .tap{position:absolute;bottom:44px;font-size:10.5px;color:var(--lime);font-weight:800;letter-spacing:1px;animation:bl 1.6s infinite;z-index:7}
 @keyframes bl{0%,100%{opacity:.3}50%{opacity:1}}
 /* zoom: orbit + bh spiral mengecil masuk */
-#intro.go .orbit{animation:orbitRush .95s cubic-bezier(.6,0,.9,.4) forwards}
+#intro.go .orbit{animation:orbitRush 1.5s cubic-bezier(.35,0,.65,1) forwards}
 @keyframes orbitRush{0%{transform:rotate(0) scale(1)}100%{transform:rotate(900deg) scale(18)}}
-#intro.go .spiral{animation:spiralRush .95s cubic-bezier(.6,0,.9,.4) forwards}
+#intro.go .spiral{animation:spiralRush 1.5s cubic-bezier(.35,0,.65,1) forwards}
 @keyframes spiralRush{0%{transform:rotate(0) scale(1);opacity:1}100%{transform:rotate(-1080deg) scale(.02);opacity:0}}
-#intro.go .bh{animation:bhSuck .95s cubic-bezier(.6,0,.9,.4) forwards}
-@keyframes bhSuck{0%{transform:scale(1)}100%{transform:scale(15)}}
+#intro.go .bh{animation:bhSuck 1.5s cubic-bezier(.35,0,.65,1) forwards}
+@keyframes bhSuck{0%{transform:scale(1)}30%{transform:scale(1.5)}65%{transform:scale(4)}100%{transform:scale(15)}}
 #intro.go .brand,#intro.go .tap{opacity:0}
 #intro.go .itxt{opacity:0;transform:translateY(40px)}
 #void{position:absolute;inset:0;z-index:15;background:#000;opacity:0;transition:opacity .25s}
@@ -109,9 +109,9 @@ function gravitySound(){
  intro.onclick=function(){
   if(busy)return;busy=true;try{gravitySound()}catch(e){}
   intro.classList.add('go');
-  setTimeout(function(){document.getElementById('void').classList.add('on')},930);
+  setTimeout(function(){document.getElementById('void').classList.add('on')},1450);
   setTimeout(function(){intro.style.display='none';document.getElementById('on').classList.add('show');
-   setTimeout(function(){var v=document.getElementById('void');v.style.transition='opacity .6s';v.classList.remove('on')},120)},1230);
+   setTimeout(function(){var v=document.getElementById('void');v.style.transition='opacity .6s';v.classList.remove('on')},120)},1750);
  };
 })();
 </script></body></html>

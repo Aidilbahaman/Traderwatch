@@ -27,10 +27,10 @@ body{background:#0a0e0b;color:var(--text);font:14px -apple-system,sans-serif}
 .tap{position:absolute;bottom:44px;font-size:10.5px;color:var(--lime);font-weight:800;letter-spacing:1px;animation:bl 1.6s infinite;z-index:6}
 @keyframes bl{0%,100%{opacity:.3}50%{opacity:1}}
 /* ZOOM: cincin rush past camera */
-#intro.go .tunnel .ring{animation:ringRush .95s cubic-bezier(.5,0,.9,.4) forwards}
+#intro.go .tunnel .ring{animation:ringRush 1.5s cubic-bezier(.35,0,.65,1) forwards}
 @keyframes ringRush{0%{transform:translateZ(-600px) scale(.4);opacity:0}12%{opacity:.95}100%{transform:translateZ(500px) scale(3.4);opacity:0}}
-#intro.go .core{animation:coreZoom 1.05s cubic-bezier(.6,0,.9,.35) forwards}
-@keyframes coreZoom{0%{transform:scale(1)}100%{transform:scale(22)}}
+#intro.go .core{animation:coreZoom 1.5s cubic-bezier(.35,0,.65,1) forwards}
+@keyframes coreZoom{0%{transform:scale(1)}30%{transform:scale(1.6)}65%{transform:scale(4.5)}100%{transform:scale(20)}}
 #intro.go .brand,#intro.go .tap{opacity:0}
 #intro.go .itxt{opacity:0;transform:translateY(50px)}
 #void{position:absolute;inset:0;z-index:15;background:#000;opacity:0;transition:opacity .25s}
@@ -101,9 +101,9 @@ function wormholeSound(){
   var rings=tn.querySelectorAll('.ring');
   rings.forEach(function(r,i){r.style.animationDelay=(i*0.07).toFixed(2)+'s'});
   intro.classList.add('go');
-  setTimeout(function(){document.getElementById('void').classList.add('on')},1150);
+  setTimeout(function(){document.getElementById('void').classList.add('on')},1500);
   setTimeout(function(){intro.style.display='none';document.getElementById('on').classList.add('show');
-   setTimeout(function(){var v=document.getElementById('void');v.style.transition='opacity .6s';v.classList.remove('on')},120)},1450);
+   setTimeout(function(){var v=document.getElementById('void');v.style.transition='opacity .6s';v.classList.remove('on')},120)},1800);
  };
 })();
 </script></body></html>
