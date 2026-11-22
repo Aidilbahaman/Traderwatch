@@ -130,6 +130,24 @@ html[data-theme="light"] .msg.me .body{background:#eaf5db;border-color:#b9d999}
 .recap .coach b{color:var(--lime);font-style:normal}
 .recap .spark{margin-top:10px;height:38px}
 .recap .spark svg{width:100%;height:38px}
+/* Recap live animation */
+.recap{animation:rcIn .5s cubic-bezier(.2,.9,.2,1) both}
+@keyframes rcIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+.recap .st b{animation:rcPop .55s cubic-bezier(.2,.9,.2,1) both}
+.recap .st:nth-child(2) b{animation-delay:.08s}.recap .st:nth-child(3) b{animation-delay:.16s}.recap .st:nth-child(4) b{animation-delay:.24s}
+@keyframes rcPop{from{opacity:0;transform:translateY(7px) scale(.94)}to{opacity:1;transform:none}}
+.recap .spark polyline.line{stroke-dasharray:1200;stroke-dashoffset:1200;animation:rcDraw 1.4s .3s cubic-bezier(.3,.7,.3,1) forwards}
+@keyframes rcDraw{to{stroke-dashoffset:0}}
+.recap .spark path.area{opacity:0;animation:rcFade .8s 1.1s ease forwards}
+@keyframes rcFade{to{opacity:1}}
+.recap .spark circle.tip{opacity:0;animation:rcFade .3s 1.6s ease forwards,rcTip 2.2s 1.9s ease-in-out infinite}
+@keyframes rcTip{0%,100%{r:3}50%{r:4.6}}
+.recap .wk{position:relative;overflow:hidden}
+.recap .wk::after{content:"";position:absolute;top:0;left:-60%;width:45%;height:100%;background:linear-gradient(105deg,transparent,#b7f36b26,transparent);animation:rcShine 9s 1.5s ease-in-out infinite}
+@keyframes rcShine{0%,88%{left:-60%}96%,100%{left:120%}}
+.recap .best{animation:rcPop .5s .3s cubic-bezier(.2,.9,.2,1) both}
+.recap .coach{animation:rcFade .6s .5s ease both}
+@media(prefers-reduced-motion:reduce){.recap,.recap .st b,.recap .best,.recap .coach{animation:none}.recap .spark polyline.line{stroke-dashoffset:0;animation:none}.recap .spark path.area,.recap .spark circle.tip{opacity:1;animation:none}.recap .wk::after{display:none}}
 .season{display:flex;align-items:center;gap:12px;background:linear-gradient(135deg,#b7f36b14,var(--card));border:1px solid #b7f36b33;border-radius:20px;padding:14px 16px;margin-bottom:12px}
 html[data-theme="light"] .season{background:linear-gradient(135deg,#eaf5db,var(--card))}
 .season .sic{width:40px;height:40px;border-radius:13px;background:#b7f36b1c;color:var(--lime);display:grid;place-items:center;flex:none}
@@ -1789,7 +1807,9 @@ function drawRecap(){
   var zero=34-((0-min)/rng)*28;
   spark='<div class="spark"><svg viewBox="0 0 340 38" preserveAspectRatio="none">'+
    '<line x1="0" y1="'+zero.toFixed(1)+'" x2="340" y2="'+zero.toFixed(1)+'" stroke="#222b23" stroke-dasharray="3,4"/>'+
-   '<polyline points="'+pts+'" fill="none" stroke="#b7f36b" stroke-width="2" stroke-linecap="round"/></svg></div>';
+   '<path class="area" d="M0,34 L'+pts.replace(/ /g,' L')+' L340,34 Z" fill="#b7f36b18"/>'+
+   '<polyline class="line" points="'+pts+'" fill="none" stroke="#b7f36b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>'+
+   '<circle class="tip" cx="340" cy="'+pts.split(' ').pop().split(',')[1]+'" r="3" fill="#b7f36b" stroke="#0a0e0b" stroke-width="1.5"/></svg></div>';
  }
  el.innerHTML='<div class="recap">'+
   '<div class="wk">📅 '+esc(t('recapTitle'))+' · '+esc(d.week_label||'')+'</div>'+
