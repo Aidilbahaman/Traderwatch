@@ -1,0 +1,191 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>TraderWatch — Winner Card Animations</title>
+<style>
+:root{--bg:#0a0e0b;--card:#111612;--card2:#171e18;--line:#222b23;--text:#eef3ee;--muted:#8a978c;
+ --lime:#b7f36b;--lime2:#d6ff9a;--red:#ff777d;--gold:#ffd166;--silver:#cbd5e1;--bronze:#e0955a}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#070a08;color:var(--text);font:14px -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;padding:26px 16px 60px}
+h1{font-size:20px;font-weight:800;text-align:center;margin-bottom:6px;letter-spacing:-.3px}
+.sub{color:var(--muted);font-size:12px;text-align:center;line-height:1.6;margin-bottom:24px;max-width:560px;margin-left:auto;margin-right:auto}
+.board{max-width:520px;margin:0 auto;display:flex;flex-direction:column;gap:12px}
+
+/* ================= BASE CARD (sama macam app) ================= */
+.lrow{position:relative;display:flex;align-items:center;gap:11px;padding:13px 14px;
+ background:var(--card);border:1px solid var(--line);border-radius:16px;overflow:hidden;
+ transition:border-color .25s,transform .2s}
+.lrow .rk{font-size:12px;width:16px;text-align:center;color:var(--muted);font-weight:700;flex:none}
+.lrow .av{width:38px;height:38px;border-radius:50%;display:grid;place-items:center;
+ font-size:12px;font-weight:800;color:#0a1407;flex:none}
+.lrow .who{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+.lrow .nm{font-size:13.5px;font-weight:800;display:flex;align-items:center;gap:6px}
+.lrow .lbadge{font-size:8.5px;font-weight:800;padding:2px 6px;border-radius:99px;
+ background:#b7f36b22;color:var(--lime);letter-spacing:.4px}
+.lrow .lbal{font-size:11px;color:var(--text);display:flex;align-items:center;gap:6px}
+.lrow .lbal i{font-style:normal;font-size:9.5px;font-weight:700}
+.lrow .lbal i.dn{color:var(--red)}
+.lrow .lsub2{font-size:9.5px;color:var(--muted)}
+.lrow .val{font-size:14px;font-weight:900;flex:none}
+
+/* ================= #1 CHAMPION (gempak) ================= */
+.rank1{border-color:rgba(255,209,102,.42);background:linear-gradient(135deg,#141a12,#111612 60%)}
+.rank1 .val{color:var(--gold)}
+.rank1 .medal{font-size:17px}
+
+/* 1a: aurora sweep across */
+.rank1::before{content:"";position:absolute;inset:-60% -40%;z-index:0;pointer-events:none;
+ background:linear-gradient(115deg,transparent 34%,rgba(255,209,102,.16) 47%,rgba(255,255,255,.30) 50%,
+  rgba(255,209,102,.16) 53%,transparent 66%);
+ transform:translateX(-120%);animation:aurora 4.8s cubic-bezier(.4,0,.2,1) infinite}
+@keyframes aurora{0%{transform:translateX(-120%)}55%,100%{transform:translateX(120%)}}
+
+/* 1b: gold shimmer border */
+.rank1::after{content:"";position:absolute;inset:0;border-radius:16px;pointer-events:none;z-index:2;
+ padding:1px;background:linear-gradient(120deg,rgba(255,209,102,.15),rgba(255,209,102,.85),
+  rgba(255,255,255,.9),rgba(255,209,102,.85),rgba(255,209,102,.15));
+ background-size:300% 100%;
+ -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);
+ -webkit-mask-composite:xor;mask-composite:exclude;
+ animation:borderFlow 4.8s linear infinite}
+@keyframes borderFlow{0%{background-position:0% 50%}100%{background-position:300% 50%}}
+
+/* 1c: sparkles */
+.spark{position:absolute;width:3px;height:3px;border-radius:50%;background:var(--gold);
+ box-shadow:0 0 6px var(--gold),0 0 12px rgba(255,209,102,.6);z-index:1;pointer-events:none;
+ opacity:0;animation:sparkRise 3.4s ease-out infinite}
+@keyframes sparkRise{
+ 0%{transform:translateY(6px) scale(.4);opacity:0}
+ 18%{opacity:1;transform:translateY(-2px) scale(1.1)}
+ 100%{transform:translateY(-46px) scale(.3);opacity:0}}
+
+/* 1d: crown bounce */
+.rank1 .av{box-shadow:0 0 0 2px rgba(255,209,102,.55),0 0 16px rgba(255,209,102,.35);
+ animation:crownGlow 2.6s ease-in-out infinite}
+@keyframes crownGlow{0%,100%{box-shadow:0 0 0 2px rgba(255,209,102,.4),0 0 12px rgba(255,209,102,.25)}
+ 50%{box-shadow:0 0 0 2.5px rgba(255,209,102,.85),0 0 24px rgba(255,209,102,.55)}}
+
+/* ================= #2 SILVER (sederhana) ================= */
+.rank2{border-color:rgba(203,213,225,.30)}
+.rank2 .val{color:var(--silver)}
+.rank2 .medal{font-size:16px}
+.rank2 .av{box-shadow:0 0 0 1.5px rgba(203,213,225,.42)}
+/* silver subtle pulse on value */
+.rank2 .val{animation:silverPulse 3.6s ease-in-out infinite}
+@keyframes silverPulse{0%,100%{opacity:.85}50%{opacity:1;text-shadow:0 0 12px rgba(203,213,225,.45)}}
+/* silver: single soft sheen */
+.rank2::before{content:"";position:absolute;inset:0;pointer-events:none;z-index:0;
+ background:linear-gradient(100deg,transparent 42%,rgba(203,213,225,.10) 50%,transparent 58%);
+ transform:translateX(-140%);animation:sheen 7s ease-in-out infinite}
+@keyframes sheen{0%,40%{transform:translateX(-140%)}70%,100%{transform:translateX(140%)}}
+
+/* ================= #3 BRONZE (sederhana) ================= */
+.rank3{border-color:rgba(224,149,90,.28)}
+.rank3 .val{color:var(--bronze)}
+.rank3 .medal{font-size:16px}
+.rank3 .av{box-shadow:0 0 0 1.5px rgba(224,149,90,.38)}
+.rank3 .val{animation:bronzePulse 4.2s ease-in-out infinite}
+@keyframes bronzePulse{0%,100%{opacity:.85}50%{opacity:1;text-shadow:0 0 10px rgba(224,149,90,.4)}}
+
+/* ================= normal row ================= */
+.rankN .val{color:var(--muted)}
+
+/* foot */
+.foot{max-width:520px;margin:22px auto 0;color:var(--muted);font-size:10.5px;text-align:center;line-height:1.7}
+.foot b{color:var(--lime)}
+.legend{max-width:520px;margin:0 auto 18px;background:#b7f36b0d;border:1px solid #b7f36b33;
+ border-radius:12px;padding:11px 14px;font-size:11px;line-height:1.8;color:#b7f36b}
+.legend b{color:#fff}
+.replay{display:block;margin:16px auto 0;background:#171e18;border:1px solid #222b23;color:var(--lime);
+ font:700 11px inherit;padding:9px 18px;border-radius:99px;cursor:pointer}
+
+@media(prefers-reduced-motion:reduce){
+ .rank1::before,.rank1::after,.spark,.rank2::before,
+ .rank1 .av,.rank2 .val,.rank3 .val{animation:none!important}
+ .rank1::after{background-position:50% 50%}
+}
+</style>
+</head>
+<body>
+<h1>✦ Winner Card Animations</h1>
+<p class="sub">#1 gempak (aurora + border emas + sparkle + crown glow), #2 &amp; #3 sederhana (sheen + pulse).</p>
+
+<div class="legend">
+  <b>#1</b> — aurora melintang, border emas mengalir, sparkle naik, avatar glow<br>
+  <b>#2</b> — sheen perak lembut + value pulse<br>
+  <b>#3</b> — value pulse bronze (tiada sheen)
+</div>
+
+<div class="board" id="board">
+  <!-- #1 CHAMPION -->
+  <div class="lrow rank1">
+    <span class="medal">🥇</span>
+    <span class="av" style="background:#8ab4ff">AI</span>
+    <span class="who">
+      <span class="nm">Aidil Bahaman <span class="lbadge">You</span></span>
+      <span class="lbal">$9,974.61 <i class="dn">−0.3%</i></span>
+      <span class="lsub2">37.5% · 25 trades</span>
+    </span>
+    <span class="val">37.5%</span>
+  </div>
+
+  <!-- #2 SILVER -->
+  <div class="lrow rank2">
+    <span class="medal">🥈</span>
+    <span class="av" style="background:#ffc16b">TW</span>
+    <span class="who">
+      <span class="nm">TWADMIN</span>
+      <span class="lbal">$9,800 <i class="dn">−2.0%</i></span>
+      <span class="lsub2">0.0% · 1 trade</span>
+    </span>
+    <span class="val">0.0%</span>
+  </div>
+
+  <!-- #3 BRONZE -->
+  <div class="lrow rank3">
+    <span class="medal">🥉</span>
+    <span class="av" style="background:#b7f36b">M.</span>
+    <span class="who">
+      <span class="nm">M. Amir Danial</span>
+      <span class="lbal">$9,900 <i class="dn">−1.0%</i></span>
+      <span class="lsub2">0.0% · 1 trade</span>
+    </span>
+    <span class="val">0.0%</span>
+  </div>
+
+  <!-- normal -->
+  <div class="lrow rankN">
+    <span class="rk">4</span>
+    <span class="av" style="background:#8ab4ff">JD</span>
+    <span class="who">
+      <span class="nm">J. Doe</span>
+      <span class="lbal">$9,500 <i class="dn">−5.0%</i></span>
+      <span class="lsub2">0.0% · 2 trades</span>
+    </span>
+    <span class="val">0.0%</span>
+  </div>
+</div>
+
+<button class="replay" onclick="location.reload()">↻ Replay</button>
+<p class="foot">Sama macam <b>League → Leaderboard</b> dalam app. Animasi cuma untuk top 3.</p>
+
+<script>
+/* sparkle untuk #1 — 8 titik rawak */
+(function(){
+  var c=document.querySelector('.rank1');
+  for(var i=0;i<8;i++){
+    var s=document.createElement('i');
+    s.className='spark';
+    s.style.left=(8+Math.random()*84)+'%';
+    s.style.top=(20+Math.random()*60)+'%';
+    s.style.animationDelay=(-Math.random()*3.4).toFixed(2)+'s';
+    var sz=(2+Math.random()*2).toFixed(1);
+    s.style.width=sz+'px';s.style.height=sz+'px';
+    c.appendChild(s);
+  }
+})();
+</script>
+</body>
+</html>
