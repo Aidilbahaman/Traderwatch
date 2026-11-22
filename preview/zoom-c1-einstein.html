@@ -1,0 +1,225 @@
+<!doctype html><html lang="ms"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>C1 — Einstein Ring</title>
+<style>
+:root{--lime:#b7f36b;--card:#0d120e;--card2:#171e18;--line:#222b23;--muted:#8a978c;--text:#eef3ee;--onlime:#10150b;--red:#ff777d;--blue:#8ab4ff;--orange:#ffc16b}
+*{box-sizing:border-box;margin:0}
+body{background:#080b09;color:var(--text);font:14px -apple-system,sans-serif}
+.hint{position:fixed;top:0;left:0;right:0;z-index:999;background:#171e18ee;color:var(--muted);font-size:10.5px;padding:8px 14px;text-align:center;border-bottom:1px solid var(--line)}
+.hint b{color:var(--lime)}
+.replay{position:fixed;bottom:14px;right:14px;z-index:999;background:var(--card2);border:1px solid var(--line);color:var(--lime);font:700 10px inherit;padding:8px 14px;border-radius:99px;cursor:pointer}
+.phone{width:390px;max-width:100%;height:800px;max-height:100vh;margin:0 auto;position:relative;overflow:hidden;background:#000}
+#intro{position:absolute;inset:0;z-index:10;display:grid;place-items:center;cursor:pointer;overflow:hidden;background:#040605}
+#decor{position:absolute;inset:0;z-index:2;pointer-events:none;overflow:hidden;display:grid;place-items:center}
+.dec{position:absolute;left:50%;top:50%;will-change:transform,opacity;transform-origin:50% 50%}
+#zh{position:relative;width:220px;height:220px;display:grid;place-items:center;z-index:6;
+ will-change:transform;transform-origin:50% 50%}
+#zh .core{position:relative;width:92px;height:92px;border-radius:50%;background:#000;z-index:9;
+ box-shadow:0 0 0 1.8px #b7f36b,0 0 18px 3px #b7f36baa,0 0 70px 20px #b7f36b33;will-change:transform,box-shadow}
+.brand{position:absolute;top:58px;left:0;right:0;text-align:center;font-size:12px;font-weight:900;letter-spacing:2px;color:var(--lime);z-index:9}
+.brand span{color:var(--text)}
+.itxt{position:absolute;bottom:140px;text-align:center;z-index:9;padding:0 30px;left:0;right:0}
+.itxt b{display:block;font-size:24px;font-weight:900}
+.itxt small{display:block;color:var(--muted);font-size:11.5px;margin-top:8px;line-height:1.6}
+.tap{position:absolute;bottom:44px;left:0;right:0;text-align:center;font-size:10.5px;color:var(--lime);font-weight:800;letter-spacing:1.5px;z-index:9}
+#zlab{position:absolute;z-index:40;top:20%;left:0;right:0;text-align:center;
+ font:900 13px monospace;letter-spacing:3px;color:#b7f36b;opacity:0;
+ text-shadow:0 0 16px #b7f36b,0 0 36px #b7f36b77;pointer-events:none}
+#zbar{position:absolute;z-index:40;bottom:70px;left:60px;right:60px;height:3px;border-radius:99px;
+ background:#b7f36b1f;opacity:0;overflow:hidden}
+#zbar i{display:block;height:100%;width:0;background:linear-gradient(90deg,#b7f36b,#eaffc4);border-radius:99px}
+#void{position:absolute;inset:0;z-index:15;background:#000;opacity:0;transition:opacity .25s;pointer-events:none}
+#void.on{opacity:1}
+#on{position:absolute;inset:0;z-index:20;display:flex;align-items:center;justify-content:center;padding:22px;
+ background:rgba(0,0,0,.94);backdrop-filter:blur(10px);opacity:0;pointer-events:none;transition:opacity .5s}
+#on.show{opacity:1;pointer-events:auto}
+.card{width:100%;max-width:360px;background:var(--card);border:1px solid #b7f36b3d;border-radius:24px;
+ padding:24px 20px 18px;text-align:center;box-shadow:0 24px 70px #0009}
+.clogo{font-size:12px;font-weight:900;color:var(--lime);margin-bottom:14px}.clogo span{color:var(--text)}
+.mini{width:60px;height:60px;margin:0 auto 14px;border-radius:50%;background:#000;
+ box-shadow:0 0 0 1.5px var(--lime),0 0 18px 5px #b7f36b66}
+.ct{font-size:20px;font-weight:900}.cs{font-size:11px;color:var(--muted);margin:6px 0 18px;line-height:1.5}
+.opt{display:flex;align-items:center;gap:11px;width:100%;text-align:left;background:var(--card2);
+ border:1px solid var(--line);border-radius:14px;padding:12px;margin-bottom:9px;color:var(--text);font:inherit;cursor:pointer}
+.oi{width:34px;height:34px;flex:none;border-radius:10px;display:grid;place-items:center;background:#b7f36b18;color:var(--lime)}
+.ot{flex:1;display:flex;flex-direction:column;gap:2px}.ot b{font-size:12px;font-weight:800}
+.ot small{font-size:9.5px;color:var(--muted)}
+.go{width:100%;border:0;border-radius:13px;padding:13px;font:800 12.5px inherit;cursor:pointer;
+ background:linear-gradient(135deg,var(--lime),#8ed94e);color:var(--onlime);margin-top:7px}
+.sk{display:block;margin:10px auto 0;border:0;background:none;color:var(--muted);cursor:pointer;
+ font:600 10.5px inherit;text-decoration:underline;padding:5px}
+
+#zh .ring{position:absolute;border-radius:50%;z-index:4;will-change:transform,opacity}
+#zh .ring.r1{width:150px;height:150px;border:2px solid #eaffc4;
+ box-shadow:0 0 22px 5px #b7f36bcc,0 0 60px 18px #b7f36b55,inset 0 0 22px #b7f36b88}
+#zh .ring.r2{width:196px;height:196px;border:1.5px solid #b7f36b99;
+ box-shadow:0 0 30px 8px #b7f36b44}
+#zh .ring.r3{width:250px;height:250px;border:1px solid #8ab4ff66;
+ box-shadow:0 0 40px 12px #8ab4ff33}
+#zh .hole{position:absolute;width:96px;height:96px;border-radius:50%;background:#000;z-index:8;
+ box-shadow:inset 0 0 30px #000,0 0 0 1px #000}
+
+</style></head><body>
+<div class="hint"><b>Einstein Ring</b> — cincin lensing sempurna + 40 zarah melengkung</div>
+<button class="replay" onclick="location.reload()">↻ Replay</button>
+<div class="phone">
+ <div id="intro">
+  <div id="decor"></div>
+  <div class="brand">✦ <span>TraderWatch</span></div>
+  <div id="zh"><div class="core"></div></div>
+  <div id="zlab">ENTERING…</div>
+  <div id="zbar"><i></i></div>
+  <div class="itxt"><b>Gravity bends light.</b><small>Cahaya tidak lari — ia membengkok.</small></div>
+  <div class="tap">TEKAN UNTUK MASUK →</div>
+ </div>
+ <div id="void"></div>
+ <div id="on"><div class="card">
+  <div class="clogo">✦ <span>TraderWatch</span></div><div class="mini"></div>
+  <div class="ct">Selamat datang!</div><div class="cs">Sediakan app anda sebelum mula.</div>
+  <button class="opt"><span class="oi"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"/></svg></span><span class="ot"><b>Hidupkan notifikasi</b><small>Alert TP/SL</small></span></button>
+  <button class="opt"><span class="oi"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="6" y="2" width="12" height="20" rx="2"/></svg></span><span class="ot"><b>Tambah ke skrin utama</b><small>Buka macam app</small></span></button>
+  <button class="go">Mula trade →</button><button class="sk">Langkau dulu</button>
+ </div></div>
+</div>
+<script>
+var AC=null;
+function ac(){if(!AC)AC=new (window.AudioContext||window.webkitAudioContext)();if(AC.state==='suspended')AC.resume();return AC}
+function nz(c,s){var b=c.createBuffer(1,c.sampleRate*s,c.sampleRate),d=b.getChannelData(0);
+ for(var i=0;i<d.length;i++)d[i]=Math.random()*2-1;return b}
+
+function sndEinstein(){var c=ac(),t=c.currentTime;
+ var n=c.createBufferSource();n.buffer=nz(c,1.9);
+ var bp=c.createBiquadFilter();bp.type='bandpass';bp.Q.value=2.2;
+ bp.frequency.setValueAtTime(320,t);bp.frequency.exponentialRampToValueAtTime(1800,t+1.2);
+ var g=c.createGain();g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(.22,t+.3);
+ g.gain.exponentialRampToValueAtTime(.001,t+1.9);
+ n.connect(bp);bp.connect(g);g.connect(c.destination);n.start(t);n.stop(t+2);
+ var o=c.createOscillator();o.type='sine';o.frequency.setValueAtTime(88,t);
+ o.frequency.exponentialRampToValueAtTime(24,t+1.5);
+ var og=c.createGain();og.gain.setValueAtTime(.0001,t);og.gain.exponentialRampToValueAtTime(.5,t+.2);
+ og.gain.exponentialRampToValueAtTime(.001,t+1.8);
+ o.connect(og);og.connect(c.destination);o.start(t);o.stop(t+1.9)}
+
+function sndQuasar(){var c=ac(),t=c.currentTime;
+ /* jet roar: noise bandpass naik */
+ var n=c.createBufferSource();n.buffer=nz(c,1.8);
+ var bp=c.createBiquadFilter();bp.type='bandpass';bp.Q.value=.8;
+ bp.frequency.setValueAtTime(240,t);bp.frequency.exponentialRampToValueAtTime(3400,t+1.1);
+ var g=c.createGain();g.gain.setValueAtTime(.001,t);g.gain.exponentialRampToValueAtTime(.3,t+.25);
+ g.gain.exponentialRampToValueAtTime(.001,t+1.8);
+ n.connect(bp);bp.connect(g);g.connect(c.destination);n.start(t);n.stop(t+1.9);
+ /* dual tone jet */
+ [58,87].forEach(function(f,i){
+  var o=c.createOscillator();o.type='sawtooth';o.frequency.setValueAtTime(f,t);
+  o.frequency.exponentialRampToValueAtTime(f*0.42,t+1.4);
+  var og=c.createGain();og.gain.setValueAtTime(.0001,t);og.gain.exponentialRampToValueAtTime(.2,t+.2+i*.06);
+  og.gain.exponentialRampToValueAtTime(.001,t+1.6);
+  o.connect(og);og.connect(c.destination);o.start(t);o.stop(t+1.7)})}
+
+function sndPlasma(){var c=ac(),t=c.currentTime;
+ /* crackle plasma */
+ for(var i=0;i<18;i++){
+  var o=c.createOscillator();o.type='square';
+  o.frequency.value=200+Math.random()*1200;
+  var g=c.createGain();var tt=t+Math.random()*1.3;
+  g.gain.setValueAtTime(.0001,tt);g.gain.exponentialRampToValueAtTime(.035,tt+.01);
+  g.gain.exponentialRampToValueAtTime(.001,tt+.09);
+  o.connect(g);g.connect(c.destination);o.start(tt);o.stop(tt+.1)}
+ var s=c.createOscillator();s.type='sine';s.frequency.setValueAtTime(72,t);
+ s.frequency.exponentialRampToValueAtTime(26,t+1.5);
+ var sg=c.createGain();sg.gain.setValueAtTime(.0001,t);sg.gain.exponentialRampToValueAtTime(.48,t+.25);
+ sg.gain.exponentialRampToValueAtTime(.001,t+1.75);
+ s.connect(sg);sg.connect(c.destination);s.start(t);s.stop(t+1.85)}
+
+function sndEclipse(){var c=ac(),t=c.currentTime;
+ /* choir pad: 3 sine harmoni */
+ [220,277.18,329.63].forEach(function(f,i){
+  var o=c.createOscillator();o.type='sine';o.frequency.setValueAtTime(f,t);
+  o.frequency.linearRampToValueAtTime(f*0.72,t+1.7);
+  var g=c.createGain();g.gain.setValueAtTime(.0001,t);
+  g.gain.exponentialRampToValueAtTime(.09,t+.35+i*.1);
+  g.gain.exponentialRampToValueAtTime(.001,t+1.85);
+  o.connect(g);g.connect(c.destination);o.start(t);o.stop(t+1.9)});
+ /* deep swell */
+ var s=c.createOscillator();s.type='sine';s.frequency.setValueAtTime(64,t);
+ s.frequency.exponentialRampToValueAtTime(22,t+1.7);
+ var sg=c.createGain();sg.gain.setValueAtTime(.0001,t);sg.gain.exponentialRampToValueAtTime(.5,t+.4);
+ sg.gain.exponentialRampToValueAtTime(.001,t+1.9);
+ s.connect(sg);sg.connect(c.destination);s.start(t);s.stop(t+2)}
+
+
+var DECOR=document.getElementById('decor');
+var zh=document.getElementById('zh'),core=zh.querySelector('.core');
+
+var RS=[];
+(function(){
+ ['r1','r2','r3'].forEach(function(cls){
+  var r=document.createElement('div');r.className='ring '+cls;
+  zh.appendChild(r);RS.push(r);
+ });
+ /* zarah lensed: melengkung mengelilingi cincin */
+ var PL=[];
+ for(var i=0;i<40;i++){
+  var sz=1.5+Math.random()*2;
+  var d=document.createElement('div');d.className='dec';
+  d.style.width=sz+'px';d.style.height=sz+'px';
+  d.style.marginLeft=(-sz/2)+'px';d.style.marginTop=(-sz/2)+'px';
+  d.style.borderRadius='50%';d.style.background='#eaffc4';
+  d.style.boxShadow='0 0 7px #b7f36b';d.style.opacity='0';d.style.zIndex='7';
+  DECOR.appendChild(d);
+  PL.push({el:d,a:Math.random()*6.283,r:96+Math.random()*105});
+ }
+})();
+
+
+var busy=false;
+(function(){
+ var zlab=document.getElementById('zlab'),zbar=document.getElementById('zbar'),zbarI=zbar.querySelector('i'),
+     voidEl=document.getElementById('void'),on=document.getElementById('on'),intro=document.getElementById('intro');
+ var DUR=2100;
+ intro.onclick=function(){
+  if(busy)return;busy=true;
+  try{sndEinstein()}catch(e){}
+  zlab.style.opacity='1';zbar.style.opacity='1';
+  var t0=null;
+  function frame(ts){
+   if(t0===null)t0=ts;
+   var p=Math.min(1,(ts-t0)/DUR);
+   var e=p<0.5?2*p*p:1-Math.pow(-2*p+2,2)/2;
+   t=p;                                     /* global untuk kod anim */
+   
+   /* cincin mengembang, menyala, kemudian mengecil ke teras */
+   for(var i=0;i<RS.length;i++){
+    var rs=RS[i];
+    var growth=1+e*(2.2+i*0.6);
+    var fade=p<0.82?1:1-(p-0.82)/0.18;
+    rs.style.transform='scale('+growth.toFixed(2)+')';
+    rs.style.opacity=((1-i*0.18)*Math.min(1,p*6)*fade).toFixed(2);
+   }
+   /* zarah lensed berpusing & jatuh */
+   for(var j=0;j<PL.length;j++){
+    var o=PL[j];
+    var ang=o.a+p*(6+ (j%5));
+    var rad=o.r*(1-p*0.95);
+    o.el.style.transform='translate('+(Math.cos(ang)*rad).toFixed(1)+'px,'+(Math.sin(ang)*rad*0.85).toFixed(1)+'px) scale('+(1-p*0.7).toFixed(2)+')';
+    o.el.style.opacity=(p<0.05?0.9:(0.9*(1-p))).toFixed(2);
+   }
+   core.style.transform='scale('+(1+e*26).toFixed(2)+')';
+   core.style.boxShadow='0 0 0 '+(1.8*(1-e*0.9)).toFixed(2)+'px rgba(183,243,107,'+(1-e*0.85).toFixed(2)+'),0 0 '+(18+e*14).toFixed(0)+'px 3px rgba(183,243,107,'+(0.6*(1-e)).toFixed(2)+'),0 0 80px 24px rgba(183,243,107,'+(0.2*(1-e)).toFixed(2)+')';
+
+   zbarI.style.width=(p*100).toFixed(1)+'%';
+   zlab.textContent=p<.3?'ENTERING…':(p<.68?'FALLING…':'SWALLOWED');
+   if(p<1){requestAnimationFrame(frame)}
+   else{
+    voidEl.classList.add('on');
+    zlab.style.opacity='0';zbar.style.opacity='0';
+    setTimeout(function(){
+     intro.style.display='none';on.classList.add('show');
+     setTimeout(function(){voidEl.style.transition='opacity .7s';voidEl.classList.remove('on')},140);
+    },320);
+   }
+  }
+  requestAnimationFrame(frame);
+ };
+})();
+</script></body></html>
