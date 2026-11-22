@@ -17,21 +17,22 @@ body{background:#050806;display:flex;align-items:center;justify-content:center;m
 .stars{position:absolute;inset:0;pointer-events:none}
 .stars i{position:absolute;border-radius:50%;background:#dfe9ff;animation:tw linear infinite}
 @keyframes tw{0%,100%{opacity:.10}50%{opacity:.8}}
-.core{position:absolute;left:50%;top:34%;transform:translate(-50%,-50%)}
-.core .glow{position:absolute;left:50%;top:50%;width:200px;height:200px;margin:-100px 0 0 -100px;border-radius:50%;
+.core{position:absolute;left:50%;top:34%;width:0;height:0}
+.core .glow{position:absolute;left:0;top:0;width:200px;height:200px;margin:-100px 0 0 -100px;border-radius:50%;
  background:radial-gradient(circle,rgba(183,243,107,.20) 0%,rgba(183,243,107,.055) 44%,transparent 70%);
  animation:glowPulse 3.2s ease-in-out infinite}
 @keyframes glowPulse{0%,100%{transform:scale(.92);opacity:.7}50%{transform:scale(1.08);opacity:1}}
-.core .vline{position:absolute;left:50%;top:50%;width:1px;height:170px;margin:-85px 0 0 0;
+.core .vline{position:absolute;left:0;top:0;width:1px;height:170px;margin:-85px 0 0 0;
  background:linear-gradient(180deg,transparent,rgba(183,243,107,.35),transparent);opacity:.5}
-.core .hline{position:absolute;left:50%;top:50%;width:340px;height:1px;margin-left:-170px;
+.core .hline{position:absolute;left:0;top:0;width:340px;height:1px;margin-left:-170px;
  background:linear-gradient(90deg,transparent,rgba(183,243,107,.5),transparent)}
-.core svg{position:relative;display:block;width:80px;height:80px;margin:-40px 0 0 -40px;
- filter:drop-shadow(0 0 16px rgba(183,243,107,.8));animation:starBreathe 3.2s ease-in-out infinite}
+.core svg{position:absolute;left:0;top:0;display:block;width:80px;height:80px;
+ margin:-40px 0 0 -40px;filter:drop-shadow(0 0 16px rgba(183,243,107,.8));
+ animation:starBreathe 3.2s ease-in-out infinite}
 @keyframes starBreathe{0%,100%{transform:scale(.97)}50%{transform:scale(1.04)}}
 
 /* ripple rings dari core */
-.ripple{position:absolute;left:50%;top:34%;width:130px;height:130px;margin:-65px 0 0 -65px;border-radius:50%;
+.ripple{position:absolute;left:50%;top:34%;width:130px;height:130px;margin:-65px 0 0 -65px;border-radius:50%;box-sizing:border-box;
  border:1px solid rgba(183,243,107,.4);animation:rippleOut 3.6s ease-out infinite;pointer-events:none}
 .ripple.r2{animation-delay:1.2s}.ripple.r3{animation-delay:2.4s}
 @keyframes rippleOut{0%{transform:scale(.45);opacity:0}16%{opacity:.5}100%{transform:scale(2.6);opacity:0}}
