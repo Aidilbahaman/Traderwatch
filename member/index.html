@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#0a0e0b">
 <link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/favicon.svg" type="image/svg+xml">
 <link rel="icon" type="image/png" href="icons/icon-192.png">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes">
@@ -697,7 +698,7 @@ html[data-theme="light"] .lotbadge{color:#4c7a17}
   <div class="phone" id="phone">
     <div class="notch"></div>
     <header class="appbar">
-      <div class="logo">T</div>
+      <div class="logo"><svg viewBox="-22 -22 44 44" width="19" height="19" aria-hidden="true"><path d="M0-20Q0 0 20 0Q0 0 0 20Q0 0-20 0Q0 0 0-20Z" fill="currentColor"/></svg></div>
       <div class="brand"><b>TRADERWATCH</b><small>AI Analyst</small></div>
       <div class="baract">
         <button class="ibtn" id="langBtn" aria-label="Language">
@@ -852,7 +853,7 @@ html[data-theme="light"] .lotbadge{color:#4c7a17}
       <div class="tf" id="tf"></div>
       <div id="mtfbox" class="mtfbox hidden"></div>
       <p class="pvtag" id="pvtag">Chart OHLC sebenar · Analisis enjin M15</p>
-      <button class="go" id="go">✦ <span id="goTxt">Analisis dengan AI</span></button>
+      <button class="go" id="go"><svg viewBox="-22 -22 44 44" width="14" height="14" aria-hidden="true" style="display:inline-block;vertical-align:-2px;margin-right:5px"><path d="M0-20Q0 0 20 0Q0 0 0 20Q0 0-20 0Q0 0 0-20Z" fill="currentColor"/></svg><span id="goTxt">Analisis dengan AI</span></button>
       <div class="term hidden" id="term"></div>
       <div id="res"></div>
       <div id="alt" class="hidden"></div>
@@ -1629,7 +1630,7 @@ function openSheet(sym){
 }
 function openAlt(icon,title,sub,html){
  S.run++;S.open=false;S.busy=false;altMode(true);
- $('sIc').textContent=icon;$('sNm').textContent=title;$('sDs').textContent=sub;
+ $('sIc').innerHTML=icon;$('sNm').textContent=title;$('sDs').textContent=sub;
  $('sheet').setAttribute('aria-label',title);
  $('alt').innerHTML=html;$('phone').classList.add('open');$('sheet').scrollTop=0;
 }
@@ -2541,6 +2542,7 @@ function menuAction(k){
  if(k==='mDevice')return showNotif();
  if(k==='mLogout')return logout();
 }
+function starIconHTML(sz){return '<svg viewBox="-22 -22 44 44" width="'+sz+'" height="'+sz+'" aria-hidden="true" style="display:inline-block;vertical-align:-2px"><path d="M0-20Q0 0 20 0Q0 0 0 20Q0 0-20 0Q0 0 0-20Z" fill="currentColor"/></svg>'}
 function showAccount(){
  var en=lang==='en';
  var nm=(ME&&ME.dispName)||'—',em=(ME&&ME.email)||'—',uid=(ME&&ME.id)||'—';
@@ -2556,13 +2558,13 @@ function showAccount(){
       '<b>'+(en?'Status':'Status')+'</b><span>'+esc(stat)+'</span></div>';
   }
   h+='<button class="again" id="altClose">'+esc(t('close'))+'</button>';
-  openAlt('✦',t('account'),em,h);
+  openAlt(starIconHTML(14),t('account'),em,h);
   $('altClose').onclick=closeSheet;
  }
  var a=mt5Acct();
  if(a||LG.me){ return render(a); }
  // LG.me belum dimuat (client buka Akaun sebelum Liga) -> ambil dari /me
- openAlt('✦',t('account'),em,kv+'<div class="empty" style="opacity:.6">…</div>');
+ openAlt(starIconHTML(14),t('account'),em,kv+'<div class="empty" style="opacity:.6">…</div>');
  apiFetch('/api/league/me').then(function(r){
   if(r.ok&&r.data)LG.me=r.data;
   render(mt5Acct());
