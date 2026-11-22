@@ -29,7 +29,7 @@ body{background:#0a0e0b;color:var(--text);font:14px -apple-system,sans-serif}
 /* ZOOM: cincin rush past camera */
 #intro.go .tunnel .ring{animation:ringRush 1.5s cubic-bezier(.35,0,.65,1) forwards}
 @keyframes ringRush{0%{transform:translateZ(-600px) scale(.4);opacity:0}12%{opacity:.95}100%{transform:translateZ(500px) scale(3.4);opacity:0}}
-#intro.go .core{animation:coreZoom 1.5s cubic-bezier(.35,0,.65,1) forwards;background:radial-gradient(circle,#eaffc4 0%,#b7f36b 35%,#000 72%)!important}
+
 @keyframes coreZoom{0%{transform:scale(1)}30%{transform:scale(1.6)}65%{transform:scale(4.5)}100%{transform:scale(20)}}
 #intro.go .brand,#intro.go .tap{opacity:0}
 #intro.go .itxt{opacity:0;transform:translateY(50px)}
@@ -50,7 +50,7 @@ body{background:#0a0e0b;color:var(--text);font:14px -apple-system,sans-serif}
 .zlabel{position:absolute;z-index:30;top:50%;left:50%;transform:translate(-50%,-50%);color:#b7f36b;font:900 20px monospace;letter-spacing:3px;opacity:0;pointer-events:none;text-shadow:0 0 20px #b7f36b}
 #intro.go .zlabel{animation:zlbl 1.6s ease-out forwards}
 @keyframes zlbl{0%{opacity:0;transform:translate(-50%,-50%) scale(.5)}20%{opacity:1;transform:translate(-50%,-50%) scale(1)}80%{opacity:1}100%{opacity:0;transform:translate(-50%,-50%) scale(1.5)}}
-@media(prefers-reduced-motion:reduce){*{animation:none!important}#intro.go .core{transform:none}}
+#intro.go .core{transform:none}}
 </style></head><body>
 <div class="hint"><b>Z1 Wormhole Tunnel</b> — cincin lalu kamera + bass drop. 🔊 Bunyi ON (tekan untuk dengar)</div>
 <button class="replay" onclick="location.reload()">↻ Replay</button>
@@ -58,7 +58,7 @@ body{background:#0a0e0b;color:var(--text);font:14px -apple-system,sans-serif}
  <div id="intro">
   <div class="brand">✦ <span>TraderWatch</span></div>
   <div class="tunnel" id="tunnel"></div>
-  <div class="core"></div>
+  <div class="bh"><div class="core"></div></div>
   <div class="itxt"><b>Enter the tunnel.</b><small>Satu keputusan di hujung lorong.</small></div>
   <div class="tap">TEKAN UNTUK MASUK →</div>
   <div class="zlabel">ENTERING…</div>
@@ -94,20 +94,37 @@ function wormholeSound(){
  var g2=c.createGain();g2.gain.setValueAtTime(.0001,t+1.15);g2.gain.exponentialRampToValueAtTime(.45,t+1.2);g2.gain.exponentialRampToValueAtTime(.001,t+1.7);
  o2.connect(g2).connect(c.destination);o2.start(t+1.15);o2.stop(t+1.75);
 }
+
+/* ===== JS-DRIVEN ZOOM (bukan CSS animation — works even with Reduce Motion) ===== */
+function jsZoom(el,max,dur,onDone){
+ var t0=null;
+ function step(ts){
+  if(t0===null)t0=ts;
+  var p=Math.min(1,(ts-t0)/dur);
+  var e=p<0.5?2*p*p:1-Math.pow(-2*p+2,2)/2;
+  var sc=1+e*(max-1);
+  el.style.transform='scale('+sc.toFixed(3)+')';
+  if(p<1)requestAnimationFrame(step);else if(onDone)onDone();
+ }
+ requestAnimationFrame(step);
+}
 (function(){
  var tn=document.getElementById('tunnel');
  for(var i=0;i<9;i++){var r=document.createElement('div');r.className='ring';r.style.animationDelay=(i*0.44).toFixed(2)+'s';tn.appendChild(r)}
  var intro=document.getElementById('intro'),busy=false;
  intro.onclick=function(){
   if(busy)return;busy=true;
-  try{wormholeSound()}catch(e){}
-  /* reset ring delays supaya semua rush serentak berturutan */
-  var rings=tn.querySelectorAll('.ring');
-  rings.forEach(function(r,i){r.style.animationDelay=(i*0.07).toFixed(2)+'s'});
+  try{wormholeSound}catch(e){}
   intro.classList.add('go');
-  setTimeout(function(){document.getElementById('void').classList.add('on')},1500);
-  setTimeout(function(){intro.style.display='none';document.getElementById('on').classList.add('show');
-   setTimeout(function(){var v=document.getElementById('void');v.style.transition='opacity .6s';v.classList.remove('on')},120)},1800);
+  var zoomEl=document.querySelector('.bh')||document.querySelector('.core');
+  jsZoom(zoomEl,20,1800,function(){
+   document.getElementById('void').classList.add('on');
+   setTimeout(function(){
+    intro.style.display='none';
+    document.getElementById('on').classList.add('show');
+    setTimeout(function(){var v=document.getElementById('void');v.style.transition='opacity .6s';v.classList.remove('on')},120);
+   },260);
+  });
  };
 })();
 </script></body></html>

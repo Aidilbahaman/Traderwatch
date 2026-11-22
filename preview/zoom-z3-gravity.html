@@ -38,7 +38,7 @@ body{background:#0a0e0b;color:var(--text);font:14px -apple-system,sans-serif}
 @keyframes orbitRush{0%{transform:rotate(0) scale(1)}100%{transform:rotate(900deg) scale(18)}}
 #intro.go .spiral{animation:spiralRush 1.5s cubic-bezier(.35,0,.65,1) forwards}
 @keyframes spiralRush{0%{transform:rotate(0) scale(1);opacity:1}100%{transform:rotate(-1080deg) scale(.02);opacity:0}}
-#intro.go .bh{animation:bhSuck 1.5s cubic-bezier(.35,0,.65,1) forwards;filter:brightness(2)}
+
 @keyframes bhSuck{0%{transform:scale(1)}30%{transform:scale(1.5)}65%{transform:scale(4)}100%{transform:scale(15)}}
 #intro.go .brand,#intro.go .tap{opacity:0}
 #intro.go .itxt{opacity:0;transform:translateY(40px)}
@@ -56,7 +56,7 @@ body{background:#0a0e0b;color:var(--text);font:14px -apple-system,sans-serif}
 .ot{flex:1;display:flex;flex-direction:column;gap:2px}.ot b{font-size:12px;font-weight:800}.ot small{font-size:9.5px;color:var(--muted)}
 .go{width:100%;border:0;border-radius:13px;padding:13px;font:800 12.5px inherit;cursor:pointer;background:linear-gradient(135deg,var(--lime),#8ed94e);color:var(--onlime);margin-top:7px}
 .sk{display:block;margin:10px auto 0;border:0;background:none;color:var(--muted);cursor:pointer;font:600 10.5px inherit;text-decoration:underline}
-@media(prefers-reduced-motion:reduce){*{animation:none!important}#intro.go .bh,#intro.go .orbit{transform:none}}
+#intro.go .bh,#intro.go .orbit{transform:none}}
 </style></head><body>
 <div class="hint"><b>Z3 Gravity Suck</b> — orbit berputar 900°, dot spiral mengecil ke pusat. 🔊 Bunyi "vortex whine + swallow"</div>
 <button class="replay" onclick="location.reload()">↻ Replay</button>
@@ -97,6 +97,20 @@ function gravitySound(){
  for(var i=0;i<d.length;i++)d[i]=(Math.random()*2-1)*Math.exp(-i/(c.sampleRate*.03));n.buffer=b;
  var ng=c.createGain();ng.gain.value=.3;n.connect(ng).connect(c.destination);n.start(t+.9);
 }
+
+/* ===== JS-DRIVEN ZOOM (bukan CSS animation — works even with Reduce Motion) ===== */
+function jsZoom(el,max,dur,onDone){
+ var t0=null;
+ function step(ts){
+  if(t0===null)t0=ts;
+  var p=Math.min(1,(ts-t0)/dur);
+  var e=p<0.5?2*p*p:1-Math.pow(-2*p+2,2)/2;
+  var sc=1+e*(max-1);
+  el.style.transform='scale('+sc.toFixed(3)+')';
+  if(p<1)requestAnimationFrame(step);else if(onDone)onDone();
+ }
+ requestAnimationFrame(step);
+}
 (function(){
  var sp=document.getElementById('spiral');
  for(var i=0;i<22;i++){
@@ -107,11 +121,18 @@ function gravitySound(){
  }
  var intro=document.getElementById('intro'),busy=false;
  intro.onclick=function(){
-  if(busy)return;busy=true;try{gravitySound()}catch(e){}
+  if(busy)return;busy=true;
+  try{gravitySound}catch(e){}
   intro.classList.add('go');
-  setTimeout(function(){document.getElementById('void').classList.add('on')},1450);
-  setTimeout(function(){intro.style.display='none';document.getElementById('on').classList.add('show');
-   setTimeout(function(){var v=document.getElementById('void');v.style.transition='opacity .6s';v.classList.remove('on')},120)},1750);
+  var zoomEl=document.querySelector('.bh');
+  jsZoom(zoomEl,15,1800,function(){
+   document.getElementById('void').classList.add('on');
+   setTimeout(function(){
+    intro.style.display='none';
+    document.getElementById('on').classList.add('show');
+    setTimeout(function(){var v=document.getElementById('void');v.style.transition='opacity .6s';v.classList.remove('on')},120);
+   },260);
+  });
  };
 })();
 </script></body></html>

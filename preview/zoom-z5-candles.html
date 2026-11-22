@@ -29,7 +29,7 @@ body{background:#0a0e0b;color:var(--text);font:14px -apple-system,sans-serif}
 /* zoom: candles fall inward */
 #intro.go .candles{animation:candSpin 1.5s cubic-bezier(.35,0,.65,1) forwards}
 @keyframes candSpin{0%{transform:rotate(0) scale(1);opacity:1}100%{transform:rotate(-540deg) scale(.03);opacity:0}}
-#intro.go .bh{animation:bhZoom 1.5s cubic-bezier(.35,0,.65,1) forwards;filter:brightness(2)}
+
 @keyframes bhZoom{0%{transform:scale(1)}30%{transform:scale(1.5)}65%{transform:scale(4)}100%{transform:scale(16)}}
 #intro.go .brand,#intro.go .tap{opacity:0}
 #intro.go .itxt{opacity:0;transform:translateY(40px)}
@@ -54,7 +54,7 @@ body{background:#0a0e0b;color:var(--text);font:14px -apple-system,sans-serif}
 .zlabel{position:absolute;z-index:30;top:50%;left:50%;transform:translate(-50%,-50%);color:#b7f36b;font:900 20px monospace;letter-spacing:3px;opacity:0;pointer-events:none;text-shadow:0 0 20px #b7f36b}
 #intro.go .zlabel{animation:zlbl 1.6s ease-out forwards}
 @keyframes zlbl{0%{opacity:0;transform:translate(-50%,-50%) scale(.5)}20%{opacity:1;transform:translate(-50%,-50%) scale(1)}80%{opacity:1}100%{opacity:0;transform:translate(-50%,-50%) scale(1.5)}}
-@media(prefers-reduced-motion:reduce){*{animation:none!important}#intro.go .bh,#intro.go .candles{transform:none}}
+#intro.go .bh,#intro.go .candles{transform:none}}
 </style></head><body>
 <div class="hint"><b>Z5 Candle Cascade</b> — candlestick hijau/merah mengelilingi core, jatuh spiral masuk. 🔊 Bunyi "tick-tick data + bass drop"</div>
 <button class="replay" onclick="location.reload()">↻ Replay</button>
@@ -101,6 +101,20 @@ function candleSound(){
  var ng=c.createGain();ng.gain.setValueAtTime(.001,t);ng.gain.exponentialRampToValueAtTime(.2,t+.1);ng.gain.exponentialRampToValueAtTime(.001,t+.9);
  n.connect(bp).connect(ng).connect(c.destination);n.start(t);n.stop(t+.95);
 }
+
+/* ===== JS-DRIVEN ZOOM (bukan CSS animation — works even with Reduce Motion) ===== */
+function jsZoom(el,max,dur,onDone){
+ var t0=null;
+ function step(ts){
+  if(t0===null)t0=ts;
+  var p=Math.min(1,(ts-t0)/dur);
+  var e=p<0.5?2*p*p:1-Math.pow(-2*p+2,2)/2;
+  var sc=1+e*(max-1);
+  el.style.transform='scale('+sc.toFixed(3)+')';
+  if(p<1)requestAnimationFrame(step);else if(onDone)onDone();
+ }
+ requestAnimationFrame(step);
+}
 (function(){
  var cd=document.getElementById('candles'),N=28;
  for(var i=0;i<N;i++){
@@ -115,11 +129,18 @@ function candleSound(){
  }
  var intro=document.getElementById('intro'),busy=false;
  intro.onclick=function(){
-  if(busy)return;busy=true;try{candleSound()}catch(e){}
+  if(busy)return;busy=true;
+  try{candleSound}catch(e){}
   intro.classList.add('go');
-  setTimeout(function(){document.getElementById('void').classList.add('on')},1450);
-  setTimeout(function(){intro.style.display='none';document.getElementById('on').classList.add('show');
-   setTimeout(function(){var v=document.getElementById('void');v.style.transition='opacity .6s';v.classList.remove('on')},120)},1750);
+  var zoomEl=document.querySelector('.bh');
+  jsZoom(zoomEl,16,1800,function(){
+   document.getElementById('void').classList.add('on');
+   setTimeout(function(){
+    intro.style.display='none';
+    document.getElementById('on').classList.add('show');
+    setTimeout(function(){var v=document.getElementById('void');v.style.transition='opacity .6s';v.classList.remove('on')},120);
+   },260);
+  });
  };
 })();
 </script></body></html>

@@ -36,7 +36,7 @@ body{background:#0a0e0b;color:var(--text);font:14px -apple-system,sans-serif}
 .chroma.c1{border-color:#ff4d6d}.chroma.c2{border-color:#4dd2ff}
 /* zoom seq */
 #intro.flash{background:#eaffd6}
-#intro.go .bh{animation:bhZoom 1.3s cubic-bezier(.35,0,.65,1) forwards;filter:brightness(2)}
+
 @keyframes bhZoom{0%{transform:scale(1)}30%{transform:scale(1.5)}65%{transform:scale(4)}100%{transform:scale(18)}}
 #intro.go .brand,#intro.go .tap{opacity:0}
 #intro.go .itxt{opacity:0;transform:scale(1.2);filter:blur(6px)}
@@ -61,7 +61,7 @@ body{background:#0a0e0b;color:var(--text);font:14px -apple-system,sans-serif}
 .ot{flex:1;display:flex;flex-direction:column;gap:2px}.ot b{font-size:12px;font-weight:800}.ot small{font-size:9.5px;color:var(--muted)}
 .go{width:100%;border:0;border-radius:13px;padding:13px;font:800 12.5px inherit;cursor:pointer;background:linear-gradient(135deg,var(--lime),#8ed94e);color:var(--onlime);margin-top:7px}
 .sk{display:block;margin:10px auto 0;border:0;background:none;color:var(--muted);cursor:pointer;font:600 10.5px inherit;text-decoration:underline}
-@media(prefers-reduced-motion:reduce){*{animation:none!important}#intro.go .bh{transform:none}}
+#intro.go .bh{transform:none}}
 </style></head><body>
 <div class="hint"><b>Z2 Lens Flare Burst</b> — white flash + chroma split + ular cahaya. 🔊 Bunyi "shimmer + impact"</div>
 <button class="replay" onclick="location.reload()">↻ Replay</button>
@@ -106,6 +106,20 @@ function flareSound(){
  var g2=c.createGain();g2.gain.setValueAtTime(.0001,t+.6);g2.gain.exponentialRampToValueAtTime(.3,t+.63);g2.gain.exponentialRampToValueAtTime(.001,t+1);
  o2.connect(g2).connect(c.destination);o2.start(t+.6);o2.stop(t+1.05);
 }
+
+/* ===== JS-DRIVEN ZOOM (bukan CSS animation — works even with Reduce Motion) ===== */
+function jsZoom(el,max,dur,onDone){
+ var t0=null;
+ function step(ts){
+  if(t0===null)t0=ts;
+  var p=Math.min(1,(ts-t0)/dur);
+  var e=p<0.5?2*p*p:1-Math.pow(-2*p+2,2)/2;
+  var sc=1+e*(max-1);
+  el.style.transform='scale('+sc.toFixed(3)+')';
+  if(p<1)requestAnimationFrame(step);else if(onDone)onDone();
+ }
+ requestAnimationFrame(step);
+}
 (function(){
  var f=document.getElementById('flare');
  for(var i=0;i<16;i++){var r=document.createElement('div');r.className='ray';
@@ -115,11 +129,18 @@ function flareSound(){
   r.appendChild(b);f.appendChild(r)}
  var intro=document.getElementById('intro'),busy=false;
  intro.onclick=function(){
-  if(busy)return;busy=true;try{flareSound()}catch(e){}
+  if(busy)return;busy=true;
+  try{flareSound}catch(e){}
   intro.classList.add('go');
-  setTimeout(function(){intro.classList.add('flash');document.getElementById('void').classList.add('on')},900);
-  setTimeout(function(){intro.style.display='none';document.getElementById('on').classList.add('show');
-   setTimeout(function(){var v=document.getElementById('void');v.style.transition='opacity .5s';v.classList.remove('on')},120)},1300);
+  var zoomEl=document.querySelector('.bh');
+  jsZoom(zoomEl,18,1600,function(){
+   document.getElementById('void').classList.add('on');
+   setTimeout(function(){
+    intro.style.display='none';
+    document.getElementById('on').classList.add('show');
+    setTimeout(function(){var v=document.getElementById('void');v.style.transition='opacity .6s';v.classList.remove('on')},120);
+   },260);
+  });
  };
 })();
 </script></body></html>
