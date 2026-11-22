@@ -43,6 +43,10 @@ try:
     import ai_learn  # noqa: E402  (closed-loop: corak TP/SL sebenar client)
 except Exception:
     ai_learn = None
+try:
+    import institutional as INST  # noqa: E402  (prompt institutional + parse verdict)
+except Exception:
+    INST = None
 
 REPO = HERE.parent
 AUDIT_FILE = REPO / "state" / "llm-analysis-log.jsonl"
@@ -402,11 +406,11 @@ def analyze(pair, bars, pip, spread_pips, call=None, budget_s=None, held=None, t
         bos = trend if trend in ("UP", "DOWN") else "RANGE"
         choch = False
         fvg_txt = "none"
+        hi_bars = [{"h": b[2], "l": b[3], "c": b[4]} for b in ctx]
+        lo_bars = [{"h": b[1], "l": b[2], "c": b[3]} for b in bars]
         if ICT is not None:
             try:
                 # Higher TF swing dari bar asing (guna ctx yang dah resample).
-                hi_bars = [{"h": b[2], "l": b[3], "c": b[4]} for b in ctx]
-                lo_bars = [{"h": b[1], "l": b[2], "c": b[3]} for b in bars]
                 s_hi = ICT.swing_trend(hi_bars, 3, 2)
                 s_lo = ICT.swing_trend(lo_bars, 3, 2)
                 bos = s_lo if s_lo != "RANGE" else s_hi
@@ -416,19 +420,41 @@ def analyze(pair, bars, pip, spread_pips, call=None, budget_s=None, held=None, t
                     fvg_txt = ", ".join(f"{x['dir']} {x['bot']:.2f}-{x['top']:.2f}" for x in fvgs[:2])
             except Exception:
                 pass
-        c_txt = ("YES — M15 structure flipped against higher TF (potential reversal)."
+        c_txt = ("YES — structure flipped against higher TF (potential reversal)."
                  if choch else "No CHoCH; follow dominant BOS.")
-        rr_min = prof["rr1_min"]
-        prompt = ("ICT/SMC BOS + CHoCH + FVG analyst. You are looking at the chart IMAGE (real OHLC). "
-                  f"Pair {pair} {tf}, price {price}, ATR {atr:.2f}, spread {spread_pips:g} pips. "
-                  f"Higher-TF {tf_key} swing: {s_hi}. {tf} swing/BOS: {s_lo}. CHoCH: {c_txt} "
-                  f"Unfilled FVG near price: {fvg_txt}. "
-                  f"Rules: trade IN the BOS direction; if CHoCH=YES prefer the NEW {tf} direction. "
-                  f"Entry=current price. SL beyond the last opposing swing (never inside spread). "
-                  f"TP at next liquidity/structure target. RR1 >= {rr_min:g}. "
-                  f"HOLD if structure unclear. "
-                  'Reply ONLY compact JSON: {"bias":"BUY"|"SELL"|"HOLD","sl":num,'
-                  '"tp1":num,"tp2":num,"confidence":0-10,"reason":"<10 words>"}')
+        # Institutional engine: sistem prompt + semua data sebenar + kontrak
+        # JSON. Model bebas pilih BUY/SELL/WAIT/NO_TRADE; enjin yang validate.
+        if INST is not None:
+            closes = [b[3] for b in bars]
+            e20 = M.ema(closes, 20)[-1] if len(closes) >= 20 else price
+            e50 = M.ema(closes, 50)[-1] if len(closes) >= 50 else price
+            e200 = M.ema(closes, 200)[-1] if len(closes) >= 200 else None
+            rsi = M.rsi_s(closes, 14)[-1]
+            hi_sw, lo_sw = ([], [])
+            if ICT is not None:
+                try:
+                    hi_sw, lo_sw = ICT.swing_levels(lo_bars, 3)
+                except Exception:
+                    pass
+            pdh = pdl = pwh = pwl = None
+            _lessons = ""
+            if ai_learn is not None:
+                try:
+                    _lessons, _ = ai_learn.lessons()
+                except Exception:
+                    _lessons = ""
+            prompt = INST.build(
+                pair, tf, price, spread_pips, bars, ctx, atr, prof, tf_key,
+                e20, e50, e200, rsi, None, hi_sw, lo_sw,
+                pdh, pdl, pwh, pwl, fvg_txt, held=held, lessons=_lessons)
+        else:
+            prompt = ("ICT/SMC BOS + CHoCH + FVG analyst. You are looking at the chart IMAGE (real OHLC). "
+                      f"Pair {pair} {tf}, price {price}, spread {spread_pips:g} pips. "
+                      f"Higher-TF {tf_key} swing: {s_hi}. {tf} swing/BOS: {s_lo}. CHoCH: {c_txt} "
+                      f"Unfilled FVG near price: {fvg_txt}. "
+                      f"HOLD if structure unclear. "
+                      'Reply ONLY compact JSON: {"bias":"BUY"|"SELL"|"HOLD","sl":num,'
+                      '"tp1":num,"tp2":num,"confidence":0-10,"reason":"<10 words>"}')
         ai_meta = {"bos": bos, "choch": choch,
                    "fvg": len(fvgs) if 'fvgs' in dir() else 0,
                    "atr": round(atr, 3), "hour": datetime.now(timezone.utc).hour}
@@ -462,9 +488,14 @@ def analyze(pair, bars, pip, spread_pips, call=None, budget_s=None, held=None, t
         else:
             latency = time.time() - t0
             try:
-                verdict = validate_verdict(j, price, pip, spread_pips, rr1_min=prof["rr1_min"])
+                if INST is not None:
+                    verdict = INST.parse_verdict(j, price, pip, spread_pips,
+                                                  rr_min=max(INST.RR_DEFAULT, prof["rr1_min"]))
+                else:
+                    verdict = validate_verdict(j, price, pip, spread_pips,
+                                               rr1_min=prof["rr1_min"])
             except ValueError as e:
-                # Rejection (aras/RR tak sah) muktamad — jangan shop model lain.
+                # Penolakan mekanikal muktamad — jangan shop model lain.
                 log(f"{pair} {VISION_MODEL} (vision) verdict ditolak ({e})")
                 _audit({"ts": datetime.now(timezone.utc).isoformat(), "pair": pair, "tf": tf,
                         "model": VISION_MODEL, "vision": True, "verdict_rejected": str(e)[:200]})
