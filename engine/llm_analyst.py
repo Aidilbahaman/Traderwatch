@@ -316,6 +316,47 @@ def _call_vision(model, prompt, bars, pair, tf, timeout):
     return (choice.get("message") or {}).get("content") or ""
 
 
+def alignment(pair, tf_bars, timeout=60):
+    """Multi-TF alignment: satu imej gabungan (M5/H1/H4), satu panggilan vision.
+    tf_bars = {tf: bars}. Return {tfs:{tf:bias}, aligned, note} atau None."""
+    panels = [(tf, tf_bars[tf]) for tf in ("M5", "H1", "H4") if tf_bars.get(tf)]
+    if not panels:
+        return None
+    url, key = _route(VISION_MODEL)
+    if not key:
+        return None
+    b64 = VC.render_multi(panels, pair=pair)
+    if not b64:
+        return None
+    tfs = [tf for tf, _ in panels]
+    prompt = ("You see " + str(len(panels)) + " stacked candlestick charts of " + pair +
+              " labelled " + ", ".join(tfs) + " (top to bottom). For EACH timeframe give the "
+              "short-term structural bias from its candles: BUY, SELL or HOLD. "
+              'Reply ONLY compact JSON: {"tfs":{"' + '":"BUY|SELL|HOLD","'.join(tfs) +
+              '":"BUY|SELL|HOLD"},"note":"<8 words on alignment>"}')
+    body = json.dumps({"model": VISION_MODEL,
+                       "messages": [{"role": "user", "content": [
+                           {"type": "text", "text": prompt},
+                           {"type": "image_url", "image_url": {"url": "data:image/png;base64," + b64}}]}],
+                       "max_tokens": 300}).encode()
+    req = urllib.request.Request(url, data=body, headers={
+        "Authorization": "Bearer " + key, "Content-Type": "application/json"})
+    try:
+        with urllib.request.urlopen(req, timeout=timeout) as r:
+            j = json.loads(r.read().decode())
+        content = (j.get("choices") or [{}])[0].get("message", {}).get("content") or ""
+        m = json.loads(content[content.find("{"):content.rfind("}") + 1])
+        t = {k: str(v).upper() for k, v in (m.get("tfs") or {}).items() if str(v).upper() in ("BUY", "SELL", "HOLD")}
+        if not t:
+            return None
+        dirs = [v for v in t.values() if v in ("BUY", "SELL")]
+        aligned = len(dirs) >= 2 and len(set(dirs)) == 1
+        return {"tfs": t, "aligned": aligned, "note": str(m.get("note") or "")[:80]}
+    except Exception as e:
+        log(f"{pair} alignment gagal ({type(e).__name__}: {str(e)[:80]})")
+        return None
+
+
 def analyze(pair, bars, pip, spread_pips, call=None, budget_s=None, held=None, tf="M15"):
     """Analisis LLM untuk satu pair mengikut timeframe. Return verdict dict / None.
 

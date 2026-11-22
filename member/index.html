@@ -322,6 +322,15 @@ html[data-theme="light"] .theme.on{background:#eaf5db}
 .tf{display:flex;gap:4px;background:var(--card2);border:1px solid var(--line);border-radius:12px;padding:3px;margin:12px 0 6px}
 .tf button{flex:1;color:var(--muted);padding:8px 0;border-radius:9px;font-weight:700;font-size:12px;transition:.15s}
 .tf button.on{background:var(--lime);color:var(--onlime)}
+.mtfbox{margin:8px 0 4px}
+.mtfbox .lab{font-size:9px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:5px}
+.mtfrow{display:flex;gap:5px}
+.mtfrow .c{flex:1;background:var(--card2);border:1px solid var(--line);border-radius:10px;padding:6px 4px;text-align:center}
+.mtfrow .c .k{font-size:9px;color:var(--muted);letter-spacing:.04em}
+.mtfrow .c .v{font-size:11px;font-weight:850;margin-top:1px}
+.mtfrow .c .v.b{color:var(--lime)}.mtfrow .c .v.s{color:var(--red)}.mtfrow .c .v.h{color:var(--orange)}
+.mtfbox .note{font-size:10.5px;color:var(--muted);margin-top:6px;line-height:1.4}
+.mtfbox .note b{color:var(--text)}
 .pvtag{text-align:center;color:var(--orange);font-size:10px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;margin:0 0 12px}
 .go{position:relative;overflow:hidden;width:100%;padding:14px;border-radius:15px;font-weight:800;font-size:15px;color:var(--onlime);background:var(--lime);box-shadow:0 0 26px #b7f36b2b;transition:transform .12s}
 .go:active{transform:scale(.98)}
@@ -448,6 +457,9 @@ html[data-theme="light"] .lotbadge{color:#4c7a17}
 .tdpbar u{position:absolute;top:50%;width:12px;height:12px;border-radius:50%;background:var(--text);border:2px solid var(--bg);transform:translate(-50%,-50%);box-shadow:0 2px 8px #000a;transition:left .5s cubic-bezier(.2,.8,.2,1)}
 .tdends{display:flex;justify-content:space-between;font-size:8.5px;font-weight:800;letter-spacing:.06em;color:var(--muted);margin-top:4px}
 #td .kv{margin-top:14px;font-size:12px}
+.tdshare{margin-top:14px}
+.btn-share{width:100%;background:var(--card2);border:1px solid var(--line);color:var(--text);border-radius:12px;padding:11px;font-size:13px;font-weight:800;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px}
+.btn-share:active{transform:scale(.98)}
 
 /* toast */
 #toast{position:absolute;left:50%;bottom:calc(96px + env(safe-area-inset-bottom));transform:translate(-50%,12px);z-index:70;background:var(--text);color:var(--bg);font-size:12.5px;font-weight:750;padding:10px 16px;border-radius:999px;box-shadow:0 12px 34px #0006;opacity:0;pointer-events:none;transition:.25s;white-space:nowrap;max-width:92%;overflow:hidden;text-overflow:ellipsis}
@@ -618,6 +630,7 @@ html[data-theme="light"] .lotbadge{color:#4c7a17}
       <div class="shead"><div class="ic" id="sIc"></div><div><h2 id="sNm"></h2><p id="sDs"></p></div><button class="x" id="sx" aria-label="Tutup">✕</button></div>
       <div class="chartbox" id="chartbox"><canvas id="cv"></canvas><div class="chipc" id="chip"><i></i><span id="chipT">SEDIA</span></div></div>
       <div class="tf" id="tf"></div>
+      <div id="mtfbox" class="mtfbox hidden"></div>
       <p class="pvtag" id="pvtag">Chart OHLC sebenar · Analisis enjin M15</p>
       <button class="go" id="go">✦ <span id="goTxt">Analisis dengan AI</span></button>
       <div class="term hidden" id="term"></div>
@@ -661,6 +674,7 @@ html[data-theme="light"] .lotbadge{color:#4c7a17}
         <div class="tdends"><span>SL</span><span>TP</span></div>
       </div>
       <div class="kv" id="tdMeta"></div>
+      <div class="tdshare"><button class="btn-share" id="tdShare" type="button">🖼 <span id="tdShareLab">Share result</span></button></div>
     </div>
 
     <div id="toast" role="status" aria-live="polite"></div>
@@ -799,6 +813,7 @@ var DICT={
   instantNote:'Instant entry — trade diisi pada harga pasaran semasa bila anda buka, bukan entry petikan.',
   toastOpened:'Paper trade dibuka! Pantau di Liga.',tpHit:'TP!',slHit:'SL!',tpHit:'TP!',slHit:'SL!',pickPair:'Pilih pair untuk analisis AI.',
   leagueErr:'Gagal memuatkan data liga. Cuba lagi.',tradeErr:'Gagal membuka trade. Cuba lagi.',noBalance:'Baki tidak tersedia — cuba lagi.',
+  mtfLab:'Alignment multi-TF',mtfAligned:'Searah',mtfMixed:'Bercampur',shareLab:'Share result',shareSaved:'Gambar disimpan 📥',shareErr:'Gagal jana gambar.',
   tdTitle:'Detail trade',livePrice:'Harga live',unreal:'P&L belum realized',finalRes:'Keputusan akhir',openedAt:'Dibuka',closedAt:'Ditutup',slTpRange:'Julat SL → TP',quoteErr:'Harga live tidak tersedia.',
   loggingOut:'Melog keluar…',langNative:'Bahasa Melayu'
  },
@@ -843,6 +858,7 @@ var DICT={
   mt5Opt:'Also place a real MT5 order with this lot',mt5Note:'Paper trade + real MT5 market order at the lot above.',mt5Sent:'Sent to MT5',mt5Dry:'MT5 dry-run (no live order)',mt5Fail:'MT5 order not placed',
   instantNote:'Instant entry — your trade fills at the live market price when you open, not the quoted entry.',
   leagueErr:'Could not load league data. Try again.',tradeErr:'Could not open the trade. Try again.',noBalance:'Balance unavailable — try again.',
+  mtfLab:'Multi-TF alignment',mtfAligned:'Aligned',mtfMixed:'Mixed',shareLab:'Share result',shareSaved:'Image saved 📥',shareErr:'Could not generate image.',
   tdTitle:'Trade detail',livePrice:'Live price',unreal:'Unrealized P&L',finalRes:'Final result',openedAt:'Opened',closedAt:'Closed',slTpRange:'SL → TP range',quoteErr:'Live price unavailable.',
   loggingOut:'Signing out…',langNative:'English'
  },
@@ -885,6 +901,7 @@ var DICT={
   mt5Opt:'同时以该手数向 MT5 下达真实订单',mt5Note:'模拟交易 + 按上述手数在 MT5 下真实市价单。',mt5Sent:'已发送至 MT5',mt5Dry:'MT5 演练（未下实单）',mt5Fail:'MT5 订单未下达',
   instantNote:'即时入场——开仓时按实时市价成交，而非报价入场位。',
   leagueErr:'无法加载联赛数据，请重试。',tradeErr:'开仓失败，请重试。',noBalance:'余额不可用——请重试。',
+  mtfLab:'多周期一致性',mtfAligned:'同向',mtfMixed:'分歧',shareLab:'分享战绩',shareSaved:'图片已保存 📥',shareErr:'无法生成图片。',
   tdTitle:'交易详情',livePrice:'实时价格',unreal:'未实现盈亏',finalRes:'最终结果',openedAt:'开仓时间',closedAt:'平仓时间',slTpRange:'SL → TP 区间',quoteErr:'实时价格不可用。',
   loggingOut:'正在退出…',langNative:'中文'
  },
@@ -926,6 +943,7 @@ var DICT={
   mt5Opt:'Juga kirim order nyata ke MT5 dengan lot ini',mt5Note:'Paper trade + order pasar MT5 nyata pada lot di atas.',mt5Sent:'Terkirim ke MT5',mt5Dry:'MT5 dry-run (tanpa order live)',mt5Fail:'Order MT5 tidak terkirim',
   instantNote:'Instant entry — trade diisi pada harga pasar saat dibuka, bukan entry kutipan.',
   leagueErr:'Gagal memuat data liga. Coba lagi.',tradeErr:'Gagal membuka trade. Coba lagi.',noBalance:'Saldo tidak tersedia — coba lagi.',
+  mtfLab:'Alignment multi-TF',mtfAligned:'Searah',mtfMixed:'Campuran',shareLab:'Bagikan hasil',shareSaved:'Gambar tersimpan 📥',shareErr:'Gagal membuat gambar.',
   tdTitle:'Detail trade',livePrice:'Harga live',unreal:'P&L belum realized',finalRes:'Hasil akhir',openedAt:'Dibuka',closedAt:'Ditutup',slTpRange:'Rentang SL → TP',quoteErr:'Harga live tidak tersedia.',
   loggingOut:'Keluar…',langNative:'Bahasa Indonesia'
  },
@@ -968,6 +986,7 @@ var DICT={
   mt5Opt:'இந்த லாட்டுடன் MT5-க்கு உண்மையான ஆர்டரையும் அனுப்பு',mt5Note:'பேப்பர் வர்த்தகம் + மேலே உள்ள லாட்டில் உண்மையான MT5 சந்தை ஆர்டர்.',mt5Sent:'MT5-க்கு அனுப்பப்பட்டது',mt5Dry:'MT5 dry-run (நேரடி ஆர்டர் இல்லை)',mt5Fail:'MT5 ஆர்டர் அனுப்பப்படவில்லை',
   instantNote:'உடனடி நுழைவு — திறக்கும்போது நேரடி சந்தை விலையில் நிரப்பப்படும், மேற்கோள் நுழைவு விலையில் அல்ல.',
   leagueErr:'லீக் தரவை ஏற்ற முடியவில்லை. மீண்டும் முயற்சிக்கவும்.',tradeErr:'வர்த்தகத்தைத் தொடங்க முடியவில்லை. மீண்டும் முயற்சிக்கவும்.',noBalance:'இருப்பு கிடைக்கவில்லை — மீண்டும் முயற்சிக்கவும்.',
+  mtfLab:'பல-TF ஒருமை',mtfAligned:'ஒரே திசை',mtfMixed:'கலப்பு',shareLab:'முடிவைப் பகிர்',shareSaved:'படம் சேமிக்கப்பட்டது 📥',shareErr:'படம் உருவாக்க முடியவில்லை.',
   tdTitle:'வர்த்தக விவரம்',livePrice:'நேரடி விலை',unreal:'நிறைவேறாத லாப/நஷ்டம்',finalRes:'இறுதி முடிவு',openedAt:'திறக்கப்பட்ட நேரம்',closedAt:'மூடப்பட்ட நேரம்',slTpRange:'SL → TP வரம்பு',quoteErr:'நேரடி விலை கிடைக்கவில்லை.',
   loggingOut:'வெளியேறுகிறது…',langNative:'தமிழ்'
  }
@@ -1270,7 +1289,7 @@ function altMode(on){
  $('alt').classList.toggle('hidden',!on);
 }
 function resetSheet(){
- S.ana=null;S.scan=null;S.busy=false;S.win=null;S.zoomT0=null;altMode(false);
+ S.ana=null;S.scan=null;S.busy=false;S.win=null;S.zoomT0=null;altMode(false);var mb=$('mtfbox');if(mb)mb.classList.add('hidden');
  $('go').classList.remove('hidden');$('go').disabled=false;setChip('','SEDIA');
 }
 function buildTf(){
@@ -1443,7 +1462,26 @@ function show(a){
  $('again').onclick=function(){S.run++;resetSheet();$('sheet').scrollTo({top:0,behavior:'smooth'})};
  $('takeBtn').onclick=function(){if(a.entry==null)return;hap(10);openRisk(a)};
  if(a.entry!=null)zoomTo(20);
+ loadAlignment();
  setTimeout(function(){$('res').scrollIntoView({behavior:'smooth',block:'start'})},220);
+}
+/* Multi-TF alignment: satu panggilan vision (M5/H1/H4) selepas verdict siap. */
+function loadAlignment(){
+ var box=$('mtfbox');if(!box||!cur)return;
+ var run=S.run,pair=cur.s;
+ box.classList.remove('hidden');
+ box.innerHTML='<div class="lab">'+esc(t('mtfLab'))+'</div><div class="mtfrow"><div class="c"><div class="k">…</div></div></div>';
+ apiFetch('/api/analyze/alignment',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({pair:pair})}).then(function(r){
+  if(run!==S.run||!cur||cur.s!==pair)return;
+  if(!r.ok||!r.data||!r.data.tfs){box.classList.add('hidden');return}
+  var d=r.data,order=['M5','H1','H4'];
+  var cells=order.filter(function(k){return d.tfs[k]}).map(function(k){
+   var v=d.tfs[k],cls=v==='BUY'?'b':v==='SELL'?'s':'h';
+   return '<div class="c"><div class="k">'+k+'</div><div class="v '+cls+'">'+v+'</div></div>';
+  }).join('');
+  var note=d.aligned?'<b>✓ '+esc(t('mtfAligned'))+'</b> ':'<b>'+esc(t('mtfMixed'))+'</b> ';
+  box.innerHTML='<div class="lab">'+esc(t('mtfLab'))+'</div><div class="mtfrow">'+cells+'</div><div class="note">'+note+esc(d.note||'')+'</div>';
+ }).catch(function(e){if(e&&e.message==='auth')return;box.classList.add('hidden')});
 }
 $('go').onclick=analyze;
 
@@ -1999,6 +2037,46 @@ function drawTdMeta(){
 function tdQuoteFail(){
  if(TD.trade&&TD.price==null){$('tdPnl').className='tdpnl neu';$('tdPnl').innerHTML='<small>'+esc(t('quoteErr'))+'</small>'}
 }
+/* ---- Share result card: render canvas 720x420, share via Web Share / download ---- */
+function shareCard(){
+ var x=TD.trade;if(!x)return;
+ var st=String(x.status||'open').toLowerCase();
+ var rr=st==='open'?(TD.price!=null?((String(x.side).toUpperCase()==='SELL'?+x.entry-TD.price:TD.price-+x.entry)/Math.abs(+x.entry-+x.sl)):null):(x.r_result==null?null:+x.r_result);
+ var usd=rr!=null?rr*(+x.risk_usd||0):null;
+ var win=rr!=null&&rr>0;
+ var W=720,H=420,c=document.createElement('canvas');c.width=W;c.height=H;
+ var g=c.getContext('2d');
+ var grad=g.createLinearGradient(0,0,W,H);grad.addColorStop(0,'#141c12');grad.addColorStop(1,'#0a0e0b');
+ g.fillStyle=grad;g.fillRect(0,0,W,H);
+ g.strokeStyle='rgba(183,243,107,.35)';g.lineWidth=2;roundRect(g,1,1,W-2,H-2,26);g.stroke();
+ g.fillStyle='#eef3ee';g.font='800 40px -apple-system,Inter,sans-serif';g.textBaseline='top';
+ g.fillText(x.pair+' · '+String(x.side).toUpperCase(),36,34);
+ var badge=st==='tp'?'TP HIT':st==='sl'?'SL':st==='be'?'BE':st==='open'?'LIVE':'CLOSED';
+ g.fillStyle=win?'#b7f36b':'#ff777d';roundRect(g,W-190,34,154,44,12);g.fill();
+ g.fillStyle=win?'#10150b':'#fff';g.font='800 22px -apple-system,Inter,sans-serif';g.textAlign='center';g.fillText(badge,W-113,45);g.textAlign='left';
+ if(rr!=null){g.fillStyle=win?'#b7f36b':'#ff777d';g.font='900 74px -apple-system,Inter,sans-serif';g.fillText((rr>0?'+':'')+rr.toFixed(2)+'R',36,104);}
+ else{g.fillStyle='#8a978c';g.font='700 40px -apple-system,Inter,sans-serif';g.fillText('—',36,116);}
+ g.fillStyle='#8a978c';g.font='500 24px -apple-system,Inter,sans-serif';
+ var sub=(usd!=null?((usd>0?'+':'−')+'$'+Math.abs(usd).toFixed(2)+' · '):'')+dateMY(x.closed_at||x.opened_at)+' · TraderWatch AI';
+ g.fillText(sub,38,rr!=null?192:176);
+ var cells=[[t('entry'),(+x.entry).toFixed(2),'#8ab4ff'],[t('sl'),(+x.sl).toFixed(2),'#ff777d'],[t('tp'),(+x.tp).toFixed(2),'#b7f36b']];
+ cells.forEach(function(cl,i){var cx=36+i*222;g.fillStyle='#171e18';roundRect(g,cx,246,206,86,14);g.fill();
+  g.fillStyle='#8a978c';g.font='700 16px -apple-system,Inter,sans-serif';g.fillText(cl[0].toUpperCase(),cx+16,262);
+  g.fillStyle=cl[2];g.font='800 30px -apple-system,Inter,sans-serif';g.fillText(cl[1],cx+16,288);});
+ g.fillStyle='#5d695f';g.font='800 16px -apple-system,Inter,sans-serif';g.textAlign='right';g.fillText('TRADERWATCH · AI ANALYST',W-36,H-40);g.textAlign='left';
+ c.toBlob(function(blob){
+  if(!blob){toast(t('shareErr'));return}
+  var file=new File([blob],'traderwatch-'+x.pair+'.png',{type:'image/png'});
+  if(navigator.canShare&&navigator.canShare({files:[file]})){
+   navigator.share({files:[file],title:'TraderWatch',text:x.pair+' '+(rr!=null?((rr>0?'+':'')+rr.toFixed(2)+'R'):'')}).catch(function(){});
+  }else{
+   var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=file.name;a.click();
+   setTimeout(function(){URL.revokeObjectURL(a.href)},2000);
+   toast(t('shareSaved'));
+  }
+ },'image/png');
+}
+function roundRect(g,x,y,w,h,r){g.beginPath();g.moveTo(x+r,y);g.arcTo(x+w,y,x+w,y+h,r);g.arcTo(x+w,y+h,x,y+h,r);g.arcTo(x,y+h,x,y,r);g.arcTo(x,y,x+w,y,r);g.closePath()}
 function pollQuote(){
  if(!TD.trade||!tdVisible())return;
  var run=TD.run,pair=TD.trade.pair;
@@ -2034,7 +2112,7 @@ function closeTrade(){
  clearInterval(TD.qTimer);clearInterval(TD.cTimer);TD.qTimer=null;TD.cTimer=null;
  $('phone').classList.remove('tdopen');
 }
-$('tdbd').onclick=closeTrade;$('tdx').onclick=closeTrade;
+$('tdbd').onclick=closeTrade;$('tdx').onclick=closeTrade;$('tdShare').onclick=shareCard;$('tdShareLab').textContent=t('shareLab');
 document.addEventListener('visibilitychange',function(){if(TD.trade&&tdVisible()){pollQuote();loadTdCandles()}});
 
 /* ---------------- profile (Supabase REST sebenar) ---------------- */

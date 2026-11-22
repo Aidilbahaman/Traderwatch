@@ -353,6 +353,46 @@ class Handler(BaseHTTPRequestHandler):
             return self._send(200, {"pair": pair, "tf": tf, "candles": candles})
         return self._send(404, {"error": "not found"})
 
+    def _alignment(self):
+        user = verify_user(self._token())
+        if not user or not user.get("id"):
+            return self._send(401, {"error": "Sila log masuk sebagai ahli."})
+        uid = user["id"]
+        try:
+            n = int(self.headers.get("Content-Length") or 0)
+            req = json.loads(self.rfile.read(n).decode() or "{}")
+        except ValueError:
+            return self._send(400, {"error": "JSON tidak sah."})
+        pair = str(req.get("pair", "")).upper().replace("/", "").replace(" ", "")
+        if pair not in ALLOWED_PAIRS:
+            return self._send(400, {"error": "This pair is not open for analysis yet."})
+        if not M5.is_up():
+            return self._send(503, {"error": "MT5 data bridge offline.", "bridge_down": True})
+        # Alignment datang sebaik sahaja scan utama siap — jangan kongsi
+        # cooldown 20s /api/analyze (nanti 429). Guna throttle 30s berasingan.
+        now = time.time()
+        ak = "align:" + uid
+        with _BARS_CACHE_LOCK:
+            last = (_BARS_CACHE.get(ak) or (0, 0))[0]
+            if now - last < 30:
+                cached_res = _BARS_CACHE.get("alignres:" + pair + ":" + uid)
+                if cached_res and now - cached_res[0] < 300:
+                    return self._send(200, cached_res[1])
+            _BARS_CACHE[ak] = (now, 1)
+        tf_bars = {}
+        for tf in ("M5", "H1", "H4"):
+            try:
+                tf_bars[tf] = fetch_bars_tf(pair, tf)
+            except Exception:
+                tf_bars[tf] = []
+        res = LA.alignment(pair, tf_bars)
+        if res is None:
+            return self._send(502, {"error": "Alignment unavailable — try again."})
+        res["pair"] = pair
+        with _BARS_CACHE_LOCK:
+            _BARS_CACHE["alignres:" + pair + ":" + uid] = (now, res)
+        return self._send(200, res)
+
     def _turnstile(self):
         if not turnstile_rate_ok(self.client_address[0]):
             return self._send(429, {"ok": False, "error": "rate limited"})
@@ -382,6 +422,8 @@ class Handler(BaseHTTPRequestHandler):
         path = urllib.parse.urlparse(self.path).path
         if path == "/api/turnstile/verify":
             return self._turnstile()
+        if path == "/api/analyze/alignment":
+            return self._alignment()
         if path != "/api/analyze":
             return self._send(404, {"error": "not found"})
         user = verify_user(self._token())

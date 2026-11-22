@@ -40,3 +40,33 @@ def render(bars, pair="XAUUSD", tf="M15", bos="", choch=False):
     buf = io.BytesIO()
     im.save(buf, format="PNG")
     return base64.b64encode(buf.getvalue()).decode()
+
+
+def render_multi(panels, pair="XAUUSD"):
+    """panels = [(tf, bars), ...] -> satu imej gabungan (stack) untuk alignment.
+    Setiap panel label TF di atas. Return base64 PNG."""
+    if not panels:
+        return ""
+    ph = 150
+    im = Image.new("RGB", (W, ph * len(panels)), (10, 14, 11))
+    d = ImageDraw.Draw(im)
+    for pi, (tf, bars) in enumerate(panels):
+        oy = pi * ph
+        if not bars:
+            continue
+        hi = max(b[1] for b in bars); lo = min(b[2] for b in bars)
+        rng = (hi - lo) or 1.0
+        y = lambda v: oy + 22 + (hi - v) / rng * (ph - 34)
+        x = lambda i: 12 + i * (W - 90) / max(1, len(bars) - 1)
+        d.text((10, oy + 4), f"{pair} {tf}", fill=(220, 230, 220))
+        for i, b in enumerate(bars):
+            xx = x(i)
+            op = bars[i - 1][3] if i else b[3]
+            col = (183, 243, 107) if b[3] >= op else (255, 119, 125)
+            d.line([(xx, y(b[1])), (xx, y(b[2]))], fill=col, width=2)
+            top, bot = y(max(op, b[3])), y(min(op, b[3]))
+            d.rectangle([xx - 2, top, xx + 2, max(bot, top + 1)], fill=col)
+        d.line([(0, oy + ph - 1), (W, oy + ph - 1)], fill=(34, 43, 35))
+    buf = io.BytesIO()
+    im.save(buf, format="PNG")
+    return base64.b64encode(buf.getvalue()).decode()
