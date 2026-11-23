@@ -44,8 +44,8 @@ ALLOWED_PAIRS = {"XAUUSD", "XAGUSD", "BTCUSD", "EURUSD", "GBPUSD",
                  "USDJPY", "AUDUSD", "USDCAD", "NZDUSD"}   # pairs dengan data bar live
 # Had longgar — client bayar untuk analisis tanpa had; jangan sekat kerja dia.
 # Semua boleh dilaras guna env tanpa ubah kod.
-MIN_GAP_S = float(os.environ.get("ANALYZE_MIN_GAP_S", "3"))
-HOURLY_CAP = int(os.environ.get("ANALYZE_HOURLY_CAP", "120"))
+MIN_GAP_S = float(os.environ.get("ANALYZE_MIN_GAP_S", "60"))
+HOURLY_CAP = int(os.environ.get("ANALYZE_HOURLY_CAP", "40"))   # kos LLM: max 40 scan/jam
 # Cooldown selepas buka trade: 0 = tiada sekatan (client bebas scan semula).
 TRADE_COOLDOWN_S = float(os.environ.get("ANALYZE_TRADE_COOLDOWN_S", "0"))
 BARS_COUNT = 300                    # M15 bars fed to the analyst
@@ -181,19 +181,42 @@ def last_trade_age_s(uid):
         return None                      # fail-open: jangan lock user jika query gagal
 
 
-def rate_check(uid):
-    """Return (ok, message). Trade-discipline cooldown + min gap + hourly cap."""
+def open_tf_lock(uid, pair, tf):
+    """Owner 2026-11-23: lock the timeframe the client committed to with
+    'take this trade'. Returns the open trade dict if that pair+TF already has
+    a LIVE trade (status open), else None. The lock releases automatically when
+    the trade closes at TP/SL (status != open) — no timer, no manual unlock."""
+    if not tf:
+        return None
+    try:
+        url = (SB_URL + "/rest/v1/paper_trades?select=id,pair,side,ai_tf,status,opened_at"
+               "&user_id=eq." + uid + "&status=eq.open&pair=eq." + pair
+               + "&ai_tf=eq." + tf)
+        req = urllib.request.Request(url, headers={"apikey": SB_KEY,
+                                                   "Authorization": "Bearer " + SB_KEY})
+        with urllib.request.urlopen(req, timeout=15) as r:
+            rows = json.loads(r.read().decode())
+        return rows[0] if rows else None
+    except Exception:
+        return None                      # fail-open: jangan sekat jika query gagal
+
+
+def rate_check(uid, pair=None, tf=None):
+    """Return (ok, message). TF-lock + min gap + hourly cap.
+
+    TF-lock (owner 2026-11-23): sekali client tekan 'take this trade' pada satu
+    timeframe, timeframe itu (pair sama) dikunci sampai trade tu tutup TP/SL.
+    Lock dilepas automatik bila status != open — tiada timer.
+    """
     now = time.time()
-    # 1) Disiplin trading: cooldown 5 minit selepas client buka trade.
-    age = last_trade_age_s(uid)
-    if TRADE_COOLDOWN_S > 0 and age is not None and 0 <= age < TRADE_COOLDOWN_S:
-        remain = int(TRADE_COOLDOWN_S - age)
-        mm, ss = divmod(remain, 60)
-        wait = f"{mm}m {ss:02d}s" if mm else f"{ss}s"
-        tip = _COOLDOWN_TIPS[int(now) % len(_COOLDOWN_TIPS)]
-        return False, (f"☕ You just opened a trade — chill first. Wait {wait} "
-                       f"before your next scan. {tip}")
-    # 2) Min gap between scans (LLM cost control).
+    # 1) TF-lock: pair+TF ada trade LIVE -> tak boleh scan semula TF itu.
+    locked = open_tf_lock(uid, pair, tf) if (pair and tf) else None
+    if locked:
+        since = locked.get("opened_at") or ""
+        return False, (f"🔒 {tf} dikunci untuk {pair} — anda sudah 'take this trade' "
+                       f"pada TF ini. Analisis {tf} akan dibuka semula selepas trade "
+                       f"itu hit TP atau SL. Anda masih boleh scan TF lain atau pair lain.")
+    # 2) Min gap between scans (LLM cost control). Default 1 minit.
     last = _last_call.get(uid, 0)
     if now - last < MIN_GAP_S:
         return False, f"Please wait {max(1, int(MIN_GAP_S - (now - last)))}s before the next analysis."
@@ -535,9 +558,9 @@ class Handler(BaseHTTPRequestHandler):
         tap = str(req.get("tap") or "").strip()[:40] or None
         if pair not in ALLOWED_PAIRS:
             return self._send(400, {"error": "This pair is not open for analysis yet."})
-        ok, msg = rate_check(uid)
+        ok, msg = rate_check(uid, pair, tf)
         if not ok:
-            return self._send(429, {"error": msg})
+            return self._send(429, {"error": msg, "tf_locked": "dikunci" in msg})
         rate_commit(uid)
         meta = (user.get("user_metadata") or {})
         nm = str(meta.get("username") or meta.get("full_name") or meta.get("name")

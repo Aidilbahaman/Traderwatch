@@ -607,6 +607,10 @@ html[data-theme="light"] .theme.on{background:#eaf5db}
 .dot{flex:none;width:8px;height:8px;border-radius:50%;margin-top:6px}
 .note{font-size:11px;color:var(--muted);background:var(--card2);border:1px solid var(--line);border-radius:14px;padding:11px 13px;margin-top:14px}
 .errbox{background:#ff777d12;border:1px solid #ff777d40;border-radius:16px;padding:14px;margin-top:14px;animation:up .45s both}
+.lockbox{background:#ffc16b12;border:1px solid #ffc16b40;border-radius:16px;padding:16px;margin-top:14px;text-align:center;animation:up .45s both}
+.lockbox .lockic{font-size:26px;line-height:1;margin-bottom:8px}
+.lockbox p{margin:0 0 10px;font-size:13.5px;line-height:1.5;color:var(--text)}
+.lockbox .lockhint{font-size:11.5px;color:var(--muted);line-height:1.45;margin-bottom:12px}
 .errbox p{margin:0;font-size:13.5px;color:var(--text)}
 .again{width:100%;margin-top:12px;padding:13px;border-radius:14px;background:var(--card2);border:1px solid var(--line);color:var(--text);font-weight:700;font-size:13px}
 .kv{display:grid;grid-template-columns:92px 1fr;gap:9px 12px;font-size:13px;line-height:1.5}
@@ -1798,12 +1802,20 @@ function analyze(){
 }
 function analyzeFail(res){
  S.busy=false;S.scan=null;JOB=null;hideFloat();setChip('','SEDIA');
+ var locked=res.status===429&&res.data&&res.data.tf_locked;
  if(window.TWSound)TWSound.play(res.status===429?'notify':'error');
  var e=esc((res.data&&res.data.error)||'');
  var msg=res.status===429?(e||t('limit')):res.status===400?t('notOpen'):t('noAnalysis');
  if(e&&res.status!==400&&res.status!==429)msg+=' '+e;
  $('term').classList.add('hidden');
- $('res').innerHTML='<div class="errbox"><p>'+msg+'</p><button class="again" id="retryAna">'+esc(t('retry'))+'</button></div>';
+ if(locked){
+  $('res').innerHTML='<div class="lockbox"><div class="lockic">🔒</div><p>'+msg+'</p><div class="lockhint">'+
+   (lang==='en'?'Tip: scan another timeframe or pair. This timeframe unlocks when the trade hits TP or SL.'
+               :'Tip: scan TF atau pair lain. TF ini dibuka semula bila trade hit TP atau SL.')+
+   '</div><button class="again" id="retryAna">'+esc(t('retry'))+'</button></div>';
+ } else {
+  $('res').innerHTML='<div class="errbox"><p>'+msg+'</p><button class="again" id="retryAna">'+esc(t('retry'))+'</button></div>';
+ }
  $('retryAna').onclick=function(){hap(8);analyze()};
 }
 function mt5Banner(m){
