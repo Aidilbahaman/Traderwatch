@@ -233,5 +233,32 @@ h1{font-size:17px;letter-spacing:-.02em;margin:0 0 4px;font-weight:850}
   }
   size();window.addEventListener('resize',size);
   requestAnimationFrame(frame);
+
+  /* ---- kawalan: aktifkan shimmer masa scan ---- */
+  var st=document.getElementById('st'), chipT=document.getElementById('chipT'), go=document.getElementById('go');
+  var busy=false;
+  function state(s){
+    st.classList.remove('ai','done');
+    go.classList.remove('ai');
+    if(s==='ai'){
+      st.classList.add('ai'); chipT.textContent='AI SCANNING';
+      go.classList.add('ai'); go.textContent='Reading the chart\u2026'; busy=true;
+    } else if(s==='done'){
+      st.classList.add('done'); chipT.textContent='ANALYSIS READY';
+      busy=false; go.textContent='\u2726 Analyze with AI';
+    } else {
+      chipT.textContent='SEDIA'; busy=false; go.textContent='\u2726 Analyze with AI';
+    }
+  }
+  go.onclick=function(){
+    if(busy)return;
+    state('ai');
+    setTimeout(function(){state('done')},4500);
+    setTimeout(function(){state('idle')},8200);
+  };
+  /* auto-demo: tunjuk sekali bila dibuka supaya effect sentiasa kelihatan */
+  setTimeout(function(){state('ai');setTimeout(function(){state('done')},4500)},700);
+  /* klik mana-mana pada carta pun aktifkan */
+  document.querySelector('.chartbox').addEventListener('click',function(){if(!busy)go.onclick()});
 })();
 </script>
