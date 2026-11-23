@@ -1809,7 +1809,7 @@ function mt5Banner(m){
  if(m.dry_run)return '<div class="mt5b dry"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 9v4m0 4h.01M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/></svg><span>'+(lang==='en'?'MT5 dry-run · lot ':'MT5 dry-run · lot ')+esc(String(m.lot))+' — '+(lang==='en'?'no live order placed':'tiada order sebenar')+'</span></div>';
  return '<div class="mt5b live"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg><span>'+(lang==='en'?'Sent to MT5 · ':'Dihantar ke MT5 · ')+esc(m.type||'pending')+' #'+esc(String(m.ticket))+' · lot '+esc(String(m.lot))+'</span></div>';
 }
-function tfStyle(x){var m={M5:'Scalping',M15:'Intraday',H1:'Swing',H4:'Position',D1:'Position'};return m[x]||'Intraday';}
+function tfStyle(x){var m={M1:'Ultra scalp',M5:'Scalping',M15:'Intraday',H1:'Swing'};return m[x]||'Scalping';}
 /* Narasi AI gaya chatbot — orb hidup + ayat muncul satu-satu.
    Buang jargon & nota dalaman; cerita dalam bahasa client. */
 function narrateAI(a){
@@ -1917,7 +1917,7 @@ function loadAlignment(){
  apiFetch('/api/analyze/alignment',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({pair:pair})}).then(function(r){
   if(run!==S.run||!cur||cur.s!==pair)return;
   if(!r.ok||!r.data||!r.data.tfs){box.classList.add('hidden');return}
-  var d=r.data,order=['M5','H1','H4'];
+  var d=r.data,order=['M5','M15','H1'];
   var cells=order.filter(function(k){return d.tfs[k]}).map(function(k){
    var v=d.tfs[k],cls=v==='BUY'?'b':v==='SELL'?'s':'h';
    return '<div class="c"><div class="k">'+k+'</div><div class="v '+cls+'">'+v+'</div></div>';

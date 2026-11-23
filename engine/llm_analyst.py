@@ -95,10 +95,15 @@ BUDGET_S = float(os.environ.get("AI_LLM_BUDGET_S", "210"))
 TF_PROFILES = {
     "M1": dict(ctx_factor=5, ctx_name="M5", min_bars=60, ctx_show=20, base_show=50,
                rr1_min=1.2, rr1_max=1.8, role="ULTRA SCALP",
-               approach=("You are ULTRA-scalping M1. SL = 1.2x M1 ATR (tight, above spread), "
-                         "TP1 = 1.2R, TP2 = 1.8R. Only trade a clear micro momentum burst "
-                         "(EMA8 vs EMA21). If bars are small/compressed or price is mid-range, HOLD. "
-                         "Speed matters: exit fast, do not wait for a big move.")),
+               approach=("You are ULTRA-scalping M1. SL = 1.0-1.3x M1 ATR (tight but above spread), "
+                         "TP1 = 1.2R, TP2 = 1.8R. On M1 you are looking for a 5-15 minute "
+                         "micro-move, NOT a swing. A short directional push in the last 5-10 bars "
+                         "with EMA8 pulling away from EMA21 IS a valid setup — take it. "
+                         "Do NOT demand a large move, a big breakout, or multi-bar confirmation; "
+                         "on M1 that never comes. If the last 5 bars have a clear slope "
+                         "(higher lows for BUY, lower highs for SELL), act. "
+                         "Only HOLD if bars are genuinely flat/overlapping with no slope at all. "
+                         "Exit fast — this is a scalp, not a position.")),
     "M5": dict(ctx_factor=3, ctx_name="M15", min_bars=80, ctx_show=24, base_show=60,
                rr1_min=1.3, rr1_max=1.8, role="SCALPER",
                approach=("You are SCALPING. Backtest-verified: SL = 1.5x ATR, TP1 = 1.5R, "
@@ -353,7 +358,12 @@ def validate_verdict(j, price, pip, spread_pips, rr1_min=1.5, pair_hint="", rr1_
     except (TypeError, ValueError):
         conf = 0.5
     if bias == "HOLD":
-        return {"side": "HOLD", "conf": conf, "reason": reason}
+        # HOLD bukan "0% yakin" — ia "tiada arah untuk diberi keyakinan".
+        # Model kadang pulang confidence:0 untuk HOLD; UI pula papar cincin
+        # kosong 0% yang nampak seperti ralat. Beri lantai 0.15-0.30 supaya
+        # paparan bermakna: rendah tapi bukan sifar.
+        return {"side": "HOLD", "conf": round(max(0.15, min(0.35, conf or 0.2)), 2),
+                "reason": reason}
     if bias not in ("BUY", "SELL"):
         raise ValueError(f"bias tidak sah: {bias!r}")
     try:
@@ -538,10 +548,18 @@ def _vision_chain():
     return out
 
 
-def alignment(pair, tf_bars, timeout=60):
-    """Multi-TF alignment: satu imej gabungan (M5/H1/H4), satu panggilan vision.
-    tf_bars = {tf: bars}. Return {tfs:{tf:bias}, aligned, note} atau None."""
-    panels = [(tf, tf_bars[tf]) for tf in ("M5", "H1", "H4") if tf_bars.get(tf)]
+ALIGN_TFS = ("M5", "M15", "H1")
+
+
+def alignment(pair, tf_bars, timeout=None):
+    """Multi-TF alignment: satu imej gabungan (M5/M15/H1), satu panggilan vision.
+
+    timeout lalai = CALL_TIMEOUT_S. Dulu 60s, sedangkan neon-high ambil 80-120s
+    untuk tiga panel -> setiap panggilan dipotong sebelum jawapan sampai dan
+    kotak alignment kekal "..." di UI.
+    """
+    timeout = timeout or CALL_TIMEOUT_S
+    panels = [(tf, tf_bars[tf]) for tf in ALIGN_TFS if tf_bars.get(tf)]
     if not panels:
         return None
     b64 = VC.render_multi(panels, pair=pair)
@@ -555,7 +573,7 @@ def alignment(pair, tf_bars, timeout=60):
               '":"BUY|SELL|HOLD"},"note":"<8 words on alignment>"}')
     for mdl in _vision_chain():
         try:
-            content = _call_vision_b64(mdl, prompt, b64, timeout, max_tokens=300)
+            content = _call_vision_b64(mdl, prompt, b64, max(timeout, 180), max_tokens=300)
             m = json.loads(content[content.find("{"):content.rfind("}") + 1])
             t = {k: str(v).upper() for k, v in (m.get("tfs") or {}).items() if str(v).upper() in ("BUY", "SELL", "HOLD")}
             if not t:
@@ -626,8 +644,13 @@ def build_quant_vision_prompt(pair, tf, price, spread_pips, tf_key, trend, bos,
             f"2. Reply HOLD only if the chart is genuinely unclear (mid-range, choppy, "
             f"no structure). Do not stall out of caution.\n"
         )
+    # Arahan gaya dagang ikut TF. Dulu hanya prompt TEKS dapat ini; prompt
+    # vision tidak — jadi M1/M5 dinilai dengan nada swing yang sama. Itu punca
+    # neon pulang HOLD pada carta M1 yang jelas trending.
+    style_block = f"YOUR STYLE ({prof['role']}, {tf}): {prof['approach']}\n"
     return (
         f"You are the senior visual analyst. You read the CHART IMAGE with full discretion.\n"
+        f"{style_block}"
         f"Pair: {pair} {tf} | Live price: {price:.{dec}f} | Spread: {spread_pips:g} pips\n"
         f"Higher TF ({tf_key}) trend: {trend} | Structure BOS: {bos} | "
         f"Macro EMA200 bias: {qm.get('macro', trend)}\n"

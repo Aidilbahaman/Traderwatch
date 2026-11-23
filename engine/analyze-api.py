@@ -473,7 +473,7 @@ class Handler(BaseHTTPRequestHandler):
                     return self._send(200, cached_res[1])
             _BARS_CACHE[ak] = (now, 1)
         tf_bars = {}
-        for tf in ("M5", "H1", "H4"):
+        for tf in LA.ALIGN_TFS:
             try:
                 tf_bars[tf] = fetch_bars_tf(pair, tf)
             except Exception:
