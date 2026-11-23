@@ -499,6 +499,15 @@ def _apply_risk_entry(verdict, risk_level, price, atr):
     return verdict
 
 
+# Nama model yang sampai ke CLIENT disembunyikan — pengguna tak perlu tahu
+# infrastruktur LLM dalaman (gemini-4-neon-*, deepseek-*, dsb). Audit/log
+# kekal nama sebenar untuk debugging.
+PUBLIC_MODEL_LABEL = "TraderWatch AI"
+def _public_model(model):
+    """Label awam untuk nama model dalaman. Log/audit kekal nama sebenar."""
+    return PUBLIC_MODEL_LABEL
+
+
 # Sumber panggilan semasa (thread-local supaya analyze-api berbilang thread selamat).
 # "member" = manusia tekan butang · "bot" = signal-engine auto-scan · "backtest" = ujian.
 # Lencana "Requests this hour" pada pair card hanya kira "member".
@@ -683,7 +692,8 @@ def alignment(pair, tf_bars, timeout=None):
                 continue
             dirs = [v for v in t.values() if v in ("BUY", "SELL")]
             aligned = len(dirs) >= 2 and len(set(dirs)) == 1
-            return {"tfs": t, "aligned": aligned, "note": str(m.get("note") or "")[:80], "model": mdl}
+            return {"tfs": t, "aligned": aligned, "note": str(m.get("note") or "")[:80],
+                    "model": _public_model(mdl)}
         except Exception as e:
             log(f"{pair} alignment {mdl} gagal ({type(e).__name__}: {str(e)[:80]})")
     return None
@@ -1054,7 +1064,7 @@ def analyze(pair, bars, pip, spread_pips, call=None, budget_s=None, held=None, t
                         "side": "HOLD", "conf": 0.4,
                         "reason": f"Quant ({q_setup['side']}) vs Vision ({v_bias}) conflict — stay flat.",
                     }
-                    verdict.update(model=v_model, tf=tf, latency_s=round(latency, 1),
+                    verdict.update(model=_public_model(v_model), tf=tf, latency_s=round(latency, 1),
                                    vision=True, ai_meta=ai_meta)
                     _audit({"ts": datetime.now(timezone.utc).isoformat(), "pair": pair, "tf": tf,
                             "model": v_model, "vision": True, "latency_s": round(latency, 1),
@@ -1080,7 +1090,7 @@ def analyze(pair, bars, pip, spread_pips, call=None, budget_s=None, held=None, t
                                            _spread_floor, v_model, ai_meta)
                 log(f"{pair} {tf} high-risk: neon HOLD -> dipaksa {verdict['side']}")
             verdict = _apply_risk_entry(verdict, risk_level, price, atr)
-            verdict.update(model=v_model, tf=tf, latency_s=round(latency, 1),
+            verdict.update(model=_public_model(v_model), tf=tf, latency_s=round(latency, 1),
                            vision=True, ai_meta=ai_meta)
             _audit({"ts": datetime.now(timezone.utc).isoformat(), "pair": pair, "tf": tf,
                     "model": v_model, "vision": True, "latency_s": round(latency, 1),
@@ -1118,7 +1128,7 @@ def analyze(pair, bars, pip, spread_pips, call=None, budget_s=None, held=None, t
             v_bias = str(j.get("bias", "")).strip().upper()
             if v_bias in ("BUY", "SELL") and v_bias != q_setup["side"]:
                 verdict = {
-                    "side": "HOLD", "conf": 0.4, "model": model, "tf": tf,
+                    "side": "HOLD", "conf": 0.4, "model": _public_model(model), "tf": tf,
                     "latency_s": round(latency, 1), "vision": False, "ai_meta": ai_meta,
                     "reason": f"Quant ({q_setup['side']}) vs LLM ({v_bias}) conflict — stay flat.",
                 }
@@ -1144,7 +1154,7 @@ def analyze(pair, bars, pip, spread_pips, call=None, budget_s=None, held=None, t
                                        _spread_floor, model, ai_meta)
             log(f"{pair} {tf} high-risk (text): HOLD -> dipaksa {verdict['side']}")
         verdict = _apply_risk_entry(verdict, risk_level, price, atr)
-        verdict["model"] = model
+        verdict["model"] = _public_model(model)
         verdict["tf"] = tf
         verdict["latency_s"] = round(latency, 1)
         verdict["vision"] = False

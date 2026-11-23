@@ -2089,7 +2089,7 @@ function show(a){
  var f=function(v){return fx(cur,v)},cls=a.dir==='BUY'?'buy':a.dir==='SELL'?'sell':'wait';
  var col=a.dir==='BUY'?'#b7f36b':a.dir==='SELL'?'#ff777d':'#ffc16b';
  var val=a.dir==='WAIT'?(lang==='en'?'WAIT':'TUNGGU'):a.dir;
- var h='<div class="bias '+cls+'" style="--rc:'+col+'"><div><div class="lab">'+esc(t('aiLabel'))+'</div><div class="val">'+val+'</div><div class="asof">'+cur.s+' · '+esc(a.tf||tf)+' · '+esc(tfStyle(a.tf||tf))+(a.model?' · '+esc(a.model):'')+'</div></div><div class="ring"><svg viewBox="0 0 80 80"><circle class="rb" cx="40" cy="40" r="34"/><circle class="rf" id="rf" cx="40" cy="40" r="34" transform="rotate(-90 40 40)"/></svg><div class="n"><div><span id="cn">0</span>%<small>'+esc(t('conf'))+'</small></div></div></div></div>';
+ var h='<div class="bias '+cls+'" style="--rc:'+col+'"><div><div class="lab">'+esc(t('aiLabel'))+'</div><div class="val">'+val+'</div><div class="asof">'+cur.s+' · '+esc(a.tf||tf)+' · '+esc(tfStyle(a.tf||tf))+'</div></div><div class="ring"><svg viewBox="0 0 80 80"><circle class="rb" cx="40" cy="40" r="34"/><circle class="rf" id="rf" cx="40" cy="40" r="34" transform="rotate(-90 40 40)"/></svg><div class="n"><div><span id="cn">0</span>%<small>'+esc(t('conf'))+'</small></div></div></div></div>';
  h+=mt5Banner(a.mt5);
  if(a.meta&&a.meta.input){var ai=a.meta.input;
   h+='<div class="sec">'+esc(t('aiNarr'))+'</div>'+
@@ -3425,7 +3425,7 @@ window.addEventListener('appinstalled',function(){drawWelcome();try{localStorage
 if(typeof window!=='undefined'){window.__welcome=showWelcome;window.__drawWelcome=drawWelcome;}
 if(typeof window!=='undefined'){window.__forceLogout=goLogin;}
 if('serviceWorker' in navigator){window.addEventListener('load',function(){
- navigator.serviceWorker.register('sw.js?v=70v58',{scope:'./',updateViaCache:'none'}).then(function(reg){
+ navigator.serviceWorker.register('sw.js?v=71v58',{scope:'./',updateViaCache:'none'}).then(function(reg){
   /* PWA homescreen resume instance lama tanpa navigation -> check update
      bila app kembali nampak/focus + setiap 30 min, dan reload automatik
      bila SW versi baru mengambil alih (controllerchange). */
