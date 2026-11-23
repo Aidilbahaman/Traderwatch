@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Apple Intelligence Scan — Preview</title>
+<meta name="theme-color" content="#0a0e0b">
+<style>
+:root{--bg:#0a0e0b;--card:#111612;--card2:#171e18;--text:#eef3ee;--muted:#8a978c;
+  --line:#222b23;--lime:#b7f36b;--red:#ff777d;--orange:#ffc16b;--blue:#8ab4ff;
+  --chart:#0c110d;--onlime:#10150b;color-scheme:dark}
+html[data-theme="light"]{--bg:#f5f7f5;--card:#ffffff;--card2:#eef2ed;--text:#14211a;
+  --muted:#63736a;--line:rgba(0,0,0,.1);--lime:#7ab52e;--red:#d64b55;--orange:#b8791b;
+  --blue:#3a6fc4;--chart:#f0f4ef;--onlime:#0b1405;color-scheme:light}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,system-ui,sans-serif;
+  min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:18px;
+  -webkit-font-smoothing:antialiased;letter-spacing:-.011em}
+.wrap{width:390px;max-width:100%}
+h1{font-size:17px;letter-spacing:-.02em;margin:0 0 4px;font-weight:850}
+.sub{color:var(--muted);font-size:12.5px;margin:0 0 14px;line-height:1.4}
+.sheet{width:390px;max-width:100%;background:var(--card);border:1px solid var(--line);
+  border-radius:26px;padding:12px 16px 20px;box-shadow:0 -20px 60px #000a}
+.grab{padding:2px 0 10px;display:flex;justify-content:center}
+.grab i{display:block;width:40px;height:5px;border-radius:9px;background:var(--line)}
+.shead{display:flex;align-items:center;gap:12px;margin-bottom:12px}
+.shead .ic{width:42px;height:42px;border-radius:13px;background:var(--lime);color:var(--onlime);
+  display:grid;place-items:center;font-weight:900;font-size:12px}
+.shead h2{margin:0;font-size:20px;letter-spacing:-.04em}
+.shead p{margin:0;color:var(--muted);font-size:12px}
+.shead .x{margin-left:auto;width:34px;height:34px;border-radius:50%;background:var(--card2);color:var(--muted);display:grid;place-items:center;font-size:15px;border:1px solid var(--line)}
+/* chartbox */
+.chartbox{position:relative;border:1px solid var(--line);border-radius:18px;background:var(--chart);overflow:hidden;height:220px;margin-bottom:12px}
+#cv{display:block;width:100%;height:100%}
+.chipc{position:absolute;left:10px;top:10px;background:var(--glass, rgba(10,14,11,.82));border:1px solid var(--line);
+  border-radius:999px;padding:4px 10px;font-size:10px;font-weight:800;letter-spacing:.08em;color:var(--muted);z-index:3}
+.chipc i{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--lime);margin-right:5px;animation:pl .7s infinite}
+.chipc.scan{color:var(--lime);border-color:#b7f36b55}
+/* mode toggle */
+.modes{display:flex;gap:6px;margin-bottom:14px}
+.modes button{flex:1;padding:9px 6px;border-radius:10px;border:1px solid var(--line);background:var(--card2);
+  color:var(--muted);font-weight:750;font-size:11px;cursor:pointer;transition:.15s}
+.modes button.on{background:var(--lime);color:var(--onlime);border-color:var(--lime)}
+.note{font-size:11px;color:var(--muted);line-height:1.5;margin:0}
+.note b{color:var(--text)}
+@keyframes pl{50%{opacity:.3}}
+@media(prefers-reduced-motion:reduce){canvas{animation:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Apple Intelligence scan</h1>
+  <p class="sub">Aurora shimmer beredar — bukan garis kaku kiri → kanan.</p>
+
+  <div class="modes">
+    <button id="mOld" >Lama: garis kiri→kanan</button>
+    <button id="mNew" class="on">Baru: Apple Intelligence</button>
+  </div>
+
+  <div class="sheet">
+    <div class="grab"><i></i></div>
+    <div class="shead">
+      <div class="ic">XAU</div>
+      <div><h2>XAUUSD</h2><p>Gold / US Dollar · M15</p></div>
+      <button class="x">✕</button>
+    </div>
+    <div class="chartbox">
+      <canvas id="cv"></canvas>
+      <div class="chipc scan" id="chip"><i></i><span id="chipT">AI SCANNING</span></div>
+    </div>
+  </div>
+
+  <p class="note"><b>Apple Intelligence</b> — aurora berbilang warna (biru→ungu→merah jambu→lime) beralun merentasi carta seperti cecair, dengan glow lembut berdenyut & jejak bercahaya. Rasa organik, bukan robotik.</p>
+</div>
+
+<script>
+(function(){
+  var mode='new';
+  var cv=document.getElementById('cv'),ctx=cv.getContext('2d');
+  function css(v){return getComputedStyle(document.documentElement).getPropertyValue(v).trim()}
+  // harga sintetik XAUUSD (bentuk realistik)
+  var PX=[3627,3625,3626,3622,3619,3620,3616,3612,3608,3604,3601,3603,3600,3602,3606,3609,3611,3608,3610,3613,3611,3609,3612,3615,3613,3611,3614,3617,3620,3623,3627,3625,3622,3620,3622,3621,3619,3620,3621,3620];
+  var t=0;
+  function size(){var r=cv.getBoundingClientRect();cv.width=r.width*2;cv.height=r.height*2}
+  function draw(){
+    var W=cv.width,H=cv.height,dpr=2;
+    ctx.clearRect(0,0,W,H);
+    var pad=16*dpr, pT=10*dpr, pB=18*dpr;
+    var lo=Math.min.apply(0,PX),hi=Math.max.apply(0,PX),rng=(hi-lo)||1;
+    var n=PX.length;
+    var plotW=W-pad*2, plotH=H-pT-pB;
+    function x(i){return pad+(i/(n-1))*plotW}
+    function y(v){return pT+(hi-v)/rng*plotH}
+    var lime=css('--lime'),blue=css('--blue'),muted=css('--muted'),txt=css('--text');
+    // grid
+    ctx.lineWidth=1;ctx.font='700 '+Math.round(10*dpr)+'px ui-monospace,Menlo,monospace';ctx.textAlign='left';ctx.textBaseline='middle';
+    for(var g=0;g<4;g++){var gv=lo+rng*g/3,gy=y(gv);ctx.strokeStyle='rgba(128,150,130,.12)';ctx.beginPath();ctx.moveTo(pad,gy);ctx.lineTo(W-pad,gy);ctx.stroke();ctx.fillStyle=muted;ctx.fillText(gv.toFixed(2),W-pad+6*dpr,gy)}
+    // line chart (lime)
+    ctx.beginPath();
+    for(var i=0;i<n;i++){var xx=x(i),yy=y(PX[i]);i?ctx.lineTo(xx,yy):ctx.moveTo(xx,yy)}
+    ctx.strokeStyle=lime;ctx.lineWidth=1.6*dpr;ctx.stroke();
+    // swing dots
+    for(var j=2;j<n-2;j++){
+      var a=PX[j-2],b=PX[j-1],c=PX[j],e=PX[j+1],f=PX[j+2];
+      if((c>b&&c>e&&b>a&&e<f)||(c<b&&c<e&&b<a&&e>f)){
+        ctx.beginPath();ctx.arc(x(j),y(c),2.4*dpr,0,6.284);
+        ctx.fillStyle=c>b?'rgba(214,255,154,.9)':'rgba(255,159,159,.9)';ctx.fill();
+      }
+    }
+
+    if(mode==='old'){
+      /* LAMA: garis menegak tegas kiri -> kanan */
+      var sx=pad+(t*1.5)%plotW;
+      var gr=ctx.createLinearGradient(sx-70*dpr,0,sx,0);
+      gr.addColorStop(0,'rgba(183,243,107,0)');gr.addColorStop(1,'rgba(183,243,107,.18)');
+      ctx.fillStyle=gr;ctx.fillRect(sx-70*dpr,pT,70*dpr,plotH);
+      ctx.strokeStyle=lime;ctx.lineWidth=1.5*dpr;
+      ctx.beginPath();ctx.moveTo(sx,pT);ctx.lineTo(sx,pT+plotH);ctx.stroke();
+    } else {
+      /* BARU: Apple Intelligence — aurora shimmer beredar */
+      // 3 lapisan aurora bergerak berbeza laju, blend screen
+      var layers=[
+        {speed:0.9,  hue:'#5ac8fa', w:120},  // biru
+        {speed:0.65, hue:'#a06bff', w:150},  // ungu
+        {speed:0.45, hue:'#ff9db0', w:170},  // merah jambu
+      ];
+      for(var L=0;L<layers.length;L++){
+        var ly=layers[L];
+        var cx0=pad+((t*ly.speed*2 + L*180) % (plotW+ly.w*dpr*2)) - ly.w*dpr;
+        var cgr=ctx.createLinearGradient(cx0,0,cx0+ly.w*dpr,0);
+        cgr.addColorStop(0,'rgba(255,255,255,0)');
+        cgr.addColorStop(0.5,hexToRgba(ly.hue,0.22));
+        cgr.addColorStop(1,'rgba(255,255,255,0)');
+        ctx.globalCompositeOperation='screen';
+        ctx.fillStyle=cgr;
+        // bentuk beralun (sinus), bukan segi empat
+        ctx.beginPath();
+        for(var s=0;s<=ly.w*dpr;s+=4*dpr){
+          var px=cx0+s;
+          var wobble=Math.sin((s/(ly.w*dpr))*Math.PI*2 + t*0.03 + L)*8*dpr;
+          var top=pT+wobble, bot=pT+plotH-wobble;
+          s?ctx.lineTo(px,top):ctx.moveTo(px,top);
+        }
+        // tutup ke bawah
+        ctx.lineTo(cx0+ly.w*dpr,pT+plotH+8*dpr);
+        ctx.lineTo(cx0,pT+plotH+8*dpr);
+        ctx.closePath();ctx.fill();
+        ctx.globalCompositeOperation='source-over';
+      }
+      // jejak bercahaya halus pada garisan harga
+      ctx.globalAlpha=0.5;
+      ctx.shadowColor=lime;ctx.shadowBlur=12*dpr;
+      ctx.beginPath();
+      for(var k=0;k<n;k++){var xx2=x(k),yy2=y(PX[k]);k?ctx.lineTo(xx2,yy2):ctx.moveTo(xx2,yy2)}
+      ctx.strokeStyle=lime;ctx.lineWidth=1.4*dpr;ctx.stroke();
+      ctx.shadowBlur=0;ctx.globalAlpha=1;
+      // glow denyut lembut keseluruhan
+      var pulse=0.5+0.5*Math.sin(t*0.04);
+      ctx.globalCompositeOperation='screen';
+      var pg=ctx.createRadialGradient(W/2,H/2,0,W/2,H/2,W*0.6);
+      pg.addColorStop(0,'rgba(183,243,107,'+(0.04*pulse)+')');
+      pg.addColorStop(1,'rgba(0,0,0,0)');
+      ctx.fillStyle=pg;ctx.fillRect(0,0,W,H);
+      ctx.globalCompositeOperation='source-over';
+    }
+    t++;
+    requestAnimationFrame(draw);
+  }
+  function hexToRgba(hex,a){
+    var r=parseInt(hex.slice(1,3),16),g=parseInt(hex.slice(3,5),16),b=parseInt(hex.slice(5,7),16);
+    return 'rgba('+r+','+g+','+b+','+a+')';
+  }
+  document.getElementById('mOld').onclick=function(){mode='old';this.classList.add('on');document.getElementById('mNew').classList.remove('on')};
+  document.getElementById('mNew').onclick=function(){mode='new';this.classList.add('on');document.getElementById('mOld').classList.remove('on')};
+  size();window.addEventListener('resize',size);
+  draw();
+})();
+</script>
+</body>
+</html>
