@@ -252,7 +252,7 @@ def fetch_bars(pair):
     return out
 
 
-TF_MINUTES = {"M5": 5, "M15": 15, "H1": 60, "H4": 240, "D1": 1440}
+TF_MINUTES = {"M1": 1, "M5": 5, "M15": 15, "H1": 60}
 
 # Chart-OHLC cache: every client opening the same chart used to spawn its own
 # ~2s wine bridge call. Cache per (pair,tf) for 60s so N viewers cost 1 call.
@@ -262,7 +262,7 @@ _OHLC_TTL = 60.0
 
 def fetch_ohlc(pair, tf, limit=200):
     """Real OHLC candles for the chart, resampled to the requested timeframe."""
-    tf = tf if tf in TF_MINUTES else "M15"
+    tf = tf if tf in TF_MINUTES else "M5"
     ck = (pair, tf)
     hit = _OHLC_CACHE.get(ck)
     if hit and (time.time() - hit[0]) < _OHLC_TTL:
@@ -280,8 +280,8 @@ def fetch_ohlc(pair, tf, limit=200):
 def _fetch_ohlc_raw(pair, tf, limit=200):
     """Real OHLC candles for the chart using native MT5 timeframes (M5..D1),
     with automatic fallback to M15 resampling if native H1/H4/D1 is empty."""
-    tf = tf if tf in TF_MINUTES else "M15"
-    gran = {"M5": "M5", "M15": "M15", "H1": "M60", "H4": "H4", "D1": "D1"}.get(tf, "M15")
+    tf = tf if tf in TF_MINUTES else "M5"
+    gran = {"M1": "M1", "M5": "M5", "M15": "M15", "H1": "M60"}.get(tf, "M15")
 
     def _parse(rows):
         out = []
@@ -309,20 +309,20 @@ def _fetch_ohlc_raw(pair, tf, limit=200):
     return [{"t": t, "o": o, "h": h, "l": l, "c": c} for t, o, h, l, c in bars[-limit:]]
 
 
-ANALYSIS_TFS = ("M5", "M15", "H1", "H4", "D1")
-TF_MIN_BARS = {"M5": 80, "M15": 100, "H1": 60, "H4": 60, "D1": 55}
+ANALYSIS_TFS = ("M1", "M5", "M15", "H1")
+TF_MIN_BARS = {"M1": 60, "M5": 80, "M15": 100, "H1": 60}
 
 
 def fetch_bars_tf(pair, tf):
     """Base-TF bars (ts_ms,h,l,c) for the analyst. Uses native MT5 candles for
     M5/M15/H1/H4/D1 (giving 300 true broker bars on H4 & D1 instead of resampled
     M60), with automatic fallback to M60 resampling if native returns too few."""
-    tf = tf if tf in ANALYSIS_TFS else "M15"
-    gran = {"M5": "M5", "M15": "M15", "H1": "M60", "H4": "H4", "D1": "D1"}.get(tf, "M15")
+    tf = tf if tf in ANALYSIS_TFS else "M5"
+    gran = {"M1": "M1", "M5": "M5", "M15": "M15", "H1": "M60"}.get(tf, "M5")
     # 520 bukan 300: quant_engine menolak setup bila bar < WARMUP_BARS
     # (M15/M5 = 400) sebab EMA200 di-seed dari bar pertama. Feed 300 bar
     # bermakna setiap analisis pulang HOLD "warmup" — app jadi bisu.
-    count = {"M5": 520, "M15": 520, "H1": 420, "H4": 400, "D1": 320}.get(tf, 520)
+    count = {"M1": 620, "M5": 520, "M15": 520, "H1": 420}.get(tf, 520)
 
     def _parse(rows):
         out = []
@@ -349,15 +349,15 @@ def fetch_bars_tf(pair, tf):
     return res
 
 
-def run_analysis(pair, tf="M15"):
-    tf = tf if tf in ANALYSIS_TFS else "M15"
+def run_analysis(pair, tf="M15", tap=None):
+    tf = tf if tf in ANALYSIS_TFS else "M5"
     bars = fetch_bars_tf(pair, tf)
     if len(bars) < TF_MIN_BARS.get(tf, 100):
         return {"error": "Not enough bar data for this timeframe yet. Try another TF or pair."}
     disp = pair[:3] + "/" + pair[3:]
     pip = M.pip_of(disp)
     spread = SMC.SPREAD_PIPS.get(pair, SMC.DEFAULT_SPREAD_PIPS)
-    verdict = LA.analyze(disp, bars, pip, spread, tf=tf)
+    verdict = LA.analyze(disp, bars, pip, spread, tf=tf, src="member", tap=tap)
     price = bars[-1][3]
     if verdict is None:
         return {"side": "HOLD", "pair": disp, "price": price, "tf": tf,
@@ -530,6 +530,9 @@ class Handler(BaseHTTPRequestHandler):
             return self._send(400, {"error": "JSON tidak sah."})
         pair = str(req.get("pair", "")).upper().replace("/", "").replace(" ", "")
         tf = str(req.get("timeframe", "M15")).upper()
+        # Satu ketukan UI = satu permintaan pada lencana, walau scan 5 TF.
+        # Frontend hantar id yang sama untuk semua TF dalam ketukan itu.
+        tap = str(req.get("tap") or "").strip()[:40] or None
         if pair not in ALLOWED_PAIRS:
             return self._send(400, {"error": "This pair is not open for analysis yet."})
         ok, msg = rate_check(uid)
@@ -551,7 +554,7 @@ class Handler(BaseHTTPRequestHandler):
         if M5.read_status().get("market") == "closed" and pair != "BTCUSD":
             return self._send(409, {"error": "Market closed for this pair — it reopens soon. BTCUSD is available 24/7.", "market_closed": True})
         try:
-            result = run_analysis(pair, tf)
+            result = run_analysis(pair, tf, tap=tap)
         except Exception as e:
             log(f"{pair} error {type(e).__name__}: {str(e)[:160]}")
             return self._send(500, {"error": "Analisis gagal buat masa ini. Cuba lagi sebentar."})

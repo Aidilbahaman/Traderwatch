@@ -93,35 +93,29 @@ BUDGET_S = float(os.environ.get("AI_LLM_BUDGET_S", "120"))
 # all 5 timeframes (M5, M15, H1, H4, D1) so rr1_min < quant_rr1 < rr1_max
 # with zero contradictory bounds.
 TF_PROFILES = {
+    "M1": dict(ctx_factor=5, ctx_name="M5", min_bars=60, ctx_show=20, base_show=50,
+               rr1_min=1.2, rr1_max=1.8, role="ULTRA SCALP",
+               approach=("You are ULTRA-scalping M1. SL = 1.2x M1 ATR (tight, above spread), "
+                         "TP1 = 1.2R, TP2 = 1.8R. Only trade a clear micro momentum burst "
+                         "(EMA8 vs EMA21). If bars are small/compressed or price is mid-range, HOLD. "
+                         "Speed matters: exit fast, do not wait for a big move.")),
     "M5": dict(ctx_factor=3, ctx_name="M15", min_bars=80, ctx_show=24, base_show=60,
                rr1_min=1.3, rr1_max=1.8, role="SCALPER",
-               approach=("You are SCALPING. Backtest-verified config: SL = 1.5x ATR from entry "
-                         "(tight, above spread), TP1 = 1.5R, TP2 = 2.2R. Trade WITH short momentum "
-                         "(EMA8 vs EMA21 direction). Only enter when volatility is expanding — if the "
-                         "last bars are compressed or sideways, HOLD. Quality over quantity: a clean "
-                         "momentum push is enough; do NOT wait for a perfect macro setup.")),
+               approach=("You are SCALPING. Backtest-verified: SL = 1.5x ATR, TP1 = 1.5R, "
+                         "TP2 = 2.2R. Trade WITH short momentum (EMA8 vs EMA21). Only enter when "
+                         "volatility is expanding — if bars are compressed or sideways, HOLD.")),
     "M15": dict(ctx_factor=4, ctx_name="H1", min_bars=100, ctx_show=24, base_show=48,
                 rr1_min=1.2, rr1_max=1.7, role="INTRADAY",
-                approach=("Intraday trading with momentum: SL = 1.4x ATR, TP1 = 1.3R, TP2 = 2.0R. "
-                          "Trade WITH momentum direction (EMA8 vs EMA21 on this TF). Require the trend to "
-                          "agree with higher TF. If price is mid-range or ATR is compressed, HOLD — "
-                          "spread will eat a tight target.")),
+                approach=("Intraday with momentum: SL = 1.4x ATR, TP1 = 1.3R, TP2 = 2.0R. "
+                          "Trade WITH momentum (EMA8 vs EMA21). Require higher-TF agreement. "
+                          "If price is mid-range or ATR compressed, HOLD.")),
     "H1": dict(ctx_factor=4, ctx_name="H4", min_bars=60, ctx_show=24, base_show=48,
-               rr1_min=0.80, rr1_max=1.80, role="SWING TREND",
-               approach=("You are SWING trading the H1 chart. Focus on clean structural trend breakouts "
-                         "and continuation patterns aligned with the H4 trend and EMA50 slope. Stops sit "
-                         "outside structural volatility (~2.4x H1 ATR). TP1 ~0.85-1.2R, TP2 ~1.65R+.")),
-    "H4": dict(ctx_factor=6, ctx_name="D1", min_bars=60, ctx_show=20, base_show=40,
-               rr1_min=0.80, rr1_max=2.00, role="POSITION TREND",
-               approach=("You are POSITION trading the H4 chart. Trade macro-aligned pullbacks and swing "
-                         "breakouts aligned with the Daily/EMA200 trend. Stops beyond H4 volatility (~2.6x ATR). "
-                         "TP1 ~0.85-1.3R at clean liquidity, TP2 ~1.65R+.")),
-    "D1": dict(ctx_factor=5, ctx_name="W1", min_bars=55, ctx_show=12, base_show=30,
-               rr1_min=0.85, rr1_max=2.20, role="POSITION TREND",
-               approach=("You are POSITION trading the Daily chart. Trade institutional macro trend "
-                         "continuation breakouts aligned with EMA20/EMA50/EMA100. Wide volatility stops "
-                         "(~2.4x D1 ATR). TP1 ~0.90-1.5R, TP2 ~1.80R+.")),
+               rr1_min=1.4, rr1_max=2.2, role="SWING",
+               approach=("Swing trading H1: SL beyond the invalidating H1 swing (~1.5x ATR), "
+                         "TP1 = 1.5R, TP2 = 2.5R. Trade clean structural breakouts aligned with "
+                         "the H4 trend. Selective — a few quality swings, not noise.")),
 }
+
 
 
 def tf_profile(tf):
@@ -276,8 +270,8 @@ def session_penalty(pair, hour_utc):
 # ===== SCALPING GATE (bukti backtest 33 hari, spread dikira) =====
 # Baseline scalping = RUGI (-0.13R/trade). Dengan 3 filter di bawah:
 #   BTCUSD +0.084R/trade (180 trade), XAUUSD +0.258R/trade (127 trade)
-VOL_MULT = float(os.environ.get("AI_SCALP_VOL_MULT", "1.1"))      # ATR >= VOL_MULT x median
-MOM_MIN = float(os.environ.get("AI_SCALP_MOM_MIN", "0.5"))        # |EMA8-EMA21|/ATR
+VOL_MULT = float(os.environ.get("AI_SCALP_VOL_MULT", "0.9"))      # ATR >= VOL_MULT x median
+MOM_MIN = float(os.environ.get("AI_SCALP_MOM_MIN", "0.35"))        # |EMA8-EMA21|/ATR
 SCALP_SESSIONS = {7, 8, 9, 10, 11, 12, 13, 14, 15, 16}            # London + NY
 # Scalping hanya pair yang TERBUKTI untung selepas spread (backtest 33 hari):
 #   XAUUSD +0.28R/trade (174 trade, 52.1% win)
@@ -296,7 +290,7 @@ def scalp_gate(bars, hour_utc, tf, pair=""):
     Jadi scalping dihadkan kepada SCALP_PAIRS (XAUUSD) sahaja.
     """
     tfu = str(tf).upper()
-    if tfu not in ("M5", "M15"):
+    if tfu not in ("M1", "M5", "M15"):
         return True, ""
     # Pair tak terbukti untung untuk scalping -> HOLD (elak rugi bayar spread).
     pref = str(pair).upper().replace("/", "")[:3]
@@ -714,7 +708,7 @@ def analyze(pair, bars, pip, spread_pips, call=None, budget_s=None, held=None, t
     rr_max = prof.get("rr1_max", RR1_MAX)
 
     if VISION_ENABLED and not explicit_call:
-        tf_key = {"M5": "M15", "M15": "H1", "H1": "H4", "H4": "D1", "D1": "W1"}[tf]
+        tf_key = {"M1": "M5", "M5": "M15", "M15": "H1", "H1": "H4"}.get(tf, "H1")
         s_hi = s_lo = "RANGE"
         fvg_n = 0
         if ICT is not None:
