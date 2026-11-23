@@ -2317,8 +2317,9 @@
    "status": "pending"
   },
   "XAUUSD_20261124_061119": {
-   "status": "pending"
+   "status": "active",
+   "entry_at": "2026-11-24T06:34:00+08:00"
   }
  },
- "updated": "2026-11-24T06:31:02+08:00"
+ "updated": "2026-11-24T06:36:03+08:00"
 }
