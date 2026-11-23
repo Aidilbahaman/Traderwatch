@@ -734,6 +734,55 @@ html[data-theme="light"] .lotbadge{color:#4c7a17}
 @media(prefers-reduced-motion:reduce){#splash .sp-bar i{animation:none;width:100%;opacity:.5}}
 </style>
 
+<style id="tw-risk">
+/* ============================================================
+   Manage Your Risk — 3 pecahan gate (Low/Med/High).
+   Animated: bar denyut, high=ember, low=perisai, med=kilau.
+   ============================================================ */
+.riskp{margin:10px 0 4px}
+.riskp .lab{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.riskp .lab span{font-size:9.5px;color:var(--muted);font-weight:800;letter-spacing:.12em;text-transform:uppercase}
+.riskp .lab b{font-size:10px;font-weight:800;letter-spacing:.02em;transition:color .3s}
+.riskp .lab b.flash{animation:gateFlash .5s ease}
+@keyframes gateFlash{0%{transform:scale(1.25)}100%{transform:scale(1)}}
+.riskrow{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.risk{position:relative;border:1px solid var(--line);border-radius:12px;padding:10px 6px;
+  text-align:center;cursor:pointer;background:var(--card2);transition:transform .16s,border-color .2s,box-shadow .2s;overflow:hidden}
+.risk:active{transform:scale(.96)}
+.risk .k{font-size:10px;font-weight:850;letter-spacing:.01em;display:block;position:relative;z-index:2}
+.risk .d{font-size:8px;color:var(--muted);font-weight:700;letter-spacing:.04em;text-transform:uppercase;display:block;margin-top:3px;position:relative;z-index:2}
+.risk.low{--rc:#b7f36b}.risk.med{--rc:#ffc16b}.risk.high{--rc:#ff777d}
+.risk.low .k{color:var(--green)}.risk.med .k{color:var(--orange)}.risk.high .k{color:var(--red)}
+.risk .bar{height:3px;border-radius:99px;background:var(--line);margin-top:7px;overflow:hidden;position:relative;z-index:2}
+.risk .bar i{display:block;height:100%;background:var(--rc);border-radius:99px;transition:width .5s cubic-bezier(.2,.8,.2,1)}
+.risk.low .bar i{width:33%}.risk.med .bar i{width:66%}.risk.high .bar i{width:100%}
+.risk.on{border-color:var(--rc);box-shadow:0 0 0 1px var(--rc),0 0 16px color-mix(in srgb,var(--rc) 40%,transparent)}
+.risk.on .bar i{animation:barPulse 2.2s ease-in-out infinite}
+@keyframes barPulse{0%,100%{filter:brightness(1)}50%{filter:brightness(1.6)}}
+.risk .tick{position:absolute;top:5px;right:5px;width:15px;height:15px;border-radius:50%;
+  border:1.5px solid var(--line);font-size:9px;font-weight:900;display:grid;place-items:center;
+  color:transparent;transition:.2s;z-index:2}
+.risk.on .tick{border-color:var(--rc);background:var(--rc);color:var(--onlime);animation:tickPop .35s cubic-bezier(.34,1.56,.64,1)}
+@keyframes tickPop{0%{transform:scale(0)}70%{transform:scale(1.3)}100%{transform:scale(1)}}
+.risk.pop{animation:pop .35s cubic-bezier(.34,1.56,.64,1)}
+@keyframes pop{0%{transform:scale(1)}50%{transform:scale(1.08)}100%{transform:scale(1)}}
+.risk.high.on .ember{position:absolute;bottom:0;border-radius:50%;pointer-events:none;
+  background:radial-gradient(circle,#ffd08a,#ff6b35 60%,transparent 70%);
+  animation:emberRise 1.6s ease-out infinite}
+.risk.low.on::after{content:"";position:absolute;inset:0;border-radius:12px;pointer-events:none;
+  background:radial-gradient(120% 80% at 50% 0%,rgba(183,243,107,.10),transparent 60%);
+  animation:shieldGlow 2.4s ease-in-out infinite}
+@keyframes shieldGlow{0%,100%{opacity:.4}50%{opacity:1}}
+.risk.med.on::before{content:"";position:absolute;top:0;bottom:0;width:50%;left:-70%;
+  background:linear-gradient(105deg,transparent,rgba(255,193,107,.14),transparent);
+  transform:skewX(-18deg);animation:warmSheen 3.5s ease-in-out infinite}
+@keyframes warmSheen{0%,50%{left:-70%}85%,100%{left:140%}}
+.riskdesc{margin-top:9px;font-size:10.5px;color:var(--muted);line-height:1.45;min-height:30px}
+.riskdesc b{color:var(--text)}
+@media(prefers-reduced-motion:reduce){.risk,.risk .bar i,.risk .tick,.risk .ember,.risk.low.on::after,.risk.med.on::before,.riskp .lab b{animation:none!important;transition:none!important}}
+</style>
+
+
 <style id="tw-cursor-glow">
 /* ============================================================
    CURSOR GLOW — spotlight radial ikut kursor (dipilih pemilik).
@@ -971,6 +1020,15 @@ html[data-theme="light"] .search::before{
       <div class="shead"><div class="ic" id="sIc"></div><div><h2 id="sNm"></h2><p id="sDs"></p></div><button class="x" id="sx" aria-label="Tutup">✕</button></div>
       <div class="chartbox" id="chartbox"><canvas id="cv"></canvas><div class="chipc" id="chip"><i></i><span id="chipT">SEDIA</span></div></div>
       <div class="tf" id="tf"></div>
+      <div class="riskp" id="riskp">
+        <div class="lab"><span id="riskLab">Manage your risk</span><b id="riskGate">Gate: balanced</b></div>
+        <div class="riskrow" id="riskRow">
+          <div class="risk low" data-k="low" role="radio" aria-checked="false"><span class="tick"></span><span class="k">Low</span><span class="d" data-t="riskLowD">Tight scan</span><div class="bar"><i></i></div></div>
+          <div class="risk med on" data-k="med" role="radio" aria-checked="true"><span class="tick">✓</span><span class="k">Medium</span><span class="d" data-t="riskMedD">Default</span><div class="bar"><i></i></div></div>
+          <div class="risk high" data-k="high" role="radio" aria-checked="false"><span class="tick"></span><span class="k">High</span><span class="d" data-t="riskHighD">Gate off</span><div class="bar"><i></i></div></div>
+        </div>
+        <div class="riskdesc" id="riskDesc"><b>Medium risk</b> — gate default. Seimbang antara kualiti setup dan peluang entry.</div>
+      </div>
       <div id="mtfbox" class="mtfbox hidden"></div>
       <p class="pvtag" id="pvtag">Chart OHLC sebenar · Analisis enjin M15</p>
       <button class="go" id="go"><svg viewBox="-22 -22 44 44" width="14" height="14" aria-hidden="true" style="display:inline-block;vertical-align:-2px;margin-right:5px"><path d="M0-20Q0 0 20 0Q0 0 0 20Q0 0-20 0Q0 0 0-20Z" fill="currentColor"/></svg><span id="goTxt">Analisis dengan AI</span></button>
@@ -1720,7 +1778,7 @@ cv.addEventListener('click',function(){if(S.ana&&S.ana.entry!=null)zoomTo(S.win!
 /* ---------------- sheet ---------------- */
 function setChip(k,txt){$('chip').className='chipc '+(k||'');$('chipT').textContent=txt}
 function altMode(on){
- ['chartbox','tf','pvtag','go'].forEach(function(id){$(id).classList.toggle('hidden',on)});
+ ['chartbox','tf','riskp','pvtag','go'].forEach(function(id){$(id).classList.toggle('hidden',on)});
  $('term').classList.add('hidden');$('term').innerHTML='';$('res').innerHTML='';
  $('alt').classList.toggle('hidden',!on);
 }
@@ -1736,6 +1794,65 @@ function buildTf(){
   tf=b.dataset.t;hap(8);S.run++;buildTf();resetSheet();loadCandles();
  }});
 }
+/* ============ Manage Your Risk (gate aggressiveness) ============
+   low  = gate ketat · med = default · high = gate MATI (AI bebas).
+   Disimpan per-user dalam user_metadata.risk_level (Supabase). */
+var riskLevel='med';
+var RISK_LEVELS={
+ low:{name:'Low risk',  gate:'Gate: strict',   color:'var(--green)',
+  desc:function(){return '<b>'+(lang==='en'?'Low risk':'Risiko rendah')+'</b> — '+(lang==='en'?'tightest gate. Only the safest setups pass (high volatility & momentum, London/NY session required).':'gate paling ketat. Hanya setup paling selamat lulus (volatility & momentum tinggi, sesi London/NY wajib).')}},
+ med:{name:'Medium risk',gate:'Gate: balanced', color:'var(--orange)',
+  desc:function(){return '<b>'+(lang==='en'?'Medium risk':'Risiko sederhana')+'</b> — '+(lang==='en'?'default gate. Balanced between setup quality and entry opportunity.':'gate default. Seimbang antara kualiti setup dan peluang entry.')}},
+ high:{name:'High risk', gate:'Gate: OFF',      color:'var(--red)',
+  desc:function(){return '<b>'+(lang==='en'?'High risk':'Risiko tinggi')+'</b> — '+(lang==='en'?'gate disabled. AI freely reads the chart and gives signals without volatility/momentum/session filters. Most aggressive.':'gate dimatikan. AI bebas menilai carta dan bagi signal tanpa sekatan vol/momentum/sesi. Paling agresif.')}}
+};
+function riskFromSession(){var s=getSession(),u=s&&s.user,md=(u&&u.user_metadata)||{};return (md.risk_level==='low'||md.risk_level==='high')?md.risk_level:'med'}
+function drawRisk(){
+ var row=$('riskRow');if(!row)return;
+ Array.prototype.forEach.call(row.querySelectorAll('.risk'),function(r){
+  var on=r.dataset.k===riskLevel;
+  r.classList.toggle('on',on);
+  r.setAttribute('aria-checked',on);
+  r.querySelector('.tick').textContent=on?'✓':'';
+  r.querySelectorAll('.ember').forEach(function(e){e.remove()});
+  if(on&&r.dataset.k==='high'){
+   for(var i=0;i<4;i++){
+    var e=document.createElement('i');e.className='ember';
+    e.style.left=(20+i*22+Math.random()*6)+'%';
+    e.style.width=e.style.height=(3+Math.random()*3)+'px';
+    e.style.animationDelay=(-Math.random()*1.6)+'s';
+    r.appendChild(e);
+   }
+  }
+ });
+ var L=RISK_LEVELS[riskLevel];
+ var g=$('riskGate');if(g){g.textContent=L.gate;g.style.color=L.color}
+ var d=$('riskDesc');if(d)d.innerHTML=L.desc();
+ // label i18n (fallback english)
+ var lab=$('riskLab');if(lab)lab.textContent=(lang==='en'?'Manage your risk':'Urus risiko anda');
+ Array.prototype.forEach.call(row.querySelectorAll('.risk .d'),function(x){x.textContent=(lang==='en'?({low:'Tight scan',med:'Default',high:'Gate off'}[x.parentNode.dataset.k]):({low:'Scan ketat',med:'Default',high:'Gate mati'}[x.parentNode.dataset.k]))});
+}
+function saveRisk(lv){
+ riskLevel=lv;
+ apiFetch('/api/analyze/risk',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({level:lv})}).then(function(r){
+  if(r.ok){try{var ss=getSession();if(ss&&ss.user){ss.user.user_metadata=Object.assign({},ss.user.user_metadata,{risk_level:lv});localStorage.setItem(AUTH_KEY,JSON.stringify(ss))}}catch(e){}}
+ }).catch(function(){});
+}
+function bindRisk(){
+ var row=$('riskRow');if(!row)return;
+ Array.prototype.forEach.call(row.querySelectorAll('.risk'),function(r){
+  r.onclick=function(){
+   if(riskLevel===r.dataset.k)return;
+   hap(6);
+   var prev=riskLevel;
+   r.classList.remove('pop');void r.offsetWidth;r.classList.add('pop');
+   var g=$('riskGate');if(g){g.classList.remove('flash');void g.offsetWidth;g.classList.add('flash')}
+   saveRisk(r.dataset.k);
+   drawRisk();
+  };
+ });
+}
+
 /* Chart OHLC SEBENAR dari /api/bars — tiada janaan rawak. */
 function loadCandles(){
  var run=S.run,pair=cur.s,tfv=tf;
@@ -1769,6 +1886,7 @@ function openSheet(sym){
  $('sheet').setAttribute('aria-label',cur.s);
  $('pvtag').textContent=(lang==='en'?'Real OHLC chart · ':'Chart OHLC sebenar · ')+tf+' · '+tfStyle(tf)+(lang==='en'?' analysis':' analisis');
  buildTf();resetSheet();$('phone').classList.add('open');$('sheet').scrollTop=0;
+ riskLevel=riskFromSession();drawRisk();bindRisk();
  if(JOB&&JOB.state==='running'&&JOB.pair===cur.s){S.busy=true;$('go').classList.add('hidden');$('term').classList.remove('hidden');$('term').innerHTML='<div class="tl">'+esc(JOB.pair+' · '+JOB.tf+' — '+t('anaRunning'))+'</div>';setChip('scan',lang==='en'?'AI SCANNING':'AI MENGIMBAS');hideFloat()}
  if(cur.soon){showSoon();return}
  S.open=true;sizeCv();loadCandles();requestAnimationFrame(function(x){loop(x)});
@@ -1842,7 +1960,7 @@ function analyze(){
     tap = id ketukan ini. Satu tap = satu permintaan pada lencana pair card,
     walau scan berbilang TF berkongsi tap yang sama. */
  var tapId='t'+Date.now().toString(36)+Math.random().toString(36).slice(2,7);
- var pre=apiFetch('/api/analyze',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({pair:cur.s,timeframe:tf,tap:tapId})}).catch(function(){return{ok:false,status:0,data:{}}});
+ var pre=apiFetch('/api/analyze',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({pair:cur.s,timeframe:tf,tap:tapId,risk_level:riskLevel})}).catch(function(){return{ok:false,status:0,data:{}}});
  var lines=[
   '<b>▸</b> '+(lang==='en'?'Reading '+m.n+' real candles of '+cur.s+' ('+tf+')…':'Membaca '+m.n+' candle sebenar '+cur.s+' ('+tf+')…'),
   '<b>▸</b> EMA 20 = '+f(m.e20)+' · EMA 50 = '+f(m.e50),
@@ -3301,7 +3419,7 @@ window.addEventListener('appinstalled',function(){drawWelcome();try{localStorage
 if(typeof window!=='undefined'){window.__welcome=showWelcome;window.__drawWelcome=drawWelcome;}
 if(typeof window!=='undefined'){window.__forceLogout=goLogin;}
 if('serviceWorker' in navigator){window.addEventListener('load',function(){
- navigator.serviceWorker.register('sw.js?v=67v58',{scope:'./',updateViaCache:'none'}).then(function(reg){
+ navigator.serviceWorker.register('sw.js?v=68v58',{scope:'./',updateViaCache:'none'}).then(function(reg){
   /* PWA homescreen resume instance lama tanpa navigation -> check update
      bila app kembali nampak/focus + setiap 30 min, dan reload automatik
      bila SW versi baru mengambil alih (controllerchange). */

@@ -372,7 +372,7 @@ def fetch_bars_tf(pair, tf):
     return res
 
 
-def run_analysis(pair, tf="M15", tap=None):
+def run_analysis(pair, tf="M15", tap=None, risk_level="med"):
     tf = tf if tf in ANALYSIS_TFS else "M5"
     bars = fetch_bars_tf(pair, tf)
     if len(bars) < TF_MIN_BARS.get(tf, 100):
@@ -380,7 +380,8 @@ def run_analysis(pair, tf="M15", tap=None):
     disp = pair[:3] + "/" + pair[3:]
     pip = M.pip_of(disp)
     spread = SMC.SPREAD_PIPS.get(pair, SMC.DEFAULT_SPREAD_PIPS)
-    verdict = LA.analyze(disp, bars, pip, spread, tf=tf, src="member", tap=tap)
+    verdict = LA.analyze(disp, bars, pip, spread, tf=tf, src="member", tap=tap,
+                         risk_level=risk_level)
     price = bars[-1][3]
     if verdict is None:
         return {"side": "HOLD", "pair": disp, "price": price, "tf": tf,
@@ -469,6 +470,30 @@ class Handler(BaseHTTPRequestHandler):
             return self._send(200, {"pair": pair, "tf": tf, "candles": candles})
         return self._send(404, {"error": "not found"})
 
+    def _save_risk(self, level):
+        """Simpan risk_level (low|med|high) ke user_metadata — kekal per-user."""
+        user = verify_user(self._token())
+        if not user or not user.get("id"):
+            return self._send(401, {"error": "sign in required"})
+        if level not in ("low", "med", "high"):
+            return self._send(400, {"error": "level must be low|med|high"})
+        try:
+            req = urllib.request.Request(SB_URL + "/auth/v1/user",
+                                         data=json.dumps({"data": {"risk_level": level}}).encode(),
+                                         headers={"apikey": SB_KEY,
+                                                  "Authorization": "Bearer " + self._token(),
+                                                  "Content-Type": "application/json"},
+                                         method="PUT")
+            with urllib.request.urlopen(req, timeout=20) as r:
+                r.read()
+            # buang cache auth supaya metadata baru terbaca serta-merta
+            with _BARS_CACHE_LOCK:
+                _auth_cache.pop(self._token(), None)
+        except Exception as e:
+            log(f"save risk_level {level} failed: {type(e).__name__}")
+            return self._send(502, {"error": "save failed"})
+        return self._send(200, {"ok": True, "risk_level": level})
+
     def _alignment(self):
         user = verify_user(self._token())
         if not user or not user.get("id"):
@@ -540,6 +565,13 @@ class Handler(BaseHTTPRequestHandler):
             return self._turnstile()
         if path == "/api/analyze/alignment":
             return self._alignment()
+        if path == "/api/analyze/risk":
+            length = int(self.headers.get("Content-Length", 0) or 0)
+            try:
+                body = json.loads(self.rfile.read(length) or b"{}")
+            except ValueError:
+                return self._send(400, {"error": "JSON tidak sah."})
+            return self._save_risk(str(body.get("level", "med")).lower())
         if path != "/api/analyze":
             return self._send(404, {"error": "not found"})
         user = verify_user(self._token())
@@ -553,6 +585,9 @@ class Handler(BaseHTTPRequestHandler):
             return self._send(400, {"error": "JSON tidak sah."})
         pair = str(req.get("pair", "")).upper().replace("/", "").replace(" ", "")
         tf = str(req.get("timeframe", "M15")).upper()
+        risk_level = str(req.get("risk_level", "med")).lower()
+        if risk_level not in ("low", "med", "high"):
+            risk_level = "med"
         # Satu ketukan UI = satu permintaan pada lencana, walau scan 5 TF.
         # Frontend hantar id yang sama untuk semua TF dalam ketukan itu.
         tap = str(req.get("tap") or "").strip()[:40] or None
@@ -577,7 +612,7 @@ class Handler(BaseHTTPRequestHandler):
         if M5.read_status().get("market") == "closed" and pair != "BTCUSD":
             return self._send(409, {"error": "Market closed for this pair — it reopens soon. BTCUSD is available 24/7.", "market_closed": True})
         try:
-            result = run_analysis(pair, tf, tap=tap)
+            result = run_analysis(pair, tf, tap=tap, risk_level=risk_level)
         except Exception as e:
             log(f"{pair} error {type(e).__name__}: {str(e)[:160]}")
             return self._send(500, {"error": "Analisis gagal buat masa ini. Cuba lagi sebentar."})

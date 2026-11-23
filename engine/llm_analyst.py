@@ -281,6 +281,17 @@ SCALP_SESSIONS = {7, 8, 9, 10, 11, 12, 13, 14, 15, 16}            # London + NY
 # Threshold per-TF: M1 ATR kecil & bising -> lebih longgar supaya tak bisu.
 TF_VOL_MULT = {"M1": 0.70, "M5": 0.90, "M15": 0.95}
 TF_MOM_MIN = {"M1": 0.20, "M5": 0.35, "M15": 0.40}
+# Risk level (Manage Your Risk): seberapa agresif gate AI scan.
+#   low  = gate ketat  (hanya setup paling selamat lulus)
+#   med  = gate default (seimbang — ini asal)
+#   high = gate MATI   (neon bebas menilai carta, tiada sekatan vol/mom/sesi)
+# Multiplier diterapkan pada ambang per-TF. high -> skip gate sepenuhnya.
+RISK_GATE = {
+    "low":  {"vol_mult": 1.15, "mom_mult": 1.25},   # ketat
+    "med":  {"vol_mult": 1.00, "mom_mult": 1.00},   # default
+    "high": {"vol_mult": 0.0,  "mom_mult": 0.0},    # gate off
+}
+RISK_DEFAULT = "med"
 # Scalping hanya pair yang TERBUKTI untung selepas spread (backtest 33 hari):
 #   XAUUSD +0.28R/trade (174 trade, 52.1% win)
 #   BTCUSD -0.01R (spread 18 USD terlalu besar), EURUSD sampel terlalu kecil
@@ -295,7 +306,7 @@ M1_BLOCKED = {p.strip().upper() for p in
               os.environ.get("AI_M1_BLOCKED_PAIRS", "").split(",") if p.strip()}
 
 
-def scalp_gate(bars, hour_utc, tf, pair=""):
+def scalp_gate(bars, hour_utc, tf, pair="", risk_level="med"):
     """Untuk M5/M15: pastikan volatility cukup, momentum ada, sesi aktif.
 
     Return (ok, reason). ok=False -> HOLD (elak bayar spread dalam chop).
@@ -320,6 +331,12 @@ def scalp_gate(bars, hour_utc, tf, pair=""):
                        f"use H1/H4 for this pair")
     if not bars or len(bars) < 60:
         return False, "insufficient bars for scalp gate"
+    # High risk = gate mati: skip semakan sesi/vol/momentum. AI (neon) bebas
+    # menilai carta. Kekalkan sahaja sekatan keselamatan keras (data kosong,
+    # pair deny-list) yang bukan sebahagian daripada "agresif".
+    _rg = RISK_GATE.get(str(risk_level).lower(), RISK_GATE[RISK_DEFAULT])
+    if _rg["vol_mult"] <= 0:
+        return True, ""
     if hour_utc not in SCALP_SESSIONS:
         return False, "outside London/NY session (low liquidity for scalping)"
     cl = [b[3] for b in bars]
@@ -336,8 +353,8 @@ def scalp_gate(bars, hour_utc, tf, pair=""):
                   abs(seg[j][2] - seg[j - 1][3])) for j in range(len(seg) - 14, len(seg))]
         return sum(tr) / len(tr)
 
-    _vol = TF_VOL_MULT.get(tfu, VOL_MULT)
-    _mom = TF_MOM_MIN.get(tfu, MOM_MIN)
+    _vol = TF_VOL_MULT.get(tfu, VOL_MULT) * _rg["vol_mult"]
+    _mom = TF_MOM_MIN.get(tfu, MOM_MIN) * _rg["mom_mult"]
     if len(bars) >= 165:
         prior = _atr(bars[-165:-15])
         if prior > 0:
@@ -680,8 +697,8 @@ def build_quant_vision_prompt(pair, tf, price, spread_pips, tf_key, trend, bos,
         f"Pair: {pair} {tf} | Live price: {price:.{dec}f} | Spread: {spread_pips:g} pips\n"
         f"Higher TF ({tf_key}) trend: {trend} | Structure BOS: {bos} | "
         f"Macro EMA200 bias: {qm.get('macro', trend)}\n"
-        f"Indicators (real bars): EMA20={e20:.{dec}f}, EMA50={e50:.{dec}f}, "
-        f"EMA200={qm.get('ema200', e50):.{dec}f}, RSI2={qm.get('rsi2', 50)}, "
+        f"Indicators (real bars): EMA8={qm.get('ema8', e20):.{dec}f}, EMA21={qm.get('ema21', e20):.{dec}f}, "
+        f"EMA50={e50:.{dec}f}, EMA200={qm.get('ema200', e50):.{dec}f}, RSI2={qm.get('rsi2', 50)}, "
         f"RSI14={rsi14:.1f}, StochK={qm.get('stoch_k', 50)}, ATR14={atr:.{dec}f} "
         f"(ATR/spread={qm.get('atr_to_spread', 0)}x).\n"
         + style_block
@@ -692,7 +709,7 @@ def build_quant_vision_prompt(pair, tf, price, spread_pips, tf_key, trend, bos,
         + held_line
         + rules
         + "Chart legend (candlesticks: lime body=close above open, red body=close below open, "
-          "wick high-low range, amber=EMA20, purple=EMA50, circles=swings, "
+          "wick high-low range, cyan=EMA8, amber=EMA21, purple=EMA50, circles=swings, "
           "red=SL, green=TP1, cyan=TP2).\n"
         + "Confidence is honest probability (6=60%, 7=68%, 8=75%, 9=rare).\n"
         + 'Reply ONLY one compact JSON object, no markdown: '
@@ -731,7 +748,7 @@ def build_quant_text_prompt(base_prompt, q, prof, market_ctx=""):
 
 
 def analyze(pair, bars, pip, spread_pips, call=None, budget_s=None, held=None, tf="M15",
-            src="bot", tap=None):
+            src="bot", tap=None, risk_level="med"):
     """Analisis LLM untuk satu pair mengikut timeframe. Return verdict dict / None.
 
     TF-aware: M5=scalping, M15=intraday, H1=swing, H4/D1=position.
@@ -767,7 +784,8 @@ def analyze(pair, bars, pip, spread_pips, call=None, budget_s=None, held=None, t
     # Kini PENASIHAT: kesimpulan gate dimasukkan ke dalam prompt, neon yang
     # menilai carta sebenar. Gate tetap berjalan supaya konteks vol/momentum
     # sampai ke model — cuma tidak lagi memutuskan bagi pihaknya.
-    _gok, _greason = scalp_gate(bars, datetime.now(timezone.utc).hour, tf, pair)
+    _gok, _greason = scalp_gate(bars, datetime.now(timezone.utc).hour, tf, pair,
+                                 risk_level=risk_level)
     _gate_hint = "" if _gok else f"{_greason}"
     if not _gok:
         log(f"{pair} {tf}: gate advisory — {_greason[:70]} (neon tetap dipanggil)")
@@ -841,6 +859,7 @@ def analyze(pair, bars, pip, spread_pips, call=None, budget_s=None, held=None, t
             "bos": bos, "choch": choch, "fvg": fvg_n,
             "atr": round(atr, 5 if _dec == 5 else 3),
             "hour": datetime.now(timezone.utc).hour,
+            "risk_level": str(risk_level).lower(),
             "quant": ({
                 "side": q_setup.get("side"),
                 "setups": q_setup.get("setups", []),
@@ -901,7 +920,8 @@ def analyze(pair, bars, pip, spread_pips, call=None, budget_s=None, held=None, t
                 '"tp1":num,"tp2":num,"confidence":0-10,"reason":"<8 words>"}')
     else:
         ai_meta = {"bos": bos, "choch": False, "fvg": 0, "atr": round(atr, 3),
-                   "hour": datetime.now(timezone.utc).hour}
+                   "hour": datetime.now(timezone.utc).hour,
+                   "risk_level": str(risk_level).lower()}
 
     # Closed-loop learning fallback bila tiada MC context (hanya untuk bukan explicit_call)
     if not _ctx and not explicit_call and ai_learn is not None:
