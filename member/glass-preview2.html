@@ -829,9 +829,12 @@ html[data-theme="light"] .wsheet,html[data-theme="light"] .hint,html[data-theme=
   opacity:.045;mix-blend-mode:overlay;z-index:0;
   background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)'/%3E%3C/svg%3E");
 }
-.appbar *,.search *,.pair *,.tcard *,.pcard *,.stat *,.season *,.chartbox *,
+.appbar *,.search *,.pair *,.tcard *,.pcard *,.stat *,.season *,
 .tf *,.bias *,.chk li *,.note *,.term *,.rpair *,.opt *,.freecard *,
 .setgroup *,.pwa *,.menu *,.wsheet *{position:relative;z-index:1}
+.chartbox > *{z-index:1}
+.chartbox .chipc{position:absolute;z-index:3;left:10px;top:10px}
+.pair .ember{position:absolute;z-index:1}
 
 /* lembutkan sheet + modal supaya nampak sebagai kaca tebal */
 #sheet{background:rgba(14,19,15,.72);backdrop-filter:saturate(200%) blur(30px);
