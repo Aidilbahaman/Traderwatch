@@ -191,23 +191,27 @@ h1{font-size:17px;letter-spacing:-.02em;margin:0 0 4px;font-weight:850}
     return g;
   }
 
+  function hexA(hex,a){var r=parseInt(hex.slice(1,3),16),g=parseInt(hex.slice(3,5),16),b=parseInt(hex.slice(5,7),16);return 'rgba('+r+','+g+','+b+','+a+')'}
   var FX=function(t){
       var p=(t*0.16)%1;
       var cx=G.pad+(0.5+0.36*Math.sin(p*Math.PI*2))*G.plotW;
       var cy=G.pT+(0.5+0.30*Math.cos(p*Math.PI*4))*G.plotH;
       var col=C[Math.floor((p*4)%4)];
-      ctx.globalCompositeOperation='screen';
-      var rg=ctx.createRadialGradient(cx,cy,0,cx,cy,120);
-      rg.addColorStop(0,hexA(col,.34));
-      rg.addColorStop(.45,hexA(col,.11));
+      ctx.globalCompositeOperation='lighter';
+      var R=G.plotW*0.55;                      /* glow luas ikut lebar carta */
+      var rg=ctx.createRadialGradient(cx,cy,0,cx,cy,R);
+      rg.addColorStop(0,hexA(col,.95));
+      rg.addColorStop(.35,hexA(col,.55));
+      rg.addColorStop(.72,hexA(col,.20));
       rg.addColorStop(1,hexA(col,0));
       ctx.fillStyle=rg;ctx.fillRect(0,0,G.W,G.H);
-      // teras kecil
-      var core=ctx.createRadialGradient(cx,cy,0,cx,cy,26);
-      core.addColorStop(0,'rgba(255,255,255,.42)');
-      core.addColorStop(.5,hexA(col,.26));
+      // teras pejal supaya jelas nampak
+      var R2=G.plotW*0.14;
+      var core=ctx.createRadialGradient(cx,cy,0,cx,cy,R2);
+      core.addColorStop(0,'rgba(255,255,255,.92)');
+      core.addColorStop(.35,hexA(col,.95));
       core.addColorStop(1,hexA(col,0));
-      ctx.fillStyle=core;ctx.beginPath();ctx.arc(cx,cy,26,0,6.284);ctx.fill();
+      ctx.fillStyle=core;ctx.beginPath();ctx.arc(cx,cy,R2,0,6.284);ctx.fill();
       ctx.globalCompositeOperation='source-over';
     };
 
