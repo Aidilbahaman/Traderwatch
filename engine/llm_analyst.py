@@ -284,8 +284,15 @@ TF_MOM_MIN = {"M1": 0.20, "M5": 0.35, "M15": 0.40}
 # Scalping hanya pair yang TERBUKTI untung selepas spread (backtest 33 hari):
 #   XAUUSD +0.28R/trade (174 trade, 52.1% win)
 #   BTCUSD -0.01R (spread 18 USD terlalu besar), EURUSD sampel terlalu kecil
+# Kosong = semua pair dibenarkan. Set AI_SCALP_PAIRS=XAUUSD untuk hadkan semula.
 SCALP_PAIRS = {p.strip().upper() for p in
-               os.environ.get("AI_SCALP_PAIRS", "XAUUSD").split(",") if p.strip()}
+               os.environ.get("AI_SCALP_PAIRS", "").split(",") if p.strip()}
+# M1 membawa kos spread paling berat (sasaran kecil). Pair yang spread-nya
+# besar berbanding ATR M1 tidak akan dapat RR yang sah, jadi ia ditolak oleh
+# semakan ATR/spread di validate_verdict — bukan oleh senarai pair. Senarai ini
+# hanya untuk deny-list pair yang memang mustahil pada M1.
+M1_BLOCKED = {p.strip().upper() for p in
+              os.environ.get("AI_M1_BLOCKED_PAIRS", "").split(",") if p.strip()}
 
 
 def scalp_gate(bars, hour_utc, tf, pair=""):
@@ -300,11 +307,16 @@ def scalp_gate(bars, hour_utc, tf, pair=""):
     tfu = str(tf).upper()
     if tfu not in ("M1", "M5", "M15"):
         return True, ""
-    # Pair tak terbukti untung untuk scalping -> HOLD (elak rugi bayar spread).
-    pref = str(pair).upper().replace("/", "")[:3]
+    # Pair yang memang mustahil untuk M1 (spread > sasaran) -> tolak.
+    pair_u = str(pair).upper().replace("/", "").replace(" ", "")
+    if tfu == "M1" and pair_u in M1_BLOCKED:
+        return False, (f"{pair_u} spread too wide for M1 scalping targets "
+                       f"— use M5 or higher")
+    # Allow-list lama: kosong bermakna semua pair dibenarkan.
+    pref = pair_u[:3]
     if SCALP_PAIRS and pref not in {x[:3] for x in SCALP_PAIRS}:
-        return False, (f"scalping {tfu} is only enabled for "
-                       f"{', '.join(sorted(SCALP_PAIRS))} (backtest-verified); "
+        return False, (f"scalping {tfu} is currently limited to "
+                       f"{', '.join(sorted(SCALP_PAIRS))}; "
                        f"use H1/H4 for this pair")
     if not bars or len(bars) < 60:
         return False, "insufficient bars for scalp gate"
@@ -343,7 +355,8 @@ def scalp_gate(bars, hour_utc, tf, pair=""):
     return True, ""
 
 
-def validate_verdict(j, price, pip, spread_pips, rr1_min=1.5, pair_hint="", rr1_max=None):
+def validate_verdict(j, price, pip, spread_pips, rr1_min=1.5, pair_hint="", rr1_max=None,
+                     spread_floor=3.0):
     """Semak sanity jawapan LLM; pulangkan verdict bersih atau raise ValueError.
 
     Jarak SL/TP = keputusan LLM (tiada cap). Semakan di sini mekanikal:
@@ -379,9 +392,14 @@ def validate_verdict(j, price, pip, spread_pips, rr1_min=1.5, pair_hint="", rr1_
     if not ok:
         raise ValueError("susunan aras tidak konsisten dengan arah")
     risk = abs(price - sl)
-    floor = 3.0 * spread_pips * pip
+    # Lantai spread: SL mesti di luar bunyi spread, tapi gandaan berbeza ikut TF.
+    # M1 forex: ATR ~1.3 pip vs spread 1.0-1.5 pip. Lantai 3x spread bermakna
+    # SL 3-4.5 pip — lebih besar daripada seluruh julat M1, jadi SEMUA setup
+    # forex M1 ditolak sebelum sempat dinilai. M1 guna 1.5x.
+    floor = float(spread_floor) * spread_pips * pip
     if risk <= 0 or risk < floor:
-        raise ValueError(f"SL {risk:.5f} bawah lantai spread {floor:.5f}")
+        raise ValueError(f"SL {risk:.5f} bawah lantai spread {floor:.5f} "
+                         f"({spread_floor}x spread)")
     rr1 = abs(tp1 - price) / risk
     rr2 = abs(tp2 - price) / risk
     cap = RR1_MAX if rr1_max is None else float(rr1_max)
@@ -648,9 +666,17 @@ def build_quant_vision_prompt(pair, tf, price, spread_pips, tf_key, trend, bos,
     # vision tidak — jadi M1/M5 dinilai dengan nada swing yang sama. Itu punca
     # neon pulang HOLD pada carta M1 yang jelas trending.
     style_block = f"YOUR STYLE ({prof['role']}, {tf}): {prof['approach']}\n"
+    # M1/M5: beritahu kos sebenar supaya model pilih SL yang boleh dilaksanakan,
+    # bukan SL 1 pip yang lenyap dalam spread.
+    _spread_units = spread_pips
+    _floor_units = (1.5 if tf in ("M1", "M5") else 3.0) * spread_pips
+    cost_block = (f"COST REALITY: spread is {_spread_units:g} pips. Your SL MUST be at "
+                  f"least {_floor_units:g} pips from entry, otherwise the trade is "
+                  f"mathematically dead on arrival. On {tf}, ATR is your guide: "
+                  f"place SL beyond the last micro-swing, never tighter than the "
+                  f"{_floor_units:g}-pip floor.\n")
     return (
         f"You are the senior visual analyst. You read the CHART IMAGE with full discretion.\n"
-        f"{style_block}"
         f"Pair: {pair} {tf} | Live price: {price:.{dec}f} | Spread: {spread_pips:g} pips\n"
         f"Higher TF ({tf_key}) trend: {trend} | Structure BOS: {bos} | "
         f"Macro EMA200 bias: {qm.get('macro', trend)}\n"
@@ -658,6 +684,8 @@ def build_quant_vision_prompt(pair, tf, price, spread_pips, tf_key, trend, bos,
         f"EMA200={qm.get('ema200', e50):.{dec}f}, RSI2={qm.get('rsi2', 50)}, "
         f"RSI14={rsi14:.1f}, StochK={qm.get('stoch_k', 50)}, ATR14={atr:.{dec}f} "
         f"(ATR/spread={qm.get('atr_to_spread', 0)}x).\n"
+        + style_block
+        + cost_block
         + quant_line
         + gate_block
         + ctx_block
@@ -774,6 +802,9 @@ def analyze(pair, bars, pip, spread_pips, call=None, budget_s=None, held=None, t
     q_setup = None
     rr_min = prof["rr1_min"]
     rr_max = prof.get("rr1_max", RR1_MAX)
+    # Lantai spread ikut TF. M1 forex: ATR ~1.3 pip vs spread 1.0-1.5 pip, jadi
+    # lantai 3x membunuh setiap setup. M1/M5 guna 1.5x, TF besar kekal 3x.
+    _spread_floor = 1.5 if tf in ("M1", "M5") else 3.0
 
     if VISION_ENABLED and not explicit_call:
         tf_key = {"M1": "M5", "M5": "M15", "M15": "H1", "H1": "H4"}.get(tf, "H1")
@@ -924,6 +955,7 @@ def analyze(pair, bars, pip, spread_pips, call=None, budget_s=None, held=None, t
                 verdict = validate_verdict(
                     j, price, pip, spread_pips,
                     rr1_min=rr_min, rr1_max=rr_max, pair_hint=pair,
+                    spread_floor=_spread_floor,
                 )
             except ValueError as e:
                 log(f"{pair} {v_model} (vision) verdict ditolak ({e})")
@@ -979,6 +1011,7 @@ def analyze(pair, bars, pip, spread_pips, call=None, budget_s=None, held=None, t
             verdict = validate_verdict(
                 j, price, pip, spread_pips,
                 rr1_min=rr_min, rr1_max=rr_max, pair_hint=pair,
+                spread_floor=_spread_floor,
             )
         except ValueError as e:
             log(f"{pair} {model}: verdict ditolak ({e})")
