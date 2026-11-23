@@ -733,6 +733,65 @@ html[data-theme="light"] .lotbadge{color:#4c7a17}
 @keyframes spSlide{0%{transform:translateX(-120%)}100%{transform:translateX(390%)}}
 @media(prefers-reduced-motion:reduce){#splash .sp-bar i{animation:none;width:100%;opacity:.5}}
 </style>
+
+<style id="tw-cursor-glow">
+/* ============================================================
+   CURSOR GLOW — spotlight radial ikut kursor (dipilih pemilik).
+   Lapisan ::before baca --mx/--my (dikemas kini oleh pointermove).
+   Desktop = spotlight sebenar; mobile = denyut lembut.
+   ============================================================ */
+:root{--spot:#b7f36b;--mx:50%;--my:50%}
+html[data-theme="light"]{--spot:#6aa62a}
+/* permukaan kad sedia ada diberi spotlight */
+.pair,.stat,.season,.chartbox,.bias,.note,.opt,.riskopt,.modepill,.tab,.search{
+  position:relative}
+.pair::before,.stat::before,.season::before,.chartbox::before,.bias::before,
+.note::before,.opt::before,.riskopt::before,.modepill::before,.tab::before,.search::before{
+  content:"";position:absolute;inset:0;pointer-events:none;z-index:0;border-radius:inherit;
+  background:radial-gradient(140px circle at var(--mx) var(--my),rgba(183,243,107,.22),transparent 70%);
+  opacity:0;transition:opacity .28s}
+html[data-theme="light"] .pair::before,html[data-theme="light"] .stat::before,
+html[data-theme="light"] .season::before,html[data-theme="light"] .chartbox::before,
+html[data-theme="light"] .bias::before,html[data-theme="light"] .note::before,
+html[data-theme="light"] .opt::before,html[data-theme="light"] .riskopt::before,
+html[data-theme="light"] .modepill::before,html[data-theme="light"] .tab::before,
+html[data-theme="light"] .search::before{
+  background:radial-gradient(140px circle at var(--mx) var(--my),rgba(122,181,46,.26),transparent 70%)}
+/* anak mesti atas spotlight supaya teks kekal tajam */
+.pair > *,.stat > *,.season > *,.chartbox > *,.bias > *,.note > *,.opt > *,
+.riskopt > *,.modepill > *,.tab > *,.search > *{position:relative;z-index:1}
+/* desktop: glow ikut kursor */
+@media (hover:hover) and (pointer:fine){
+  .pair:hover::before,.stat:hover::before,.season:hover::before,.chartbox:hover::before,
+  .bias:hover::before,.note:hover::before,.opt:hover::before,.riskopt:hover::before,
+  .modepill:hover::before,.tab:hover::before,.search:focus-within::before{opacity:1}
+  .pair:hover,.stat:hover,.season:hover,.chartbox:hover,.bias:hover,.note:hover,
+  .opt:hover,.riskopt:hover,.modepill:hover,.tab:hover,.search:focus-within{
+    box-shadow:0 0 0 1px rgba(183,243,107,.28),0 10px 28px rgba(0,0,0,.34);
+    border-color:rgba(183,243,107,.42) !important}
+  html[data-theme="light"] .pair:hover,html[data-theme="light"] .stat:hover,
+  html[data-theme="light"] .season:hover,html[data-theme="light"] .chartbox:hover,
+  html[data-theme="light"] .bias:hover,html[data-theme="light"] .note:hover,
+  html[data-theme="light"] .opt:hover,html[data-theme="light"] .riskopt:hover,
+  html[data-theme="light"] .modepill:hover,html[data-theme="light"] .tab:hover,
+  html[data-theme="light"] .search:focus-within{
+    box-shadow:0 0 0 1px rgba(122,181,46,.30),0 8px 20px rgba(23,42,30,.14)}
+}
+/* mobile / tiada hover: denyut lembut pada kad utama */
+@keyframes cursorGlow{0%,100%{box-shadow:0 0 0 rgba(183,243,107,0)}50%{box-shadow:0 0 22px rgba(183,243,107,.16)}}
+@media (hover:none){
+  .pair,.stat,.season,.chartbox,.bias,.note{animation:cursorGlow 5s ease-in-out infinite}
+}
+/* butang membesar bila disentuh */
+.go:active,.take:active,.tab:active,.nav:active{transform:scale(1.06)}
+/* logo/avatar berdenyut */
+.logo,.avatar{animation:logoPulse 3s ease-in-out infinite}
+@keyframes logoPulse{0%,100%{box-shadow:0 0 20px rgba(183,243,107,.3)}50%{box-shadow:0 0 32px rgba(183,243,107,.6)}}
+@media (prefers-reduced-motion:reduce){*{animation:none !important;transition:none !important}
+  .pair::before,.stat::before,.season::before,.chartbox::before,.bias::before,
+  .note::before,.opt::before,.riskopt::before,.modepill::before,.tab::before,.search::before{display:none}}
+</style>
+
 </head>
 <body>
 <div id="splash" role="status" aria-live="polite" aria-label="Loading TraderWatch">
@@ -3234,7 +3293,7 @@ window.addEventListener('appinstalled',function(){drawWelcome();try{localStorage
 if(typeof window!=='undefined'){window.__welcome=showWelcome;window.__drawWelcome=drawWelcome;}
 if(typeof window!=='undefined'){window.__forceLogout=goLogin;}
 if('serviceWorker' in navigator){window.addEventListener('load',function(){
- navigator.serviceWorker.register('sw.js?v=20261123v58',{scope:'./',updateViaCache:'none'}).then(function(reg){
+ navigator.serviceWorker.register('sw.js?v=66v58',{scope:'./',updateViaCache:'none'}).then(function(reg){
   /* PWA homescreen resume instance lama tanpa navigation -> check update
      bila app kembali nampak/focus + setiap 30 min, dan reload automatik
      bila SW versi baru mengambil alih (controllerchange). */
@@ -3259,7 +3318,29 @@ if(!iv){
 showView(VIEWS.indexOf(iv)>-1?iv:'analyst');
 splashStart();
 })();
+
 </script>
+
+<script>
+/* CURSOR GLOW — kemas kini --mx/--my global ikut kursor (satu handler, murah).
+   Kad membaca var ini dalam ::before mereka. Sentiasa pasang — CSS @media
+   yang tentukan bila spotlight kelihatan. */
+(function(){
+  var root=document.documentElement;
+  var raf=0;
+  document.addEventListener('pointermove',function(e){
+    var w=root.clientWidth||1, h=root.clientHeight||1;
+    var x=(e.clientX/w*100).toFixed(2)+'%', y=(e.clientY/h*100).toFixed(2)+'%';
+    if(raf) return;
+    raf=requestAnimationFrame(function(){
+      raf=0;
+      root.style.setProperty('--mx', x);
+      root.style.setProperty('--my', y);
+    });
+  },{passive:true});
+})();
+</script>
+
     <!-- ===== WELCOME CINEMATIC (2 layer) ===== -->
 </body>
 </html>
