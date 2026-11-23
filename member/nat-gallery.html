@@ -3,70 +3,107 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Natural scan — 5 rupa</title>
+<title>Natural scan — pilih satu</title>
 <style>
-:root{--bg:#080b09;--card:#111612;--text:#eef3ee;--muted:#8a978c;--line:#222b23;--lime:#b7f36b}
-*{box-sizing:border-box}
+:root{--bg:#080b09;--card:#111612;--text:#eef3ee;--muted:#8a978c;
+  --line:#222b23;--lime:#b7f36b;--onlime:#10150b}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{margin:0;padding:0;background:var(--bg);color:var(--text);
   font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,system-ui,sans-serif;
   -webkit-font-smoothing:antialiased;letter-spacing:-.011em}
-.wrap{max-width:1160px;margin:0 auto;padding:26px 18px 70px}
-h1{font-size:22px;letter-spacing:-.04em;margin:0 0 6px;font-weight:850}
-.sub{color:var(--muted);font-size:13px;margin:0 0 6px;line-height:1.55}
-.lead{color:var(--muted);font-size:12.5px;line-height:1.65;margin:0 0 24px;
-  padding:12px 14px;background:var(--card);border:1px solid var(--line);border-radius:12px}
+.wrap{max-width:760px;margin:0 auto;padding:26px 18px 70px}
+h1{font-size:23px;letter-spacing:-.04em;margin:0 0 6px;font-weight:850}
+.sub{color:var(--muted);font-size:13px;margin:0 0 18px;line-height:1.55}
+.lead{color:var(--muted);font-size:12.5px;line-height:1.65;margin:0 0 26px;
+  padding:13px 15px;background:var(--card);border:1px solid var(--line);border-radius:13px}
 .lead b{color:var(--text)}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:18px}
-.tile{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:13px;
-  transition:border-color .2s,transform .2s}
-.tile:hover{border-color:rgba(183,243,107,.32);transform:translateY(-2px)}
-.ttl{display:flex;align-items:baseline;gap:8px;margin-bottom:9px}
-.ttl b{font-size:14px;font-weight:820;letter-spacing:-.02em}
-.ttl span{font-size:10px;color:var(--muted);letter-spacing:.03em}
-iframe{width:100%;height:320px;border:0;border-radius:11px;background:#0a0e0b;display:block}
-.open{display:block;margin-top:10px;font-size:11.5px;font-weight:750;color:var(--lime);
-  text-decoration:none}
-.open:hover{text-decoration:underline}
+
+.list{display:flex;flex-direction:column;gap:12px}
+.card{display:flex;align-items:center;gap:14px;padding:16px 18px;
+  background:var(--card);border:1px solid var(--line);border-radius:16px;
+  text-decoration:none;color:inherit;transition:border-color .18s,transform .18s,background .18s}
+.card:hover{border-color:rgba(183,243,107,.45);transform:translateX(3px);
+  background:#141a15}
+.card:active{transform:scale(.99)}
+.num{width:34px;height:34px;border-radius:10px;flex:none;
+  background:rgba(183,243,107,.13);color:var(--lime);
+  display:grid;place-items:center;font-weight:900;font-size:14px}
+.tx{flex:1;min-width:0}
+.tx b{display:block;font-size:15px;font-weight:820;letter-spacing:-.02em;margin-bottom:3px}
+.tx span{display:block;font-size:12px;color:var(--muted);line-height:1.45}
+.go{margin-left:auto;flex:none;color:var(--lime);font-size:18px;opacity:.65}
+.card:hover .go{opacity:1}
+
+.pick{margin-top:26px;padding:16px 18px;background:rgba(183,243,107,.07);
+  border:1px solid rgba(183,243,107,.28);border-radius:14px;
+  font-size:12.5px;line-height:1.65;color:var(--muted)}
+.pick b{color:var(--lime)}
 </style>
 </head>
 <body>
 <div class="wrap">
   <h1>Natural scan</h1>
-  <p class="sub">Border hairline kekal. Lima cara berbeza untuk menandakan AI sedang membaca — semuanya organik, tiada neon.</p>
+  <p class="sub">Border hairline kekal. Lima cara menandakan AI sedang membaca — semuanya organik.</p>
+
   <p class="lead">
-    <b>Falsafah:</b> semua versi sebelum ini menghias ruang carta dengan warna dan sapuan.
+    <b>Falsafah:</b> versi sebelum ini menghias ruang carta dengan warna dan sapuan.
     Lima ini buang semua itu. Yang tinggal cuma <b>cahaya</b> — bergerak perlahan,
     satu warna, mengikut bentuk data. Kalau anda perasan ia bergerak, ia berjaya.
     Kalau ia menarik perhatian, ia gagal.
   </p>
 
-  <div class="grid">
-    <div class="tile">
-      <div class="ttl"><b>Breath</b><span>bernafas</span></div>
-      <iframe src="nat-breath.html" loading="lazy"></iframe>
-      <a class="open" href="nat-breath.html" target="_blank">Buka penuh →</a>
-    </div>
-    <div class="tile">
-      <div class="ttl"><b>Horizon</b><span>fajar menyinsing</span></div>
-      <iframe src="nat-horizon.html" loading="lazy"></iframe>
-      <a class="open" href="nat-horizon.html" target="_blank">Buka penuh →</a>
-    </div>
-    <div class="tile">
-      <div class="ttl"><b>Ripple</b><span>gelombang lembut</span></div>
-      <iframe src="nat-ripple.html" loading="lazy"></iframe>
-      <a class="open" href="nat-ripple.html" target="_blank">Buka penuh →</a>
-    </div>
-    <div class="tile">
-      <div class="ttl"><b>Dew</b><span>titisan turun</span></div>
-      <iframe src="nat-dew.html" loading="lazy"></iframe>
-      <a class="open" href="nat-dew.html" target="_blank">Buka penuh →</a>
-    </div>
-    <div class="tile">
-      <div class="ttl"><b>Sand</b><span>habuk hanyut</span></div>
-      <iframe src="nat-sand.html" loading="lazy"></iframe>
-      <a class="open" href="nat-sand.html" target="_blank">Buka penuh →</a>
-    </div>
+  <div class="list">
+    <a class="card" href="nat-breath.html">
+      <div class="num">1</div>
+      <div class="tx">
+        <b>Breath</b>
+        <span>Carta bernafas. Garisan cerah→malap→cerah, halo lembut, nadi di hujung. Kitaran 7s.</span>
+      </div>
+      <div class="go">→</div>
+    </a>
+
+    <a class="card" href="nat-horizon.html">
+      <div class="num">2</div>
+      <div class="tx">
+        <b>Horizon</b>
+        <span>Jalur cahaya hangat merayap naik-turun, macam fajar. Kitaran ~28s — paling halus.</span>
+      </div>
+      <div class="go">→</div>
+    </a>
+
+    <a class="card" href="nat-ripple.html">
+      <div class="num">3</div>
+      <div class="tx">
+        <b>Ripple</b>
+        <span>Satu gelombang berbentuk loceng menyusuri garisan, menebalkan sekejap. Kitaran ~9s.</span>
+      </div>
+      <div class="go">→</div>
+    </a>
+
+    <a class="card" href="nat-dew.html">
+      <div class="num">4</div>
+      <div class="tx">
+        <b>Dew</b>
+        <span>Tiga titisan cahaya hangat turun pada lembah carta, memudar bila sampai.</span>
+      </div>
+      <div class="go">→</div>
+    </a>
+
+    <a class="card" href="nat-sand.html">
+      <div class="num">5</div>
+      <div class="tx">
+        <b>Sand</b>
+        <span>26 zarah halus hanyut perlahan seperti habuk dalam cahaya. Sangat kecil dan malap.</span>
+      </div>
+      <div class="go">→</div>
+    </a>
   </div>
+
+  <p class="pick">
+    <b>Cadangan saya: Breath.</b> Ia bukan animasi — ia nafas. Garisan carta hidup macam
+    objek bernyawa, tiada warna menarik perhatian. Horizon pula paling premium tapi anda
+    perlu tunggu untuk perasan ia bergerak.
+  </p>
 </div>
 </body>
 </html>
