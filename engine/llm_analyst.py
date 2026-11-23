@@ -457,7 +457,46 @@ def _force_direction(pair, price, atr, pip, spread_pips, trend, bos, tf,
     return {"side": side, "entry": round(price, 5), "sl": round(sl, 5),
             "tp1": round(tp1, 5), "tp2": round(tp2, 5),
             "conf": 0.4, "rr1": round(rr, 2), "rr2": round(rr * 1.6, 2),
-            "reason": reason, "forced": True}
+            "reason": reason, "forced": True, "entry_type": "market"}
+
+
+def _apply_risk_entry(verdict, risk_level, price, atr):
+    """Tetapkan jenis entry ikut risk level.
+
+    high        -> market (instant): entry = harga semasa, order terus.
+    low / med   -> buy_limit / sell_limit: entry ditarik ke level retrace
+                   (BUY = bawah harga, SELL = atas harga) — tunggu harga
+                   sampai level lebih baik, bukan kejar pasaran.
+    Kembalikan verdict dengan entry_type + entry yang mungkin dilaras.
+    """
+    side = verdict.get("side")
+    if side not in ("BUY", "SELL"):
+        return verdict
+    lv = str(risk_level).lower()
+    if lv == "high":
+        verdict["entry_type"] = "market"
+        # entry kekal harga semasa (instant)
+        verdict["entry"] = round(price, 5)
+        verdict["limit_note"] = "Instant market entry."
+    else:
+        # limit: geser entry, SL & TP sama jarak supaya risk/RR kekal.
+        # BUY limit = bawah harga (tunggu pullback), SELL limit = atas harga.
+        pull = atr * 0.5
+        old_entry = verdict.get("entry", price)
+        if side == "BUY":
+            entry = price - pull
+            verdict["entry_type"] = "buy_limit"
+        else:
+            entry = price + pull
+            verdict["entry_type"] = "sell_limit"
+        shift = entry - old_entry
+        verdict["entry"] = round(entry, 5)
+        verdict["sl"] = round(verdict["sl"] + shift, 5)
+        verdict["tp1"] = round(verdict["tp1"] + shift, 5)
+        verdict["tp2"] = round(verdict["tp2"] + shift, 5)
+        verdict["limit_note"] = (f"{'Buy' if side=='BUY' else 'Sell'} limit at "
+                                 f"{entry:.{5 if price < 500 else 2}f} — waits for pullback.")
+    return verdict
 
 
 # Sumber panggilan semasa (thread-local supaya analyze-api berbilang thread selamat).
@@ -1040,6 +1079,7 @@ def analyze(pair, bars, pip, spread_pips, call=None, budget_s=None, held=None, t
                                            trend, bos, tf, rr_min, rr_max,
                                            _spread_floor, v_model, ai_meta)
                 log(f"{pair} {tf} high-risk: neon HOLD -> dipaksa {verdict['side']}")
+            verdict = _apply_risk_entry(verdict, risk_level, price, atr)
             verdict.update(model=v_model, tf=tf, latency_s=round(latency, 1),
                            vision=True, ai_meta=ai_meta)
             _audit({"ts": datetime.now(timezone.utc).isoformat(), "pair": pair, "tf": tf,
@@ -1103,6 +1143,7 @@ def analyze(pair, bars, pip, spread_pips, call=None, budget_s=None, held=None, t
                                        trend, bos, tf, rr_min, rr_max,
                                        _spread_floor, model, ai_meta)
             log(f"{pair} {tf} high-risk (text): HOLD -> dipaksa {verdict['side']}")
+        verdict = _apply_risk_entry(verdict, risk_level, price, atr)
         verdict["model"] = model
         verdict["tf"] = tf
         verdict["latency_s"] = round(latency, 1)

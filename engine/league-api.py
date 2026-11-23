@@ -504,13 +504,27 @@ class Handler(BaseHTTPRequestHandler):
             entry, sl, tp = float(req["entry"]), float(req["sl"]), float(req["tp"])
         except (KeyError, TypeError, ValueError):
             return self._send(400, {"error": "Missing entry / SL / TP."})
-        # Instant entry: fill at the LIVE market price. The verdict entry can
-        # drift while the LLM runs — using it created unfilled "pending" trades
-        # that the resolver wrongly closed at SL/TP.
+        # Entry type: market (instant) vs buy_limit/sell_limit (pending).
+        #   market     -> fill at LIVE price now (entry drift selamat).
+        #   *_limit    -> simpan entry limit; resolver fill-first tunggu harga
+        #                 sentuh level, expired 6j jika tak pernah terisi.
+        entry_type = str(req.get("entry_type", "market")).lower()
+        if entry_type not in ("market", "buy_limit", "sell_limit"):
+            entry_type = "market"
         live = live_price(pair)
         if live is None:
             return self._send(503, {"error": "Live price unavailable — try again in a moment."})
-        entry = live
+        if entry_type == "market":
+            entry = live
+        else:
+            # limit: kekalkan entry dari verdict (retrace), bukan harga live.
+            entry = float(entry)
+            # sahkan arah limit masuk akal: buy_limit mesti bawah harga semasa,
+            # sell_limit mesti atas — kalau tak, ia sudah terisi / salah arah.
+            if side == "BUY" and entry >= live:
+                return self._send(409, {"error": "Buy limit must be below current price — re-scan."})
+            if side == "SELL" and entry <= live:
+                return self._send(409, {"error": "Sell limit must be above current price — re-scan."})
         if side == "BUY" and not (sl < entry < tp):
             return self._send(409, {"error": "Price moved beyond this setup's SL/TP — run a fresh scan."})
         if side == "SELL" and not (sl > entry > tp):
@@ -553,6 +567,7 @@ class Handler(BaseHTTPRequestHandler):
             body = {
                 "user_id": uid, "username": display_name(user), "pair": pair,
                 "side": side, "entry": entry, "sl": sl, "tp": tp,
+                "entry_type": entry_type,
                 "risk_pct": risk_pct, "risk_usd": risk_usd, "season": SEASON}
             if custom_lot is not None:
                 body["lot"] = custom_lot
@@ -576,17 +591,20 @@ class Handler(BaseHTTPRequestHandler):
             acct = MA.account_for(uid) if MA else None
             allowed = bool((MO and MO.is_owner(uid)) or (acct and acct.get("can_trade") is True))
             if req.get("mt5") and MO and allowed:
-                if custom_lot is not None:
-                    use_lot = custom_lot
-                else:
-                    mult = CONTRACT_MULT.get(pair, DEFAULT_MULT)
-                    use_lot = round(risk_usd / (abs(entry - sl) * mult), 2)
                 verdict = {"pair": pair, "side": side, "entry": entry, "sl": sl, "tp1": tp}
                 try:
-                    mt5res = MO.sync_verdict(verdict, uid, lot=use_lot, account=acct)
+                    # Jika user pilih tab Lot manual (custom_lot), guna lot itu.
+                    # Jika user pilih tab Risk % (1% / 2%), kira lot MT5 daripada
+                    # EKUITI SEBENAR MT5 (bukan baki maya $10,000 Paper League)
+                    # supaya akaun MT5 kecil tak ditolak dengan "No money".
+                    mt5res = MO.sync_verdict(
+                        verdict, uid, lot=custom_lot, account=acct,
+                        risk_pct=(None if custom_lot is not None else risk_pct),
+                    )
                 except Exception as e:
                     log(f"mt5 sync error {type(e).__name__}: {str(e)[:120]}")
                     mt5res = {"synced": False, "reason": "sync-error"}
+                use_lot = (mt5res or {}).get("lot") or custom_lot or 0.01
                 # Sync paper entry -> actual MT5 fill price (owner 2026-11-21).
                 # Paper entry came from the Swissquote feed; the MT5 market order
                 # fills at the broker price (spread/feed differ). Without this the

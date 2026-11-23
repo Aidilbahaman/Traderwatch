@@ -1663,12 +1663,18 @@ function metrics(c){
 /* Map verdict backend (/api/analyze) -> kad UI. Teks server di-escape. */
 function mapVerdict(d){
  var en=lang==='en',hold=d.side==='HOLD',dir=hold?'WAIT':d.side,conf=Math.round((+d.conf||0)*100);
- var a={dir:dir,conf:conf,entry:null,sl:null,tp:null,tp2:null,reasons:[],checks:[],risk:[],model:d.model||'',meta:d.ai_meta||null,tf:d.tf||tf};
+ var et=d.entry_type||'market';   /* market | buy_limit | sell_limit */
+ var a={dir:dir,conf:conf,entry:null,sl:null,tp:null,tp2:null,entry_type:et,
+  reasons:[],checks:[],risk:[],model:d.model||'',meta:d.ai_meta||null,tf:d.tf||tf};
  var rr1=+d.rr1||0,rr2=+d.rr2||0;
  if(!hold){
   a.entry=+d.entry;a.sl=+d.sl;a.tp=+d.tp1;a.tp2=(d.tp2!=null&&isFinite(+d.tp2))?+d.tp2:null;
+  var isLimit=et==='buy_limit'||et==='sell_limit';
+  var entryLine=isLimit
+    ?((en?'Limit entry':'Entry limit')+' ('+(et==='buy_limit'?(en?'Buy Limit':'Buy Limit'):(en?'Sell Limit':'Sell Limit'))+') '+fx(cur,a.entry)+' — '+(en?'waits for pullback':'tunggu harga sampai')+'.')
+    :((en?'Instant market entry ':'Entry pasaran serta-merta ')+fx(cur,a.entry)+'.');
   a.reasons=[d.reason?esc(d.reason):null,
-   (en?'Entry at current price ':'Entry pada harga semasa ')+fx(cur,a.entry)+'.',
+   entryLine,
    'Stop Loss '+fx(cur,a.sl)+(en?' (risk ':' (risiko ')+fx(cur,Math.abs(a.entry-a.sl))+(en?' points).':' mata).'),
    'TP1 '+fx(cur,a.tp)+' · RR 1:'+rr1+'.',
    a.tp2!=null?'TP2 '+fx(cur,a.tp2)+' · RR 1:'+rr2+'.':null].filter(Boolean);
@@ -2089,7 +2095,7 @@ function show(a){
   h+='<div class="sec">'+esc(t('aiNarr'))+'</div>'+
      '<div class="narrwrap"><div class="miniorb"><div class="ring2"></div><div class="core2"></div></div>'+
      '<div class="narr" id="narrTx"></div></div>';}
- if(a.entry!=null)h+='<div class="lv"><div class="e" style="animation-delay:.15s"><small>'+esc(t('entry'))+'</small><b>'+f(a.entry)+'</b></div><div class="t" style="animation-delay:.25s"><small>'+esc(t('tp'))+'</small><b>'+f(a.tp)+(a.tp2!=null?' / '+f(a.tp2):'')+'</b></div><div class="s" style="animation-delay:.35s"><small>'+esc(t('sl'))+'</small><b>'+f(a.sl)+'</b></div></div>';
+ if(a.entry!=null){var eLab=a.entry_type==='buy_limit'?'BUY LIMIT':a.entry_type==='sell_limit'?'SELL LIMIT':t('entry');h+='<div class="lv"><div class="e" style="animation-delay:.15s"><small>'+esc(eLab)+'</small><b>'+f(a.entry)+'</b></div><div class="t" style="animation-delay:.25s"><small>'+esc(t('tp'))+'</small><b>'+f(a.tp)+(a.tp2!=null?' / '+f(a.tp2):'')+'</b></div><div class="s" style="animation-delay:.35s"><small>'+esc(t('sl'))+'</small><b>'+f(a.sl)+'</b></div></div>';}
  else h+='<p style="text-align:center;color:var(--muted);font-size:12px;margin:4px 0 0">'+esc(t('waitMsg'))+'</p>';
  if(a.entry!=null)h+='<button class="take" id="takeBtn">'+esc(t('takeTrade'))+'</button>';
  else h+='<button class="take" id="takeBtn" disabled>'+esc(t('takeTrade'))+'</button><p class="takenote">'+esc(t('noSetup'))+'</p>';
@@ -2590,7 +2596,7 @@ $('rLotInput').addEventListener('input',function(){
 function riskErr(msg){$('rErr').innerHTML='<div class="errbox" style="margin-top:0;margin-bottom:12px"><p>'+esc(msg)+'</p></div>'}
 function openRisk(a){
  if(!cur||a.entry==null||a.dir==='WAIT')return;
- riskAna={pair:cur.s,side:a.dir,entry:a.entry,sl:a.sl,tp:a.tp,conf:a.conf,meta:a.meta||null,tf:a.tf||tf};
+ riskAna={pair:cur.s,side:a.dir,entry:a.entry,sl:a.sl,tp:a.tp,conf:a.conf,meta:a.meta||null,tf:a.tf||tf,entry_type:a.entry_type||'market'};
  riskPct=1;riskBusy=false;riskMode='pct';riskLot=0.05;
  riskBal=(LG.me&&isFinite(+LG.me.balance))?+LG.me.balance:null;
  $('rErr').innerHTML='';
@@ -2616,7 +2622,7 @@ function submitTrade(){
  if(riskBal==null){riskErr(t('noBalance'));return}
  if(riskMode==='lot'&&!lotValid(riskLot)){riskErr(t('lotInvalid'));return}
  riskBusy=true;$('rGo').disabled=true;$('rGo').textContent=t('opening');$('rErr').innerHTML='';
- var body={pair:String(riskAna.pair).replace('/',''),side:riskAna.side,entry:riskAna.entry,sl:riskAna.sl,tp:riskAna.tp};
+ var body={pair:String(riskAna.pair).replace('/',''),side:riskAna.side,entry:riskAna.entry,sl:riskAna.sl,tp:riskAna.tp,entry_type:riskAna.entry_type||'market'};
  var am=riskAna.meta||{};
  if(am.bos)body.ai_bos=am.bos;if(am.choch!=null)body.ai_choch=!!am.choch;
  if(am.fvg!=null)body.ai_fvg=+am.fvg;if(am.atr!=null)body.ai_atr=+am.atr;
@@ -3419,7 +3425,7 @@ window.addEventListener('appinstalled',function(){drawWelcome();try{localStorage
 if(typeof window!=='undefined'){window.__welcome=showWelcome;window.__drawWelcome=drawWelcome;}
 if(typeof window!=='undefined'){window.__forceLogout=goLogin;}
 if('serviceWorker' in navigator){window.addEventListener('load',function(){
- navigator.serviceWorker.register('sw.js?v=68v58',{scope:'./',updateViaCache:'none'}).then(function(reg){
+ navigator.serviceWorker.register('sw.js?v=70v58',{scope:'./',updateViaCache:'none'}).then(function(reg){
   /* PWA homescreen resume instance lama tanpa navigation -> check update
      bila app kembali nampak/focus + setiap 30 min, dan reload automatik
      bila SW versi baru mengambil alih (controllerchange). */
