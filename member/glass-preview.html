@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>TraderWatch — Liquid Glass Preview</title>
+<meta name="theme-color" content="#070b08">
+<style>
+/* ============================================================
+   LIQUID GLASS — TraderWatch preview
+   Real glass = 4 layers stacked:
+     1. tinted gradient fill (depth)
+     2. backdrop-filter blur+saturate (refraction)
+     3. specular rim via inset shadows (light catching the edge)
+     4. grain + sheen overlay (material, not plastic)
+   Without a colourful backdrop there is nothing to refract —
+   the page background carries 4 tinted light sources.
+   ============================================================ */
+
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0}
+
+html{
+  --blur:24px;
+  --sat:190%;
+  color-scheme:dark;
+  --bg:#070b08;
+  --ink:#f2f7f1;
+  --ink2:#a8b6ac;
+  --ink3:#75847b;
+  --lime:#b7f36b;
+  --red:#ff7b82;
+  --amber:#ffc46b;
+  --blue:#8ab4ff;
+  /* glass material */
+  /* gelap + rim terang: kanta menyerap cahaya, tepinya yang menangkapnya */
+  --g-tint:linear-gradient(152deg,rgba(255,255,255,.10),rgba(7,11,8,.62) 42%,rgba(7,11,8,.72));
+  --g-edge:rgba(255,255,255,.15);
+  --g-spec:rgba(255,255,255,.42);
+  --g-shadow:0 14px 40px rgba(0,0,0,.48),0 2px 8px rgba(0,0,0,.30);
+  --g-inner:inset 0 1px 0 var(--g-spec),inset 0 0 0 1px var(--g-edge),inset 0 -1px 0 rgba(255,255,255,.05);
+  --dock-tint:rgba(18,24,19,.55);
+}
+html[data-theme="light"]{
+  color-scheme:light;
+  --bg:#eef2ee;
+  --ink:#0e1a13;
+  --ink2:#4a5c51;
+  --ink3:#75877c;
+  --lime:#6aa62a;
+  --red:#d2454f;
+  --amber:#b07515;
+  --blue:#3168c0;
+  --g-tint:linear-gradient(150deg,rgba(255,255,255,.72),rgba(255,255,255,.42) 44%,rgba(255,255,255,.26));
+  --g-edge:rgba(255,255,255,.85);
+  --g-spec:rgba(255,255,255,.95);
+  --g-shadow:0 12px 34px rgba(23,42,30,.14),0 2px 8px rgba(23,42,30,.08);
+  --g-inner:inset 0 1px 0 var(--g-spec),inset 0 0 0 1px rgba(255,255,255,.6),inset 0 -1px 0 rgba(0,0,0,.04);
+  --dock-tint:rgba(255,255,255,.5);
+}
+html[data-transparency="off"]{
+  --blur:0px;--sat:100%;
+  --g-tint:rgba(19,25,20,.97);
+  --dock-tint:rgba(19,25,20,.97);
+}
+html[data-theme="light"][data-transparency="off"]{
+  --g-tint:rgba(252,254,252,.98);
+  --dock-tint:rgba(252,254,252,.98);
+}
+
+body{
+  background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Inter,system-ui,sans-serif;
+  min-height:100vh;overflow-x:hidden;
+  -webkit-font-smoothing:antialiased;
+  letter-spacing:-.011em;
+  transition:background .45s ease;
+}
+
+/* ---------- the light field the glass refracts ---------- */
+.field{position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none}
+.field i{position:absolute;border-radius:50%;filter:blur(70px);opacity:.55;display:block}
+.f1{width:520px;height:520px;left:-14%;top:-12%;background:radial-gradient(circle,#b7f36b,transparent 68%)}
+.f2{width:460px;height:460px;right:-10%;top:6%;background:radial-gradient(circle,#4a7dff,transparent 68%);opacity:.38}
+.f3{width:420px;height:420px;left:26%;bottom:-16%;background:radial-gradient(circle,#ff9e5c,transparent 70%);opacity:.30}
+.f4{width:340px;height:340px;right:12%;bottom:2%;background:radial-gradient(circle,#a06bff,transparent 70%);opacity:.28}
+html[data-theme="light"] .field i{opacity:.42;filter:blur(80px)}
+/* fine grain over the whole field so glass has texture to pick up */
+.field::after{
+  content:'';position:absolute;inset:0;opacity:.05;mix-blend-mode:overlay;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='4'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* ---------- page chrome ---------- */
+.wrap{position:relative;z-index:2;max-width:1180px;margin:0 auto;padding:34px 20px 80px}
+
+.brandline{display:flex;align-items:center;gap:14px;margin-bottom:6px}
+.bmark{
+  width:46px;height:46px;border-radius:14px;display:grid;place-items:center;flex:none;
+  background:linear-gradient(150deg,rgba(183,243,107,.34),rgba(183,243,107,.10));
+  border:1px solid rgba(183,243,107,.42);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.42),0 8px 26px rgba(183,243,107,.20);
+  backdrop-filter:blur(16px) saturate(180%);
+}
+.bmark svg{width:24px;height:24px;display:block}
+h1{font-size:25px;letter-spacing:-.04em;margin:0;font-weight:800;line-height:1.15}
+h1 em{font-style:normal;color:var(--lime)}
+.sub{color:var(--ink2);font-size:13px;margin:5px 0 0;letter-spacing:-.005em}
+
+/* ---------- control deck ---------- */
+.deck{
+  margin:26px 0 30px;padding:16px 18px;border-radius:22px;
+  display:flex;flex-wrap:wrap;gap:20px;align-items:center;
+  background:var(--g-tint);backdrop-filter:blur(var(--blur)) saturate(var(--sat));
+  border:1px solid var(--g-edge);box-shadow:var(--g-inner),var(--g-shadow);
+  position:relative;isolation:isolate;
+}
+.deck::before{
+  content:'';position:absolute;inset:0;border-radius:inherit;pointer-events:none;z-index:-1;
+  background:radial-gradient(130% 100% at 18% -20%,rgba(255,255,255,.22),transparent 46%);mix-blend-mode:screen;
+}
+.ctl{display:flex;align-items:center;gap:9px;font-size:12px;font-weight:650;color:var(--ink2);letter-spacing:.01em}
+.seg{display:flex;background:rgba(0,0,0,.20);border-radius:12px;padding:3px;border:1px solid rgba(255,255,255,.07)}
+html[data-theme="light"] .seg{background:rgba(0,0,0,.05);border-color:rgba(0,0,0,.05)}
+.seg button{
+  border:0;background:transparent;color:var(--ink2);font:inherit;font-size:11.5px;font-weight:700;
+  padding:6px 12px;border-radius:9px;cursor:pointer;transition:.22s;letter-spacing:.01em;
+}
+.seg button[aria-pressed="true"]{
+  background:rgba(255,255,255,.16);color:var(--ink);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.30),0 2px 6px rgba(0,0,0,.14)
+}
+html[data-theme="light"] .seg button[aria-pressed="true"]{background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.12)}
+input[type=range]{
+  -webkit-appearance:none;appearance:none;width:120px;height:3px;border-radius:3px;
+  background:linear-gradient(90deg,var(--lime),rgba(255,255,255,.18));outline:0;
+}
+input[type=range]::-webkit-slider-thumb{
+  -webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:#fff;cursor:pointer;
+  box-shadow:0 1px 4px rgba(0,0,0,.4),inset 0 -1px 2px rgba(0,0,0,.10);
+}
+.rd{font-variant-numeric:tabular-nums;color:var(--ink);font-weight:750;min-width:38px}
+
+/* ---------- stage ---------- */
+.stage{display:flex;gap:44px;justify-content:center;flex-wrap:wrap;align-items:flex-start}
+
+/* ---------- phone ---------- */
+.phone{
+  position:relative;width:430px;height:932px;flex:none;border-radius:56px;overflow:hidden;
+  background:
+    radial-gradient(120% 62% at 8% -6%,rgba(183,243,107,.20),transparent 58%),
+    radial-gradient(100% 54% at 104% 22%,rgba(74,125,255,.18),transparent 60%),
+    radial-gradient(110% 60% at 46% 108%,rgba(255,158,92,.13),transparent 62%),
+    var(--bg);
+  box-shadow:
+    0 0 0 11px #0b0f0c,
+    0 0 0 12.5px rgba(255,255,255,.09),
+    0 40px 100px rgba(0,0,0,.60),
+    0 0 90px rgba(183,243,107,.07);
+  display:flex;flex-direction:column;isolation:isolate;
+}
+html[data-theme="light"] .phone{box-shadow:0 0 0 11px #ffffff,0 0 0 12.5px rgba(0,0,0,.10),0 40px 90px rgba(23,42,30,.22)}
+.phone .inner{position:absolute;inset:0;overflow:hidden;display:flex;flex-direction:column}
+/* the phone has its own light field so glass refracts inside the frame too */
+.phone .pf{position:absolute;inset:0;z-index:0;pointer-events:none;overflow:hidden}
+.pf i{position:absolute;border-radius:50%;filter:blur(52px);display:block}
+.pf .a{width:340px;height:340px;left:-30%;top:-4%;background:radial-gradient(circle,#c8ff7a,transparent 62%);opacity:.50}
+.pf .b{width:320px;height:320px;right:-32%;top:14%;background:radial-gradient(circle,#5b88ff,transparent 62%);opacity:.36}
+.pf .c{width:360px;height:360px;left:2%;bottom:-10%;background:radial-gradient(circle,#ffa96b,transparent 64%);opacity:.28}
+.pf .d{width:260px;height:260px;right:-10%;bottom:22%;background:radial-gradient(circle,#b06bff,transparent 64%);opacity:.20}
+html[data-theme="light"] .pf i{opacity:.46;filter:blur(60px)}
+
+.notch{
+  position:absolute;top:11px;left:50%;transform:translateX(-50%);z-index:20;
+  width:112px;height:29px;border-radius:16px;background:#05080a;
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.06);
+}
+html[data-theme="light"] .notch{background:#0d1410}
+.status{
+  position:relative;z-index:12;display:flex;justify-content:space-between;align-items:center;
+  padding:15px 26px 0;font-size:12.5px;font-weight:700;letter-spacing:.01em;color:var(--ink);
+}
+.sbar{display:flex;gap:5px;align-items:center;opacity:.92}
+.sbar b{width:15px;height:10px;border-radius:2px;border:1.4px solid currentColor;position:relative;display:block}
+.sbar b::after{content:'';position:absolute;inset:2px;background:currentColor;border-radius:.5px;width:62%}
+
+/* ---------- app header ---------- */
+.hdr{position:relative;z-index:12;display:flex;align-items:center;gap:11px;padding:8px 20px 10px}
+.hlogo{
+  width:38px;height:38px;border-radius:12px;display:grid;place-items:center;flex:none;
+  background:linear-gradient(150deg,rgba(183,243,107,.30),rgba(183,243,107,.08));
+  border:1px solid rgba(183,243,107,.38);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.40),0 6px 20px rgba(183,243,107,.18);
+  backdrop-filter:blur(18px) saturate(180%);
+}
+.hlogo svg{width:20px;height:20px}
+.htxt{display:flex;flex-direction:column;gap:1px;margin-right:auto}
+.htxt b{font-size:13.5px;letter-spacing:.055em;font-weight:800}
+.htxt span{font-size:9px;letter-spacing:.20em;color:var(--ink3);font-weight:700;text-transform:uppercase}
+.hbtns{display:flex;gap:7px}
+.hbtn{
+  width:34px;height:34px;border-radius:50%;display:grid;place-items:center;cursor:pointer;
+  background:var(--g-tint);border:1px solid var(--g-edge);
+  box-shadow:var(--g-inner);backdrop-filter:blur(var(--blur)) saturate(var(--sat));
+  color:var(--ink2);transition:transform .18s,color .18s;
+}
+.hbtn:active{transform:scale(.93)}
+.hbtn svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.hbtn.tw{
+  width:38px;height:38px;font-size:10px;font-weight:850;color:#0b1206;letter-spacing:.02em;
+  background:linear-gradient(150deg,#c9f88a,#9ade4d);border-color:rgba(255,255,255,.5);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.7),0 5px 16px rgba(183,243,107,.36);
+}
+
+/* ---------- scroll body ---------- */
+.body{position:relative;z-index:10;flex:1;overflow-y:auto;overflow-x:hidden;padding:2px 16px 172px;scrollbar-width:none}
+.body::-webkit-scrollbar{display:none}
+
+/* ============================================================
+   THE GLASS
+   ============================================================ */
+.g{
+  position:relative;border-radius:24px;isolation:isolate;
+  background:var(--g-tint);
+  border:1px solid var(--g-edge);
+  box-shadow:var(--g-inner),var(--g-shadow);
+  backdrop-filter:blur(var(--blur)) saturate(var(--sat));
+  -webkit-backdrop-filter:blur(var(--blur)) saturate(var(--sat));
+  overflow:hidden;
+}
+/* specular sheen — light entering top-left, exiting bottom-right */
+.g::before{
+  content:'';position:absolute;inset:0;border-radius:inherit;pointer-events:none;z-index:0;
+  background:
+    radial-gradient(150% 96% at 14% -30%,rgba(255,255,255,.40),transparent 46%),
+    radial-gradient(110% 84% at 110% 116%,rgba(255,255,255,.16),transparent 58%);
+  mix-blend-mode:screen;
+}
+html[data-theme="light"] .g::before{background:radial-gradient(140% 92% at 16% -26%,rgba(255,255,255,.92),transparent 48%)}
+/* grain — real glass has micro-texture, plastic does not */
+.g::after{
+  content:'';position:absolute;inset:0;border-radius:inherit;pointer-events:none;z-index:0;
+  opacity:.045;mix-blend-mode:overlay;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+.g > *{position:relative;z-index:1}
+
+/* pair hero */
+.pair{padding:13px 17px 12px;margin-bottom:10px}
+.pair .top{display:flex;align-items:flex-start;gap:10px}
+.pair .nm{font-size:15.5px;font-weight:800;letter-spacing:-.02em;line-height:1.2}
+.pair .nm small{display:block;font-size:9.5px;color:var(--ink3);font-weight:650;letter-spacing:.09em;text-transform:uppercase;margin-top:3px}
+.pair .px{margin-left:auto;text-align:right}
+.pair .px b{font-size:21px;font-weight:850;letter-spacing:-.045em;font-variant-numeric:tabular-nums;display:block;line-height:1.05}
+.pair .px span{font-size:11px;font-weight:750;color:var(--lime);font-variant-numeric:tabular-nums}
+.chips{display:flex;gap:6px;margin-top:12px;flex-wrap:wrap}
+.chip{
+  font-size:9.5px;font-weight:780;letter-spacing:.055em;text-transform:uppercase;
+  padding:5px 9px;border-radius:8px;
+  background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.09);color:var(--ink2);
+}
+html[data-theme="light"] .chip{background:rgba(0,0,0,.04);border-color:rgba(0,0,0,.06)}
+.chip.hot{background:rgba(255,123,130,.15);border-color:rgba(255,123,130,.30);color:var(--red)}
+.chip.on{background:rgba(183,243,107,.15);border-color:rgba(183,243,107,.34);color:var(--lime)}
+
+/* chart card */
+.chartc{padding:9px 9px 9px;margin-bottom:10px;position:relative}
+.chartbox{position:relative;border-radius:16px;overflow:hidden;
+  background:radial-gradient(120% 90% at 78% 8%,rgba(183,243,107,.10),transparent 54%),rgba(0,0,0,.30);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.10)}
+html[data-theme="light"] .chartbox{background:rgba(255,255,255,.62);box-shadow:inset 0 1px 0 #fff,inset 0 0 0 1px rgba(0,0,0,.04)}
+.chartbox svg{display:block;width:100%;height:auto}
+.ready{
+  position:absolute;top:16px;left:16px;z-index:5;
+  display:flex;align-items:center;gap:7px;
+  padding:7px 12px;border-radius:999px;font-size:10.5px;font-weight:800;letter-spacing:.055em;
+  background:rgba(183,243,107,.16);border:1px solid rgba(183,243,107,.42);color:#d6ff9e;
+  backdrop-filter:blur(20px) saturate(200%);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.32),0 6px 20px rgba(0,0,0,.34);
+}
+html[data-theme="light"] .ready{color:#3d6b0d;background:rgba(183,243,107,.42)}
+.ready i{width:6px;height:6px;border-radius:50%;background:var(--lime);box-shadow:0 0 8px var(--lime);animation:blink 2s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.35}}
+
+/* timeframe selector */
+.tfs{display:flex;gap:0;padding:4px;border-radius:16px;margin-bottom:10px}
+.tf{
+  flex:1;text-align:center;padding:9px 0;border-radius:12px;cursor:pointer;
+  font-size:12.5px;font-weight:780;letter-spacing:.03em;color:var(--ink3);
+  transition:all .26s cubic-bezier(.34,1.4,.64,1);
+}
+.tf.on{
+  color:#0c1505;
+  background:linear-gradient(155deg,#d3fa9d,#a5e356);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.78),
+    inset 0 -1px 0 rgba(0,0,0,.12),
+    0 5px 18px rgba(183,243,107,.40);
+}
+html[data-theme="light"] .tf.on{color:#fff;background:linear-gradient(155deg,#7ab52e,#5f9c22)}
+
+/* alignment */
+.mtf{padding:10px 12px;margin-bottom:10px}
+.mtf .lab{font-size:8.5px;font-weight:800;letter-spacing:.15em;color:var(--ink3);text-transform:uppercase;margin-bottom:9px}
+.mtfrow{display:flex;gap:6px}
+.mtf .lab{margin-bottom:7px}
+.mc{flex:1;text-align:center;padding:8px 4px;border-radius:11px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.06)}
+html[data-theme="light"] .mc{background:rgba(0,0,0,.035);border-color:rgba(0,0,0,.05)}
+.mc .k{font-size:9px;font-weight:780;letter-spacing:.06em;color:var(--ink3)}
+.mc .v{font-size:11.5px;font-weight:850;margin-top:3px;letter-spacing:.01em}
+.mc .v.b{color:var(--lime)}.mc .v.s{color:var(--red)}.mc .v.h{color:var(--amber)}
+
+/* AI view card */
+.aiv{padding:14px 16px;margin-bottom:10px;display:flex;align-items:center;gap:16px}
+.aiv .l{flex:1;min-width:0}
+.aiv .k{font-size:8.5px;font-weight:800;letter-spacing:.15em;color:var(--ink3);text-transform:uppercase}
+.aiv .val{font-size:28px;font-weight:900;letter-spacing:-.055em;line-height:1.05;margin:4px 0 0;color:var(--amber)}
+.aiv .meta{font-size:10px;color:var(--ink3);margin-top:6px;letter-spacing:.005em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ring{position:relative;width:70px;height:70px;flex:none}
+.ring svg{width:70px;height:70px;transform:rotate(-90deg)}
+.ring .rb{fill:none;stroke:rgba(255,255,255,.09);stroke-width:6}
+html[data-theme="light"] .ring .rb{stroke:rgba(0,0,0,.07)}
+.ring .rf{fill:none;stroke:#ffc46b;stroke-width:6;stroke-linecap:round;stroke-dasharray:213.6;stroke-dashoffset:145;filter:drop-shadow(0 0 6px rgba(255,196,107,.65))}
+.ring .n{position:absolute;inset:0;display:grid;place-items:center;text-align:center}
+.ring .n b{font-size:18px;color:var(--ink);font-weight:880;letter-spacing:-.04em;display:block;font-variant-numeric:tabular-nums}
+.ring .n small{font-size:6.5px;letter-spacing:.13em;color:var(--ink3);font-weight:780;display:block;margin-top:1px}
+
+/* checklist */
+.chk{padding:12px 14px;margin-bottom:10px}
+.chk .lab{font-size:8.5px;font-weight:800;letter-spacing:.15em;color:var(--ink3);text-transform:uppercase;margin-bottom:10px}
+.ci{display:flex;gap:9px;align-items:flex-start;font-size:11px;line-height:1.38;color:var(--ink2);padding:5px 0}
+.ci .b{
+  width:15px;height:15px;border-radius:50%;flex:none;display:grid;place-items:center;
+  font-size:9px;font-weight:900;margin-top:.5px;
+}
+.ci.y .b{background:rgba(183,243,107,.18);color:var(--lime);border:1px solid rgba(183,243,107,.34)}
+.ci.n .b{background:rgba(255,123,130,.14);color:var(--red);border:1px solid rgba(255,123,130,.30)}
+
+/* dock */
+.dock{
+  position:absolute;left:20px;right:20px;bottom:18px;z-index:30;
+  display:flex;justify-content:space-around;align-items:center;
+  padding:9px 8px;border-radius:26px;
+  background:var(--dock-tint);
+  border:1px solid var(--g-edge);
+  box-shadow:inset 0 1px 0 var(--g-spec),inset 0 0 0 1px rgba(255,255,255,.06),0 14px 40px rgba(0,0,0,.52);
+  backdrop-filter:blur(30px) saturate(210%);
+  -webkit-backdrop-filter:blur(30px) saturate(210%);
+}
+.di{
+  flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;
+  font-size:8.5px;font-weight:760;letter-spacing:.03em;color:var(--ink3);
+  padding:5px 0;cursor:pointer;transition:color .2s;
+}
+.di svg{width:19px;height:19px;stroke:currentColor;fill:none;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round}
+.di.on{color:var(--lime)}
+.di.on svg{filter:drop-shadow(0 0 7px rgba(183,243,107,.55))}
+
+/* notes panel */
+.notes{margin-top:46px;display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:14px}
+.n{
+  padding:16px 17px;border-radius:20px;
+  background:var(--g-tint);border:1px solid var(--g-edge);
+  box-shadow:var(--g-inner),var(--g-shadow);
+  backdrop-filter:blur(18px) saturate(170%);
+}
+.n h3{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--lime);margin:0 0 9px;font-weight:820}
+.n p{margin:0;font-size:12.5px;line-height:1.62;color:var(--ink2);letter-spacing:-.005em}
+.n code{font-family:ui-monospace,"SF Mono",Menlo,monospace;font-size:11px;background:rgba(255,255,255,.08);padding:1px 5px;border-radius:5px;color:var(--ink)}
+html[data-theme="light"] .n code{background:rgba(0,0,0,.05)}
+
+.lbl{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink3);font-weight:800;margin:0 0 14px 2px;text-align:center}
+
+@media (max-width:900px){
+  .wrap{padding:22px 12px 60px}
+  .phone{transform:scale(.92);transform-origin:top center;margin-bottom:-60px}
+  .deck{gap:14px;padding:13px 14px}
+}
+@media (prefers-reduced-motion:reduce){
+  *{animation:none!important;transition:none!important}
+}
+</style>
+</head>
+<body>
+
+<div class="field"><i class="f1"></i><i class="f2"></i><i class="f3"></i><i class="f4"></i></div>
+
+<div class="wrap">
+  <div class="brandline">
+    <div class="bmark">
+      <svg viewBox="0 0 24 24" fill="none"><path d="M12 1.6l2.5 7.1 7.1 2.5-7.1 2.5-2.5 7.1-2.5-7.1L2.4 11.2l7.1-2.5L12 1.6z" fill="#b7f36b"/></svg>
+    </div>
+    <div>
+      <h1>Liquid <em>Glass</em></h1>
+      <p class="sub">TraderWatch member app · iOS-style material preview</p>
+    </div>
+  </div>
+
+  <div class="deck">
+    <div class="ctl">
+      <span>Theme</span>
+      <div class="seg" id="segTheme">
+        <button data-v="dark" aria-pressed="true">Dark</button>
+        <button data-v="light" aria-pressed="false">Light</button>
+      </div>
+    </div>
+    <div class="ctl">
+      <span>Refraction</span>
+      <input type="range" id="blur" min="0" max="40" value="24">
+      <span class="rd" id="blurv">24px</span>
+    </div>
+    <div class="ctl">
+      <span>Saturation</span>
+      <input type="range" id="sat" min="100" max="300" value="190">
+      <span class="rd" id="satv">190%</span>
+    </div>
+    <div class="ctl">
+      <span>Transparency</span>
+      <div class="seg" id="segTr">
+        <button data-v="on" aria-pressed="true">On</button>
+        <button data-v="off" aria-pressed="false">Off</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="stage">
+    <div>
+      <p class="lbl">Live sheet · what the app becomes</p>
+      <div class="phone" id="phone">
+        <div class="notch"></div>
+        <div class="pf"><i class="a"></i><i class="b"></i><i class="c"></i><i class="d"></i></div>
+        <div class="inner" id="phoneInner"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="notes">
+    <div class="n">
+      <h3>Not glassmorphism</h3>
+      <p>Old trick: <code>rgba()</code> + <code>blur()</code> = frosted plastic. Liquid glass stacks four things — tinted depth gradient, <code>backdrop-filter: blur+saturate</code>, an inset specular rim so light catches the edge, and a grain overlay. The rim is what makes it read as a lens instead of a sticker.</p>
+    </div>
+    <div class="n">
+      <h3>Needs a light field</h3>
+      <p>Glass only exists if there is something behind it to bend. The page carries four tinted sources — lime, blue, apricot, violet — at 48–70px blur. That is what you see smeared inside every card. On a flat black page it would look grey no matter how much blur you add.</p>
+    </div>
+    <div class="n">
+      <h3>Active = lit, not filled</h3>
+      <p>The selected M1 pill is lime glass with a 78% white top rim and a drop glow, not a flat lime rectangle. Same for the dock icon and the logo tile. Light comes from one direction across the whole app — top-left.</p>
+    </div>
+    <div class="n">
+      <h3>Accessibility built in</h3>
+      <p>Transparency <b>Off</b> drops blur to zero and swaps in an opaque tint — this is the real iOS Reduce Transparency behaviour, and it matters on Android where blur costs frames. Respects <code>prefers-reduced-motion</code>. Text contrast holds in both themes.</p>
+    </div>
+  </div>
+</div>
+
+<svg width="0" height="0" style="position:absolute">
+  <defs>
+    <linearGradient id="rg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#ffd98f"/>
+      <stop offset="1" stop-color="#f0a63c"/>
+    </linearGradient>
+    <linearGradient id="rgb" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#d3fa9d"/><stop offset="1" stop-color="#8fd642"/>
+    </linearGradient>
+    <linearGradient id="lg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#c6fa78" stop-opacity=".34"/>
+      <stop offset="1" stop-color="#c6fa78" stop-opacity="0"/>
+    </linearGradient>
+    <filter id="glow" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="3" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+</svg>
+
+<script>
+/* ---------- chart geometry: real XAUUSD M1 shape ----------
+   decline -> floor -> recovery -> pullback -> spike -> fade */
+var PX=[3627,3625,3626,3622,3619,3620,3616,3612,3608,3604,3601,3603,3600,3602,3606,3609,3611,3608,3610,3613,3611,3609,3612,3615,3613,3611,3614,3617,3620,3623,3627,3625,3622,3620,3622,3621,3619,3620,3621,3620];
+
+function chartSVG(){
+  var LIGHT=document.documentElement.dataset.theme==="light";
+  var FILTER_BG=LIGHT?"#ffffff":"#0b100c";
+  var W=366,H=172,GUT=52;            /* gutter kanan untuk label harga */
+  var pw=W-GUT-8;                    /* lebar plot */
+  var pad=8;
+  var lo=Math.min.apply(0,PX),hi=Math.max.apply(0,PX),rng=(hi-lo)||1;
+
+  function xAt(i){return pad+(i/(PX.length-1))*(pw-pad*2)}
+  function yAt(v){return pad+(1-(v-lo)/rng)*(H-pad*2)}
+
+  var pts=PX.map(function(v,i){return [xAt(i),yAt(v)]});
+  var d='M'+pts.map(function(p){return p[0].toFixed(1)+' '+p[1].toFixed(1)}).join('L');
+  var area=d+'L'+(pw-pad)+' '+(H-pad)+'L'+pad+' '+(H-pad)+'Z';
+
+  /* pivot swing: ekstrem setempat, dijarakkan */
+  var sw=[];
+  for(var i=2;i<PX.length-2;i++){
+    var a=PX[i-2],b=PX[i-1],c=PX[i],e=PX[i+1],f=PX[i+2];
+    if((c>b&&c>e&&b>a&&e<f)||(c<b&&c<e&&b<a&&e>f)) sw.push({x:pts[i][0],y:pts[i][1],up:c>b});
+  }
+  var dots=sw.map(function(o){
+    return '<circle cx="'+o.x.toFixed(1)+'" cy="'+o.y.toFixed(1)+'" r="2.5" fill="'+(o.up?'#c6fa78':'#ff8f95')+'" opacity=".95"/>';
+  }).join('');
+
+  /* label harga: 5 paras, dijarak supaya tak bertindih, dalam gutter */
+  var labs=[3627.84,3620.90,3613.96,3607.02,3600.08];
+  var seen=[];
+  var labTxt=labs.map(function(v){
+    var y=yAt(v);
+    if(y<pad+2||y>H-pad-2) return '';
+    if(seen.some(function(p){return Math.abs(p-y)<17})) return '';
+    seen.push(y);
+    return '<text x="'+(W-4)+'" y="'+(y+3.1).toFixed(1)+'" text-anchor="end" font-size="8.4" '
+      +'font-weight="760" fill="currentColor" opacity=".78" font-family="-apple-system,system-ui">'+v.toFixed(2)+'</text>';
+  }).join('');
+
+  /* tick kecil di hujung garisan R/S masuk ke gutter */
+  var resY=yAt(3624.2), supY=yAt(3612.0);
+
+  return '<svg viewBox="0 0 '+W+' '+H+'" style="height:'+H+'px;color:var(--ink)">'
+    +'<rect x="'+(pw-1)+'" y="0" width="'+(W-pw+1)+'" height="'+H+'" fill="'+FILTER_BG+'" opacity="'+(LIGHT?'.10':'.34')+'"/>'
+    +'<line x1="'+(pw-1)+'" y1="0" x2="'+(pw-1)+'" y2="'+H+'" stroke="currentColor" stroke-width=".7" opacity=".10"/>'
+    +'<path d="'+area+'" fill="url(#lg)"/>'
+    +'<line x1="'+pad+'" y1="'+resY.toFixed(1)+'" x2="'+pw+'" y2="'+resY.toFixed(1)+'" stroke="#ff7b82" stroke-width=".85" stroke-dasharray="4 4" opacity=".55"/>'
+    +'<line x1="'+pad+'" y1="'+supY.toFixed(1)+'" x2="'+pw+'" y2="'+supY.toFixed(1)+'" stroke="#b7f36b" stroke-width=".85" stroke-dasharray="4 4" opacity=".48"/>'
+    +'<text x="'+(pad+1)+'" y="'+(resY-4).toFixed(1)+'" font-size="8.4" font-weight="850" fill="#ff7b82" opacity=".95" font-family="-apple-system,system-ui">R</text>'
+    +'<text x="'+(pad+1)+'" y="'+(supY-4).toFixed(1)+'" font-size="8.4" font-weight="850" fill="#b7f36b" opacity=".95" font-family="-apple-system,system-ui">S</text>'
+    +'<path d="'+d+'" fill="none" stroke="#c6fa78" stroke-width="1.65" stroke-linejoin="round" stroke-linecap="round" filter="url(#glow)"/>'
+    +dots+labTxt
+  +'</svg>';
+}
+
+var root=document.documentElement;
+var qp=new URLSearchParams(location.search);
+if(qp.get('theme')==='light'){
+  root.dataset.theme='light';
+  document.querySelectorAll('#segTheme button').forEach(function(b){b.setAttribute('aria-pressed',b.dataset.v==='light')});
+}
+
+/* ---------- satu skrin penuh ---------- */
+function screenHTML(){
+  var card='';
+  card+='<div class="status"><span>9:41</span><span class="sbar">'
+    +'<svg width="15" height="11" viewBox="0 0 17 12" fill="currentColor"><rect x="0" y="7" width="3" height="5" rx="1"/><rect x="4.5" y="5" width="3" height="7" rx="1"/><rect x="9" y="2.5" width="3" height="9.5" rx="1"/><rect x="13.5" y="0" width="3" height="12" rx="1" opacity=".4"/></svg>'
+    +'<svg width="15" height="11" viewBox="0 0 16 12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M1 4.2a10 10 0 0114 0"/><path d="M3.6 7a6.6 6.6 0 018.8 0"/><circle cx="8" cy="10" r="1.1" fill="currentColor" stroke="none"/></svg>'
+    +'<b></b></span></div>';
+
+  card+='<div class="hdr">'
+    +'<div class="hlogo"><svg viewBox="0 0 24 24" fill="none"><path d="M12 1.6l2.5 7.1 7.1 2.5-7.1 2.5-2.5 7.1-2.5-7.1L2.4 11.2l7.1-2.5L12 1.6z" fill="#b7f36b"/></svg></div>'
+    +'<div class="htxt"><b>TRADERWATCH</b><span>AI Analyst</span></div>'
+    +'<div class="hbtns">'
+    +'<div class="hbtn"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a15 15 0 010 18M12 3a15 15 0 000 18"/></svg></div>'
+    +'<div class="hbtn"><svg viewBox="0 0 24 24"><path d="M20 14.5A8.5 8.5 0 019.5 4a8.5 8.5 0 1010.5 10.5z"/></svg></div>'
+    +'<div class="hbtn"><svg viewBox="0 0 24 24"><path d="M11 5L6 9H3v6h3l5 4V5z"/><path d="M15.5 8.5a5 5 0 010 7"/></svg></div>'
+    +'<div class="hbtn tw">TW</div>'
+    +'</div></div>';
+
+  card+='<div class="body">';
+
+  card+='<div class="g pair"><div class="top">'
+    +'<div class="nm">Gold / US Dollar<small>XAUUSD · M1</small></div>'
+    +'<div class="px"><b>3620.73</b><span>+0.41%</span></div>'
+    +'</div><div class="chips"><span class="chip on">Live</span><span class="chip hot">Volatile</span><span class="chip">Spread 3.0</span></div></div>';
+
+  card+='<div class="g chartc"><div class="chartbox">'+chartSVG()
+    +'<div class="ready"><i></i>ANALYSIS READY</div></div></div>';
+
+  card+='<div class="g tfs"><div class="tf on">M1</div><div class="tf">M5</div><div class="tf">M15</div><div class="tf">H1</div></div>';
+
+  card+='<div class="g mtf"><div class="lab">Multi-TF alignment</div><div class="mtfrow">'
+    +'<div class="mc"><div class="k">M5</div><div class="v b">BUY</div></div>'
+    +'<div class="mc"><div class="k">M15</div><div class="v s">SELL</div></div>'
+    +'<div class="mc"><div class="k">H1</div><div class="v s">SELL</div></div>'
+    +'</div></div>';
+
+  card+='<div class="g aiv"><div class="l"><div class="k">AI view</div><div class="val">WAIT</div>'
+    +'<div class="meta">XAUUSD · M1 · Ultra scalp</div></div>'
+    +'<div class="ring"><svg viewBox="0 0 80 80"><circle class="rb" cx="40" cy="40" r="34"/><circle class="rf" cx="40" cy="40" r="34"/></svg>'
+    +'<div class="n"><b>32%</b><small>CONF</small></div></div></div>';
+
+  card+='<div class="g chk"><div class="lab">Confluence</div>'
+    +'<div class="ci n"><div class="b">&#10005;</div><div>ATR/spread 1.3&times; &mdash; too compressed for M1 targets</div></div>'
+    +'<div class="ci n"><div class="b">&#10005;</div><div>Bars overlapping, no directional slope on last 6</div></div>'
+    +'<div class="ci y"><div class="b">&#10003;</div><div>London session open, liquidity intact</div></div>'
+    +'<div class="ci y"><div class="b">&#10003;</div><div>M15/H1 agree bearish &mdash; macro aligned</div></div>'
+    +'</div>';
+
+  card+='</div>';
+
+  card+='<div class="dock">'
+    +'<div class="di on"><svg viewBox="0 0 24 24"><path d="M3 10.5L12 3l9 7.5"/><path d="M5.5 9.5V20h13V9.5"/></svg>Markets</div>'
+    +'<div class="di"><svg viewBox="0 0 24 24"><path d="M8 21h8M12 17v4"/><path d="M17 4H7v6a5 5 0 0010 0V4z"/></svg>League</div>'
+    +'<div class="di"><svg viewBox="0 0 24 24"><path d="M21 12a8 8 0 01-11.5 7.2L4 21l1.8-5.5A8 8 0 1121 12z"/></svg>Chat</div>'
+    +'<div class="di"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.6"/><path d="M4.5 20a7.5 7.5 0 0115 0"/></svg>Me</div>'
+    +'</div>';
+
+  return card;
+}
+
+document.getElementById('phoneInner').innerHTML = screenHTML();
+
+/* ---------- controls ---------- */
+document.getElementById('segTheme').addEventListener('click',function(e){
+  var b=e.target.closest('button'); if(!b)return;
+  root.dataset.theme=b.dataset.v;
+  this.querySelectorAll('button').forEach(function(x){x.setAttribute('aria-pressed',x===b)});
+});
+
+document.getElementById('segTr').addEventListener('click',function(e){
+  var b=e.target.closest('button'); if(!b)return;
+  root.dataset.transparency=b.dataset.v;
+  this.querySelectorAll('button').forEach(function(x){x.setAttribute('aria-pressed',x===b)});
+});
+
+var bl=document.getElementById('blur'), blv=document.getElementById('blurv');
+bl.addEventListener('input',function(){
+  root.style.setProperty('--blur',this.value+'px');
+  blv.textContent=this.value+'px';
+});
+
+var st=document.getElementById('sat'), stv=document.getElementById('satv');
+st.addEventListener('input',function(){
+  root.style.setProperty('--sat',this.value+'%');
+  stv.textContent=this.value+'%';
+});
+
+/* tapping a timeframe pill moves the lit state — feels alive */
+document.getElementById('phoneInner').addEventListener('click',function(e){
+  var tf=e.target.closest('.tf'); if(!tf)return;
+  tf.parentNode.querySelectorAll('.tf').forEach(function(x){x.classList.toggle('on',x===tf)});
+  var d=e.target.closest('.di');
+});
+document.getElementById('phoneInner').addEventListener('click',function(e){
+  var d=e.target.closest('.di'); if(!d)return;
+  d.parentNode.querySelectorAll('.di').forEach(function(x){x.classList.toggle('on',x===d)});
+});
+</script>
+</body>
+</html>
