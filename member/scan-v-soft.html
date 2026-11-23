@@ -42,7 +42,7 @@ h1{font-size:17px;letter-spacing:-.02em;margin:0 0 4px;font-weight:850}
 
 /* ===== stage: chart dengan 3 lapisan shimmer ===== */
 .stage{position:relative;margin:0 0 16px}
-.ait{position:absolute;pointer-events:none;z-index:0;
+.ait{position:absolute;pointer-events:none;z-index:3;
   border-radius:20px;
   background:conic-gradient(from var(--ai-angle),
     #0894FF 0%, #C959DD 33%, #FF2E54 66%, #FF9004 88%, #0894FF 100%);
@@ -60,9 +60,9 @@ h1{font-size:17px;letter-spacing:-.02em;margin:0 0 4px;font-weight:850}
 @keyframes aiSpin{to{--ai-angle:360deg}}
 
 /* keadaan scanning */
-.stage.ai .ait.core{.82}
-.stage.ai .ait.bloom{.44}
-.stage.ai .ait.wash{.22}
+.stage.ai .ait.core{opacity:.82}
+.stage.ai .ait.bloom{opacity:.44}
+.stage.ai .ait.wash{opacity:.22}
 /* pudar pantas 0.4s bila selesai (Apple: shimmer hilang, tinggal treatment statik) */
 .stage.done .ait{opacity:0;transition:opacity .4s ease}
 

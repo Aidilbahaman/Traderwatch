@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html><head><meta charset="utf-8"><title>mask technique test</title>
+<style>
+@property --a{syntax:'<angle>';initial-value:0deg;inherits:false}
+body{margin:0;background:#0a0e0b;font:12px -apple-system,system-ui;color:#eef3ee;padding:14px}
+.panel{position:relative;height:130px;margin-bottom:26px;border-radius:16px}
+.panel>.inner{position:absolute;inset:0;border-radius:16px;background:#0c110d;
+  border:1px solid rgba(255,255,255,.06);z-index:2}
+.lab{position:absolute;bottom:-19px;left:2px;font-size:10px;color:#8a978c;letter-spacing:.06em}
+
+/* A: mask-composite exclude */
+.A>.glow{position:absolute;inset:0;z-index:3;border-radius:16px;padding:3px;
+  background:conic-gradient(from var(--a),#0894FF,#C959DD 33%,#FF2E54 66%,#FF9004 88%,#0894FF);
+  -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);
+  -webkit-mask-composite:xor;mask-composite:exclude;
+  animation:sp 1.8s linear infinite}
+
+/* B: ring OUTSIDE the card (no mask at all) */
+.B>.glow{position:absolute;inset:-3px;z-index:3;border-radius:19px;padding:3px;
+  background:conic-gradient(from var(--a),#0894FF,#C959DD 33%,#FF2E54 66%,#FF9004 88%,#0894FF);
+  animation:sp 1.8s linear infinite}
+.B>.cover{position:absolute;inset:0;z-index:4;border-radius:16px;
+  box-shadow:0 0 0 3px #0a0e0b;pointer-events:none}
+.B>.cover::after{content:"";position:absolute;inset:0;border-radius:16px;
+  background:#0c110d}
+
+/* C: blurred glow BEHIND (bleeds out) + thin ring outside */
+.C>.bloom{position:absolute;inset:-14px;z-index:1;border-radius:30px;
+  background:conic-gradient(from var(--a),#0894FF,#C959DD 33%,#FF2E54 66%,#FF9004 88%,#0894FF);
+  filter:blur(16px) saturate(180%);opacity:.7;animation:sp 1.8s linear infinite}
+.C>.ring{position:absolute;inset:-2px;z-index:3;border-radius:18px;padding:2px;
+  background:conic-gradient(from var(--a),#0894FF,#C959DD 33%,#FF2E54 66%,#FF9004 88%,#0894FF);
+  animation:sp 1.8s linear infinite}
+.C>.cover{position:absolute;inset:0;z-index:4;border-radius:16px;background:#0c110d;
+  box-shadow:0 0 0 2px #0a0e0b;pointer-events:none}
+
+@keyframes sp{to{--a:360deg}}
+</style></head><body>
+
+<div class="panel A" id="A"><div class="inner"></div><div class="glow"></div><span class="lab">A — mask-composite exclude</span></div>
+
+<div class="panel B" id="B"><div class="inner"></div><div class="glow"></div><div class="cover"></div><span class="lab">B — ring outside card (no mask)</span></div>
+
+<div class="panel C" id="C"><div class="inner"></div><div class="bloom"></div><div class="ring"></div><div class="cover"></div><span class="lab">C — blurred glow behind + ring</span></div>
+
+</body></html>
