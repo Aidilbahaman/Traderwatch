@@ -307,9 +307,9 @@ _AI_AGG = {"at": 0.0, "out": {}}
 _AI_AGG_TTL = 20
 
 
-def pair_ai_requests(window_s=3600):
-    """Kira berapa kali AHLI (manusia) minta analisis untuk setiap pair dalam
-    1 jam terakhir — satu ketukan UI dikira SATU.
+def pair_ai_requests():
+    """Kira berapa kali AHLI (manusia) minta analisis untuk setiap pair
+    HARI INI (reset 00:00 MYT) — satu ketukan UI dikira SATU.
 
     Sumber: state/llm-analysis-log.jsonl (setiap analisis ditulis oleh llm_analyst).
     Hanya rekod src="member" dikira; panggilan bot auto-scan (src="bot") dan
@@ -326,9 +326,15 @@ def pair_ai_requests(window_s=3600):
         return _AI_AGG["out"]
     seen = set()
     out = {}
+    # Tetingkap = HARI INI ikut waktu Malaysia (reset 00:00 MYT),
+    # sama seperti badge traders supaya kedua-dua konsisten.
+    try:
+        _ds = datetime.fromisoformat(my_day_start_iso())
+        cutoff = _ds.timestamp()
+    except Exception:
+        cutoff = now - 3600
     try:
         if ANALYSIS_LOG.exists():
-            cutoff = now - window_s
             size = ANALYSIS_LOG.stat().st_size
             # Baca hanya ekor fail (max 2MB) untuk elak muat seluruh log.
             with ANALYSIS_LOG.open("rb") as f:
@@ -417,7 +423,7 @@ class Handler(BaseHTTPRequestHandler):
                 return self._send(200, {"traders": out, "scope": "today",
                                         "since": day_start, "season": SEASON})
             if path == "/api/league/pair-ai-requests":
-                return self._send(200, {"requests": pair_ai_requests(), "window": "1h"})
+                return self._send(200, {"requests": pair_ai_requests(), "window": "today"})
             if path == "/api/league/trades":
                 return self._send(200, {"trades": my_trades(uid), "season": SEASON})
             if path == "/api/league/recap":
