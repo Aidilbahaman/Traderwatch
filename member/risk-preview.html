@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Manage Your Risk — Preview</title>
+<meta name="theme-color" content="#0a0e0b">
+<style>
+/* ============================================================
+   Manage Your Risk — preview (token sama dengan app sebenar)
+   3 pecahan scan: High / Medium / Low Risk.
+   ============================================================ */
+:root{--bg:#0a0e0b;--card:#111612;--card2:#171e18;--text:#eef3ee;--muted:#8a978c;
+  --line:#222b23;--lime:#b7f36b;--green:#b7f36b;--red:#ff777d;--orange:#ffc16b;
+  --blue:#8ab4ff;--chart:#0c110d;--onlime:#10150b;--glass:rgba(10,14,11,.82);color-scheme:dark}
+html[data-theme="light"]{--bg:#f5f7f5;--card:#ffffff;--card2:#eef2ed;--text:#14211a;
+  --muted:#63736a;--line:rgba(0,0,0,.1);--lime:#7ab52e;--green:#5f9c22;--red:#d64b55;
+  --orange:#b8791b;--blue:#3a6fc4;--chart:#f0f4ef;--onlime:#0b1405;--glass:rgba(245,247,245,.86);color-scheme:light}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,system-ui,sans-serif;
+  min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;
+  -webkit-font-smoothing:antialiased;letter-spacing:-.011em}
+.wrap{width:390px;max-width:100%}
+h1{font-size:17px;letter-spacing:-.02em;margin:0 0 4px;font-weight:850}
+.sub{color:var(--muted);font-size:12.5px;margin:0 0 16px;line-height:1.4}
+/* kad utama */
+.card{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:16px;margin-bottom:12px}
+.sec{font-size:9.5px;color:var(--muted);font-weight:800;letter-spacing:.12em;text-transform:uppercase;margin:0 0 10px}
+/* ringkasan baki */
+.balrow{display:flex;align-items:center;justify-content:space-between;background:var(--card2);
+  border:1px solid var(--line);border-radius:14px;padding:12px 14px;margin-bottom:14px}
+.balrow b{font-size:19px;font-weight:850;font-variant-numeric:tabular-nums;letter-spacing:-.03em}
+.balrow small{display:block;color:var(--muted);font-size:10px;margin-top:2px}
+/* 3 pecahan scan */
+.scans{display:flex;flex-direction:column;gap:10px}
+.scan{position:relative;border:1px solid var(--line);border-radius:16px;padding:14px;
+  background:var(--card2);cursor:pointer;transition:border-color .18s,transform .18s,box-shadow .18s;
+  overflow:hidden}
+.scan:active{transform:scale(.985)}
+.scan .row{display:flex;align-items:center;gap:10px}
+.scan .ico{width:38px;height:38px;border-radius:11px;display:grid;place-items:center;flex:none;font-weight:900;font-size:15px}
+.scan .t{flex:1;min-width:0}
+.scan .t b{display:block;font-size:14px;font-weight:800;letter-spacing:-.01em}
+.scan .t small{display:block;color:var(--muted);font-size:10.5px;margin-top:2px;line-height:1.35}
+.scan .pct{text-align:right;flex:none}
+.scan .pct b{display:block;font-size:16px;font-weight:850;font-variant-numeric:tabular-nums;letter-spacing:-.02em}
+.scan .pct small{display:block;color:var(--muted);font-size:9.5px;margin-top:2px}
+/* bar risk + status scan */
+.scan .meter{height:5px;border-radius:99px;background:var(--line);margin-top:11px;overflow:hidden}
+.scan .meter i{display:block;height:100%;border-radius:99px;width:0;transition:width .6s cubic-bezier(.2,.8,.2,1)}
+.scan .status{display:flex;align-items:center;gap:6px;margin-top:9px;font-size:10px;font-weight:750;letter-spacing:.03em}
+.scan .status .dot{width:6px;height:6px;border-radius:50%;flex:none}
+/* warna ikut level */
+.scan.high{border-color:#ff777d40}
+.scan.high .ico{background:#ff777d1f;color:var(--red)}
+.scan.high .meter i{background:var(--red);box-shadow:0 0 10px #ff777d66}
+.scan.high .status{color:var(--red)}
+.scan.high .status .dot{background:var(--red);animation:pl .8s infinite}
+.scan.med{border-color:#ffc16b40}
+.scan.med .ico{background:#ffc16b1f;color:var(--orange)}
+.scan.med .meter i{background:var(--orange);box-shadow:0 0 10px #ffc16b55}
+.scan.med .status{color:var(--orange)}
+.scan.med .status .dot{background:var(--orange)}
+.scan.low{border-color:#b7f36b40}
+.scan.low .ico{background:#b7f36b1f;color:var(--green)}
+.scan.low .meter i{background:var(--lime);box-shadow:0 0 10px #b7f36b55}
+.scan.low .status{color:var(--green)}
+.scan.low .status .dot{background:var(--lime)}
+/* dipilih */
+.scan.on{box-shadow:0 0 0 1.5px var(--sel,#b7f36b);border-color:var(--sel,#b7f36b)}
+.scan.high.on{--sel:#ff777d}
+.scan.med.on{--sel:#ffc16b}
+.scan.low.on{--sel:#b7f36b}
+.scan .tick{position:absolute;top:12px;right:12px;width:20px;height:20px;border-radius:50%;
+  border:2px solid var(--muted);display:grid;place-items:center;font-size:11px;font-weight:900;color:transparent}
+.scan.on .tick{border-color:var(--sel,#b7f36b);background:var(--sel,#b7f36b);color:var(--onlime)}
+/* nota bawah */
+.note{font-size:11px;color:var(--muted);line-height:1.5;margin:0}
+.note b{color:var(--text)}
+@keyframes pl{50%{opacity:.3}}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Manage Your Risk</h1>
+  <p class="sub">Pilih tahap risiko untuk setiap trade. AI scan memberi cadangan ikut volatility &amp; struktur semasa.</p>
+
+  <div class="card">
+    <div class="balrow">
+      <div><b id="balAmt">$10,000.00</b><small id="balLab">Virtual balance</small></div>
+      <div style="text-align:right"><b id="selPct" style="color:var(--lime)">1%</b><small style="color:var(--muted)">selected</small></div>
+    </div>
+
+    <div class="sec">Risk scan</div>
+    <div class="scans" id="scans"></div>
+  </div>
+
+  <p class="note"><b>Not financial advice.</b> High = aggressive target, Medium = balanced, Low = capital protection. Pilihan disimpan &amp; digunakan untuk sizing lot seterusnya.</p>
+</div>
+
+<script>
+(function(){
+  var BAL=10000;
+  var LEVELS=[
+    {k:'low',  pct:0.5,  name:'Low Risk',   desc:'Capital protection. Tight stop, small size, high-probability setups only.',      status:'Conservative', meter:20},
+    {k:'med',  pct:1,    name:'Medium Risk', desc:'Balanced. Standard 1% per trade — steady growth without big drawdowns.',     status:'Recommended',  meter:45},
+    {k:'high', pct:2,    name:'High Risk',   desc:'Aggressive. 2% per trade for faster growth — larger drawdowns possible.',   status:'Aggressive',   meter:85}
+  ];
+  var sel='med';
+  function money(v){return '$'+Number(v).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}
+  function draw(){
+    var el=document.getElementById('scans');
+    el.innerHTML=LEVELS.map(function(L){
+      var on=L.k===sel;
+      var amt=BAL*L.pct/100;
+      return '<div class="scan '+L.k+(on?' on':'')+'" data-k="'+L.k+'" role="radio" aria-checked="'+on+'">'
+        +'<span class="tick">'+(on?'✓':'')+'</span>'
+        +'<div class="row"><div class="ico">'+(L.k==='low'?'🛡':L.k==='med'?'⚖':'⚡')+'</div>'
+        +'<div class="t"><b>'+L.name+'</b><small>'+L.desc+'</small></div>'
+        +'<div class="pct"><b>'+L.pct+'%</b><small>'+money(amt)+'</small></div></div>'
+        +'<div class="meter"><i style="width:'+L.meter+'%"></i></div>'
+        +'<div class="status"><span class="dot"></span>'+L.status+'</div>'
+        +'</div>';
+    }).join('');
+    Array.prototype.forEach.call(el.querySelectorAll('.scan'),function(s){
+      s.onclick=function(){sel=s.dataset.k;draw()};
+    });
+    var L=LEVELS.filter(function(x){return x.k===sel})[0];
+    document.getElementById('selPct').textContent=L.pct+'%';
+    document.getElementById('selPct').style.color=L.k==='high'?'var(--red)':L.k==='med'?'var(--orange)':'var(--lime)';
+  }
+  draw();
+})();
+</script>
+</body>
+</html>
