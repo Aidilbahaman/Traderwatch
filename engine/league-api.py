@@ -304,18 +304,27 @@ def weekly_recap(uid):
 
 ANALYSIS_LOG = pathlib.Path(__file__).resolve().parent.parent / "state" / "llm-analysis-log.jsonl"
 _AI_AGG = {"at": 0.0, "out": {}}
-_AI_AGG_TTL = 60
+_AI_AGG_TTL = 20
 
 
 def pair_ai_requests(window_s=3600):
-    """Kira berapa kali AI analyst diminta untuk setiap pair dalam 1 jam terakhir.
+    """Kira berapa kali AHLI (manusia) minta analisis untuk setiap pair dalam
+    1 jam terakhir — satu ketukan UI dikira SATU.
 
     Sumber: state/llm-analysis-log.jsonl (setiap analisis ditulis oleh llm_analyst).
+    Hanya rekod src="member" dikira; panggilan bot auto-scan (src="bot") dan
+    backtest tidak masuk lencana, supaya angka pada pair card bermaksud
+    "manusia yang minta", bukan kitaran enjin.
+    Setiap rekod member membawa medan tap (id ketukan). Scan 5 TF dalam satu
+    ketukan berkongsi tap yang sama, jadi ia dikira sekali sahaja.
+    Rekod lama tanpa tap: dikira ikut (pair, saat-dibulatkan-ke-minit) supaya
+    satu ketukan berbilang-TF tidak berganda; rekod tanpa src dikira bot.
     Cache 60s supaya tak baca fail besar pada setiap request.
     """
     now = time.time()
     if now - _AI_AGG["at"] < _AI_AGG_TTL and _AI_AGG["out"]:
         return _AI_AGG["out"]
+    seen = set()
     out = {}
     try:
         if ANALYSIS_LOG.exists():
@@ -331,6 +340,12 @@ def pair_ai_requests(window_s=3600):
                         r = json.loads(raw)
                     except Exception:
                         continue
+                    # Hanya MEMBER (manusia tekan). Bot auto-scan dikecualikan
+                    # supaya angka pada pair card = "berapa orang minta",
+                    # bukan kitaran enjin. Rekod lama tanpa src TIDAK dikira
+                    # (ia tidak boleh dibezakan bot vs member).
+                    if r.get("src") != "member":
+                        continue
                     ts = r.get("ts") or ""
                     pair = str(r.get("pair") or "").upper().replace("/", "")
                     if not pair or not ts:
@@ -341,6 +356,12 @@ def pair_ai_requests(window_s=3600):
                         continue
                     if t < cutoff:
                         continue
+                    tap = str(r.get("tap") or "").strip()
+                    # Kunci ketukan: tap eksplisit, atau pair+minit bila tiada.
+                    key = (pair, "tap:" + tap) if tap else (pair, "min:%d" % int(t // 60))
+                    if key in seen:
+                        continue
+                    seen.add(key)
                     out[pair] = out.get(pair, 0) + 1
     except Exception:
         out = {}
