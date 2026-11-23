@@ -849,6 +849,40 @@ html[data-theme="light"] .search::before{
   .note::before,.opt::before,.riskopt::before,.modepill::before,.tab::before,.search::before{display:none}}
 </style>
 
+
+
+<style id="tw-ai-hairline">
+/* Apple Intelligence hairline — 4 warna Apple mengelilingi sempadan chartbox.
+   Teknik: conic-gradient 400% saiz pada lapisan besar, dirotasi melalui
+   transform pada ELEMEN LUAR yang lebih besar (bukan gradien) — cara paling
+   serasi tanpa @property. Hanya tepi bercahaya (mask exclude). */
+.chartbox .ai-ring{position:absolute;pointer-events:none;z-index:4;
+  border-radius:inherit;inset:0;overflow:hidden;
+  -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);
+  -webkit-mask-composite:xor;mask-composite:exclude;
+  opacity:0;
+  padding:1px}
+/* lapisan gradien besar yang berputar di dalam mask */
+.chartbox .ai-ring::before{
+  content:"";position:absolute;left:50%;top:50%;
+  width:180%;height:600%;                /* cukup besar supaya menutup semasa berpusing */
+  transform:translate(-50%,-50%) rotate(0deg);
+  background:conic-gradient(#0894FF,#C959DD 25%,#FF2E54 50%,#FF9004 75%,#0894FF);
+  animation:aiSpin 1.8s linear infinite}
+.chartbox .ai-ring.bloom{inset:-3px;padding:4px;filter:blur(5px) saturate(170%)}
+.chartbox .ai-ring.wash{inset:-8px;padding:9px;filter:blur(14px) saturate(150%)}
+@keyframes aiSpin{from{transform:translate(-50%,-50%) rotate(0deg)}
+                  to{transform:translate(-50%,-50%) rotate(360deg)}}
+.chartbox.ai-on .ai-ring.core{opacity:1 !important}
+.chartbox.ai-on .ai-ring.bloom{opacity:.55 !important}
+.chartbox.ai-on .ai-ring.wash{opacity:.26 !important}
+@media (prefers-reduced-motion:reduce){
+  .chartbox .ai-ring::before{animation:none!important}
+  .chartbox.ai-on .ai-ring.core{opacity:.9 !important}
+  .chartbox.ai-on .ai-ring.bloom{opacity:.45 !important}
+  .chartbox.ai-on .ai-ring.wash{opacity:.2 !important}
+}
+</style>
 </head>
 <body>
 <div id="splash" role="status" aria-live="polite" aria-label="Loading TraderWatch">
@@ -1018,7 +1052,7 @@ html[data-theme="light"] .search::before{
     <div id="sheet" role="dialog" aria-modal="true" aria-label="Analisis AI">
       <div class="grab"><i></i></div>
       <div class="shead"><div class="ic" id="sIc"></div><div><h2 id="sNm"></h2><p id="sDs"></p></div><button class="x" id="sx" aria-label="Tutup">✕</button></div>
-      <div class="chartbox" id="chartbox"><canvas id="cv"></canvas><div class="chipc" id="chip"><i></i><span id="chipT">SEDIA</span></div></div>
+      <div class="chartbox" id="chartbox"><span class="ai-ring wash"></span><span class="ai-ring bloom"></span><span class="ai-ring core"></span><canvas id="cv"></canvas><div class="chipc" id="chip"><i></i><span id="chipT">SEDIA</span></div></div>
       <div class="tf" id="tf"></div>
       <div class="riskp" id="riskp">
         <div class="lab"><span id="riskLab">Manage your risk</span><b id="riskGate">Gate: balanced</b></div>
@@ -1727,7 +1761,8 @@ function draw(now){
  for(var j=0;j<show;j++){
   var i=i0+j,k=c[i],up=k.c>=k.o,col=up?lime:red,cxm=x(i);
   var edge=S.rv<1?Math.max(.12,Math.min(1,(show-j)/3)):1;
-  cx.globalAlpha=(S.scan!=null&&cxm>S.scan)?.25:edge;
+  /* breath: seluruh carta bernafas masa scan (bukan garis menegak) */
+  cx.globalAlpha=(S.scan!=null?edge*(S._breath||1):edge);
   cx.strokeStyle=col;cx.fillStyle=col;cx.lineWidth=1;
   cx.beginPath();cx.moveTo(cxm,y(k.h));cx.lineTo(cxm,y(k.l));cx.stroke();
   var ty=y(Math.max(k.o,k.c)),hh=Math.max(1.5,Math.abs(y(k.o)-y(k.c)));
@@ -1750,10 +1785,24 @@ function draw(now){
  hiMk.slice(-10).forEach(function(mk){dot(mk,'rgba(214,255,154,.9)')});
  loMk.slice(-10).forEach(function(mk){dot(mk,'rgba(255,159,159,.9)')});
  cx.globalAlpha=1;
+ /* === BREATH: carta bernafas masa AI membaca (ganti scan garis menegak) ===
+    Kitaran ~7s: garisan/candle cerah->malap->cerah. Halo lembut di belakang
+    candle paling baru, + nadi halus di hujung kanan. Tiada warna, tiada sapuan. */
  if(S.scan!=null){
-  var sx=S.scan,gr=cx.createLinearGradient(sx-70,0,sx,0);gr.addColorStop(0,'#b7f36b00');gr.addColorStop(1,'#b7f36b2e');cx.fillStyle=gr;cx.fillRect(sx-70,0,70,H);
-  cx.strokeStyle=lime;cx.lineWidth=1.5;cx.beginPath();cx.moveTo(sx,0);cx.lineTo(sx,H);cx.stroke();cx.lineWidth=1;
- }
+  var _bt=0.5+0.5*Math.sin(now*0.0009);
+  var _br=0.45+0.55*_bt;
+  /* halo lembut di belakang candle terakhir */
+  cx.save();cx.globalCompositeOperation='lighter';
+  var _hx=x(n-1),_hy=y(c[n-1].c),_hr=Math.max(18,slot*5);
+  var _hg=cx.createRadialGradient(_hx,_hy,0,_hx,_hy,_hr);
+  _hg.addColorStop(0,'rgba(232,255,204,'+(0.10+0.10*_bt).toFixed(3)+')');
+  _hg.addColorStop(0.5,'rgba(183,243,107,'+(0.04+0.04*_bt).toFixed(3)+')');
+  _hg.addColorStop(1,'rgba(183,243,107,0)');
+  cx.fillStyle=_hg;cx.beginPath();cx.arc(_hx,_hy,_hr,0,6.284);cx.fill();
+  cx.restore();
+  /* paksa candle dirender dengan alpha nafas */
+  S._breath=_br;
+ } else { S._breath=1; }
  var ly=y(m.last);cx.strokeStyle='rgba(128,150,130,.4)';cx.setLineDash([3,4]);cx.beginPath();cx.moveTo(ex,ly);cx.lineTo(xr,ly);cx.stroke();cx.setLineDash([]);
  if(!a)pill(W-pR+2,ly,54,fx(cur,m.last),card2,txt);
  if(a&&a.entry!=null){
@@ -1769,7 +1818,6 @@ function loop(now){
  if(!S.open)return;
  if(S.rv<1)S.rv=Math.min(1,(now-S.rv0)/750);
  if(S.zoomT0!=null){var zk=Math.min(1,(now-S.zoomT0)/900);S.win=S.winFrom+(S.winTo-S.winFrom)*ease(zk);if(zk>=1){S.win=S.winTo;S.zoomT0=null}}
- if(S.scan!=null){var W=cv.clientWidth-58;S.scan+=W/110;if(S.scan>W)S.scan=0}
  draw(now);requestAnimationFrame(loop);
 }
 /* Zoom beranimasi ke bilangan candle target (20 = jelas Entry/SL/TP). */
@@ -1782,7 +1830,12 @@ function zoomTo(target){
 cv.addEventListener('click',function(){if(S.ana&&S.ana.entry!=null)zoomTo(S.win!=null&&S.win<=20.5?S.candles.length:20)});
 
 /* ---------------- sheet ---------------- */
-function setChip(k,txt){$('chip').className='chipc '+(k||'');$('chipT').textContent=txt}
+function setChip(k,txt){
+ $('chip').className='chipc '+(k||'');$('chipT').textContent=txt;
+ /* border hairline Apple Intelligence menyala hanya masa scan */
+ var cb=$('chartbox');
+ if(cb)cb.classList.toggle('ai-on',k==='scan');
+}
 function altMode(on){
  ['chartbox','tf','riskp','pvtag','go'].forEach(function(id){$(id).classList.toggle('hidden',on)});
  $('term').classList.add('hidden');$('term').innerHTML='';$('res').innerHTML='';
@@ -2510,7 +2563,7 @@ function loadAiLearn(){
 }
 if(typeof window!=='undefined'){window.__aiLearn=loadAiLearn;window.__drawAiLearn=drawAiLearn;}
 if(typeof window!=='undefined'){window.__showAccount=showAccount;}
-if(typeof window!=='undefined'){window.__show=show;window.__mapVerdict=mapVerdict;}
+if(typeof window!=='undefined'){window.__show=show;window.__mapVerdict=mapVerdict;window.__setChip=setChip;window.__S=S;}
 if(typeof window!=='undefined'){window.__setCur=function(sym){var p=PAIRS.filter(function(x){return x.s===sym})[0];if(p){cur=p;S.m=null;try{openSheet(sym)}catch(e){}}}};
 if(typeof window!=='undefined'){window.__loadProfile=loadProfile;window.__showView=showView;}
 if(typeof window!=='undefined'){window.__getME=function(){return ME};window.__getLG=function(){return LG.me};}
@@ -3425,7 +3478,7 @@ window.addEventListener('appinstalled',function(){drawWelcome();try{localStorage
 if(typeof window!=='undefined'){window.__welcome=showWelcome;window.__drawWelcome=drawWelcome;}
 if(typeof window!=='undefined'){window.__forceLogout=goLogin;}
 if('serviceWorker' in navigator){window.addEventListener('load',function(){
- navigator.serviceWorker.register('sw.js?v=71v58',{scope:'./',updateViaCache:'none'}).then(function(reg){
+ navigator.serviceWorker.register('sw.js?v=72v58',{scope:'./',updateViaCache:'none'}).then(function(reg){
   /* PWA homescreen resume instance lama tanpa navigation -> check update
      bila app kembali nampak/focus + setiap 30 min, dan reload automatik
      bila SW versi baru mengambil alih (controllerchange). */
