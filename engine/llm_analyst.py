@@ -82,12 +82,12 @@ FALLBACK_MODELS = [m.strip() for m in os.environ.get(
     "AI_LLM_FALLBACKS",
     "gemini-4-neon-medium,deepseek-v4.1-flash,asai/freemodel-1-GLM,asai/freemodel-2-MiniMax,asai/deepseek-v4-flash"
 ).split(",") if m.strip()]
-CALL_TIMEOUT_S = float(os.environ.get("AI_LLM_CALL_TIMEOUT", "60"))
+CALL_TIMEOUT_S = float(os.environ.get("AI_LLM_CALL_TIMEOUT", "150"))
 # Had atas RR1 lalai (untuk panggilan tanpa rr1_max eksplisit).
 RR1_MAX = float(os.environ.get("AI_RR1_MAX", "1.6"))
 # Toleransi pembundaran float untuk semakan RR1 (elak "RR1 1.00 below 1.0").
 RR1_EPS = 0.015
-BUDGET_S = float(os.environ.get("AI_LLM_BUDGET_S", "120"))
+BUDGET_S = float(os.environ.get("AI_LLM_BUDGET_S", "210"))
 
 # Timeframe-aware trading styles. Aligned with quant_engine.TF_CONFIG across
 # all 5 timeframes (M5, M15, H1, H4, D1) so rr1_min < quant_rr1 < rr1_max
@@ -273,6 +273,9 @@ def session_penalty(pair, hour_utc):
 VOL_MULT = float(os.environ.get("AI_SCALP_VOL_MULT", "0.9"))      # ATR >= VOL_MULT x median
 MOM_MIN = float(os.environ.get("AI_SCALP_MOM_MIN", "0.35"))        # |EMA8-EMA21|/ATR
 SCALP_SESSIONS = {7, 8, 9, 10, 11, 12, 13, 14, 15, 16}            # London + NY
+# Threshold per-TF: M1 ATR kecil & bising -> lebih longgar supaya tak bisu.
+TF_VOL_MULT = {"M1": 0.70, "M5": 0.90, "M15": 0.95}
+TF_MOM_MIN = {"M1": 0.20, "M5": 0.35, "M15": 0.40}
 # Scalping hanya pair yang TERBUKTI untung selepas spread (backtest 33 hari):
 #   XAUUSD +0.28R/trade (174 trade, 52.1% win)
 #   BTCUSD -0.01R (spread 18 USD terlalu besar), EURUSD sampel terlalu kecil
@@ -316,20 +319,22 @@ def scalp_gate(bars, hour_utc, tf, pair=""):
                   abs(seg[j][2] - seg[j - 1][3])) for j in range(len(seg) - 14, len(seg))]
         return sum(tr) / len(tr)
 
+    _vol = TF_VOL_MULT.get(tfu, VOL_MULT)
+    _mom = TF_MOM_MIN.get(tfu, MOM_MIN)
     if len(bars) >= 165:
         prior = _atr(bars[-165:-15])
         if prior > 0:
             ratio = atr_now / prior
-            if ratio < VOL_MULT:
-                return False, (f"volatility {ratio:.2f}x below median (need {VOL_MULT}x) "
+            if ratio < _vol:
+                return False, (f"volatility {ratio:.2f}x below median (need {_vol}x) "
                                "— spread would eat a tight target")
     # momentum
     if len(cl) >= 21:
         e8 = sum(cl[-8:]) / 8.0
         e21 = sum(cl[-21:]) / 21.0
         mom = abs(e8 - e21) / atr_now
-        if mom < MOM_MIN:
-            return False, (f"no momentum ({mom:.2f} < {MOM_MIN}) — chop, spread would eat profit")
+        if mom < _mom:
+            return False, (f"no momentum ({mom:.2f} < {_mom}) — chop, spread would eat profit")
     return True, ""
 
 
@@ -564,10 +569,12 @@ def alignment(pair, tf_bars, timeout=60):
 
 
 def build_quant_vision_prompt(pair, tf, price, spread_pips, tf_key, trend, bos,
-                              e20, e50, rsi14, atr, dec, prof, q, market_ctx="", held=None):
-    """Build the Quant + Vision confirmation prompt for Gemini 4 Neon.
+                              e20, e50, rsi14, atr, dec, prof, q, market_ctx="", held=None,
+                              gate_hint=""):
+    """Prompt untuk Gemini 4 Neon: ia BACA carta, quant cuma beri konteks.
 
-    Shared by live analyze() and end-to-end backtests so zero prompt drift occurs.
+    Quant tidak lagi menyekat. Bila ada setup mekanikal, ia dicadangkan
+    (neon sahkan/veto). Bila tiada, neon tetap bebas nilai dari imej.
     """
     rr_min = prof["rr1_min"]
     rr_max = prof["rr1_max"]
@@ -581,36 +588,65 @@ def build_quant_vision_prompt(pair, tf, price, spread_pips, tf_key, trend, bos,
             opp = "BUY" if hs == "SELL" else "SELL"
             held_line = f"Open position: {hs}. Do NOT issue {opp} (no hedging).\n"
     ctx_block = ("MARKET CONTEXT (real data):\n" + market_ctx + "\n") if market_ctx else ""
+    # Gate bukan lagi veto: ia maklumat tambahan untuk pertimbangan neon.
+    gate_block = ""
+    if gate_hint:
+        gate_block = (f"MECHANICAL SCREEN (advisory, NOT a veto): {gate_hint}.\n"
+                      "Weigh this against what you SEE — if the chart shows a clean, "
+                      "tradeable move you may still take it; if it confirms chop, HOLD.\n")
+    side = q.get("side")
+    if side and q.get("entry") is not None:
+        quant_line = (
+            f"QUANT CANDIDATE: {side} | Triggers: {q.get('setup_label')} | "
+            f"Grade {q.get('grade')} (score={q.get('score')}, "
+            f"quant_conf={int((q.get('base_conf') or 0) * 10)}/10)\n"
+            f"PROPOSED LEVELS (drawn on chart): entry={q['entry']:.{dec}f}, "
+            f"sl={q['sl']:.{dec}f} ({q.get('risk_atr')}x ATR), "
+            f"tp1={q['tp1']:.{dec}f} ({q.get('rr1')}R), tp2={q['tp2']:.{dec}f} ({q.get('rr2')}R).\n"
+        )
+        rules = (
+            f"DECISION RULES:\n"
+            f"1. APPROVE ({side}) if the chart supports this setup (keep levels; RR1 between "
+            f"{rr_min:g} and {rr_max:g}).\n"
+            f"2. VETO (HOLD) only for a CLEAR severe visual trap right now: obvious double-top "
+            f"ceiling before TP1, obvious multi-swing floor before TP1, violent news spike, "
+            f"or clear structural breakdown opposing the setup. Do NOT veto normal pullbacks.\n"
+            f"3. Never flip to the opposite side — reply only {side} or HOLD.\n"
+        )
+    else:
+        quant_line = (
+            f"QUANT HINT: {q.get('hint') or 'no mechanical trigger on this TF'}. "
+            "This is advisory only — you decide from the CHART IMAGE.\n"
+        )
+        rules = (
+            f"DECISION RULES:\n"
+            f"1. You are the analyst. Read the chart structure and momentum. If a clear, "
+            f"tradeable setup exists, give BUY or SELL with SL beyond the invalidating swing "
+            f"and TP1 with RR between {rr_min:g} and {rr_max:g}.\n"
+            f"2. Reply HOLD only if the chart is genuinely unclear (mid-range, choppy, "
+            f"no structure). Do not stall out of caution.\n"
+        )
     return (
-        f"You are the senior visual risk analyst confirming a statistically validated {tf} quant setup.\n"
+        f"You are the senior visual analyst. You read the CHART IMAGE with full discretion.\n"
         f"Pair: {pair} {tf} | Live price: {price:.{dec}f} | Spread: {spread_pips:g} pips\n"
-        f"Higher TF ({tf_key}) trend: {trend} | Structure BOS: {bos} | Macro EMA200 bias: {qm.get('macro', trend)}\n"
+        f"Higher TF ({tf_key}) trend: {trend} | Structure BOS: {bos} | "
+        f"Macro EMA200 bias: {qm.get('macro', trend)}\n"
         f"Indicators (real bars): EMA20={e20:.{dec}f}, EMA50={e50:.{dec}f}, "
         f"EMA200={qm.get('ema200', e50):.{dec}f}, RSI2={qm.get('rsi2', 50)}, "
         f"RSI14={rsi14:.1f}, StochK={qm.get('stoch_k', 50)}, ATR14={atr:.{dec}f} "
         f"(ATR/spread={qm.get('atr_to_spread', 0)}x).\n"
-        f"QUANT CANDIDATE: {q['side']} | Triggers: {q['setup_label']} | Grade {q['grade']} "
-        f"(score={q['score']}, quant_conf={int(q['base_conf']*10)}/10)\n"
-        f"PROPOSED LEVELS (drawn on chart): entry={q['entry']:.{dec}f}, "
-        f"sl={q['sl']:.{dec}f} ({q['risk_atr']}x ATR), "
-        f"tp1={q['tp1']:.{dec}f} ({q['rr1']}R), tp2={q['tp2']:.{dec}f} ({q['rr2']}R).\n"
-        f"{ctx_block}{held_line}"
-        "Inspect the chart image (candlesticks: lime body=close above open, red body=close below open, "
-        "wick high-low range, amber=EMA20, purple=EMA50, "
-        "circles=swings, red=SL, green=TP1, cyan=TP2).\n"
-        "DECISION RULES:\n"
-        f"1. APPROVE ({q['side']}) if the chart structure supports this {q['side']} setup without a severe visual trap. "
-        "Keep the proposed calibrated SL/TP1/TP2 (only adjust slightly if a clear swing demands it; "
-        f"RR1 must stay between {rr_min:g} and {rr_max:g}).\n"
-        "2. VETO (HOLD) ONLY for a CLEAR, severe visual invalidation right now: "
-        "(a) buying straight into an obvious multi-swing double-top/brick-wall ceiling before TP1, "
-        "(b) selling straight into an obvious multi-swing floor before TP1, "
-        "(c) violent parabolic spike / whipsaw news bar, or (d) clear structural breakdown opposing the setup. "
-        "Do NOT veto normal pullbacks in a healthy trend.\n"
-        f"3. Never flip to the opposite side — reply only {q['side']} or HOLD.\n"
-        "Confidence is honest probability (6=60%, 7=68%, 8=75%, 9=rare).\n"
-        'Reply ONLY one compact JSON object, no markdown: '
-        '{"bias":"BUY"|"SELL"|"HOLD","sl":num,"tp1":num,"tp2":num,"confidence":0-10,"reason":"<max 10 words>"}'
+        + quant_line
+        + gate_block
+        + ctx_block
+        + held_line
+        + rules
+        + "Chart legend (candlesticks: lime body=close above open, red body=close below open, "
+          "wick high-low range, amber=EMA20, purple=EMA50, circles=swings, "
+          "red=SL, green=TP1, cyan=TP2).\n"
+        + "Confidence is honest probability (6=60%, 7=68%, 8=75%, 9=rare).\n"
+        + 'Reply ONLY one compact JSON object, no markdown: '
+        + '{"bias":"BUY"|"SELL"|"HOLD","sl":num,"tp1":num,"tp2":num,'
+          '"confidence":0-10,"reason":"<max 10 words>"}'
     )
 
 
@@ -623,16 +659,24 @@ def build_quant_text_prompt(base_prompt, q, prof, market_ctx=""):
     rr_min = prof["rr1_min"]
     rr_max = prof["rr1_max"]
     ctx_block = ("\nMARKET CONTEXT (real data):\n" + market_ctx) if market_ctx else ""
-    return (
-        base_prompt
-        + ctx_block
-        + f"\nQUANT CANDIDATE (validated setup): {q['side']} | Triggers: {q['setup_label']} "
-        f"| Grade {q['grade']} (score={q['score']}, quant_conf={int(q['base_conf']*10)}/10)\n"
-        f"PROPOSED CALIBRATED LEVELS: entry={q['entry']}, sl={q['sl']} ({q['risk_atr']}x ATR), "
-        f"tp1={q['tp1']} ({q['rr1']}R), tp2={q['tp2']} ({q['rr2']}R).\n"
-        f"Confirm {q['side']} (keeping calibrated levels; RR1 between {rr_min:g} and {rr_max:g}) "
-        f"OR veto with HOLD if recent OHLC shows a severe trap/reversal. Never flip to opposite side."
-    )
+    side = q.get("side")
+    if side and q.get("entry") is not None:
+        tail = (
+            f"\nQUANT CANDIDATE: {side} | Triggers: {q.get('setup_label')} | "
+            f"Grade {q.get('grade')} (score={q.get('score')}, "
+            f"quant_conf={int((q.get('base_conf') or 0)*10)}/10)\n"
+            f"PROPOSED LEVELS: entry={q['entry']}, sl={q['sl']} ({q.get('risk_atr')}x ATR), "
+            f"tp1={q['tp1']} ({q.get('rr1')}R), tp2={q['tp2']} ({q.get('rr2')}R).\n"
+            f"Confirm {side} (RR1 between {rr_min:g} and {rr_max:g}) or veto with HOLD if the "
+            f"recent OHLC shows a severe trap. Never flip to the opposite side."
+        )
+    else:
+        tail = (
+            f"\nQUANT HINT: {q.get('hint') or 'no mechanical trigger'}. Advisory only — "
+            f"you decide from the OHLC structure. Give BUY or SELL if a clear setup exists "
+            f"(RR1 between {rr_min:g} and {rr_max:g}), otherwise HOLD."
+        )
+    return base_prompt + ctx_block + tail
 
 
 def analyze(pair, bars, pip, spread_pips, call=None, budget_s=None, held=None, tf="M15",
@@ -668,13 +712,14 @@ def analyze(pair, bars, pip, spread_pips, call=None, budget_s=None, held=None, t
         return {"side": "HOLD", "conf": 0.0, "tf": tf,
                 "reason": "Market data unavailable — no price movement "
                           "(market closed or feed stalled).", "stale_data": True}
-    # Scalping gate (M5/M15): volatility + momentum + sesi.
-    # Backtest: baseline -0.13R/trade; dengan gate +0.08R (BTC) / +0.26R (XAU).
+    # Scalping gate: DULU menyekat terus (M1/M5/M15 jadi bisu ~90% masa).
+    # Kini PENASIHAT: kesimpulan gate dimasukkan ke dalam prompt, neon yang
+    # menilai carta sebenar. Gate tetap berjalan supaya konteks vol/momentum
+    # sampai ke model — cuma tidak lagi memutuskan bagi pihaknya.
     _gok, _greason = scalp_gate(bars, datetime.now(timezone.utc).hour, tf, pair)
+    _gate_hint = "" if _gok else f"{_greason}"
     if not _gok:
-        log(f"{pair} {tf}: HOLD — scalp gate ({_greason})")
-        return {"side": "HOLD", "conf": 0.2,
-                "reason": "Scalp gate: " + _greason, "scalp_blocked": True}
+        log(f"{pair} {tf}: gate advisory — {_greason[:70]} (neon tetap dipanggil)")
 
     # Berita high-impact dekat (<=1 jam) -> HOLD paksa, jangan panggil LLM.
     # Bukti: spread melebar & stop-hunt biasa semasa release; lebih baik duduk luar.
@@ -763,30 +808,22 @@ def analyze(pair, bars, pip, spread_pips, call=None, budget_s=None, held=None, t
             # Anti-hedge gate sebelum panggil LLM
             if q_setup.get("side") and held:
                 if len(held) > 1 or q_setup["side"] not in held:
-                    reason = f"Anti-hedge: open {sorted(held)} blocks {q_setup['side']}."
-                    log(f"{pair} {tf} quant HOLD: {reason}")
-                    return {
-                        "side": "HOLD", "conf": 0.3, "reason": reason, "tf": tf,
-                        "model": f"{VISION_MODEL}+quant", "latency_s": 0.0,
-                        "vision": False, "ai_meta": ai_meta,
-                    }
-            # Tiada trigger quant -> HOLD pantas tanpa bakar masa/kuota LLM
+                    # Anti-hedge: beritahu neon dalam prompt, bukan sekat terus.
+                    ai_meta["antihedge"] = f"open {sorted(held)} blocks {q_setup['side']}"
+            # Tiada trigger quant: DULU terus HOLD (neon tak dipanggil).
+            # Kini: quant jadi PENASIHAT sahaja — neon tetap baca carta.
+            # Sebab: quant gate sekat ~90% masa; owner mahu neon (vision)
+            # yang menilai, bukan penapis mekanikal.
             if not q_setup.get("side"):
-                reason = q_setup.get("hold_reason") or f"Waiting for clean {tf} setup."
-                _audit({"ts": datetime.now(timezone.utc).isoformat(), "pair": pair, "tf": tf,
-                        "model": f"{VISION_MODEL}+quant", "vision": False, "latency_s": 0.0,
-                        "side": "HOLD", "conf": 0.35, "quant_gate": reason[:140]})
-                log(f"{pair} {tf} quant-gate: HOLD ({reason[:90]})")
-                return {
-                    "side": "HOLD", "conf": 0.35, "reason": reason, "tf": tf,
-                    "model": f"{VISION_MODEL}+quant", "latency_s": 0.0,
-                    "vision": False, "ai_meta": ai_meta,
-                }
+                _qhint = q_setup.get("hold_reason") or f"No mechanical {tf} trigger."
+                q_setup["side"] = None          # tiada cadangan arah
+                q_setup["hint"] = _qhint        # untuk prompt
+                ai_meta["quant_hint"] = _qhint[:120]
             # Setup quant aktif -> Gemini 4 Neon sahkan secara visual pada carta
             vision_prompt = build_quant_vision_prompt(
                 pair, tf, price, spread_pips, tf_key, trend, bos,
                 e20, e50, _rsi14, atr, _dec, prof, q_setup,
-                market_ctx=_ctx, held=held,
+                market_ctx=_ctx, held=held, gate_hint=_gate_hint,
             )
             text_prompt = build_quant_text_prompt(text_prompt, q_setup, prof, market_ctx=_ctx)
         else:
