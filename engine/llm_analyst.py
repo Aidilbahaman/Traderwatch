@@ -431,6 +431,35 @@ def validate_verdict(j, price, pip, spread_pips, rr1_min=1.5, pair_hint="", rr1_
             "rr1": round(rr1, 2), "rr2": round(rr2, 2)}
 
 
+def _force_direction(pair, price, atr, pip, spread_pips, trend, bos, tf,
+                     rr_min, rr_max, spread_floor, model, ai_meta):
+    """HIGH RISK: bina arah dari struktur bila neon bagi HOLD. Jujur: tiada
+    claim keyakinan tinggi — conf rendah tetapi arah sentiasa diberi."""
+    # arah dari trend + BOS (break of structure lebih kuat daripada trend label)
+    if bos == "UP":
+        side = "BUY"
+    elif bos == "DOWN":
+        side = "SELL"
+    else:
+        side = "BUY" if trend == "UP" else ("SELL" if trend == "DOWN" else "BUY")
+    # SL = 1.5x ATR dari entry (luas, selamat), TP1 = RR tengah julat
+    rr = (rr_min + rr_max) / 2.0
+    risk = max(1.5 * atr, spread_floor * pip * 1.5)
+    if side == "BUY":
+        sl = price - risk
+        tp1 = price + risk * rr
+        tp2 = price + risk * rr * 1.6
+    else:
+        sl = price + risk
+        tp1 = price - risk * rr
+        tp2 = price - risk * rr * 1.6
+    reason = f"High-risk auto-direction ({'BOS '+bos if bos in ('UP','DOWN') else 'trend '+trend}); neon was flat."
+    return {"side": side, "entry": round(price, 5), "sl": round(sl, 5),
+            "tp1": round(tp1, 5), "tp2": round(tp2, 5),
+            "conf": 0.4, "rr1": round(rr, 2), "rr2": round(rr * 1.6, 2),
+            "reason": reason, "forced": True}
+
+
 # Sumber panggilan semasa (thread-local supaya analyze-api berbilang thread selamat).
 # "member" = manusia tekan butang · "bot" = signal-engine auto-scan · "backtest" = ujian.
 # Lencana "Requests this hour" pada pair card hanya kira "member".
@@ -623,7 +652,7 @@ def alignment(pair, tf_bars, timeout=None):
 
 def build_quant_vision_prompt(pair, tf, price, spread_pips, tf_key, trend, bos,
                               e20, e50, rsi14, atr, dec, prof, q, market_ctx="", held=None,
-                              gate_hint=""):
+                              gate_hint="", risk_level="med"):
     """Prompt untuk Gemini 4 Neon: ia BACA carta, quant cuma beri konteks.
 
     Quant tidak lagi menyekat. Bila ada setup mekanikal, ia dicadangkan
@@ -657,28 +686,48 @@ def build_quant_vision_prompt(pair, tf, price, spread_pips, tf_key, trend, bos,
             f"sl={q['sl']:.{dec}f} ({q.get('risk_atr')}x ATR), "
             f"tp1={q['tp1']:.{dec}f} ({q.get('rr1')}R), tp2={q['tp2']:.{dec}f} ({q.get('rr2')}R).\n"
         )
-        rules = (
-            f"DECISION RULES:\n"
-            f"1. APPROVE ({side}) if the chart supports this setup (keep levels; RR1 between "
-            f"{rr_min:g} and {rr_max:g}).\n"
-            f"2. VETO (HOLD) only for a CLEAR severe visual trap right now: obvious double-top "
-            f"ceiling before TP1, obvious multi-swing floor before TP1, violent news spike, "
-            f"or clear structural breakdown opposing the setup. Do NOT veto normal pullbacks.\n"
-            f"3. Never flip to the opposite side — reply only {side} or HOLD.\n"
-        )
+        if str(risk_level).lower() == "high":
+            rules = (
+                f"DECISION RULES (HIGH RISK — you MUST act):\n"
+                f"1. Gate is OFF. APPROVE {side} and give BUY/SELL — do NOT reply HOLD\n"
+                f"   unless the chart shows a clear, severe, imminent reversal.\n"
+                f"2. Keep levels close to the quant candidate (RR1 between {rr_min:g} and {rr_max:g}).\n"
+                f"3. Never flip to the opposite side.\n"
+            )
+        else:
+            rules = (
+                f"DECISION RULES:\n"
+                f"1. APPROVE ({side}) if the chart supports this setup (keep levels; RR1 between "
+                f"{rr_min:g} and {rr_max:g}).\n"
+                f"2. VETO (HOLD) only for a CLEAR severe visual trap right now: obvious double-top "
+                f"ceiling before TP1, obvious multi-swing floor before TP1, violent news spike, "
+                f"or clear structural breakdown opposing the setup. Do NOT veto normal pullbacks.\n"
+                f"3. Never flip to the opposite side — reply only {side} or HOLD.\n"
+            )
     else:
         quant_line = (
             f"QUANT HINT: {q.get('hint') or 'no mechanical trigger on this TF'}. "
             "This is advisory only — you decide from the CHART IMAGE.\n"
         )
-        rules = (
-            f"DECISION RULES:\n"
-            f"1. You are the analyst. Read the chart structure and momentum. If a clear, "
-            f"tradeable setup exists, give BUY or SELL with SL beyond the invalidating swing "
-            f"and TP1 with RR between {rr_min:g} and {rr_max:g}.\n"
-            f"2. Reply HOLD only if the chart is genuinely unclear (mid-range, choppy, "
-            f"no structure). Do not stall out of caution.\n"
-        )
+        if str(risk_level).lower() == "high":
+            rules = (
+                f"DECISION RULES (HIGH RISK — you MUST act):\n"
+                f"1. Gate is OFF. Do NOT reply HOLD. You must give BUY or SELL.\n"
+                f"2. Pick the direction the chart supports MOST right now: higher lows + "
+                f"rising EMAs = BUY; lower highs + falling EMAs = SELL.\n"
+                f"3. SL beyond the nearest invalidating swing (>= {rr_min:g}R to TP1, max {rr_max:g}).\n"
+                f"4. Confidence is honest (5-8). If truly 50/50 with zero tilt, take the "
+                f"higher-timeframe trend direction — but still act.\n"
+            )
+        else:
+            rules = (
+                f"DECISION RULES:\n"
+                f"1. You are the analyst. Read the chart structure and momentum. If a clear, "
+                f"tradeable setup exists, give BUY or SELL with SL beyond the invalidating swing "
+                f"and TP1 with RR between {rr_min:g} and {rr_max:g}.\n"
+                f"2. Reply HOLD only if the chart is genuinely unclear (mid-range, choppy, "
+                f"no structure). Do not stall out of caution.\n"
+            )
     # Arahan gaya dagang ikut TF. Dulu hanya prompt TEKS dapat ini; prompt
     # vision tidak — jadi M1/M5 dinilai dengan nada swing yang sama. Itu punca
     # neon pulang HOLD pada carta M1 yang jelas trending.
@@ -897,6 +946,7 @@ def analyze(pair, bars, pip, spread_pips, call=None, budget_s=None, held=None, t
                 pair, tf, price, spread_pips, tf_key, trend, bos,
                 e20, e50, _rsi14, atr, _dec, prof, q_setup,
                 market_ctx=_ctx, held=held, gate_hint=_gate_hint,
+                risk_level=risk_level,
             )
             text_prompt = build_quant_text_prompt(text_prompt, q_setup, prof, market_ctx=_ctx)
         else:
@@ -982,6 +1032,14 @@ def analyze(pair, bars, pip, spread_pips, call=None, budget_s=None, held=None, t
                 _audit({"ts": datetime.now(timezone.utc).isoformat(), "pair": pair, "tf": tf,
                         "model": v_model, "vision": True, "verdict_rejected": str(e)[:200]})
                 return None
+            # HIGH RISK: gate off => WAIT tak dibenarkan. Jika neon tetap bagi
+            # HOLD (degil/konservatif), flip ke arah trend sebenar dengan level
+            # jujur dari ATR — client minta agresif, jadi beri arah.
+            if str(risk_level).lower() == "high" and verdict.get("side") == "HOLD":
+                verdict = _force_direction(pair, price, atr, pip, spread_pips,
+                                           trend, bos, tf, rr_min, rr_max,
+                                           _spread_floor, v_model, ai_meta)
+                log(f"{pair} {tf} high-risk: neon HOLD -> dipaksa {verdict['side']}")
             verdict.update(model=v_model, tf=tf, latency_s=round(latency, 1),
                            vision=True, ai_meta=ai_meta)
             _audit({"ts": datetime.now(timezone.utc).isoformat(), "pair": pair, "tf": tf,
@@ -1039,6 +1097,12 @@ def analyze(pair, bars, pip, spread_pips, call=None, budget_s=None, held=None, t
                     "model": model, "latency_s": round(latency, 1),
                     "content": content[:600], "reject": str(e)})
             return None
+        # HIGH RISK: WAIT tak dibenarkan — flip ke arah trend.
+        if str(risk_level).lower() == "high" and verdict.get("side") == "HOLD":
+            verdict = _force_direction(pair, price, atr, pip, spread_pips,
+                                       trend, bos, tf, rr_min, rr_max,
+                                       _spread_floor, model, ai_meta)
+            log(f"{pair} {tf} high-risk (text): HOLD -> dipaksa {verdict['side']}")
         verdict["model"] = model
         verdict["tf"] = tf
         verdict["latency_s"] = round(latency, 1)
