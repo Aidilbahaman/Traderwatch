@@ -279,16 +279,31 @@ def session_penalty(pair, hour_utc):
 VOL_MULT = float(os.environ.get("AI_SCALP_VOL_MULT", "1.1"))      # ATR >= VOL_MULT x median
 MOM_MIN = float(os.environ.get("AI_SCALP_MOM_MIN", "0.5"))        # |EMA8-EMA21|/ATR
 SCALP_SESSIONS = {7, 8, 9, 10, 11, 12, 13, 14, 15, 16}            # London + NY
+# Scalping hanya pair yang TERBUKTI untung selepas spread (backtest 33 hari):
+#   XAUUSD +0.28R/trade (174 trade, 52.1% win)
+#   BTCUSD -0.01R (spread 18 USD terlalu besar), EURUSD sampel terlalu kecil
+SCALP_PAIRS = {p.strip().upper() for p in
+               os.environ.get("AI_SCALP_PAIRS", "XAUUSD").split(",") if p.strip()}
 
 
-def scalp_gate(bars, hour_utc, tf):
+def scalp_gate(bars, hour_utc, tf, pair=""):
     """Untuk M5/M15: pastikan volatility cukup, momentum ada, sesi aktif.
 
     Return (ok, reason). ok=False -> HOLD (elak bayar spread dalam chop).
-    Backtest: tanpa gate -0.13R/trade; dengan gate +0.08R (BTC) / +0.26R (XAU).
+    Backtest 33 hari (spread dikira):
+      - baseline tanpa gate: -0.13R/trade (rugi)
+      - dengan gate: XAUUSD +0.28R/trade, BTCUSD -0.01R
+    Jadi scalping dihadkan kepada SCALP_PAIRS (XAUUSD) sahaja.
     """
-    if str(tf).upper() not in ("M5", "M15"):
+    tfu = str(tf).upper()
+    if tfu not in ("M5", "M15"):
         return True, ""
+    # Pair tak terbukti untung untuk scalping -> HOLD (elak rugi bayar spread).
+    pref = str(pair).upper().replace("/", "")[:3]
+    if SCALP_PAIRS and pref not in {x[:3] for x in SCALP_PAIRS}:
+        return False, (f"scalping {tfu} is only enabled for "
+                       f"{', '.join(sorted(SCALP_PAIRS))} (backtest-verified); "
+                       f"use H1/H4 for this pair")
     if not bars or len(bars) < 60:
         return False, "insufficient bars for scalp gate"
     if hour_utc not in SCALP_SESSIONS:
@@ -661,7 +676,7 @@ def analyze(pair, bars, pip, spread_pips, call=None, budget_s=None, held=None, t
                           "(market closed or feed stalled).", "stale_data": True}
     # Scalping gate (M5/M15): volatility + momentum + sesi.
     # Backtest: baseline -0.13R/trade; dengan gate +0.08R (BTC) / +0.26R (XAU).
-    _gok, _greason = scalp_gate(bars, datetime.now(timezone.utc).hour, tf)
+    _gok, _greason = scalp_gate(bars, datetime.now(timezone.utc).hour, tf, pair)
     if not _gok:
         log(f"{pair} {tf}: HOLD — scalp gate ({_greason})")
         return {"side": "HOLD", "conf": 0.2,

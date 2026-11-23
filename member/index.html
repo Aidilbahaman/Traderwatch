@@ -1546,7 +1546,11 @@ function mapVerdict(d){
    {t:en?'AI confidence ≥ 50%':'Keyakinan AI ≥ 50%',ok:conf>=50},
    {t:en?'SL beyond spread':'SL di luar spread',ok:true}];
  }else{
-  a.reasons=[d.reason?esc(d.reason):t('waitMsg'),en?'No entry suggested — wait for a clearer setup.':'Tiada entry dicadangkan — tunggu setup lebih jelas.'];
+  var _why=d.reason?esc(d.reason):t('waitMsg');
+  a.reasons=[_why];
+  if(d.scalp_blocked)a.reasons.push(en?'Scalping M5/M15 is tuned for XAUUSD only — use H1 or H4 for this pair.':'Scalping M5/M15 hanya untuk XAUUSD — guna H1 atau H4 untuk pair ini.');
+  else if(d.stale_data)a.reasons.push(en?'No live price movement — market may be closed.':'Tiada pergerakan harga — market mungkin tutup.');
+  else a.reasons.push(en?'No entry suggested — wait for a clearer setup.':'Tiada entry dicadangkan — tunggu setup lebih jelas.');
   a.checks=[{t:(en?'Clear direction (BUY/SELL) — waiting':'Arah jelas (BUY/SELL) — masih menunggu'),ok:false},
    {t:(en?'Calibrated Risk:Reward — no setup':'Risk:Reward terkalibrasi — tiada setup'),ok:false},
    {t:en?'AI confidence ≥ 50%':'Keyakinan AI ≥ 50%',ok:conf>=50},
