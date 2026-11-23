@@ -21,12 +21,43 @@ never dominates stop distance), TP1 = 0.75R-0.90R (high winrate + positive
 net-of-spread expectancy), TP2 = 1.50R-1.80R.
 """
 
+import os
+
 TF_CONFIG = {
     "M5":  dict(sl_atr=2.6, rr1=0.75, rr2=1.50, min_bars=80,  min_atr_sp=3.0, min_sl_sp=9.0),
     "M15": dict(sl_atr=2.5, rr1=0.80, rr2=1.55, min_bars=100, min_atr_sp=3.0, min_sl_sp=9.0),
     "H1":  dict(sl_atr=2.4, rr1=0.85, rr2=1.65, min_bars=60,  min_atr_sp=3.0, min_sl_sp=9.0),
     "H4":  dict(sl_atr=2.6, rr1=0.85, rr2=1.65, min_bars=60,  min_atr_sp=2.5, min_sl_sp=9.0),
     "D1":  dict(sl_atr=2.4, rr1=0.90, rr2=1.80, min_bars=55,  min_atr_sp=2.0, min_sl_sp=9.0),
+}
+
+# Bar minimum untuk setiap tag stabil. `min_bars` di atas hanya lantai
+# keselamatan struktur; tag bergantung pada EMA200 memerlukan lebih — EMA200
+# di-seed dengan harga bar pertama, jadi sejarah pendek = sisihan besar.
+# Diukur (XAUUSD/BTCUSD M15, rujukan 600 bar): 80 bar -> 100% keputusan
+# berbeza; 220 -> 7-10%; 260 -> 5-7%; 350 -> 0-7%; 400 -> 0.0%.
+# `WARMUP_BARS` ialah bilangan bar yang discan sebelum EMA200 boleh dipercayai.
+WARMUP_BARS = {"M5": 400, "M15": 400, "H1": 300, "H4": 300, "D1": 260}
+
+# Tag yang terbukti E[R] negatif pada ujian ke hadapan — IKUT TIMEFRAME.
+# Tag yang sama boleh menguntungkan pada satu TF dan merugikan pada TF lain:
+# diukur pada XAU/BTC/XAG, TP2 lawan SL, tiada look-ahead:
+#   M5  : RSI2_FLUSH +0.217 (terbaik), KELTNER_DIP +0.173  -> tiada yang dibuang
+#   M15 : STREAK_TREND +0.101, INSIDE_BAR +0.077, KELTNER_DIP +0.059,
+#         RSI2_FLUSH -0.032, STOCH_TURN -0.062            -> dua dibuang
+# Senarai global akan memusnahkan M5 (RSI2_FLUSH ialah tag utamanya).
+# Kosongkan via AI_WEAK_TAGS_M15= untuk menghidupkan semula pada M15.
+def _weak_tag_set(env_key, default):
+    raw = os.environ.get(env_key)
+    return {t.strip().upper() for t in (default if raw is None else raw).split(",") if t.strip()}
+
+
+WEAK_TAGS_BY_TF = {
+    "M5": _weak_tag_set("AI_WEAK_TAGS_M5", ""),
+    "M15": _weak_tag_set("AI_WEAK_TAGS_M15", "RSI2_FLUSH,STOCH_TURN"),
+    "H1": _weak_tag_set("AI_WEAK_TAGS_H1", ""),
+    "H4": _weak_tag_set("AI_WEAK_TAGS_H4", ""),
+    "D1": _weak_tag_set("AI_WEAK_TAGS_D1", ""),
 }
 
 
@@ -289,6 +320,19 @@ def scan_index(ind, i, tf, pip, spread_pips):
         if dn_tr and price < ind["lo20"][i] and ind["rsi14"][i] > 20:
             sell_tags.append("D1_DONCHIAN20")
 
+    # Tag lemah ikut TF (lihat WEAK_TAGS_BY_TF). Kalau tag lemah hadir
+    # bersama tag kuat, setup tetap dibuang — campuran yang menang telak
+    # tidak menjadikannya elok.
+    weak_tags = WEAK_TAGS_BY_TF.get(tf, set())
+    weak_hit = [t for t in (buy_tags + sell_tags) if t in weak_tags]
+    if weak_hit:
+        return {
+            "side": None, "setups": [], "score": 0, "grade": "NONE",
+            "hold_reason": (f"Tag lemah {','.join(sorted(set(weak_hit)))} — "
+                            f"E[R] negatif pada {tf}, setup dibuang."),
+            "metrics": metrics, "weak_tags": weak_hit,
+        }
+
     side = None
     tags = []
     if buy_tags and not sell_tags:
@@ -352,6 +396,19 @@ def scan(bars, pair, tf, pip, spread_pips):
             "side": None, "setups": [], "score": 0, "grade": "NONE",
             "hold_reason": f"Not enough {tf} bars ({len(bars or [])} < {cfg['min_bars']}).",
             "metrics": {},
+        }
+    # Warmup: min_bars cuma lantai struktur. Tag EMA200 (RSI2_FLUSH,
+    # KELTNER_DIP, STREAK_TREND) perlukan ~2x panjang EMA sebelum nilai
+    # penunjuk boleh dipercayai. Sejarah pendek -> EMA200 tersasar -> setup
+    # dijana atas paras yang salah. Diukur: 80 bar = 100% keputusan berbeza
+    # berbanding 600 bar; 400 bar = 0.0%. Fail closed, bukan jana setup cacat.
+    warm = WARMUP_BARS.get(tf, 400)
+    if len(bars) < warm:
+        return {
+            "side": None, "setups": [], "score": 0, "grade": "NONE",
+            "hold_reason": (f"{tf} warmup: {len(bars)} bar < {warm} diperlukan "
+                            f"untuk EMA200 stabil — tiada setup."),
+            "metrics": {}, "warmup": True,
         }
     ind = compute_series(bars)
     return scan_index(ind, ind["n"] - 1, tf, pip, spread_pips)

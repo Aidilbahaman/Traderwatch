@@ -319,7 +319,10 @@ def fetch_bars_tf(pair, tf):
     M60), with automatic fallback to M60 resampling if native returns too few."""
     tf = tf if tf in ANALYSIS_TFS else "M15"
     gran = {"M5": "M5", "M15": "M15", "H1": "M60", "H4": "H4", "D1": "D1"}.get(tf, "M15")
-    count = 300
+    # 520 bukan 300: quant_engine menolak setup bila bar < WARMUP_BARS
+    # (M15/M5 = 400) sebab EMA200 di-seed dari bar pertama. Feed 300 bar
+    # bermakna setiap analisis pulang HOLD "warmup" — app jadi bisu.
+    count = {"M5": 520, "M15": 520, "H1": 420, "H4": 400, "D1": 320}.get(tf, 520)
 
     def _parse(rows):
         out = []
@@ -337,7 +340,7 @@ def fetch_bars_tf(pair, tf):
     if len(bars) >= TF_MIN_BARS.get(tf, 60) or tf not in ("H4", "D1"):
         return bars
     # Fallback: resample from M60 if broker H4/D1 feed returned insufficient bars
-    m60 = _parse(M5.candles(pair, "M60", 800 if tf == "H4" else 1500))
+    m60 = _parse(M5.candles(pair, "M60", 1600 if tf == "H4" else 2400))
     factor = 4 if tf == "H4" else 24
     res = []
     for i in range(0, len(m60) - factor + 1, factor):

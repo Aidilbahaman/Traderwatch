@@ -174,6 +174,8 @@ MAX_SL_PRICE = {
     "XAU/USD": float(os.environ.get("AI_MAX_SL_XAU", "5.0")),
     "XAG/USD": float(os.environ.get("AI_MAX_SL_XAG", "0.25")),
     "BTCUSD": float(os.environ.get("AI_MAX_SL_BTC", "250.0")),
+    "EUR/USD": float(os.environ.get("AI_MAX_SL_EUR", "0.0100")),
+    "GBP/USD": float(os.environ.get("AI_MAX_SL_GBP", "0.0120")),
 }
 # Keputusan LLM (owner 2026-11-20): Qwen4 Max (rootsys) analisis konteks
 # H1 + M15 dan buat keputusan muktamad BUY/SELL/HOLD. Model logistic lama
@@ -184,7 +186,7 @@ LLM_MIN_CONF = float(os.environ.get("AI_LLM_MIN_CONF", "0.5"))
 # (5 min) bila conf kekal atas gate — malam 19 Nov 25 signal dalam 90 minit.
 # Cooldown 30 min/pair hadkan spam tanpa menyekat setup baru selepas resolve.
 # 0 = lumpuh. Mark hanya selepas insert berjaya.
-PAIR_COOLDOWN_MIN = float(os.environ.get("AI_PAIR_COOLDOWN_MIN", "5"))
+PAIR_COOLDOWN_MIN = float(os.environ.get("AI_PAIR_COOLDOWN_MIN", "2"))
 COOLDOWN_FILE = REPO / "state" / "ai-pair-cooldown.json"
 # M15: matches the trained model (state/ai-m15-model.json, timeframe M15).
 # Previously labelled M1 but mt5_read silently returned M15; now explicit so
@@ -192,8 +194,10 @@ COOLDOWN_FILE = REPO / "state" / "ai-pair-cooldown.json"
 TIMEFRAME = "M15"
 TD_INTERVAL = "15min"
 
-PAIRS = ["XAU/USD", "XAG/USD", "BTCUSD"]
-DP = {"XAU/USD": 2, "XAG/USD": 3, "USD/JPY": 3, "BTCUSD": 2}
+PAIRS = [p.strip() for p in os.environ.get(
+    "AI_PAIRS", "XAU/USD,XAG/USD,BTCUSD,EUR/USD,GBP/USD").split(",") if p.strip()]
+DP = {"XAU/USD": 2, "XAG/USD": 3, "USD/JPY": 3, "BTCUSD": 2,
+      "EUR/USD": 5, "GBP/USD": 5}
 DEFAULT_DP = 5
 
 

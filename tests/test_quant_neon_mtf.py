@@ -19,8 +19,12 @@ def _load(name):
     return mod
 
 
-def make_uptrend_with_flush(n=220, base=2000.0, step=1.5):
-    """Build deterministic uptrend bars ending with a sharp 3-bar pullback (triggers RSI2/STREAK/KELTNER)."""
+def make_uptrend_with_flush(n=460, base=2000.0, step=1.5):
+    """Deterministic uptrend ending in a sharp pullback.
+
+    n defaults to 460: quant_engine.WARMUP_BARS requires ~400 M15 bars before
+    EMA200 is trustworthy, and scan() fails closed below that.
+    """
     bars = []
     p = base
     for i in range(n - 4):
@@ -33,7 +37,7 @@ def make_uptrend_with_flush(n=220, base=2000.0, step=1.5):
     return bars
 
 
-def make_breakout_bars(n=120, base=2000.0):
+def make_breakout_bars(n=420, base=2000.0):
     """Build realistic uptrend + 20-bar consolidation ending with a clean Donchian breakout (RSI14 ~60-72)."""
     bars = []
     p = base
@@ -53,6 +57,24 @@ def make_breakout_bars(n=120, base=2000.0):
     return bars
 
 
+def make_drift_down_hold(n=460, base=2000.0, step=1.5, ndn=4, dstep=1.2):
+    """Uptrend then four small stair-step down bars.
+
+    Triggers STREAK_TREND on M15 without tripping the weak-tag filter
+    (RSI2_FLUSH / STOCH_TURN): dn_st reaches 3 while RSI2 stays moderate.
+    Verified: returns tags ['STREAK_TREND'] on M15 at ndn=4, dstep=1.2.
+    """
+    bars = []
+    p = base
+    for i in range(n - ndn):
+        p += step
+        bars.append((i * 900000, p + 1.8, p - 1.2, p))
+    for k in range(ndn):
+        p -= dstep
+        bars.append(((n - ndn + k) * 900000, p + 0.8, p - 1.0, p))
+    return bars
+
+
 class QuantEngineTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
@@ -69,13 +91,14 @@ class QuantEngineTests(unittest.TestCase):
 
     def test_flat_low_atr_filtered_out(self):
         # Zero volatility bars -> ATR=0 -> skipped
-        flat = [(i * 900000, 1.1000, 1.1000, 1.1000) for i in range(150)]
+        # 420 bar: cukup untuk lepas warmup, jadi yang menolak benar-benar ATR=0.
+        flat = [(i * 900000, 1.1000, 1.1000, 1.1000) for i in range(420)]
         r = self.qe.scan(flat, "EUR/USD", "M15", 0.0001, 1.0)
         self.assertIsNone(r["side"])
         self.assertIn("Low volatility", r["hold_reason"])
 
     def test_strictly_causal_zero_lookahead(self):
-        bars2 = make_uptrend_with_flush(260)
+        bars2 = make_uptrend_with_flush(460)
         ind_full = self.qe.compute_series(bars2)
         # 1) Mutating future bars (same length) must not change bar `idx2`
         idx2 = 215
@@ -107,9 +130,18 @@ class QuantEngineTests(unittest.TestCase):
             self.assertEqual(cfg["min_bars"], prof["min_bars"], f"{tf} min_bars mismatch")
 
     def test_pullback_and_breakout_generate_valid_levels(self):
-        pb_bars = make_uptrend_with_flush(220)
-        for tf in ("M5", "M15", "H4"):
-            q = self.qe.scan(pb_bars, "XAU/USD", tf, 0.1, 3.0)
+        # M5 tiada STREAK_TREND/INSIDE_BAR (rujuk quant_engine scan_index) dan
+        # tidak menapis RSI2_FLUSH, jadi ia guna fixture pullback berasingan.
+        # M15 menapis RSI2_FLUSH/STOCH_TURN, jadi ia perlukan fixture yang
+        # mencetuskan STREAK_TREND tanpa RSI2_FLUSH — iaitu drift turun
+        # berperingkat (rsi2 kekal tinggi, rsi5 rendah).
+        cases = [
+            ("M5", make_uptrend_with_flush(460)),
+            ("M15", make_drift_down_hold(460)),
+            ("H4", make_uptrend_with_flush(460)),
+        ]
+        for tf, bars in cases:
+            q = self.qe.scan(bars, "XAU/USD", tf, 0.1, 3.0)
             self.assertEqual(q["side"], "BUY", f"Expected BUY on {tf}, got {q}")
             self.assertLess(q["sl"], q["entry"])
             self.assertLess(q["entry"], q["tp1"])
@@ -122,7 +154,7 @@ class QuantEngineTests(unittest.TestCase):
             )
             self.assertEqual(v["side"], "BUY")
 
-        bo_bars = make_breakout_bars(120)
+        bo_bars = make_breakout_bars(420)
         for tf in ("H1", "D1"):
             q = self.qe.scan(bo_bars, "XAU/USD", tf, 0.1, 3.0)
             self.assertEqual(q["side"], "BUY", f"Expected BUY breakout on {tf}, got {q}")
@@ -184,7 +216,7 @@ class ValidationAndVisionIntegrationTests(unittest.TestCase):
             self.assertAlmostEqual(out_hi["rr1"], 1.9, places=2)
 
     def test_vision_chart_render_with_levels(self):
-        bars = make_uptrend_with_flush(220)
+        bars = make_uptrend_with_flush(460)
         q = self.qe.scan(bars, "XAU/USD", "M15", 0.1, 3.0)
         b64 = self.vc.render(bars, pair="XAU/USD", tf="M15", bos="UP", choch=False, levels=q)
         raw = base64.b64decode(b64)
@@ -193,8 +225,9 @@ class ValidationAndVisionIntegrationTests(unittest.TestCase):
 
     def test_quant_gate_skips_vision_when_no_setup(self):
         # Steady drift with no pullback/breakout trigger on M5
+        # 460 bar: lepas warmup (400) supaya yang menolak benar-benar ketiadaan setup.
         bars = [(i * 300000, 2000.0 + i * 0.2 + 0.5, 2000.0 + i * 0.2 - 0.5, 2000.0 + i * 0.2)
-                for i in range(150)]
+                for i in range(460)]
         with mock.patch.object(self.la, "_call_vision") as m_vis, \
              mock.patch.object(self.la, "MC", None):
             out = self.la.analyze("XAU/USD", bars, 0.1, 3.0, tf="M5")
@@ -204,7 +237,7 @@ class ValidationAndVisionIntegrationTests(unittest.TestCase):
             m_vis.assert_not_called()
 
     def test_quant_plus_vision_approval_veto_conflict_and_antihedge(self):
-        bars = make_uptrend_with_flush(220)
+        bars = make_drift_down_hold(460)
         q = self.qe.scan(bars, "XAU/USD", "M15", 0.1, 3.0)
         self.assertEqual(q["side"], "BUY")
 
@@ -249,7 +282,7 @@ class ValidationAndVisionIntegrationTests(unittest.TestCase):
             m_vis.assert_not_called()
 
     def test_vision_fallback_prefers_neon_medium_and_text_fallback_has_ohlc(self):
-        bars = make_uptrend_with_flush(220)
+        bars = make_drift_down_hold(460)
         q = self.qe.scan(bars, "XAU/USD", "M15", 0.1, 3.0)
         self.assertEqual(q["side"], "BUY")
 
