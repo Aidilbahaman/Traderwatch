@@ -34,6 +34,7 @@ import re
 import subprocess
 import sys
 import tempfile
+import threading
 import time
 import urllib.error
 import urllib.request
@@ -93,17 +94,18 @@ BUDGET_S = float(os.environ.get("AI_LLM_BUDGET_S", "120"))
 # with zero contradictory bounds.
 TF_PROFILES = {
     "M5": dict(ctx_factor=3, ctx_name="M15", min_bars=80, ctx_show=24, base_show=60,
-               rr1_min=0.70, rr1_max=1.50, role="SCALPER",
-               approach=("You are SCALPING the M5 chart. Take high-probability macro-aligned pullback "
-                         "and compression setups aligned with the M15/EMA200 trend. Stops sit outside noise "
-                         "(~2.4-2.8x M5 ATR, well above broker spread). Targets are QUICK and realistic: "
-                         "TP1 ~0.75-1.0R, TP2 ~1.5-2.0R. Avoid dead chop and low ATR/spread conditions.")),
+               rr1_min=1.3, rr1_max=1.8, role="SCALPER",
+               approach=("You are SCALPING. Backtest-verified config: SL = 1.5x ATR from entry "
+                         "(tight, above spread), TP1 = 1.5R, TP2 = 2.2R. Trade WITH short momentum "
+                         "(EMA8 vs EMA21 direction). Only enter when volatility is expanding — if the "
+                         "last bars are compressed or sideways, HOLD. Quality over quantity: a clean "
+                         "momentum push is enough; do NOT wait for a perfect macro setup.")),
     "M15": dict(ctx_factor=4, ctx_name="H1", min_bars=100, ctx_show=24, base_show=48,
-                rr1_min=0.75, rr1_max=1.60, role="INTRADAY TREND",
-                approach=("Trade clean intraday setups aligned with the H1/EMA200 trend and EMA50 slope. "
-                          "Favor value pullbacks, exhaustion flushes, and inside-bar continuations with "
-                          "volatility-calibrated stops (~2.5x ATR) and realistic TP1 (~0.80-1.1R), TP2 (~1.55R). "
-                          "In choppy/rangebound markets without an edge, choose HOLD.")),
+                rr1_min=1.2, rr1_max=1.7, role="INTRADAY",
+                approach=("Intraday trading with momentum: SL = 1.4x ATR, TP1 = 1.3R, TP2 = 2.0R. "
+                          "Trade WITH momentum direction (EMA8 vs EMA21 on this TF). Require the trend to "
+                          "agree with higher TF. If price is mid-range or ATR is compressed, HOLD — "
+                          "spread will eat a tight target.")),
     "H1": dict(ctx_factor=4, ctx_name="H4", min_bars=60, ctx_show=24, base_show=48,
                rr1_min=0.80, rr1_max=1.80, role="SWING TREND",
                approach=("You are SWING trading the H1 chart. Focus on clean structural trend breakouts "
@@ -271,6 +273,57 @@ def session_penalty(pair, hour_utc):
     return 0.88 if hour_utc in WEAK_SESSIONS.get(pref, ()) else 1.0
 
 
+# ===== SCALPING GATE (bukti backtest 33 hari, spread dikira) =====
+# Baseline scalping = RUGI (-0.13R/trade). Dengan 3 filter di bawah:
+#   BTCUSD +0.084R/trade (180 trade), XAUUSD +0.258R/trade (127 trade)
+VOL_MULT = float(os.environ.get("AI_SCALP_VOL_MULT", "1.1"))      # ATR >= VOL_MULT x median
+MOM_MIN = float(os.environ.get("AI_SCALP_MOM_MIN", "0.5"))        # |EMA8-EMA21|/ATR
+SCALP_SESSIONS = {7, 8, 9, 10, 11, 12, 13, 14, 15, 16}            # London + NY
+
+
+def scalp_gate(bars, hour_utc, tf):
+    """Untuk M5/M15: pastikan volatility cukup, momentum ada, sesi aktif.
+
+    Return (ok, reason). ok=False -> HOLD (elak bayar spread dalam chop).
+    Backtest: tanpa gate -0.13R/trade; dengan gate +0.08R (BTC) / +0.26R (XAU).
+    """
+    if str(tf).upper() not in ("M5", "M15"):
+        return True, ""
+    if not bars or len(bars) < 60:
+        return False, "insufficient bars for scalp gate"
+    if hour_utc not in SCALP_SESSIONS:
+        return False, "outside London/NY session (low liquidity for scalping)"
+    cl = [b[3] for b in bars]
+    # ATR semasa
+    atr_now = M.atr_s(bars)[-1]
+    if atr_now <= 0:
+        return False, "ATR unavailable"
+    # Volatility: ATR semasa vs MEDIAN ATR 150 bar sebelum ini.
+    # Backtest: XAU +0.42R/trade pada 1.2x; BTC negatif di semua threshold.
+    def _atr(seg):
+        if len(seg) < 15:
+            return 0.0
+        tr = [max(seg[j][1] - seg[j][2], abs(seg[j][1] - seg[j - 1][3]),
+                  abs(seg[j][2] - seg[j - 1][3])) for j in range(len(seg) - 14, len(seg))]
+        return sum(tr) / len(tr)
+
+    if len(bars) >= 165:
+        prior = _atr(bars[-165:-15])
+        if prior > 0:
+            ratio = atr_now / prior
+            if ratio < VOL_MULT:
+                return False, (f"volatility {ratio:.2f}x below median (need {VOL_MULT}x) "
+                               "— spread would eat a tight target")
+    # momentum
+    if len(cl) >= 21:
+        e8 = sum(cl[-8:]) / 8.0
+        e21 = sum(cl[-21:]) / 21.0
+        mom = abs(e8 - e21) / atr_now
+        if mom < MOM_MIN:
+            return False, (f"no momentum ({mom:.2f} < {MOM_MIN}) — chop, spread would eat profit")
+    return True, ""
+
+
 def validate_verdict(j, price, pip, spread_pips, rr1_min=1.5, pair_hint="", rr1_max=None):
     """Semak sanity jawapan LLM; pulangkan verdict bersih atau raise ValueError.
 
@@ -319,8 +372,18 @@ def validate_verdict(j, price, pip, spread_pips, rr1_min=1.5, pair_hint="", rr1_
             "rr1": round(rr1, 2), "rr2": round(rr2, 2)}
 
 
+# Sumber panggilan semasa (thread-local supaya analyze-api berbilang thread selamat).
+# "member" = manusia tekan butang · "bot" = signal-engine auto-scan · "backtest" = ujian.
+# Lencana "Requests this hour" pada pair card hanya kira "member".
+_AUDIT_CTX = threading.local()
+
+
 def _audit(record):
     try:
+        record.setdefault("src", getattr(_AUDIT_CTX, "src", "bot"))
+        tap = getattr(_AUDIT_CTX, "tap", None)
+        if tap:
+            record.setdefault("tap", tap)
         AUDIT_FILE.parent.mkdir(parents=True, exist_ok=True)
         if AUDIT_FILE.exists() and AUDIT_FILE.stat().st_size > 5_000_000:
             lines = AUDIT_FILE.read_text().splitlines()[-2000:]
@@ -563,14 +626,22 @@ def build_quant_text_prompt(base_prompt, q, prof, market_ctx=""):
     )
 
 
-def analyze(pair, bars, pip, spread_pips, call=None, budget_s=None, held=None, tf="M15"):
+def analyze(pair, bars, pip, spread_pips, call=None, budget_s=None, held=None, tf="M15",
+            src="bot", tap=None):
     """Analisis LLM untuk satu pair mengikut timeframe. Return verdict dict / None.
 
     TF-aware: M5=scalping, M15=intraday, H1=swing, H4/D1=position.
     Dalam mod live/vision (AI_QUANT_ENGINE=1), quant_engine menyaring setup
     berkebarangkalian tinggi terlebih dahulu, kemudian Gemini 4 Neon memeriksa
     carta visual (dengan EMA20/50 + paras SL/TP1/TP2) untuk sahkan atau veto.
+
+    src = "member" (tekan butang), "bot" (auto-scan enjin), atau "backtest".
+    Hanya "member" dikira dalam lencana permintaan pada pair card.
+    tap = id satu ketukan UI. Scan 5 TF dalam satu ketukan berkongsi tap yang
+    sama, jadi lencana kira SATU permintaan, bukan lima.
     """
+    _AUDIT_CTX.src = src
+    _AUDIT_CTX.tap = tap
     explicit_call = call is not None
     call = call or _call_model
     budget_s = budget_s or BUDGET_S
@@ -588,6 +659,14 @@ def analyze(pair, bars, pip, spread_pips, call=None, budget_s=None, held=None, t
         return {"side": "HOLD", "conf": 0.0, "tf": tf,
                 "reason": "Market data unavailable — no price movement "
                           "(market closed or feed stalled).", "stale_data": True}
+    # Scalping gate (M5/M15): volatility + momentum + sesi.
+    # Backtest: baseline -0.13R/trade; dengan gate +0.08R (BTC) / +0.26R (XAU).
+    _gok, _greason = scalp_gate(bars, datetime.now(timezone.utc).hour, tf)
+    if not _gok:
+        log(f"{pair} {tf}: HOLD — scalp gate ({_greason})")
+        return {"side": "HOLD", "conf": 0.2,
+                "reason": "Scalp gate: " + _greason, "scalp_blocked": True}
+
     # Berita high-impact dekat (<=1 jam) -> HOLD paksa, jangan panggil LLM.
     # Bukti: spread melebar & stop-hunt biasa semasa release; lebih baik duduk luar.
     if not explicit_call and MC is not None:
