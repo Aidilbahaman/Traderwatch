@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Apple Intelligence Border Glow — Preview</title>
+<meta name="theme-color" content="#0a0e0b">
+<style>
+:root{--bg:#0a0e0b;--card:#111612;--card2:#171e18;--text:#eef3ee;--muted:#8a978c;
+  --line:#222b23;--lime:#b7f36b;--red:#ff777d;--orange:#ffc16b;--blue:#8ab4ff;
+  --chart:#0c110d;--onlime:#10150b;color-scheme:dark}
+html[data-theme="light"]{--bg:#f5f7f5;--card:#ffffff;--card2:#eef2ed;--text:#14211a;
+  --muted:#63736a;--line:rgba(0,0,0,.1);--lime:#7ab52e;--red:#d64b55;--orange:#b8791b;
+  --blue:#3a6fc4;--chart:#f0f4ef;--onlime:#0b1405;color-scheme:light}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,system-ui,sans-serif;
+  min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:18px;
+  -webkit-font-smoothing:antialiased;letter-spacing:-.011em}
+.wrap{width:390px;max-width:100%}
+h1{font-size:17px;letter-spacing:-.02em;margin:0 0 4px;font-weight:850}
+.sub{color:var(--muted);font-size:12.5px;margin:0 0 14px;line-height:1.4}
+.sheet{width:390px;max-width:100%;background:var(--card);border:1px solid var(--line);
+  border-radius:26px;padding:12px 16px 20px;box-shadow:0 -20px 60px #000a}
+.grab{padding:2px 0 10px;display:flex;justify-content:center}
+.grab i{display:block;width:40px;height:5px;border-radius:9px;background:var(--line)}
+.shead{display:flex;align-items:center;gap:12px;margin-bottom:12px}
+.shead .ic{width:42px;height:42px;border-radius:13px;background:var(--lime);color:var(--onlime);
+  display:grid;place-items:center;font-weight:900;font-size:12px}
+.shead h2{margin:0;font-size:20px;letter-spacing:-.04em}
+.shead p{margin:0;color:var(--muted);font-size:12px}
+.shead .x{margin-left:auto;width:34px;height:34px;border-radius:50%;background:var(--card2);color:var(--muted);display:grid;place-items:center;font-size:15px;border:1px solid var(--line)}
+
+/* ===== BINGKAI BERCahaya BERPUTAR ===== */
+.chartwrap{position:relative;margin-bottom:14px;border-radius:20px;padding:2px;isolation:isolate}
+/* cincin conic berputar — asas glow */
+.chartwrap::before{
+  content:"";position:absolute;inset:0;border-radius:20px;z-index:0;
+  background:conic-gradient(from 0deg,
+    #5ac8fa 0deg, #a06bff 90deg, #ff9db0 180deg, #ffb86b 270deg, #5ac8fa 360deg);
+  opacity:0;transition:opacity .4s;
+  animation:spinGlow 3.5s linear infinite;
+  filter:blur(6px) saturate(150%)}
+/* lapisan kedua, lebih lebar, lebih kabur → glow luar */
+.chartwrap::after{
+  content:"";position:absolute;inset:-5px;border-radius:26px;z-index:0;
+  background:conic-gradient(from 0deg,
+    #5ac8fa 0deg, #a06bff 90deg, #ff9db0 180deg, #ffb86b 270deg, #5ac8fa 360deg);
+  opacity:0;transition:opacity .5s;
+  animation:spinGlow 3.5s linear infinite;
+  filter:blur(18px) saturate(180%);
+  pointer-events:none}
+.chartwrap.scanning::before{opacity:.95}
+.chartwrap.scanning::after{opacity:.55}
+@keyframes spinGlow{to{transform:rotate(360deg)}}
+
+/* kotak chart di atas glow */
+.chartbox{position:relative;z-index:2;border-radius:18px;background:var(--chart);
+  overflow:hidden;height:220px;border:1px solid rgba(255,255,255,.07)}
+.chartwrap.scanning .chartbox{border-color:transparent}
+#cv{display:block;width:100%;height:100%}
+
+.chipc{position:absolute;left:10px;top:10px;background:rgba(10,14,11,.82);border:1px solid var(--line);
+  border-radius:999px;padding:5px 11px;font-size:10px;font-weight:800;letter-spacing:.08em;
+  color:var(--muted);z-index:3;display:flex;align-items:center;gap:6px;
+  transition:color .3s,border-color .3s,background .3s}
+.chipc i{width:6px;height:6px;border-radius:50%;background:var(--muted);transition:background .3s}
+.chartwrap.scanning .chipc{color:#fff;border-color:rgba(255,255,255,.3);
+  background:rgba(20,24,32,.85);backdrop-filter:blur(12px)}
+.chartwrap.scanning .chipc i{background:linear-gradient(90deg,#5ac8fa,#a06bff,#ff9db0);
+  animation:pulseDot .9s ease-in-out infinite}
+@keyframes pulseDot{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.5);opacity:.6}}
+
+/* butang */
+.go{width:100%;padding:14px;border-radius:15px;font-weight:800;font-size:15px;border:0;
+  color:var(--onlime);background:var(--lime);box-shadow:0 0 26px #b7f36b2b;margin-top:4px;cursor:pointer;
+  transition:transform .12s}
+.go:active{transform:scale(.98)}
+.go.scanning{background:var(--card2);color:var(--muted);box-shadow:none;cursor:default}
+.note{font-size:11px;color:var(--muted);line-height:1.5;margin:12px 0 0}
+.note b{color:var(--text)}
+@media(prefers-reduced-motion:reduce){
+  .chartwrap::before,.chartwrap::after{animation:none}
+  .chartwrap.scanning::before{opacity:.7}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Apple Intelligence glow</h1>
+  <p class="sub">Bingkai carta bercahaya berputar masa AI scanning.</p>
+
+  <div class="sheet">
+    <div class="grab"><i></i></div>
+    <div class="shead">
+      <div class="ic">XAU</div>
+      <div><h2>XAUUSD</h2><p>Gold / US Dollar · M15</p></div>
+      <button class="x">✕</button>
+    </div>
+
+    <div class="chartwrap" id="cw">
+      <div class="chartbox">
+        <canvas id="cv"></canvas>
+        <div class="chipc" id="chip"><i></i><span id="chipT">SEDIA</span></div>
+      </div>
+    </div>
+
+    <button class="go" id="go">✦ Analyze with AI</button>
+  </div>
+
+  <p class="note"><b>Apple Intelligence</b> — cincin conic berputar (biru→ungu→merah jambu→oren) di tepi bingkai carta, dengan glow luar kabur. Hanya menyala masa AI membaca, padam bila siap.</p>
+</div>
+
+<script>
+(function(){
+  var cv=document.getElementById('cv'),ctx=cv.getContext('2d');
+  function css(v){return getComputedStyle(document.documentElement).getPropertyValue(v).trim()}
+  var PX=[3627,3625,3626,3622,3619,3620,3616,3612,3608,3604,3601,3603,3600,3602,3606,3609,3611,3608,3610,3613,3611,3609,3612,3615,3613,3611,3614,3617,3620,3623,3627,3625,3622,3620,3622,3621,3619,3620,3621,3620];
+
+  function size(){var r=cv.getBoundingClientRect();cv.width=r.width*2;cv.height=r.height*2;draw()}
+  function draw(){
+    var W=cv.width,H=cv.height;
+    ctx.clearRect(0,0,W,H);
+    var pad=16, pT=12, pB=20;
+    var lo=Math.min.apply(0,PX),hi=Math.max.apply(0,PX),rng=(hi-lo)||1,n=PX.length;
+    var plotW=W-pad*2, plotH=H-pT-pB;
+    function x(i){return pad+(i/(n-1))*plotW}
+    function y(v){return pT+(hi-v)/rng*plotH}
+    var lime=css('--lime'),muted=css('--muted');
+    // grid + label
+    ctx.lineWidth=1;ctx.font='700 '+(10*2)+'px ui-monospace,Menlo,monospace';
+    ctx.textAlign='left';ctx.textBaseline='middle';
+    for(var g=0;g<4;g++){var gv=lo+rng*g/3,gy=y(gv);
+      ctx.strokeStyle='rgba(128,150,130,.12)';ctx.beginPath();ctx.moveTo(pad,gy);ctx.lineTo(W-pad,gy);ctx.stroke();
+      ctx.fillStyle=muted;ctx.fillText(gv.toFixed(2),W-pad+6,gy)}
+    // line
+    ctx.beginPath();
+    for(var i=0;i<n;i++){var xx=x(i),yy=y(PX[i]);i?ctx.lineTo(xx,yy):ctx.moveTo(xx,yy)}
+    ctx.strokeStyle=lime;ctx.lineWidth=1.7*2;ctx.lineJoin='round';ctx.stroke();
+    // swing dots
+    for(var j=2;j<n-2;j++){
+      var a=PX[j-2],b=PX[j-1],c=PX[j],e=PX[j+1],f=PX[j+2];
+      if((c>b&&c>e&&b>a&&e<f)||(c<b&&c<e&&b<a&&e>f)){
+        ctx.beginPath();ctx.arc(x(j),y(c),2.4*2,0,6.284);
+        ctx.fillStyle=c>b?'rgba(214,255,154,.9)':'rgba(255,159,159,.9)';ctx.fill();
+      }
+    }
+  }
+
+  // toggle scanning
+  var cw=document.getElementById('cw'),chip=document.getElementById('chip'),chipT=document.getElementById('chipT'),go=document.getElementById('go');
+  var busy=false;
+  function setScan(on){
+    busy=on;
+    cw.classList.toggle('scanning',on);
+    chip.classList.toggle('scan',on);
+    chipT.textContent=on?'AI SCANNING':'ANALYSIS READY';
+    go.classList.toggle('scanning',on);
+    go.textContent=on?'Reading the chart…':'✦ Analyze with AI';
+  }
+  go.onclick=function(){
+    if(busy)return;
+    setScan(true);
+    setTimeout(function(){setScan(false)},4200);
+  };
+
+  size();window.addEventListener('resize',size);
+  // auto demo sekali
+  setTimeout(function(){setScan(true);setTimeout(function(){setScan(false)},4200)},600);
+})();
+</script>
+</body>
+</html>
