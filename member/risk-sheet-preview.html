@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Risk Level — Sheet Preview</title>
+<meta name="theme-color" content="#0a0e0b">
+<style>
+/* ============================================================
+   Risk Level dalam sheet analisis — preview (token sama app sebenar)
+   Panel duduk antara TF selector dan butang "Analyze with AI".
+   3 pecahan: Low / Medium / High = seberapa agresif gate AI scan.
+   ============================================================ */
+:root{--bg:#0a0e0b;--card:#111612;--card2:#171e18;--text:#eef3ee;--muted:#8a978c;
+  --line:#222b23;--lime:#b7f36b;--green:#b7f36b;--red:#ff777d;--orange:#ffc16b;
+  --blue:#8ab4ff;--chart:#0c110d;--onlime:#10150b;--glass:rgba(10,14,11,.82);color-scheme:dark}
+html[data-theme="light"]{--bg:#f5f7f5;--card:#ffffff;--card2:#eef2ed;--text:#14211a;
+  --muted:#63736a;--line:rgba(0,0,0,.1);--lime:#7ab52e;--green:#5f9c22;--red:#d64b55;
+  --orange:#b8791b;--blue:#3a6fc4;--chart:#f0f4ef;--onlime:#0b1405;--glass:rgba(245,247,245,.86);color-scheme:light}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,system-ui,sans-serif;
+  min-height:100vh;display:flex;align-items:center;justify-content:center;padding:18px;
+  -webkit-font-smoothing:antialiased;letter-spacing:-.011em}
+
+/* ===== sheet tiruan (dimensi sama sheet sebenar) ===== */
+.sheet{width:390px;max-width:100%;background:var(--card);border:1px solid var(--line);
+  border-radius:26px;padding:12px 16px 22px;box-shadow:0 -20px 60px #000a}
+
+/* grab handle */
+.grab{padding:2px 0 10px;display:flex;justify-content:center}
+.grab i{display:block;width:40px;height:5px;border-radius:9px;background:var(--line)}
+
+/* header pair */
+.shead{display:flex;align-items:center;gap:12px;margin-bottom:12px}
+.shead .ic{width:42px;height:42px;border-radius:13px;background:var(--lime);color:var(--onlime);
+  display:grid;place-items:center;font-weight:900;font-size:12px}
+.shead h2{margin:0;font-size:20px;letter-spacing:-.04em}
+.shead p{margin:0;color:var(--muted);font-size:12px;font-variant-numeric:tabular-nums}
+.shead .x{margin-left:auto;width:34px;height:34px;border-radius:50%;background:var(--card2);
+  color:var(--muted);display:grid;place-items:center;font-size:15px;border:1px solid var(--line)}
+
+/* chart box */
+.chartbox{position:relative;border:1px solid var(--line);border-radius:18px;background:var(--chart);overflow:hidden;height:180px;margin-bottom:12px}
+.chartbox .cv{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:11px}
+.chartbox .chipc{position:absolute;left:10px;top:10px;background:var(--glass);border:1px solid var(--line);
+  border-radius:999px;padding:4px 10px;font-size:10px;font-weight:800;letter-spacing:.08em;color:var(--muted)}
+.chartbox .chipc i{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--lime);margin-right:5px}
+
+/* TF selector */
+.tf{display:flex;gap:4px;background:var(--card2);border:1px solid var(--line);border-radius:12px;padding:3px;margin:12px 0 6px}
+.tf button{flex:1;color:var(--muted);padding:8px 0;border-radius:9px;font-weight:700;font-size:12px;border:0;background:transparent}
+.tf button.on{background:var(--lime);color:var(--onlime)}
+
+/* ===== RISK LEVEL PANEL (baru) ===== */
+.riskp{margin:10px 0 4px}
+.riskp .lab{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.riskp .lab span{font-size:9.5px;color:var(--muted);font-weight:800;letter-spacing:.12em;text-transform:uppercase}
+.riskp .lab b{font-size:10px;font-weight:800;letter-spacing:.02em}
+.riskrow{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.risk{position:relative;border:1px solid var(--line);border-radius:12px;padding:10px 6px;
+  text-align:center;cursor:pointer;background:var(--card2);transition:.16s;overflow:hidden}
+.risk:active{transform:scale(.97)}
+.risk .k{font-size:10px;font-weight:850;letter-spacing:.01em;display:block}
+.risk .d{font-size:8px;color:var(--muted);font-weight:700;letter-spacing:.04em;text-transform:uppercase;display:block;margin-top:3px}
+/* warna ikut level */
+.risk.low{--rc:#b7f36b}
+.risk.med{--rc:#ffc16b}
+.risk.high{--rc:#ff777d}
+.risk.low .k{color:var(--green)}
+.risk.med .k{color:var(--orange)}
+.risk.high .k{color:var(--red)}
+.risk .bar{height:3px;border-radius:99px;background:var(--line);margin-top:7px;overflow:hidden}
+.risk .bar i{display:block;height:100%;background:var(--rc);border-radius:99px}
+.risk.low .bar i{width:33%}
+.risk.med .bar i{width:66%}
+.risk.high .bar i{width:100%;box-shadow:0 0 8px var(--red)}
+/* dipilih */
+.risk.on{border-color:var(--rc);box-shadow:0 0 0 1px var(--rc)}
+.risk .tick{position:absolute;top:5px;right:5px;width:14px;height:14px;border-radius:50%;
+  border:1.5px solid var(--line);font-size:9px;font-weight:900;display:grid;place-items:center;color:transparent}
+.risk.on .tick{border-color:var(--rc);background:var(--rc);color:var(--onlime)}
+/* penerangan gate (dinamik) */
+.riskdesc{margin-top:9px;font-size:10.5px;color:var(--muted);line-height:1.45;min-height:30px}
+.riskdesc b{color:var(--text)}
+
+/* butang go */
+.go{position:relative;width:100%;padding:14px;border-radius:15px;font-weight:800;font-size:15px;
+  color:var(--onlime);background:var(--lime);border:0;box-shadow:0 0 26px #b7f36b2b;margin-top:8px}
+.go:active{transform:scale(.98)}
+
+@keyframes pl{50%{opacity:.3}}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div class="sheet">
+  <div class="grab"><i></i></div>
+
+  <div class="shead">
+    <div class="ic">XAU</div>
+    <div><h2>XAUUSD</h2><p>Gold / US Dollar · 3620.73</p></div>
+    <button class="x" aria-label="Tutup">✕</button>
+  </div>
+
+  <div class="chartbox">
+    <div class="cv">chart OHLC sebenar</div>
+    <div class="chipc"><i></i>SEDIA</div>
+  </div>
+
+  <div class="tf">
+    <button class="on">M1</button><button>M5</button><button>M15</button><button>H1</button>
+  </div>
+
+  <!-- ===== RISK LEVEL PANEL ===== -->
+  <div class="riskp">
+    <div class="lab"><span>Manage your risk</span><b id="gateState">Gate: balanced</b></div>
+    <div class="riskrow" id="riskRow">
+      <div class="risk low on" data-k="low"><span class="tick">✓</span><span class="k">Low</span><span class="d">Tight scan</span><div class="bar"><i></i></div></div>
+      <div class="risk med" data-k="med"><span class="tick"></span><span class="k">Medium</span><span class="d">Default</span><div class="bar"><i></i></div></div>
+      <div class="risk high" data-k="high"><span class="tick"></span><span class="k">High</span><span class="d">Gate off</span><div class="bar"><i></i></div></div>
+    </div>
+    <div class="riskdesc" id="riskDesc">
+      <b>Low risk</b> — gate paling ketat. Hanya setup paling selamat lulus (volatility &amp; momentum tinggi).
+    </div>
+  </div>
+
+  <button class="go">✦ <span>Analyze with AI</span></button>
+</div>
+
+<script>
+(function(){
+  var LEVELS={
+    low: {name:'Low risk',   gate:'Gate: strict',     desc:'<b>Low risk</b> — gate paling ketat. Hanya setup paling selamat lulus (volatility & momentum tinggi, sesi London/NY wajib).'},
+    med: {name:'Medium risk',gate:'Gate: balanced',   desc:'<b>Medium risk</b> — gate default. Seimbang antara kualiti setup dan peluang entry.'},
+    high:{name:'High risk',  gate:'Gate: OFF',        desc:'<b>High risk</b> — gate dimatikan. AI bebas menilai carta dan bagi signal tanpa sekatan vol/momentum/sesi. Paling agresif, paling banyak entry.'}
+  };
+  var sel='low';
+  var row=document.getElementById('riskRow');
+  function draw(){
+    Array.prototype.forEach.call(row.querySelectorAll('.risk'),function(r){
+      var on=r.dataset.k===sel;
+      r.classList.toggle('on',on);
+      r.querySelector('.tick').textContent=on?'✓':'';
+    });
+    document.getElementById('gateState').textContent=LEVELS[sel].gate;
+    document.getElementById('gateState').style.color=sel==='high'?'var(--red)':sel==='low'?'var(--green)':'var(--orange)';
+    document.getElementById('riskDesc').innerHTML=LEVELS[sel].desc;
+  }
+  Array.prototype.forEach.call(row.querySelectorAll('.risk'),function(r){
+    r.onclick=function(){sel=r.dataset.k;draw()};
+  });
+  draw();
+})();
+</script>
+</body>
+</html>
