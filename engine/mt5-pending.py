@@ -46,6 +46,16 @@ SLEEP_SEC = int(os.environ.get("MT5_SLEEP_SEC", "15"))
 # semasa ujian luar waktu forex.
 ALLOW = [x.strip().upper() for x in os.environ.get("MT5_ALLOW", "").split(",") if x.strip()]
 
+# ---------- auto-entry lock ----------
+# Owner 2026-11-23: auto-trade hanya pada apps. Modul ini TIDAK boleh buka
+# posisi baru dari signal cron — kalau tiada, 8 BUY BTCUSD berturut masuk
+# sendiri dalam 7 jam tanpa sesiapa tekan apa-apa.
+# AUTO_ENTRY=0 -> semua order baru disekat. PENGURUSAN posisi sedia ada
+# (break-even SL, partial close di TP1, reconcile, cancel) tetap jalan supaya
+# posisi yang sudah terbuka tak ditinggalkan tanpa perlindungan.
+# AUTO_ENTRY=1 -> tingkah laku lama (hantar order sendiri).
+AUTO_ENTRY = os.environ.get("MT5_AUTO_ENTRY", "0") == "1"
+
 # ---------- kill switch ----------
 # Berhenti hantar order baru bila rugi harian capai had. Posisi sedia ada
 # TIDAK ditutup (biar TP/SL uruskan) — hanya tiada order baru.
@@ -703,7 +713,8 @@ def equity_now():
 def main():
     log(f"START mode={MODE} lot={LOT if RISK_PCT<=0 else 'RISK'+str(RISK_PCT)+'%'} "
         f"max_pending={MAX_PENDING} allow={ALLOW or 'semua'} "
-        f"kill={'OFF' if KILL_PCT <= 0 else str(KILL_PCT) + '%'}")
+        f"kill={'OFF' if KILL_PCT <= 0 else str(KILL_PCT) + '%'} "
+        f"auto_entry={'ON' if AUTO_ENTRY else 'OFF (apps-only)'}")
 
     # ---------- kill switch check ----------
     # Guna BALANCE (realized), bukan equity (floating). Equity swing liar bila
@@ -770,6 +781,14 @@ def main():
     for s in active_signals():
         sid = str(s["id"])
         if sid in seen:
+            continue
+        # Auto-entry dimatikan (owner: auto-trade hanya pada apps). Rekod signal
+        # sebagai "held" supaya tidak diulang setiap kitaran, TANPA hantar apa-apa
+        # ke MT5. Posisi sedia ada masih diurus di bawah.
+        if not AUTO_ENTRY:
+            seen[sid] = {"status": "held", "pair": str(s.get("pair")),
+                         "side": str(s.get("side")),
+                         "reason": "auto-entry off (apps-only)"}
             continue
         if len(pending) + placed >= MAX_PENDING:
             log("capai max pending")
