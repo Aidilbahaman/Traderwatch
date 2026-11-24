@@ -68,7 +68,14 @@ _turnstile_rl_lock = threading.Lock()
 # 5min, so a 20s TTL is safe and cuts repeat calls to ~0ms.
 _BARS_CACHE = {}                    # (pair,tf) -> (ts, candles)
 _BARS_CACHE_LOCK = threading.Lock()
+# Client-facing cache lifetime for /api/bars (unchanged behaviour).
 BARS_CACHE_TTL = 20
+# Prewarm lifetime for the M15 pair cards. Longer than BARS_CACHE_TTL because
+# the prewarm exists only to keep the card sparklines warm; every re-read is a
+# full wine bridge spawn (a fresh MT5 terminal round-trip). M15 bars close once
+# per 15 minutes, so a 60s refresh already over-samples the data. Override with
+# ANALYZE_PREWARM_TTL.
+PREWARM_TTL = float(os.environ.get("ANALYZE_PREWARM_TTL", "60"))
 
 # Live AI activity: siapa sedang minta analisis apa. TTL 60s supaya senarai
 # tidak tersangkut bila sesi terputus. Hanya inisial didedah (privasi).
@@ -648,7 +655,7 @@ def _bars_refresh_loop():
                 now = time.time()
                 with _BARS_CACHE_LOCK:
                     hit = _BARS_CACHE.get(ck)
-                    fresh = bool(hit and now - hit[0] <= BARS_CACHE_TTL - 5)
+                    fresh = bool(hit and now - hit[0] <= PREWARM_TTL - 5)
                 if not fresh:
                     candles = fetch_ohlc(pair, "M15")
                     with _BARS_CACHE_LOCK:
