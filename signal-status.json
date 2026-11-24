@@ -3257,12 +3257,20 @@
    "status": "pending"
   },
   "BTCUSD_20261124_201300": {
-   "status": "pending"
+   "status": "active",
+   "entry_at": "2026-11-24T20:17:00+08:00"
   },
   "XAGUSD_20261124_201206": {
    "status": "active",
    "entry_at": "2026-11-24T20:13:00+08:00"
+  },
+  "BTCUSD_20261124_201803": {
+   "status": "pending"
+  },
+  "XAGUSD_20261124_201657": {
+   "status": "active",
+   "entry_at": "2026-11-24T20:17:00+08:00"
   }
  },
- "updated": "2026-11-24T20:16:03+08:00"
+ "updated": "2026-11-24T20:21:02+08:00"
 }
