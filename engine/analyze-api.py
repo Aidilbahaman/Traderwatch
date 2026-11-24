@@ -634,7 +634,13 @@ class Handler(BaseHTTPRequestHandler):
 
 def _bars_refresh_loop():
     """Keep the 9 pair-card caches warm sequentially (MT5 bridge is serial).
-    Runs in background so no member request ever pays the 1-2s candle read."""
+    Runs in background so no member request ever pays the 1-2s candle read.
+
+    The per-pair sleep sits outside the cache check on purpose. The previous
+    version used `continue` to skip fresh pairs, which also skipped the sleep:
+    whenever all 9 pairs were still cached the loop re-entered `while True`
+    with no wait at all and spun a Python core at ~65% for the 15s between
+    expiry windows (measured 2026-11-24, load 6.6 on 2 vCPU)."""
     while True:
         for pair in ALLOWED_PAIRS:
             ck = (pair, "M15")
@@ -642,13 +648,18 @@ def _bars_refresh_loop():
                 now = time.time()
                 with _BARS_CACHE_LOCK:
                     hit = _BARS_CACHE.get(ck)
-                    if hit and now - hit[0] <= BARS_CACHE_TTL - 5:
-                        continue
-                candles = fetch_ohlc(pair, "M15")
-                with _BARS_CACHE_LOCK:
-                    _BARS_CACHE[ck] = (now, candles)
+                    fresh = bool(hit and now - hit[0] <= BARS_CACHE_TTL - 5)
+                if not fresh:
+                    candles = fetch_ohlc(pair, "M15")
+                    with _BARS_CACHE_LOCK:
+                        _BARS_CACHE[ck] = (now, candles)
             except Exception as e:
                 log(f"bars prewarm {pair} {type(e).__name__}: {str(e)[:80]}")
+            # Sleep on EVERY pass, fresh or not. The old `continue` skipped this
+            # whenever all 9 pairs were still cached, so the loop re-entered
+            # `while True` with no wait: ~65% of a core burned on an empty pass
+            # (measured 2026-11-24, load 6.6 on 2 vCPU). Cadence now identical
+            # to the intended 0.2s-per-pair pace.
             time.sleep(0.2)
 
 
