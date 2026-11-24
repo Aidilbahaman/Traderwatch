@@ -3143,7 +3143,8 @@
    "entry_at": "2026-11-24T19:18:00+08:00"
   },
   "XAUUSD_20261124_190559": {
-   "status": "pending"
+   "status": "active",
+   "entry_at": "2026-11-24T19:21:00+08:00"
   },
   "BTCUSD_20261124_190830": {
    "status": "active",
@@ -3154,14 +3155,23 @@
    "entry_at": "2026-11-24T19:08:00+08:00"
   },
   "BTCUSD_20261124_191346": {
-   "status": "pending"
+   "status": "active",
+   "entry_at": "2026-11-24T19:25:00+08:00"
   },
   "XAGUSD_20261124_191226": {
-   "status": "pending"
+   "status": "active",
+   "entry_at": "2026-11-24T19:25:00+08:00"
   },
   "BTCUSD_20261124_191748": {
    "status": "pending"
+  },
+  "BTCUSD_20261124_192315": {
+   "status": "pending"
+  },
+  "XAGUSD_20261124_192131": {
+   "status": "active",
+   "entry_at": "2026-11-24T19:22:00+08:00"
   }
  },
- "updated": "2026-11-24T19:21:02+08:00"
+ "updated": "2026-11-24T19:26:02+08:00"
 }
