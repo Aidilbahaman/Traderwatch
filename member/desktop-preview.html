@@ -27,13 +27,12 @@ html,body{margin:0;height:100%;overflow:hidden;background:var(--bg);color:var(--
   -webkit-font-smoothing:antialiased;letter-spacing:-.011em}
 
 /* ====== DESKTOP APP SHELL ====== */
-.app{height:100%;display:grid;grid-template-columns:248px 1fr 360px;
-  grid-template-areas:"side main right"}
-@media (max-width:1400px){.app{grid-template-columns:220px 1fr 320px}}
-@media (max-width:1100px){.app{grid-template-columns:220px 1fr;grid-template-areas:"side main"} .right{display:none}}
+.app{height:100%;display:flex;align-items:stretch}
+@media (max-width:1400px){.side{width:220px}.right{width:320px}}
+@media (max-width:1100px){.right{display:none}}
 
 /* --- sidebar --- */
-.side{grid-area:side;background:var(--card);border-right:1px solid var(--line);
+.side{width:248px;flex:none;background:var(--card);border-right:1px solid var(--line);
   display:flex;flex-direction:column;overflow:hidden}
 .side .brand{display:flex;align-items:center;gap:11px;padding:20px 18px 16px;
   border-bottom:1px solid var(--line)}
@@ -66,7 +65,7 @@ html,body{margin:0;height:100%;overflow:hidden;background:var(--bg);color:var(--
   background:var(--card2);border:1px solid var(--line);color:var(--muted);cursor:pointer;font-size:13px}
 
 /* --- main --- */
-.main{grid-area:main;display:flex;flex-direction:column;overflow:hidden}
+.main{flex:1;min-width:0;display:flex;flex-direction:column;overflow:hidden}
 .topbar{display:flex;align-items:center;gap:14px;padding:14px 24px;
   border-bottom:1px solid var(--line);background:var(--card);flex:none}
 .topbar h1{font-size:16px;font-weight:830;letter-spacing:-.02em;margin:0}
@@ -114,7 +113,7 @@ html,body{margin:0;height:100%;overflow:hidden;background:var(--bg);color:var(--
 .risk.high.on .bar i{box-shadow:0 0 8px var(--red)}
 
 /* right rail */
-.right{grid-area:right;background:var(--card);border-left:1px solid var(--line);
+.right{width:360px;flex:none;background:var(--card);border-left:1px solid var(--line);
   display:flex;flex-direction:column;overflow-y:auto}
 .right .sec{padding:18px 18px 10px;font-size:9px;letter-spacing:.14em;color:var(--muted);
   text-transform:uppercase;font-weight:800}
@@ -144,6 +143,54 @@ html,body{margin:0;height:100%;overflow:hidden;background:var(--bg);color:var(--
 /* analisis kad (menunggu) */
 .waitbox{padding:20px;text-align:center;color:var(--muted);font-size:12.5px;line-height:1.6}
 .waitbox b{color:var(--text)}
+
+/* ====== pair list (view 1) ====== */
+.search{flex:0 0 280px;padding:10px 14px;border-radius:12px;border:1px solid var(--line);
+  background:var(--card2);color:var(--text);font:inherit;font-size:13px;outline:0}
+.search:focus{border-color:rgba(183,243,107,.4)}
+.tabs{display:flex;gap:6px;margin-bottom:16px;flex-wrap:wrap}
+.tabs button{border:1px solid var(--line);background:var(--card2);color:var(--muted);
+  padding:6px 14px;border-radius:99px;font-weight:750;font-size:12px;cursor:pointer;
+  font-family:inherit;transition:.15s}
+.tabs button.on{background:var(--lime);color:var(--onlime);border-color:var(--lime)}
+.pairs{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px}
+.pcard{position:relative;text-align:left;padding:14px;border-radius:16px;cursor:pointer;
+  background:var(--card);border:1px solid var(--line);color:var(--text);
+  font-family:inherit;transition:border-color .18s,transform .18s,box-shadow .18s;overflow:hidden}
+.pcard:hover{border-color:rgba(183,243,107,.4);transform:translateY(-2px);
+  box-shadow:0 10px 26px rgba(0,0,0,.32)}
+.pcard:active{transform:scale(.985)}
+.pcard .row1{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.pcard .ic{width:34px;height:34px;border-radius:10px;background:var(--card2);
+  border:1px solid var(--line);display:grid;place-items:center;font-size:10px;
+  font-weight:850;color:var(--lime);flex:none}
+.pcard .nm b{display:block;font-size:14px;font-weight:830;letter-spacing:-.02em}
+.pcard .nm small{display:block;color:var(--muted);font-size:10px;margin-top:1px}
+.pcard .px{font-size:16px;font-weight:830;font-variant-numeric:tabular-nums;
+  letter-spacing:-.03em;margin-bottom:6px}
+.pcard .px i{font-style:normal;font-size:11px;font-weight:750;margin-left:5px}
+.pcard .px i.up{color:var(--lime)}.pcard .px i.dn{color:var(--red)}
+.pcard .spark{display:block;width:100%;height:26px;opacity:.9}
+.pcard .bds{display:flex;justify-content:space-between;gap:6px;margin-top:8px;
+  font-size:9px;font-weight:750;letter-spacing:.02em}
+.pcard .ai{color:var(--blue)}
+.pcard .ai.idle{color:var(--muted);opacity:.6}
+.pcard .tr{color:var(--orange)}
+.pcard .tag{position:absolute;top:10px;right:10px;font-size:8.5px;font-weight:850;
+  letter-spacing:.08em;padding:3px 7px;border-radius:99px;
+  background:rgba(255,107,53,.16);color:#ffa070;border:1px solid rgba(255,107,53,.35)}
+.pcard .tag.soon{background:var(--card2);color:var(--muted);border-color:var(--line)}
+.pcard.hot{border-color:rgba(255,107,53,.30)}
+.pcard.hot::after{content:"";position:absolute;inset:-40% -10%;pointer-events:none;
+  background:radial-gradient(ellipse at 50% 0%,rgba(255,107,53,.10),transparent 60%)}
+
+/* ====== detail (view 2) ====== */
+.detail{flex:1;min-height:0;display:flex;flex-direction:column;overflow:hidden}
+.detail.hidden{display:none!important}
+.back{width:34px;height:34px;border-radius:10px;background:var(--card2);border:1px solid var(--line);
+  color:var(--text);cursor:pointer;font-size:16px;flex:none;transition:.15s}
+.back:hover{border-color:rgba(183,243,107,.4);color:var(--lime)}
+.detail .hero h2{display:flex;align-items:center;gap:10px}
 
 /* mobile guard: preview ini desktop sahaja */
 @media (max-width:840px){
@@ -181,52 +228,125 @@ html,body{margin:0;height:100%;overflow:hidden;background:var(--bg);color:var(--
 
   <!-- MAIN -->
   <main class="main">
+    <!-- VIEW 1: pair list -->
     <header class="topbar">
-      <h1>XAUUSD <span style="color:var(--muted);font-weight:650">· Gold / US Dollar</span></h1>
+      <h1>Market</h1>
       <span class="pill">LIVE</span>
       <span class="sp"></span>
       <button class="tb" title="Theme">☾</button>
       <button class="tb" title="Sound">♪</button>
     </header>
 
-    <div class="scroll">
+    <div class="scroll" id="viewList">
       <div class="hero">
-        <h2>Gold <em>analysis</em></h2>
+        <h2>Hai, <em>Trader</em></h2>
         <span class="sp2"></span>
-        <div class="tf">
-          <button>M1</button><button>M5</button><button>M15</button><button class="on">H1</button>
-        </div>
+        <input class="search" placeholder="Cari pair…" aria-label="Cari pair">
       </div>
 
-      <div class="grid2">
-        <div class="panel">
-          <div class="lab">Real OHLC chart · H1</div>
-          <div class="chartbox">Chart OHLC sebenar di sini</div>
+      <div class="tabs">
+        <button class="on">All</button><button>Commodity</button><button>Forex</button>
+        <button>Crypto</button><button>Indices</button>
+      </div>
 
-          <div style="margin-top:14px">
-            <div class="lab">Manage your risk</div>
-            <div class="risks">
-              <div class="risk low"><b>Low</b><small>Tight scan</small><div class="bar"><i></i></div></div>
-              <div class="risk med on"><b>Medium</b><small>Default</small><div class="bar"><i></i></div></div>
-              <div class="risk high"><b>High</b><small>Gate off</small><div class="bar"><i></i></div></div>
-            </div>
+      <div class="pairs">
+        <!-- pair card 1 -->
+        <button class="pcard hot" data-open="1">
+          <span class="tag">🔥 12</span>
+          <div class="row1"><span class="ic">XAU</span><div class="nm"><b>XAUUSD</b><small>Gold / US Dollar</small></div></div>
+          <div class="px">3,650.04 <i class="up">+0.41%</i></div>
+          <svg class="spark" viewBox="0 0 100 26" preserveAspectRatio="none"><polyline points="0,20 8,18 16,21 24,16 32,14 40,17 48,12 56,10 64,13 72,9 80,7 88,10 100,6" fill="none" stroke="#b7f36b" stroke-width="1.6"/></svg>
+          <div class="bds"><span class="ai">✦ 6 today</span><span class="tr">🔥 24 traders</span></div>
+        </button>
+        <!-- pair card 2 -->
+        <button class="pcard" data-open="1">
+          <span class="tag soon">SOON</span>
+          <div class="row1"><span class="ic">XAG</span><div class="nm"><b>XAGUSD</b><small>Silver / US Dollar</small></div></div>
+          <div class="px">41.28 <i class="dn">−0.12%</i></div>
+          <svg class="spark" viewBox="0 0 100 26" preserveAspectRatio="none"><polyline points="0,14 10,16 20,13 30,18 40,15 50,19 60,14 70,17 80,12 90,15 100,11" fill="none" stroke="#ff777d" stroke-width="1.6"/></svg>
+          <div class="bds"><span class="ai idle">✦ 0</span></div>
+        </button>
+        <!-- pair card 3 -->
+        <button class="pcard" data-open="1">
+          <div class="row1"><span class="ic">BTC</span><div class="nm"><b>BTCUSD</b><small>Bitcoin</small></div></div>
+          <div class="px">61,420 <i class="up">+1.84%</i></div>
+          <svg class="spark" viewBox="0 0 100 26" preserveAspectRatio="none"><polyline points="0,22 10,19 20,20 30,15 40,17 50,11 60,13 70,8 80,10 90,5 100,4" fill="none" stroke="#b7f36b" stroke-width="1.6"/></svg>
+          <div class="bds"><span class="ai">✦ 3 today</span><span class="tr">🔥 9 traders</span></div>
+        </button>
+        <!-- pair card 4 -->
+        <button class="pcard" data-open="1">
+          <div class="row1"><span class="ic">EUR</span><div class="nm"><b>EURUSD</b><small>Euro / US Dollar</small></div></div>
+          <div class="px">1.0842 <i class="dn">−0.06%</i></div>
+          <svg class="spark" viewBox="0 0 100 26" preserveAspectRatio="none"><polyline points="0,12 10,14 20,11 30,13 40,16 50,14 60,17 70,15 80,18 90,16 100,19" fill="none" stroke="#ff777d" stroke-width="1.6"/></svg>
+          <div class="bds"><span class="ai idle">✦ 0</span></div>
+        </button>
+        <!-- pair card 5 -->
+        <button class="pcard" data-open="1">
+          <div class="row1"><span class="ic">GBP</span><div class="nm"><b>GBPUSD</b><small>Pound / US Dollar</small></div></div>
+          <div class="px">1.2715 <i class="up">+0.09%</i></div>
+          <svg class="spark" viewBox="0 0 100 26" preserveAspectRatio="none"><polyline points="0,16 10,15 20,17 30,14 40,15 50,12 60,14 70,11 80,13 90,10 100,9" fill="none" stroke="#b7f36b" stroke-width="1.6"/></svg>
+          <div class="bds"><span class="ai idle">✦ 0</span></div>
+        </button>
+        <!-- pair card 6 -->
+        <button class="pcard" data-open="1">
+          <div class="row1"><span class="ic">USD</span><div class="nm"><b>USDJPY</b><small>US Dollar / Yen</small></div></div>
+          <div class="px">159.12 <i class="up">+0.22%</i></div>
+          <svg class="spark" viewBox="0 0 100 26" preserveAspectRatio="none"><polyline points="0,20 10,18 20,21 30,17 40,19 50,15 60,18 70,14 80,16 90,12 100,10" fill="none" stroke="#b7f36b" stroke-width="1.6"/></svg>
+          <div class="bds"><span class="ai idle">✦ 0</span></div>
+        </button>
+      </div>
+    </div>
+
+    <!-- VIEW 2: pair detail (sembunyi mula) -->
+    <div class="detail hidden" id="viewDetail">
+      <header class="topbar" style="display:none" id="detailBar">
+        <button class="back" id="backBtn" title="Kembali">←</button>
+        <h1>XAUUSD <span style="color:var(--muted);font-weight:650">· Gold / US Dollar</span></h1>
+        <span class="pill">LIVE</span>
+        <span class="sp"></span>
+        <button class="tb">☾</button>
+        <button class="tb">♪</button>
+      </header>
+
+      <div class="scroll">
+        <div class="hero">
+          <h2>3,650.04 <i class="up" style="font-size:15px;font-style:normal;color:var(--lime)">+0.41%</i></h2>
+          <span class="sp2"></span>
+          <div class="tf">
+            <button>M1</button><button>M5</button><button class="on">M15</button><button>H1</button>
           </div>
-
-          <button style="width:100%;margin-top:14px;padding:14px;border-radius:14px;border:0;
-            background:var(--lime);color:var(--onlime);font-weight:800;font-size:14px;cursor:pointer;
-            font-family:inherit">✦ Analyze with AI</button>
         </div>
 
-        <div class="panel" style="display:flex;flex-direction:column">
-          <div class="lab">Confluence checklist</div>
-          <div class="waitbox" style="flex:1;display:grid;place-items:center">
-            Belum ada analisis.<br>
-            <b>Tekan "Analyze with AI"</b><br>untuk mula imbasan H1.
+        <div class="grid2">
+          <div class="panel">
+            <div class="lab">Real OHLC chart · M15</div>
+            <div class="chartbox">Chart OHLC sebenar di sini</div>
+
+            <div style="margin-top:14px">
+              <div class="lab">Manage your risk</div>
+              <div class="risks">
+                <div class="risk low"><b>Low</b><small>Tight scan</small><div class="bar"><i></i></div></div>
+                <div class="risk med on"><b>Medium</b><small>Default</small><div class="bar"><i></i></div></div>
+                <div class="risk high"><b>High</b><small>Gate off</small><div class="bar"><i></i></div></div>
+              </div>
+            </div>
+
+            <button style="width:100%;margin-top:14px;padding:14px;border-radius:14px;border:0;
+              background:var(--lime);color:var(--onlime);font-weight:800;font-size:14px;cursor:pointer;
+              font-family:inherit">✦ Analyze with AI</button>
+          </div>
+
+          <div class="panel">
+            <div class="lab">Confluence checklist</div>
+            <div class="waitbox" style="flex:1;display:grid;place-items:center">
+              Belum ada analisis.<br>
+              <b>Tekan "Analyze with AI"</b><br>untuk mula imbasan M15.
+            </div>
           </div>
         </div>
       </div>
     </div>
-  </main>
+    </main>
 
   <!-- RIGHT RAIL -->
   <aside class="right">
@@ -256,5 +376,55 @@ html,body{margin:0;height:100%;overflow:hidden;background:var(--bg);color:var(--
 
 <div class="mob"><b>Preview ini untuk desktop.</b><br>Buka pada skrin > 840px untuk lihat layout penuh. Mobile app tak berubah.</div>
 
+<script>
+(function(){
+  var list=document.getElementById('viewList'),
+      det=document.getElementById('viewDetail'),
+      back=document.getElementById('backBtn');
+  var listBar=document.querySelector('.main > .topbar'),
+      detBar=document.getElementById('detailBar');
+  document.querySelectorAll('.pcard').forEach(function(c){
+    c.addEventListener('click',function(){
+      list.style.display='none';
+      listBar.style.display='none';
+      detBar.style.display='flex';
+      det.classList.remove('hidden');
+      det.querySelector('.scroll').scrollTop=0;
+    });
+  });
+  back.addEventListener('click',function(){
+    det.classList.add('hidden');
+    detBar.style.display='none';
+    listBar.style.display='flex';
+    list.style.display='';
+  });
+  document.addEventListener('keydown',function(e){
+    if(e.key==='Escape'&&!det.classList.contains('hidden')) back.click();
+  });
+  // TF tabs dummy toggle (kedua-dua view)
+  document.querySelectorAll('.tf').forEach(function(g){
+    g.querySelectorAll('button').forEach(function(b){
+      b.addEventListener('click',function(){
+        g.querySelectorAll('button').forEach(function(x){x.classList.remove('on')});
+        b.classList.add('on');
+      });
+    });
+  });
+  document.querySelectorAll('.risk').forEach(function(r){
+    r.addEventListener('click',function(){
+      r.parentNode.querySelectorAll('.risk').forEach(function(x){x.classList.remove('on')});
+      r.classList.add('on');
+    });
+  });
+  document.querySelectorAll('.tabs').forEach(function(g){
+    g.querySelectorAll('button').forEach(function(b){
+      b.addEventListener('click',function(){
+        g.querySelectorAll('button').forEach(function(x){x.classList.remove('on')});
+        b.classList.add('on');
+      });
+    });
+  });
+})();
+</script>
 </body>
 </html>
