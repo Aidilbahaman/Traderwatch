@@ -80,10 +80,9 @@
         el.onclick = function () { el.remove(); el = null; last = null; };
         (document.body || document.documentElement).appendChild(el);
       }
-      var models = (s.models || []).join(", ");
       var when = s.checked_at ? new Date(s.checked_at).toLocaleTimeString() : "";
       el.innerHTML = "⚠ <b>AI SIGNAL ENGINE OFFLINE</b> — " +
-        "semua model gagal. " + (models ? "Model: " + models + ". " : "") +
+        "semua model TraderWatch AI gagal. " +
         (when ? "Sejak " + when + ". " : "") +
         "Hubungi dev / tukar LLM aktif. <span style='opacity:.7'>(ketuk untuk tutup)</span>";
     }
