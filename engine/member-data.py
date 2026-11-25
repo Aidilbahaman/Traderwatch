@@ -43,6 +43,12 @@ PAIRS = {
     "XAUUSD": ("XAU", "M15"),
     "BTCUSD": ("BTC", "M15"),
     "XAGUSD": ("XAG", "M15"),
+    "EURUSD": ("EUR", "M15"),
+    "GBPUSD": ("GBP", "M15"),
+    "USDJPY": ("JPY", "M15"),
+    "AUDUSD": ("AUD", "M15"),
+    "USDCAD": ("CAD", "M15"),
+    "NZDUSD": ("NZD", "M15"),
 }
 
 MT5_CMD = [
@@ -105,17 +111,23 @@ def price_block():
         day = day or rows[-24:]
         hi = max(float(r["h"]) for r in day)
         lo = min(float(r["l"]) for r in day)
-        pip = 0.1 if pair in ("XAUUSD", "USOIL") else 1.0
+        # Decimal places must match the frontend's PAIRS[].d (fx()).
+        # flat round(...,2) made EURUSD 1.09411 -> 1.09, silently destroying
+        # 3 significant digits for the 6 forex pairs added 2026-11-25.
+        digits = {"XAUUSD": 2, "XAGUSD": 3, "BTCUSD": 2,
+                  "USDJPY": 3, "EURUSD": 4, "GBPUSD": 4,
+                  "AUDUSD": 4, "USDCAD": 4, "NZDUSD": 4}.get(pair, 4)
+        pip = 0.1 if pair in ("XAUUSD", "USOIL") else (0.001 if pair == "XAGUSD" else 0.0001)
         out[sym] = {
             "pair": pair,
-            "price": round(disp_price, 2),
+            "price": round(disp_price, digits),
             "price_src": "mt5-live",
             "change_pct": round(change, 2),
-            "high": round(hi, 2),
-            "low": round(lo, 2),
+            "high": round(hi, digits),
+            "low": round(lo, digits),
             "range_pips": int(round((hi - lo) / pip)),
             "ts": datetime.now(timezone.utc).isoformat(),
-            "spark": [round(float(r["c"]), 2) for r in rows[-48:]],
+            "spark": [round(float(r["c"]), digits) for r in rows[-48:]],
         }
     # nearest support / resistance + trend from H1 swing structure
     for pair, (sym, _) in PAIRS.items():
@@ -129,7 +141,7 @@ def price_block():
         lows = [float(r["l"]) for r in h1]
         res = [x for x in sorted(set(highs)) if x > px]
         sup = [x for x in sorted(set(lows), reverse=True) if x < px]
-        pip = 0.1 if pair in ("XAUUSD", "USOIL") else 1.0
+        pip = 0.1 if pair in ("XAUUSD", "USOIL") else (0.001 if pair == "XAGUSD" else 0.0001)
         if sup:
             out[sym]["support"] = round(sup[0], 2)
             out[sym]["support_pips"] = int(round((px - sup[0]) / pip))

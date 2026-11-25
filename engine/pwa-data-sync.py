@@ -32,7 +32,11 @@ TARGETS = [
     os.path.join(REPO, "data"),
 ]
 FEEDS = ["signal-status.json", "landing-signal.json"]
-CHART_PAIRS = [("XAUUSD", "xauusd"), ("XAGUSD", "xagusd"), ("BTCUSD", "btcusd")]
+CHART_PAIRS = [
+    ("XAUUSD", "xauusd"), ("XAGUSD", "xagusd"), ("BTCUSD", "btcusd"),
+    ("EURUSD", "eurusd"), ("GBPUSD", "gbpusd"), ("USDJPY", "usdjpy"),
+    ("AUDUSD", "audusd"), ("USDCAD", "usdcad"), ("NZDUSD", "nzdusd"),
+]
 BAR_LIMIT = 120
 MT5_CMD = [
     "sudo", "-n", "-u", "mt5", "/usr/bin/env",
