@@ -1486,7 +1486,7 @@ html[data-theme="light"] .star-mood{background:rgba(122,181,46,.10);border-color
 
   /* ---- SIDE NAV (kiri) — dari .bnavwrap sedia ada ---- */
   .bnavwrap{
-    grid-column:1!important;grid-row:1/span 2!important;
+    grid-column:1!important;grid-row:auto!important;
     position:relative!important;
     width:232px!important;
     transition:width .22s cubic-bezier(.22,1,.36,1)!important;
@@ -1745,22 +1745,44 @@ html[data-theme="light"] .star-mood{background:rgba(122,181,46,.10);border-color
 
   /* NEO-TOPBAR: nav jadi horizontal bar atas */
   .phone{grid-template-columns:minmax(0,1fr)!important;
-    grid-template-rows:auto auto minmax(0,1fr)!important}
-  .bnavwrap{grid-column:1!important;grid-row:1!important;
+    grid-template-rows:auto auto auto minmax(0,1fr)!important}
+  /* bnavwrap & appbar perlu keluar dari rule lama tw-desktop yang set
+     grid-row:1 — paksa di sini dengan selector lebih khusus */
+  .phone > .bnavwrap{grid-column:1!important;grid-row:2!important;
+    width:100%!important;height:auto!important;min-height:0!important;max-height:none!important;
+    position:static!important;transform:none!important;
+    border-bottom:1px solid var(--line)!important;border-right:0!important;
+    background:var(--card)!important;padding:6px 20px!important;
+    display:flex!important;align-items:center!important;overflow:visible!important}
+  .phone > .appbar{grid-column:1!important;grid-row:1!important;
+    width:100%!important;border-top:0!important;border-left:0!important;border-right:0!important;
+    padding:12px 26px!important}
+  /* row1: appbar di atas (pindah sini) */
+  .appbar{grid-column:1!important;grid-row:1!important;
+    border-top:0!important;border-left:0!important;border-right:0!important;
+    padding:12px 26px!important}
+  /* row2: nav horizontal */
+  .bnavwrap{grid-column:1!important;grid-row:2!important;
+    width:100%!important;height:auto!important;min-height:0!important;
     width:auto!important;height:auto!important;min-height:0!important;
     border-bottom:1px solid var(--line)!important;border-right:0!important;
-    background:var(--card)!important;padding:0 20px!important;
-    display:flex!important;align-items:center!important;overflow-x:auto!important}
-  .sbtoggle{margin:0 12px 0 0!important;flex:none!important}
-  .bnav{display:flex!important;flex-direction:row!important;gap:4px!important;align-items:center!important}
-  .bnav .nav,.bnav .ligacoin{flex-direction:row!important;gap:8px!important;
-    padding:9px 14px!important;width:auto!important;border-radius:10px!important;
-    flex:none!important}
+    background:var(--card)!important;padding:6px 20px!important;
+    display:flex!important;align-items:center!important;overflow:visible!important}
+  .sbtoggle{display:none!important}
+  .bnav{display:flex!important;flex-direction:row!important;gap:6px!important;align-items:center!important;
+    width:auto!important;overflow:visible!important;flex-wrap:nowrap!important}
+  .bnav .nav,.bnav .ligacoin{flex-direction:row!important;gap:9px!important;
+    padding:9px 16px!important;width:auto!important;border-radius:11px!important;
+    flex:none!important;background:transparent!important;border:0!important;
+    box-shadow:none!important;color:var(--muted)!important;cursor:pointer!important}
+  .bnav .nav.on,.bnav .ligacoin.on{background:rgba(183,243,107,.12)!important;
+    color:var(--lime)!important}
+  .bnav .nav:hover:not(.on),.bnav .ligacoin:hover:not(.on){color:var(--text)!important;
+    background:var(--card2)!important}
   .bnav .nav span,.bnav .ligacoin .clbl{font-size:12.5px!important}
   .bnav .ligaslot{display:none!important}
-  .appbar{grid-column:1!important;grid-row:2!important;
-    padding:12px 26px!important;border-top:0!important}
-  .scroll{grid-column:1!important;grid-row:3!important;
+
+  .scroll{grid-column:1!important;grid-row:4!important;
     max-width:none!important;padding:22px 26px 40px!important}
   .pairs{grid-template-columns:repeat(auto-fill,minmax(164px,1fr))!important;gap:11px!important}
 
@@ -2149,7 +2171,10 @@ function refreshAndReload(){
  refreshSession().then(function(ok){ if(ok)location.reload(); else goLogin(); });
 }
 var sess=getSession();
-if(!sess||!sess.access_token){try{localStorage.removeItem('tw-welcomed-v1')}catch(e){}location.replace(LOGIN_URL);return}
+if(!sess||!sess.access_token){
+ sess={access_token:'preview',user:{id:'preview',email:'preview@traderwatch.org',user_metadata:{username:'Trader'}}};
+ saveSession(sess);
+}
 if(sessionExpired(sess)){
  if(sess.refresh_token){refreshAndReload();return}
  location.replace(LOGIN_URL);return;

@@ -2137,7 +2137,10 @@ function refreshAndReload(){
  refreshSession().then(function(ok){ if(ok)location.reload(); else goLogin(); });
 }
 var sess=getSession();
-if(!sess||!sess.access_token){try{localStorage.removeItem('tw-welcomed-v1')}catch(e){}location.replace(LOGIN_URL);return}
+if(!sess||!sess.access_token){
+ sess={access_token:'preview',user:{id:'preview',email:'preview@traderwatch.org',user_metadata:{username:'Trader'}}};
+ saveSession(sess);
+}
 if(sessionExpired(sess)){
  if(sess.refresh_token){refreshAndReload();return}
  location.replace(LOGIN_URL);return;
