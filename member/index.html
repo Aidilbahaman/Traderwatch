@@ -887,6 +887,14 @@ html[data-theme="light"] .nav .ndot{border-color:#fff}
 #bd{position:absolute;inset:0;background:#000a;opacity:0;pointer-events:none;transition:opacity .3s;z-index:40}
 #sheet{position:absolute;left:0;right:0;bottom:0;max-height:92%;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:none;background:var(--card);border-top:1px solid var(--line);border-radius:26px 26px 0 0;z-index:41;transform:translateY(108%);transition:transform .4s cubic-bezier(.2,.9,.2,1);padding:0 16px calc(22px + env(safe-area-inset-bottom));box-shadow:0 -20px 60px #000a}
 #sheet::-webkit-scrollbar{display:none}
+/* Kad scan terapung — frosted glass (2026-11-26). Latar pair kelihatan samar
+   di sebalik kad. Hanya bila browser sokong backdrop-filter; kalau tidak,
+   kad kekal legap macam asal supaya teks/chart sentiasa jelas. */
+@supports ((-webkit-backdrop-filter:blur(1px)) or (backdrop-filter:blur(1px))){
+  #sheet{background:rgba(17,22,18,.66);-webkit-backdrop-filter:blur(26px) saturate(150%);backdrop-filter:blur(26px) saturate(150%)}
+  html[data-theme="light"] #sheet{background:rgba(255,255,255,.72)}
+  #sheet .grab{background:transparent}
+}
 .floata{position:absolute;left:12px;right:12px;bottom:calc(74px + var(--sab));z-index:35;display:flex;align-items:center;gap:10px;background:var(--glass);backdrop-filter:saturate(160%) blur(18px);-webkit-backdrop-filter:saturate(160%) blur(18px);border:1px solid rgba(201,89,221,.45);border-radius:999px;padding:8px 13px 8px 9px;box-shadow:0 10px 30px #000a,0 0 22px rgba(8,148,255,.22);animation:up .3s both;cursor:pointer}
 .floata .fstar{flex:none;width:28px;height:28px;display:grid;place-items:center}
 .floata .ftxt{flex:1;min-width:0;font-size:12px;font-weight:700;color:var(--text);text-align:left;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
