@@ -230,9 +230,12 @@ html[data-theme="light"] .composer:focus-within{border-color:rgba(104,166,34,.55
 .send{width:40px;height:40px;flex:none;border-radius:50%;background:var(--lime);color:var(--onlime);display:grid;place-items:center;box-shadow:0 0 16px #b7f36b38;transition:transform .14s cubic-bezier(.22,1,.36,1),box-shadow .18s}
 .send:active{transform:scale(.92)}
 .send:disabled{opacity:.45}
-html.kb-open .bnavwrap{transform:translateY(110%);opacity:0;pointer-events:none}
+html.kb-open .bnavwrap,html.kb-focus .bnavwrap{transform:translateY(110%);opacity:0;pointer-events:none}
 .bnavwrap{transition:transform .22s cubic-bezier(.22,1,.36,1),opacity .18s ease}
 html.kb-open .composer{bottom:calc(var(--kb-h,0px) + 10px)}
+/* Focus tanpa resize (sesetengah keyboard Android): composer naik ikut saved KB */
+html.kb-focus:not(.kb-open) .composer{bottom:calc(var(--kb-h,0px) + 10px)}
+html.kb-focus:not(.kb-open) .scroll.com{padding-bottom:78px}
 html.is-android.kb-open .scroll.com{padding-bottom:78px}
 html.kb-pre .composer,html.kb-pre .dm-comp{transition:none !important;animation:compFloat .2s cubic-bezier(.22,1,.36,1) both}
 @keyframes compFloat{from{opacity:.85;transform:translate3d(0,14px,0) scale(.985)}to{opacity:1;transform:translate3d(0,0,0) scale(1)}}
@@ -271,11 +274,29 @@ html.kb-pre .composer,html.kb-pre .dm-comp{transition:none !important;animation:
 /* orbit state: section memenuhi tinggi scroll penuh (kalau tidak, sheet absolute bottom:0 tergantung
    di tengah dan meninggalkan kawasan gelap antara tabs dan bnav — bug screenshot iPhone) */
 #view-friends.st-orbit{min-height:var(--frs-h,calc(100vh - 130px))}
-#view-friends.st-orbit .orb-sheet{position:absolute;left:0;right:0;bottom:0;transform:translateY(calc(100% - 92px));padding-top:6px;z-index:9;box-shadow:0 -18px 40px #000a}
+#view-friends.st-orbit .orb-sheet{position:absolute;left:0;right:0;bottom:0;transform:translateY(calc(100% - 92px));padding-top:6px;z-index:9;box-shadow:0 -18px 40px rgba(0,0,0,.4)}
+html[data-theme="light"] #view-friends.st-orbit .orb-sheet{box-shadow:0 -18px 40px rgba(20,33,26,.14)}
 #view-friends.st-orbit .orb-sheet .orb-grip .glab::after{content:" ⌃"}
 #view-friends.st-orbit .orb-ring.r1{width:150px;height:150px}
-#view-friends.st-orbit .orb-ring.r2{width:260px;height:260px}
+/* ring orbit ikut bond stage (eliptical) — bulat tetap 260px keluar tepi & terclip (bug "lari") */
+#view-friends.st-orbit .orb-ring.r2{width:min(78%,300px);height:min(52%,240px)}
+#view-friends.st-orbit .orb-stage{--ocx:50%;--ocy:44%}
+#view-friends.st-orbit .orb-ring,#view-friends.st-orbit .orb-core{top:44%}
 #view-friends.st-orbit .orb-core{width:52px;height:52px}
+/* ===== walking orbit (orbit state): node berjalan ikut laluan, label disembunyikan ===== */
+#view-friends.st-orbit .orb-node{offset-path:circle(38% at 50% 44%);left:auto;top:auto;offset-rotate:0deg}
+#view-friends.st-orbit .orb-node span{display:none}
+#view-friends.st-orbit .orb-node .walk-tag{display:block}
+#view-friends.st-orbit .orb-node{animation:walkOrbit var(--wdur,26s) linear infinite;animation-delay:var(--wdel,0s)}
+@keyframes walkOrbit{from{offset-distance:var(--wdist,0%)}to{offset-distance:calc(var(--wdist,0%) + 100%)}}
+/* fallback: tiada offset-path (Safari lama) — node statik, label kekal */
+@supports not (offset-path:circle(50% at 50% 50%)){
+ #view-friends.st-orbit .orb-node{left:var(--wl,50%);top:var(--wt,40%);animation:none}
+ #view-friends.st-orbit .orb-node span{display:block}
+}
+@media (prefers-reduced-motion:reduce){
+ #view-friends.st-orbit .orb-node{animation:none;left:var(--wl,50%);top:var(--wt,40%)}
+}
 /* drag-follow mode (jari di skrin) — transition dimatikan supaya ikut jari 1:1 */
 #view-friends.dragging .orb-stage,#view-friends.dragging .orb-sheet{transition:none}
 html[data-theme="light"] .orb-stage::before{background:radial-gradient(circle at 50% 48%,rgba(122,181,46,.16),transparent 60%)}
@@ -285,6 +306,14 @@ html[data-theme="light"] .orb-stage::before{background:radial-gradient(circle at
 .orb-core{position:absolute;left:50%;top:48%;transform:translate(-50%,-50%);z-index:2;width:44px;height:44px;border-radius:50%;background:radial-gradient(circle,#1b281c,#0e140f);border:1px solid rgba(183,243,107,.42);display:grid;place-items:center;box-shadow:0 0 28px rgba(183,243,107,.24);animation:orbCoreB 3.6s ease-in-out infinite}
 html[data-theme="light"] .orb-core{background:radial-gradient(circle,#eef7e2,#dcecc6);border-color:rgba(122,181,46,.45);box-shadow:0 6px 20px rgba(122,181,46,.18)}
 @keyframes orbCoreB{0%,100%{transform:translate(-50%,-50%) scale(1)}50%{transform:translate(-50%,-50%) scale(1.05)}}
+/* ===== Starling scan mode (orbit state) — dua ring berputar + garis radar sapu ===== */
+.orb-core .scan-ring{position:absolute;inset:-9px;border-radius:50%;border:1.5px solid rgba(183,243,107,.55);border-top-color:transparent;border-left-color:transparent;opacity:0;transition:opacity .3s;pointer-events:none;animation:scanSpin 1.4s linear infinite}
+.orb-core .scan-ring.r2{inset:-17px;border-width:1px;border-style:dashed;border-color:rgba(183,243,107,.3);animation:scanSpin 2.2s linear infinite reverse}
+.orb-core .scan-line{position:absolute;left:16%;right:16%;height:2px;top:18%;border-radius:2px;background:linear-gradient(90deg,transparent,#b7f36b,transparent);box-shadow:0 0 8px rgba(183,243,107,.6);opacity:0;transition:opacity .3s;pointer-events:none;animation:scanSweep 1.6s ease-in-out infinite}
+#view-friends.st-orbit .orb-core .scan-ring,#view-friends.st-orbit .orb-core .scan-line{opacity:1}
+@keyframes scanSpin{to{transform:rotate(360deg)}}
+@keyframes scanSweep{0%{top:16%;opacity:.15}15%{opacity:.9}85%{opacity:.9}100%{top:80%;opacity:.15}}
+@media (prefers-reduced-motion:reduce){.orb-core .scan-ring,.orb-core .scan-line{animation:none;opacity:0 !important}}
 .orb-meta{position:absolute;top:8px;left:16px;right:16px;display:flex;align-items:center;justify-content:space-between;gap:8px;z-index:5}
 .orb-pill{display:inline-flex;align-items:center;gap:6px;padding:6px 11px;border-radius:999px;background:var(--glass);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border:1px solid var(--line);font-size:11.5px;font-weight:700;color:var(--text)}
 .orb-pill i{width:6px;height:6px;border-radius:50%;background:var(--lime);box-shadow:0 0 8px var(--lime);animation:pulseDot 1.8s infinite}
@@ -1062,6 +1091,9 @@ html[data-theme="light"] .lotbadge{color:#4c7a17}
  background:linear-gradient(90deg,transparent,#b7f36b,transparent);animation:spSlide 1.15s cubic-bezier(.45,0,.25,1) infinite}
 @keyframes spSlide{0%{transform:translateX(-120%)}100%{transform:translateX(390%)}}
 @media(prefers-reduced-motion:reduce){#splash .sp-bar i{animation:none;width:100%;opacity:.5}}
+html[data-theme="light"] #splash{background:#f5f7f5}
+html[data-theme="light"] #splash .sp-name{color:#14211a}
+html[data-theme="light"] #splash .sp-star{filter:drop-shadow(0 0 22px #7ab52e44)}
 </style>
 
 <style id="tw-risk">
@@ -1208,8 +1240,12 @@ html[data-theme="light"] .chipc.scan{
 /* ===== Starling AI Buddy across Member App ===== */
 .greet-row{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:4px 0 4px}
 .greet-tx{min-width:0;flex:1}
-.greet-tx h1{margin:0 0 4px}
+.greet-tx h1{margin:0}
 .greet-tx .sub{margin:0}
+/* Starling duduk sejajar greet, sedikit naik & keluar dari tepi supaya
+   rasa "perched" atas header, bukan terapung jauh */
+.greet-row .st-buddy{width:58px;height:58px;margin:-6px -6px 0 0}
+.greet-row .st-buddy svg{width:54px;height:54px}
 .st-buddy{
   position:relative;flex:none;width:54px;height:54px;padding:0;border:0;background:none;
   display:grid;place-items:center;cursor:pointer;-webkit-tap-highlight-color:transparent;
@@ -1462,7 +1498,6 @@ html[data-theme="light"] .star-mood{background:rgba(122,181,46,.10);border-color
         <div class="greet-row">
           <div class="greet-tx">
             <h1 id="greet">Hai, <span>Trader</span></h1>
-            <p class="sub" id="greetSub">Pilih pair — AI baca chart dan lukis Entry, SL &amp; TP untuk anda.</p>
           </div>
           <button class="st-buddy" id="homeStarling" type="button" aria-label="Starling AI Buddy"></button>
         </div>
@@ -1839,7 +1874,7 @@ var hap=function(m){try{navigator.vibrate&&navigator.vibrate(m)}catch(e){}};
 /* ---------------- i18n ---------------- */
 var DICT={
  ms:{
-  greet:'Hai, ',gM:'Selamat Pagi',gA:'Selamat Tengah Hari',gE:'Selamat Petang',trader:'Trader',greetSub:'Pilih pair — AI baca chart dan lukis Entry, SL & TP untuk anda.',
+  greet:'Hai, ',gM:'Selamat Pagi',gA:'Selamat Tengah Hari',gE:'Selamat Petang',trader:'Trader',
   navAnalyst:'Analyst',navCommunity:'Komuniti',navFriends:'Rakan',navProfile:'Profil',navSettings:'Tetapan',
   search:'Cari pair…',noPairs:'Tiada pair dijumpai.',hint:'Pilih pair untuk analisis AI masa sebenar.',all:'Semua',commodity:'Komoditi',forex:'Forex',crypto:'Crypto',indices:'Indeks',
   soon:'Belum dibuka',notOpen:'Pair ini belum dibuka untuk analisis AI. Cuba pair di bawah.',
@@ -1888,7 +1923,7 @@ var DICT={
   loggingOut:'Melog keluar…',langNative:'Bahasa Melayu'
  },
  en:{
-  greet:'Hi, ',gM:'Good Morning',gA:'Good Afternoon',gE:'Good Evening',trader:'Trader',greetSub:'Pick a pair — AI reads the chart and draws Entry, SL & TP for you.',
+  greet:'Hi, ',gM:'Good Morning',gA:'Good Afternoon',gE:'Good Evening',trader:'Trader',
   navAnalyst:'Analyst',navCommunity:'Community',navFriends:'Friends',navProfile:'Profile',navSettings:'Settings',
   search:'Search pairs…',noPairs:'No pairs found.',hint:'Choose a pair for real-time AI analysis.',all:'All',commodity:'Commodities',forex:'Forex',crypto:'Crypto',indices:'Indices',
   soon:'Not open yet',notOpen:'This pair is not open for AI analysis yet. Try a pair below.',
@@ -1937,7 +1972,7 @@ var DICT={
   loggingOut:'Signing out…',langNative:'English'
  },
  zh:{
-  greet:'你好，',gM:'早上好',gA:'下午好',gE:'晚上好',trader:'交易者',greetSub:'选择货币对——AI 读取图表并为您绘制入场、止损与止盈。',
+  greet:'你好，',gM:'早上好',gA:'下午好',gE:'晚上好',trader:'交易者',
   navAnalyst:'分析',navCommunity:'社区',navFriends:'好友',navProfile:'个人资料',navSettings:'设置',
   search:'搜索货币对…',noPairs:'未找到货币对。',hint:'选择货币对进行实时 AI 分析。',all:'全部',commodity:'商品',forex:'外汇',crypto:'加密货币',indices:'指数',
   soon:'尚未开放',notOpen:'该货币对尚未开放 AI 分析。请尝试下方货币对。',
@@ -1984,7 +2019,7 @@ var DICT={
   loggingOut:'正在退出…',langNative:'中文'
  },
  id:{
-  greet:'Hai, ',gM:'Selamat Pagi',gA:'Selamat Siang',gE:'Selamat Malam',trader:'Trader',greetSub:'Pilih pair — AI membaca chart dan lukis Entry, SL & TP untuk anda.',
+  greet:'Hai, ',gM:'Selamat Pagi',gA:'Selamat Siang',gE:'Selamat Malam',trader:'Trader',
   navAnalyst:'Analis',navCommunity:'Komunitas',navFriends:'Teman',navProfile:'Profil',navSettings:'Pengaturan',
   search:'Cari pair…',noPairs:'Tidak ada pair ditemukan.',hint:'Pilih pair untuk analisis AI waktu nyata.',all:'Semua',commodity:'Komoditas',forex:'Forex',crypto:'Kripto',indices:'Indeks',
   soon:'Belum dibuka',notOpen:'Pair ini belum dibuka untuk analisis AI. Coba pair di bawah.',
@@ -2030,7 +2065,7 @@ var DICT={
   loggingOut:'Keluar…',langNative:'Bahasa Indonesia'
  },
  ta:{
-  greet:'வணக்கம், ',gM:'காலை வணக்கம்',gA:'மதிய வணக்கம்',gE:'மாலை வணக்கம்',trader:'வர்த்தகர்',greetSub:'ஒரு ஜோடியைத் தேர்ந்தெடுக்கவும் — AI கிராபைப் படித்து Entry, SL & TP ஐ வரைகிறது.',
+  greet:'வணக்கம், ',gM:'காலை வணக்கம்',gA:'மதிய வணக்கம்',gE:'மாலை வணக்கம்',trader:'வர்த்தகர்',
   navAnalyst:'பகுப்பாய்வு',navCommunity:'சமூகம்',navFriends:'நண்பர்கள்',navProfile:'சுயவிவரம்',navSettings:'அமைப்புகள்',
   search:'ஜோடிகளைத் தேடு…',noPairs:'ஜோடிகள் இல்லை.',hint:'நேரடி AI பகுப்பாய்விற்கு ஜோடியைத் தேர்ந்தெடுக்கவும்.',all:'அனைத்தும்',commodity:'பொருட்கள்',forex:'ஃபாரெக்ஸ்',crypto:'கிரிப்டோ',indices:'குறியீடுகள்',
   soon:'திறக்கப்படவில்லை',notOpen:'இந்த ஜோடி AI பகுப்பாய்விற்கு திறக்கப்படவில்லை. கீழே உள்ள ஜோடியை முயற்சிக்கவும்.',
@@ -2730,7 +2765,7 @@ function updateStarMood(cycleTip){
  var wk=isFxWeekend();
  if(hs){
   var want=wk?'sleep':'normal';
-  if(hs.dataset.mood!==want){hs.dataset.mood=want;hs.innerHTML=starlingSvg(want,52,'sgHome')}
+  if(hs.dataset.mood!==want){hs.dataset.mood=want;hs.innerHTML=starlingSvg(want,54,'sgHome')}
  }
  if(!mt)return;
  var topS=null,topN=0;
@@ -2742,8 +2777,8 @@ function updateStarMood(cycleTip){
   tips.push(en?'Markets resting — <b>BTCUSD</b> is still live 24/7':'Pasaran rehat — <b>BTCUSD</b> masih aktif 24/7');
   tips.push(en?'Weekend tip: review your past trades in <b>League</b>':'Tip hujung minggu: semak rekod trade dalam <b>Liga</b>');
  } else {
+  tips.push(en?'Pick a pair — I read the chart and draw <b>Entry, SL &amp; TP</b> for you':'Pilih pair — saya baca chart dan lukis <b>Entry, SL &amp; TP</b> untuk anda');
   if(topS&&topN>0)tips.push(en?'<b>'+esc(topS)+'</b> is hottest right now ('+topN+' scans)':'<b>'+esc(topS)+'</b> paling hangat sekarang ('+topN+' scan)');
-  tips.push(en?'Tap any pair — Starling maps <b>Entry, SL &amp; TP</b>':'Ketik mana-mana pair — Starling lukis <b>Entry, SL &amp; TP</b>');
   tips.push(en?'Discipline wins: wait for clean confirmation':'Disiplin menang: tunggu pengesahan bersih sebelum masuk');
  }
  if(cycleTip)starTipIdx=(starTipIdx+1)%tips.length;
@@ -3177,6 +3212,33 @@ setInterval(function(){
 $('sendBtn').addEventListener('mousedown',function(e){e.preventDefault()});
 $('sendBtn').onclick=sendMsg;
 $('msgInput').addEventListener('keydown',function(e){if(e.key==='Enter')sendMsg()});
+/* Dock sembunyi SEGERA bila input chat focus (jangan tunggu viewport resize
+   yang mungkin lambat/tak dilapor sesetengah keyboard Android). */
+(function(){
+ function setKbFocus(on){
+  var root=document.documentElement;
+  root.classList.toggle('kb-focus',!!on);
+  if(on){
+   /* anggaran tinggi keyboard (saved) — composer naik segera walaupun
+      viewport belum resize */
+   var h=window.innerHeight||844,v=0;
+   try{v=parseInt(localStorage.getItem('tw_kb_h')||'0',10)||0}catch(e){}
+   var minH=260,maxH=Math.round(h*0.56);
+   if(!(v>=minH&&v<=maxH))v=Math.max(minH,Math.min(maxH,Math.round(h*0.44)));
+   root.style.setProperty('--kb-h',v+'px');
+  }
+ }
+ var mi=document.getElementById('msgInput');
+ if(mi){
+  mi.addEventListener('focus',function(){setKbFocus(true)});
+  mi.addEventListener('blur',function(){setTimeout(function(){if(document.activeElement!==mi)setKbFocus(false)},60)});
+ }
+ var di=document.getElementById('dmInp');
+ if(di){
+  di.addEventListener('focus',function(){setKbFocus(true)});
+  di.addEventListener('blur',function(){setTimeout(function(){if(document.activeElement!==di)setKbFocus(false)},60)});
+ }
+})();
 
 /* ----- Community upgrade: pair rooms, reactions, shared signal cards ----- */
 $('rooms').addEventListener('click',function(e){
@@ -3305,9 +3367,13 @@ function renderFriends(){
  if(!stage||!tabs||!body)return;
  var en=(lang==='en');
 
- /* Orbit constellation coordinates (clear of top pills & centered bottom tip) */
+ /* Orbit constellation coordinates (clear of top pills & centered bottom tip)
+    Orbit state: node duduk pada perimeter ring (path positions) & berjalan (walking). */
  var inPos=[{x:36,y:37},{x:64,y:37},{x:63,y:62},{x:37,y:62}];
  var outPos=[{x:18,y:34},{x:82,y:34},{x:19,y:63},{x:81,y:63}];
+ /* path positions untuk walking orbit (orbit state): tersebar pada perimeter elips */
+ var walkPos=[{x:50,y:20},{x:72,y:30},{x:78,y:52},{x:60,y:66},{x:36,y:64},{x:24,y:44}];
+ var walkDur=[22,28,25,31,27,24],walkDel=[0,-7,-14,-4,-10,-18],walkDist=[0,25,50,75,12,62];
  var innerNodes=FR.friends.slice(0,4);
  var outerNodes=FR.arrivals.slice(0,4);
 
@@ -3356,7 +3422,7 @@ function renderFriends(){
    +'</button>'
   +'</div>'
   +'<div class="orb-ring r1"></div><div class="orb-ring r2"></div>'
-  +'<div class="orb-core">'+orbStarSVG()+'</div>'
+  +'<div class="orb-core">'+orbStarSVG()+'<span class="scan-ring"></span><span class="scan-ring r2"></span><span class="scan-line"></span></div>'
   +innerNodes.map(function(f,i){
    var isSel=selObj&&selObj.kind==='friend'&&selObj.data.id===f.id;
    return '<div class="orb-node'+(isSel?' sel':'')+'" style="left:'+inPos[i].x+'%;top:'+inPos[i].y+'%" data-orb-f="'+esc(f.id)+'">'
@@ -3385,9 +3451,9 @@ function renderFriends(){
  }
 
  tabs.innerHTML=
-  '<button class="'+(FR.tab==='chats'?'on':'')+'" data-ftab="chats" type="button">'+(en?'Private Chats':'Chat Peribadi')+(FR.friends.length?' ('+FR.friends.length+')':'')+'</button>'
-  +'<button class="'+(FR.tab==='req'?'on':'')+'" data-ftab="req" type="button">'+(en?'Requests':'Permintaan')+(reqCnt?'<span class="cnt">'+reqCnt+'</span>':'')+'</button>'
-  +'<button class="'+(FR.tab==='new'?'on':'')+'" data-ftab="new" type="button">'+(en?'New Traders':'Ahli Baru')+' ('+FR.arrivals.length+')</button>';
+  '<button class="'+(FR.tab==='chats'?'on':'')+'" data-ftab="chats" type="button"><span>'+(en?'Private Chats':'Chat Peribadi')+'</span>'+(FR.friends.length?'<span class="cnt">'+FR.friends.length+'</span>':'')+'</button>'
+  +'<button class="'+(FR.tab==='req'?'on':'')+'" data-ftab="req" type="button"><span>'+(en?'Requests':'Permintaan')+'</span>'+(reqCnt?'<span class="cnt">'+reqCnt+'</span>':'')+'</button>'
+  +'<button class="'+(FR.tab==='new'?'on':'')+'" data-ftab="new" type="button"><span>'+(en?'New Traders':'Ahli Baru')+'</span><span class="cnt">'+FR.arrivals.length+'</span></button>';
 
  /* Body */
  if(FR.tab==='chats'){
@@ -4582,6 +4648,7 @@ function loadProfile(){
    PLAN=((row&&row.plan)||'free').toLowerCase();
    ME.dispName=(row&&row.name)||(ME.user_metadata&&(ME.user_metadata.name||ME.user_metadata.full_name||ME.user_metadata.username))||(ME.email||'').split('@')[0]||'Ahli';
    renderProfile();
+   drawGreet(); /* greeting guna nama sebenar sebaik profil sampai */
   });
  }).catch(function(){profileLoaded=false});
  loadPerf();
@@ -4746,7 +4813,7 @@ function renderAll(){
  drawNav();try{
  document.documentElement.lang=lang;
  drawGreet();
- $('greetSub').textContent=t('greetSub');$('hintTxt').textContent=t('hint');
+ var gs=$('greetSub');if(gs)gs.textContent=t('greetSub');$('hintTxt').textContent=t('hint');
  if(typeof updateStarMood==='function')updateStarMood(false);
  $('footTxt').textContent='Educational only. Trading involves substantial risk.';
  $('q').setAttribute(PH,t('search'));$('q').setAttribute('aria-label',t('search'));
@@ -5179,7 +5246,7 @@ window.addEventListener('appinstalled',function(){drawWelcome();try{localStorage
 if(typeof window!=='undefined'){window.__welcome=showWelcome;window.__drawWelcome=drawWelcome;}
 if(typeof window!=='undefined'){window.__forceLogout=goLogin;}
 if('serviceWorker' in navigator){window.addEventListener('load',function(){
- navigator.serviceWorker.register('sw.js?v=72v58',{scope:'./',updateViaCache:'none'}).then(function(reg){
+ navigator.serviceWorker.register('sw.js?v=72v59',{scope:'./',updateViaCache:'none'}).then(function(reg){
   /* PWA homescreen resume instance lama tanpa navigation -> check update
      bila app kembali nampak/focus + setiap 30 min, dan reload automatik
      bila SW versi baru mengambil alih (controllerchange). */
@@ -5194,7 +5261,7 @@ if('serviceWorker' in navigator){window.addEventListener('load',function(){
 })}
 
 /* ---------------- init ---------------- */
-applyTheme();renderAll();scheduleGreet();
+applyTheme();renderAll();scheduleGreet();loadProfile();
 var _sp=new URLSearchParams(location.search);
 var iv=_sp.get('view');
 var _dm=_sp.get('dm');
@@ -5207,7 +5274,7 @@ if(!iv){
 showView(VIEWS.indexOf(iv)>-1?iv:'analyst');
 splashStart();
 /* build marker: sahkan versi CSS yang telefon render (buang bila punca blur jumpa) */
-try{var bt=document.getElementById('buildTag');if(bt)bt.textContent='build v108-drag8 · '+(getComputedStyle(document.querySelector('.appbar')).backdropFilter==='none'?'appbar blur OFF':'appbar blur STILL ON');}catch(e){}
+try{var bt=document.getElementById('buildTag');if(bt)bt.textContent='build v109-scan1 · '+(getComputedStyle(document.querySelector('.appbar')).backdropFilter==='none'?'appbar blur OFF':'appbar blur STILL ON');}catch(e){}
 })();
 
 </script>

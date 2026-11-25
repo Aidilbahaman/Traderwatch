@@ -5,13 +5,14 @@
  *  - /api/* dan /auth/*: NETWORK SAHAJA — jangan cache data pasaran/user
  *  - Data user (Supabase REST, chat, profil): tidak dicache sama sekali
  */
-const VERSION = 'tw-member-full-v72';
+const VERSION = 'tw-member-full-v110';
 const SHELL_CACHE = VERSION + '-shell';
 
 const SHELL_ASSETS = [
   './',
   './index.html',
   './manifest.webmanifest',
+  './icons/favicon.svg',
   './icons/icon-192.png',
   './icons/icon-512.png',
   './icons/icon-maskable-512.png',
@@ -21,9 +22,9 @@ const SHELL_ASSETS = [
 
 const SHELL_PATHS = new Set([
   '/member/', '/member/index.html', '/member/manifest.webmanifest',
-  '/member/icons/icon-192.png', '/member/icons/icon-512.png',
-  '/member/icons/icon-maskable-512.png', '/member/icons/icon-180.png',
-  '/member/icons/apple-touch-icon.png'
+  '/member/icons/favicon.svg', '/member/icons/icon-192.png',
+  '/member/icons/icon-512.png', '/member/icons/icon-maskable-512.png',
+  '/member/icons/icon-180.png', '/member/icons/apple-touch-icon.png'
 ]);
 
 self.addEventListener('install', (event) => {
@@ -96,11 +97,12 @@ self.addEventListener('message', (event) => {
 self.addEventListener('push', (event) => {
   let data = {};
   try { data = event.data ? event.data.json() : {}; } catch (e) { data = {}; }
-  const title = data.title || 'TraderWatch';
+  const title = data.title || 'Trader Watch';
+  const ico = data.icon || '/member/icons/icon-192.png?v=20261124a';
   const opts = {
     body: data.body || '',
-    icon: '/member/icons/icon-192.png',
-    badge: '/member/icons/icon-192.png',
+    icon: ico,
+    badge: ico,
     tag: data.tag || 'tw-alert',
     data: { url: data.url || '/member/' }
   };
