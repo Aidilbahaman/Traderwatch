@@ -57,6 +57,22 @@ RATE_LIMIT_SECONDS = 5          # one message per 5s per user
 DAILY_RESET_HOUR_MYT = 0        # community chat clears at 12am Malaysia
 
 _last_post = {}                 # user_id -> unix ts of last accepted message
+_last_dm = {}                   # user_id -> unix ts of last DM
+_last_wave = {}                 # user_id -> unix ts of last wave
+DM_RATE_LIMIT = 1.2
+UUID_RE = re.compile(r"^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$", re.I)
+PUSH_ENV = pathlib.Path("/home/ubuntu/.secrets/push.env")
+
+# ---- rooms / signal cards / reactions (needs migrations/20261124_chat_rooms_cards_reactions.sql) ----
+ROOMS = ("XAUUSD", "XAGUSD", "BTCUSD", "EURUSD", "GBPUSD", "USDJPY", "AUDUSD", "USDCAD", "NZDUSD")
+EMOJIS = ("🔥", "🎯", "👏", "👍")
+CARD_TFS = ("M1", "M5", "M15", "H1", "H4")
+SEASON = int(os.environ.get("LEAGUE_SEASON", "1"))
+REACT_COOLDOWN = 0.4            # seconds between reaction toggles per user
+_last_react = {}
+_cache_lock = threading.Lock()
+_cache = {}
+_feat = {"ext": (0.0, False), "rx": (0.0, False)}
 
 # ---- presence (online count) ----
 PRESENCE_TTL = float(os.environ.get("PRESENCE_TTL", "150"))  # 60s heartbeat + margin
@@ -78,6 +94,15 @@ def presence_count():
         for u in stale:
             _presence.pop(u, None)
         return len(_presence)
+
+
+def presence_online_set():
+    now = time.time()
+    with _presence_lock:
+        stale = [u for u, ts in _presence.items() if now - ts > PRESENCE_TTL]
+        for u in stale:
+            _presence.pop(u, None)
+        return set(_presence.keys())
 
 
 # ---------------------------------------------------------------- secrets
@@ -172,21 +197,174 @@ def sb(method, path, body=None, token=None, params=None):
         raise RuntimeError(f"supabase {e.code}: {detail}") from None
 
 
+AUTH_TTL = 120          # token -> user cache (seconds). Tokens are JWTs with
+_auth_cache = {}        # ~1h lifetime; caching 2 min is safe and removes a
+_auth_lock = threading.Lock()  # Supabase round-trip from every poll (DM polls
+                               # every 4s, presence every 30s, friends refresh).
+
 def verify_user(token):
-    """Return the authed user dict, or None."""
+    """Return the authed user dict, or None. Cached per token for AUTH_TTL:
+    the DM sheet polls every 4s, so without this every poll paid one Supabase
+    /auth round-trip (~150-350ms) - the "Loading private chat..." slowness."""
     if not token:
         return None
+    now = time.time()
+    with _auth_lock:
+        hit = _auth_cache.get(token)
+        if hit:
+            ts, val = hit
+            if now - ts <= AUTH_TTL:
+                return val
+            del _auth_cache[token]
     try:
         req = urllib.request.Request(SB_URL + "/auth/v1/user")
         req.add_header("apikey", SB_KEY)
         req.add_header("Authorization", "Bearer " + token)
         with urllib.request.urlopen(req, timeout=20) as r:
-            return json.loads(r.read().decode())
+            user = json.loads(r.read().decode())
     except Exception:
         return None
+    with _auth_lock:
+        _auth_cache[token] = (now, user)
+        if len(_auth_cache) > 1000:  # had lembut, buang tertua
+            for k, _ in sorted(_auth_cache.items(), key=lambda kv: kv[1][0])[:200]:
+                _auth_cache.pop(k, None)
+    return user
+
+
+# ---------------------------------------------------------------- privacy
+# Nama penuh tidak pernah keluar dari server. Setiap nama paparan melalui
+# public_name(), yang mengambil SATU perkataan sahaja:
+#   "Farrah Wahida Zulkifli" -> "Farrah"
+#   "M SHAMRAIZ"             -> "Shamraiz"   (token 1 huruf dilangkau)
+#   "Mr T “SharulR”"         -> "SharulR"
+#   "MUHAMMAD ASYRAF BIN ..."-> "Muhammad"
+# Ini melindungi identiti ahli baru yang tersenarai dalam direktori awam,
+# dan konsisten dengan cara chat komuniti memaparkan nama.
+HONORIFICS = {"mr", "mrs", "ms", "dr", "haji", "hj", "bin", "binti", "a/l", "a/p"}
+
+
+def public_name(raw):
+    """One-token display name. Never returns a full legal name."""
+    txt = str(raw or "").strip()
+    if not txt:
+        return "Trader"
+    # buang emoji/simbol pelik tetapi kekalkan huruf, digit, . ' - dan ruang
+    txt = re.sub(r"[^\w\s.'-]", " ", txt)
+    tokens = [t for t in txt.split() if t]
+    # langkau gelaran & partikel — tetapi jangan buang token terakhir
+    # (nama pengguna "MS" ialah nama, bukan gelaran "Ms").
+    while len(tokens) > 1 and tokens[0].strip(".").lower() in HONORIFICS:
+        tokens.pop(0)
+    # token pertama yang ada huruf sebenar (bukan "M", bukan "A.")
+    pick = ""
+    for t in tokens:
+        core = t.strip(".'-")
+        if len(re.sub(r"[^A-Za-z]", "", core)) >= 2:
+            pick = core
+            break
+    if not pick and tokens:
+        pick = tokens[0].strip(".'-")
+    if not pick:
+        return "Trader"
+    # Title case supaya "SHAMRAIZ" jadi "Shamraiz"; kekalkan akronim pendek berhuruf besar
+    if pick.isupper() and len(pick) <= 2:
+        return pick
+    return pick[:1].upper() + pick[1:].lower() if pick.isupper() else pick[:1].upper() + pick[1:]
+
+
+def _suffix(raw, taken):
+    """Huruf pembeza daripada token kedua nama penuh: "Aidil Bahaman" -> "B."."""
+    txt = re.sub(r"[^\w\s.'-]", " ", str(raw or "")).split()
+    txt = [t for t in txt if t.strip(".'-")]
+    if len(txt) > 1:
+        for t in txt[1:]:
+            core = re.sub(r"[^A-Za-z]", "", t)
+            if core:
+                letter = core[0].upper() + "."
+                if letter not in taken:
+                    return letter
+    return ""
+
+
+def disambiguate(items):
+    """Beri akhiran hanya kepada nama yang berlanggar.
+    items: [{"id":.., "raw": "<nama mentah>"}] -> {id: "Aidil B."}
+
+    Peraturan: nama yang TIADA token kedua (cth. "Aidil") mengekalkan nama
+    bersih, kerana ia tidak boleh dibezakan dengan cara lain. Nama yang ADA
+    token kedua ("Aidil Bahaman") menerima akhiran huruf pertama token itu.
+    Nama unik tidak disentuh langsung."""
+    base = {it["id"]: public_name(it["raw"]) for it in items}
+    groups = {}
+    for it in items:
+        groups.setdefault(base[it["id"]], []).append(it)
+
+    out = {}
+    for nm, members in groups.items():
+        if len(members) == 1:
+            out[members[0]["id"]] = nm
+            continue
+
+        taken = set()
+        plain = [it for it in members if not _suffix_parts(it["raw"])]
+        suffixed = [it for it in members if _suffix_parts(it["raw"])]
+
+        # yang tak boleh diberi akhiran dapat nama bersih dahulu
+        for idx, it in enumerate(plain):
+            if idx == 0 and nm not in taken:
+                taken.add(nm)
+                out[it["id"]] = nm
+            else:
+                cand = nm + " " + str(it["id"])[:2].upper()
+                while cand in taken:
+                    cand += "2"
+                taken.add(cand)
+                out[it["id"]] = cand
+
+        # selebihnya terima akhiran
+        for it in suffixed:
+            final = None
+            for p in _suffix_parts(it["raw"]):
+                cand = nm + " " + p
+                if cand not in taken and cand not in out.values():
+                    final = cand
+                    break
+            if not final:
+                cand = nm + " " + str(it["id"])[:2].upper()
+                while cand in taken or cand in out.values():
+                    cand += "2"
+                final = cand
+            taken.add(final)
+            out[it["id"]] = final
+    return out
+
+
+def _suffix_parts(raw):
+    """Calon akhiran daripada token kedua dan seterusnya: ["B.", "BAH"]."""
+    txt = [t for t in re.sub(r"[^\w\s.'-]", " ", str(raw or "")).split() if t.strip(".'-")]
+    parts = []
+    for t in txt[1:]:
+        core = re.sub(r"[^A-Za-z]", "", t)
+        if core:
+            parts.append(core[0].upper() + ".")
+    if len(txt) > 1:
+        # fallback: dua huruf penuh token terakhir, kalau perlu pembeza lanjut
+        core = re.sub(r"[^A-Za-z]", "", txt[-1])
+        if len(core) >= 2:
+            parts.append(core[:2].upper())
+    return parts
 
 
 def display_name(user):
+    md = user.get("user_metadata") or {}
+    raw = (md.get("username") or md.get("full_name") or md.get("name")
+           or (user.get("email") or "").split("@")[0] or "member")
+    return public_name(raw)
+
+
+def display_name_full(user):
+    """Nama paparan MENTAH (belum dibezakan) — untuk disambiguate()."""
     md = user.get("user_metadata") or {}
     return (md.get("username") or md.get("full_name") or md.get("name")
             or (user.get("email") or "").split("@")[0] or "member")
@@ -199,7 +377,439 @@ def day_start_utc():
     return start_myt.astimezone(timezone.utc).isoformat()
 
 
+def purge_dm_expired():
+    """Delete DM rows older than 24 hours. Private chat is temporary."""
+    cutoff = (datetime.now(timezone.utc) - timedelta(hours=24)).isoformat()
+    try:
+        sb("DELETE", "/rest/v1/dm_messages", params={"created_at": f"lt.{cutoff}"})
+    except RuntimeError:
+        pass
+
+
+def _dm_purge_loop():
+    """Every 30 minutes, drop DMs older than 24h."""
+    while True:
+        try:
+            purge_dm_expired()
+        except Exception:
+            pass
+        time.sleep(1800)
+
+
 # ---------------------------------------------------------------- handler
+def _cached(key, ttl, fn):
+    now = time.time()
+    with _cache_lock:
+        hit = _cache.get(key)
+        if hit and now - hit[0] <= ttl:
+            return hit[1]
+    val = fn()
+    with _cache_lock:
+        _cache[key] = (now, val)
+    return val
+
+
+def _probe(name, path, params):
+    """True if the optional schema is present. Cached 30s so an un-migrated
+    database costs one cheap failing query per 30s, not one per request."""
+    now = time.time()
+    with _cache_lock:
+        ts, ok = _feat[name]
+        if now - ts < 30:
+            return ok
+    try:
+        sb("GET", path, params=params)
+        ok = True
+    except RuntimeError:
+        ok = False
+    with _cache_lock:
+        _feat[name] = (now, ok)
+    return ok
+
+
+def ext_ok():
+    return _probe("ext", "/rest/v1/chat_messages", {"select": "room,kind,payload", "limit": 1})
+
+
+def rx_ok():
+    return _probe("rx", "/rest/v1/chat_reactions", {"select": "message_id", "limit": 1})
+
+
+def _num(v):
+    try:
+        f = float(v)
+    except (TypeError, ValueError):
+        return None
+    return round(f, 6) if f == f and abs(f) < 1e9 else None
+
+
+def clean_card(c):
+    """Validate a shared AI-signal card. Returns a normalised dict or None.
+    Everything is re-validated server-side; the client is never trusted."""
+    if not isinstance(c, dict):
+        return None
+    pair = str(c.get("pair") or "").upper()
+    side = str(c.get("side") or "").upper()
+    tf = str(c.get("tf") or "").upper()
+    entry, sl, tp = _num(c.get("entry")), _num(c.get("sl")), _num(c.get("tp"))
+    if pair not in ROOMS or side not in ("BUY", "SELL") or None in (entry, sl, tp):
+        return None
+    if tf not in CARD_TFS:
+        tf = "M15"
+    try:
+        conf = max(0, min(100, int(float(c.get("conf") or 0))))
+    except (TypeError, ValueError):
+        conf = 0
+    if side == "BUY" and not (sl < entry < tp):
+        return None
+    if side == "SELL" and not (tp < entry < sl):
+        return None
+    return {"pair": pair, "side": side, "tf": tf, "entry": entry, "sl": sl, "tp": tp, "conf": conf}
+
+
+def _rank_key(r):
+    """Susunan rasmi liga — mesti sama dengan league-api.rank_key dan
+    sortBoard() dalam member/index.html: win rate, kemudian net_r, kemudian
+    bilangan trade. Kalau tidak, badge dalam chat bercanggah dengan senarai."""
+    def f(v):
+        try:
+            return float(v or 0)
+        except (TypeError, ValueError):
+            return 0.0
+    def i(v):
+        try:
+            return int(v or 0)
+        except (TypeError, ValueError):
+            return 0
+    return (-f(r.get("win_rate")), -f(r.get("net_r")), -i(r.get("trades")))
+
+
+def rank_map():
+    """user_id -> league rank for the current top 3 (shown as a badge)."""
+    def load():
+        try:
+            rows = sb("POST", "/rest/v1/rpc/get_leaderboard", body={"p_season": SEASON}) or []
+        except RuntimeError:
+            return {}
+        rows = sorted(rows, key=_rank_key)
+        return {r.get("user_id"): i + 1 for i, r in enumerate(rows[:3]) if r.get("user_id")}
+    return _cached("rank", 60, load)
+
+
+def room_counts():
+    def load():
+        try:
+            rows = sb("GET", "/rest/v1/chat_messages",
+                      params={"select": "room", "created_at": "gte." + day_start_utc(), "limit": 2000}) or []
+        except RuntimeError:
+            return {}
+        out = {}
+        for r in rows:
+            rm = r.get("room") or "all"
+            out[rm] = out.get(rm, 0) + 1
+        return out
+    return _cached("rooms", 10, load)
+
+
+def load_reactions(ids, uid):
+    """message_id -> {"reactions": {emoji: n}, "mine": [emoji]} (user ids never leave the server)."""
+    out = {i: {"reactions": {}, "mine": []} for i in ids}
+    if not ids or not rx_ok():
+        return out
+    try:
+        rows = sb("GET", "/rest/v1/chat_reactions",
+                  params={"select": "message_id,emoji,user_id",
+                          "message_id": "in.(" + ",".join(str(int(i)) for i in ids) + ")",
+                          "limit": 3000}) or []
+    except RuntimeError:
+        return out
+    for r in rows:
+        slot = out.get(r.get("message_id"))
+        em = r.get("emoji")
+        if slot is None or em not in EMOJIS:
+            continue
+        slot["reactions"][em] = slot["reactions"].get(em, 0) + 1
+        if r.get("user_id") == uid:
+            slot["mine"].append(em)
+    return out
+
+
+# ---------------------------------------------------------------- Orbit Friends / Welcoming / Private DM
+def _push_env():
+    if not PUSH_ENV.exists():
+        return {}
+    sec = {}
+    for line in PUSH_ENV.read_text().splitlines():
+        if "=" in line and not line.strip().startswith("#"):
+            k, v = line.split("=", 1)
+            sec[k.strip()] = v.strip().strip('"').strip("'")
+    return sec
+
+
+def send_push_async(uid, title, body, url, tag="tw-friends"):
+    """Best-effort Web Push in a background thread (never blocks HTTP)."""
+    def _worker():
+        try:
+            env = _push_env()
+            priv = env.get("VAPID_PRIVATE_KEY")
+            if not priv:
+                return
+            rows = sb("GET", "/rest/v1/push_subs", params={
+                "select": "id,endpoint,p256dh,auth",
+                "user_id": "eq." + uid, "limit": "30"}) or []
+            if not rows:
+                return
+            from pywebpush import webpush
+            data = json.dumps({
+                "title": title,
+                "body": body,
+                "icon": "/member/icons/icon-192.png?v=20261124a",
+                "tag": tag,
+                "url": url,
+            })
+            subj = env.get("VAPID_SUBJECT", "mailto:ops@traderwatch.org")
+            for sub in rows:
+                try:
+                    webpush(
+                        subscription_info={"endpoint": sub["endpoint"],
+                                           "keys": {"p256dh": sub["p256dh"], "auth": sub["auth"]}},
+                        data=data, vapid_private_key=priv, vapid_claims={"sub": subj})
+                except Exception as e:
+                    scode = getattr(getattr(e, "response", None), "status_code", None)
+                    if scode in (404, 410):
+                        try:
+                            sb("DELETE", "/rest/v1/push_subs", params={"id": "eq." + str(sub["id"])})
+                        except Exception:
+                            pass
+        except Exception:
+            pass
+    threading.Thread(target=_worker, daemon=True).start()
+
+
+def _valid_uuid(s):
+    return isinstance(s, str) and bool(UUID_RE.match(s.strip()))
+
+
+TEST_EMAIL_DOMAINS = (
+    "test.traderwatch.org", "example.com", "example.org", "example.net",
+    "localhost", "invalid", "test.local",
+)
+TEST_LOCAL_RE = re.compile(r"^(qc-|tw-auth-|e2e-|qa-|smoke-|bot-)", re.I)
+
+
+def is_real_client(u):
+    """Only include real verified clients — exclude QA/test/bot and unconfirmed accounts."""
+    email = (u.get("email") or "").strip().lower()
+    if not email or "@" not in email:
+        return False
+    local, dom = email.rsplit("@", 1)
+    if dom in TEST_EMAIL_DOMAINS or dom.endswith(".test") or dom.endswith(".example"):
+        return False
+    if TEST_LOCAL_RE.match(local):
+        return False
+    if not u.get("email_confirmed_at"):
+        return False
+    if u.get("is_anonymous"):
+        return False
+    return True
+
+
+def users_directory():
+    """Cached public directory from auth.users (real verified clients only;
+    id, display name, created_at ONLY — never exposes email or private metadata)."""
+    def load():
+        by_id = {}
+        ordered = []
+        for page in range(1, 11):
+            try:
+                res = sb("GET", "/auth/v1/admin/users",
+                         params={"page": page, "per_page": 200}) or {}
+            except RuntimeError:
+                break
+            batch = res.get("users") if isinstance(res, dict) else (res if isinstance(res, list) else [])
+            if not batch:
+                break
+            for u in batch:
+                uid = u.get("id")
+                if not uid or not is_real_client(u):
+                    continue
+                item = {
+                    "id": uid,
+                    "raw": display_name_full(u),   # mentah, untuk disambiguate()
+                    "created_at": u.get("created_at") or "",
+                }
+                by_id[uid] = item
+                ordered.append(item)
+            if len(batch) < 200:
+                break
+        ordered.sort(key=lambda x: x.get("created_at") or "", reverse=True)
+        # Nama yang berlanggar ("Aidil" vs "Aidil") dibezakan sekali sahaja di
+        # sini, ikut uid; setiap endpoint kemudian guna nama yang sama.
+        names = disambiguate(ordered)
+        for item in ordered:
+            item["username"] = names.get(item["id"], "Trader")
+        return {"by_id": by_id, "ordered": ordered}
+    return _cached("users_dir", 20, load)
+
+
+def _pair_filter(a, b):
+    return f"(and(requester_id.eq.{a},addressee_id.eq.{b}),and(requester_id.eq.{b},addressee_id.eq.{a}))"
+
+
+def get_friendship(a, b):
+    rows = sb("GET", "/rest/v1/friendships", params={
+        "select": "id,requester_id,addressee_id,status,created_at",
+        "or": _pair_filter(a, b), "limit": 1}) or []
+    return rows[0] if rows else None
+
+
+def is_friends(a, b):
+    """Dengan cache 30s: DM poll setiap 4s dan handler panggil ini setiap kali -
+    tanpa cache, tiap poll bayar 1-2 query Supabase lagi."""
+    key = "fr:" + (a + b if a < b else b + a)
+    def load():
+        row = get_friendship(a, b)
+        return bool(row and row.get("status") == "accepted")
+    return _cached(key, 30, load)
+
+
+def build_friends_overview(uid):
+    directory = users_directory()
+    by_id = directory["by_id"]
+    ordered = directory["ordered"]
+    ranks = rank_map()
+    online_ids = presence_online_set()
+    day0 = day_start_utc()
+
+    today_joined = sum(1 for u in ordered if (u.get("created_at") or "") >= day0)
+    total_members = len(ordered)
+
+    try:
+        frows = sb("GET", "/rest/v1/friendships", params={
+            "select": "id,requester_id,addressee_id,status,created_at,updated_at",
+            "or": f"(requester_id.eq.{uid},addressee_id.eq.{uid})",
+            "order": "updated_at.desc", "limit": 300}) or []
+    except RuntimeError:
+        frows = []
+
+    rel_map = {}         # other_id -> accepted | pending_out | pending_in
+    friend_ids = []
+    requests_in = []
+    outgoing_ids = []
+    for f in frows:
+        st = f.get("status")
+        req_id, add_id = f.get("requester_id"), f.get("addressee_id")
+        other = add_id if req_id == uid else req_id
+        if not other or other == uid:
+            continue
+        if st == "accepted":
+            rel_map[other] = "accepted"
+            friend_ids.append(other)
+        elif st == "pending":
+            if req_id == uid:
+                rel_map[other] = "pending_out"
+                outgoing_ids.append(other)
+            else:
+                rel_map[other] = "pending_in"
+                info = by_id.get(other) or {"username": "Trader"}
+                requests_in.append({
+                    "id": other,
+                    "friendship_id": f.get("id"),
+                    "username": info["username"],
+                    "rank": ranks.get(other),
+                    "created_at": f.get("created_at") or "",
+                })
+
+    # Latest DM & unread count per friend
+    last_dm = {}
+    unread_by = {}
+    if friend_ids:
+        cutoff24 = (datetime.now(timezone.utc) - timedelta(hours=24)).isoformat()
+        try:
+            drows = sb("GET", "/rest/v1/dm_messages", params={
+                "select": "id,sender_id,recipient_id,body,kind,payload,read_at,created_at",
+                "or": f"(sender_id.eq.{uid},recipient_id.eq.{uid})",
+                "created_at": f"gte.{cutoff24}",
+                "order": "created_at.desc", "limit": 400}) or []
+        except RuntimeError:
+            drows = []
+        fset = set(friend_ids)
+        for m in drows:
+            s_id, r_id = m.get("sender_id"), m.get("recipient_id")
+            other = r_id if s_id == uid else s_id
+            if other not in fset:
+                continue
+            if other not in last_dm:
+                last_dm[other] = m
+            if r_id == uid and not m.get("read_at"):
+                unread_by[other] = unread_by.get(other, 0) + 1
+
+    friends = []
+    for fid in friend_ids:
+        info = by_id.get(fid) or {"username": "Trader"}
+        lm = last_dm.get(fid)
+        preview = ""
+        if lm:
+            if lm.get("kind") == "signal" and isinstance(lm.get("payload"), dict):
+                p = lm["payload"]
+                preview = f"Shared {p.get('pair', '')} {p.get('side', '')} setup".strip()
+            else:
+                preview = lm.get("body") or ""
+        friends.append({
+            "id": fid,
+            "username": info["username"],
+            "online": fid in online_ids,
+            "rank": ranks.get(fid),
+            "unread": unread_by.get(fid, 0),
+            "last_msg": preview,
+            "last_from_me": bool(lm and lm.get("sender_id") == uid),
+            "last_at": (lm.get("created_at") if lm else "") or "",
+        })
+    friends.sort(key=lambda x: (1 if x["last_at"] else 0, x["last_at"], 1 if x["online"] else 0, x["username"].lower()), reverse=True)
+
+    # Newest 12 arrivals (exclude self) + wave counts
+    newest = [u for u in ordered if u["id"] != uid][:12]
+    wave_counts = {}
+    my_waves = set()
+    if newest:
+        ids_csv = ",".join(u["id"] for u in newest)
+        try:
+            wrows = sb("GET", "/rest/v1/member_waves", params={
+                "select": "from_user_id,to_user_id",
+                "to_user_id": f"in.({ids_csv})", "limit": 500}) or []
+        except RuntimeError:
+            wrows = []
+        for w in wrows:
+            tid = w.get("to_user_id")
+            wave_counts[tid] = wave_counts.get(tid, 0) + 1
+            if w.get("from_user_id") == uid:
+                my_waves.add(tid)
+
+    arrivals = [{
+        "id": u["id"],
+        "username": u["username"],
+        "created_at": u["created_at"],
+        "rank": ranks.get(u["id"]),
+        "waved": u["id"] in my_waves,
+        "waves": wave_counts.get(u["id"], 0),
+        "rel": rel_map.get(u["id"], "none"),
+    } for u in newest]
+
+    unread_dm_total = sum(unread_by.values())
+    return {
+        "me": {"id": uid, "username": (by_id.get(uid) or {}).get("username") or "Trader"},
+        "today_joined": today_joined,
+        "total_members": total_members,
+        "online_count": presence_count(),
+        "friends": friends,
+        "requests": requests_in,
+        "outgoing": outgoing_ids,
+        "arrivals": arrivals,
+        "unread_total": unread_dm_total + len(requests_in),
+        "unread_dm": unread_dm_total,
+    }
+
+
 class Handler(BaseHTTPRequestHandler):
     server_version = "TraderWatchChat/1.0"
 
@@ -232,32 +842,181 @@ class Handler(BaseHTTPRequestHandler):
         path = urllib.parse.urlparse(self.path).path
         if path == "/api/chat/health":
             return self._send(200, {"ok": True, "time": datetime.now(timezone.utc).isoformat()})
-        if path != "/api/chat/messages":
-            return self._send(404, {"error": "not found"})
 
         user = verify_user(self._token())
         if not user:
             return self._send(401, {"error": "sign in required"})
-
+        uid = user.get("id") or ""
         q = urllib.parse.parse_qs(urllib.parse.urlparse(self.path).query)
+
+        # ---- Orbit Friends overview (friends, requests, live arrivals, unread)
+        if path == "/api/chat/friends/overview":
+            if uid:
+                presence_beat(uid)
+            try:
+                return self._send(200, build_friends_overview(uid))
+            except RuntimeError as e:
+                return self._send(502, {"error": str(e)})
+
+        # ---- Search traders by display name (never searches/exposes emails)
+        if path == "/api/chat/friends/search":
+            term = ((q.get("q") or [""])[0] or "").strip().lower()
+            if not term:
+                return self._send(200, {"results": []})
+            directory = users_directory()
+            ranks = rank_map()
+            try:
+                frows = sb("GET", "/rest/v1/friendships", params={
+                    "select": "requester_id,addressee_id,status",
+                    "or": f"(requester_id.eq.{uid},addressee_id.eq.{uid})", "limit": 300}) or []
+            except RuntimeError:
+                frows = []
+            rel_map = {}
+            for f in frows:
+                st = f.get("status")
+                other = f["addressee_id"] if f["requester_id"] == uid else f["requester_id"]
+                if st == "accepted":
+                    rel_map[other] = "accepted"
+                elif st == "pending":
+                    rel_map[other] = "pending_out" if f["requester_id"] == uid else "pending_in"
+            hits = []
+            for u in directory["ordered"]:
+                if u["id"] == uid:
+                    continue
+                if term in u["username"].lower():
+                    hits.append({
+                        "id": u["id"],
+                        "username": u["username"],
+                        "rank": ranks.get(u["id"]),
+                        "rel": rel_map.get(u["id"], "none"),
+                    })
+                    if len(hits) >= 15:
+                        break
+            return self._send(200, {"results": hits})
+
+        # ---- Private DM thread (strictly accepted friends only)
+        if path == "/api/chat/dm":
+            other = ((q.get("with") or [""])[0] or "").strip()
+            if not _valid_uuid(other) or other == uid:
+                return self._send(400, {"error": "invalid friend id"})
+            try:
+                if not is_friends(uid, other):
+                    return self._send(403, {"error": "friends only"})
+            except RuntimeError as e:
+                return self._send(502, {"error": str(e)})
+            try:
+                limit = min(100, max(1, int((q.get("limit") or ["60"])[0])))
+            except ValueError:
+                limit = 60
+            if uid:
+                presence_beat(uid)
+            cutoff_iso = (datetime.now(timezone.utc) - timedelta(hours=24)).isoformat()
+            try:
+                rows = sb("GET", "/rest/v1/dm_messages", params={
+                    "select": ("id,sender_id,recipient_id,body,kind,payload,read_at,created_at,"
+                               "reply_to,pinned,deleted,deleted_by,"
+                               "parent:dm_messages!reply_to(id,body,kind,payload,sender_id,deleted)"),
+                    "or": f"(and(sender_id.eq.{uid},recipient_id.eq.{other}),and(sender_id.eq.{other},recipient_id.eq.{uid}))",
+                    "created_at": f"gte.{cutoff_iso}",
+                    "order": "created_at.desc", "limit": limit}) or []
+                # Mark incoming unread as read
+                if any(r.get("recipient_id") == uid and not r.get("read_at") for r in rows):
+                    sb("PATCH", "/rest/v1/dm_messages",
+                       params={"sender_id": "eq." + other, "recipient_id": "eq." + uid, "read_at": "is.null"},
+                       body={"read_at": datetime.now(timezone.utc).isoformat()})
+            except RuntimeError as e:
+                return self._send(502, {"error": str(e)})
+            rows.reverse()
+            # Bila PIN ditukar, Supabase PostgREST boleh pulangkan baris yang
+            # sama dua kali (re-fetch dalam embed) — nyah-duplikasi ikut id.
+            seen_ids = set()
+            uniq = []
+            for r in rows:
+                if r["id"] in seen_ids:
+                    continue
+                seen_ids.add(r["id"])
+                uniq.append(r)
+            rows = uniq
+            msgs = []
+            for r in rows:
+                deleted = bool(r.get("deleted"))
+                parent = r.get("parent") or None
+                # PostgREST boleh pulangkan embed sebagai SENARAI (bukan objek)
+                # bila relationship !reply_to resolve ke banyak baris — ambil
+                # yang pertama sahaja supaya handler tak crash (126x AttributeError).
+                if isinstance(parent, list):
+                    parent = parent[0] if parent else None
+                if parent and parent.get("deleted"):
+                    parent = dict(parent, body="")
+                msgs.append({
+                    "id": r["id"],
+                    "me": r["sender_id"] == uid,
+                    # Soft-deleted: isi disembunyikan, baris kekal (bubble "dipadam")
+                    "body": "" if deleted else (r.get("body") or ""),
+                    "kind": r.get("kind") or "text",
+                    "payload": None if deleted else r.get("payload"),
+                    "created_at": r.get("created_at") or "",
+                    "deleted": deleted,
+                    "mine_deleted": deleted and r.get("deleted_by") == uid,
+                    "pinned": bool(r.get("pinned")),
+                    "reply_to": r.get("reply_to"),
+                    "reply": ({"id": parent["id"], "body": (parent.get("body") or "")[:90],
+                               "kind": parent.get("kind") or "text",
+                               "me": parent.get("sender_id") == uid} if parent else None),
+                })
+            info = (users_directory()["by_id"].get(other)) or {"username": "Trader"}
+            info = dict(info, username=public_name(info.get("username")))
+            pinned = [{"id": m["id"], "body": m["body"][:80], "kind": m["kind"], "me": m["me"]}
+                      for m in msgs if m["pinned"] and not m["deleted"]]
+            return self._send(200, {
+                "friend": {
+                    "id": other,
+                    "username": info["username"],
+                    "online": other in presence_online_set(),
+                    "rank": rank_map().get(other),
+                },
+                "messages": msgs,
+                "pinned": pinned[-1:],
+            })
+
+        if path != "/api/chat/messages":
+            return self._send(404, {"error": "not found"})
+
         try:
             limit = min(100, max(1, int((q.get("limit") or ["50"])[0])))
         except ValueError:
             limit = 50
 
+        ext = ext_ok()
+        room = ((q.get("room") or ["all"])[0] or "all").upper()
+        params = {"select": "id,user_id,username,body,created_at" + (",room,kind,payload" if ext else ""),
+                  "created_at": "gte." + day_start_utc(),
+                  "order": "created_at.desc",
+                  "limit": limit}
+        if ext and room in ROOMS:
+            params["room"] = "eq." + room
         try:
-            rows = sb("GET", "/rest/v1/chat_messages",
-                      params={"select": "id,username,body,created_at",
-                              "created_at": "gte." + day_start_utc(),
-                              "order": "created_at.desc",
-                              "limit": limit})
+            rows = sb("GET", "/rest/v1/chat_messages", params=params) or []
         except RuntimeError as e:
             return self._send(502, {"error": str(e)})
-        uid = user.get("id") or ""
         if uid:
             presence_beat(uid)  # reading chat = active too
-        return self._send(200, {"messages": rows or [], "reset_at_utc": day_start_utc(),
-                                "online": presence_count()})
+        ranks = rank_map()
+        rx = load_reactions([r["id"] for r in rows], uid)
+        # Nama baris chat ditulis semasa menghantar dan mungkin nama penuh lama.
+        # Utamakan nama direktori (sudah ditapis + dibezakan ikut uid) supaya
+        # "Aidil" dan "Aidil B." kekal konsisten dengan senarai rakan.
+        dir_by_id = users_directory()["by_id"]
+        for r in rows:
+            owner = r.pop("user_id", None)
+            r["username"] = (dir_by_id.get(owner) or {}).get("username") or public_name(r.get("username"))
+            r["rank"] = ranks.get(owner)
+            slot = rx.get(r["id"]) or {"reactions": {}, "mine": []}
+            r["reactions"], r["mine"] = slot["reactions"], slot["mine"]
+        return self._send(200, {"messages": rows, "reset_at_utc": day_start_utc(),
+                                "online": presence_count(),
+                                "rooms": room_counts() if ext else {},
+                                "features": {"rooms": ext, "cards": ext, "reactions": rx_ok()}})
 
     def do_POST(self):
         path = urllib.parse.urlparse(self.path).path
@@ -290,11 +1049,265 @@ class Handler(BaseHTTPRequestHandler):
                 return self._send(502, {"error": str(e)})
             return self._send(200, {"ok": True, "level": level})
 
+        # ---- reaction toggle: {"message_id": 12, "emoji": "🔥"}
+        if path == "/api/chat/react":
+            uid = user.get("id") or ""
+            emoji = payload.get("emoji")
+            try:
+                mid = int(payload.get("message_id"))
+            except (TypeError, ValueError):
+                return self._send(400, {"error": "bad message_id"})
+            if emoji not in EMOJIS:
+                return self._send(400, {"error": "emoji not allowed"})
+            if not rx_ok():
+                return self._send(501, {"error": "reactions not enabled yet"})
+            now = time.time()
+            if now - _last_react.get(uid, 0) < REACT_COOLDOWN:
+                return self._send(429, {"error": "slow down"})
+            _last_react[uid] = now
+            try:
+                have = sb("GET", "/rest/v1/chat_reactions",
+                          params={"select": "message_id", "message_id": "eq." + str(mid),
+                                  "user_id": "eq." + uid, "emoji": "eq." + emoji, "limit": 1})
+                if have:
+                    sb("DELETE", "/rest/v1/chat_reactions",
+                       params={"message_id": "eq." + str(mid), "user_id": "eq." + uid, "emoji": "eq." + emoji})
+                else:
+                    sb("POST", "/rest/v1/chat_reactions",
+                       body={"message_id": mid, "user_id": uid, "emoji": emoji})
+            except RuntimeError:
+                return self._send(400, {"error": "message not found"})
+            slot = load_reactions([mid], uid).get(mid) or {"reactions": {}, "mine": []}
+            return self._send(200, {"ok": True, "message_id": mid, **slot})
+
+        # ---- Friend request (auto-accepts if inverse pending exists)
+        if path == "/api/chat/friends/request":
+            uid = user.get("id") or ""
+            target = str(payload.get("user_id") or "").strip()
+            if not _valid_uuid(target) or target == uid:
+                return self._send(400, {"error": "invalid user_id"})
+            if target not in users_directory()["by_id"]:
+                return self._send(404, {"error": "user not found"})
+            me_name = display_name(user)
+            try:
+                ex = get_friendship(uid, target)
+                now_iso = datetime.now(timezone.utc).isoformat()
+                if ex:
+                    if ex["status"] == "accepted":
+                        return self._send(200, {"ok": True, "status": "accepted"})
+                    if ex["status"] == "pending" and ex["requester_id"] == target:
+                        sb("PATCH", "/rest/v1/friendships",
+                           params={"id": "eq." + str(ex["id"])},
+                           body={"status": "accepted", "updated_at": now_iso})
+                        send_push_async(target, "You're now friends",
+                                        f"{me_name} accepted your friend request",
+                                        "https://traderwatch.org/member/?view=friends&dm=" + uid,
+                                        "tw-fr-" + uid[:8])
+                        return self._send(200, {"ok": True, "status": "accepted"})
+                    if ex["status"] == "pending" and ex["requester_id"] == uid:
+                        return self._send(200, {"ok": True, "status": "pending"})
+                    sb("PATCH", "/rest/v1/friendships",
+                       params={"id": "eq." + str(ex["id"])},
+                       body={"requester_id": uid, "addressee_id": target, "status": "pending", "updated_at": now_iso})
+                else:
+                    sb("POST", "/rest/v1/friendships",
+                       body={"requester_id": uid, "addressee_id": target, "status": "pending"})
+            except RuntimeError as e:
+                return self._send(502, {"error": str(e)})
+            send_push_async(target, "Friend request",
+                            f"{me_name} wants to connect on Trader Watch",
+                            "https://traderwatch.org/member/?view=friends",
+                            "tw-fr-" + uid[:8])
+            return self._send(201, {"ok": True, "status": "pending"})
+
+        # ---- Respond to friend request or unfriend: accept | decline | remove | cancel
+        if path == "/api/chat/friends/respond":
+            uid = user.get("id") or ""
+            target = str(payload.get("user_id") or "").strip()
+            action = str(payload.get("action") or "").strip().lower()
+            if not _valid_uuid(target) or target == uid or action not in ("accept", "decline", "remove", "cancel"):
+                return self._send(400, {"error": "invalid request"})
+            try:
+                ex = get_friendship(uid, target)
+                if not ex:
+                    return self._send(404, {"error": "not found"})
+                if action == "accept":
+                    if ex["status"] == "accepted":
+                        return self._send(200, {"ok": True, "status": "accepted"})
+                    if ex["addressee_id"] != uid or ex["status"] != "pending":
+                        return self._send(403, {"error": "cannot accept"})
+                    sb("PATCH", "/rest/v1/friendships",
+                       params={"id": "eq." + str(ex["id"])},
+                       body={"status": "accepted", "updated_at": datetime.now(timezone.utc).isoformat()})
+                    send_push_async(target, "You're now friends",
+                                    f"{display_name(user)} accepted your friend request",
+                                    "https://traderwatch.org/member/?view=friends&dm=" + uid,
+                                    "tw-fr-" + uid[:8])
+                    return self._send(200, {"ok": True, "status": "accepted"})
+                sb("DELETE", "/rest/v1/friendships", params={"id": "eq." + str(ex["id"])})
+            except RuntimeError as e:
+                return self._send(502, {"error": str(e)})
+            return self._send(200, {"ok": True, "status": "removed"})
+
+        # ---- Wave welcome to a newcomer
+        if path == "/api/chat/friends/wave":
+            uid = user.get("id") or ""
+            target = str(payload.get("user_id") or "").strip()
+            if not _valid_uuid(target) or target == uid:
+                return self._send(400, {"error": "invalid user_id"})
+            if target not in users_directory()["by_id"]:
+                return self._send(404, {"error": "user not found"})
+            now = time.time()
+            if now - _last_wave.get(uid, 0) < 0.8:
+                return self._send(429, {"error": "slow down"})
+            _last_wave[uid] = now
+            try:
+                have = sb("GET", "/rest/v1/member_waves", params={
+                    "select": "id", "from_user_id": "eq." + uid, "to_user_id": "eq." + target, "limit": 1}) or []
+                if have:
+                    return self._send(200, {"ok": True, "already": True})
+                sb("POST", "/rest/v1/member_waves", body={"from_user_id": uid, "to_user_id": target})
+            except RuntimeError as e:
+                return self._send(502, {"error": str(e)})
+            send_push_async(target, "Welcome to Trader Watch",
+                            f"{display_name(user)} waved to welcome you!",
+                            "https://traderwatch.org/member/?view=friends",
+                            "tw-wave-" + uid[:8])
+            return self._send(201, {"ok": True, "already": False})
+
+        # ---- Send private DM (strictly between accepted friends)
+        # ---- pin / unpin a DM (either party may pin) ----
+        if path == "/api/chat/dm/pin":
+            uid = user.get("id") or ""
+            try:
+                mid = int(payload.get("id"))
+            except (TypeError, ValueError):
+                return self._send(400, {"error": "bad id"})
+            want = bool(payload.get("pinned"))
+            try:
+                rows = sb("GET", "/rest/v1/dm_messages", params={
+                    "select": "id,sender_id,recipient_id,pinned",
+                    "id": f"eq.{mid}", "limit": 1}) or []
+            except RuntimeError as e:
+                return self._send(502, {"error": str(e)})
+            if not rows or uid not in (rows[0]["sender_id"], rows[0]["recipient_id"]):
+                return self._send(403, {"error": "not your chat"})
+            try:
+                upd = sb("PATCH", "/rest/v1/dm_messages",
+                         params={"id": f"eq.{mid}"}, body={"pinned": want}) or []
+            except RuntimeError as e:
+                return self._send(502, {"error": str(e)})
+            m = (upd or [{}])[0]
+            return self._send(200, {"ok": True, "id": mid, "pinned": bool(m.get("pinned", want))})
+
+        # ---- soft-delete own message (content hidden, row kept) ----
+        if path == "/api/chat/dm/delete":
+            uid = user.get("id") or ""
+            try:
+                mid = int(payload.get("id"))
+            except (TypeError, ValueError):
+                return self._send(400, {"error": "bad id"})
+            try:
+                rows = sb("GET", "/rest/v1/dm_messages", params={
+                    "select": "id,sender_id", "id": f"eq.{mid}", "limit": 1}) or []
+            except RuntimeError as e:
+                return self._send(502, {"error": str(e)})
+            if not rows or rows[0]["sender_id"] != uid:
+                return self._send(403, {"error": "only your own messages"})
+            try:
+                sb("PATCH", "/rest/v1/dm_messages", params={"id": f"eq.{mid}"},
+                   body={"deleted": True, "deleted_by": uid, "body": "", "payload": None})
+            except RuntimeError as e:
+                return self._send(502, {"error": str(e)})
+            return self._send(200, {"ok": True, "id": mid, "deleted": True})
+
+        if path == "/api/chat/dm":
+            uid = user.get("id") or ""
+            target = str(payload.get("to") or "").strip()
+            if not _valid_uuid(target) or target == uid:
+                return self._send(400, {"error": "invalid recipient"})
+            try:
+                if not is_friends(uid, target):
+                    return self._send(403, {"error": "friends only"})
+            except RuntimeError as e:
+                return self._send(502, {"error": str(e)})
+            now = time.time()
+            if now - _last_dm.get(uid, 0) < DM_RATE_LIMIT:
+                return self._send(429, {"error": "slow down"})
+            raw = str(payload.get("text") or "").strip()
+            card = None
+            if payload.get("card"):
+                card = clean_card(payload.get("card"))
+                if not card:
+                    return self._send(400, {"error": "invalid signal card"})
+            if not raw and not card:
+                return self._send(400, {"error": "empty message"})
+            if len(raw) > MAX_LEN:
+                return self._send(400, {"error": f"max {MAX_LEN} characters"})
+            clean_txt = re.sub(r"[\x00-\x08\x0b\x0c\x0e-\x1f]", "", raw).strip()
+            if not clean_txt and card:
+                clean_txt = f"Shared {card['pair']} {card['side']} setup"
+            row = {
+                "sender_id": uid,
+                "recipient_id": target,
+                "body": clean_txt,
+                "kind": "signal" if card else "text",
+                "payload": card,
+            }
+            # Reply-to: mesti mesej dalam thread yang sama (rakan sahaja).
+            rt = payload.get("reply_to")
+            if rt is not None:
+                try:
+                    rt_id = int(rt)
+                except (TypeError, ValueError):
+                    return self._send(400, {"error": "bad reply_to"})
+                try:
+                    chk = sb("GET", "/rest/v1/dm_messages", params={
+                        "select": "id,sender_id,recipient_id",
+                        "id": f"eq.{rt_id}", "limit": 1}) or []
+                except RuntimeError:
+                    chk = []
+                ok = bool(chk) and {chk[0]["sender_id"], chk[0]["recipient_id"]} == {uid, target}
+                if ok:
+                    row["reply_to"] = rt_id
+            _last_dm[uid] = now
+            try:
+                rows = sb("POST", "/rest/v1/dm_messages", body=row) or [{}]
+            except RuntimeError as e:
+                return self._send(502, {"error": str(e)})
+            m = rows[0]
+            out_msg = {
+                "id": m.get("id"),
+                "me": True,
+                "body": m.get("body") or clean_txt,
+                "kind": m.get("kind") or row["kind"],
+                "payload": m.get("payload"),
+                "created_at": m.get("created_at") or datetime.now(timezone.utc).isoformat(),
+                "pinned": bool(m.get("pinned")),
+                "deleted": False,
+                "reply_to": m.get("reply_to"),
+                "reply": ({"id": rt_id, "body": str(payload.get("reply_body") or "")[:90],
+                           "me": False} if row.get("reply_to") else None),
+            }
+            me_name = display_name(user)
+            push_body = f"Shared {card['pair']} {card['side']} setup" if card else clean_txt[:120]
+            send_push_async(target, me_name, push_body,
+                            "https://traderwatch.org/member/?view=friends&dm=" + uid,
+                            "tw-dm-" + uid[:8])
+            return self._send(201, {"message": out_msg})
+
         if path != "/api/chat/messages":
             return self._send(404, {"error": "not found"})
 
         raw = str(payload.get("text") or "").strip()
-        if not raw:
+        card = None
+        if payload.get("card"):
+            card = clean_card(payload.get("card"))
+            if not card:
+                return self._send(400, {"error": "invalid signal card"})
+            if not ext_ok():
+                return self._send(501, {"error": "signal cards not enabled yet"})
+        if not raw and not card:
             return self._send(400, {"error": "empty message"})
         if len(raw) > MAX_LEN:
             return self._send(400, {"error": f"max {MAX_LEN} characters"})
@@ -304,20 +1317,34 @@ class Handler(BaseHTTPRequestHandler):
         if now - _last_post.get(uid, 0) < RATE_LIMIT_SECONDS:
             return self._send(429, {"error": "slow down"})
 
-        clean, actions = sanitise(raw)
-        if not clean:
+        clean, actions = sanitise(raw) if raw else ("", [])
+        if not clean and not card:
             return self._send(400, {"error": "message filtered out"})
+        if not clean:
+            clean = "Kongsi setup AI"
+
+        row = {"user_id": uid, "username": public_name(display_name(user)), "body": clean}
+        if ext_ok():
+            room = str(payload.get("room") or "").upper()
+            row["room"] = card["pair"] if card else (room if room in ROOMS else "all")
+            row["kind"] = "signal" if card else "text"
+            if card:
+                row["payload"] = card
 
         _last_post[uid] = now
         try:
-            rows = sb("POST", "/rest/v1/chat_messages",
-                      body={"user_id": uid, "username": display_name(user), "body": clean})
+            rows = sb("POST", "/rest/v1/chat_messages", body=row)
         except RuntimeError as e:
             return self._send(502, {"error": str(e)})
-        return self._send(201, {"message": (rows or [{}])[0], "filtered": actions})
+        msg = (rows or [{}])[0]
+        msg.pop("user_id", None)
+        msg.setdefault("reactions", {})
+        msg.setdefault("mine", [])
+        return self._send(201, {"message": msg, "filtered": actions})
 
 
 def main():
+    threading.Thread(target=_dm_purge_loop, daemon=True).start()
     srv = ThreadingHTTPServer(("127.0.0.1", PORT), Handler)
     print(f"chat api listening on 127.0.0.1:{PORT}", flush=True)
     srv.serve_forever()
