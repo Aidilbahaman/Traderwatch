@@ -2147,8 +2147,11 @@ if(!sess||!sess.access_token){
  saveSession(sess);
 }
 if(sessionExpired(sess)){
- if(sess.refresh_token){refreshAndReload();return}
- location.replace(LOGIN_URL);return;
+ if(sess.access_token==='preview'){sess.expires_at=Math.floor(Date.now()/1000)+86400;saveSession(sess)}
+ else{
+  if(sess.refresh_token){refreshAndReload();return}
+  location.replace(LOGIN_URL);return;
+ }
 }
 /* Proaktif refresh sebelum tamat (5 min sebelum expiry) + bila app resume,
    supaya token tak pernah expired semasa sesi aktif. */
