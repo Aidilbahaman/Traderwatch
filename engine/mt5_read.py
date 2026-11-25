@@ -83,17 +83,59 @@ mt5.shutdown()
 
 SCRIPT_PATH = "/home/mt5/.mt5/drive_c/mt5work/mt5_query.py"
 
-def ensure_script():
-    """Tulis script ke drive_c supaya wine nampak sebagai C:\\mt5work."""
-    import tempfile, os
+# Cache untuk ensure_script(): elak tulis semula fail yang sama setiap panggilan.
+# _ENSURE_TTL membenarkan deploy baru merebak tanpa restart servis.
+import time as _time
+_SCRIPT_OK = False
+_SCRIPT_AT = 0.0
+_ENSURE_TTL = 600.0
+
+def ensure_script(force=False):
+    """Tulis script ke drive_c supaya wine nampak sebagai C:\\mt5work.
+
+    Dioptimumkan 2026-11-24. Dulu fail ini ditulis semula SETIAP panggilan:
+    mkdir + cp + chown = 3 sudo, setiap kali candles()/tick(). Diukur 202
+    spawn sudo/minit dan load 11 pada 2 vCPU — fork storm, bukan kerja.
+
+    Sekarang: hash script yang ada disemak dahulu (sudoers benarkan
+    `cat /home/mt5/*` tanpa password). Kalau sama, ketiga-tiga sudo dilangkau.
+    Hasil cache dipegang per-proses selama _ENSURE_TTL detik supaya deploy
+    baru merebak dalam 10 minit tanpa perlu restart servis.
+    """
+    global _SCRIPT_OK, _SCRIPT_AT
+    import hashlib
+    now = _time.time()
+    if (_SCRIPT_OK and not force
+            and (now - _SCRIPT_AT) < _ENSURE_TTL):
+        return
+    want = hashlib.sha256(WIN_SCRIPT.encode()).hexdigest()
+    try:
+        cur = subprocess.run(["sudo", "-n", "cat", SCRIPT_PATH],
+                             capture_output=True, text=True, timeout=20)
+        if (cur.returncode == 0
+                and hashlib.sha256((cur.stdout or "").encode()).hexdigest() == want):
+            _SCRIPT_OK, _SCRIPT_AT = True, now
+            return
+    except (OSError, subprocess.SubprocessError):
+        pass
+    # script tiada atau berbeza — tulis semula (3 sudo, jarang berlaku)
+    import tempfile, os as _os
     subprocess.run(["sudo", "-n", "-u", "mt5", "mkdir", "-p",
-                    os.path.dirname(SCRIPT_PATH)], capture_output=True)
+                    _os.path.dirname(SCRIPT_PATH)], capture_output=True)
     with tempfile.NamedTemporaryFile("w", suffix=".py", delete=False) as f:
         f.write(WIN_SCRIPT)
         tmp = f.name
-    subprocess.run(["sudo", "-n", "cp", tmp, SCRIPT_PATH], capture_output=True)
-    subprocess.run(["sudo", "-n", "chown", "mt5:mt5", SCRIPT_PATH], capture_output=True)
-    os.unlink(tmp)
+    try:
+        subprocess.run(["sudo", "-n", "cp", tmp, SCRIPT_PATH],
+                       capture_output=True, check=False)
+        subprocess.run(["sudo", "-n", "chown", "mt5:mt5", SCRIPT_PATH],
+                       capture_output=True, check=False)
+    finally:
+        try:
+            _os.unlink(tmp)
+        except OSError:
+            pass
+    _SCRIPT_OK, _SCRIPT_AT = True, now
 
 
 def run(win_args, timeout=180):

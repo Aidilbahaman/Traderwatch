@@ -17,11 +17,13 @@ Kunci anti-duplicate:
 
 Mod: MT5_MODE=plan (default, log sahaja) | live (hantar order)
 """
+import hashlib
 import json
 import math
 import os
 import subprocess
 import sys
+import time
 from datetime import datetime, timezone, timedelta
 from pathlib import Path
 
@@ -196,6 +198,13 @@ elif act == "market":
     vmin = float(info.volume_min or step)
     vmax = float(info.volume_max or lot)
     lot = max(vmin, min(vmax, (int(lot / step) * step)))
+    # Semak margin bebas supaya lot besar tak gagal dengan "No money"
+    acc_info = mt5.account_info()
+    if acc_info and acc_info.margin_free > 0:
+        m_req = mt5.order_calc_margin(otype, sym, lot, price)
+        if m_req and m_req > acc_info.margin_free * 0.85:
+            scale = (acc_info.margin_free * 0.85) / m_req
+            lot = max(vmin, round(int((lot * scale) / step) * step, 8))
     request = {"action": mt5.TRADE_ACTION_DEAL, "symbol": sym, "volume": lot,
                "type": otype, "price": price, "sl": sl, "tp": tp,
                "deviation": int(req.get("deviation", 20)), "magic": magic,
@@ -340,13 +349,43 @@ mt5.shutdown()
 '''
 
 
-def _ensure_script():
+_SCRIPT_OK = False
+_SCRIPT_AT = 0.0
+_ENSURE_TTL = 600.0
+
+
+def _ensure_script(force=False):
+    """Pastikan mt5_pending.py dalam drive_c sepadan dengan WIN.
+
+    Dioptimumkan 2026-11-24. Dulu: tulis /tmp, salin, chown — tiga sudo,
+    SETIAP panggilan mt5(). Loop ini jalan setiap 15s dengan ~8 panggilan
+    satu pusingan, jadi itu ~1,100 spawn sudo sejam untuk menyalin fail
+    yang tidak pernah berubah.
+
+    Sekarang: hash disemak dulu melalui `sudo -n cat` (dibenarkan sudoers),
+    dan hasilnya dicache per-proses selama _ENSURE_TTL detik.
+    """
+    global _SCRIPT_OK, _SCRIPT_AT
+    now = time.time()
+    if _SCRIPT_OK and not force and (now - _SCRIPT_AT) < _ENSURE_TTL:
+        return
+    want = hashlib.sha256(WIN.encode()).hexdigest()
+    try:
+        cur = subprocess.run(["sudo", "-n", "cat", WIN_SCRIPT_HOST],
+                             capture_output=True, text=True, timeout=20)
+        if (cur.returncode == 0
+                and hashlib.sha256((cur.stdout or "").encode()).hexdigest() == want):
+            _SCRIPT_OK, _SCRIPT_AT = True, now
+            return
+    except (OSError, subprocess.SubprocessError):
+        pass
     tmp = Path("/tmp/mt5_pending_win.py")
     tmp.write_text(WIN)
     subprocess.run(["sudo", "-n", "mkdir", "-p", "/home/mt5/.mt5/drive_c/mt5work"],
                    capture_output=True)
     subprocess.run(["sudo", "-n", "cp", str(tmp), WIN_SCRIPT_HOST], capture_output=True)
     subprocess.run(["sudo", "-n", "chown", "mt5:mt5", WIN_SCRIPT_HOST], capture_output=True)
+    _SCRIPT_OK, _SCRIPT_AT = True, now
 
 
 def mt5(payload, timeout=180):
@@ -486,7 +525,7 @@ def symbol_spec(pair):
     return _SPEC_CACHE[pair]
 
 
-def size_lot(pair, entry, sl, equity):
+def size_lot(pair, entry, sl, equity, risk_pct=None, min_spread_mult=3.0):
     """Kira lot dari risiko % equity pada jarak entry->SL.
 
     trade_tick_value dari MT5 sudah dalam MATA WANG AKAUN (akaun ini EUR),
@@ -505,15 +544,15 @@ def size_lot(pair, entry, sl, equity):
     dist = abs(float(entry) - float(sl))
     if dist <= 0:
         return None, "zero-sl"
-    # Guard spread: SL mesti > 3x spread live. Kalau tidak, spread sahaja
-    # boleh makan edge (RoboForex spread besar). Skip, bukan kecilkan lot.
+    # Guard spread: SL mesti > min_spread_mult x spread live.
     sp = float(spec.get("spread_price") or 0) or float(spec.get("spread_pt") or 0) * float(spec.get("point") or 0)
-    if sp > 0 and dist < 3 * sp:
-        return None, f"sl<{3*sp:g} (3x spread {sp:g})"
+    if sp > 0 and dist < min_spread_mult * sp:
+        return None, f"sl<{min_spread_mult*sp:g} ({min_spread_mult}x spread {sp:g})"
     loss_per_lot = (dist / tick_size) * tick_value
     if loss_per_lot <= 0:
         return None, "bad-loss"
-    risk_money = float(equity) * RISK_PCT / 100.0
+    use_risk_pct = float(risk_pct) if (risk_pct is not None and float(risk_pct) > 0) else RISK_PCT
+    risk_money = float(equity) * use_risk_pct / 100.0
     raw = risk_money / loss_per_lot
     step = float(spec.get("vol_step") or 0.01) or 0.01
     vmin = float(spec.get("vol_min") or 0.01) or 0.01
@@ -529,7 +568,7 @@ def size_lot(pair, entry, sl, equity):
         lot = vmin
     if lot > vmax:
         lot = vmax
-    return lot, (f"eq={float(equity):.2f} risk={RISK_PCT}% money={risk_money:.2f} "
+    return lot, (f"eq={float(equity):.2f} risk={use_risk_pct}% money={risk_money:.2f} "
                  f"sl_dist={dist:g} loss/lot={loss_per_lot:.2f} lot={lot:g}")
 
 
