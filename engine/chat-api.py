@@ -80,11 +80,67 @@ _presence = {}                  # user_id -> unix ts of last heartbeat
 _presence_lock = threading.Lock()
 
 
+# ---- last seen (orbit: nama kekal sehingga 12 malam, hilang esok kalau tak online) ----
+# _presence di atas hilang bila server restart. Orbit pula perlu tahu siapa yang
+# pernah online HARI INI, jadi cap masa terakhir disimpan ke state/presence.json.
+SEEN_FILE = pathlib.Path(__file__).resolve().parent.parent / "state" / "presence.json"
+SEEN_KEEP = 7 * 86400           # simpan 7 hari (debug); orbit guna "hari ini" sahaja
+_seen = {}                      # user_id -> unix ts terakhir dikesan online
+_seen_dirty = False
+_seen_last_flush = 0.0
+_seen_lock = threading.Lock()
+
+
+def _load_seen():
+    try:
+        raw = json.loads(SEEN_FILE.read_text())
+    except (OSError, ValueError):
+        return
+    now = time.time()
+    if isinstance(raw, dict):
+        for k, v in raw.items():
+            if isinstance(v, (int, float)) and now - v < SEEN_KEEP:
+                _seen[k] = float(v)
+
+
+def _flush_seen(force=False):
+    global _seen_dirty, _seen_last_flush
+    now = time.time()
+    with _seen_lock:
+        if not _seen_dirty:
+            return
+        if not force and now - _seen_last_flush < 60:
+            return
+        _seen_dirty = False
+        _seen_last_flush = now
+        data = {k: v for k, v in _seen.items() if now - v < SEEN_KEEP}
+    try:
+        SEEN_FILE.parent.mkdir(parents=True, exist_ok=True)
+        tmp = SEEN_FILE.with_suffix(".tmp")
+        tmp.write_text(json.dumps(data))
+        os.replace(tmp, SEEN_FILE)
+    except OSError:
+        pass                            # disk penuh / read-only: jangan rosakkan chat
+
+
+def mark_seen(uid):
+    """Cap masa 'online' terkini. Dipanggil setiap heartbeat & setiap API call sah."""
+    global _seen_dirty
+    if not uid:
+        return
+    with _seen_lock:
+        _seen[uid] = time.time()
+        _seen_dirty = True
+    _flush_seen()
+
+
 def presence_beat(uid):
     now = time.time()
     with _presence_lock:
         _presence[uid] = now
-        return sum(1 for ts in _presence.values() if now - ts <= PRESENCE_TTL)
+        n = sum(1 for ts in _presence.values() if now - ts <= PRESENCE_TTL)
+    mark_seen(uid)
+    return n
 
 
 def presence_count():
@@ -103,6 +159,9 @@ def presence_online_set():
         for u in stale:
             _presence.pop(u, None)
         return set(_presence.keys())
+
+
+_load_seen()
 
 
 # ---------------------------------------------------------------- secrets
@@ -680,6 +739,11 @@ def build_friends_overview(uid):
     ranks = rank_map()
     online_ids = presence_online_set()
     day0 = day_start_utc()
+    # Siapa yang pernah dikesan online sejak 12 malam (MYT). Orbit guna ini:
+    # nama kekal sampai tengah malam, esok hilang kalau tak buka app.
+    seen_start = datetime.now(MYT).replace(
+        hour=DAILY_RESET_HOUR_MYT, minute=0, second=0, microsecond=0).timestamp()
+    seen_today_ids = {u for u, ts in _seen.items() if ts >= seen_start}
 
     today_joined = sum(1 for u in ordered if (u.get("created_at") or "") >= day0)
     total_members = len(ordered)
@@ -759,6 +823,7 @@ def build_friends_overview(uid):
             "id": fid,
             "username": info["username"],
             "online": fid in online_ids,
+            "seen_today": fid in seen_today_ids,
             "rank": ranks.get(fid),
             "unread": unread_by.get(fid, 0),
             "last_msg": preview,
@@ -790,9 +855,11 @@ def build_friends_overview(uid):
         "username": u["username"],
         "created_at": u["created_at"],
         "rank": ranks.get(u["id"]),
+        "online": u["id"] in online_ids,
         "waved": u["id"] in my_waves,
         "waves": wave_counts.get(u["id"], 0),
         "rel": rel_map.get(u["id"], "none"),
+        "seen_today": u["id"] in seen_today_ids,
     } for u in newest]
 
     unread_dm_total = sum(unread_by.values())
@@ -847,6 +914,8 @@ class Handler(BaseHTTPRequestHandler):
         if not user:
             return self._send(401, {"error": "sign in required"})
         uid = user.get("id") or ""
+        if uid:
+            presence_beat(uid)          # sebarang aktiviti API dikira online
         q = urllib.parse.parse_qs(urllib.parse.urlparse(self.path).query)
 
         # ---- Orbit Friends overview (friends, requests, live arrivals, unread)
@@ -1023,6 +1092,8 @@ class Handler(BaseHTTPRequestHandler):
         user = verify_user(self._token())
         if not user:
             return self._send(401, {"error": "sign in required"})
+        if user.get("id"):
+            presence_beat(user["id"])   # sebarang aktiviti API dikira online
 
         try:
             n = int(self.headers.get("Content-Length") or 0)

@@ -3681,17 +3681,22 @@ function renderFriends(){
  /* path positions untuk walking orbit (orbit state): tersebar pada perimeter elips */
  var walkPos=[{x:50,y:20},{x:72,y:30},{x:78,y:52},{x:60,y:66},{x:36,y:64},{x:24,y:44}];
  var walkDur=[22,28,25,31,27,24],walkDel=[0,-7,-14,-4,-10,-18],walkDist=[0,25,50,75,12,62];
- var innerNodes=FR.friends.slice(0,4);
- var outerNodes=FR.arrivals.slice(0,4);
+ /* Orbit hanya papar ahli yang aktif HARI INI (sejak 12 malam MYT).
+    Nama kekal dalam bubble sampai tengah malam walaupun dia offline semula;
+    esok dia hilang kalau tak buka app langsung. Server kira seen_today. */
+ var orbitF=FR.friends.filter(function(f){return f.seen_today});
+ orbitF.sort(function(a,b){return (b.online?1:0)-(a.online?1:0)});
+ var innerNodes=orbitF.slice(0,4);
+ var outerNodes=FR.arrivals.filter(function(a){return a.seen_today}).slice(0,4);
 
  /* Keep selected node fresh */
  var selObj=null;
  if(FR.sel){
   if(FR.sel.kind==='friend'){
-   var ff=FR.friends.filter(function(x){return x.id===FR.sel.id})[0];
+   var ff=orbitF.filter(function(x){return x.id===FR.sel.id})[0];
    if(ff)selObj={kind:'friend',data:ff};
   }else{
-   var aa=FR.arrivals.filter(function(x){return x.id===FR.sel.id})[0];
+   var aa=outerNodes.filter(function(x){return x.id===FR.sel.id})[0];
    if(aa)selObj={kind:'new',data:aa};
   }
  }
@@ -3738,12 +3743,12 @@ function renderFriends(){
   +outerNodes.map(function(a,i){
    var isSel=selObj&&selObj.kind==='new'&&selObj.data.id===a.id;
    return '<div class="orb-node is-new'+(isSel?' sel':'')+'" style="left:'+outPos[i].x+'%;top:'+outPos[i].y+'%" data-orb-n="'+esc(a.id)+'">'
-    +orbAvHTML(a.username,a.id,false,a.rank)+'<span>NEW · '+esc(firstWord(a.username))+'</span></div>';
+    +orbAvHTML(a.username,a.id,!!a.online,a.rank)+'<span>NEW · '+esc(firstWord(a.username))+'</span></div>';
   }).join('')
   +tipHTML
   +'<button class="orb-minipill" id="orbMini" type="button" aria-label="'+(en?'Expand orbit':'Besarkan orbit')+'">'
    +'<span class="mc">'+orbStarSVG()+'</span>'
-   +'<span><b>'+FR.total+'</b> '+(en?'online':'online')+'</span>'
+   +'<span><b>'+FR.online+'</b> '+(en?'online':'online')+'</span>'
    +'<span class="chev">⌄</span>'
   +'</button>';
 
