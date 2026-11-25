@@ -1476,7 +1476,7 @@ html[data-theme="light"] .star-mood{background:rgba(122,181,46,.10);border-color
     var(--bg)!important;padding:0!important}
   .phone{
     display:grid!important;
-    grid-template-columns:232px minmax(0,1fr)!important;
+    grid-template-columns:auto minmax(0,1fr)!important;
     grid-template-rows:minmax(0,1fr)!important;
     width:100%!important;height:100%!important;max-height:none!important;
     border:0!important;border-radius:0!important;box-shadow:none!important;
@@ -1486,9 +1486,10 @@ html[data-theme="light"] .star-mood{background:rgba(122,181,46,.10);border-color
 
   /* ---- SIDE NAV (kiri) — dari .bnavwrap sedia ada ---- */
   .bnavwrap{
-    grid-column:1!important;grid-row:1!important;
+    grid-column:1!important;grid-row:1/span 2!important;
     position:relative!important;
-    width:auto!important;
+    width:232px!important;
+    transition:width .22s cubic-bezier(.22,1,.36,1)!important;
     height:100vh!important;min-height:100vh!important;max-height:none!important;
     flex:none!important;
     z-index:25!important;
@@ -1659,6 +1660,68 @@ html[data-theme="light"] .star-mood{background:rgba(122,181,46,.10);border-color
 
   /* ---- BNAVWRAP lama disembunyikan di bawah (mobile fallback) ---- */
   html:not(:root) .bnavwrap{display:block}
+
+  /* ============================================================
+     DESKTOP REFINEMENT — collapsible sidebar / compact topbar /
+     12-pair single screen. Semua override dalam block ini SAHAJA.
+     ============================================================ */
+
+  /* ---- FIX 1: collapsible sidebar (default collapsed 72px) ---- */
+  .phone{grid-template-rows:auto minmax(0,1fr)!important}
+  .appbar{flex:0 0 auto!important}
+  .sbtoggle{
+    display:block;width:30px;height:30px;padding:0;margin:0 0 14px;
+    border-radius:9px;border:1px solid var(--line);background:var(--card2);
+    color:var(--muted);font-size:13px;line-height:1;cursor:pointer;
+    display:grid;place-items:center;
+    transition:border-color .18s,color .18s,background .18s}
+  .sbtoggle:hover{border-color:var(--lime);color:var(--lime)}
+  body.sb-min .bnavwrap{width:72px!important;padding-left:21px!important;padding-right:21px!important}
+  body.sb-min .sbtoggle{margin:0 auto 14px}
+  body.sb-min .bnav .nav span,body.sb-min .bnav .ligacoin .clbl{display:none!important}
+  body.sb-min .bnav .nav,body.sb-min .bnav .ligacoin{justify-content:center!important;padding:11px 0!important}
+  body.sb-min .bnav .nav .st-nav{display:inline!important} /* st-nav = icon svg wrapper, keep */
+  body.sb-min .bnav .nav svg{width:20px!important;height:20px!important}
+
+  /* ---- FIX 2: clean single-row topbar ---- */
+  .appbar{
+    padding:12px 26px!important;gap:14px!important;
+    border-bottom:1px solid var(--line)!important;
+    background:var(--card)!important}
+  .appbar .logo{width:34px!important;height:34px!important;border-radius:10px!important}
+  .appbar .brand{display:flex!important;flex-direction:row!important;align-items:baseline!important;gap:8px!important;
+    flex:0 0 auto!important;justify-content:flex-start!important}
+  .appbar .brand b{font-size:14px!important}
+  .appbar .brand small{font-size:9px!important;margin-top:0!important}
+  .appbar .logo{flex:none!important}
+  .appbar .baract{margin-left:auto!important;display:flex!important;gap:8px!important}
+
+  /* ---- FIX 2: compact greeting (title left, starling right) ---- */
+  .greet-row{display:flex!important;align-items:center!important;justify-content:space-between!important;margin-bottom:10px!important}
+  h1{font-size:20px!important}
+  h1 span{font-size:inherit!important}
+  .view[data-view="analyst"] .star-mood{display:none!important}
+  .view[data-view="analyst"] .sub{display:none!important}
+  .view[data-view="analyst"] .hint{display:none!important}
+
+  /* ---- FIX 3+4: compact search / tabs ---- */
+  .scroll{padding:18px 22px 40px!important}
+  .search{padding:9px 14px!important;margin-bottom:10px!important;font-size:13px!important}
+  .search input{font-size:13px!important}
+  .tabs{margin-bottom:12px!important}
+  .tab{padding:7px 16px!important;font-size:12px!important}
+
+  /* ---- FIX 3+4: compact pair cards — 12 fit on first load ---- */
+  .pairs{grid-template-columns:repeat(auto-fill,minmax(168px,1fr))!important;gap:10px!important}
+  .pair{padding:11px 12px!important;border-radius:14px!important;min-height:0!important}
+  .pair .ic{width:28px!important;height:28px!important;font-size:9px!important;border-radius:8px!important}
+  .pair .nm{font-size:12.5px!important}
+  .pair .ds{font-size:10px!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important}
+  .pair .px{font-size:13px!important;margin-top:7px!important}
+  .pair .spark{height:18px!important;margin:6px 0 4px!important}
+  .pair .aitick{font-size:8px!important}
+  .pair .traders{font-size:8px!important}
+  .pair .badges{margin-top:6px!important}
 }
 
 /* ---- fallback: <=840px mobile biasa (TIDAK DISSENTUH) ---- */
@@ -5501,7 +5564,7 @@ window.addEventListener('appinstalled',function(){drawWelcome();try{localStorage
 if(typeof window!=='undefined'){window.__welcome=showWelcome;window.__drawWelcome=drawWelcome;}
 if(typeof window!=='undefined'){window.__forceLogout=goLogin;}
 if('serviceWorker' in navigator){window.addEventListener('load',function(){
- navigator.serviceWorker.register('sw.js?v=113v60',{scope:'./',updateViaCache:'none'}).then(function(reg){
+ navigator.serviceWorker.register('sw.js?v=114v60',{scope:'./',updateViaCache:'none'}).then(function(reg){
   /* PWA homescreen resume instance lama tanpa navigation -> check update
      bila app kembali nampak/focus + setiap 30 min, dan reload automatik
      bila SW versi baru mengambil alih (controllerchange). */
@@ -5517,6 +5580,28 @@ if('serviceWorker' in navigator){window.addEventListener('load',function(){
 
 /* ---------------- init ---------------- */
 applyTheme();renderAll();scheduleGreet();loadProfile();
+/* Desktop collapsible sidebar toggle (>=841px sahaja — CSS dalam #tw-desktop).
+   Default: COLLAPSED (72px, ikon sahaja). sb-min class = collapsed.
+   localStorage tw-sb-min: '0' bila user expand — kekal expand. */
+try{if(localStorage.getItem('tw-sb-min')!=='0')document.body.classList.add('sb-min')}
+catch(e){document.body.classList.add('sb-min')}
+(function(){
+ var bw=document.querySelector('.bnavwrap');if(!bw)return;
+ var sbBtn=document.createElement('button');
+ sbBtn.id='sbToggle';sbBtn.className='sbtoggle';sbBtn.setAttribute('aria-label','Toggle sidebar');
+ sbBtn.innerHTML='☰';
+ sbBtn.onclick=function(){
+  document.body.classList.toggle('sb-min');
+  try{localStorage.setItem('tw-sb-min',document.body.classList.contains('sb-min')?'1':'0')}catch(e){}
+ };
+ bw.insertBefore(sbBtn,bw.firstChild);
+ /* butang hanya hidup pada desktop (>=841px) — mobile kekal 100% tanpa sentuhan */
+ var sbMQ=window.matchMedia('(min-width:841px)');
+ function sbSync(){sbBtn.style.display=sbMQ.matches?'':'none'}
+ if(sbMQ.addEventListener)sbMQ.addEventListener('change',sbSync);
+ else if(sbMQ.addListener)sbMQ.addListener(sbSync);
+ sbSync();
+})();
 var _sp=new URLSearchParams(location.search);
 var iv=_sp.get('view');
 var _dm=_sp.get('dm');
