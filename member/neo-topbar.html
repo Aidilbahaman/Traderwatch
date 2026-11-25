@@ -1474,38 +1474,10 @@ html[data-theme="light"] .star-mood{background:rgba(122,181,46,.10);border-color
     radial-gradient(60% 50% at 18% 0%,rgba(183,243,107,.05),transparent 60%),
     radial-gradient(50% 44% at 100% 100%,rgba(138,180,255,.04),transparent 60%),
     var(--bg)!important;padding:0!important}
-  .phone{
-    display:grid!important;
-    grid-template-columns:auto minmax(0,1fr)!important;
-    grid-template-rows:minmax(0,1fr)!important;
-    width:100%!important;height:100%!important;max-height:none!important;
-    border:0!important;border-radius:0!important;box-shadow:none!important;
-    background:transparent!important;overflow:visible!important;
-    gap:0}
+  .phone{display:grid!important;grid-template-columns:minmax(0,1fr)!important;grid-template-rows:auto auto minmax(0,1fr)!important;width:100%!important;height:100%!important;max-height:none!important;border:0!important;border-radius:0!important;box-shadow:none!important;background:transparent!important;overflow:visible!important}
   .notch{display:none!important}
 
   /* ---- SIDE NAV (kiri) — dari .bnavwrap sedia ada ---- */
-  .bnavwrap{
-    grid-column:1!important;grid-row:auto!important;
-    position:relative!important;
-    width:232px!important;
-    transition:width .22s cubic-bezier(.22,1,.36,1)!important;
-    height:100vh!important;min-height:100vh!important;max-height:none!important;
-    flex:none!important;
-    z-index:25!important;
-    border-right:1px solid var(--line);border-top:0;border-bottom:0;border-left:0;
-    border-radius:0!important;
-    background:var(--card)!important;
-    display:block!important;
-    padding:18px 12px calc(18px + env(safe-area-inset-bottom))!important;
-    box-shadow:none!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important;
-    overflow-y:auto;overflow-x:hidden}
-  .bnav{position:static!important;display:block!important;height:auto!important;
-    background:transparent!important;border:0!important;box-shadow:none!important;
-    backdrop-filter:none!important;-webkit-backdrop-filter:none!important;
-    padding:0!important;border-radius:0!important;
-    left:auto!important;right:auto!important;bottom:auto!important;top:auto!important;
-    transform:none!important}
   /* buang overlay hitam & pill dari mobile — ia menutup label sidebar */
   .bnav::before,.bnav::after,.bnav .navpill{display:none!important}
   .bnav *{position:static!important;transform:none!important;left:auto!important;
@@ -1556,13 +1528,6 @@ html[data-theme="light"] .star-mood{background:rgba(122,181,46,.10);border-color
   .bnav .nav:active{transform:none!important}
 
   /* ---- MAIN (tengah) ---- */
-  .appbar{
-    position:static!important;order:0;
-    display:flex!important;align-items:center;gap:12px;
-    padding:16px 26px 14px!important;
-    max-width:none!important;margin:0!important;
-    border-bottom:1px solid var(--line);background:var(--card)!important;
-    backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
   .scroll{
     max-width:1080px!important;margin:0 auto!important;width:100%!important;
     padding:26px 30px 60px!important;
@@ -1590,14 +1555,6 @@ html[data-theme="light"] .star-mood{background:rgba(122,181,46,.10);border-color
   .search{max-width:none!important;width:100%!important}
 
   /* ---- APPBAR: pindah ke atas sebagai topbar ---- */
-  .appbar{
-    grid-column:2!important;grid-row:1!important;
-    display:flex!important;align-items:center;gap:12px!important;
-    padding:16px 30px 14px!important;
-    margin:0!important;
-    border-bottom:1px solid var(--line)!important;
-    background:var(--card)!important;
-    backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
   .appbar .brand b{font-size:15px!important}
   .appbar .brand small{font-size:9px!important}
   .appbar .baract{margin-left:auto!important;display:flex!important;gap:8px!important}
@@ -1670,7 +1627,6 @@ html[data-theme="light"] .star-mood{background:rgba(122,181,46,.10);border-color
 
   /* ---- FIX 1: collapsible sidebar (default collapsed 72px) ---- */
   .phone{grid-template-rows:auto minmax(0,1fr)!important}
-  .appbar{flex:0 0 auto!important}
   .sbtoggle{
     display:block;width:30px;height:30px;padding:0;margin:0 0 14px;
     border-radius:9px;border:1px solid var(--line);background:var(--card2);
@@ -1686,10 +1642,6 @@ html[data-theme="light"] .star-mood{background:rgba(122,181,46,.10);border-color
   body.sb-min .bnav .nav svg{width:20px!important;height:20px!important}
 
   /* ---- FIX 2: clean single-row topbar ---- */
-  .appbar{
-    padding:12px 26px!important;gap:14px!important;
-    border-bottom:1px solid var(--line)!important;
-    background:var(--card)!important}
   .appbar .logo{width:34px!important;height:34px!important;border-radius:10px!important}
   .appbar .brand{display:flex!important;flex-direction:row!important;align-items:baseline!important;gap:8px!important;
     flex:0 0 auto!important;justify-content:flex-start!important}
@@ -1737,7 +1689,6 @@ html[data-theme="light"] .star-mood{background:rgba(122,181,46,.10);border-color
   .pair .ds{font-size:9.5px!important}
   .pair .px{font-size:12px!important}
   .pair .spark{height:16px!important}
-  .appbar{padding:10px 22px!important}
   h1{font-size:22px!important}
   .greet-row .st-buddy{width:64px!important;height:64px!important}
   .greet-row .st-buddy svg{width:60px!important;height:60px!important}
@@ -1745,9 +1696,10 @@ html[data-theme="light"] .star-mood{background:rgba(122,181,46,.10);border-color
 
   /* NEO-TOPBAR: nav jadi horizontal bar atas */
   .phone{grid-template-columns:minmax(0,1fr)!important;
-    grid-template-rows:auto auto auto minmax(0,1fr)!important}
+    grid-template-rows:auto auto minmax(0,1fr)!important}
   /* bnavwrap & appbar perlu keluar dari rule lama tw-desktop yang set
      grid-row:1 — paksa di sini dengan selector lebih khusus */
+  .composer{display:none!important}
   .phone > .bnavwrap{grid-column:1!important;grid-row:2!important;
     width:100%!important;height:auto!important;min-height:0!important;max-height:none!important;
     position:static!important;transform:none!important;
@@ -1758,19 +1710,8 @@ html[data-theme="light"] .star-mood{background:rgba(122,181,46,.10);border-color
     width:100%!important;border-top:0!important;border-left:0!important;border-right:0!important;
     padding:12px 26px!important}
   /* row1: appbar di atas (pindah sini) */
-  .appbar{grid-column:1!important;grid-row:1!important;
-    border-top:0!important;border-left:0!important;border-right:0!important;
-    padding:12px 26px!important}
   /* row2: nav horizontal */
-  .bnavwrap{grid-column:1!important;grid-row:2!important;
-    width:100%!important;height:auto!important;min-height:0!important;
-    width:auto!important;height:auto!important;min-height:0!important;
-    border-bottom:1px solid var(--line)!important;border-right:0!important;
-    background:var(--card)!important;padding:6px 20px!important;
-    display:flex!important;align-items:center!important;overflow:visible!important}
   .sbtoggle{display:none!important}
-  .bnav{display:flex!important;flex-direction:row!important;gap:6px!important;align-items:center!important;
-    width:auto!important;overflow:visible!important;flex-wrap:nowrap!important}
   .bnav .nav,.bnav .ligacoin{flex-direction:row!important;gap:9px!important;
     padding:9px 16px!important;width:auto!important;border-radius:11px!important;
     flex:none!important;background:transparent!important;border:0!important;
@@ -1787,6 +1728,55 @@ html[data-theme="light"] .star-mood{background:rgba(122,181,46,.10);border-color
   .pairs{grid-template-columns:repeat(auto-fill,minmax(164px,1fr))!important;gap:11px!important}
 
 </style>
+  /* ====== NEO-TOPBAR FINAL ====== */
+  .phone > .appbar{grid-column:1!important;grid-row:1!important;
+    width:100%!important;display:flex!important;align-items:center;gap:12px!important;
+    padding:12px 26px!important;border:0!important;border-bottom:1px solid var(--line)!important;
+    background:var(--card)!important;backdrop-filter:none!important;
+    margin:0!important;max-width:none!important}
+  .phone > .bnavwrap{grid-column:1!important;grid-row:2!important;
+    width:100%!important;height:auto!important;min-height:0!important;
+    display:flex!important;align-items:center!important;gap:6px!important;
+    padding:7px 22px!important;border:0!important;border-bottom:1px solid var(--line)!important;
+    background:var(--card)!important;backdrop-filter:none!important;
+    margin:0!important;max-width:none!important;overflow:visible!important;
+    box-shadow:none!important;border-radius:0!important}
+  .phone > .bnavwrap .sbtoggle{display:none!important}
+  .phone > .bnavwrap .bnav{display:flex!important;flex-direction:row!important;gap:6px!important;
+    width:auto!important;height:auto!important;overflow:visible!important;
+    background:transparent!important;border:0!important;padding:0!important;
+    position:static!important;transform:none!important}
+  .phone > .bnavwrap .bnav *{position:static!important;transform:none!important;
+    left:auto!important;right:auto!important;top:auto!important;bottom:auto!important;
+    inset:auto!important;margin:0!important}
+  .phone > .bnavwrap .bnav .nav,
+  .phone > .bnavwrap .bnav .ligaslot,
+  .phone > .bnavwrap .bnav .ligacoin{
+    display:flex!important;flex-direction:row!important;align-items:center;gap:9px!important;
+    width:auto!important;height:auto!important;padding:8px 15px!important;
+    border-radius:11px!important;background:transparent!important;border:0!important;
+    box-shadow:none!important;color:var(--muted)!important;flex:none!important;
+    font-size:12.5px!important;font-weight:750!important;cursor:pointer!important;
+    transition:background .15s,color .15s}
+  .phone > .bnavwrap .bnav .ligaslot{padding:8px 4px!important;
+    font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);
+    font-weight:800}
+  .phone > .bnavwrap .bnav .nav.on,
+  .phone > .bnavwrap .bnav .ligacoin.on{background:rgba(183,243,107,.13)!important;
+    color:var(--lime)!important}
+  .phone > .bnavwrap .bnav .nav:hover:not(.on),
+  .phone > .bnavwrap .bnav .ligacoin:hover:not(.on){background:var(--card2)!important;
+    color:var(--text)!important}
+  .phone > .bnavwrap .bnav .nav span,
+  .phone > .bnavwrap .bnav .ligacoin .clbl{display:inline!important;opacity:1!important;
+    font-size:12.5px!important;font-weight:750!important;text-shadow:none!important;
+    text-align:left!important;color:inherit!important;letter-spacing:normal!important}
+  .phone > .bnavwrap .bnav svg{width:18px!important;height:18px!important;flex:none!important}
+  .phone > .scroll{grid-column:1!important;grid-row:3!important;
+    max-width:none!important;margin:0!important;width:auto!important;
+    padding:22px 28px 46px!important}
+  .pairs{grid-template-columns:repeat(auto-fill,minmax(168px,1fr))!important;gap:11px!important}
+
 </head>
 <body>
 <div id="splash" role="status" aria-live="polite" aria-label="Loading TraderWatch">
@@ -2176,8 +2166,12 @@ if(!sess||!sess.access_token){
  saveSession(sess);
 }
 if(sessionExpired(sess)){
- if(sess.refresh_token){refreshAndReload();return}
- location.replace(LOGIN_URL);return;
+ /* preview mode: jangan refresh/redirect — terus guna sesi preview */
+ if(sess.access_token==='preview'){sess.expires_at=Math.floor(Date.now()/1000)+86400;saveSession(sess)}
+ else{
+  if(sess.refresh_token){refreshAndReload();return}
+  location.replace(LOGIN_URL);return;
+ }
 }
 /* Proaktif refresh sebelum tamat (5 min sebelum expiry) + bila app resume,
    supaya token tak pernah expired semasa sesi aktif. */
