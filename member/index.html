@@ -2,50 +2,67 @@
 <html lang="en" data-theme="dark">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,minimum-scale=1,user-scalable=no,viewport-fit=cover,interactive-widget=resizes-content">
 <meta name="robots" content="noindex,nofollow,noarchive,nosnippet">
 <meta name="referrer" content="no-referrer">
 <meta name="theme-color" content="#0a0e0b">
-<link rel="manifest" href="manifest.webmanifest">
-<link rel="icon" href="icons/favicon.svg?v=20261123a" type="image/svg+xml">
-<link rel="icon" type="image/png" href="icons/icon-192.png?v=20261123a">
-<link rel="apple-touch-icon" href="icons/apple-touch-icon.png?v=20261123a">
+<link rel="manifest" href="manifest.webmanifest?v=20261124a">
+<link rel="icon" href="icons/favicon.svg?v=20261124a" type="image/svg+xml">
+<link rel="icon" type="image/png" href="icons/icon-192.png?v=20261124a">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png?v=20261124a">
 <meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="TW Analyst">
-<meta name="description" content="TraderWatch AI Analyst — analisis AI sebenar, komuniti dan profil ahli.">
-<title>TraderWatch — AI Analyst</title>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="Trader Watch">
+<meta name="description" content="Trader Watch — analisis AI sebenar, komuniti dan profil ahli.">
+<title>Trader Watch — AI Analyst</title>
 <style>
-:root{--bg:#0a0e0b;--card:#111612;--card2:#171e18;--text:#eef3ee;--muted:#8a978c;--line:#222b23;--lime:#b7f36b;--green:#b7f36b;--red:#ff777d;--orange:#ffc16b;--blue:#8ab4ff;--chart:#0c110d;--onlime:#10150b;--glass:rgba(10,14,11,.82);color-scheme:dark}
+:root{--bg:#0a0e0b;--card:#111612;--card2:#171e18;--text:#eef3ee;--muted:#8a978c;--line:#222b23;--lime:#b7f36b;--green:#b7f36b;--red:#ff777d;--orange:#ffc16b;--blue:#8ab4ff;--chart:#0c110d;--onlime:#10150b;--glass:rgba(10,14,11,.82);--sab:max(0px,calc(env(safe-area-inset-bottom,0px) - 12px));color-scheme:dark}
 html[data-theme="light"]{--bg:#f5f7f5;--card:#ffffff;--card2:#eef2ed;--text:#14211a;--muted:#63736a;--line:rgba(0,0,0,.1);--lime:#7ab52e;--green:#5f9c22;--red:#d64b55;--orange:#b8791b;--blue:#3a6fc4;--chart:#f0f4ef;--onlime:#0b1405;--glass:rgba(245,247,245,.86);color-scheme:light}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-html,body{margin:0;min-height:100%;background:var(--bg)}
+html,body{margin:0;min-height:100%;background:var(--bg);touch-action:pan-x pan-y;-webkit-text-size-adjust:100%}
 body{font:15px/1.5 -apple-system,BlinkMacSystemFont,"Inter","Segoe UI",sans-serif;letter-spacing:-.02em;color:var(--text);transition:background .3s,color .3s}
 button,input{font:inherit}button{cursor:pointer;border:0;background:none;color:inherit}
 .hidden{display:none!important}
 :focus-visible{outline:2px solid var(--lime);outline-offset:2px;border-radius:8px}
 
 /* desktop stage */
-.stage{min-height:100vh;display:grid;place-items:center;padding:24px;background:radial-gradient(ellipse 55% 55% at 50% 40%,#b7f36b12 0,transparent 70%),#050705}
-.phone{position:relative;width:390px;height:844px;max-height:calc(100vh - 40px);background:var(--bg);border:1px solid #2a342a;border-radius:38px;overflow:hidden;box-shadow:0 30px 90px #000b,0 0 0 8px #0d120d,0 0 60px #b7f36b14;display:flex;flex-direction:column}
+.stage{position:relative;min-height:100vh;display:grid;place-items:center;padding:20px 20px 40px;background:radial-gradient(ellipse 55% 55% at 50% 40%,#b7f36b12 0,transparent 70%),#050705}
+.phone{position:relative;width:390px;height:844px;max-height:calc(100vh - 60px);background:var(--bg);border:1px solid #2a342a;border-radius:38px;overflow:hidden;box-shadow:0 30px 90px #000b,0 0 0 8px #0d120d,0 0 60px #b7f36b14;display:flex;flex-direction:column}
 html[data-theme="light"] .phone{border-color:#d6ddd4;box-shadow:0 30px 90px #0004,0 0 0 8px #e5eae3,0 0 60px #7ab52e22}
 .notch{position:absolute;top:0;left:50%;transform:translateX(-50%);width:116px;height:22px;background:#050705;border-radius:0 0 16px 16px;z-index:31}
 html[data-theme="light"] .notch{background:#e5eae3}
-.stagehint{position:absolute;bottom:14px;left:0;right:0;text-align:center;color:#5d695f;font-size:11px;letter-spacing:.04em}
-@media(max-width:520px){.stage{padding:0;background:var(--bg);display:block;height:100vh;height:100dvh;min-height:0;overflow:hidden}.phone{width:100%;height:100%;max-height:none;border:0;border-radius:0;box-shadow:none}.notch,.stagehint{display:none}}
+.stagehint{position:absolute;bottom:12px;left:0;right:0;text-align:center;color:#5d695f;font-size:11px;letter-spacing:.04em}
+@media(max-width:520px){html,body{height:var(--app-h,100%);overflow:hidden;overscroll-behavior:none}.stage{position:fixed;top:0;left:0;right:0;bottom:auto;width:100%;height:var(--app-h,100%);padding:0;background:var(--bg);display:block;min-height:0;overflow:hidden}.phone{width:100%;height:100%;max-height:none;border:0;border-radius:0;box-shadow:none}.notch,.stagehint{display:none}}
 
 /* app bar */
-.appbar{position:sticky;top:0;z-index:20;display:flex;align-items:center;gap:10px;padding:calc(16px + env(safe-area-inset-top)) 16px 11px;background:var(--glass);backdrop-filter:saturate(160%) blur(18px);-webkit-backdrop-filter:saturate(160%) blur(18px);border-bottom:1px solid var(--line)}
+/* iOS PWA: backdrop-filter pada header (atau pseudo-layer dia) masih blur anak statik
+   pada sesetengah iOS walaupun dah di isolat. Tiada apa yang scroll di belakang header
+   (ia sticky di atas .scroll yang berasingan), jadi glass blur nyata tiada beza visual —
+   buang terus untuk bunuh bug ini pada semua versi iOS. */
+.appbar{position:sticky;top:0;z-index:20;display:flex;align-items:center;gap:10px;padding:28px 16px 10px;background:var(--glass);border-bottom:1px solid var(--line)}
 .logo{width:34px;height:34px;flex:none;border-radius:11px;background:var(--lime);color:var(--onlime);display:grid;place-items:center;font-weight:950;font-size:17px;box-shadow:0 0 24px #b7f36b33}
-.brand b{display:block;font-size:13px;letter-spacing:.03em;font-weight:850;line-height:1.1}
-.brand small{display:block;color:var(--muted);font-size:9px;letter-spacing:.12em;text-transform:uppercase;font-weight:700;margin-top:2px}
-.baract{margin-left:auto;display:flex;align-items:center;gap:6px}
-.ibtn{width:34px;height:34px;border-radius:11px;background:var(--card);border:1px solid var(--line);color:var(--muted);display:grid;place-items:center;transition:.15s}
+.logo svg{display:block}
+.brand{min-width:0;flex:1 1 auto;overflow:hidden;display:flex;flex-direction:column;justify-content:center}
+.brand b{display:block;font-size:13px;letter-spacing:.03em;font-weight:850;line-height:1.1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.brand small{display:block;color:var(--muted);font-size:9px;letter-spacing:.12em;text-transform:uppercase;font-weight:700;margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.baract{margin-left:auto;display:flex;align-items:center;gap:6px;flex:none}
+.ibtn{width:34px;height:34px;flex:none;border-radius:11px;background:var(--card);border:1px solid var(--line);color:var(--muted);display:grid;place-items:center;transition:.15s}
+.ibtn svg{display:block;flex:none}
 .ibtn:hover{color:var(--text);border-color:var(--lime)}
-.avatar{width:34px;height:34px;border-radius:50%;background:var(--lime);color:var(--onlime);display:grid;place-items:center;font-weight:850;font-size:12px;border:2px solid var(--card);box-shadow:0 0 0 1px var(--lime),0 0 16px #b7f36b44}
+.avatar{width:34px;height:34px;flex:none;border-radius:50%;background:var(--lime);color:var(--onlime);display:grid;place-items:center;font-weight:850;font-size:12px;border:2px solid var(--card);box-shadow:0 0 0 1px var(--lime),0 0 16px #b7f36b44}
+@media(max-width:520px){.appbar{padding:max(12px,calc(env(safe-area-inset-top,0px) + 4px)) max(14px,env(safe-area-inset-right,0px)) 10px max(14px,env(safe-area-inset-left,0px));gap:8px}}
+/* iOS-only: teks header turun di bawah zon status-bar (safe-area penuh + gap).
+   Android takde kelas ini — tak berubah. Diagnostik/fix untuk blur header iPhone PWA:
+   WebKit kadang rasterize sticky header yang menyentuh status-bar zone pada resolusi rendah. */
+@supports (-webkit-touch-callout:none){
+  @media(max-width:520px){
+    .appbar{padding-top:calc(env(safe-area-inset-top,0px) + 16px)}
+  }
+}
+@media(max-width:375px){.appbar{padding-left:max(12px,env(safe-area-inset-left,0px));padding-right:max(12px,env(safe-area-inset-right,0px));gap:6px}.logo{width:30px;height:30px;border-radius:9px}.brand b{font-size:12px;letter-spacing:.02em}.brand small{font-size:8.5px;letter-spacing:.09em}.baract{gap:5px}.ibtn{width:30px;height:30px;border-radius:10px}.avatar{width:30px;height:30px;font-size:11px}}
 
 /* scroll area */
-.scroll{flex:1;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:none;padding-bottom:calc(76px + env(safe-area-inset-bottom))}
-.scroll.com{padding-bottom:calc(142px + env(safe-area-inset-bottom))}
+.scroll{flex:1;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:none;padding-bottom:calc(74px + var(--sab))}
+.scroll.com{padding-bottom:calc(150px + var(--sab))}
 .scroll::-webkit-scrollbar{display:none}
 .view{padding:16px;animation:fade .28s ease both}
 @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
@@ -56,7 +73,7 @@ h1{font-size:29px;line-height:1.08;letter-spacing:-.05em;margin:6px 0 6px;font-w
 .search{display:flex;align-items:center;gap:10px;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:0 14px;margin-bottom:12px;transition:.2s}
 .search:focus-within{border-color:var(--lime);box-shadow:0 0 0 3px #b7f36b18}
 .search svg{flex:none;opacity:.6}
-.search input{flex:1;min-width:0;background:transparent;border:0;outline:0;color:var(--text);padding:13px 0;font-size:15px}
+.search input{flex:1;min-width:0;background:transparent;border:0;outline:0;color:var(--text);padding:13px 0;font-size:16px}
 .tabs{display:flex;gap:6px;overflow-x:auto;padding:2px 0 12px;scrollbar-width:none}.tabs::-webkit-scrollbar{display:none}
 .tab{background:var(--card);border:1px solid var(--line);color:var(--muted);padding:8px 14px;border-radius:999px;font-weight:700;font-size:13px;white-space:nowrap;transition:.15s}
 .tab.on{background:var(--lime);border-color:var(--lime);color:var(--onlime)}
@@ -133,7 +150,10 @@ html[data-theme="light"] .ic{background:#e6efd9;border-color:#c9dbb4}
  .pair .aitick.live .ico,.pair .aitick.live b,.pair .aitick.live::after,
  .pair.hot1::before,.pair.hot1::after,.pair.hot1 .ember,
  .pair.hot2::before,.pair.hot1 .aitick b,.pair.hot1 .aitick .ico{animation:none!important}
- .pair .aitick.live .ico{opacity:1;transform:none}}
+ .pair .aitick.live .ico{opacity:1;transform:none}
+ .navpill,.ligacoin,.ligacoin .halo,.nav .ndot,.nav .st-nav svg{animation:none!important}
+ .ligacoin{transform:translateX(-50%)}
+ .nav.on svg,.nav:active svg{transform:none}}
 .up{color:var(--green)}.dn{color:var(--red)}
 .soon{display:inline-block;background:#ffc16b1f;color:var(--orange);font-weight:800;font-size:8px;letter-spacing:.04em;padding:2px 6px;border-radius:6px;margin-left:5px;vertical-align:middle;text-transform:uppercase}
 .pair.closed{opacity:.5;cursor:not-allowed;filter:grayscale(.5)}
@@ -149,7 +169,7 @@ html[data-theme="light"] .ic{background:#e6efd9;border-color:#c9dbb4}
 .vhead{margin:4px 0 14px}
 .vhead h2{font-size:24px;letter-spacing:-.04em;margin:0;font-weight:850}
 .vhead p{margin:4px 0 0;color:var(--muted);font-size:13px}
-.online{display:inline-flex;align-items:center;gap:7px;background:var(--card);border:1px solid var(--line);border-radius:999px;padding:6px 12px;font-size:11px;font-weight:700;color:var(--muted);margin-bottom:14px}
+.online{display:inline-flex;align-self:flex-start;align-items:center;gap:7px;background:var(--card);border:1px solid var(--line);border-radius:999px;padding:6px 12px;font-size:11px;font-weight:700;color:var(--muted);margin-bottom:14px}
 .online i{width:7px;height:7px;border-radius:50%;background:var(--lime);box-shadow:0 0 8px var(--lime)}
 .msgs{display:flex;flex-direction:column;gap:12px}
 .msg{display:flex;gap:10px;animation:up .4s both}
@@ -163,13 +183,272 @@ html[data-theme="light"] .ic{background:#e6efd9;border-color:#c9dbb4}
 .msg.me .body{background:#b7f36b12;border-color:#b7f36b40;border-radius:16px 4px 16px 16px}
 html[data-theme="light"] .msg.me .body{background:#eaf5db;border-color:#b9d999}
 .msg.me .meta{flex-direction:row-reverse}
-.comnote{font-size:11px;color:var(--muted);text-align:center;margin:16px 0 4px;opacity:.75}
-.composer{position:absolute;left:12px;right:12px;bottom:calc(64px + env(safe-area-inset-bottom));display:flex;gap:8px;align-items:center;background:var(--glass);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);padding:8px;border-radius:18px;border:1px solid var(--line);z-index:8}
-.composer input{flex:1;min-width:0;background:var(--card);border:1px solid var(--line);border-radius:12px;color:var(--text);padding:11px 13px;outline:0;font-size:14px}
-.composer input:focus{border-color:var(--lime)}
-.send{width:44px;height:44px;flex:none;border-radius:13px;background:var(--lime);color:var(--onlime);display:grid;place-items:center;box-shadow:0 0 18px #b7f36b33;transition:transform .12s}
-.send:active{transform:scale(.93)}
-.send:disabled{opacity:.5}
+#view-community{display:flex;flex-direction:column;min-height:calc(100% + var(--kb-extra,0px))}
+#view-community::after{content:"";display:block;flex:0 0 var(--kb-extra,0px)}
+.comnote{font-size:11px;color:var(--muted);text-align:center;margin:auto 0 4px;padding-top:18px;opacity:.72}
+/* ===== Community upgrade: pair rooms, signal cards, reactions, league badge ===== */
+.rooms{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;margin:0 -16px 12px;padding:0 16px 2px}
+.rooms::-webkit-scrollbar{display:none}
+.room{flex:none;display:inline-flex;align-items:center;gap:5px;padding:7px 12px;border-radius:999px;background:var(--card);border:1px solid var(--line);color:var(--muted);font-size:12px;font-weight:800;transition:background .15s,color .15s,border-color .15s}
+.room.on{background:var(--lime);border-color:var(--lime);color:var(--onlime)}
+.room .rc{font-size:9.5px;font-weight:800;padding:1px 6px;border-radius:99px;background:#ff777d26;color:#ff9ba0}
+.room.on .rc{background:#10150b26;color:var(--onlime)}
+.room .rh{font-size:10px}
+.msg .rtag{font-size:9px;font-weight:800;letter-spacing:.04em;color:var(--lime);background:#b7f36b14;border:1px solid #b7f36b30;padding:1px 6px;border-radius:99px}
+.msg .rk{font-size:9.5px;font-weight:800;padding:1px 7px;border-radius:99px;background:#ffc16b1f;color:var(--orange);white-space:nowrap}
+.msg .body.wide{flex:1;min-width:0}
+.sigcard{margin:7px 0 2px;border-radius:14px;background:var(--chart);border:1px solid #b7f36b4d;padding:10px}
+.sigcard.sell{border-color:#ff777d4d}
+.sigcard .sh{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px}
+.sigcard .sh b{font-size:13px;letter-spacing:-.02em}
+.sigcard .sh .sd{font-size:10.5px;font-weight:900;padding:3px 9px;border-radius:8px;background:var(--lime);color:var(--onlime);white-space:nowrap}
+.sigcard.sell .sh .sd{background:var(--red);color:#fff}
+.sigcard .sl3{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.sigcard .sl3 div{background:var(--card2);border-radius:10px;padding:6px 4px;text-align:center}
+.sigcard .sl3 small{display:block;font-size:9px;color:var(--muted);font-weight:700;letter-spacing:.06em;text-transform:uppercase}
+.sigcard .sl3 b{font:700 12px ui-monospace,Menlo,monospace;font-variant-numeric:tabular-nums}
+.sigcard .sl3 .e b{color:var(--blue)}.sigcard .sl3 .t b{color:var(--green)}.sigcard .sl3 .s b{color:var(--red)}
+.sigcard .take2{width:100%;margin-top:8px;padding:9px;border-radius:11px;font-weight:850;font-size:12px;color:var(--lime);background:#b7f36b12;border:1px solid #b7f36b55}
+.sigcard .take2:active{transform:scale(.98)}
+html[data-theme="light"] .sigcard .take2,html[data-theme="light"] .msg .rtag,html[data-theme="light"] .rxc.mine{color:#4c7a17}
+.rxrow{display:flex;flex-wrap:wrap;gap:5px;margin-top:6px;align-items:center}
+.rxc,.rxadd,.rxp{font-size:12px;font-weight:800;padding:3px 9px;border-radius:99px;background:var(--card2);border:1px solid var(--line);color:var(--text);line-height:1.3}
+.rxc.mine{background:#b7f36b1a;border-color:#b7f36b66;color:var(--lime)}
+.rxc.bump{animation:rxBump .35s cubic-bezier(.22,1,.36,1)}
+@keyframes rxBump{40%{transform:scale(1.3)}}
+.rxadd{color:var(--muted);padding:3px 8px}
+.rxpick{display:inline-flex;gap:4px;margin-left:2px;animation:up .2s both}
+.rxp{padding:3px 7px;font-size:14px}
+.rxp:active{transform:scale(1.2)}
+@media (prefers-reduced-motion:reduce){.rxc.bump{animation:none}}
+.composer{position:absolute;left:12px;right:12px;bottom:calc(72px + var(--sab));display:flex;gap:8px;align-items:center;background:rgba(18,24,19,.88);backdrop-filter:saturate(180%) blur(22px);-webkit-backdrop-filter:saturate(180%) blur(22px);padding:5px 5px 5px 16px;border-radius:28px;border:1px solid rgba(255,255,255,.11);box-shadow:0 10px 28px rgba(0,0,0,.44),inset 0 1px 0 rgba(255,255,255,.08);z-index:28;transition:bottom .22s cubic-bezier(.22,1,.36,1),border-color .2s,box-shadow .22s}
+html[data-theme="light"] .composer{background:rgba(255,255,255,.92);border-color:rgba(20,33,26,.12);box-shadow:0 8px 24px rgba(0,0,0,.10),inset 0 1px 0 rgba(255,255,255,.9)}
+.composer:focus-within{border-color:rgba(183,243,107,.55);box-shadow:0 12px 32px rgba(0,0,0,.52),0 0 0 3px rgba(183,243,107,.13),inset 0 1px 0 rgba(255,255,255,.12)}
+html[data-theme="light"] .composer:focus-within{border-color:rgba(104,166,34,.55);box-shadow:0 10px 26px rgba(0,0,0,.14),0 0 0 3px rgba(132,204,22,.16),inset 0 1px 0 rgba(255,255,255,.95)}
+.composer input{flex:1;min-width:0;background:transparent;border:0;color:var(--text);padding:9px 2px;outline:0;font-size:16px;line-height:1.3}
+.composer input::placeholder{color:var(--muted);opacity:.78}
+.send{width:40px;height:40px;flex:none;border-radius:50%;background:var(--lime);color:var(--onlime);display:grid;place-items:center;box-shadow:0 0 16px #b7f36b38;transition:transform .14s cubic-bezier(.22,1,.36,1),box-shadow .18s}
+.send:active{transform:scale(.92)}
+.send:disabled{opacity:.45}
+html.kb-open .bnavwrap{transform:translateY(110%);opacity:0;pointer-events:none}
+.bnavwrap{transition:transform .22s cubic-bezier(.22,1,.36,1),opacity .18s ease}
+html.kb-open .composer{bottom:calc(var(--kb-h,0px) + 10px)}
+html.is-android.kb-open .scroll.com{padding-bottom:78px}
+html.kb-pre .composer,html.kb-pre .dm-comp{transition:none !important;animation:compFloat .2s cubic-bezier(.22,1,.36,1) both}
+@keyframes compFloat{from{opacity:.85;transform:translate3d(0,14px,0) scale(.985)}to{opacity:1;transform:translate3d(0,0,0) scale(1)}}
+
+/* ===== ORBIT FRIENDS + LIVE WELCOMING + PRIVATE DM ===== */
+.nav .ndot{position:absolute;top:5px;right:calc(50% - 14px);width:7px;height:7px;border-radius:50%;background:var(--lime);box-shadow:0 0 8px var(--lime);pointer-events:none}
+.ibtn.on{color:var(--lime);border-color:rgba(183,243,107,.45);background:rgba(183,243,107,.1)}
+#view-friends{padding:0 16px 12px}
+/* ===== Friends snap-stage: 3 states (balanced / list-full / orbit-full), drag bawah grip ===== */
+#view-friends{position:relative;overflow:hidden}
+.orb-stage{position:relative;height:262px;margin:0 -16px 6px;overflow:hidden;transition:height .38s cubic-bezier(.22,1,.36,1),transform .38s cubic-bezier(.22,1,.36,1),opacity .3s}
+.orb-stage::before{content:"";position:absolute;inset:0;background:radial-gradient(circle at 50% 48%,rgba(183,243,107,.14),transparent 60%);pointer-events:none;transition:opacity .4s}
+.orb-stage.flash::before{background:radial-gradient(circle at 50% 48%,rgba(183,243,107,.32),transparent 64%)}
+/* grip drag handle atas sheet */
+.orb-grip{display:flex;align-items:center;justify-content:center;gap:8px;padding:2px 0 8px;cursor:grab;touch-action:none;user-select:none;-webkit-user-select:none}
+.orb-grip i{width:40px;height:4px;border-radius:99px;background:#3a463a;transition:background .2s}
+.orb-grip:active i{background:var(--lime)}
+.orb-grip .glab{font-size:10px;font-weight:800;letter-spacing:.08em;color:var(--muted);transition:color .2s}
+.orb-grip:active .glab{color:var(--lime)}
+/* pill mini orbit (state list-full) */
+.orb-minipill{position:absolute;top:10px;left:50%;transform:translate(-50%,0) scale(.6);z-index:8;display:inline-flex;align-items:center;gap:7px;
+ padding:5px 12px 5px 6px;border-radius:999px;background:var(--glass);border:1px solid rgba(183,243,107,.3);
+ font-size:11px;font-weight:800;color:var(--text);opacity:0;pointer-events:none;transition:opacity .3s,transform .38s cubic-bezier(.22,1,.36,1)}
+.orb-minipill .mc{width:22px;height:22px;border-radius:50%;background:radial-gradient(circle,#1b281c,#0e140f);border:1px solid rgba(183,243,107,.5);display:grid;place-items:center;color:var(--lime)}
+.orb-minipill .mc svg{display:block}
+.orb-minipill b{color:var(--lime)}
+.orb-minipill .chev{color:var(--muted);font-size:12px;line-height:1;transition:transform .3s}
+/* state classes on #view-friends */
+#view-friends.st-list .orb-stage{height:64px;opacity:.92}
+#view-friends.st-list .orb-minipill{opacity:1;transform:translate(-50%,0) scale(1);pointer-events:auto;cursor:pointer}
+#view-friends.st-list .orb-stage .orb-ring,.orb-stage .orb-node,.orb-stage .orb-tip,.orb-stage .orb-core{transition:opacity .28s,transform .38s cubic-bezier(.22,1,.36,1)}
+#view-friends.st-list .orb-stage .orb-ring,#view-friends.st-list .orb-stage .orb-node,#view-friends.st-list .orb-stage .orb-tip,#view-friends.st-list .orb-stage .orb-meta{opacity:0;pointer-events:none}
+#view-friends.st-list .orb-stage .orb-core{opacity:1;transform:translate(-50%,-50%) scale(.8)}
+#view-friends.st-list .orb-stage::before{opacity:.5}
+#view-friends.st-orbit .orb-stage{height:min(62vh,480px)}
+#view-friends.st-orbit .orb-sheet{position:absolute;left:0;right:0;bottom:0;transform:translateY(calc(100% - 54px));padding-top:6px;z-index:9;box-shadow:0 -18px 40px #000a}
+#view-friends.st-orbit .orb-sheet .orb-grip .glab::after{content:" ⌃"}
+#view-friends.st-orbit .orb-ring.r1{width:150px;height:150px}
+#view-friends.st-orbit .orb-ring.r2{width:260px;height:260px}
+#view-friends.st-orbit .orb-core{width:52px;height:52px}
+/* drag-follow mode (jari di skrin) — transition dimatikan supaya ikut jari 1:1 */
+#view-friends.dragging .orb-stage,#view-friends.dragging .orb-sheet{transition:none}
+html[data-theme="light"] .orb-stage::before{background:radial-gradient(circle at 50% 48%,rgba(122,181,46,.16),transparent 60%)}
+.orb-ring{position:absolute;left:50%;top:48%;transform:translate(-50%,-50%);border-radius:50%;border:1px dashed var(--line);pointer-events:none}
+.orb-ring.r1{width:118px;height:118px;border-style:solid;border-color:rgba(183,243,107,.18)}
+.orb-ring.r2{width:200px;height:200px}
+.orb-core{position:absolute;left:50%;top:48%;transform:translate(-50%,-50%);z-index:2;width:44px;height:44px;border-radius:50%;background:radial-gradient(circle,#1b281c,#0e140f);border:1px solid rgba(183,243,107,.42);display:grid;place-items:center;box-shadow:0 0 28px rgba(183,243,107,.24);animation:orbCoreB 3.6s ease-in-out infinite}
+html[data-theme="light"] .orb-core{background:radial-gradient(circle,#eef7e2,#dcecc6);border-color:rgba(122,181,46,.45);box-shadow:0 6px 20px rgba(122,181,46,.18)}
+@keyframes orbCoreB{0%,100%{transform:translate(-50%,-50%) scale(1)}50%{transform:translate(-50%,-50%) scale(1.05)}}
+.orb-meta{position:absolute;top:8px;left:16px;right:16px;display:flex;align-items:center;justify-content:space-between;gap:8px;z-index:5}
+.orb-pill{display:inline-flex;align-items:center;gap:6px;padding:6px 11px;border-radius:999px;background:var(--glass);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border:1px solid var(--line);font-size:11.5px;font-weight:700;color:var(--text)}
+.orb-pill i{width:6px;height:6px;border-radius:50%;background:var(--lime);box-shadow:0 0 8px var(--lime);animation:pulseDot 1.8s infinite}
+@keyframes pulseDot{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.35;transform:scale(.8)}}
+.orb-pill b{color:var(--lime)}
+.orb-findbtn{display:inline-flex;align-items:center;gap:5px;padding:6px 12px;border-radius:999px;background:rgba(183,243,107,.12);border:1px solid rgba(183,243,107,.32);color:var(--lime);font-size:11.5px;font-weight:800;transition:transform .14s,background .16s}
+.orb-findbtn:active{transform:scale(.94)}
+html[data-theme="light"] .orb-findbtn{background:rgba(122,181,46,.12);border-color:rgba(122,181,46,.35);color:#4f7e16}
+.orb-node{position:absolute;z-index:4;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer;transition:transform .2s cubic-bezier(.22,1,.36,1)}
+/* Lebarkan lebuh: setiap node terapung perlahan dengan fasa berbeza */
+.orb-node{animation:orbFloat 5.2s ease-in-out infinite alternate}
+.orb-node:nth-of-type(2n){animation-duration:6.4s;animation-delay:-1.8s}
+.orb-node:nth-of-type(3n){animation-duration:7.1s;animation-delay:-3.1s}
+.orb-node:nth-of-type(5n){animation-duration:5.8s;animation-delay:-.9s}
+.orb-ring.r1{animation:orbSpin1 60s linear infinite}
+.orb-ring.r2{animation:orbSpin2 90s linear infinite}
+@keyframes orbFloat{
+ 0%{margin-top:0}
+ 50%{margin-top:-7px}
+ 100%{margin-top:3px}
+}
+@keyframes orbSpin1{from{transform:translate(-50%,-50%) rotate(0)}to{transform:translate(-50%,-50%) rotate(360deg)}}
+@keyframes orbSpin2{from{transform:translate(-50%,-50%) rotate(0)}to{transform:translate(-50%,-50%) rotate(-360deg)}}
+@media (prefers-reduced-motion:reduce){
+ .orb-node,.orb-ring.r1,.orb-ring.r2{animation:none}
+}
+.orb-node:active{transform:translate(-50%,-50%) scale(.92)}
+.orb-node.sel{z-index:6;transform:translate(-50%,-50%) scale(1.08)}
+.orb-av{position:relative;border-radius:50%;display:grid;place-items:center;font-weight:800;color:#0b1109;flex:none;user-select:none}
+.orb-node .orb-av{width:36px;height:36px;font-size:11.5px;border:2px solid var(--bg);box-shadow:0 6px 16px rgba(0,0,0,.38)}
+.orb-node.is-new .orb-av{box-shadow:0 0 0 2px rgba(183,243,107,.72),0 0 18px rgba(183,243,107,.36);animation:orbPop .42s cubic-bezier(.22,1,.36,1)}
+@keyframes orbPop{from{transform:scale(.3);opacity:0}to{transform:scale(1);opacity:1}}
+.orb-av .on-d{position:absolute;right:-1px;bottom:-1px;width:10px;height:10px;border-radius:50%;background:var(--lime);border:2px solid var(--bg);box-shadow:0 0 8px rgba(183,243,107,.6)}
+.orb-av .rk-p{position:absolute;left:-3px;top:-3px;min-width:16px;height:16px;padding:0 3px;border-radius:99px;background:#151d16;border:1px solid rgba(246,199,109,.65);color:#f6c76d;font-size:8.5px;font-weight:900;display:grid;place-items:center}
+.orb-node span{font-size:9.5px;font-weight:700;color:var(--muted);background:var(--glass);padding:1px 6px;border-radius:6px;max-width:74px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;pointer-events:none}
+.orb-node.is-new span{color:var(--lime)}
+html[data-theme="light"] .orb-node.is-new span{color:#4f7e16}
+.orb-tip{position:absolute;bottom:8px;left:12px;right:12px;margin:0 auto;width:fit-content;max-width:calc(100% - 24px);z-index:7;display:flex;align-items:center;gap:8px;padding:6px 8px 6px 13px;border-radius:999px;background:rgba(18,25,19,.94);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid rgba(183,243,107,.34);box-shadow:0 10px 26px rgba(0,0,0,.46);animation:orbTipIn .2s cubic-bezier(.22,1,.36,1) both}
+@keyframes orbTipIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+html[data-theme="light"] .orb-tip{background:rgba(255,255,255,.95);border-color:rgba(122,181,46,.38);box-shadow:0 8px 22px rgba(0,0,0,.12)}
+.orb-tip .tm{min-width:0;display:flex;align-items:baseline;gap:6px}
+.orb-tip b{font-size:12px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:118px}
+.orb-tip small{font-size:10.5px;color:var(--muted);white-space:nowrap}
+.orb-btn{flex:none;padding:5px 10px;border-radius:999px;font-size:11px;font-weight:800;background:var(--card2);border:1px solid var(--line);color:var(--text);transition:transform .14s}
+.orb-btn.lime{background:var(--lime);border-color:var(--lime);color:var(--onlime)}
+.orb-btn.soft{background:rgba(183,243,107,.14);border-color:rgba(183,243,107,.35);color:var(--lime)}
+html[data-theme="light"] .orb-btn.soft{color:#4f7e16}
+.orb-btn:active{transform:scale(.93)}
+.orb-btn:disabled{opacity:.5}
+
+.orb-sheet{margin:0 -16px;padding:4px 16px 24px;border-radius:26px 26px 0 0;background:linear-gradient(180deg,var(--card) 0%,var(--bg) 100%);border-top:1px solid var(--line);min-height:360px;transition:transform .38s cubic-bezier(.22,1,.36,1);position:relative}
+/* scroll-list dalam sheet untuk st-orbit (sheet menutup bawah, list scrollable) */
+#view-friends.st-orbit .orb-sheet #orbBody{max-height:calc(46vh - 20px);overflow-y:auto;overscroll-behavior:contain}
+.orb-tabs{display:flex;align-items:center;gap:6px;margin-bottom:10px;overflow-x:auto;scrollbar-width:none}
+.orb-tabs::-webkit-scrollbar{display:none}
+.orb-tabs button{flex:none;padding:7px 13px;border-radius:999px;font-size:12.5px;font-weight:700;color:var(--muted);background:transparent;transition:.16s;display:inline-flex;align-items:center;gap:5px}
+.orb-tabs button.on{background:var(--card2);color:var(--text);border:1px solid var(--line)}
+.orb-tabs .cnt{display:inline-grid;place-items:center;min-width:17px;height:17px;padding:0 5px;border-radius:999px;background:var(--lime);color:var(--onlime);font-size:10px;font-weight:900}
+
+.f-list{display:flex;flex-direction:column}
+.f-row{display:flex;align-items:center;gap:12px;padding:11px 6px;border-bottom:1px solid var(--line);cursor:pointer;border-radius:14px;transition:background .15s}
+.f-row:last-child{border-bottom:0}
+.f-row:active{background:var(--card2)}
+.f-row .orb-av{width:44px;height:44px;font-size:13.5px}
+.f-mid{flex:1;min-width:0}
+.f-r1{display:flex;align-items:baseline;gap:6px}
+.f-r1 b{font-size:14.5px;font-weight:750;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.f-r1 time{margin-left:auto;font-size:11px;color:var(--muted);flex:none}
+.f-r2{display:flex;align-items:center;gap:8px;margin-top:2px}
+.f-r2 p{margin:0;font-size:12.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:1}
+.f-row.unread .f-r2 p{color:var(--text);font-weight:600}
+.f-udot{min-width:19px;height:19px;padding:0 5px;border-radius:99px;background:var(--lime);color:var(--onlime);font-size:10.5px;font-weight:900;display:grid;place-items:center;flex:none}
+.f-act{display:flex;align-items:center;gap:6px;flex:none}
+.f-x{width:30px;height:30px;border-radius:50%;background:var(--card2);border:1px solid var(--line);color:var(--muted);display:grid;place-items:center}
+
+/* Private DM Overlay — bottom sheet (slide bawah ke atas) + glossy frosted backdrop.
+   Blur duduk pada lapisan .dm-blur yang BERASINGAN (bukan pada elemen yang pegang teks),
+   supaya iOS WebKit tidak blur label header lagi. */
+.dm-sheet{position:absolute;inset:0;z-index:36;background:transparent;display:flex;flex-direction:column;transform:translateY(100%);visibility:hidden;pointer-events:none;transition:transform .34s cubic-bezier(.22,1,.36,1),visibility 0s linear .34s}
+.dm-sheet.open{transform:translateY(0);visibility:visible;pointer-events:auto;transition:transform .34s cubic-bezier(.22,1,.36,1),visibility 0s}
+/* lapisan frosted: tint + blur, terpisah dari content */
+.dm-sheet::before{content:"";position:absolute;inset:0;z-index:0;background:rgba(6,9,7,.42);backdrop-filter:blur(22px) saturate(150%);-webkit-backdrop-filter:blur(22px) saturate(150%);pointer-events:none;opacity:0;transition:opacity .34s ease}
+.dm-sheet.open::before{opacity:1}
+/* semua anak sheet duduk atas lapisan frosted */
+.dm-sheet>*{position:relative;z-index:1}
+.dm-sheet.open .dm-msgs,.dm-sheet.open .dm-head{background:transparent}
+.dm-head{flex:none;display:flex;align-items:center;gap:10px;padding:max(12px,calc(env(safe-area-inset-top) + 4px)) 14px 10px;background:transparent;border-bottom:1px solid rgba(255,255,255,.08)}
+.dm-msgs{background:transparent}
+/* iOS-only: turunkan isi DM header ke bawah zon status-bar (safe-area + 16px, sama seperti appbar).
+   WebKit blur/rasterize header yang rapat dengan status-bar zone — Android tak terjejas. */
+@supports (-webkit-touch-callout:none){
+  .dm-head{padding-top:calc(env(safe-area-inset-top,0px) + 16px)}
+}
+.dm-head .orb-av{width:36px;height:36px;font-size:12.5px}
+.dm-who{flex:1;min-width:0}
+.dm-who b{display:block;font-size:14.5px;font-weight:800;line-height:1.15;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dm-who small{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--muted);margin-top:2px}
+.dm-who small.on{color:var(--lime)}
+html[data-theme="light"] .dm-who small.on{color:#4f7e16}
+.dm-who small i{width:6px;height:6px;border-radius:50%;background:currentColor}
+.dm-lock{display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:700;color:var(--muted);padding:4px 8px;border-radius:999px;background:var(--card);border:1px solid var(--line);flex:none}
+.dm-msgs{flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:none;padding:14px 14px calc(86px + var(--sab));display:flex;flex-direction:column;gap:7px}
+.dm-msgs::-webkit-scrollbar{display:none}
+.dm-msgs::after{content:"";display:block;flex:0 0 var(--kb-h,0px)}
+html.kb-open .dm-msgs{padding-bottom:74px}
+.dm-day{align-self:center;font-size:10.5px;font-weight:600;color:var(--muted);opacity:.75;margin:4px 0 8px}
+.dm-tmp{align-self:center;max-width:86%;text-align:center;font-size:10.5px;line-height:1.5;color:var(--amber);background:rgba(255,212,121,.07);border:1px solid rgba(255,212,121,.28);border-radius:12px;padding:8px 12px;margin:0 0 10px}
+.dm-bbl{max-width:80%;padding:9px 13px;border-radius:18px 18px 18px 5px;background:var(--card2);border:1px solid var(--line);color:var(--text);font-size:14px;line-height:1.45;word-break:break-word;animation:up .18s both}
+.dm-bbl.me{align-self:flex-end;border-radius:18px 18px 5px 18px;background:#b7f36b1a;border-color:#b7f36b44}
+html[data-theme="light"] .dm-bbl.me{background:#e7f5d4;border-color:#b2d783}
+.dm-bbl time{display:block;font-size:9.5px;color:var(--muted);margin-top:3px;text-align:right;opacity:.8}
+/* ---- reply / pin / delete (long-press & swipe kanan) ---- */
+.dm-bbl,.dm-setup{position:relative;transition:transform .18s cubic-bezier(.22,1,.36,1),opacity .18s}
+.dm-bbl.swiping,.dm-setup.swiping{transition:transform .05s linear}
+.dm-bbl.replying,.dm-setup.replying{box-shadow:0 0 0 2px rgba(183,243,107,.55)}
+.dm-bbl.pinned-b{border-color:rgba(255,212,121,.5)}
+.dm-bbl.del{opacity:.55;font-style:italic;color:var(--muted)}
+.dm-replyref{display:flex;align-items:center;gap:6px;margin-bottom:5px;padding:5px 9px;border-radius:10px;background:rgba(183,243,107,.08);border-left:3px solid var(--lime);font-size:11.5px;color:var(--muted);cursor:pointer;max-width:100%}
+.dm-replyref:active{background:rgba(183,243,107,.16)}
+.dm-replyref b{color:var(--lime);font-size:10px;white-space:nowrap}
+.dm-replyref span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dm-pinbar{display:flex;align-items:center;gap:8px;margin:2px 4px 10px;padding:8px 12px;border-radius:14px;background:rgba(255,212,121,.08);border:1px solid rgba(255,212,121,.35);font-size:12px;color:var(--amber);cursor:pointer;animation:up .25s both}
+.dm-pinbar:active{background:rgba(255,212,121,.16)}
+.dm-pinbar svg{flex:none}
+.dm-pinbar span{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dm-pinbar .unpin{border:0;background:none;color:var(--muted);font-size:10.5px;font-weight:800;padding:4px 6px;cursor:pointer}
+/* action sheet ala WhatsApp */
+.dm-actwrap{position:absolute;inset:0;z-index:30;background:rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center;animation:fadeIn .16s both}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+.dm-actmenu{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:8px;min-width:210px;box-shadow:0 24px 60px rgba(0,0,0,.5);animation:actPop .18s cubic-bezier(.22,1,.36,1) both}
+@keyframes actPop{from{transform:scale(.85);opacity:0}to{transform:scale(1);opacity:1}}
+.dm-actmenu button{display:flex;align-items:center;gap:12px;width:100%;padding:12px 14px;border:0;background:none;color:var(--text);font:600 14px Inter,system-ui;border-radius:13px;cursor:pointer;text-align:left}
+.dm-actmenu button:active{background:var(--card2)}
+.dm-actmenu button.red{color:var(--red)}
+.dm-actmenu button.on{color:var(--amber)}
+.dm-actmenu svg{flex:none}
+.dm-setup{width:86%;max-width:300px;padding:11px 13px;border-radius:18px;background:var(--card);border:1px solid rgba(183,243,107,.35);animation:up .2s both}
+.dm-setup.me{align-self:flex-end}
+.dm-setup .st-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.dm-setup .st-pair{font-weight:800;font-size:13.5px;display:flex;align-items:center;gap:6px}
+.dm-setup .st-side{font-size:10px;font-weight:900;padding:2px 7px;border-radius:99px;background:rgba(183,243,107,.16);color:var(--lime)}
+.dm-setup .st-side.sell{background:rgba(255,119,125,.16);color:var(--red)}
+.dm-setup .st-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:8px}
+.dm-setup .st-cell{background:var(--card2);border-radius:10px;padding:6px 8px}
+.dm-setup .st-cell small{display:block;font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
+.dm-setup .st-cell b{font-size:12px;font-variant-numeric:tabular-nums}
+.dm-comp{position:absolute;left:12px;right:12px;bottom:calc(12px + var(--sab));display:flex;gap:6px;align-items:center;background:rgba(18,24,19,.72);padding:5px 5px 5px 7px;border-radius:28px;border:1px solid rgba(255,255,255,.11);box-shadow:0 10px 28px rgba(0,0,0,.44),inset 0 1px 0 rgba(255,255,255,.08);z-index:38;transition:bottom .22s cubic-bezier(.22,1,.36,1),border-color .2s,box-shadow .22s}
+html[data-theme="light"] .dm-comp{background:rgba(255,255,255,.94);border-color:rgba(20,33,26,.12);box-shadow:0 8px 24px rgba(0,0,0,.10)}
+.dm-comp:focus-within{border-color:rgba(183,243,107,.55);box-shadow:0 12px 32px rgba(0,0,0,.52),0 0 0 3px rgba(183,243,107,.13)}
+html[data-theme="light"] .dm-comp:focus-within{border-color:rgba(104,166,34,.55);box-shadow:0 10px 26px rgba(0,0,0,.14),0 0 0 3px rgba(132,204,22,.16)}
+.dm-comp input{flex:1;min-width:0;background:transparent;border:0;color:var(--text);padding:9px 4px;outline:0;font-size:16px;line-height:1.3}
+.dm-comp input::placeholder{color:var(--muted);opacity:.78}
+.dm-plus{width:36px;height:36px;flex:none;border-radius:50%;background:var(--card2);color:var(--muted);display:grid;place-items:center;transition:.15s}
+.dm-plus:active{transform:scale(.92);color:var(--lime)}
+html.kb-open .dm-comp{bottom:calc(var(--kb-h,0px) + 10px)}
+
+/* Find Traders Sheet */
+.ffind-bg{position:absolute;inset:0;z-index:39;background:rgba(4,7,5,.65);display:flex;align-items:flex-end;justify-content:center;padding:12px;opacity:0;visibility:hidden;pointer-events:none;transition:opacity .2s,visibility 0s linear .2s}
+.ffind-bg.open{opacity:1;visibility:visible;pointer-events:auto;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);transition:opacity .2s,visibility 0s}
+.ffind-card{width:100%;max-height:76%;display:flex;flex-direction:column;border-radius:26px;background:var(--card);border:1px solid var(--line);padding:16px;box-shadow:0 20px 50px rgba(0,0,0,.6);transform:translateY(24px);transition:transform .24s cubic-bezier(.22,1,.36,1)}
+.ffind-bg.open .ffind-card{transform:translateY(0)}
+.ffind-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.ffind-top h3{margin:0;font-size:16px;font-weight:800}
+.ffind-inp{display:flex;align-items:center;gap:8px;padding:10px 13px;border-radius:14px;background:var(--card2);border:1px solid var(--line);margin-bottom:10px}
+.ffind-inp input{flex:1;min-width:0;outline:0;background:transparent;color:var(--text);font-size:16px}
+.ffind-res{flex:1;overflow-y:auto;scrollbar-width:none;min-height:120px}
+.ffind-res::-webkit-scrollbar{display:none}
 .empty{text-align:center;color:var(--muted);font-size:13px;padding:28px 14px;border:1px dashed var(--line);border-radius:18px;line-height:1.7}
 
 /* liga (paper league) */
@@ -517,20 +796,58 @@ html[data-theme="light"] .theme.on{background:#eaf5db}
 .setnote{font-size:11px;color:var(--muted);text-align:center;margin:16px 0 0;opacity:.75}
 
 /* bottom nav — 5 tab */
-.bnav{position:absolute;left:0;right:0;bottom:0;z-index:25;display:grid;grid-template-columns:repeat(5,1fr);gap:2px;padding:8px 6px calc(8px + env(safe-area-inset-bottom));background:var(--glass);backdrop-filter:saturate(160%) blur(20px);-webkit-backdrop-filter:saturate(160%) blur(20px);border-top:1px solid var(--line)}
-.nav{display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 1px;border-radius:12px;color:var(--muted);font-size:9px;font-weight:750;letter-spacing:0;transition:.15s;min-width:0}
-.nav span{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.nav svg{width:20px;height:20px}
+.bnavwrap{position:relative;flex:none;height:calc(78px + var(--sab));z-index:25}
+.bnav{position:absolute;left:10px;right:10px;bottom:calc(14px + var(--sab));height:62px;border-radius:26px;background:rgba(17,22,18,.55);border:1px solid rgba(183,243,107,.12);box-shadow:0 14px 34px rgba(0,0,0,.6),inset 0 1px 0 rgba(255,255,255,.05);backdrop-filter:blur(18px) saturate(1.4);-webkit-backdrop-filter:blur(18px) saturate(1.4)}
+html[data-theme="light"] .bnav{background:rgba(255,255,255,.6);border-color:rgba(122,181,46,.2);box-shadow:0 14px 34px rgba(0,0,0,.12),inset 0 1px 0 rgba(255,255,255,.6)}
+/* lekukan curve di tengah untuk syiling Liga */
+.bnav::before{content:"";position:absolute;inset:0;border-radius:26px;background:radial-gradient(circle 46px at 50% 100%,transparent 44px,rgba(17,22,18,.92) 45px);pointer-events:none}
+html[data-theme="light"] .bnav::before{background:radial-gradient(circle 46px at 50% 100%,transparent 44px,rgba(255,255,255,.88) 45px)}
+.bnavrow{position:relative;display:grid;grid-template-columns:repeat(5,1fr);height:100%;align-items:center;padding:0 6px}
+/* pil kaca cecair — slaid mengikut tab/swipe */
+.navpill{position:absolute;top:8px;left:0;width:calc(20% - 8px);height:calc(100% - 16px);border-radius:20px;background:linear-gradient(160deg,rgba(183,243,107,.18),rgba(183,243,107,.06));border:1px solid rgba(183,243,107,.25);box-shadow:0 4px 18px rgba(183,243,107,.12),inset 0 1px 0 rgba(255,255,255,.12);transition:transform .45s cubic-bezier(.32,.72,.28,1.02);pointer-events:none;z-index:1;will-change:transform}
+html[data-theme="light"] .navpill{background:linear-gradient(160deg,rgba(122,181,46,.16),rgba(122,181,46,.05));border-color:rgba(122,181,46,.3)}
+.navpill::after{content:"";position:absolute;top:50%;left:50%;width:14px;height:14px;border-radius:50%;background:rgba(183,243,107,.22);filter:blur(6px);transform:translate(-50%,-50%);opacity:0;transition:opacity .2s}
+.navpill.moving::after{opacity:1}
+.nav{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;width:100%;padding:6px 2px;line-height:1.15;color:var(--muted);font-size:9px;font-weight:750;letter-spacing:0;transition:color .25s;min-width:0;background:none;border:0;cursor:pointer;position:relative;z-index:2}
+.nav span{display:block;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-align:center}
+.nav svg{width:20px;height:20px;flex:none;display:block;transition:transform .35s cubic-bezier(.34,1.56,.64,1)}
 .nav.on{color:var(--lime)}
-.nav.on svg{filter:drop-shadow(0 0 6px #b7f36b66)}
-.nav:active{transform:scale(.94)}
+.nav.on svg{transform:translateY(-1px) scale(1.06);filter:drop-shadow(0 0 6px #b7f36b66)}
+.nav.on svg{animation:navpop .38s cubic-bezier(.34,1.56,.64,1)}
+@keyframes navpop{0%{transform:scale(.7)}60%{transform:scale(1.18)}100%{transform:translateY(-1px) scale(1.06)}}
+.nav:active svg{transform:scale(.85)}
+/* ikon Starling dalam slot nav */
+.nav .st-nav{display:block;width:21px;height:21px}
+.nav .st-nav svg{width:21px;height:21px;animation:stNavFloat 3s ease-in-out infinite;filter:drop-shadow(0 2px 6px rgba(183,243,107,.3))}
+html[data-theme="light"] .nav .st-nav svg{filter:drop-shadow(0 2px 6px rgba(122,181,46,.3))}
+@keyframes stNavFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-2px)}}
+/* syiling Liga — terapung dalam curve tengah */
+.ligaslot{position:relative;display:flex;justify-content:center;height:100%}
+.ligacoin{position:absolute;bottom:10px;left:50%;transform:translateX(-50%);width:58px;height:58px;border-radius:50%;border:0;cursor:pointer;font-family:inherit;background:linear-gradient(155deg,#0d120d,#161d14);box-shadow:0 0 0 2.5px var(--bg),0 0 0 4.5px var(--lime),0 14px 30px rgba(0,0,0,.6),0 0 28px rgba(183,243,107,.3);display:grid;place-items:center;color:var(--lime);z-index:12;transition:box-shadow .3s;animation:coinfloat 3.2s ease-in-out infinite;will-change:transform}
+@keyframes coinfloat{0%,100%{transform:translateX(-50%) translateY(0)}50%{transform:translateX(-50%) translateY(-5px)}}
+.ligacoin:active{transform:translateX(-50%) scale(.92);animation-play-state:paused}
+.ligacoin>svg{width:25px;height:25px;transition:transform .3s cubic-bezier(.34,1.56,.64,1)}
+.ligacoin .halo{position:absolute;inset:-7px;border-radius:50%;background:conic-gradient(from 0deg,rgba(183,243,107,.28),transparent 22%,rgba(183,243,107,.16) 48%,transparent 72%,rgba(183,243,107,.28));-webkit-mask:radial-gradient(circle,transparent 66%,#000 68%);mask:radial-gradient(circle,transparent 66%,#000 68%);animation:halospin 7s linear infinite;pointer-events:none}
+@keyframes halospin{to{transform:rotate(360deg)}}
+.ligacoin .clbl{position:absolute;bottom:-15px;left:50%;transform:translateX(-50%);font-size:8.5px;font-weight:800;letter-spacing:.08em;color:var(--lime);text-shadow:0 1px 4px rgba(0,0,0,.8);transition:letter-spacing .25s;pointer-events:none}
+.ligacoin.on{animation-play-state:paused;transform:translateX(-50%) translateY(-4px);box-shadow:0 0 0 2.5px var(--bg),0 0 0 4.5px var(--lime),0 18px 36px rgba(0,0,0,.7),0 0 46px rgba(183,243,107,.5)}
+.ligacoin.on>svg{transform:scale(1.12)}
+.ligacoin.on .clbl{letter-spacing:.14em}
+.ligacoin .burst{position:absolute;inset:-4px;border-radius:50%;border:2px solid var(--lime);opacity:0;pointer-events:none}
+.ligacoin.juston .burst{animation:navburst .55s cubic-bezier(.22,1,.36,1)}
+@keyframes navburst{0%{transform:scale(.8);opacity:.9}100%{transform:scale(1.5);opacity:0}}
+.nav .ndot{position:absolute;top:4px;right:calc(50% - 14px);width:8px;height:8px;border-radius:50%;background:var(--red);border:1.5px solid var(--bg);z-index:3}
+html[data-theme="light"] .nav .ndot{border-color:#fff}
+.nav .ndot{animation:ndotpulse 1.8s ease-in-out infinite}
+@keyframes ndotpulse{0%,100%{transform:scale(1)}50%{transform:scale(1.12)}}
+
 
 /* sheet */
 #bd{position:absolute;inset:0;background:#000a;opacity:0;pointer-events:none;transition:opacity .3s;z-index:40}
 #sheet{position:absolute;left:0;right:0;bottom:0;max-height:92%;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:none;background:var(--card);border-top:1px solid var(--line);border-radius:26px 26px 0 0;z-index:41;transform:translateY(108%);transition:transform .4s cubic-bezier(.2,.9,.2,1);padding:0 16px calc(22px + env(safe-area-inset-bottom));box-shadow:0 -20px 60px #000a}
 #sheet::-webkit-scrollbar{display:none}
-.floata{position:absolute;left:12px;right:12px;bottom:calc(76px + env(safe-area-inset-bottom));z-index:35;display:flex;align-items:center;gap:10px;background:var(--glass);backdrop-filter:saturate(160%) blur(18px);-webkit-backdrop-filter:saturate(160%) blur(18px);border:1px solid #b7f36b55;border-radius:999px;padding:10px 14px;box-shadow:0 10px 30px #000a;animation:up .3s both;cursor:pointer}
-.floata .fspin{flex:none;width:14px;height:14px;border-radius:50%;border:2px solid #b7f36b40;border-top-color:var(--lime);animation:spin 1s linear infinite}
+.floata{position:absolute;left:12px;right:12px;bottom:calc(74px + var(--sab));z-index:35;display:flex;align-items:center;gap:10px;background:var(--glass);backdrop-filter:saturate(160%) blur(18px);-webkit-backdrop-filter:saturate(160%) blur(18px);border:1px solid rgba(201,89,221,.45);border-radius:999px;padding:8px 13px 8px 9px;box-shadow:0 10px 30px #000a,0 0 22px rgba(8,148,255,.22);animation:up .3s both;cursor:pointer}
+.floata .fstar{flex:none;width:28px;height:28px;display:grid;place-items:center}
 .floata .ftxt{flex:1;min-width:0;font-size:12px;font-weight:700;color:var(--text);text-align:left;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .floata .fx{flex:none;color:var(--muted);font-size:13px;padding:2px 6px;border-radius:8px}
 .floata .fx:active{background:var(--card2)}
@@ -596,6 +913,9 @@ html[data-theme="light"] .theme.on{background:#eaf5db}
 .take{width:100%;margin-top:12px;padding:13px;border-radius:14px;background:var(--lime);color:var(--onlime);font-weight:850;font-size:14px;box-shadow:0 0 22px #b7f36b2b;display:flex;align-items:center;justify-content:center;gap:8px;transition:transform .12s;animation:up .5s both}
 .take:active{transform:scale(.98)}
 .take:disabled{background:var(--card2);color:var(--muted);box-shadow:none;cursor:not-allowed;border:1px solid var(--line)}
+.sharebtn{width:100%;margin-top:8px;padding:11px;border-radius:13px;background:var(--card2);border:1px solid var(--line);color:var(--text);font-weight:750;font-size:13px;transition:transform .12s,border-color .15s}
+.sharebtn:active{transform:scale(.98);border-color:var(--lime)}
+.sharebtn:disabled{opacity:.5}
 .takenote{font-size:11px;color:var(--muted);text-align:center;margin:7px 0 0}
 .chk,.reasons{list-style:none;margin:0;padding:0;display:grid;gap:6px}
 .chk li{display:flex;align-items:center;gap:10px;background:var(--card2);border:1px solid var(--line);border-radius:12px;padding:9px 12px;font-size:13px;animation:up .45s both}
@@ -851,47 +1171,258 @@ html[data-theme="light"] .search::before{
 
 
 
-<style id="tw-ai-hairline">
-/* Apple Intelligence hairline — 4 warna Apple mengelilingi sempadan chartbox.
-   Teknik: conic-gradient 400% saiz pada lapisan besar, dirotasi melalui
-   transform pada ELEMEN LUAR yang lebih besar (bukan gradien) — cara paling
-   serasi tanpa @property. Hanya tepi bercahaya (mask exclude). */
-.chartbox .ai-ring{position:absolute;pointer-events:none;z-index:4;
-  border-radius:inherit;inset:0;overflow:hidden;
-  -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);
-  -webkit-mask-composite:xor;mask-composite:exclude;
-  opacity:0;
-  padding:1px}
-/* lapisan gradien besar yang berputar di dalam mask */
-.chartbox .ai-ring::before{
-  content:"";position:absolute;left:50%;top:50%;
-  width:180%;height:600%;                /* cukup besar supaya menutup semasa berpusing */
-  transform:translate(-50%,-50%) rotate(0deg);
-  background:conic-gradient(#0894FF,#C959DD 25%,#FF2E54 50%,#FF9004 75%,#0894FF);
-  animation:aiSpin 1.8s linear infinite}
-.chartbox .ai-ring.bloom{inset:-3px;padding:4px;filter:blur(5px) saturate(170%)}
-.chartbox .ai-ring.wash{inset:-8px;padding:9px;filter:blur(14px) saturate(150%)}
-@keyframes aiSpin{from{transform:translate(-50%,-50%) rotate(0deg)}
-                  to{transform:translate(-50%,-50%) rotate(360deg)}}
-.chartbox.ai-on .ai-ring.core{opacity:1 !important}
-.chartbox.ai-on .ai-ring.bloom{opacity:.55 !important}
-.chartbox.ai-on .ai-ring.wash{opacity:.26 !important}
+<style id="tw-ai-liquid-rim">
+/* Apple Intelligence #1: Liquid Mesh Rim — 4 cahaya organik dirender atas canvas
+   + outer ambient halo & chip dot spektrum Apple. Tanpa @property. */
+.chartbox{transition:border-color .4s ease,box-shadow .45s ease}
+.chartbox.ai-on{
+  border-color:transparent !important;
+  box-shadow:0 0 0 1px rgba(255,255,255,.06),0 0 22px rgba(8,148,255,.18),0 0 36px rgba(201,89,221,.13)}
+html[data-theme="light"] .chartbox.ai-on{
+  box-shadow:0 0 0 1px rgba(8,148,255,.14),0 4px 20px rgba(8,148,255,.14),0 0 28px rgba(201,89,221,.10)}
+.chipc.scan{
+  color:#eef5ee;border-color:rgba(255,255,255,.18);background:rgba(12,17,13,.86);
+  backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+html[data-theme="light"] .chipc.scan{
+  color:#14211a;border-color:rgba(20,33,26,.14);background:rgba(255,255,255,.88)}
+.chipc.scan i{
+  background:linear-gradient(135deg,#0894FF,#C959DD,#FF2E54,#FF9004);
+  box-shadow:0 0 8px rgba(201,89,221,.8);
+  animation:aiDotPulse 1.6s ease-in-out infinite}
+@keyframes aiDotPulse{
+  0%,100%{transform:scale(.85);opacity:.75}
+  50%{transform:scale(1.25);opacity:1}}
 @media (prefers-reduced-motion:reduce){
-  .chartbox .ai-ring::before{animation:none!important}
-  .chartbox.ai-on .ai-ring.core{opacity:.9 !important}
-  .chartbox.ai-on .ai-ring.bloom{opacity:.45 !important}
-  .chartbox.ai-on .ai-ring.wash{opacity:.2 !important}
+  .chipc.scan i{animation:none !important;transform:none;opacity:1}
+}
+/* ===== Starling AI Buddy across Member App ===== */
+.greet-row{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:4px 0 4px}
+.greet-tx{min-width:0;flex:1}
+.greet-tx h1{margin:0 0 4px}
+.greet-tx .sub{margin:0}
+.st-buddy{
+  position:relative;flex:none;width:54px;height:54px;padding:0;border:0;background:none;
+  display:grid;place-items:center;cursor:pointer;-webkit-tap-highlight-color:transparent;
+  transition:transform .18s cubic-bezier(.22,1,.36,1)
+}
+.st-buddy:active{transform:scale(.9)}
+.st-buddy.hop{animation:stHop .5s cubic-bezier(.22,1,.36,1)}
+@keyframes stHop{0%{transform:translateY(0) scale(1)}35%{transform:translateY(-10px) scale(1.1,.93)}65%{transform:translateY(2px) scale(.96,1.04)}100%{transform:translateY(0) scale(1)}}
+.st-svg{display:block;animation:stFloat 2.8s ease-in-out infinite;filter:drop-shadow(0 5px 14px rgba(183,243,107,.24))}
+@keyframes stFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
+.st-eyes{transform-origin:center;transform-box:fill-box;animation:stBlink 3.8s infinite,stGlance 4.8s ease-in-out infinite}
+@keyframes stBlink{0%,92%,100%{transform:scaleY(1)}96%{transform:scaleY(.08)}}
+@keyframes stGlance{0%,38%,100%{translate:0 0}48%,66%{translate:-1.6px .8px}76%,88%{translate:1.4px .4px}}
+.st-scan-eyes{transform-origin:center;transform-box:fill-box;animation:stScanE 1.9s ease-in-out infinite}
+@keyframes stScanE{0%,100%{translate:-1.8px 0}50%{translate:2px 0}}
+.st-wake-eyes{transform-origin:center;transform-box:fill-box;animation:stWake 1.2s cubic-bezier(.22,1,.36,1) both}
+@keyframes stWake{0%,28%{transform:scaleY(.06)}55%{transform:scaleY(1.08)}70%{transform:scaleY(1)}82%{transform:scaleY(.08)}100%{transform:scaleY(1)}}
+.st-happy-eyes{opacity:0;transition:opacity .12s}
+.st-buddy.happy .st-eyes,.st-buddy.happy .st-sleep-eyes{opacity:0}
+.st-buddy.happy .st-happy-eyes{opacity:1}
+.st-twinkle{transform-origin:center;transform-box:fill-box;animation:stTwinkle 2.2s ease-in-out infinite}
+@keyframes stTwinkle{0%,100%{transform:scale(.72);opacity:.5}50%{transform:scale(1.24);opacity:1}}
+.st-zzz{font:800 9px ui-monospace,Menlo,monospace;fill:#8ab4ff;animation:stZzz 2.4s ease-in-out infinite}
+@keyframes stZzz{0%,100%{opacity:.25;transform:translate(0,1px)}50%{opacity:1;transform:translate(1.5px,-2px)}}
+.star-mood{
+  display:flex;align-items:center;gap:7px;margin:8px 0 13px;
+  padding:7px 11px;border-radius:12px;
+  background:rgba(183,243,107,.07);border:1px solid rgba(183,243,107,.22);
+  font-size:11.5px;line-height:1.35;color:var(--text);cursor:pointer;
+  transition:border-color .2s,background .2s
+}
+html[data-theme="light"] .star-mood{background:rgba(122,181,46,.10);border-color:rgba(122,181,46,.28)}
+.star-mood:hover{border-color:rgba(183,243,107,.45)}
+.star-mood b{color:var(--lime)}
+.narr-star{flex:none;width:40px;height:40px;padding:0;border:0;background:none;display:grid;place-items:center;cursor:pointer}
+.narr-star.hop{animation:stHop .5s cubic-bezier(.22,1,.36,1)}
+#splash .sp-bar i{background:linear-gradient(90deg,#0894FF,#C959DD,#b7f36b)}
+@media (prefers-reduced-motion:reduce){
+  .st-svg,.st-eyes,.st-scan-eyes,.st-wake-eyes,.st-twinkle,.st-zzz,.st-nav svg{animation:none !important}
 }
 </style>
+<script>
+/* Viewport + Keyboard auto-float (iOS & Android PWA):
+   1) Kunci penuh html/body/.stage pada top:0 dan tinggi penuh (--app-h).
+   2) Di iOS: angkat .composer ke atas garisan papan kekunci SEBELUM focus() supaya
+      iOS WebKit tidak pernah menatal/melompatkan lapisan belakang (offsetTop kekal 0).
+   3) Fine-tune --kb-h ikut visualViewport sebenar dan simpan dalam localStorage. */
+(function(){
+ var root=document.documentElement;
+ var isIOS=/iPhone|iPad|iPod/i.test(navigator.userAgent||'')||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
+ if(!isIOS)root.classList.add('is-android');
+ var isStandalone=!!(navigator.standalone||(window.matchMedia&&window.matchMedia('(display-mode: standalone)').matches));
+ var blurT=null,restH=0,lastOrient=window.innerHeight>=window.innerWidth,preLiftUntil=0,tStartX=0,tStartY=0,tMoved=false,wasKb=false;
+ function scrollDmEnd(){
+  var sh=document.getElementById('dmSheet'),dm=document.getElementById('dmMsgs');
+  if(sh&&sh.classList.contains('open')&&dm)dm.scrollTop=dm.scrollHeight;
+ }
+ function getSavedKb(baseH){
+  var v=0;
+  try{v=parseInt(localStorage.getItem('tw_kb_h')||'0',10)||0}catch(e){}
+  var minH=260,maxH=Math.round(baseH*0.56);
+  if(v>=minH&&v<=maxH)return v;
+  return Math.max(minH,Math.min(maxH,Math.round(baseH*0.44)));
+ }
+ function measureRest(){
+  var portrait=window.innerHeight>=window.innerWidth;
+  if(portrait!==lastOrient){restH=0;lastOrient=portrait}
+  var screenH=portrait?Math.max(window.screen.height,window.screen.width):Math.min(window.screen.height,window.screen.width);
+  if(isIOS&&isStandalone)return Math.max(window.innerHeight,screenH);
+  var vvH=window.visualViewport?window.visualViewport.height:window.innerHeight;
+  if(!root.classList.contains('kb-open'))restH=Math.max(restH,window.innerHeight,vvH);
+  return restH||window.innerHeight;
+ }
+ function resetWinScroll(){
+  if(window.scrollY||window.pageYOffset||(window.visualViewport&&window.visualViewport.offsetTop)){
+   window.scrollTo(0,0);
+  }
+ }
+ function syncViewport(){
+  if(window.innerWidth>520){
+   preLiftUntil=0;wasKb=false;
+   root.classList.remove('kb-open','kb-pre');
+   root.style.removeProperty('--app-h');
+   root.style.removeProperty('--kb-h');
+   root.style.removeProperty('--kb-extra');
+   return;
+  }
+  var baseH=measureRest();
+  var vv=window.visualViewport;
+  var vvH=vv?vv.height:window.innerHeight;
+  var kbH=Math.max(0,Math.round(baseH-vvH));
+  var kbShrink=(kbH>110);
+  var ae=document.activeElement;
+  var isChatInp=!!(ae&&(ae.id==='msgInput'||ae.id==='dmInp'));
+  var inPreLift=(Date.now()<preLiftUntil&&isChatInp);
+  if(kbShrink){
+   preLiftUntil=0;
+   root.classList.add('kb-open');
+   if(isIOS){
+    root.style.setProperty('--app-h',Math.round(baseH)+'px');
+    root.style.setProperty('--kb-h',kbH+'px');
+    root.style.setProperty('--kb-extra',Math.max(0,kbH-74)+'px');
+    try{if(kbH>=240&&kbH<=Math.round(baseH*0.62))localStorage.setItem('tw_kb_h',String(kbH))}catch(e){}
+   }else{
+    root.style.setProperty('--app-h',Math.round(vvH)+'px');
+    root.style.setProperty('--kb-h','0px');
+    root.style.setProperty('--kb-extra','0px');
+   }
+   resetWinScroll();
+   if(!wasKb)setTimeout(scrollDmEnd,40);
+   wasKb=true;
+  }else if(inPreLift){
+   root.style.setProperty('--app-h',Math.round(baseH)+'px');
+   resetWinScroll();
+   if(!wasKb)setTimeout(scrollDmEnd,40);
+   wasKb=true;
+  }else{
+   preLiftUntil=0;wasKb=false;
+   root.classList.remove('kb-open','kb-pre');
+   if(isIOS&&isStandalone)root.style.setProperty('--app-h',Math.round(baseH)+'px');
+   else root.style.removeProperty('--app-h');
+   root.style.setProperty('--kb-h','0px');
+   root.style.setProperty('--kb-extra','0px');
+   resetWinScroll();
+  }
+ }
+ syncViewport();
+ window.addEventListener('resize',syncViewport);
+ window.addEventListener('scroll',resetWinScroll,{passive:true});
+ window.addEventListener('orientationchange',function(){restH=0;preLiftUntil=0;setTimeout(syncViewport,140)});
+ if(window.visualViewport){
+  window.visualViewport.addEventListener('resize',syncViewport);
+  window.visualViewport.addEventListener('scroll',resetWinScroll);
+ }
+ /* iOS pre-lift: angkat composer SEBELUM focus() supaya iOS WebKit tidak pan/scroll skrin belakang */
+ if(isIOS){
+  document.addEventListener('touchstart',function(e){
+   var t=e.touches&&e.touches[0];
+   if(!t)return;
+   tStartX=t.clientX;tStartY=t.clientY;tMoved=false;
+  },{passive:true});
+  document.addEventListener('touchmove',function(e){
+   var t=e.touches&&e.touches[0];
+   if(!t)return;
+   if(Math.abs(t.clientX-tStartX)>10||Math.abs(t.clientY-tStartY)>10)tMoved=true;
+  },{passive:true});
+  document.addEventListener('touchend',function(e){
+   if(tMoved||window.innerWidth>520)return;
+   var target=e.target;
+   if(!target||!target.closest)return;
+   var comp=target.closest('#composer,#dmComp');
+   if(!comp||target.closest('#sendBtn,#dmSendBtn,#dmShareBtn'))return;
+   var inp=comp.id==='dmComp'?document.getElementById('dmInp'):document.getElementById('msgInput');
+   if(!inp||document.activeElement===inp)return;
+   e.preventDefault();
+   if(blurT){clearTimeout(blurT);blurT=null}
+   var baseH=measureRest();
+   var estKb=getSavedKb(baseH);
+   preLiftUntil=Date.now()+700;
+   root.classList.add('kb-pre','kb-open');
+   root.style.setProperty('--app-h',Math.round(baseH)+'px');
+   root.style.setProperty('--kb-h',estKb+'px');
+   root.style.setProperty('--kb-extra',Math.max(0,estKb-74)+'px');
+   void comp.offsetHeight;
+   try{inp.focus({preventScroll:true})}catch(err){inp.focus()}
+   resetWinScroll();
+   setTimeout(scrollDmEnd,40);
+   setTimeout(function(){root.classList.remove('kb-pre')},220);
+   setTimeout(syncViewport,120);
+   setTimeout(syncViewport,320);
+  },{passive:false});
+ }
+ document.addEventListener('focusin',function(e){
+  if(e.target&&(e.target.id==='msgInput'||e.target.id==='dmInp')){
+   if(blurT){clearTimeout(blurT);blurT=null}
+   resetWinScroll();
+   setTimeout(syncViewport,80);
+   setTimeout(syncViewport,260);
+   if(e.target.id==='dmInp'){
+    setTimeout(scrollDmEnd,120);
+    setTimeout(scrollDmEnd,300);
+   }
+  }
+ });
+ document.addEventListener('focusout',function(e){
+  if(e.target&&(e.target.id==='msgInput'||e.target.id==='dmInp')){
+   preLiftUntil=0;
+   if(blurT)clearTimeout(blurT);
+   blurT=setTimeout(function(){resetWinScroll();syncViewport()},80);
+  }
+ });
+})();
+/* Lock pinch-to-zoom di iOS & Android PWA (iOS abai user-scalable=no tanpa sekat gesture) */
+(function(){
+ function noZoom(e){e.preventDefault()}
+ ['gesturestart','gesturechange','gestureend'].forEach(function(ev){
+  document.addEventListener(ev,noZoom,{passive:false});
+ });
+ document.addEventListener('touchstart',function(e){if(e.touches&&e.touches.length>1)e.preventDefault()},{passive:false});
+ document.addEventListener('touchmove',function(e){if(e.touches&&e.touches.length>1)e.preventDefault()},{passive:false});
+})();
+</script>
 </head>
 <body>
 <div id="splash" role="status" aria-live="polite" aria-label="Loading TraderWatch">
   <div class="sp-wrap">
-    <svg class="sp-star" viewBox="-22 -22 44 44" aria-hidden="true">
-      <defs><linearGradient id="spg" x1="0" y1="0" x2="0" y2="1">
-        <stop offset="0" stop-color="#eaffc4"/><stop offset="1" stop-color="#9fe83f"/>
-      </linearGradient></defs>
-      <path d="M0-20Q0 0 20 0Q0 0 0 20Q0 0-20 0Q0 0 0-20Z" fill="url(#spg)"/>
+    <svg class="sp-star" viewBox="0 0 64 64" aria-hidden="true">
+      <defs>
+        <radialGradient id="spg" cx="42%" cy="30%" r="68%">
+          <stop offset="0%" stop-color="#ecffc9"/><stop offset="55%" stop-color="#b7f36b"/><stop offset="100%" stop-color="#7bc92a"/>
+        </radialGradient>
+      </defs>
+      <path class="st-twinkle" d="M52 10 Q52 15 57 15 Q52 15 52 20 Q52 15 47 15 Q52 15 52 10Z" fill="#8ab4ff"/>
+      <path d="M32 6 C35 20 44 29 58 32 C44 35 35 44 32 58 C29 44 20 35 6 32 C20 29 29 20 32 6 Z" fill="url(#spg)"/>
+      <g class="st-wake-eyes">
+        <ellipse cx="26.5" cy="31" rx="2.6" ry="3.2" fill="#0d140a"/>
+        <ellipse cx="37.5" cy="31" rx="2.6" ry="3.2" fill="#0d140a"/>
+        <circle cx="25.6" cy="29.8" r="1" fill="#ffffff"/>
+        <circle cx="36.6" cy="29.8" r="1" fill="#ffffff"/>
+      </g>
+      <ellipse cx="22.5" cy="35" rx="2.4" ry="1.4" fill="#ff7f8f" opacity=".55"/>
+      <ellipse cx="41.5" cy="35" rx="2.4" ry="1.4" fill="#ff7f8f" opacity=".55"/>
+      <path d="M29.5 35 Q32 37.5 34.5 35" fill="none" stroke="#0d140a" stroke-width="1.6" stroke-linecap="round"/>
     </svg>
     <div class="sp-name">TRADERWATCH</div>
     <div class="sp-bar"><i></i></div>
@@ -904,13 +1435,13 @@ html[data-theme="light"] .search::before{
       <div class="logo"><svg viewBox="-22 -22 44 44" width="19" height="19" aria-hidden="true"><path d="M0-20Q0 0 20 0Q0 0 0 20Q0 0-20 0Q0 0 0-20Z" fill="currentColor"/></svg></div>
       <div class="brand"><b>TRADERWATCH</b><small>AI Analyst</small></div>
       <div class="baract">
-        <button class="ibtn" id="langBtn" aria-label="Language">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.7 2.5 15.3 0 18M12 3c-2.5 2.7-2.5 15.3 0 18"/></svg>
-        </button>
         <button class="ibtn" id="themeBtn" aria-label="Toggle theme">
           <svg id="themeIcon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"/></svg>
         </button>
         <button class="ibtn" data-sound-toggle aria-label="Toggle sound"></button>
+        <button class="ibtn" id="setBtn" aria-label="Settings">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1-2.8 2.8-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.5V21h-4v-.1a1.7 1.7 0 0 0-1-1.5 1.7 1.7 0 0 0-1.9.3l-.1.1L4.2 17l.1-.1a1.7 1.7 0 0 0 .3-1.9 1.7 1.7 0 0 0-1.5-1H3v-4h.1a1.7 1.7 0 0 0 1.5-1 1.7 1.7 0 0 0-.3-1.9L4.2 7 7 4.2l.1.1a1.7 1.7 0 0 0 1.9.3A1.7 1.7 0 0 0 10 3V3h4v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.9-.3l.1-.1L19.8 7l-.1.1a1.7 1.7 0 0 0-.3 1.9 1.7 1.7 0 0 0 1.5 1H21v4h-.1a1.7 1.7 0 0 0-1.5 1Z"/></svg>
+        </button>
         <button class="avatar" id="avatarBtn" aria-label="Profil">TW</button>
       </div>
     </header>
@@ -918,8 +1449,14 @@ html[data-theme="light"] .search::before{
     <div class="scroll" id="scroll">
       <!-- ANALYST -->
       <section class="view" id="view-analyst" data-view="analyst">
-        <h1 id="greet">Hai, <span>Trader</span></h1>
-        <p class="sub" id="greetSub">Pilih pair — AI baca chart dan lukis Entry, SL &amp; TP untuk anda.</p>
+        <div class="greet-row">
+          <div class="greet-tx">
+            <h1 id="greet">Hai, <span>Trader</span></h1>
+            <p class="sub" id="greetSub">Pilih pair — AI baca chart dan lukis Entry, SL &amp; TP untuk anda.</p>
+          </div>
+          <button class="st-buddy" id="homeStarling" type="button" aria-label="Starling AI Buddy"></button>
+        </div>
+        <div class="star-mood" id="starMood" role="button" tabindex="0">✦ <span id="starMoodTxt">Starling sedia membaca 9 pair secara langsung.</span></div>
         <label class="search"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><input id="q" type="search" autocomplete="off" aria-label="Cari pair"></label>
         <div class="tabs" id="tabs"></div>
         <div class="pairs" id="pairs"></div>
@@ -931,8 +1468,18 @@ html[data-theme="light"] .search::before{
       <section class="view hidden" id="view-community" data-view="community">
         <div class="vhead"><h2 id="comTitle">Komuniti</h2><p id="comSub">Berbincang dengan trader lain.</p></div>
         <div class="online"><i></i><span id="onlineTxt">Komuniti aktif</span></div>
+        <div class="rooms hidden" id="rooms" role="tablist" aria-label="Rooms"></div>
         <div class="msgs" id="msgs"></div>
         <p class="comnote" id="comNote"></p>
+      </section>
+
+      <!-- FRIENDS (ORBIT) -->
+      <section class="view hidden" id="view-friends" data-view="friends">
+        <div class="orb-stage" id="orbStage"></div>
+        <div class="orb-sheet">
+          <div class="orb-tabs" id="orbTabs" role="tablist" aria-label="Friends sections"></div>
+          <div id="orbBody"></div>
+        </div>
       </section>
 
       <!-- LIGA -->
@@ -1007,7 +1554,7 @@ html[data-theme="light"] .search::before{
 
       <!-- SETTINGS -->
       <section class="view hidden" id="view-settings" data-view="settings">
-        <div class="vhead"><h2 id="setTitle">Tetapan</h2><p id="setSub">Bahasa, tema dan app.</p></div>
+        <div class="vhead"><h2 id="setTitle">Tetapan</h2><p id="setSub">Bahasa, tema dan app.</p><p style="margin:6px 0 0;font-size:10px;color:var(--muted);letter-spacing:.08em" id="buildTag">build —</p></div>
         <div class="setgroup">
           <div class="setlabel"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.7 2.5 15.3 0 18M12 3c-2.5 2.7-2.5 15.3 0 18"/></svg><span id="langSec">Bahasa / Language</span></div>
           <div class="langs" id="langs"></div>
@@ -1043,16 +1590,58 @@ html[data-theme="light"] .search::before{
 
     <div class="composer hidden" id="composer">
       <input id="msgInput" type="text" autocomplete="off" maxlength="500" aria-label="Tulis mesej">
-      <button class="send" id="sendBtn" aria-label="Hantar mesej"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m4 12 16-8-6 16-2.5-6.5L4 12Z"/></svg></button>
+      <button class="send" id="sendBtn" data-no-sound aria-label="Hantar mesej"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m4 12 16-8-6 16-2.5-6.5L4 12Z"/></svg></button>
     </div>
 
-    <nav class="bnav" id="bnav" aria-label="Navigasi utama"></nav>
+    <div class="bnavwrap" id="bnavwrap"><nav class="bnav" id="bnav" aria-label="Navigasi utama"></nav></div>
+
+    <!-- ORBIT PRIVATE DM OVERLAY -->
+    <div class="dm-sheet" id="dmSheet" role="dialog" aria-modal="true" aria-label="Private message">
+      <div class="dm-head">
+        <button class="ibtn" id="dmBack" aria-label="Back">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+        </button>
+        <div class="orb-av" id="dmAv">TW</div>
+        <div class="dm-who">
+          <b id="dmName">—</b>
+          <small id="dmSub">Private friend</small>
+        </div>
+        <span class="dm-lock"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg><span id="dmLockTxt">Friends</span></span>
+        <button class="ibtn" id="dmRemoveBtn" aria-label="Unfriend" title="Remove friend">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="22" y1="11" x2="16" y2="11"/></svg>
+        </button>
+      </div>
+      <div class="dm-msgs" id="dmMsgs"></div>
+      <div class="dm-comp hidden" id="dmReplyBar" style="position:absolute;left:12px;right:12px;bottom:100%;display:flex;gap:6px;align-items:center;padding:8px 10px;border-radius:14px 14px 0 0;background:var(--card2);border:1px solid var(--line);border-bottom:0"></div>
+      <div class="dm-comp" id="dmComp">
+        <button class="dm-plus" id="dmShareBtn" type="button" aria-label="Share setup" title="Share latest setup">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
+        </button>
+        <input id="dmInp" type="text" autocomplete="off" maxlength="500" placeholder="Message privately..." aria-label="Private message">
+        <button class="send" id="dmSendBtn" data-no-sound type="button" aria-label="Send message"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m4 12 16-8-6 16-2.5-6.5L4 12Z"/></svg></button>
+      </div>
+    </div>
+
+    <!-- ORBIT FIND TRADERS SHEET -->
+    <div class="ffind-bg" id="fFindBg" role="dialog" aria-modal="true" aria-label="Find traders">
+      <div class="ffind-card">
+        <div class="ffind-top">
+          <h3 id="fFindTitle">Find traders</h3>
+          <button class="x" id="fFindClose" aria-label="Close">✕</button>
+        </div>
+        <div class="ffind-inp">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><line x1="20" y1="20" x2="16.65" y2="16.65"/></svg>
+          <input id="fFindInp" type="search" autocomplete="off" placeholder="Search username...">
+        </div>
+        <div class="ffind-res" id="fFindRes"></div>
+      </div>
+    </div>
 
     <div id="bd"></div>
     <div id="sheet" role="dialog" aria-modal="true" aria-label="Analisis AI">
       <div class="grab"><i></i></div>
       <div class="shead"><div class="ic" id="sIc"></div><div><h2 id="sNm"></h2><p id="sDs"></p></div><button class="x" id="sx" aria-label="Tutup">✕</button></div>
-      <div class="chartbox" id="chartbox"><span class="ai-ring wash"></span><span class="ai-ring bloom"></span><span class="ai-ring core"></span><canvas id="cv"></canvas><div class="chipc" id="chip"><i></i><span id="chipT">SEDIA</span></div></div>
+      <div class="chartbox" id="chartbox"><canvas id="cv"></canvas><div class="chipc" id="chip"><i></i><span id="chipT">SEDIA</span></div></div>
       <div class="tf" id="tf"></div>
       <div class="riskp" id="riskp">
         <div class="lab"><span id="riskLab">Manage your risk</span><b id="riskGate">Gate: balanced</b></div>
@@ -1114,7 +1703,7 @@ html[data-theme="light"] .search::before{
 
     <div id="toast" role="status" aria-live="polite"></div>
     <div id="floatAna" class="floata hidden" role="button" tabindex="0" aria-live="polite">
-      <span class="fspin" aria-hidden="true"></span><span class="ftxt" id="floatTxt"></span><span class="fx" id="floatX" role="button" aria-label="Cancel analysis">✕</span>
+      <span class="fstar" id="floatStar" aria-hidden="true"></span><span class="ftxt" id="floatTxt"></span><span class="fx" id="floatX" role="button" aria-label="Cancel analysis">✕</span>
     </div>
   </div>
   
@@ -1241,7 +1830,7 @@ var hap=function(m){try{navigator.vibrate&&navigator.vibrate(m)}catch(e){}};
 var DICT={
  ms:{
   greet:'Hai, ',trader:'Trader',greetSub:'Pilih pair — AI baca chart dan lukis Entry, SL & TP untuk anda.',
-  navAnalyst:'Analyst',navCommunity:'Komuniti',navProfile:'Profil',navSettings:'Tetapan',
+  navAnalyst:'Analyst',navCommunity:'Komuniti',navFriends:'Rakan',navProfile:'Profil',navSettings:'Tetapan',
   search:'Cari pair…',noPairs:'Tiada pair dijumpai.',hint:'Pilih pair untuk analisis AI masa sebenar.',all:'Semua',commodity:'Komoditi',forex:'Forex',crypto:'Crypto',indices:'Indeks',
   soon:'Belum dibuka',notOpen:'Pair ini belum dibuka untuk analisis AI. Cuba pair di bawah.',
   mktClosed:'Pasaran tutup',dataOffline:'Data luar talian',mktReopens:'Buka semula',
@@ -1274,6 +1863,7 @@ var DICT={
   bcRisk:'10 trade risiko ≤1%',bcCons:'7 hari hijau berturut',bcAna:'50 analisis AI',bcPat:'Tunggu HOLD 5×',bcTp:'5 TP berturut-turut',bcStart:'Buka paper trade pertama',
   got:'Dicapai',locked:'Berkunci',
   takeTrade:'＋ Saya ambil trade ini',noSetup:'Tiada setup untuk diambil sekarang.',
+  shareCom:'⇪ Kongsi ke Komuniti',sharedTo:'Dikongsi ke #',roomAll:'Semua',roomMsgPre:'Mesej dalam #',shareNo:'Perkongsian belum tersedia.',
   riskTitle:'Buka paper trade',lotLab:'Lot anggaran',rBase:'Risiko dikira dari baki maya anda:',rNote:'Modal maya sahaja — tiada wang sebenar.',openBtn:'Buka trade',opening:'Membuka…',
   riskModePct:'Risk %',riskModeLot:'Lot sendiri',lotSize:'Saiz lot',riskAmt:'Risiko',ofBalance:'dari baki',lotTooBig:'Lot melebihi baki',lotInvalid:'Lot 0.01–100',
   mt5Opt:'Juga hantar order sebenar ke MT5 dengan lot ini',mt5Note:'Paper trade + order MT5 sebenar (instant entry) pada lot di atas.',mt5Sent:'Dihantar ke MT5',mt5Dry:'MT5 dry-run (tiada order live)',mt5Fail:'Order MT5 tidak dihantar',
@@ -1289,7 +1879,7 @@ var DICT={
  },
  en:{
   greet:'Hi, ',trader:'Trader',greetSub:'Pick a pair — AI reads the chart and draws Entry, SL & TP for you.',
-  navAnalyst:'Analyst',navCommunity:'Community',navProfile:'Profile',navSettings:'Settings',
+  navAnalyst:'Analyst',navCommunity:'Community',navFriends:'Friends',navProfile:'Profile',navSettings:'Settings',
   search:'Search pairs…',noPairs:'No pairs found.',hint:'Choose a pair for real-time AI analysis.',all:'All',commodity:'Commodities',forex:'Forex',crypto:'Crypto',indices:'Indices',
   soon:'Not open yet',notOpen:'This pair is not open for AI analysis yet. Try a pair below.',
   mktClosed:'Market closed',dataOffline:'Data offline',mktReopens:'Reopens',
@@ -1322,6 +1912,7 @@ var DICT={
   bcRisk:'10 trades at ≤1% risk',bcCons:'7 green days in a row',bcAna:'50 AI analyses',bcPat:'Waited out HOLD 5×',bcTp:'5 TPs in a row',bcStart:'Open your first paper trade',
   got:'Earned',locked:'Locked',
   takeTrade:'＋ Take this trade',noSetup:'No setup to take right now.',
+  shareCom:'⇪ Share to Community',sharedTo:'Shared to #',roomAll:'All',roomMsgPre:'Message in #',shareNo:'Sharing not available yet.',
   riskTitle:'Open paper trade',lotLab:'Indicative lot',rBase:'Risk sized from your virtual balance:',rNote:'Virtual capital only — no real money.',openBtn:'Open trade',opening:'Opening…',
   riskModePct:'Risk %',riskModeLot:'Custom lot',lotSize:'Lot size',riskAmt:'Risk',ofBalance:'of balance',lotTooBig:'Lot risks more than balance',lotInvalid:'Lot 0.01–100',
   toastOpened:'Paper trade opened! Track it in League.',tpHit:'TP!',slHit:'SL!',pickPair:'Pick a pair for AI analysis.',
@@ -1337,7 +1928,7 @@ var DICT={
  },
  zh:{
   greet:'你好，',trader:'交易者',greetSub:'选择货币对——AI 读取图表并为您绘制入场、止损与止盈。',
-  navAnalyst:'分析',navCommunity:'社区',navProfile:'个人资料',navSettings:'设置',
+  navAnalyst:'分析',navCommunity:'社区',navFriends:'好友',navProfile:'个人资料',navSettings:'设置',
   search:'搜索货币对…',noPairs:'未找到货币对。',hint:'选择货币对进行实时 AI 分析。',all:'全部',commodity:'商品',forex:'外汇',crypto:'加密货币',indices:'指数',
   soon:'尚未开放',notOpen:'该货币对尚未开放 AI 分析。请尝试下方货币对。',
   comTitle:'社区',comSub:'与其他交易者交流。',online:'社区活跃',membersToday:'位成员今日',onlineNow:'人在线',writeMsg:'写消息…',
@@ -1369,6 +1960,7 @@ var DICT={
   bcRisk:'10 笔交易风险 ≤1%',bcCons:'连续 7 个盈利日',bcAna:'50 次 AI 分析',bcPat:'等待 HOLD 5 次',bcTp:'连续 5 次止盈',bcStart:'开启首笔模拟交易',
   got:'已获得',locked:'未解锁',
   takeTrade:'＋ 采用这笔交易',noSetup:'目前没有可采用的设置。',
+  shareCom:'⇪ 分享到社区',sharedTo:'已分享到 #',roomAll:'全部',roomMsgPre:'在 # 中发送消息',shareNo:'暂时无法分享。',
   riskTitle:'开启模拟交易',lotLab:'参考手数',rBase:'风险按您的虚拟余额计算：',rNote:'仅虚拟资金——不涉及真实金钱。',openBtn:'开仓',opening:'开仓中…',
   toastOpened:'模拟交易已开仓！可在联赛中查看。',tpHit:'止盈！',slHit:'止损！',pickPair:'选择货币对进行 AI 分析。',
   mt5Opt:'同时以该手数向 MT5 下达真实订单',mt5Note:'模拟交易 + 按上述手数在 MT5 下真实市价单。',mt5Sent:'已发送至 MT5',mt5Dry:'MT5 演练（未下实单）',mt5Fail:'MT5 订单未下达',
@@ -1383,7 +1975,7 @@ var DICT={
  },
  id:{
   greet:'Hai, ',trader:'Trader',greetSub:'Pilih pair — AI membaca chart dan lukis Entry, SL & TP untuk anda.',
-  navAnalyst:'Analis',navCommunity:'Komunitas',navProfile:'Profil',navSettings:'Pengaturan',
+  navAnalyst:'Analis',navCommunity:'Komunitas',navFriends:'Teman',navProfile:'Profil',navSettings:'Pengaturan',
   search:'Cari pair…',noPairs:'Tidak ada pair ditemukan.',hint:'Pilih pair untuk analisis AI waktu nyata.',all:'Semua',commodity:'Komoditas',forex:'Forex',crypto:'Kripto',indices:'Indeks',
   soon:'Belum dibuka',notOpen:'Pair ini belum dibuka untuk analisis AI. Coba pair di bawah.',
   comTitle:'Komunitas',comSub:'Berkunjung dengan trader lain.',online:'Komunitas aktif',membersToday:'anggota hari ini',onlineNow:'sedang online',writeMsg:'Tulis pesan…',
@@ -1414,6 +2006,7 @@ var DICT={
   bcRisk:'10 trade risiko ≤1%',bcCons:'7 hari hijau berturut',bcAna:'50 analisis AI',bcPat:'Menunggu HOLD 5×',bcTp:'5 TP berturut-turut',bcStart:'Buka paper trade pertama',
   got:'Diraih',locked:'Terkunci',
   takeTrade:'＋ Saya ambil trade ini',noSetup:'Tidak ada setup untuk diambil sekarang.',
+  shareCom:'⇪ Bagikan ke Komunitas',sharedTo:'Dibagikan ke #',roomAll:'Semua',roomMsgPre:'Pesan di #',shareNo:'Berbagi belum tersedia.',
   riskTitle:'Buka paper trade',lotLab:'Lot perkiraan',rBase:'Risiko dihitung dari saldo virtual Anda:',rNote:'Hanya modal virtual — tanpa uang sungguhan.',openBtn:'Buka trade',opening:'Membuka…',
   toastOpened:'Paper trade dibuka! Pantau di Liga.',pickPair:'Pilih pair untuk analisis AI.',
   mt5Opt:'Juga kirim order nyata ke MT5 dengan lot ini',mt5Note:'Paper trade + order pasar MT5 nyata pada lot di atas.',mt5Sent:'Terkirim ke MT5',mt5Dry:'MT5 dry-run (tanpa order live)',mt5Fail:'Order MT5 tidak terkirim',
@@ -1428,7 +2021,7 @@ var DICT={
  },
  ta:{
   greet:'வணக்கம், ',trader:'வர்த்தகர்',greetSub:'ஒரு ஜோடியைத் தேர்ந்தெடுக்கவும் — AI கிராபைப் படித்து Entry, SL & TP ஐ வரைகிறது.',
-  navAnalyst:'பகுப்பாய்வு',navCommunity:'சமூகம்',navProfile:'சுயவிவரம்',navSettings:'அமைப்புகள்',
+  navAnalyst:'பகுப்பாய்வு',navCommunity:'சமூகம்',navFriends:'நண்பர்கள்',navProfile:'சுயவிவரம்',navSettings:'அமைப்புகள்',
   search:'ஜோடிகளைத் தேடு…',noPairs:'ஜோடிகள் இல்லை.',hint:'நேரடி AI பகுப்பாய்விற்கு ஜோடியைத் தேர்ந்தெடுக்கவும்.',all:'அனைத்தும்',commodity:'பொருட்கள்',forex:'ஃபாரெக்ஸ்',crypto:'கிரிப்டோ',indices:'குறியீடுகள்',
   soon:'திறக்கப்படவில்லை',notOpen:'இந்த ஜோடி AI பகுப்பாய்விற்கு திறக்கப்படவில்லை. கீழே உள்ள ஜோடியை முயற்சிக்கவும்.',
   comTitle:'சமூகம்',comSub:'மற்ற வர்த்தகர்களுடன் பேசுங்கள்.',online:'சமூகம் செயலில்',membersToday:'உறுப்பினர்கள் இன்று',onlineNow:'இப்போது ஆன்லைன்',writeMsg:'செய்தி எழுதுங்கள்…',
@@ -1460,6 +2053,7 @@ var DICT={
   bcRisk:'≤1% இடரில் 10 வர்த்தகங்கள்',bcCons:'தொடர்ச்சியாக 7 பசுமை நாட்கள்',bcAna:'50 AI பகுப்பாய்வுகள்',bcPat:'HOLD ஐ 5× கடந்து காத்திருப்பு',bcTp:'தொடர்ச்சியாக 5 TP',bcStart:'உங்கள் முதல் பேப்பர் வர்த்தகத்தைத் தொடங்கவும்',
   got:'பெறப்பட்டது',locked:'பூட்டப்பட்டது',
   takeTrade:'＋ இந்த வர்த்தகத்தை எடுக்கிறேன்',noSetup:'இப்போது எடுக்க அமைப்பு இல்லை.',
+  shareCom:'⇪ சமூகத்தில் பகிர்',sharedTo:'# இல் பகிரப்பட்டது',roomAll:'அனைத்தும்',roomMsgPre:'# இல் செய்தி',shareNo:'பகிர்வு இன்னும் இல்லை.',
   riskTitle:'பேப்பர் வர்த்தகத்தைத் தொடங்கு',lotLab:'மதிப்பிடப்பட்ட லாட்',rBase:'உங்கள் மெய்நிகர் இருப்பிலிருந்து இடர் கணக்கிடப்படுகிறது:',rNote:'மெய்நிகர் மூலதனம் மட்டும் — உண்மையான பணம் இல்லை.',openBtn:'வர்த்தகத்தைத் தொடங்கு',opening:'தொடங்குகிறது…',
   toastOpened:'பேப்பர் வர்த்தகம் தொடங்கப்பட்டது! லீக்கில் கண்காணிக்கவும்.',tpHit:'TP!',slHit:'SL!',pickPair:'AI பகுப்பாய்விற்கு ஒரு ஜோடியைத் தேர்ந்தெடுக்கவும்.',
   mt5Opt:'இந்த லாட்டுடன் MT5-க்கு உண்மையான ஆர்டரையும் அனுப்பு',mt5Note:'பேப்பர் வர்த்தகம் + மேலே உள்ள லாட்டில் உண்மையான MT5 சந்தை ஆர்டர்.',mt5Sent:'MT5-க்கு அனுப்பப்பட்டது',mt5Dry:'MT5 dry-run (நேரடி ஆர்டர் இல்லை)',mt5Fail:'MT5 ஆர்டர் அனுப்பப்படவில்லை',
@@ -1495,31 +2089,102 @@ try{mq.addEventListener&&mq.addEventListener('change',function(){if(theme==='sys
 function setTheme(x){theme=x;try{localStorage.setItem('tw-theme',x)}catch(e){}applyTheme();drawThemes()}
 
 /* ---------------- navigation ---------------- */
-var VIEWS=['analyst','community','liga','profile','settings'];
+var VIEWS=['analyst','community','friends','liga','profile','settings'];
+var NAV_VIEWS=['analyst','community','liga','friends','profile'];
 var navIcons={
  analyst:'<path d="M3 17l5-6 4 4 6-9 3 4"/><path d="M3 21h18"/>',
  community:'<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.9M16 3.1a4 4 0 0 1 0 7.8"/>',
+ friends:'<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>',
  liga:'<path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0V4Z"/><path d="M7 6H4a1 1 0 0 0-1 1c0 2.2 1.8 4 4 4M17 6h3a1 1 0 0 1 1 1c0 2.2-1.8 4-4 4"/>',
  profile:'<circle cx="12" cy="8" r="4"/><path d="M4 21v-1a8 8 0 0 1 16 0v1"/>',
  settings:'<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1-2.8 2.8-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.5V21h-4v-.1a1.7 1.7 0 0 0-1-1.5 1.7 1.7 0 0 0-1.9.3l-.1.1L4.2 17l.1-.1a1.7 1.7 0 0 0 .3-1.9 1.7 1.7 0 0 0-1.5-1H3v-4h.1a1.7 1.7 0 0 0 1.5-1 1.7 1.7 0 0 0-.3-1.9L4.2 7 7 4.2l.1.1a1.7 1.7 0 0 0 1.9.3A1.7 1.7 0 0 0 10 3V3h4v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.9-.3l.1-.1L19.8 7l-.1.1a1.7 1.7 0 0 0-.3 1.9 1.7 1.7 0 0 0 1.5 1H21v4h-.1a1.7 1.7 0 0 0-1.5 1Z"/>'
 };
 var current='analyst';
+function starlingNavSvg(gid){
+ return '<svg viewBox="0 0 64 64" aria-hidden="true"><defs><radialGradient id="'+gid+'" cx="42%" cy="30%" r="68%"><stop offset="0%" stop-color="#ecffc9"/><stop offset="55%" stop-color="#b7f36b"/><stop offset="100%" stop-color="#7bc92a"/></radialGradient></defs><path class="st-twinkle" d="M52 10 Q52 15 57 15 Q52 15 52 20 Q52 15 47 15 Q52 15 52 10Z" fill="#8ab4ff"/><path d="M32 6 C35 20 44 29 58 32 C44 35 35 44 32 58 C29 44 20 35 6 32 C20 29 29 20 32 6 Z" fill="url(#'+gid+')"/><g class="st-eyes"><ellipse cx="26.5" cy="31" rx="2.6" ry="3.2" fill="#0d140a"/><ellipse cx="37.5" cy="31" rx="2.6" ry="3.2" fill="#0d140a"/><circle cx="25.6" cy="29.8" r="1" fill="#ffffff"/><circle cx="36.6" cy="29.8" r="1" fill="#ffffff"/></g><ellipse cx="22.5" cy="35" rx="2.4" ry="1.4" fill="#ff7f8f" opacity=".55"/><ellipse cx="41.5" cy="35" rx="2.4" ry="1.4" fill="#ff7f8f" opacity=".55"/><path d="M29.5 35 Q32 37.5 34.5 35" fill="none" stroke="#0d140a" stroke-width="1.6" stroke-linecap="round"/></svg>';
+}
+function moveNavPill(animate){
+ var navEl=$('bnav');
+ var pill=navEl?navEl.querySelector('.navpill'):null;if(!pill)return;
+ if(NAV_VIEWS.indexOf(current)<0){pill.style.opacity='0';return}
+ /* Ukur slot dari TAB SEBENAR (bukan anggaran): pil mesti selari dengan
+    grid columns .bnavrow yang ada padding 6px — ambil offsetLeft tab target
+    relatif kepada .bnavrow, dan center pil padanya. Ini auto-tepat walau
+    lebar bar/tabs berubah. */
+ var tab=navEl.querySelector('.nav[data-v="'+current+'"]');
+ if(!tab){pill.style.opacity='0';return}
+ var rx=tab.offsetLeft; /* offsetLeft relatif .bnavrow (offsetParent) */
+ var x=rx+(tab.offsetWidth-pill.offsetWidth)/2;
+ pill.style.opacity='1';
+ if(!animate){pill.style.transition='none'}
+ pill.style.transform='translateX('+x+'px)';
+ if(!animate){void pill.offsetWidth;pill.style.transition=''}
+}
 function drawNav(){
- $('bnav').innerHTML=VIEWS.map(function(v){var lab=t('nav'+v.charAt(0).toUpperCase()+v.slice(1));return '<button class="nav'+(v===current?' on':'')+'" data-v="'+v+'" aria-label="'+esc(lab)+'"><svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">'+navIcons[v]+'</svg><span>'+esc(lab)+'</span></button>'}).join('');
- Array.prototype.forEach.call($('bnav').querySelectorAll('.nav'),function(b){b.onclick=function(){showView(b.dataset.v)}});
+ var fUnread=(typeof FR!=='undefined'&&FR&&FR.unread>0);
+ var nav=$('bnav');
+ var html='<div class="navpill"></div>';
+ NAV_VIEWS.forEach(function(v){
+  var lab=t('nav'+v.charAt(0).toUpperCase()+v.slice(1));
+  if(v==='liga'){
+   html+='<div class="ligaslot">'
+    +'<button class="ligacoin'+(v===current?' on juston':'')+'" data-v="liga" aria-label="'+esc(lab)+'">'
+    +'<span class="halo"></span><span class="burst"></span>'
+    +'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">'+navIcons.liga+'</svg>'
+    +'<span class="clbl">'+esc(lab)+'</span></button></div>';
+  } else {
+   var ico=(v==='analyst')
+    ?'<span class="st-nav">'+starlingNavSvg('sgNavStar')+'</span>'
+    :'<svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">'+navIcons[v]+'</svg>';
+   html+='<button class="nav'+(v===current?' on':'')+'" data-v="'+v+'" aria-label="'+esc(lab)+'">'+(v==='friends'&&fUnread?'<i class="ndot"></i>':'')+ico+'<span>'+esc(lab)+'</span></button>';
+  }
+ });
+ nav.innerHTML='<div class="bnavrow">'+html+'</div>';
+ Array.prototype.forEach.call(nav.querySelectorAll('[data-v]'),function(b){b.onclick=function(){showView(b.dataset.v)}});
+ moveNavPill(false);
+ if($('setBtn'))$('setBtn').classList.toggle('on',current==='settings');
 }
 function showView(v){
  if(VIEWS.indexOf(v)<0)return;
+ var prev=current;
  current=v;drawNav();
+ moveNavPill(prev!==v);
  VIEWS.forEach(function(x){var el=$('view-'+x);if(el)el.classList.toggle('hidden',x!==v)});
  $('composer').classList.toggle('hidden',v!=='community');
  $('scroll').classList.toggle('com',v==='community');
  $('scroll').scrollTop=0;
  if(v==='analyst'){drawPairs(true);maybePrices();loadPairTraders();loadPairAi()}
  if(v==='community')loadMessages();
+ if(v==='friends'&&typeof loadFriends==='function')loadFriends();
  if(v==='liga')renderLiga();
  if(v==='profile'){if(!profileLoaded)loadProfile();else loadPerf()}
 }
+/* ---- swipe navigasi (liquid glass): leret mendatar pada kandungan untuk tukar view ----
+   Axis-lock: gerakan menegak kekal scroll; hanya leret mendatar dominant yang tukar view. */
+(function(){
+ var scrollEl=$('scroll');if(!scrollEl)return;
+ var x0=null,y0=null,dx=0,locked=null;
+ function start(x,y){x0=x;y0=y;dx=0;locked=null}
+ function update(dxNow,dyNow){
+  if(locked===null){
+   if(Math.abs(dxNow)<10&&Math.abs(dyNow)<10)return;
+   locked=(Math.abs(dxNow)>Math.abs(dyNow)*1.4&&NAV_VIEWS.indexOf(current)>-1)?'h':'v';
+  }
+  if(locked!=='h')return;
+  dx=dxNow;
+ }
+ function end(){
+  if(locked==='h'){
+   var thr=56,i=NAV_VIEWS.indexOf(current);
+   if(dx<-thr&&i>-1&&i<NAV_VIEWS.length-1)showView(NAV_VIEWS[i+1]);
+   else if(dx>thr&&i>0)showView(NAV_VIEWS[i-1]);
+  }
+  x0=null;y0=null;dx=0;locked=null;
+ }
+ scrollEl.addEventListener('touchstart',function(e){if(e.touches.length===1)start(e.touches[0].clientX,e.touches[0].clientY)},{passive:true});
+ scrollEl.addEventListener('touchmove',function(e){if(x0===null)return;update(e.touches[0].clientX-x0,e.touches[0].clientY-y0)},{passive:true});
+ scrollEl.addEventListener('touchend',end);
+})();
 
 /* ---------------- toast ---------------- */
 var tt;
@@ -1569,7 +2234,7 @@ function detectClosedTrades(){
   if(prev==='open'&&(st==='tp'||st==='sl')){
    var r=(x.r_result!=null)?fmtR(+x.r_result):'';
    toast(pairName(x.pair)+' — '+(st==='tp'?t('tpHit'):t('slHit'))+(r?' '+r:''));
-   if(st==='tp'){confetti();haptic([10,30,10])}
+   if(st==='tp'){confetti();haptic([10,30,10]);if(typeof hopHomeStar==='function')hopHomeStar()}
   }
   prevStatuses[id]=st;
  });
@@ -1580,7 +2245,7 @@ var PAIR_TRADERS={};   /* pair -> bilangan member berbeza yang ambil trade (labe
 var PAIR_AI={};        /* pair -> bilangan request AI analyst dalam 1 jam terakhir */
 function loadPairAi(){
  apiFetch('/api/league/pair-ai-requests').then(function(r){
-  if(r.ok&&r.data&&r.data.requests){PAIR_AI=r.data.requests;drawPairs(true)}
+  if(r.ok&&r.data&&r.data.requests){PAIR_AI=r.data.requests;drawPairs(true);if(typeof updateStarMood==='function')updateStarMood(false)}
  }).catch(function(){});
 }
 function loadPairTraders(){
@@ -1735,13 +2400,81 @@ function mapVerdict(d){
 
 /* ---------------- chart ---------------- */
 var cv=$('cv'),cx=cv.getContext('2d'),DPR=1;
+var AI_COLS=[[8,148,255],[201,89,221],[255,46,84],[255,144,4]];
+function aiRgba(rgb,a){return 'rgba('+rgb[0]+','+rgb[1]+','+rgb[2]+','+a.toFixed(3)+')'}
+function aiMix(p){
+ var t=((p%1)+1)%1*AI_COLS.length,i=Math.floor(t),f=t-i;
+ var c1=AI_COLS[i%AI_COLS.length],c2=AI_COLS[(i+1)%AI_COLS.length];
+ return [Math.round(c1[0]+(c2[0]-c1[0])*f),Math.round(c1[1]+(c2[1]-c1[1])*f),Math.round(c1[2]+(c2[2]-c1[2])*f)];
+}
+/* Liquid Mesh Rim (#1): 4 cahaya Apple Intelligence berenang di tepi chartbox */
+function drawLiquidRimGlow(W,H,t,intensity,light){
+ if(intensity<=0.005)return;
+ cx.save();
+ cx.globalCompositeOperation=light?'source-over':'screen';
+ var blobs=[
+  {speed:0.55,phase:0.0,col:AI_COLS[0],r:0.55},
+  {speed:-0.42,phase:1.7,col:AI_COLS[1],r:0.52},
+  {speed:0.63,phase:3.3,col:AI_COLS[2],r:0.48},
+  {speed:-0.51,phase:4.9,col:AI_COLS[3],r:0.46}
+ ];
+ for(var i=0;i<blobs.length;i++){
+  var b=blobs[i],ang=t*b.speed+b.phase,cs=Math.cos(ang),sn=Math.sin(ang);
+  var bx=W*0.5+(cs<0?-1:1)*Math.pow(Math.abs(cs),0.72)*(W*0.52);
+  var by=H*0.5+(sn<0?-1:1)*Math.pow(Math.abs(sn),0.72)*(H*0.54);
+  var rad=Math.max(W,H)*b.r*(0.85+0.15*Math.sin(t*1.4+b.phase));
+  var g=cx.createRadialGradient(bx,by,0,bx,by,rad);
+  var pk=(light?0.18:0.34)*intensity;
+  g.addColorStop(0,aiRgba(b.col,pk));
+  g.addColorStop(0.32,aiRgba(b.col,pk*0.42));
+  g.addColorStop(0.68,aiRgba(b.col,pk*0.08));
+  g.addColorStop(1,aiRgba(b.col,0));
+  cx.fillStyle=g;cx.fillRect(0,0,W,H);
+ }
+ cx.restore();
+}
+function drawLiquidRimBorder(W,H,t,intensity){
+ if(intensity<=0.005)return;
+ cx.save();
+ var ang=t*1.1;
+ var gx1=W*0.5+Math.cos(ang)*W*0.55,gy1=H*0.5+Math.sin(ang)*H*0.65;
+ var lg=cx.createLinearGradient(gx1,gy1,W-gx1,H-gy1);
+ lg.addColorStop(0,aiRgba(AI_COLS[0],0.95*intensity));
+ lg.addColorStop(0.33,aiRgba(AI_COLS[1],0.95*intensity));
+ lg.addColorStop(0.66,aiRgba(AI_COLS[2],0.92*intensity));
+ lg.addColorStop(1,aiRgba(AI_COLS[3],0.92*intensity));
+ cx.strokeStyle=lg;cx.lineWidth=2.6;
+ cx.shadowColor=aiRgba(aiMix(t*0.18),0.75*intensity);cx.shadowBlur=12*intensity;
+ cx.beginPath();
+ if(cx.roundRect)cx.roundRect(1.3,1.3,W-2.6,H-2.6,16.5);else cx.rect(1.3,1.3,W-2.6,H-2.6);
+ cx.stroke();
+ cx.shadowBlur=0;
+ cx.strokeStyle='rgba(255,255,255,'+(0.28*intensity).toFixed(3)+')';cx.lineWidth=0.8;
+ cx.beginPath();
+ if(cx.roundRect)cx.roundRect(2.4,2.4,W-4.8,H-4.8,15.5);else cx.rect(2.4,2.4,W-4.8,H-4.8);
+ cx.stroke();
+ cx.restore();
+}
 function sizeCv(){DPR=Math.min(2,window.devicePixelRatio||1);var w=cv.clientWidth||320,h=cv.clientHeight||220;cv.width=w*DPR;cv.height=h*DPR}
 function ease(x){return 1-Math.pow(1-x,3)}
 function css(v){return getComputedStyle(document.documentElement).getPropertyValue(v).trim()}
 function pill(x,y,w,txt,bg,fg){cx.fillStyle=bg;cx.beginPath();if(cx.roundRect)cx.roundRect(x,y-8,w,16,5);else cx.rect(x,y-8,w,16);cx.fill();cx.fillStyle=fg;cx.font='700 10px ui-monospace,Menlo,monospace';cx.textAlign='center';cx.textBaseline='middle';cx.fillText(txt,x+w/2,y+.5)}
 function draw(now){
  var W=cv.clientWidth||320,H=cv.clientHeight||220;cx.setTransform(DPR,0,0,DPR,0,0);cx.clearRect(0,0,W,H);
- var c=S.candles;if(!c.length||!S.m)return;
+ var light=document.documentElement.getAttribute('data-theme')==='light';
+ var redMot=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+ var tSec=redMot?0.6:now*0.001;
+ var isScan=(S.scan!=null)||(JOB&&JOB.state==='running'&&cur&&JOB.pair===cur.s);
+ var targetRim=isScan?1:0;
+ if(S._aiRim==null)S._aiRim=targetRim;
+ S._aiRim+=(targetRim-S._aiRim)*(redMot?1:0.09);
+ if(Math.abs(targetRim-S._aiRim)<0.004)S._aiRim=targetRim;
+ var rimA=S._aiRim;
+ var c=S.candles;
+ if(!c.length||!S.m){
+  if(rimA>0.005){drawLiquidRimGlow(W,H,tSec,rimA,light);drawLiquidRimBorder(W,H,tSec,rimA)}
+  return;
+ }
  var n=c.length,fut=16,pR=58,pT=14,pB=14,m=S.m;
  /* Zoom window: 100 candle masa scan, auto zoom-in ke 20 bila verdict siap. */
  var win=Math.max(8,Math.min(n,S.win!=null?S.win:n)),start=n-win,i0=Math.max(0,Math.floor(start)),vis=c.slice(i0);
@@ -1750,6 +2483,8 @@ function draw(now){
  var y=function(v){return pT+(hi-v)/(hi-lo)*(H-pT-pB)},x=function(i){return(i-start+.5)*slot};
  cx.lineWidth=1;cx.font='10px ui-monospace,Menlo,monospace';cx.textAlign='left';cx.textBaseline='middle';
  for(var g=0;g<5;g++){var gv=lo+(hi-lo)*g/4,gy=y(gv);cx.strokeStyle='rgba(128,150,130,.12)';cx.beginPath();cx.moveTo(0,gy);cx.lineTo(W-pR,gy);cx.stroke();cx.fillStyle=css('--muted');cx.fillText(fx(cur,gv),W-pR+6,gy)}
+ /* Liquid Mesh Rim glow di belakang candlestick supaya candle kekal 100% tajam */
+ if(rimA>0.005)drawLiquidRimGlow(W,H,tSec,rimA,light);
  var lime=css('--lime'),red=css('--red'),blue=css('--blue'),txt=css('--text'),card2=css('--card2');
  var a=S.ana,tt=a?ease(Math.min(1,(now-S.t0)/1000)):0,ex=x(n-1),xr=W-pR;
  if(a){[[m.res,'R',red],[m.sup,'S',lime]].forEach(function(l){
@@ -1757,12 +2492,12 @@ function draw(now){
    cx.globalAlpha=tt;cx.fillStyle=l[2];cx.textAlign='left';cx.fillText(l[1],6,ly-8);cx.globalAlpha=1});
  }
  var show=Math.floor(vis.length*S.rv);
+ var scanAlpha=1-rimA*(1-(0.88+0.12*Math.sin(tSec*2.1)));
  /* CANDLESTICK: wick + badan ikut O/H/L/C sebenar */
  for(var j=0;j<show;j++){
   var i=i0+j,k=c[i],up=k.c>=k.o,col=up?lime:red,cxm=x(i);
   var edge=S.rv<1?Math.max(.12,Math.min(1,(show-j)/3)):1;
-  /* breath: seluruh carta bernafas masa scan (bukan garis menegak) */
-  cx.globalAlpha=(S.scan!=null?edge*(S._breath||1):edge);
+  cx.globalAlpha=edge*scanAlpha;
   cx.strokeStyle=col;cx.fillStyle=col;cx.lineWidth=1;
   cx.beginPath();cx.moveTo(cxm,y(k.h));cx.lineTo(cxm,y(k.l));cx.stroke();
   var ty=y(Math.max(k.o,k.c)),hh=Math.max(1.5,Math.abs(y(k.o)-y(k.c)));
@@ -1785,24 +2520,17 @@ function draw(now){
  hiMk.slice(-10).forEach(function(mk){dot(mk,'rgba(214,255,154,.9)')});
  loMk.slice(-10).forEach(function(mk){dot(mk,'rgba(255,159,159,.9)')});
  cx.globalAlpha=1;
- /* === BREATH: carta bernafas masa AI membaca (ganti scan garis menegak) ===
-    Kitaran ~7s: garisan/candle cerah->malap->cerah. Halo lembut di belakang
-    candle paling baru, + nadi halus di hujung kanan. Tiada warna, tiada sapuan. */
- if(S.scan!=null){
-  var _bt=0.5+0.5*Math.sin(now*0.0009);
-  var _br=0.45+0.55*_bt;
-  /* halo lembut di belakang candle terakhir */
-  cx.save();cx.globalCompositeOperation='lighter';
-  var _hx=x(n-1),_hy=y(c[n-1].c),_hr=Math.max(18,slot*5);
+ /* Glint prismatik lembut di candle terakhir semasa AI mengimbas */
+ if(rimA>0.005){
+  var _hx=x(n-1),_hy=y(c[n-1].c),_hc=aiMix(tSec*0.22);
+  var _hr=Math.max(16,slot*4.2)+(redMot?0:5*Math.sin(tSec*2.4));
+  cx.save();cx.globalCompositeOperation=light?'source-over':'lighter';
   var _hg=cx.createRadialGradient(_hx,_hy,0,_hx,_hy,_hr);
-  _hg.addColorStop(0,'rgba(232,255,204,'+(0.10+0.10*_bt).toFixed(3)+')');
-  _hg.addColorStop(0.5,'rgba(183,243,107,'+(0.04+0.04*_bt).toFixed(3)+')');
-  _hg.addColorStop(1,'rgba(183,243,107,0)');
+  _hg.addColorStop(0,aiRgba(_hc,(light?0.24:0.34)*rimA));
+  _hg.addColorStop(1,aiRgba(_hc,0));
   cx.fillStyle=_hg;cx.beginPath();cx.arc(_hx,_hy,_hr,0,6.284);cx.fill();
   cx.restore();
-  /* paksa candle dirender dengan alpha nafas */
-  S._breath=_br;
- } else { S._breath=1; }
+ }
  var ly=y(m.last);cx.strokeStyle='rgba(128,150,130,.4)';cx.setLineDash([3,4]);cx.beginPath();cx.moveTo(ex,ly);cx.lineTo(xr,ly);cx.stroke();cx.setLineDash([]);
  if(!a)pill(W-pR+2,ly,54,fx(cur,m.last),card2,txt);
  if(a&&a.entry!=null){
@@ -1813,6 +2541,8 @@ function draw(now){
    var yy=y(l[3]===1?l[0]:a.entry+(l[0]-a.entry)*tt);cx.strokeStyle=l[1];cx.setLineDash([5,4]);cx.beginPath();cx.moveTo(ex,yy);cx.lineTo(xr,yy);cx.stroke();cx.setLineDash([]);
    cx.globalAlpha=Math.min(1,tt*1.4);pill(W-pR+2,yy,54,fx(cur,l[0]),l[1],css('--bg'));cx.fillStyle=l[1];cx.font='800 10px ui-monospace,Menlo,monospace';cx.textAlign='left';cx.fillText(l[2],ex+8,yy-9);cx.globalAlpha=1});
  }
+ /* Bingkai kaca Liquid Mesh Rim di lapisan atas supaya bersih di semua tepi */
+ if(rimA>0.005)drawLiquidRimBorder(W,H,tSec,rimA);
 }
 function loop(now){
  if(!S.open)return;
@@ -1842,7 +2572,7 @@ function altMode(on){
  $('alt').classList.toggle('hidden',!on);
 }
 function resetSheet(){
- S.ana=null;S.scan=null;S.busy=false;S.win=null;S.zoomT0=null;altMode(false);var mb=$('mtfbox');if(mb)mb.classList.add('hidden');
+ S.ana=null;S.scan=null;S._aiRim=0;S.busy=false;S.win=null;S.zoomT0=null;altMode(false);var mb=$('mtfbox');if(mb)mb.classList.add('hidden');
  $('go').classList.remove('hidden');$('go').disabled=false;setChip('','SEDIA');
 }
 function buildTf(){
@@ -1964,7 +2694,69 @@ function closeSheet(){
 $('bd').onclick=closeSheet;$('sx').onclick=closeSheet;
 /* Floating pill: analysis terus berjalan walaupun sheet ditutup/swipe down.
    Tap pill = buka semula sheet; ✕ = batal job. Siap -> pop up automatik. */
-function showFloat(J){$('floatTxt').textContent=J.pair+' · '+J.tf+' — '+t('anaRunning');$('floatAna').classList.remove('hidden')}
+function starlingSvg(mood,sz,gid){
+ var s=sz||48,id=gid||('sg'+Math.random().toString(36).slice(2,6));
+ var eyes='';
+ if(mood==='happy'){
+  eyes='<path d="M23.5 31.5 Q26.5 28 29.5 31.5" fill="none" stroke="#0d140a" stroke-width="2.3" stroke-linecap="round"/><path d="M34.5 31.5 Q37.5 28 40.5 31.5" fill="none" stroke="#0d140a" stroke-width="2.3" stroke-linecap="round"/>';
+ } else if(mood==='calm'){
+  eyes='<ellipse cx="26.5" cy="31" rx="2.4" ry="2.6" fill="#0d140a"/><ellipse cx="37.5" cy="31" rx="2.4" ry="2.6" fill="#0d140a"/><circle cx="25.8" cy="30.1" r=".9" fill="#ffffff"/><circle cx="36.8" cy="30.1" r=".9" fill="#ffffff"/>';
+ } else if(mood==='scan'){
+  eyes='<g class="st-scan-eyes"><ellipse cx="26.5" cy="31" rx="2.6" ry="3.2" fill="#0d140a"/><ellipse cx="37.5" cy="31" rx="2.6" ry="3.2" fill="#0d140a"/><circle cx="25.6" cy="29.8" r="1" fill="#ffffff"/><circle cx="36.6" cy="29.8" r="1" fill="#ffffff"/></g>';
+ } else if(mood==='sleep'){
+  eyes='<g class="st-sleep-eyes"><path d="M23.5 31.5 Q26.5 34 29.5 31.5" fill="none" stroke="#0d140a" stroke-width="2" stroke-linecap="round"/><path d="M34.5 31.5 Q37.5 34 40.5 31.5" fill="none" stroke="#0d140a" stroke-width="2" stroke-linecap="round"/></g><g class="st-happy-eyes"><path d="M23.5 31.5 Q26.5 28 29.5 31.5" fill="none" stroke="#0d140a" stroke-width="2.2" stroke-linecap="round"/><path d="M34.5 31.5 Q37.5 28 40.5 31.5" fill="none" stroke="#0d140a" stroke-width="2.2" stroke-linecap="round"/></g><text class="st-zzz" x="45" y="18">zZ</text>';
+ } else {
+  eyes='<g class="st-eyes"><ellipse cx="26.5" cy="31" rx="2.6" ry="3.2" fill="#0d140a"/><ellipse cx="37.5" cy="31" rx="2.6" ry="3.2" fill="#0d140a"/><circle cx="25.6" cy="29.8" r="1" fill="#ffffff"/><circle cx="36.6" cy="29.8" r="1" fill="#ffffff"/></g><g class="st-happy-eyes"><path d="M23.5 31.5 Q26.5 28 29.5 31.5" fill="none" stroke="#0d140a" stroke-width="2.2" stroke-linecap="round"/><path d="M34.5 31.5 Q37.5 28 40.5 31.5" fill="none" stroke="#0d140a" stroke-width="2.2" stroke-linecap="round"/></g>';
+ }
+ var mouth=mood==='calm'?'<path d="M29 35.5 L35 35.5" fill="none" stroke="#0d140a" stroke-width="1.6" stroke-linecap="round"/>':(mood==='sleep'?'<circle cx="32" cy="35.6" r="1.4" fill="#0d140a"/>':'<path d="M29.5 35 Q32 37.5 34.5 35" fill="none" stroke="#0d140a" stroke-width="1.6" stroke-linecap="round"/>');
+ var tw=(mood==='scan'||mood==='sleep')?'':'<path class="st-twinkle" d="M52 10 Q52 15 57 15 Q52 15 52 20 Q52 15 47 15 Q52 15 52 10Z" fill="#8ab4ff"/>';
+ return '<svg class="'+(mood==='scan'?'':'st-svg')+'" width="'+s+'" height="'+s+'" viewBox="0 0 64 64" aria-hidden="true"><defs><radialGradient id="'+id+'" cx="42%" cy="30%" r="68%"><stop offset="0%" stop-color="#ecffc9"/><stop offset="55%" stop-color="#b7f36b"/><stop offset="100%" stop-color="#7bc92a"/></radialGradient></defs>'+tw+'<path d="M32 6 C35 20 44 29 58 32 C44 35 35 44 32 58 C29 44 20 35 6 32 C20 29 29 20 32 6 Z" fill="url(#'+id+')"/>'+eyes+'<ellipse cx="22.5" cy="35" rx="2.4" ry="1.4" fill="#ff7f8f" opacity=".55"/><ellipse cx="41.5" cy="35" rx="2.4" ry="1.4" fill="#ff7f8f" opacity=".55"/>'+mouth+'</svg>';
+}
+var starTipIdx=0,starHotPair=null,starHopT=null;
+function isFxWeekend(){var d=new Date(),day=d.getUTCDay(),h=d.getUTCHours();return day===6||(day===5&&h>=22)||(day===0&&h<21)}
+function updateStarMood(cycleTip){
+ var hs=$('homeStarling'),mt=$('starMoodTxt'),fs=$('floatStar');
+ if(fs&&!fs.innerHTML)fs.innerHTML=starlingSvg('scan',28,'sgFloat');
+ var wk=isFxWeekend();
+ if(hs){
+  var want=wk?'sleep':'normal';
+  if(hs.dataset.mood!==want){hs.dataset.mood=want;hs.innerHTML=starlingSvg(want,52,'sgHome')}
+ }
+ if(!mt)return;
+ var topS=null,topN=0;
+ Object.keys(PAIR_AI||{}).forEach(function(k){var v=+PAIR_AI[k]||0;if(v>topN){topN=v;topS=k}});
+ starHotPair=topS;
+ var en=(lang==='en');
+ var tips=[];
+ if(wk){
+  tips.push(en?'Markets resting — <b>BTCUSD</b> is still live 24/7':'Pasaran rehat — <b>BTCUSD</b> masih aktif 24/7');
+  tips.push(en?'Weekend tip: review your past trades in <b>League</b>':'Tip hujung minggu: semak rekod trade dalam <b>Liga</b>');
+ } else {
+  if(topS&&topN>0)tips.push(en?'<b>'+esc(topS)+'</b> is hottest right now ('+topN+' scans)':'<b>'+esc(topS)+'</b> paling hangat sekarang ('+topN+' scan)');
+  tips.push(en?'Tap any pair — Starling maps <b>Entry, SL &amp; TP</b>':'Ketik mana-mana pair — Starling lukis <b>Entry, SL &amp; TP</b>');
+  tips.push(en?'Discipline wins: wait for clean confirmation':'Disiplin menang: tunggu pengesahan bersih sebelum masuk');
+ }
+ if(cycleTip)starTipIdx=(starTipIdx+1)%tips.length;
+ mt.innerHTML=tips[starTipIdx%tips.length];
+}
+function hopHomeStar(){
+ var hs=$('homeStarling');if(!hs)return;
+ hap(8);if(window.TWSound)TWSound.play('click');
+ hs.classList.remove('hop','happy');void hs.offsetWidth;hs.classList.add('hop','happy');
+ updateStarMood(true);
+ if(starHopT)clearTimeout(starHopT);
+ starHopT=setTimeout(function(){hs.classList.remove('happy')},850);
+}
+if($('homeStarling'))$('homeStarling').onclick=hopHomeStar;
+if($('starMood'))$('starMood').onclick=function(){
+ if(starHotPair&&!isFxWeekend()){openSheet(starHotPair)}else{hopHomeStar()}
+};
+updateStarMood(false);
+function showFloat(J){
+ var fs=$('floatStar');if(fs&&!fs.innerHTML)fs.innerHTML=starlingSvg('scan',28,'sgFloat');
+ $('floatTxt').textContent='Starling: '+J.pair+' · '+J.tf+' — '+t('anaRunning');
+ $('floatAna').classList.remove('hidden');
+}
 function hideFloat(){$('floatAna').classList.add('hidden')}
 function cancelJob(){if(!JOB)return;JOB=null;S.run++;S.busy=false;hideFloat();resetSheet();hap(6)}
 $('floatAna').onclick=function(){if(JOB&&JOB.state==='running')openSheet(JOB.pair)};
@@ -2145,23 +2937,26 @@ function show(a){
  var h='<div class="bias '+cls+'" style="--rc:'+col+'"><div><div class="lab">'+esc(t('aiLabel'))+'</div><div class="val">'+val+'</div><div class="asof">'+cur.s+' · '+esc(a.tf||tf)+' · '+esc(tfStyle(a.tf||tf))+'</div></div><div class="ring"><svg viewBox="0 0 80 80"><circle class="rb" cx="40" cy="40" r="34"/><circle class="rf" id="rf" cx="40" cy="40" r="34" transform="rotate(-90 40 40)"/></svg><div class="n"><div><span id="cn">0</span>%<small>'+esc(t('conf'))+'</small></div></div></div></div>';
  h+=mt5Banner(a.mt5);
  if(a.meta&&a.meta.input){var ai=a.meta.input;
+  var nMood=(a.dir==='WAIT'||a.dir==='HOLD')?'calm':'happy';
   h+='<div class="sec">'+esc(t('aiNarr'))+'</div>'+
-     '<div class="narrwrap"><div class="miniorb"><div class="ring2"></div><div class="core2"></div></div>'+
+     '<div class="narrwrap"><button type="button" class="narr-star" id="narrStar" aria-label="Starling AI">'+starlingSvg(nMood,40,'sgNarr')+'</button>'+
      '<div class="narr" id="narrTx"></div></div>';}
  if(a.entry!=null){var eLab=a.entry_type==='buy_limit'?'BUY LIMIT':a.entry_type==='sell_limit'?'SELL LIMIT':t('entry');h+='<div class="lv"><div class="e" style="animation-delay:.15s"><small>'+esc(eLab)+'</small><b>'+f(a.entry)+'</b></div><div class="t" style="animation-delay:.25s"><small>'+esc(t('tp'))+'</small><b>'+f(a.tp)+(a.tp2!=null?' / '+f(a.tp2):'')+'</b></div><div class="s" style="animation-delay:.35s"><small>'+esc(t('sl'))+'</small><b>'+f(a.sl)+'</b></div></div>';}
  else h+='<p style="text-align:center;color:var(--muted);font-size:12px;margin:4px 0 0">'+esc(t('waitMsg'))+'</p>';
- if(a.entry!=null)h+='<button class="take" id="takeBtn">'+esc(t('takeTrade'))+'</button>';
+ if(a.entry!=null)h+='<button class="take" id="takeBtn">'+esc(t('takeTrade'))+'</button><button class="sharebtn" id="shareCom" type="button">'+esc(t('shareCom'))+'</button>';
  else h+='<button class="take" id="takeBtn" disabled>'+esc(t('takeTrade'))+'</button><p class="takenote">'+esc(t('noSetup'))+'</p>';
  h+='<div class="sec">'+esc(t('checklist'))+'</div><ul class="chk">'+a.checks.map(function(c,i){return '<li class="'+(c.ok?'y':'n')+'" style="animation-delay:'+(.4+i*.12)+'s"><span class="b">'+(c.ok?'✓':'✕')+'</span>'+esc(c.t)+'</li>'}).join('')+'</ul>';
  h+='<div class="sec">'+esc(t('reasons'))+'</div><ul class="reasons">'+a.reasons.map(function(x,i){return '<li style="animation-delay:'+(1+i*.12)+'s"><span class="dot" style="background:'+col+'"></span><span>'+x+'</span></li>'}).join('')+'</ul>';
  h+='<div class="sec">'+esc(t('risk'))+'</div><ul class="reasons">'+a.risk.map(function(x,i){return '<li style="animation-delay:'+(1.5+i*.12)+'s"><span class="dot" style="background:#ffc16b"></span><span>'+esc(x)+'</span></li>'}).join('')+'</ul>';
  h+='<div class="note">'+(lang==='en'?'Not financial advice. All trading decisions are your own.':'Ini bukan nasihat kewangan. Semua keputusan trading adalah tanggungjawab anda.')+'</div><button class="again" id="again">'+esc(t('again'))+'</button>';
  $('res').innerHTML=h;
+ if($('narrStar'))$('narrStar').onclick=function(){var ns=$('narrStar');hap(6);if(window.TWSound)TWSound.play('click');ns.classList.remove('hop');void ns.offsetWidth;ns.classList.add('hop')};
  if(a.meta&&a.meta.input){try{narrateAI(a)}catch(e){}}
  requestAnimationFrame(function(){requestAnimationFrame(function(){$('rf').style.strokeDashoffset=(213.6*(1-a.conf/100)).toFixed(1)})});
  var t0p=performance.now();(function up(now){var k=Math.min(1,(now-t0p)/1100);$('cn').textContent=Math.round(a.conf*ease(k));if(k<1)requestAnimationFrame(up)})(t0p);
  $('again').onclick=function(){S.run++;resetSheet();$('sheet').scrollTo({top:0,behavior:'smooth'})};
  $('takeBtn').onclick=function(){if(a.entry==null)return;hap(10);openRisk(a)};
+ if($('shareCom'))$('shareCom').onclick=function(){shareToCommunity(a)};
  if(a.entry!=null)zoomTo(20);
  loadAlignment();
  setTimeout(function(){$('res').scrollIntoView({behavior:'smooth',block:'start'})},220);
@@ -2186,8 +2981,61 @@ function loadAlignment(){
 }
 $('go').onclick=analyze;
 
+/* ---------------- Chat SFX (delivered + incoming message) ---------------- */
+var _chatActx=null,_chatSfxAt={};
+function _chatMuted(){
+ try{if(window.TWSound&&typeof TWSound.isMuted==='function'&&TWSound.isMuted())return true}catch(e){}
+ try{return localStorage.getItem('tw_sound_muted')==='1'}catch(e){return false}
+}
+function _unlockChatAudio(){
+ if(_chatMuted())return null;
+ try{
+  var AC=window.AudioContext||window.webkitAudioContext;
+  if(!AC)return null;
+  if(!_chatActx)_chatActx=new AC();
+  if(_chatActx.state==='suspended')_chatActx.resume().catch(function(){});
+  return _chatActx;
+ }catch(e){return null}
+}
+['pointerdown','touchstart','keydown'].forEach(function(ev){
+ document.addEventListener(ev,_unlockChatAudio,{passive:true,capture:true});
+});
+function playChatSfx(kind){
+ if(_chatMuted())return;
+ var now=Date.now();
+ if(_chatSfxAt[kind]&&now-_chatSfxAt[kind]<450)return;
+ _chatSfxAt[kind]=now;
+ var c=_unlockChatAudio();if(!c)return;
+ try{
+  var t0=c.currentTime;
+  function oscTone(f1,f2,dur,vol,delay,type){
+   var o=c.createOscillator(),g=c.createGain(),st=t0+(delay||0);
+   o.type=type||'sine';
+   o.frequency.setValueAtTime(f1,st);
+   if(f2)o.frequency.exponentialRampToValueAtTime(f2,st+dur);
+   g.gain.setValueAtTime(0.0001,st);
+   g.gain.exponentialRampToValueAtTime(vol,st+0.006);
+   g.gain.exponentialRampToValueAtTime(0.0001,st+dur);
+   o.connect(g);g.connect(c.destination);
+   o.start(st);o.stop(st+dur+0.03);
+  }
+  if(kind==='sent'){
+   oscTone(540,880,0.075,0.16,0,'sine');
+   oscTone(1320,0,0.055,0.06,0.022,'sine');
+  }else{
+   oscTone(784,0,0.095,0.16,0,'sine');
+   oscTone(1046.5,0,0.15,0.18,0.075,'sine');
+   oscTone(2093,0,0.09,0.04,0.075,'sine');
+  }
+ }catch(e){}
+}
+
 /* ---------------- community (API sebenar) ---------------- */
-var MSGS=[],comLoaded=false,sending=false;
+var MSGS=[],comLoaded=false,sending=false,comInit=false,comLastId=null;
+var COM_ROOM='all',COM_ROOMS={},COM_FEAT={rooms:false,cards:false,reactions:false},comReq=0;
+var COM_PAIR_ROOMS=['XAUUSD','BTCUSD','XAGUSD','EURUSD','GBPUSD','USDJPY','AUDUSD','USDCAD','NZDUSD'];
+var RX_EMOJIS=['🔥','🎯','👏','👍'];
+function tx(en,ms){return lang==='en'?en:ms}
 var AVCOL=['#b7f36b','#8ab4ff','#ffc16b','#ff9db0','#a78bfa','#7ad4c4','#f0a860'];
 function avCol(n){var h=0;for(var i=0;i<n.length;i++)h=(h*31+n.charCodeAt(i))>>>0;return AVCOL[h%AVCOL.length]}
 function initials(n){return String(n||'?').trim().slice(0,2).toUpperCase()}
@@ -2200,20 +3048,52 @@ function myTm(iso){
  if(day===today)return hm;
  return new Intl.DateTimeFormat('en-GB',{timeZone:'Asia/Kuala_Lumpur',day:'numeric',month:'short'}).format(d)+' '+hm;
 }
+function sigCardHtml(p,id){
+ var d=pdec(p.pair),f=function(v){return Number(v).toFixed(d)},sell=p.side==='SELL';
+ return '<div class="sigcard'+(sell?' sell':'')+'"><div class="sh"><b>✦ '+esc(p.pair)+' · '+esc(p.tf)+'</b><span class="sd">'+esc(p.side)+(p.conf?' '+(+p.conf)+'%':'')+'</span></div>'+
+  '<div class="sl3"><div class="e"><small>'+esc(t('entry'))+'</small><b>'+f(p.entry)+'</b></div><div class="t"><small>'+esc(t('tp'))+'</small><b>'+f(p.tp)+'</b></div><div class="s"><small>'+esc(t('sl'))+'</small><b>'+f(p.sl)+'</b></div></div>'+
+  '<button class="take2" type="button" data-id="'+id+'">'+esc(tx('Take this trade →','Ambil trade ini →'))+'</button></div>';
+}
+function rxHtml(m){
+ if(!COM_FEAT.reactions)return '';
+ var rs=m.reactions||{},mine=m.mine||[];
+ var chips=RX_EMOJIS.filter(function(e){return rs[e]>0}).map(function(e){
+  return '<button class="rxc'+(mine.indexOf(e)>-1?' mine':'')+'" data-id="'+m.id+'" data-e="'+e+'" type="button">'+e+' '+rs[e]+'</button>';
+ }).join('');
+ return '<div class="rxrow">'+chips+'<button class="rxadd" data-id="'+m.id+'" type="button" aria-label="React">＋</button></div>';
+}
+function msgHtml(m,me){
+ var isMe=me&&m.username===me,isSig=m.kind==='signal'&&m.payload&&m.payload.pair;
+ var rk=m.rank?'<span class="rk r'+m.rank+'">🏆 #'+m.rank+' '+esc(tx('League','Liga'))+'</span>':'';
+ var rt=(COM_ROOM==='all'&&m.room&&m.room!=='all')?'<span class="rtag">'+esc(m.room)+'</span>':'';
+ var txt=(isSig&&m.body==='Kongsi setup AI')?tx('Shared an AI setup:','Kongsi setup AI:'):m.body;
+ return '<div class="msg'+(isMe?' me':'')+'" data-id="'+m.id+'"><div class="av" style="background:'+avCol(m.username)+'">'+esc(initials(m.username))+'</div><div class="body'+(isSig?' wide':'')+'"><div class="meta"><b>'+esc(m.username)+'</b>'+rk+rt+'<time>'+esc(myTm(m.created_at))+'</time></div><p>'+esc(txt)+'</p>'+(isSig?sigCardHtml(m.payload,m.id):'')+rxHtml(m)+'</div></div>';
+}
 function drawMsgs(){
  var me=myChatName();
  if(!MSGS.length){
   $('msgs').innerHTML='<div class="empty">'+esc(t('emptyChat'))+'</div>';
  }else{
-  $('msgs').innerHTML=MSGS.map(function(m){
-   var isMe=me&&m.username===me;
-   return '<div class="msg'+(isMe?' me':'')+'"><div class="av" style="background:'+avCol(m.username)+'">'+esc(initials(m.username))+'</div><div class="body"><div class="meta"><b>'+esc(m.username)+'</b><time>'+esc(myTm(m.created_at))+'</time></div><p>'+esc(m.body)+'</p></div></div>';
-  }).join('');
+  $('msgs').innerHTML=MSGS.map(function(m){return msgHtml(m,me)}).join('');
  }
  var users={};MSGS.forEach(function(m){users[m.username]=1});
  var n=Object.keys(users).length;
  $('onlineTxt').textContent=(ONLINE!=null)?(ONLINE+' '+t('onlineNow')):(n?(n+' '+t('membersToday')):t('online'));
  $('comNote').textContent=t('resetAt');
+ drawRooms();
+}
+function drawRooms(){
+ var box=$('rooms');if(!box)return;
+ if(!COM_FEAT.rooms){box.classList.add('hidden');return}
+ box.classList.remove('hidden');
+ var hot=0,hotRoom=null;
+ COM_PAIR_ROOMS.forEach(function(k){var v=COM_ROOMS[k]||0;if(v>hot){hot=v;hotRoom=k}});
+ box.innerHTML=['all'].concat(COM_PAIR_ROOMS).map(function(r){
+  var n=r==='all'?0:(COM_ROOMS[r]||0);
+  return '<button class="room'+(r===COM_ROOM?' on':'')+'" data-r="'+r+'" type="button">'+(r===hotRoom&&hot>=3?'<span class="rh">🔥</span>':'')+esc(r==='all'?t('roomAll'):r)+(n?'<span class="rc">'+n+'</span>':'')+'</button>';
+ }).join('');
+ var inp=$('msgInput');
+ if(inp)inp.setAttribute('placeholder',COM_ROOM==='all'?t('writeMsg'):t('roomMsgPre')+COM_ROOM+'…');
 }
 /* Presence: heartbeat setiap 60s selagi app dibuka & nampak. Backend kira
    ahli aktif (TTL 150s); chip community papar "X sedang online". */
@@ -2230,14 +3110,28 @@ function beat(){
 setInterval(beat,30000); /* presence refresh 30s (dulu 60s) */
 document.addEventListener('visibilitychange',function(){if(!document.visibilityState||document.visibilityState==='visible')beat()});
 beat();
-function loadMessages(){
- comLoaded=true;
- apiFetch('/api/chat/messages?limit=50').then(function(res){
-  if(!res.ok){toast(t('sendErr'));return}
-  MSGS=(res.data&&Array.isArray(res.data.messages))?res.data.messages.slice().reverse():[];
+function loadMessages(silent){
+ if(!silent)comLoaded=true;
+ var req=++comReq,room=COM_ROOM;
+ apiFetch('/api/chat/messages?limit=50'+(room!=='all'?'&room='+encodeURIComponent(room):'')).then(function(res){
+  if(req!==comReq)return;
+  if(!res.ok){if(!silent)toast(t('sendErr'));return}
+  var next=(res.data&&Array.isArray(res.data.messages))?res.data.messages.slice().reverse():[];
+  var lastM=next.length?next[next.length-1]:null;
+  var me=myChatName();
+  if(comInit&&lastM&&comLastId!=null&&Number(lastM.id)>Number(comLastId)&&lastM.username!==me){
+   playChatSfx('recv');
+  }
+  comInit=true;
+  if(lastM&&lastM.id!=null)comLastId=lastM.id;
+  MSGS=next;
   if(res.data&&typeof res.data.online==='number')ONLINE=res.data.online;
+  var f=(res.data&&res.data.features)||{};
+  COM_FEAT={rooms:!!f.rooms,cards:!!f.cards,reactions:!!f.reactions};
+  COM_ROOMS=(res.data&&res.data.rooms)||{};
+  if(!COM_FEAT.rooms&&COM_ROOM!=='all')COM_ROOM='all';
   drawMsgs();
- }).catch(function(){toast(t('sendErr'))});
+ }).catch(function(){if(!silent&&req===comReq)toast(t('sendErr'))});
 }
 function sendMsg(){
  if(sending)return;
@@ -2245,7 +3139,8 @@ function sendMsg(){
  if(!v){toast(t('emptyMsg'));return}
  if(v.length>500){toast(t('longMsg'));return}
  sending=true;$('sendBtn').disabled=true;
- apiFetch('/api/chat/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text:v})}).then(function(res){
+ var body={text:v};if(COM_FEAT.rooms&&COM_ROOM!=='all')body.room=COM_ROOM;
+ apiFetch('/api/chat/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)}).then(function(res){
   sending=false;$('sendBtn').disabled=false;
   if(!res.ok){
    if(res.status===429)toast(t('slow'));
@@ -2253,14 +3148,774 @@ function sendMsg(){
    else toast(t('sendErr'));return;
   }
   inp.value='';
-  if(res.data&&res.data.message)MSGS.push(res.data.message);
+  if(res.data&&res.data.message){
+   MSGS.push(res.data.message);
+   if(res.data.message.id!=null)comLastId=Math.max(Number(comLastId||0),Number(res.data.message.id)||0);
+   if(COM_FEAT.rooms&&COM_ROOM!=='all')COM_ROOMS[COM_ROOM]=(COM_ROOMS[COM_ROOM]||0)+1;
+  }
+  playChatSfx('sent');
   drawMsgs();hap(8);
   if(res.data&&res.data.filtered&&res.data.filtered.length)toast(t('someFiltered'));
-  var last=$('msgs').lastElementChild;if(last)last.scrollIntoView({behavior:'smooth',block:'nearest'});
+  var last=$('msgs').lastElementChild,comp=$('composer'),sc=$('scroll');
+ if(last&&comp&&sc){var lr=last.getBoundingClientRect(),cr=comp.getBoundingClientRect();if(lr.bottom>cr.top-12)sc.scrollBy({top:lr.bottom-cr.top+16,behavior:'smooth'})}
  }).catch(function(){sending=false;$('sendBtn').disabled=false;toast(t('sendErr'))});
 }
+setInterval(function(){
+ if(document.visibilityState&&document.visibilityState!=='visible')return;
+ if(current==='community')loadMessages(true);
+},8000);
+$('sendBtn').addEventListener('mousedown',function(e){e.preventDefault()});
 $('sendBtn').onclick=sendMsg;
 $('msgInput').addEventListener('keydown',function(e){if(e.key==='Enter')sendMsg()});
+
+/* ----- Community upgrade: pair rooms, reactions, shared signal cards ----- */
+$('rooms').addEventListener('click',function(e){
+ var b=e.target.closest?e.target.closest('.room'):null;if(!b)return;
+ var r=b.dataset.r;if(!r||r===COM_ROOM)return;
+ COM_ROOM=r;comInit=false;comLastId=null;hap(6);drawRooms();loadMessages();
+});
+function redrawReact(id,bumpEmoji){
+ var m=MSGS.filter(function(x){return x.id===id})[0],row=document.querySelector('.msg[data-id="'+id+'"] .rxrow');
+ if(!m||!row)return;
+ row.outerHTML=rxHtml(m);
+ if(bumpEmoji){
+  var c=document.querySelector('.msg[data-id="'+id+'"] .rxc[data-e="'+bumpEmoji+'"]');
+  if(c)c.classList.add('bump');
+ }
+}
+function toggleReact(id,e){
+ if(!COM_FEAT.reactions)return;
+ var m=MSGS.filter(function(x){return x.id===id})[0];if(!m)return;
+ var prev={r:JSON.parse(JSON.stringify(m.reactions||{})),mine:(m.mine||[]).slice()};
+ m.reactions=m.reactions||{};m.mine=m.mine||[];
+ var i=m.mine.indexOf(e);
+ if(i>-1){m.mine.splice(i,1);m.reactions[e]=Math.max(0,(m.reactions[e]||1)-1)}
+ else{m.mine.push(e);m.reactions[e]=(m.reactions[e]||0)+1}
+ hap(6);redrawReact(id,i>-1?null:e);
+ apiFetch('/api/chat/react',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message_id:id,emoji:e})}).then(function(r){
+  if(r.ok&&r.data){m.reactions=r.data.reactions||{};m.mine=r.data.mine||[]}
+  else{m.reactions=prev.r;m.mine=prev.mine;if(r.status===429)toast(t('slow'))}
+  redrawReact(id);
+ }).catch(function(){m.reactions=prev.r;m.mine=prev.mine;redrawReact(id)});
+}
+function openRxPicker(btn){
+ var row=btn.parentNode,old=row.querySelector('.rxpick');
+ if(old){old.remove();return}
+ var id=btn.dataset.id,pk=document.createElement('span');pk.className='rxpick';
+ pk.innerHTML=RX_EMOJIS.map(function(e){return '<button class="rxp" data-id="'+id+'" data-e="'+e+'" type="button">'+e+'</button>'}).join('');
+ row.appendChild(pk);
+}
+function takeFromCard(id){
+ var m=MSGS.filter(function(x){return String(x.id)===String(id)})[0];
+ if(!m||!m.payload)return;
+ var p=m.payload,pair=PAIRS.filter(function(x){return x.s===p.pair})[0];
+ if(!pair)return;
+ var cl=pairClosed(pair);if(cl){toast(cl==='offline'?t('dataOffline'):t('mktClosed'));return}
+ cur=pair;hap(10);
+ openRisk({dir:p.side,entry:+p.entry,sl:+p.sl,tp:+p.tp,conf:+p.conf||0,tf:p.tf,entry_type:'market',meta:null});
+}
+$('msgs').addEventListener('click',function(e){
+ var b=e.target.closest?e.target.closest('button'):null;if(!b)return;
+ if(b.classList.contains('rxc')||b.classList.contains('rxp')){toggleReact(+b.dataset.id,b.dataset.e);return}
+ if(b.classList.contains('rxadd')){openRxPicker(b);return}
+ if(b.classList.contains('take2')){takeFromCard(b.dataset.id)}
+});
+var shareBusy=false;
+function shareToCommunity(a){
+ if(shareBusy||!cur||a.entry==null||(a.dir!=='BUY'&&a.dir!=='SELL'))return;
+ shareBusy=true;var b=$('shareCom');if(b)b.disabled=true;
+ var pair=cur.s;
+ apiFetch('/api/chat/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({card:{pair:pair,side:a.dir,tf:a.tf||tf,entry:a.entry,sl:a.sl,tp:a.tp,conf:a.conf}})}).then(function(res){
+  shareBusy=false;if(b)b.disabled=false;
+  if(!res.ok){toast(res.status===501?t('shareNo'):res.status===429?t('slow'):t('sendErr'));return}
+  hap(12);if(window.TWSound)TWSound.play('success');
+  toast(t('sharedTo')+pair);
+  COM_ROOM=pair;closeSheet();showView('community');
+ }).catch(function(){shareBusy=false;if(b)b.disabled=false;toast(t('sendErr'))});
+}
+/* ---------------- Orbit Friends + Live Welcoming + Private DM ---------------- */
+var FR={loaded:false,tab:'chats',sel:null,today:0,total:0,online:0,unread:0,prevUnreadDm:null,friends:[],requests:[],arrivals:[],lastTopArrival:'',dmFriend:null,dmMsgs:[],dmInit:false,dmLastId:null,dmBusy:false,dmPoll:null,findTimer:null,pendingDm:null};
+var ORB_PALS=[
+ 'linear-gradient(135deg,#d8fb9e,#94e347)',
+ 'linear-gradient(135deg,#a5d8ff,#6da7f9)',
+ 'linear-gradient(135deg,#ffd699,#f2a75c)',
+ 'linear-gradient(135deg,#d9b8ff,#a87ef7)',
+ 'linear-gradient(135deg,#9cf5dc,#4fd1a5)',
+ 'linear-gradient(135deg,#ffb3c1,#f0758c)'
+];
+function orbBg(str){
+ var s=String(str||'tw'),h=0;
+ for(var i=0;i<s.length;i++)h=((h<<5)-h+s.charCodeAt(i))|0;
+ return ORB_PALS[Math.abs(h)%ORB_PALS.length];
+}
+function relAgo(iso){
+ if(!iso)return '';
+ var d=new Date(iso);if(isNaN(d))return '';
+ var sec=Math.max(0,Math.floor((Date.now()-d.getTime())/1000));
+ if(sec<60)return (lang==='en'?'just now':'baru tadi');
+ var min=Math.floor(sec/60);if(min<60)return min+'m';
+ var hr=Math.floor(min/60);if(hr<24)return hr+'h';
+ var day=Math.floor(hr/24);if(day<30)return day+'d';
+ return d.toLocaleDateString(lang==='en'?'en-GB':'ms-MY',{day:'numeric',month:'short'});
+}
+function dmTime(iso){
+ if(!iso)return '';
+ var d=new Date(iso);if(isNaN(d))return '';
+ return d.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit',hour12:false});
+}
+function orbStarSVG(){
+ return '<svg width="24" height="24" viewBox="-26 -26 52 52" aria-hidden="true">'
+  +'<defs><linearGradient id="osg" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#eaffc6"/><stop offset="100%" stop-color="#a5ec49"/></linearGradient></defs>'
+  +'<path d="M0-22Q2-2 22 0Q2 2 0 22Q-2 2-22 0Q-2-2 0-22Z" fill="url(#osg)"/>'
+  +'<circle cx="-4.2" cy="-1" r="1.7" fill="#0d1408"/><circle cx="4.2" cy="-1" r="1.7" fill="#0d1408"/></svg>';
+}
+function orbIni(name){
+ var parts=String(name||'?').trim().replace(/[^A-Za-z0-9\s]/g,' ').trim().split(/\s+/).filter(Boolean);
+ if(parts.length>=2)return (parts[0][0]+parts[1][0]).toUpperCase();
+ return String(parts[0]||'?').slice(0,2).toUpperCase();
+}
+function orbAvHTML(name,id,online,rank){
+ return '<div class="orb-av" style="background:'+orbBg(id||name)+'">'+esc(orbIni(name))
+  +(online?'<span class="on-d"></span>':'')
+  +(rank?'<span class="rk-p">#'+rank+'</span>':'')+'</div>';
+}
+function firstWord(s){
+ var parts=String(s||'Trader').trim().split(/\s+/).filter(Boolean);
+ if(!parts.length)return 'Trader';
+ if(parts.length>1&&parts[0].replace(/\./g,'').length<=1)return parts[1];
+ /* Server sudah tapis nama jadi satu perkataan, kecuali bila ada dua ahli
+    bernama sama — masa itu akhiran seperti "B." MESTI dikekalkan, kalau tidak
+    dua orang kelihatan sama dalam orbit. */
+ if(parts.length>1&&/^[A-Z]{1,2}\.$/.test(parts[1]))return parts[0]+' '+parts[1];
+ return parts[0];
+}
+
+function renderFriends(){
+ var stage=$('orbStage'),tabs=$('orbTabs'),body=$('orbBody');
+ if(!stage||!tabs||!body)return;
+ var en=(lang==='en');
+
+ /* Orbit constellation coordinates (clear of top pills & centered bottom tip) */
+ var inPos=[{x:36,y:37},{x:64,y:37},{x:63,y:62},{x:37,y:62}];
+ var outPos=[{x:18,y:34},{x:82,y:34},{x:19,y:63},{x:81,y:63}];
+ var innerNodes=FR.friends.slice(0,4);
+ var outerNodes=FR.arrivals.slice(0,4);
+
+ /* Keep selected node fresh */
+ var selObj=null;
+ if(FR.sel){
+  if(FR.sel.kind==='friend'){
+   var ff=FR.friends.filter(function(x){return x.id===FR.sel.id})[0];
+   if(ff)selObj={kind:'friend',data:ff};
+  }else{
+   var aa=FR.arrivals.filter(function(x){return x.id===FR.sel.id})[0];
+   if(aa)selObj={kind:'new',data:aa};
+  }
+ }
+ if(!selObj&&outerNodes.length)selObj={kind:'new',data:outerNodes[0]};
+ else if(!selObj&&innerNodes.length)selObj={kind:'friend',data:innerNodes[0]};
+
+ var liveTxt=FR.today>0
+  ? ('<b>+'+FR.today+'</b> '+(en?'joined today':'baru hari ini'))
+  : ('<b>'+FR.total+'</b> '+(en?'members':'ahli'));
+
+ var tipHTML='';
+ if(selObj){
+  var d=selObj.data;
+  if(selObj.kind==='friend'){
+   tipHTML='<div class="orb-tip"><div class="tm"><b>'+esc(d.username)+'</b><small>'+(d.online?(en?'Online':'Aktif'):(en?'Friend':'Rakan'))+'</small></div>'
+    +'<button class="orb-btn lime" data-f-open="'+esc(d.id)+'" type="button">'+(en?'Chat':'Mesej')+'</button></div>';
+  }else{
+   var actBtn='';
+   if(d.rel==='accepted')actBtn='<button class="orb-btn lime" data-f-open="'+esc(d.id)+'" type="button">'+(en?'Chat':'Mesej')+'</button>';
+   else if(d.rel==='pending_out')actBtn='<button class="orb-btn" disabled type="button">'+(en?'Sent':'Dihantar')+'</button>';
+   else if(d.rel==='pending_in')actBtn='<button class="orb-btn lime" data-f-acc="'+esc(d.id)+'" type="button">'+(en?'Accept':'Terima')+'</button>';
+   else actBtn='<button class="orb-btn" data-f-add="'+esc(d.id)+'" type="button">'+(en?'+ Add':'+ Tambah')+'</button>';
+   tipHTML='<div class="orb-tip"><div class="tm"><b>'+esc(d.username)+'</b><small>'+esc(relAgo(d.created_at))+'</small></div>'
+    +'<button class="orb-btn '+(d.waved?'soft':'lime')+'" data-f-wave="'+esc(d.id)+'" type="button">'+(d.waved?(en?'Waved':'Disapa'):(en?'Wave':'Sapa'))+'</button>'
+    +actBtn+'</div>';
+  }
+ }
+
+ stage.innerHTML=
+  '<div class="orb-meta">'
+   +'<div class="orb-pill"><i></i>'+liveTxt+'</div>'
+   +'<button class="orb-findbtn" id="orbFindBtn" type="button">'
+    +'<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><line x1="20" y1="20" x2="16.65" y2="16.65"/></svg>'
+    +(en?'Find':'Cari')
+   +'</button>'
+  +'</div>'
+  +'<div class="orb-ring r1"></div><div class="orb-ring r2"></div>'
+  +'<div class="orb-core">'+orbStarSVG()+'</div>'
+  +innerNodes.map(function(f,i){
+   var isSel=selObj&&selObj.kind==='friend'&&selObj.data.id===f.id;
+   return '<div class="orb-node'+(isSel?' sel':'')+'" style="left:'+inPos[i].x+'%;top:'+inPos[i].y+'%" data-orb-f="'+esc(f.id)+'">'
+    +orbAvHTML(f.username,f.id,f.online,f.rank)+'<span>'+esc(firstWord(f.username))+'</span></div>';
+  }).join('')
+  +outerNodes.map(function(a,i){
+   var isSel=selObj&&selObj.kind==='new'&&selObj.data.id===a.id;
+   return '<div class="orb-node is-new'+(isSel?' sel':'')+'" style="left:'+outPos[i].x+'%;top:'+outPos[i].y+'%" data-orb-n="'+esc(a.id)+'">'
+    +orbAvHTML(a.username,a.id,false,a.rank)+'<span>NEW · '+esc(firstWord(a.username))+'</span></div>';
+  }).join('')
+  +tipHTML
+  +'<button class="orb-minipill" id="orbMini" type="button" aria-label="'+(en?'Expand orbit':'Besarkan orbit')+'">'
+   +'<span class="mc">'+orbStarSVG()+'</span>'
+   +'<span><b>'+FR.total+'</b> '+(en?'online':'online')+'</span>'
+   +'<span class="chev">⌄</span>'
+  +'</button>';
+
+ /* Tabs */
+ var reqCnt=FR.requests.length;
+ /* Grip drag handle (sekali je — guard supaya re-render tak duplicate) */
+ if(!$('orbGrip')){
+  var grip=document.createElement('div');
+  grip.className='orb-grip';grip.id='orbGrip';
+  grip.innerHTML='<i></i><span class="glab">'+(en?'Friends':'Rakan')+'</span>';
+  tabs.parentElement.insertBefore(grip,tabs);
+ }
+
+ tabs.innerHTML=
+  '<button class="'+(FR.tab==='chats'?'on':'')+'" data-ftab="chats" type="button">'+(en?'Private Chats':'Chat Peribadi')+(FR.friends.length?' ('+FR.friends.length+')':'')+'</button>'
+  +'<button class="'+(FR.tab==='req'?'on':'')+'" data-ftab="req" type="button">'+(en?'Requests':'Permintaan')+(reqCnt?'<span class="cnt">'+reqCnt+'</span>':'')+'</button>'
+  +'<button class="'+(FR.tab==='new'?'on':'')+'" data-ftab="new" type="button">'+(en?'New Traders':'Ahli Baru')+' ('+FR.arrivals.length+')</button>';
+
+ /* Body */
+ if(FR.tab==='chats'){
+  if(!FR.loaded){
+   body.innerHTML='<div class="empty">'+(en?'Loading your orbit...':'Memuatkan orbit rakan...')+'</div>';
+  }else if(!FR.friends.length){
+   body.innerHTML='<div class="empty">'+(en?'No private chats yet.<br>Tap any star in the Orbit above or tap <b>Find</b> to connect with traders.':'Belum ada chat peribadi.<br>Tap mana-mana ahli di Orbit atas atau tekan <b>Cari</b> untuk tambah rakan.')+'</div>';
+  }else{
+   body.innerHTML='<div class="f-list">'+FR.friends.map(function(f){
+    var lastTxt=f.last_msg?(f.last_from_me?(en?'You: ':'Anda: ')+f.last_msg:f.last_msg):(en?'Friends — tap to start chatting':'Rakan — tap untuk mula berbual');
+    return '<div class="f-row'+(f.unread?' unread':'')+'" data-f-open="'+esc(f.id)+'">'
+     +orbAvHTML(f.username,f.id,f.online,f.rank)
+     +'<div class="f-mid"><div class="f-r1"><b>'+esc(f.username)+'</b><time>'+esc(relAgo(f.last_at))+'</time></div>'
+     +'<div class="f-r2"><p>'+esc(lastTxt)+'</p>'+(f.unread?'<span class="f-udot">'+f.unread+'</span>':'')+'</div></div></div>';
+   }).join('')+'</div>';
+  }
+ }else if(FR.tab==='req'){
+  if(!FR.requests.length){
+   body.innerHTML='<div class="empty">'+(en?'No pending friend requests right now.':'Tiada permintaan rakan buat masa ini.')+'</div>';
+  }else{
+   body.innerHTML='<div class="f-list">'+FR.requests.map(function(r){
+    return '<div class="f-row" style="cursor:default">'+orbAvHTML(r.username,r.id,false,r.rank)
+     +'<div class="f-mid"><div class="f-r1"><b>'+esc(r.username)+'</b><time>'+esc(relAgo(r.created_at))+'</time></div>'
+     +'<div class="f-r2"><p>'+(en?'Wants to chat privately with you':'Ingin berhubung secara peribadi')+'</p></div></div>'
+     +'<div class="f-act"><button class="orb-btn lime" data-f-acc="'+esc(r.id)+'" type="button">'+(en?'Accept':'Terima')+'</button>'
+     +'<button class="f-x" data-f-dec="'+esc(r.id)+'" type="button" aria-label="Decline"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div></div>';
+   }).join('')+'</div>';
+  }
+ }else{
+  if(!FR.arrivals.length){
+   body.innerHTML='<div class="empty">'+(en?'No recent arrivals yet.':'Tiada ahli baru buat masa ini.')+'</div>';
+  }else{
+   body.innerHTML='<div class="f-list">'+FR.arrivals.map(function(a){
+    var btn='';
+    if(a.rel==='accepted')btn='<button class="orb-btn lime" data-f-open="'+esc(a.id)+'" type="button">'+(en?'Chat':'Mesej')+'</button>';
+    else if(a.rel==='pending_out')btn='<button class="orb-btn" disabled type="button">'+(en?'Sent':'Dihantar')+'</button>';
+    else if(a.rel==='pending_in')btn='<button class="orb-btn lime" data-f-acc="'+esc(a.id)+'" type="button">'+(en?'Accept':'Terima')+'</button>';
+    else btn='<button class="orb-btn" data-f-add="'+esc(a.id)+'" type="button">'+(en?'+ Add':'+ Tambah')+'</button>';
+    var waveTxt=(a.waved?(en?'Waved':'Disapa'):(en?'Wave':'Sapa'))+(a.waves>0?' · '+a.waves:'');
+    return '<div class="f-row" style="cursor:default">'+orbAvHTML(a.username,a.id,false,a.rank)
+     +'<div class="f-mid"><div class="f-r1"><b>'+esc(a.username)+'</b><time>'+esc(relAgo(a.created_at))+'</time></div>'
+     +'<div class="f-r2"><p>'+(en?'Joined Trader Watch':'Sertai Trader Watch')+'</p></div></div>'
+     +'<div class="f-act"><button class="orb-btn '+(a.waved?'soft':'lime')+'" data-f-wave="'+esc(a.id)+'" type="button">'+esc(waveTxt)+'</button>'+btn+'</div></div>';
+   }).join('')+'</div>';
+  }
+ }
+}
+
+function loadFriends(silent){
+ apiFetch('/api/chat/friends/overview').then(function(r){
+  if(!r.ok||!r.data)return;
+  var d=r.data,prevTop=FR.lastTopArrival;
+  FR.loaded=true;
+  FR.today=d.today_joined||0;
+  FR.total=d.total_members||0;
+  FR.online=d.online_count||0;
+  FR.unread=d.unread_total||0;
+  var udm=d.unread_dm||0;
+  if(FR.prevUnreadDm!==null&&udm>FR.prevUnreadDm&&!FR.dmFriend){
+   playChatSfx('recv');hap(10);
+  }
+  FR.prevUnreadDm=udm;
+  FR.friends=Array.isArray(d.friends)?d.friends:[];
+  FR.requests=Array.isArray(d.requests)?d.requests:[];
+  FR.arrivals=Array.isArray(d.arrivals)?d.arrivals:[];
+  if(FR.arrivals.length){
+   var topId=FR.arrivals[0].id;
+   if(prevTop&&prevTop!==topId&&current==='friends'){
+    var st=$('orbStage');if(st){st.classList.add('flash');setTimeout(function(){st.classList.remove('flash')},900)}
+    toast(FR.arrivals[0].username+(lang==='en'?' just joined Trader Watch':' baru sertai Trader Watch'));
+   }
+   FR.lastTopArrival=topId;
+  }
+  drawNav();
+  if(current==='friends')renderFriends();
+  if(FR.pendingDm){
+   var pid=FR.pendingDm;FR.pendingDm=null;
+   if(FR.friends.some(function(x){return x.id===pid}))openDM(pid);
+  }
+ }).catch(function(){if(!silent&&current==='friends')renderFriends()});
+}
+
+function openDM(fid){
+ var f=FR.friends.filter(function(x){return x.id===fid})[0]||{id:fid,username:'Trader',online:false,rank:null};
+ FR.dmFriend=f;FR.dmMsgs=[];FR.dmInit=false;FR.dmLastId=null;setDmReply(null);
+ $('dmAv').textContent=orbIni(f.username);
+ $('dmAv').style.background=orbBg(f.id);
+ $('dmName').textContent=f.username;
+ $('dmSub').className=f.online?'on':'';
+ $('dmSub').innerHTML=f.online?'<i></i>'+(lang==='en'?'Online now':'Aktif sekarang'):(lang==='en'?'Private friend':'Rakan peribadi');
+ $('dmInp').setAttribute('placeholder',lang==='en'?'Message privately...':'Tulis mesej peribadi...');
+ $('dmMsgs').innerHTML='<div class="dm-day">'+(lang==='en'?'Loading private chat...':'Memuatkan chat peribadi...')+'</div>';
+ $('dmSheet').classList.add('open');
+ loadDM(true);
+ clearInterval(FR.dmPoll);
+ FR.dmPoll=setInterval(function(){if(FR.dmFriend&&(!document.visibilityState||document.visibilityState==='visible'))loadDM(false)},4000);
+}
+function closeDM(){
+ $('dmSheet').classList.remove('open');
+ clearInterval(FR.dmPoll);FR.dmPoll=null;FR.dmFriend=null;FR.dmInit=false;FR.dmLastId=null;
+ if(document.activeElement===$('dmInp'))$('dmInp').blur();
+ loadFriends(true);
+}
+var DM_CACHE={};   /* fid -> {msgs, at}: buka semula DM = instan, refresh senyap */
+function loadDM(scrollEnd){
+ if(!FR.dmFriend)return;
+ var fid=FR.dmFriend.id;
+ /* Papar cache serta-merta (jika ada) supaya tiada "Loading..." bila buka
+    semula; fetch di bawah tetap jalan untuk data terkini. */
+ var c=DM_CACHE[fid];
+ if(c&&c.msgs&&c.msgs.length&&!FR.dmInit){
+  FR.dmMsgs=c.msgs;FR.dmInit=true;
+  var mx=0;c.msgs.forEach(function(x){var v=Number(x.id)||0;if(v>mx)mx=v});
+  FR.dmLastId=mx;
+  drawDMMsgs(false);
+ }
+ apiFetch('/api/chat/dm?with='+encodeURIComponent(fid)+'&limit=60').then(function(r){
+  if(!FR.dmFriend||FR.dmFriend.id!==fid)return;
+  if(!r.ok){
+   if(r.status===403){toast(lang==='en'?'Private chat is for friends only':'Chat peribadi hanya untuk rakan');closeDM()}
+   return;
+  }
+  if(r.data&&r.data.friend){
+   var fr=r.data.friend;FR.dmFriend=fr;
+   $('dmName').textContent=fr.username;
+   $('dmSub').className=fr.online?'on':'';
+   $('dmSub').innerHTML=fr.online?'<i></i>'+(lang==='en'?'Online now':'Aktif sekarang'):(lang==='en'?'Private friend':'Rakan peribadi');
+  }
+  var next=(r.data&&Array.isArray(r.data.messages))?r.data.messages:[];
+  var prevLast=FR.dmLastId;
+  var maxId=next.reduce(function(mx,m){return Math.max(mx,Number(m.id)||0)},0);
+  if(FR.dmInit&&next.some(function(m){return !m.me&&Number(m.id)>Number(prevLast||0)})){
+   playChatSfx('recv');hap(10);
+  }
+  FR.dmInit=true;
+  if(maxId>0)FR.dmLastId=maxId;
+  FR.dmMsgs=next;
+  DM_CACHE[fid]={msgs:next.slice(0,60),at:Date.now()};
+  drawDMMsgs(scrollEnd||(maxId&&maxId!==Number(prevLast||0)));
+  var ff=FR.friends.filter(function(x){return x.id===fid})[0];
+  if(ff&&ff.unread){ff.unread=0;loadFriends(true)}
+ }).catch(function(){});
+}
+function drawDMMsgs(scrollEnd){
+ var box=$('dmMsgs');if(!box)return;
+ var en=(lang==='en');
+ if(!FR.dmMsgs.length){
+  box.innerHTML='<div class="dm-day">'+(en?'Private chat between friends · Say hi!':'Chat peribadi antara rakan · Ucapkan hai!')+'</div>'
+   +'<div class="dm-tmp">'+(en?'⏳ Temporary chat — messages are kept for 24 hours only, then auto-deleted.':'⏳ Chat sementara - mesej disimpan 24 jam sahaja, selepas itu dipadam automatik.')+'</div>';
+  return;
+ }
+ var pin=FR.dmMsgs.filter(function(x){return x.pinned&&!x.deleted})[0];
+ var html='<div class="dm-day">'+(en?'Private friends chat · kept 24 hours':'Chat peribadi rakan · disimpan 24 jam')+'</div>';
+ if(pin)html+='<div class="dm-pinbar" data-dm-unpin="'+esc(String(pin.id))+'" role="button" tabindex="0">'
+  +'<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 17v5"/><path d="M9 10.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24V16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V6h1a2 2 0 0 0 0-4H8a2 2 0 0 0 0 4h1z"/></svg>'
+  +'<span>'+esc((pin.kind==='signal'&&pin.payload)?(pin.payload.pair+' '+(pin.payload.side||'')):(pin.body||(en?'Message':'Mesej')))+'</span>'
+  +'<button class="unpin" type="button">'+(en?'Unpin':'Buka pin')+'</button></div>';
+ html+=FR.dmMsgs.map(function(m){
+  var ref='';
+  if(m.reply){
+   var who=m.reply.me?(en?'You':'Anda'):(dmFriendName()||'');
+   var rtx=m.reply.body||(m.reply.kind==='signal'?(en?'Signal setup':'Setup signal'):'');
+   ref='<div class="dm-replyref" data-dm-jump="'+esc(String(m.reply.id))+'"><b>'+esc(who)+'</b><span>'+esc(rtx)+'</span></div>';
+  }
+  if(m.deleted){
+   return '<div class="dm-bbl'+(m.me?' me':'')+' del" data-mid="'+esc(String(m.id))+'">'
+    +(en?(m.mine_deleted?'You deleted this message':'Message deleted'):(m.mine_deleted?'Anda padam mesej ini':'Mesej dipadam'))
+    +'<time>'+esc(dmTime(m.created_at))+'</time></div>';
+  }
+  if(m.kind==='signal'&&m.payload){
+   var p=m.payload,dec=pdec(p.pair),isSell=p.side==='SELL';
+   return '<div class="dm-setup'+(m.me?' me':'')+(m.pinned?' pinned-b':'')+'" data-mid="'+esc(String(m.id))+'">'+ref
+    +'<div class="st-top"><span class="st-pair">'+esc(p.pair)+' <span class="st-side'+(isSell?' sell':'')+'">'+esc(p.side)+'</span></span>'
+    +'<span style="font-size:10px;color:var(--muted)">'+esc(p.tf||'')+' · '+esc(dmTime(m.created_at))+'</span></div>'
+    +'<div class="st-grid">'
+     +'<div class="st-cell"><small>Entry</small><b>'+Number(p.entry).toFixed(dec)+'</b></div>'
+     +'<div class="st-cell"><small>SL</small><b style="color:var(--red)">'+Number(p.sl).toFixed(dec)+'</b></div>'
+     +'<div class="st-cell"><small>TP</small><b style="color:var(--lime)">'+Number(p.tp).toFixed(dec)+'</b></div>'
+    +'</div>'
+    +'<button class="take2" data-dm-take="'+esc(String(m.id))+'" type="button">'+(en?'Take trade':'Ambil trade')+'</button></div>';
+  }
+  return '<div class="dm-bbl'+(m.me?' me':'')+(m.pinned?' pinned-b':'')+'" data-mid="'+esc(String(m.id))+'">'+ref+esc(m.body)+'<time>'+esc(dmTime(m.created_at))+'</time></div>';
+ }).join('');
+ box.innerHTML=html;
+ if(scrollEnd)box.scrollTop=box.scrollHeight;
+}
+function dmFriendName(){return FR.dmFriend?FR.dmFriend.username:''}
+/* ---------- reply / pin / delete ---------- */
+var DM_REPLY=null;   /* {id, body, me} mesej yang dibalas */
+function setDmReply(m){
+ DM_REPLY=m;
+ var bar=$('dmReplyBar');
+ if(!m){bar.classList.add('hidden');bar.innerHTML='';return}
+ var en=(lang==='en');
+ bar.innerHTML='<div class="dm-replyref" style="flex:1"><b>'+(m.me?(en?'You':'Anda'):'')+'</b><span>'+esc(m.body||(en?'Signal setup':'Setup signal'))+'</span></div>'
+  +'<button class="ibtn" id="dmReplyX" type="button" aria-label="Cancel reply" style="width:28px;height:28px">✕</button>';
+ bar.classList.remove('hidden');
+ $('dmReplyX').onclick=function(){setDmReply(null)};
+ $('dmInp').focus();
+}
+function findDmMsg(id){return FR.dmMsgs.filter(function(x){return String(x.id)===String(id)})[0]}
+function openDmActions(id, el){
+ var m=findDmMsg(id);if(!m)return;
+ var en=(lang==='en');
+ var wrap=document.createElement('div');wrap.className='dm-actwrap';
+ var opts='';
+ if(!m.deleted)opts+='<button data-a="reply" type="button"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 17 4 12 9 7"/><path d="M20 18v-2a4 4 0 0 0-4-4H4"/></svg>'+(en?'Reply':'Balas')+'</button>'
+  +'<button data-a="pin" type="button" class="'+(m.pinned?'on':'')+'"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 17v5"/><path d="M9 10.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24V16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V6h1a2 2 0 0 0 0-4H8a2 2 0 0 0 0 4h1z"/></svg>'+(m.pinned?(en?'Unpin':'Buka pin'):(en?'Pin':'Pin'))+'</button>';
+ if(m.me&&!m.deleted)opts+='<button data-a="del" type="button" class="red"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>'+(en?'Delete':'Padam')+'</button>';
+ wrap.innerHTML='<div class="dm-actmenu">'+opts+'</div>';
+ var sheet=$('dmSheet');sheet.appendChild(wrap);
+ var close=function(){if(wrap.parentNode)wrap.parentNode.removeChild(wrap);document.removeEventListener('pointerdown',onDoc,true)};
+ var onDoc=function(e){if(!wrap.contains(e.target))close()};
+ setTimeout(function(){document.addEventListener('pointerdown',onDoc,true)},10);
+ wrap.addEventListener('click',function(e){
+  var b=e.target.closest('button');if(!b)return;
+  var a=b.dataset.a;
+  if(a==='reply'){setDmReply({id:m.id,body:m.body,me:m.me})}
+  else if(a==='pin'){
+   apiFetch('/api/chat/dm/pin',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id:m.id,pinned:!m.pinned})}).then(function(r){
+    if(r.ok){m.pinned=!m.pinned;drawDMMsgs(false);hap(6);playChatSfx('sent')}
+    else toast(r.status===403?(en?'Not your chat':'Bukan chat anda'):t('sendErr'));
+   }).catch(function(){toast(t('sendErr'))});
+  }
+  else if(a==='del'){
+   apiFetch('/api/chat/dm/delete',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id:m.id})}).then(function(r){
+    if(r.ok){m.deleted=true;m.mine_deleted=true;m.body='';m.payload=null;drawDMMsgs(false);hap(10)}
+    else toast(r.status===403?(en?'Only your own messages':'Mesej anda sahaja'):t('sendErr'));
+   }).catch(function(){toast(t('sendErr'))});
+  }
+  close();
+ });
+}
+/* long-press 450ms pada bubble; swipe kanan pada bubble = reply terus */
+(function(){
+ var pressT=null,pressEl=null,moved=false,startX=0,curX=0,baseY=0,firedSwipe=false;
+ function target(e){
+  var b=e.target.closest?e.target.closest('.dm-bbl,.dm-setup'):null;
+  if(!b||b.classList.contains('del'))return null;
+  if(e.target.closest('.take2,.dm-replyref,.dm-pinbar'))return null;
+  return b;
+ }
+ var box=$('dmMsgs');
+ box.addEventListener('pointerdown',function(e){
+  var b=target(e);if(!b)return;
+  pressEl=b;moved=false;firedSwipe=false;startX=e.clientX;curX=e.clientX;baseY=e.clientY;
+  b.classList.add('swiping');
+  pressT=setTimeout(function(){
+   pressT=null;
+   if(!moved){openDmActions(b.dataset.mid,b);pressEl=null}
+  },450);
+ },{passive:true});
+ box.addEventListener('pointermove',function(e){
+  if(!pressEl)return;
+  var dx=e.clientX-startX,dy=Math.abs(e.clientY-baseY);
+  if(!firedSwipe&&dy>14)moved=true;
+  if(dy>14&&!firedSwipe){pressEl.style.transform='';pressEl.classList.remove('swiping');return}
+  /* swipe kanan > 56px = reply terus (macam WhatsApp) */
+  if(dx>56&&!firedSwipe){
+   firedSwipe=true;moved=true;
+   clearTimeout(pressT);pressT=null;
+   var m=findDmMsg(pressEl.dataset.mid);
+   pressEl.style.transform='';
+   pressEl.classList.remove('swiping');
+   pressEl=null;
+   if(m){hap(6);setDmReply({id:m.id,body:m.body,me:m.me})}
+   return;
+  }
+  if(dx>0&&dx<=56&&!firedSwipe){pressEl.style.transform='translateX('+dx+'px)';return}
+ },{passive:true});
+ var end=function(){
+  clearTimeout(pressT);pressT=null;
+  if(pressEl){pressEl.style.transform='';pressEl.classList.remove('swiping');pressEl=null}
+ };
+ box.addEventListener('pointerup',end);box.addEventListener('pointercancel',end);box.addEventListener('pointerleave',end);
+})();
+function sendDM(cardObj){
+ if(FR.dmBusy||!FR.dmFriend)return;
+ var inp=$('dmInp'),v=cardObj?'':inp.value.trim();
+ if(!v&&!cardObj)return;
+ if(v.length>500){toast(t('longMsg'));return}
+ FR.dmBusy=true;$('dmSendBtn').disabled=true;
+ var body={to:FR.dmFriend.id};
+ if(v)body.text=v;
+ if(DM_REPLY&&!cardObj){body.reply_to=DM_REPLY.id;body.reply_body=DM_REPLY.body||''}
+ if(cardObj)body.card=cardObj;
+ apiFetch('/api/chat/dm',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)}).then(function(r){
+  FR.dmBusy=false;$('dmSendBtn').disabled=false;
+  if(!r.ok){
+   toast(r.status===429?t('slow'):r.status===403?(lang==='en'?'Friends only':'Hanya untuk rakan'):t('sendErr'));
+   return;
+  }
+  if(!cardObj)inp.value='';
+  if(r.data&&r.data.message){
+   FR.dmMsgs.push(r.data.message);
+   if(r.data.message.id!=null)FR.dmLastId=Math.max(Number(FR.dmLastId||0),Number(r.data.message.id)||0);
+   drawDMMsgs(true);
+  }
+  setDmReply(null);
+  playChatSfx('sent');
+  hap(8);
+ }).catch(function(){FR.dmBusy=false;$('dmSendBtn').disabled=false;toast(t('sendErr'))});
+}
+function shareSetupInDM(){
+ if(!FR.dmFriend)return;
+ var pick=null;
+ /* Prefer latest analyzed pair if it has entry/sl/tp, else newest PAIR_AI BUY/SELL */
+ if(typeof PAIR_AI==='object'&&PAIR_AI){
+  Object.keys(PAIR_AI).forEach(function(k){
+   var a=PAIR_AI[k];
+   if(!pick&&a&&(a.side==='BUY'||a.side==='SELL')&&a.entry!=null&&a.sl!=null&&a.tp!=null){
+    pick={pair:k,side:a.side,tf:a.tf||'M15',entry:a.entry,sl:a.sl,tp:a.tp,conf:Math.round((a.conf||0)*100)};
+   }
+  });
+ }
+ if(!pick){
+  toast(lang==='en'?'Analyze a pair first to share a setup':'Analisis satu pair dahulu untuk kongsi setup');
+  return;
+ }
+ sendDM(pick);
+ toast((lang==='en'?'Shared setup: ':'Setup dikongsi: ')+pick.pair);
+}
+
+/* ===== Friends snap-stage drag engine =====
+   3 states: balanced (default) / list (orbit jadi pill) / orbit (orbit besar, list sorok bawah).
+   Drag pada grip atau stage — ikut jari, lepas snap ikut velocity. */
+var FST={cur:'balanced',y:0,y0:0,t0:0,drag:false,moved:false};
+function fstSet(st){FST.cur=st;var v=$('view-friends');if(v){v.classList.remove('st-list','st-orbit','dragging');if(st==='list')v.classList.add('st-list');if(st==='orbit')v.classList.add('st-orbit')}var g=$('orbGrip');if(g){var lab=g.querySelector('.glab');if(lab)lab.textContent=st==='list'?(lang==='en'?'Chats':'Chat'):st==='orbit'?(lang==='en'?'Starling':'Starling'):(lang==='en'?'Friends':'Rakan')}}
+function fstStageH(){var v=$('view-friends');var s=$('orbStage');if(!v||!s)return 0;return s.getBoundingClientRect().height}
+function fstSnap(dy,dt){
+ /* dy>0 = tarik ke bawah (ke arah orbit), dy<0 = ke atas (ke arah list) */
+ var v=FST.y0!==0?Math.abs(dy)/Math.max(1,dt):0; /* px/ms */
+ var dir=dy>0?1:-1,fast=v>0.5;
+ if(FST.cur==='balanced'){if(dir>0&&(fast||dy>110))return 'orbit';if(dir<0&&(fast||dy>90))return 'list';return 'balanced'}
+ if(FST.cur==='list'){if(dir>0&&(fast||dy>90))return 'balanced';return 'list'}
+ if(FST.cur==='orbit'){if(dir<0&&(fast||dy>110))return 'balanced';return 'orbit'}
+ return FST.cur;
+}
+(function(){
+ var v=$('view-friends');if(!v)return;
+ function down(e){
+  var grip=e.target.closest?e.target.closest('.orb-grip'):null;
+  var pill=e.target.closest?e.target.closest('.orb-minipill'):null;
+  if(pill){fstSet('balanced');hap(6);return}
+  if(!grip)return;
+  /* dalam st-orbit, grip di atas sheet yang menutup bawah — drag naik = buka list */
+  FST.drag=true;FST.moved=false;FST.y0=e.touches?e.touches[0].clientY:e.clientY;
+  FST.t0=Date.now();FST.y=FST.y0;FST.dy=0;
+ }
+ function move(e){
+  if(!FST.drag)return;
+  var y=e.touches?e.touches[0].clientY:e.clientY;
+  FST.dy=y-FST.y0;FST.y=y;FST.vt=Date.now()-FST.t0;
+  if(Math.abs(FST.dy)>6)FST.moved=true;
+  /* drag-follow: stage height & sheet transform mengikut jari (live) */
+  if(FST.moved){
+   v.classList.add('dragging');
+   var s=$('orbStage'),sh=$('view-friends').querySelector('.orb-sheet');
+   var base=FST.cur==='list'?64:FST.cur==='orbit'?Math.min(window.innerHeight*0.62,480):262;
+   var nh=Math.max(40,Math.min(base+FST.dy,Math.min(window.innerHeight*0.62,480)));
+   if(s)s.style.height=nh+'px';
+   /* sheet ikut berlawan: ditarik ke bawah bila stage besar */
+   if(FST.cur==='orbit'){var t=Math.max(0,-FST.dy);if(sh)sh.style.transform='translateY('+t+'px)'}
+   else if(sh)sh.style.transform='';
+  }
+ }
+ function up(){
+  if(!FST.drag)return;
+  FST.drag=false;
+  v.classList.remove('dragging');
+  var s=$('orbStage'),sh=$('view-friends').querySelector('.orb-sheet');
+  if(s)s.style.height='';if(sh)sh.style.transform='';
+  if(FST.moved){var nx=fstSnap(FST.dy||0,FST.vt||300);if(nx!==FST.cur){hap(6);fstSet(nx)}}
+ }
+ /* minipill klik = balik balanced (ikut gestur 'tarik bawah') */
+ v.addEventListener('click',function(e){
+  var pill=e.target.closest?e.target.closest('.orb-minipill'):null;
+  if(pill&&!FST.moved){fstSet('balanced');hap(6)}
+ },true);
+ v.addEventListener('touchstart',down,{passive:true});
+ v.addEventListener('touchmove',move,{passive:true});
+ v.addEventListener('touchend',up);v.addEventListener('touchcancel',up);
+ v.addEventListener('mousedown',down);
+ document.addEventListener('mousemove',function(e){if(FST.drag)move(e)});
+ document.addEventListener('mouseup',up);
+})();
+
+/* Orbit + Find Traders event handlers */
+$('view-friends').addEventListener('click',function(e){
+ var el=e.target.closest?e.target.closest('button,.orb-node,.f-row'):null;if(!el)return;
+ if(el.id==='orbFindBtn'){openFindSheet();return}
+ if(el.dataset.orbF){
+  var fid=el.dataset.orbF;
+  if(FR.sel&&FR.sel.kind==='friend'&&FR.sel.id===fid){openDM(fid);return}
+  FR.sel={kind:'friend',id:fid};hap(5);renderFriends();return;
+ }
+ if(el.dataset.orbN){
+  FR.sel={kind:'new',id:el.dataset.orbN};hap(5);renderFriends();return;
+ }
+ if(el.dataset.ftab){FR.tab=el.dataset.ftab;hap(5);renderFriends();return}
+ if(el.dataset.fOpen){hap(6);openDM(el.dataset.fOpen);return}
+ if(el.dataset.fWave){
+  var wid=el.dataset.fWave;
+  apiFetch('/api/chat/friends/wave',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({user_id:wid})}).then(function(r){
+   if(r.ok){
+    var a=FR.arrivals.filter(function(x){return x.id===wid})[0];
+    if(a){if(!a.waved)a.waves=(a.waves||0)+1;a.waved=true}
+    hap(8);toast(lang==='en'?'Welcome wave sent!':'Sapaan dihantar!');renderFriends();
+   }
+  });return;
+ }
+ if(el.dataset.fAdd){
+  var aid=el.dataset.fAdd;
+  apiFetch('/api/chat/friends/request',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({user_id:aid})}).then(function(r){
+   if(r.ok){
+    hap(8);
+    var st=r.data&&r.data.status;
+    toast(st==='accepted'?(lang==='en'?'You are now friends!':'Kini anda berdua rakan!'):(lang==='en'?'Friend request sent':'Permintaan rakan dihantar'));
+    loadFriends(true);
+   }
+  });return;
+ }
+ if(el.dataset.fAcc){
+  var cid=el.dataset.fAcc;
+  apiFetch('/api/chat/friends/respond',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({user_id:cid,action:'accept'})}).then(function(r){
+   if(r.ok){hap(10);toast(lang==='en'?'Friend request accepted!':'Permintaan diterima!');FR.tab='chats';loadFriends(true)}
+  });return;
+ }
+ if(el.dataset.fDec){
+  var did=el.dataset.fDec;
+  apiFetch('/api/chat/friends/respond',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({user_id:did,action:'decline'})}).then(function(r){
+   if(r.ok){hap(6);toast(lang==='en'?'Request declined':'Permintaan ditolak');loadFriends(true)}
+  });return;
+ }
+});
+
+$('dmBack').onclick=closeDM;
+$('dmSendBtn').addEventListener('mousedown',function(e){e.preventDefault()});
+$('dmSendBtn').onclick=function(){sendDM(null)};
+$('dmInp').addEventListener('keydown',function(e){if(e.key==='Enter')sendDM(null)});
+$('dmShareBtn').onclick=shareSetupInDM;
+$('dmRemoveBtn').onclick=function(){
+ if(!FR.dmFriend)return;
+ var nm=FR.dmFriend.username;
+ if(!confirm((lang==='en'?'Remove ':'Buang ')+nm+(lang==='en'?' from friends?':' dari senarai rakan?')))return;
+ apiFetch('/api/chat/friends/respond',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({user_id:FR.dmFriend.id,action:'remove'})}).then(function(r){
+  if(r.ok){toast(lang==='en'?'Friend removed':'Rakan dibuang');closeDM()}
+ });
+};
+$('dmMsgs').addEventListener('click',function(e){
+ var un=e.target.closest?e.target.closest('[data-dm-unpin]'):null;
+ if(un){
+  var id=un.dataset.dmUnpin||un.getAttribute('data-dm-unpin');
+  var m=findDmMsg(id);
+  if(m)apiFetch('/api/chat/dm/pin',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id:m.id,pinned:false})}).then(function(r){
+   if(r.ok){m.pinned=false;drawDMMsgs(false);hap(6)}
+  }).catch(function(){});
+  return;
+ }
+ var jp=e.target.closest?e.target.closest('[data-dm-jump]'):null;
+ if(jp){
+  var el=document.querySelector('.dm-bbl[data-mid="'+jp.getAttribute('data-dm-jump')+'"],.dm-setup[data-mid="'+jp.getAttribute('data-dm-jump')+'"]');
+  if(el){el.scrollIntoView({behavior:'smooth',block:'center'});el.classList.add('replying');setTimeout(function(){el.classList.remove('replying')},1200)}
+  return;
+ }
+ var b=e.target.closest?e.target.closest('.take2'):null;if(!b)return;
+ var mid=b.dataset.dmTake;
+ var m=FR.dmMsgs.filter(function(x){return String(x.id)===String(mid)})[0];
+ if(!m||!m.payload)return;
+ var p=m.payload,pair=PAIRS.filter(function(x){return x.s===p.pair})[0];
+ if(!pair)return;
+ var cl=pairClosed(pair);if(cl){toast(cl==='offline'?t('dataOffline'):t('mktClosed'));return}
+ cur=pair;closeDM();hap(10);
+ openRisk({dir:p.side,entry:+p.entry,sl:+p.sl,tp:+p.tp,conf:+p.conf||0,tf:p.tf,entry_type:'market',meta:null});
+});
+
+/* Find Traders Sheet */
+function openFindSheet(){
+ $('fFindTitle').textContent=lang==='en'?'Find traders':'Cari trader';
+ $('fFindInp').setAttribute('placeholder',lang==='en'?'Search username...':'Cari nama pengguna...');
+ $('fFindInp').value='';
+ $('fFindRes').innerHTML='<div class="empty">'+(lang==='en'?'Type a trader name to search':'Taip nama trader untuk mencari')+'</div>';
+ $('fFindBg').classList.add('open');
+ setTimeout(function(){$('fFindInp').focus()},120);
+}
+function closeFindSheet(){$('fFindBg').classList.remove('open');$('fFindInp').blur()}
+$('fFindClose').onclick=closeFindSheet;
+$('fFindBg').onclick=function(e){if(e.target===$('fFindBg'))closeFindSheet()};
+$('fFindInp').addEventListener('input',function(){
+ clearTimeout(FR.findTimer);
+ var q=this.value.trim();
+ if(!q){$('fFindRes').innerHTML='<div class="empty">'+(lang==='en'?'Type a trader name to search':'Taip nama trader untuk mencari')+'</div>';return}
+ FR.findTimer=setTimeout(function(){
+  apiFetch('/api/chat/friends/search?q='+encodeURIComponent(q)).then(function(r){
+   var list=(r.ok&&r.data&&Array.isArray(r.data.results))?r.data.results:[];
+   var en=(lang==='en');
+   if(!list.length){$('fFindRes').innerHTML='<div class="empty">'+(en?'No trader found':'Tiada trader dijumpai')+'</div>';return}
+   $('fFindRes').innerHTML='<div class="f-list">'+list.map(function(u){
+    var act='';
+    if(u.rel==='accepted')act='<button class="orb-btn lime" data-s-open="'+esc(u.id)+'" type="button">'+(en?'Chat':'Mesej')+'</button>';
+    else if(u.rel==='pending_out')act='<button class="orb-btn" disabled type="button">'+(en?'Sent':'Dihantar')+'</button>';
+    else if(u.rel==='pending_in')act='<button class="orb-btn lime" data-s-acc="'+esc(u.id)+'" type="button">'+(en?'Accept':'Terima')+'</button>';
+    else act='<button class="orb-btn lime" data-s-add="'+esc(u.id)+'" type="button">'+(en?'+ Add':'+ Tambah')+'</button>';
+    return '<div class="f-row" style="cursor:default">'+orbAvHTML(u.username,u.id,false,u.rank)
+     +'<div class="f-mid"><div class="f-r1"><b>'+esc(u.username)+'</b></div></div><div class="f-act">'+act+'</div></div>';
+   }).join('')+'</div>';
+  });
+ },220);
+});
+$('fFindRes').addEventListener('click',function(e){
+ var b=e.target.closest?e.target.closest('button'):null;if(!b)return;
+ if(b.dataset.sOpen){closeFindSheet();openDM(b.dataset.sOpen);return}
+ if(b.dataset.sAdd){
+  b.disabled=true;
+  apiFetch('/api/chat/friends/request',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({user_id:b.dataset.sAdd})}).then(function(r){
+   if(r.ok){b.textContent=lang==='en'?'Sent':'Dihantar';toast(lang==='en'?'Friend request sent':'Permintaan rakan dihantar');loadFriends(true)}
+   else b.disabled=false;
+  });return;
+ }
+ if(b.dataset.sAcc){
+  b.disabled=true;
+  apiFetch('/api/chat/friends/respond',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({user_id:b.dataset.sAcc,action:'accept'})}).then(function(r){
+   if(r.ok){closeFindSheet();toast(lang==='en'?'You are now friends!':'Kini anda rakan!');loadFriends(true)}
+   else b.disabled=false;
+  });return;
+ }
+});
+
+/* Background live polling for unread badge & new arrivals */
+setInterval(function(){
+ if(document.visibilityState&&document.visibilityState!=='visible')return;
+ if(current==='friends')loadFriends(true);
+},20000);
+setInterval(function(){
+ if(document.visibilityState&&document.visibilityState!=='visible')return;
+ if(current!=='friends')loadFriends(true);
+},60000);
+setTimeout(function(){loadFriends(true)},1500);
 
 /* ---------------- liga (paper league — API sebenar) ---------------- */
 var LG={me:null,trades:[],board:[],season:null,state:'idle',at:0};
@@ -2361,11 +4016,15 @@ function drawYou(){
  var me=LG.me,el=$('youcard');
  if(LG.state==='error'){el.innerHTML=lgErrorHtml();return}
  if(!me){el.innerHTML='<div class="ylab">'+esc(t('youLab'))+'</div><div class="empty">'+esc(t('loading'))+'</div>';return}
- var rank=me.rank!=null?+me.rank:null,nr=+me.net_r||0;
- var hasActivity=((+me.trades_closed||0)>0||(+me.trades_open||0)>0);
+ /* Rank mesti datang dari array yang SAMA yang dipaparkan dalam senarai.
+    Sebelum ini kad guna me.rank (server susun ikut net_r) sementara senarai
+    susun ikut win_rate — jadi #1 dalam senarai boleh jadi #4 dalam kad. */
  var sorted=sortBoard(LG.board,metric),idx=-1;
  sorted.forEach(function(x,i){if(x.is_me)idx=i});
- var above=(rank!=null&&idx>0)?sorted[idx-1]:null,prog;
+ var rank=idx>=0?idx+1:(me.rank!=null?+me.rank:null);
+ var nr=+me.net_r||0;
+ var hasActivity=((+me.trades_closed||0)>0||(+me.trades_open||0)>0);
+ var above=(idx>0)?sorted[idx-1]:null,prog;
  if(above){
   var awr=+above.win_rate||0,mwr=+me.win_rate||0;
   var diff=Math.max(0,awr-mwr);
@@ -2379,7 +4038,7 @@ function drawYou(){
  el.innerHTML='<div class="ylab">'+esc(t('youLab'))+'</div><div class="row"><div class="bigrank">'+(rank!=null?'#'+rank:'—')+'<small>'+esc(t('rankLab')).toUpperCase()+'</small></div><div class="youstats">'+
   '<div class="ystat"><b>'+wrTxt(me.win_rate)+'</b><small>'+esc(t('winRate'))+'</small></div>'+
   '<div class="ystat"><b>'+money(me.balance)+'</b><small>'+esc(t('balanceLab'))+'</small></div>'+
-  '<div class="ystat"><b>'+consScore(me).toFixed(0)+'</b><small>'+esc(t('mCons'))+'</small></div>'+
+  '<div class="ystat"><b>'+consScore({win_rate:me.win_rate,trades:(+me.trades_closed||0)}).toFixed(0)+'</b><small>'+esc(t('mCons'))+'</small></div>'+
   '</div></div>'+prog;
 }
 function drawLb(){
@@ -2565,7 +4224,7 @@ if(typeof window!=='undefined'){window.__aiLearn=loadAiLearn;window.__drawAiLear
 if(typeof window!=='undefined'){window.__showAccount=showAccount;}
 if(typeof window!=='undefined'){window.__show=show;window.__mapVerdict=mapVerdict;window.__setChip=setChip;window.__S=S;}
 if(typeof window!=='undefined'){window.__setCur=function(sym){var p=PAIRS.filter(function(x){return x.s===sym})[0];if(p){cur=p;S.m=null;try{openSheet(sym)}catch(e){}}}};
-if(typeof window!=='undefined'){window.__loadProfile=loadProfile;window.__showView=showView;}
+if(typeof window!=='undefined'){window.__loadProfile=loadProfile;window.__showView=showView;window.__openDM=openDM;window.__sendDM=sendDM;window.__setDmReply=setDmReply;window.__openDmActions=openDmActions;window.__FR=function(){return FR};window.__drawDMMsgs=drawDMMsgs;}
 if(typeof window!=='undefined'){window.__getME=function(){return ME};window.__getLG=function(){return LG.me};}
 
 function renderLiga(){
@@ -2654,7 +4313,7 @@ function openRisk(a){
  riskBal=(LG.me&&isFinite(+LG.me.balance))?+LG.me.balance:null;
  $('rErr').innerHTML='';
  $('rInstant').textContent=t('instantNote');
- $('rPair').innerHTML='<b>'+esc(pairName(riskAna.pair))+'</b><span class="side '+esc(riskAna.side.toLowerCase())+'">'+esc(riskAna.side)+'</span><span class="rsub">'+esc(tf)+' · '+riskAna.conf+'%</span>';
+ $('rPair').innerHTML='<b>'+esc(pairName(riskAna.pair))+'</b><span class="side '+esc(riskAna.side.toLowerCase())+'">'+esc(riskAna.side)+'</span><span class="rsub">'+esc(riskAna.tf)+' · '+riskAna.conf+'%</span>';
  $('rLevels').innerHTML='<div class="e"><small>'+esc(t('entry'))+'</small><b>'+tfx(riskAna.pair,riskAna.entry)+'</b></div><div class="t"><small>'+esc(t('tp'))+'</small><b>'+tfx(riskAna.pair,riskAna.tp)+'</b></div><div class="s"><small>'+esc(t('sl'))+'</small><b>'+tfx(riskAna.pair,riskAna.sl)+'</b></div>';
  drawRiskModes();drawRiskOpts();updateLot();
  $('mt5Chk').checked=true;drawMt5Opt();
@@ -3049,6 +4708,7 @@ function renderAll(){
  document.documentElement.lang=lang;
  $('greet').innerHTML=esc(t('greet'))+'<span>'+esc(t('trader'))+'</span>';
  $('greetSub').textContent=t('greetSub');$('hintTxt').textContent=t('hint');
+ if(typeof updateStarMood==='function')updateStarMood(false);
  $('footTxt').textContent='Educational only. Trading involves substantial risk.';
  $('q').setAttribute(PH,t('search'));$('q').setAttribute('aria-label',t('search'));
  $('comTitle').textContent=t('comTitle');$('comSub').textContent=t('comSub');
@@ -3071,11 +4731,12 @@ function renderAll(){
  if(TD.trade){drawTdHead();drawTdLive();drawTdLevels();drawTdMeta();drawTdProg()}
  var tb=$('takeBtn');if(tb)tb.textContent=t('takeTrade');
  renderStats();drawTabs();drawPairs(true);drawLangs();drawThemes();drawMenu();renderLiga();
+ if(current==='friends'&&typeof renderFriends==='function')renderFriends();
  try{drawWelcome()}catch(e){}
  if(current==='settings')pushStatus();
  }catch(e){if(window.console)console.error('renderAll partial fail:',e);drawNav()}
 }
-$('langBtn').onclick=function(){showView('settings')};
+if($('setBtn'))$('setBtn').onclick=function(){showView(current==='settings'?'analyst':'settings')};
 $('themeBtn').onclick=function(){setTheme(resolved()==='dark'?'light':'dark')};
 $('avatarBtn').onclick=function(){showView('profile')};
 
@@ -3446,6 +5107,7 @@ function maybeWelcome(opts){
  setTimeout(showWelcome,d);
 }
 try{window.addEventListener('resize',cineSize)}catch(e){}
+try{window.addEventListener('resize',function(){moveNavPill(false)})}catch(e){}
 /* Tap anywhere (kecuali sheet) untuk masuk */
 (function(){
  var wrap=$('cineWrap');
@@ -3494,14 +5156,19 @@ if('serviceWorker' in navigator){window.addEventListener('load',function(){
 
 /* ---------------- init ---------------- */
 applyTheme();renderAll();
-var iv=new URLSearchParams(location.search).get('view');
+var _sp=new URLSearchParams(location.search);
+var iv=_sp.get('view');
+var _dm=_sp.get('dm');
+if(_dm&&typeof FR!=='undefined'){FR.pendingDm=_dm;if(!iv)iv='friends'}
 if(!iv){
  var hv=(location.hash||'').replace(/^#\/?/,'').toLowerCase();
- var HMAP={liga:'liga',league:'liga',analyst:'analyst',community:'community',profile:'profile',settings:'settings'};
+ var HMAP={liga:'liga',league:'liga',analyst:'analyst',community:'community',friends:'friends',profile:'profile',settings:'settings'};
  iv=HMAP[hv]||null;
 }
 showView(VIEWS.indexOf(iv)>-1?iv:'analyst');
 splashStart();
+/* build marker: sahkan versi CSS yang telefon render (buang bila punca blur jumpa) */
+try{var bt=document.getElementById('buildTag');if(bt)bt.textContent='build v104-drag4 · '+(getComputedStyle(document.querySelector('.appbar')).backdropFilter==='none'?'appbar blur OFF':'appbar blur STILL ON');}catch(e){}
 })();
 
 </script>
