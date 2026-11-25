@@ -57,18 +57,42 @@
    * active LLM in the backend is immediate.
    * -------------------------------------------------------------------- */
   (function aiMaint() {
-    var el = null, last = null;
-    var CSS = "position:fixed;top:0;left:0;right:0;z-index:2147483647;" +
+    var el = null, last = null, shiftCSS = null;
+    /* Safe zone (2026-11-26): banner mula DI BAWAH status-bar/Dynamic Island.
+       Dulu top:0 — pada iPhone PWA teks banner tertimbus di belakang status bar
+       dan hanya jalur merahnya yang nampak. Pada telefon, .appbar/.dm-head
+       ditolak ke bawah sebanyak tinggi banner supaya header tak tertutup.
+       Desktop: env() = 0 dan peraturan tolakan hanya aktif <=520px. */
+    var CSS = "position:fixed;top:env(safe-area-inset-top,0px);left:0;right:0;z-index:2147483647;" +
       "background:#3a1418;color:#ffd9dc;border-bottom:1px solid #ff5d6c;" +
-      "padding:9px 14px;font:600 12px/1.45 system-ui,-apple-system,sans-serif;" +
+      "padding:9px max(14px,env(safe-area-inset-right,0px)) 9px max(14px,env(safe-area-inset-left,0px));" +
+      "font:600 12px/1.45 system-ui,-apple-system,sans-serif;" +
       "text-align:center;box-shadow:0 4px 18px #0008;cursor:pointer";
+    var SHIFT_CSS = "@media(max-width:520px){" +
+      "html.tw-ai-on .appbar{margin-top:calc(var(--tw-ai-h,0px) + env(safe-area-inset-top,0px))!important;padding-top:10px!important}" +
+      "html.tw-ai-on .dm-head{margin-top:calc(var(--tw-ai-h,0px) + env(safe-area-inset-top,0px))!important;padding-top:10px!important}" +
+      "html.tw-ai-on #sheet{max-height:calc(92% - var(--tw-ai-h,0px) - env(safe-area-inset-top,0px))}" +
+      "}";
+    function ensureShiftCSS() {
+      if (shiftCSS || !document.head) return;
+      shiftCSS = document.createElement("style");
+      shiftCSS.id = "tw-ai-maint-shift";
+      shiftCSS.textContent = SHIFT_CSS;
+      document.head.appendChild(shiftCSS);
+    }
+    function measure() {
+      if (!el) return;
+      document.documentElement.style.setProperty("--tw-ai-h", el.offsetHeight + "px");
+    }
+    function hide() {
+      if (el) { el.remove(); el = null; }
+      last = null;
+      document.documentElement.classList.remove("tw-ai-on");
+      document.documentElement.style.removeProperty("--tw-ai-h");
+    }
     function render(s) {
       var active = !!(s && s.active);
-      if (!active) {
-        if (el) { el.remove(); el = null; }
-        last = null;
-        return;
-      }
+      if (!active) { hide(); return; }
       var sig = JSON.stringify(s);
       if (sig === last) return;
       last = sig;
@@ -77,15 +101,20 @@
         el.id = "tw-ai-maint";
         el.setAttribute("role", "alert");
         el.style.cssText = CSS;
-        el.onclick = function () { el.remove(); el = null; last = null; };
+        el.onclick = hide;
+        ensureShiftCSS();
         (document.body || document.documentElement).appendChild(el);
+        document.documentElement.classList.add("tw-ai-on");
       }
       var when = s.checked_at ? new Date(s.checked_at).toLocaleTimeString() : "";
       el.innerHTML = "⚠ <b>AI SIGNAL ENGINE OFFLINE</b> — " +
         "semua model TraderWatch AI gagal. " +
         (when ? "Sejak " + when + ". " : "") +
         "Hubungi dev / tukar LLM aktif. <span style='opacity:.7'>(ketuk untuk tutup)</span>";
+      measure();
     }
+    window.addEventListener("resize", measure);
+    window.addEventListener("orientationchange", measure);
     function poll() {
       fetch("/data/ai-maintenance.json?t=" + Date.now(), { cache: "no-store" })
         .then(function (r) { return r.json(); })
