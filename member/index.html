@@ -62,7 +62,7 @@ html[data-theme="light"] .notch{background:#e5eae3}
 
 /* scroll area */
 .scroll{flex:1;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:none;padding-bottom:calc(74px + var(--sab))}
-.scroll.com{padding-bottom:calc(150px + var(--sab))}
+.scroll.com{padding-bottom:calc(186px + var(--sab))}
 .scroll::-webkit-scrollbar{display:none}
 .view{padding:16px;animation:fade .28s ease both}
 @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
@@ -221,7 +221,7 @@ html[data-theme="light"] .sigcard .take2,html[data-theme="light"] .msg .rtag,htm
 .rxp{padding:3px 7px;font-size:14px}
 .rxp:active{transform:scale(1.2)}
 @media (prefers-reduced-motion:reduce){.rxc.bump{animation:none}}
-.composer{position:absolute;left:12px;right:12px;bottom:calc(72px + var(--sab));display:flex;gap:8px;align-items:center;background:rgba(18,24,19,.88);backdrop-filter:saturate(180%) blur(22px);-webkit-backdrop-filter:saturate(180%) blur(22px);padding:5px 5px 5px 16px;border-radius:28px;border:1px solid rgba(255,255,255,.11);box-shadow:0 10px 28px rgba(0,0,0,.44),inset 0 1px 0 rgba(255,255,255,.08);z-index:28;transition:bottom .22s cubic-bezier(.22,1,.36,1),border-color .2s,box-shadow .22s}
+.composer{position:absolute;left:12px;right:12px;bottom:calc(104px + var(--sab));display:flex;gap:8px;align-items:center;background:rgba(18,24,19,.88);backdrop-filter:saturate(180%) blur(22px);-webkit-backdrop-filter:saturate(180%) blur(22px);padding:5px 5px 5px 16px;border-radius:28px;border:1px solid rgba(255,255,255,.11);box-shadow:0 10px 28px rgba(0,0,0,.44),inset 0 1px 0 rgba(255,255,255,.08);z-index:28;transition:bottom .22s cubic-bezier(.22,1,.36,1),border-color .2s,box-shadow .22s}
 html[data-theme="light"] .composer{background:rgba(255,255,255,.92);border-color:rgba(20,33,26,.12);box-shadow:0 8px 24px rgba(0,0,0,.10),inset 0 1px 0 rgba(255,255,255,.9)}
 .composer:focus-within{border-color:rgba(183,243,107,.55);box-shadow:0 12px 32px rgba(0,0,0,.52),0 0 0 3px rgba(183,243,107,.13),inset 0 1px 0 rgba(255,255,255,.12)}
 html[data-theme="light"] .composer:focus-within{border-color:rgba(104,166,34,.55);box-shadow:0 10px 26px rgba(0,0,0,.14),0 0 0 3px rgba(132,204,22,.16),inset 0 1px 0 rgba(255,255,255,.95)}
@@ -268,7 +268,7 @@ html.kb-pre .composer,html.kb-pre .dm-comp{transition:none !important;animation:
 #view-friends.st-list .orb-stage .orb-core{opacity:1;transform:translate(-50%,-50%) scale(.8)}
 #view-friends.st-list .orb-stage::before{opacity:.5}
 #view-friends.st-orbit .orb-stage{height:min(62vh,480px)}
-#view-friends.st-orbit .orb-sheet{position:absolute;left:0;right:0;bottom:0;transform:translateY(calc(100% - 54px));padding-top:6px;z-index:9;box-shadow:0 -18px 40px #000a}
+#view-friends.st-orbit .orb-sheet{position:absolute;left:0;right:0;bottom:0;transform:translateY(calc(100% - 92px));padding-top:6px;z-index:9;box-shadow:0 -18px 40px #000a}
 #view-friends.st-orbit .orb-sheet .orb-grip .glab::after{content:" ⌃"}
 #view-friends.st-orbit .orb-ring.r1{width:150px;height:150px}
 #view-friends.st-orbit .orb-ring.r2{width:260px;height:260px}
@@ -332,9 +332,15 @@ html[data-theme="light"] .orb-btn.soft{color:#4f7e16}
 .orb-btn:active{transform:scale(.93)}
 .orb-btn:disabled{opacity:.5}
 
-.orb-sheet{margin:0 -16px;padding:4px 16px 24px;border-radius:26px 26px 0 0;background:linear-gradient(180deg,var(--card) 0%,var(--bg) 100%);border-top:1px solid var(--line);min-height:360px;transition:transform .38s cubic-bezier(.22,1,.36,1);position:relative}
+.orb-sheet{margin:0 -16px;padding:4px 16px 24px;border-radius:26px 26px 0 0;background:linear-gradient(180deg,var(--card) 0%,var(--bg) 100%);border-top:1px solid var(--line);transition:transform .38s cubic-bezier(.22,1,.36,1);position:relative}
+/* orbit state: sheet peek menunjukkan grip + tabs sahaja — tinggi ikut kandungan, min-height lama
+   memaksa 360px dan menyebabkan kawasan kosong nampak bawah tabs (bug drag ke bawah) */
+#view-friends.st-orbit .orb-sheet{min-height:0}
 /* scroll-list dalam sheet untuk st-orbit (sheet menutup bawah, list scrollable) */
-#view-friends.st-orbit .orb-sheet #orbBody{max-height:calc(46vh - 20px);overflow-y:auto;overscroll-behavior:contain}
+/* orbit state: peek tunjuk grip + tabs sahaja; list tak nampak sehingga user tarik grip ke atas.
+   Semasa peek, orbBody disembunyikan supaya tiada row flash di bawah tabs. */
+#view-friends.st-orbit .orb-sheet #orbBody{max-height:calc(46vh - 20px);overflow-y:auto;overscroll-behavior:contain;opacity:0;transition:opacity .25s;pointer-events:none}
+#view-friends.st-orbit.peek-open .orb-sheet #orbBody{opacity:1;pointer-events:auto}
 .orb-tabs{display:flex;align-items:center;gap:6px;margin-bottom:10px;overflow-x:auto;scrollbar-width:none}
 .orb-tabs::-webkit-scrollbar{display:none}
 .orb-tabs button{flex:none;padding:7px 13px;border-radius:999px;font-size:12.5px;font-weight:700;color:var(--muted);background:transparent;transition:.16s;display:inline-flex;align-items:center;gap:5px}
@@ -3705,7 +3711,7 @@ function shareSetupInDM(){
    3 states: balanced (default) / list (orbit jadi pill) / orbit (orbit besar, list sorok bawah).
    Drag pada grip atau stage — ikut jari, lepas snap ikut velocity. */
 var FST={cur:'balanced',y:0,y0:0,t0:0,drag:false,moved:false};
-function fstSet(st){FST.cur=st;var v=$('view-friends');if(v){v.classList.remove('st-list','st-orbit','dragging');if(st==='list')v.classList.add('st-list');if(st==='orbit')v.classList.add('st-orbit')}var g=$('orbGrip');if(g){var lab=g.querySelector('.glab');if(lab)lab.textContent=st==='list'?(lang==='en'?'Chats':'Chat'):st==='orbit'?(lang==='en'?'Starling':'Starling'):(lang==='en'?'Friends':'Rakan')}}
+function fstSet(st){FST.cur=st;var v=$('view-friends');if(v){v.classList.remove('st-list','st-orbit','dragging','peek-open');if(st==='list')v.classList.add('st-list');if(st==='orbit')v.classList.add('st-orbit')}var g=$('orbGrip');if(g){var lab=g.querySelector('.glab');if(lab)lab.textContent=st==='list'?(lang==='en'?'Chats':'Chat'):st==='orbit'?(lang==='en'?'Starling':'Starling'):(lang==='en'?'Friends':'Rakan')}}
 function fstStageH(){var v=$('view-friends');var s=$('orbStage');if(!v||!s)return 0;return s.getBoundingClientRect().height}
 function fstSnap(dy,dt){
  /* dy>0 = tarik ke bawah (ke arah orbit), dy<0 = ke atas (ke arah list) */
@@ -3740,7 +3746,12 @@ function fstSnap(dy,dt){
    var nh=Math.max(40,Math.min(base+FST.dy,Math.min(window.innerHeight*0.62,480)));
    if(s)s.style.height=nh+'px';
    /* sheet ikut berlawan: ditarik ke bawah bila stage besar */
-   if(FST.cur==='orbit'){var t=Math.max(0,-FST.dy);if(sh)sh.style.transform='translateY('+t+'px)'}
+   if(FST.cur==='orbit'){
+    var t=Math.max(0,-FST.dy);
+    if(sh)sh.style.transform='translateY('+t+'px)';
+    /* tarik atas melebihi 56px = buka list dalam orbit */
+    v.classList.toggle('peek-open',t>56);
+   }
    else if(sh)sh.style.transform='';
   }
  }
@@ -5168,7 +5179,7 @@ if(!iv){
 showView(VIEWS.indexOf(iv)>-1?iv:'analyst');
 splashStart();
 /* build marker: sahkan versi CSS yang telefon render (buang bila punca blur jumpa) */
-try{var bt=document.getElementById('buildTag');if(bt)bt.textContent='build v104-drag4 · '+(getComputedStyle(document.querySelector('.appbar')).backdropFilter==='none'?'appbar blur OFF':'appbar blur STILL ON');}catch(e){}
+try{var bt=document.getElementById('buildTag');if(bt)bt.textContent='build v106-drag6 · '+(getComputedStyle(document.querySelector('.appbar')).backdropFilter==='none'?'appbar blur OFF':'appbar blur STILL ON');}catch(e){}
 })();
 
 </script>
