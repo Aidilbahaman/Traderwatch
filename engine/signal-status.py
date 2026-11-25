@@ -32,14 +32,26 @@ EXPIRY_SCALP = None  # M15 stays active until TP/SL or explicit cancellation
 EXPIRY_H1 = timedelta(hours=48)
 MAX_AGE = timedelta(days=90)
 CALL_GAP = 9
+
+# --- Fair rotation over the signal backlog (2026-11-25) ----------------------
+# Before this, the loop walked `rows` from index 0 every run and broke at
+# MAX_CHECKS. With 456 verified signals in the 7-day window and only 40
+# checks per run, the same 40 were re-tested forever and the rest were never
+# read — a signal could sit "active" for hours after its TP was hit because
+# it was never its turn. Checks are ~1.35 s each, so one run is ~55 s.
+#
+# Now: the newest ROTATE_FRESH signals are always checked (a fresh signal's
+# SL/TP is what the operator is watching), then a cursor sweeps the rest so
+# every signal is covered on a bounded cycle.
+ROTATE_FRESH = 30
+MAX_CHECKS = 110
+# rows fetched per run; must exceed the number of signals that can be
+# genuinely active inside LOOKBACK_DAYS
+ROWS_LIMIT = 600
 PIP = {"XAUUSD": 0.1, "XAGUSD": 0.001, "USDJPY": 0.01, "BTCUSD": 1.0}
 DEFAULT_PIP = 0.0001
 # BTC movement is measured in USD, not forex pips.
 USD_UNIT = {"BTCUSD"}
-# Cap how many open setups are evaluated per run. Swissquote M1 ialah SQLite
-# lokal (tiada kredit/rate limit), jadi had ini hanya perlu cukup besar untuk
-# semua setup terbuka — bukan lagi terikat bajet Twelve Data.
-MAX_CHECKS = 40
 
 
 LIFECYCLE_FILE = Path("/home/ubuntu/web/.signal-lifecycle.json")
@@ -272,7 +284,7 @@ def main():
     history_since = now - MAX_AGE
     rows_raw = sb_get("signals?select=id,pair,side,entry,sl,tp,timeframe,posted_at,verified"
                   f"&verified=is.true&posted_at=gte.{since.strftime('%Y-%m-%dT%H:%M:%SZ')}"
-                  "&order=posted_at.desc&limit=200")
+                  f"&order=posted_at.desc&limit={ROWS_LIMIT}")
     # Tapis private signal daripada status web
     from engine.private_signals import is_private
     rows = [r for r in (json.loads(rows_raw or "[]") if isinstance(rows_raw,str) else (rows_raw or []))
@@ -289,7 +301,40 @@ def main():
 
     checked = changed = errors = 0
     _lc_map = lifecycle_closed_by_id()
-    for row in rows:
+
+    # --- build the sweep order (see ROTATE_FRESH) ---------------------------
+    # Skip entries already in a terminal state so the cursor measures real
+    # work, not rows that are about to be `continue`d.
+    live_idx = []
+    for i, _r in enumerate(rows):
+        try:
+            _k = key_for(_r.get("pair"), _r.get("posted_at"))
+        except Exception:
+            _k = None          # unparseable row: the main loop skips it too
+        if _k and state["signals"].get(_k, {}).get("status") in (
+                "tp", "sl", "expired", "cancelled", "collected", "void_unfilled"):
+            continue
+        live_idx.append(i)
+
+    fresh = live_idx[:ROTATE_FRESH]
+    tail = live_idx[ROTATE_FRESH:]
+    cursor = state.get("_cursor") or 0
+    cap = MAX_CHECKS - len(fresh)
+    if tail and cap > 0:
+        if cursor >= len(tail):
+            cursor = 0
+        order = fresh + (tail[cursor:] + tail[:cursor])[:cap]
+        new_cursor = cursor + min(cap, len(tail))
+        if new_cursor >= len(tail):
+            new_cursor = 0
+    else:
+        order = fresh[:MAX_CHECKS]
+        new_cursor = 0
+    state["_cursor"] = new_cursor
+    log(f"rotate fresh={len(fresh)} tail={len(tail)} cursor={cursor} "
+        f"-> {new_cursor} planned={len(order)}")
+
+    for row in (rows[i] for i in order):
         try:
             sig = {
                 "pair": row["pair"], "side": row["side"],
@@ -343,7 +388,10 @@ def main():
 
         checked += 1
         if checked > MAX_CHECKS:
-            log(f"CAP reached {MAX_CHECKS} checks; remaining signals evaluated next run")
+            # Belt-and-braces: `order` is already capped, so this should never
+            # fire. Kept so a future edit cannot silently re-create the
+            # starvation bug this rotation was written to fix.
+            log(f"CAP reached {MAX_CHECKS} checks unexpectedly; rest deferred")
             break
         # An open-ended scalping setup still needs a bounded API window per
         # request; evaluate from posting time through now.
