@@ -107,10 +107,17 @@
         document.documentElement.classList.add("tw-ai-on");
       }
       var when = s.checked_at ? new Date(s.checked_at).toLocaleTimeString() : "";
-      el.innerHTML = "⚠ <b>AI SIGNAL ENGINE OFFLINE</b> — " +
-        "semua model TraderWatch AI gagal. " +
-        (when ? "Sejak " + when + ". " : "") +
-        "Hubungi dev / tukar LLM aktif. <span style='opacity:.7'>(ketuk untuk tutup)</span>";
+      var ms = false;
+      try { ms = localStorage.getItem("tw-lang") === "ms"; } catch (e) { /* private mode */ }
+      el.innerHTML = ms
+        ? "⚠ <b>AI SIGNAL ENGINE OFFLINE</b> — " +
+          "semua model TraderWatch AI gagal. " +
+          (when ? "Sejak " + when + ". " : "") +
+          "Hubungi dev / tukar LLM aktif. <span style='opacity:.7'>(ketuk untuk tutup)</span>"
+        : "⚠ <b>AI SIGNAL ENGINE OFFLINE</b> — " +
+          "all TraderWatch AI models are failing. " +
+          (when ? "Since " + when + ". " : "") +
+          "Contact dev / switch active LLM. <span style='opacity:.7'>(tap to dismiss)</span>";
       measure();
     }
     window.addEventListener("resize", measure);
