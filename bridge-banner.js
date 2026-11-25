@@ -47,4 +47,53 @@
 
   poll();
   setInterval(poll, 60000);
+
+  /* ----------------------------------------------------------------------
+   * AI maintenance banner (2026-11-25).
+   * Reads /data/ai-maintenance.json written by llm_analyst.py when EVERY
+   * model in the chain fails (quota / maintenance / 503). Without this the
+   * engine returns None and the UI silently shows a normal-looking HOLD.
+   * Dev sees it too — the banner names the failing models so switching the
+   * active LLM in the backend is immediate.
+   * -------------------------------------------------------------------- */
+  (function aiMaint() {
+    var el = null, last = null;
+    var CSS = "position:fixed;top:0;left:0;right:0;z-index:2147483647;" +
+      "background:#3a1418;color:#ffd9dc;border-bottom:1px solid #ff5d6c;" +
+      "padding:9px 14px;font:600 12px/1.45 system-ui,-apple-system,sans-serif;" +
+      "text-align:center;box-shadow:0 4px 18px #0008;cursor:pointer";
+    function render(s) {
+      var active = !!(s && s.active);
+      if (!active) {
+        if (el) { el.remove(); el = null; }
+        last = null;
+        return;
+      }
+      var sig = JSON.stringify(s);
+      if (sig === last) return;
+      last = sig;
+      if (!el) {
+        el = document.createElement("div");
+        el.id = "tw-ai-maint";
+        el.setAttribute("role", "alert");
+        el.style.cssText = CSS;
+        el.onclick = function () { el.remove(); el = null; last = null; };
+        (document.body || document.documentElement).appendChild(el);
+      }
+      var models = (s.models || []).join(", ");
+      var when = s.checked_at ? new Date(s.checked_at).toLocaleTimeString() : "";
+      el.innerHTML = "⚠ <b>AI SIGNAL ENGINE OFFLINE</b> — " +
+        "semua model gagal. " + (models ? "Model: " + models + ". " : "") +
+        (when ? "Sejak " + when + ". " : "") +
+        "Hubungi dev / tukar LLM aktif. <span style='opacity:.7'>(ketuk untuk tutup)</span>";
+    }
+    function poll() {
+      fetch("/data/ai-maintenance.json?t=" + Date.now(), { cache: "no-store" })
+        .then(function (r) { return r.json(); })
+        .then(render)
+        .catch(function () { /* network blip — keep last banner */ });
+    }
+    poll();
+    setInterval(poll, 30000);
+  })();
 })();

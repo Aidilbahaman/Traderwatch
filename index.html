@@ -2,48 +2,156 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,minimum-scale=1,user-scalable=no,viewport-fit=cover">
 <meta name="theme-color" content="#0a0e0b">
-<meta name="description" content="Automated AI signals for XAU/USD, XAG/USD & BTC. Charts, risk tools and education — one app, installable, works offline.">
+<meta name="description" content="Automated AI signals for 9 pairs across Gold, Silver, Forex & BTC. Charts, risk tools and education — one app, installable, works offline.">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icons/favicon.svg?v=20261123a" type="image/svg+xml">
 <link rel="icon" type="image/png" href="icons/icon-192.png?v=20261123a">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png?v=20261123a">
+<link rel="prefetch" href="login.html?mode=signup" as="document">
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 <meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="TraderWatch">
-<meta property="og:title" content="TraderWatch — Read the Market"><meta property="og:description" content="Automated AI signals for XAU/USD, XAG/USD & BTC.">
+<meta property="og:title" content="TraderWatch — Read the Market"><meta property="og:description" content="Automated AI signals for 9 pairs across Gold, Silver, Forex & BTC.">
 <title>TraderWatch — Read the Market</title>
 <style>
 :root{--bg:#0a0e0b;--card:#111612;--card2:#171e18;--text:#eef3ee;--muted:#8a978c;--line:#222b23;--lime:#b7f36b;--red:#ff777d;--orange:#ffc16b;--blue:#8ab4ff;color-scheme:dark}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html{scroll-behavior:smooth}
-html,body{margin:0;background:var(--bg)}
+html,body{margin:0;background:var(--bg);touch-action:pan-x pan-y;-webkit-text-size-adjust:100%}
 body{font:16px/1.55 -apple-system,BlinkMacSystemFont,"Inter","Segoe UI",sans-serif;letter-spacing:-.02em;color:var(--text);overflow-x:hidden}
 a{color:inherit;text-decoration:none}button{font:inherit;cursor:pointer;border:0}
 .glow{position:absolute;inset:0 0 auto 0;height:560px;background:radial-gradient(ellipse 70% 60% at 50% -5%,#b7f36b22 0,transparent 65%);pointer-events:none;z-index:0}
 .wrap{position:relative;z-index:1;max-width:640px;margin:auto;padding:0 18px}
 header{position:sticky;top:0;z-index:30;transition:.25s;padding:calc(10px + env(safe-area-inset-top)) 0 10px;border-bottom:1px solid transparent}
 header.sc{background:#0a0e0bd9;backdrop-filter:saturate(160%) blur(18px);-webkit-backdrop-filter:saturate(160%) blur(18px);border-color:var(--line)}
-.hrow{max-width:640px;margin:auto;padding:0 18px;display:flex;align-items:center;gap:10px}
-.brand{display:flex;align-items:center;gap:10px;font-weight:850;font-size:15px;letter-spacing:.02em}
-.logo{width:32px;height:32px;border-radius:10px;background:var(--lime);color:#10150b;display:grid;place-items:center;font-weight:950;font-size:16px;box-shadow:0 0 24px #b7f36b33}
-.live{display:flex;align-items:center;gap:5px;font-size:10px;font-weight:800;letter-spacing:.12em;color:var(--lime);margin-left:4px}
+.hrow{max-width:640px;margin:auto;padding:0 max(18px,env(safe-area-inset-right,0px)) 0 max(18px,env(safe-area-inset-left,0px));display:flex;align-items:center;gap:8px}
+.brand{display:flex;align-items:center;gap:9px;font-weight:850;font-size:14.5px;letter-spacing:.02em;white-space:nowrap;flex:none}
+.logo{width:32px;height:32px;flex:none;border-radius:10px;background:var(--lime);color:#10150b;display:grid;place-items:center;font-weight:950;font-size:16px;box-shadow:0 0 24px #b7f36b33;animation:logoPulse 3s ease-in-out infinite}
+@keyframes logoPulse{0%,100%{box-shadow:0 0 18px rgba(183,243,107,.28)}50%{box-shadow:0 0 30px rgba(183,243,107,.54)}}
+.live{display:flex;align-items:center;gap:5px;font-size:10px;font-weight:800;letter-spacing:.12em;color:var(--lime);margin-left:2px;white-space:nowrap;flex:none}
 .live i{width:6px;height:6px;border-radius:50%;background:var(--lime);box-shadow:0 0 10px var(--lime);animation:pl 1.6s infinite}
 @keyframes pl{50%{opacity:.3}}
-.hbtns{margin-left:auto;display:flex;gap:8px}
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border-radius:14px;font-weight:800;padding:11px 16px;font-size:14px;transition:transform .12s,box-shadow .2s}
+.hbtns{margin-left:auto;display:flex;align-items:center;gap:6px;flex:none}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border-radius:14px;font-weight:800;padding:11px 16px;font-size:14px;white-space:nowrap;transition:transform .12s,box-shadow .2s}
 .btn:active{transform:scale(.97)}
-.b1{background:var(--lime);color:#10150b;box-shadow:0 0 28px #b7f36b2e}
+.b1{background:var(--lime);color:#10150b;border:1px solid transparent;box-shadow:0 0 28px #b7f36b2e}
 .b1:hover{box-shadow:0 0 38px #b7f36b55}
 .b2{background:var(--card);color:var(--text);border:1px solid var(--line)}
-.sm{padding:8px 13px;font-size:13px;border-radius:11px}
-.lg{padding:15px 22px;font-size:16px;border-radius:16px}
+.sm{padding:8px 12px;font-size:12.5px;border-radius:11px}
+.hbtns .sm{height:36px;padding:0 13px;font-size:12.5px;line-height:1;border-radius:11px}
+.hbtns .snd{width:36px;height:36px;padding:0;display:inline-flex;align-items:center;justify-content:center}
+@media(max-width:440px){
+  .live{display:none}
+  .hrow{gap:6px}
+  .brand{gap:7px;font-size:13.5px;min-width:0}
+  .logo{width:30px;height:30px;border-radius:9px}
+  .hbtns{gap:5px}
+  .hbtns .sm{height:32px;padding:0 10px;font-size:12px;border-radius:10px}
+  .hbtns .snd{width:32px;height:32px;padding:0}
+}
+@media(max-width:350px){
+  .hrow{padding:0 max(12px,env(safe-area-inset-right,0px)) 0 max(12px,env(safe-area-inset-left,0px));gap:5px}
+  .brand{gap:6px;font-size:12.5px;letter-spacing:.01em}
+  .logo{width:28px;height:28px;border-radius:8px}
+  .hbtns{gap:4px}
+  .hbtns .sm{height:30px;padding:0 8px;font-size:11.5px;border-radius:9px}
+  .hbtns .snd{width:30px;height:30px;padding:0}
+}
+.lg{padding:11px 20px;font-size:14.5px;border-radius:999px}
+/* Compact glossy lime capsule for section CTAs */
+.btn-pill{
+  position:relative;display:inline-flex;align-items:center;justify-content:center;gap:7px;
+  padding:11px 22px;border-radius:999px;font-size:14px;font-weight:820;letter-spacing:-.015em;
+  color:#0b1106;white-space:nowrap;overflow:hidden;
+  background:linear-gradient(180deg,#cbff85 0%,#b7f36b 55%,#9ee04b 100%);
+  box-shadow:inset 0 1.5px 0 rgba(255,255,255,.72),inset 0 -1.5px 0 rgba(45,82,12,.25),0 8px 24px rgba(183,243,107,.24);
+  transition:transform .16s cubic-bezier(.22,1,.36,1),box-shadow .22s ease
+}
+.btn-pill:hover{transform:translateY(-1px);box-shadow:inset 0 1.5px 0 rgba(255,255,255,.8),inset 0 -1.5px 0 rgba(45,82,12,.25),0 10px 30px rgba(183,243,107,.38)}
+.btn-pill:active{transform:scale(.97)}
+/* Starling AI mascot hero widget (#2) */
+.starling-zone{
+  display:inline-flex;align-items:center;justify-content:center;gap:12px;
+  margin:2px auto 0;padding:4px 6px
+}
+.starling-btn{
+  position:relative;display:flex;flex-direction:column;align-items:center;
+  padding:0;background:none;border:0;cursor:pointer;
+  -webkit-tap-highlight-color:transparent;
+  transition:transform .18s cubic-bezier(.22,1,.36,1)
+}
+.starling-btn:active{transform:scale(.92)}
+.starling-btn.hop{animation:stHop .52s cubic-bezier(.22,1,.36,1)}
+@keyframes stHop{
+  0%{transform:translateY(0) scale(1)}
+  35%{transform:translateY(-12px) scale(1.08,.94)}
+  65%{transform:translateY(2px) scale(.96,1.04)}
+  100%{transform:translateY(0) scale(1)}
+}
+.st-svg{display:block;animation:stFloat 2.8s ease-in-out infinite;filter:drop-shadow(0 6px 18px rgba(183,243,107,.24))}
+@keyframes stFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
+.st-shadow{
+  width:38px;height:7px;border-radius:50%;margin-top:1px;
+  background:radial-gradient(ellipse,rgba(183,243,107,.34),transparent 70%);
+  animation:stShadow 2.8s ease-in-out infinite
+}
+@keyframes stShadow{0%,100%{transform:scale(1);opacity:.78}50%{transform:scale(.76);opacity:.38}}
+.st-eyes{transform-origin:center;transform-box:fill-box;animation:stBlink 3.8s infinite,stGlance 4.6s ease-in-out infinite}
+@keyframes stBlink{0%,92%,100%{transform:scaleY(1)}96%{transform:scaleY(.08)}}
+@keyframes stGlance{0%,36%,100%{translate:0 0}46%,64%{translate:1.6px 1px}74%,88%{translate:-1.4px .4px}}
+.st-happy{opacity:0;transition:opacity .12s}
+.starling-btn.happy .st-eyes{opacity:0}
+.starling-btn.happy .st-happy{opacity:1}
+.st-twinkle{transform-origin:center;transform-box:fill-box;animation:stTwinkle 2.2s ease-in-out infinite}
+@keyframes stTwinkle{0%,100%{transform:scale(.72);opacity:.5}50%{transform:scale(1.24);opacity:1}}
+.st-bubble{
+  position:relative;display:flex;flex-direction:column;align-items:flex-start;gap:3px;
+  padding:10px 15px 10px 14px;
+  border-radius:18px 18px 18px 5px;
+  background:linear-gradient(180deg,rgba(255,255,255,.10) 0%,rgba(255,255,255,.04) 100%);
+  border:1px solid rgba(255,255,255,.15);
+  backdrop-filter:blur(16px) saturate(160%);-webkit-backdrop-filter:blur(16px) saturate(160%);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.24),0 10px 26px rgba(0,0,0,.44);
+  text-align:left;
+  transition:border-color .2s,transform .18s cubic-bezier(.22,1,.36,1),box-shadow .22s
+}
+.st-bubble:hover{
+  border-color:rgba(183,243,107,.5);
+  transform:translateY(-1px);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.32),0 12px 28px rgba(0,0,0,.5),0 0 22px rgba(183,243,107,.16)
+}
+.st-bubble:active{transform:scale(.97)}
+.st-line{font-size:13.5px;font-weight:800;color:#eef5ee;line-height:1.2;letter-spacing:-.02em;transition:opacity .2s}
+.st-go{display:inline-flex;align-items:center;gap:4px;font-size:12px;font-weight:780;color:var(--lime)}
+.st-go svg{transition:transform .2s cubic-bezier(.22,1,.36,1)}
+.st-bubble:hover .st-go svg{transform:translateX(3px)}
+.inst-micro{
+  display:inline-flex;align-items:center;gap:5px;
+  margin-top:10px;padding:6px 12px;border-radius:999px;
+  background:transparent;border:1px solid var(--line);color:var(--muted);
+  font-size:12px;font-weight:700;transition:color .16s,border-color .16s
+}
+.inst-micro:hover{color:var(--text);border-color:#354636}
+/* Cross-page Starling flight transition (GPU-only transform + opacity, zero blur/layout thrash) */
+main,header{transition:opacity .22s cubic-bezier(.22,1,.36,1),transform .26s cubic-bezier(.22,1,.36,1)}
+body.tw-leaving main{opacity:0;transform:translate3d(0,-8px,0) scale(.97);pointer-events:none}
+body.tw-leaving header{opacity:.4;pointer-events:none}
+.tw-fly-star{position:fixed;left:0;top:0;width:66px;height:66px;z-index:9999;pointer-events:none;will-change:transform;transform-origin:0 0}
+.tw-fly-cv{position:fixed;inset:0;width:100%;height:100%;z-index:9998;pointer-events:none}
 /* hero */
 .hero{padding:34px 0 8px;text-align:center}
 .pill{display:inline-flex;align-items:center;gap:8px;background:#b7f36b12;border:1px solid #b7f36b33;color:var(--lime);border-radius:999px;padding:6px 13px;font-size:12px;font-weight:700;letter-spacing:.02em;margin-bottom:18px}
 .pill i{width:6px;height:6px;border-radius:50%;background:var(--lime)}
 h1{font-size:clamp(40px,11vw,64px);line-height:1.02;letter-spacing:-.06em;margin:0 0 14px;font-weight:900}
-h1 span{color:var(--lime)}
+h1 .tw-wrap{display:inline-flex;align-items:center;justify-content:center;min-height:1.06em;vertical-align:bottom}
+h1 .tw-word{color:var(--lime);display:inline-block}
+h1 .tw-word.flash{background:linear-gradient(100deg,#b7f36b 0%,#b7f36b 24%,#0894FF 38%,#C959DD 50%,#FF2E54 62%,#FF9004 72%,#b7f36b 84%,#b7f36b 100%);background-size:340% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:twPrism 1.55s cubic-bezier(.37,0,.25,1) forwards}
+@keyframes twPrism{0%{background-position:100% 0}100%{background-position:0% 0}}
+h1 .tw-caret{display:inline-block;width:.065em;min-width:3px;height:.86em;border-radius:3px;margin-left:.06em;background:linear-gradient(180deg,#0894FF,#C959DD,#b7f36b);box-shadow:0 0 12px rgba(183,243,107,.55);animation:twBlink .82s step-end infinite}
+@keyframes twBlink{50%{opacity:.12}}
+@media(prefers-reduced-motion:reduce){h1 .tw-caret{display:none}}
 .lead{color:var(--muted);font-size:17px;max-width:470px;margin:0 auto 24px}
 .cta{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
 .tiny{color:#5d695f;font-size:12px;margin-top:14px}
@@ -56,11 +164,14 @@ h1 span{color:var(--lime)}
 .pt{flex:none;background:var(--card2);border:1px solid var(--line);color:var(--muted);padding:7px 12px;border-radius:999px;font-weight:700;font-size:12px;transition:.15s}
 .pt.on{background:var(--lime);border-color:var(--lime);color:#10150b}
 .dtag{margin-left:auto;flex:none;font-size:10px;color:#5d695f;font-weight:700;letter-spacing:.08em}
-.cb{position:relative;border:1px solid var(--line);border-radius:16px;background:#0c110d;overflow:hidden}
+.cb{position:relative;border:1px solid var(--line);border-radius:16px;background:#0c110d;overflow:hidden;transition:border-color .4s ease,box-shadow .45s ease}
+.cb.ai-on{border-color:transparent;box-shadow:0 0 0 1px rgba(255,255,255,.06),0 0 22px rgba(8,148,255,.18),0 0 36px rgba(201,89,221,.13)}
 #cv{display:block;width:100%;height:260px}
-.chip{position:absolute;left:10px;top:10px;display:flex;align-items:center;gap:6px;background:#0a0e0bcc;border:1px solid var(--line);border-radius:999px;padding:4px 10px;font-size:10px;font-weight:800;letter-spacing:.1em;color:var(--muted);backdrop-filter:blur(6px);transition:.3s}
+.chip{position:absolute;left:10px;top:10px;display:flex;align-items:center;gap:6px;background:#0a0e0bcc;border:1px solid var(--line);border-radius:999px;padding:4px 10px;font-size:10px;font-weight:800;letter-spacing:.1em;color:var(--muted);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);transition:.3s}
 .chip i{width:6px;height:6px;border-radius:50%;background:#5d695f}
-.chip.scan{color:var(--lime);border-color:#b7f36b55}.chip.scan i{background:var(--lime);box-shadow:0 0 8px var(--lime);animation:pl .7s infinite}
+.chip.scan{color:#eef5ee;border-color:rgba(255,255,255,.18);background:rgba(12,17,13,.88)}
+.chip.scan i{background:linear-gradient(135deg,#0894FF,#C959DD,#FF2E54,#FF9004);box-shadow:0 0 8px rgba(201,89,221,.85);animation:aiDotPulse 1.6s ease-in-out infinite}
+@keyframes aiDotPulse{0%,100%{transform:scale(.85);opacity:.75}50%{transform:scale(1.25);opacity:1}}
 .chip.done{color:var(--lime)}.chip.done i{background:var(--lime)}
 .dfoot{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}
 .dfoot div{background:var(--card2);border:1px solid var(--line);border-radius:12px;padding:9px 6px;text-align:center;transition:.4s;opacity:.35}
@@ -92,7 +203,7 @@ h2{font-size:clamp(28px,7.5vw,40px);line-height:1.08;letter-spacing:-.05em;margi
 .free ul{list-style:none;margin:20px 0 22px;padding:0;display:grid;gap:11px;position:relative;z-index:1}
 .free li{display:flex;gap:11px;font-size:15px}
 .free li::before{content:"✓";flex:none;width:21px;height:21px;border-radius:50%;background:#b7f36b20;color:var(--lime);display:grid;place-items:center;font-size:12px;font-weight:900;margin-top:1px}
-.free .btn{width:100%;position:relative;z-index:1}
+.free .btn,.free .btn-pill{width:100%;position:relative;z-index:1}
 .one{color:var(--muted);font-size:13px;text-align:center;margin-top:12px;position:relative;z-index:1}
 /* install */
 .inst{background:var(--card);border:1px solid var(--line);border-radius:24px;padding:22px}
@@ -132,27 +243,57 @@ footer a{color:var(--muted);margin:0 8px}
 <body>
 <div class="glow"></div>
 <header id="hd"><div class="hrow">
-  <a class="brand" href="#top"><div class="logo">T</div>TRADERWATCH</a>
+  <a class="brand" href="#top"><div class="logo"><svg viewBox="-22 -22 44 44" width="18" height="18" aria-hidden="true"><path d="M0-20Q0 0 20 0Q0 0 0 20Q0 0-20 0Q0 0 0-20Z" fill="currentColor"/></svg></div>TRADERWATCH</a>
   <div class="live"><i></i>LIVE</div>
-  <div class="hbtns"><button data-sound-toggle type="button" aria-label="Toggle sound" class="btn b2 sm" style="padding:8px 10px;display:grid;place-items:center"></button><a class="btn b2 sm" href="https://traderwatch.org/login.html">Log in</a><a class="btn b1 sm" href="https://traderwatch.org/login.html?mode=signup">Sign up</a></div>
+  <div class="hbtns"><button data-sound-toggle type="button" aria-label="Toggle sound" class="btn b2 sm snd"></button><a class="btn b2 sm" href="https://traderwatch.org/login.html">Log in</a><a class="btn b1 sm" href="https://traderwatch.org/login.html?mode=signup">Sign up</a></div>
 </div></header>
 
 <main class="wrap" id="top">
   <div class="hero">
     <div class="pill rv"><i></i>Automated AI signals</div>
-    <h1 class="rv">Signals,<br><span>annotated.</span></h1>
-    <p class="lead rv">AI signals for XAU/USD, XAG/USD & BTC — annotated charts, right on your home screen.</p>
-    <div class="cta rv">
-      <a class="btn b1 lg" href="https://traderwatch.org/login.html?mode=signup">Get started free</a>
-      <button class="btn b2 lg" id="installBtn">⬇ Install app</button>
+    <h1 class="rv" aria-label="Signals, decoded, mapped, intelligent.">Signals,<br><span class="tw-wrap"><span class="tw-word" id="heroWord">decoded.</span><span class="tw-caret" aria-hidden="true"></span></span></h1>
+    <p class="lead rv">AI signals across Gold, Silver, major Forex &amp; BTC — annotated charts, right on your home screen.</p>
+    <div class="starling-zone rv">
+      <button class="starling-btn" id="starlingBtn" type="button" aria-label="TraderWatch AI mascot Starling">
+        <svg class="st-svg" width="66" height="66" viewBox="0 0 64 64" aria-hidden="true">
+          <defs>
+            <radialGradient id="twStarGrad" cx="42%" cy="30%" r="68%">
+              <stop offset="0%" stop-color="#ecffc9"/>
+              <stop offset="55%" stop-color="#b7f36b"/>
+              <stop offset="100%" stop-color="#7bc92a"/>
+            </radialGradient>
+          </defs>
+          <path class="st-twinkle" d="M52 10 Q52 15 57 15 Q52 15 52 20 Q52 15 47 15 Q52 15 52 10Z" fill="#8ab4ff"/>
+          <path d="M32 6 C35 20 44 29 58 32 C44 35 35 44 32 58 C29 44 20 35 6 32 C20 29 29 20 32 6 Z" fill="url(#twStarGrad)"/>
+          <g class="st-eyes">
+            <ellipse cx="26.5" cy="31" rx="2.6" ry="3.2" fill="#0d140a"/>
+            <ellipse cx="37.5" cy="31" rx="2.6" ry="3.2" fill="#0d140a"/>
+            <circle cx="25.6" cy="29.8" r="1" fill="#ffffff"/>
+            <circle cx="36.6" cy="29.8" r="1" fill="#ffffff"/>
+          </g>
+          <g class="st-happy">
+            <path d="M23.5 31.5 Q26.5 28 29.5 31.5" fill="none" stroke="#0d140a" stroke-width="2.2" stroke-linecap="round"/>
+            <path d="M34.5 31.5 Q37.5 28 40.5 31.5" fill="none" stroke="#0d140a" stroke-width="2.2" stroke-linecap="round"/>
+          </g>
+          <ellipse cx="22.5" cy="35" rx="2.4" ry="1.4" fill="#ff7f8f" opacity=".55"/>
+          <ellipse cx="41.5" cy="35" rx="2.4" ry="1.4" fill="#ff7f8f" opacity=".55"/>
+          <path d="M29.5 35 Q32 37.5 34.5 35" fill="none" stroke="#0d140a" stroke-width="1.6" stroke-linecap="round"/>
+        </svg>
+        <div class="st-shadow" aria-hidden="true"></div>
+      </button>
+      <a class="st-bubble" href="https://traderwatch.org/login.html?mode=signup">
+        <span class="st-line" id="starlingLine">Ready to scan? ✦</span>
+        <span class="st-go">Try AI free <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></span>
+      </a>
     </div>
+    <div class="rv"><button class="inst-micro" id="installBtn" type="button"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align:-1px;margin-right:5px"><path d="M12 3v12"/><path d="m6 11 6 6 6-6"/><path d="M5 21h14"/></svg>Install Apps</button></div>
     <p class="tiny rv">Educational only. Trading involves substantial risk.</p>
-    <div class="chips rv"><span><b>3</b> pairs tracked</span><span>Free for everyone</span><span>Works offline</span></div>
+    <div class="chips rv"><span><b>9</b> pairs tracked</span><span>Free for everyone</span><span>Works offline</span></div>
   </div>
 
   <div class="cwrap rv"><div class="demo">
     <div class="dtop" id="pt"></div>
-    <div class="cb"><canvas id="cv"></canvas><div class="chip" id="chip"><i></i><span id="chipT">READY</span></div></div>
+    <div class="cb" id="cb"><canvas id="cv"></canvas><div class="chip" id="chip"><i></i><span id="chipT">READY</span></div></div>
     <div class="dfoot" id="df"><div class="e"><small>Entry</small><b id="vE">—</b></div><div class="t"><small>Take Profit</small><b id="vT">—</b></div><div class="s"><small>Stop Loss</small><b id="vS">—</b></div></div>
     <p class="dnote">Visual illustration — real signals are available to members in the app.</p>
   </div></div>
@@ -181,20 +322,20 @@ footer a{color:var(--muted);margin:0 8px}
       <span class="tag">FREE CARD</span>
       <div class="price">Free<small>/ for everyone</small></div>
       <ul>
-        <li>Latest AI signals — XAU/USD, XAG/USD &amp; BTC</li>
+        <li>Latest AI signals — 9 pairs (Gold, Silver, Forex &amp; BTC)</li>
         <li>Full Entry + Stop Loss + Take Profit</li>
         <li>Annotated charts + entry reason</li>
         <li>Full dashboard &amp; results history</li>
       </ul>
-      <a class="btn b1 lg" href="https://traderwatch.org/login.html?mode=signup">Get started free</a>
+      <a class="btn-pill" href="https://traderwatch.org/login.html?mode=signup">Get started free <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></a>
       <div class="one">One tier for everyone — full access, no subscription.</div>
     </div>
   </section>
 
   <section id="install">
     <div class="inst rv">
-      <h3>Install app</h3><p>Install on your home screen for quick access — installable, works offline.</p>
-      <button class="btn b1" id="installBtn2">⬇ Install app</button>
+      <h3>Install Apps</h3><p>Install on your home screen for quick access — installable, works offline.</p>
+      <button class="btn b1" id="installBtn2"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align:-2px;margin-right:7px"><path d="M12 3v12"/><path d="m6 11 6 6 6-6"/><path d="M5 21h14"/></svg>Install Apps</button>
       <ol class="ios" id="ios"><li>Tap the <b>Share</b> button in Safari.</li><li>Choose <b>Add to Home Screen</b>.</li><li>Tap <b>Add</b> — TraderWatch appears on your home screen.</li></ol>
     </div>
   </section>
@@ -207,7 +348,7 @@ footer a{color:var(--muted);margin:0 8px}
   <div class="final rv">
     <h2>Read the market.<br><span style="color:var(--lime)">Clearly.</span></h2>
     <p class="sub" style="margin:0 auto 22px">Get started free and see annotated signals today.</p>
-    <a class="btn b1 lg" href="https://traderwatch.org/login.html?mode=signup">Get started free</a>
+    <a class="btn-pill" href="https://traderwatch.org/login.html?mode=signup">Get started free <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></a>
     <div class="risk" style="text-align:left">
       <p><b>Risk disclosure.</b> Trading forex, metals and crypto involves substantial risk of loss and may not suit all investors. You may lose part or all of your capital. Past performance does not guarantee future results. Signals are generated automatically by AI and may be late or wrong. Only trade with money you can afford to lose and seek independent financial advice if needed.</p>
       <p><b>Partner disclosure:</b> TraderWatch may receive commission from partner broker links. This does not change the price you pay and does not influence the signal engine's decisions.</p>
@@ -216,14 +357,20 @@ footer a{color:var(--muted);margin:0 8px}
 </main>
 <footer>© TraderWatch · traderwatch.org<br><span style="display:block;margin-top:6px">Educational only. Trading involves substantial risk.</span></footer>
 
-<div id="ib"><div class="logo">T</div><div style="flex:1"><b>Install TraderWatch</b><span id="ibT">Quick access from your home screen.</span></div><button class="btn b1 sm" id="ibGo">Install</button><button class="x" id="ibX" aria-label="Close">✕</button></div>
+<div id="ib"><div class="logo"><svg viewBox="-22 -22 44 44" width="18" height="18" aria-hidden="true"><path d="M0-20Q0 0 20 0Q0 0 0 20Q0 0-20 0Q0 0 0-20Z" fill="currentColor"/></svg></div><div style="flex:1"><b>Install TraderWatch</b><span id="ibT">Quick access from your home screen.</span></div><button class="btn b1 sm" id="ibGo">Install</button><button class="x" id="ibX" aria-label="Close">✕</button></div>
 
 <script src="sound.js?v=20261121s3" defer></script>
-<script src="/bridge-banner.js?v=20261121b" defer></script>
+<script src="/bridge-banner.js?v=20261125a" defer></script>
 <script>
 (function(){
 'use strict';
 var $=function(i){return document.getElementById(i)};
+/* Lock pinch-to-zoom di iOS & Android PWA */
+['gesturestart','gesturechange','gestureend'].forEach(function(ev){
+ document.addEventListener(ev,function(e){e.preventDefault()},{passive:false});
+});
+document.addEventListener('touchstart',function(e){if(e.touches&&e.touches.length>1)e.preventDefault()},{passive:false});
+document.addEventListener('touchmove',function(e){if(e.touches&&e.touches.length>1)e.preventDefault()},{passive:false});
 
 /* ---------- header & reveal ---------- */
 var hd=$('hd');function sc(){hd.classList.toggle('sc',scrollY>10)}addEventListener('scroll',sc,{passive:true});sc();
@@ -231,6 +378,153 @@ var rvs=document.querySelectorAll('.rv');
 if('IntersectionObserver' in window){var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){var d=e.target.parentNode.querySelectorAll?0:0;e.target.classList.add('in');io.unobserve(e.target)}})},{threshold:.12,rootMargin:'0px 0px -6% 0px'});
  Array.prototype.forEach.call(rvs,function(el,i){el.style.transitionDelay=(el.classList.contains('f')||el.classList.contains('st'))?((i%3)*70)+'ms':'0ms';io.observe(el)})}
 else Array.prototype.forEach.call(rvs,function(el){el.classList.add('in')});
+
+/* ---------- hero kinetic typewriter (Style #5 fast: decoded -> mapped -> intelligent) ---------- */
+(function(){
+ var el=$('heroWord');
+ if(!el||matchMedia('(prefers-reduced-motion: reduce)').matches)return;
+ var W=['decoded.','mapped.','intelligent.'],wi=0,t=null;
+ function schedule(fn,ms){if(t)clearTimeout(t);t=setTimeout(fn,ms)}
+ function erase(){
+  if(document.hidden){schedule(erase,400);return}
+  el.classList.remove('flash');
+  var s=el.textContent;
+  if(s.length>0){el.textContent=s.slice(0,-1);schedule(erase,28)}
+  else{wi=(wi+1)%W.length;schedule(function(){type(0)},90)}
+ }
+ function type(pos){
+  var target=W[wi];
+  if(pos<=target.length){
+   el.textContent=target.slice(0,pos);
+   schedule(function(){type(pos+1)},44);
+  }else{
+   void el.offsetWidth;
+   el.classList.add('flash');
+   schedule(erase,1950);
+  }
+ }
+ schedule(erase,1500);
+})();
+
+/* ---------- Starling mascot interaction ---------- */
+(function(){
+ var btn=$('starlingBtn'),line=$('starlingLine');
+ if(!btn||!line)return;
+ var LINES=['Ready to scan? ✦','Gold & BTC live!','9 pairs mapped!','Let’s read charts!'];
+ var li=0,ht=null;
+ function nextLine(){
+  li=(li+1)%LINES.length;
+  line.style.opacity='0';
+  setTimeout(function(){line.textContent=LINES[li];line.style.opacity='1'},180);
+ }
+ if(!matchMedia('(prefers-reduced-motion: reduce)').matches){
+  setInterval(function(){if(!document.hidden)nextLine()},3600);
+ }
+ btn.addEventListener('click',function(){
+  if(window.TWSound)TWSound.play('click');
+  try{navigator.vibrate&&navigator.vibrate(10)}catch(e){}
+  btn.classList.remove('hop','happy');
+  void btn.offsetWidth;
+  btn.classList.add('hop','happy');
+  nextLine();
+  if(ht)clearTimeout(ht);
+  ht=setTimeout(function(){btn.classList.remove('happy')},900);
+ });
+
+ /* Cross-page Starling Arc Swoop flight (GPU-composited 60fps, zero layout thrash) */
+ var reduceM=matchMedia('(prefers-reduced-motion: reduce)').matches;
+ var FLIGHT_KEY='tw_starling_flight';
+ var SP_COLS=['#b7f36b','#eaffc4','#0894FF','#C959DD','#FF2E54'];
+ function starSvgMarkup(happy){
+  return '<svg viewBox="0 0 64 64" width="66" height="66" style="display:block"><defs><radialGradient id="twFlyG" cx="42%" cy="30%" r="68%"><stop offset="0%" stop-color="#ecffc9"/><stop offset="55%" stop-color="#b7f36b"/><stop offset="100%" stop-color="#7bc92a"/></radialGradient><radialGradient id="twAura" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#b7f36b" stop-opacity=".42"/><stop offset="100%" stop-color="#b7f36b" stop-opacity="0"/></radialGradient></defs><circle cx="32" cy="32" r="30" fill="url(#twAura)"/><path d="M52 10 Q52 15 57 15 Q52 15 52 20 Q52 15 47 15 Q52 15 52 10Z" fill="#8ab4ff"/><path d="M32 6 C35 20 44 29 58 32 C44 35 35 44 32 58 C29 44 20 35 6 32 C20 29 29 20 32 6 Z" fill="url(#twFlyG)"/>'+(happy?'<path d="M23.5 31.5 Q26.5 28 29.5 31.5" fill="none" stroke="#0d140a" stroke-width="2.3" stroke-linecap="round"/><path d="M34.5 31.5 Q37.5 28 40.5 31.5" fill="none" stroke="#0d140a" stroke-width="2.3" stroke-linecap="round"/>':'<ellipse cx="26.5" cy="31" rx="2.6" ry="3.2" fill="#0d140a"/><ellipse cx="37.5" cy="31" rx="2.6" ry="3.2" fill="#0d140a"/><circle cx="25.6" cy="29.8" r="1" fill="#ffffff"/><circle cx="36.6" cy="29.8" r="1" fill="#ffffff"/>')+'<ellipse cx="22.5" cy="35" rx="2.4" ry="1.4" fill="#ff7f8f" opacity=".55"/><ellipse cx="41.5" cy="35" rx="2.4" ry="1.4" fill="#ff7f8f" opacity=".55"/><path d="M29.5 35 Q32 37.5 34.5 35" fill="none" stroke="#0d140a" stroke-width="1.6" stroke-linecap="round"/></svg>';
+ }
+ function runArcFlight(opts){
+  var cv=document.createElement('canvas');cv.className='tw-fly-cv';
+  var vw=window.innerWidth,vh=window.innerHeight;
+  cv.width=vw;cv.height=vh;
+  var c=cv.getContext('2d');
+  var fl=document.createElement('div');fl.className='tw-fly-star';
+  fl.innerHTML=starSvgMarkup(true);
+  var initSc=opts.s0/66;
+  fl.style.transform='translate3d('+opts.x0.toFixed(1)+'px,'+opts.y0.toFixed(1)+'px,0) rotate('+(opts.tilt0||0)+'deg) scale('+initSc.toFixed(3)+')';
+  document.body.appendChild(cv);document.body.appendChild(fl);
+  var pts=[],t0=performance.now(),dur=opts.dur||240,frameN=0;
+  function curve(t){
+   if(opts.ease==='in')return t*t;
+   if(opts.ease==='out')return 1-Math.pow(1-t,3);
+   return t<.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2;
+  }
+  function step(now){
+   var raw=Math.min(1,(now-t0)/dur),t=curve(raw),iv=1-t;
+   var x=iv*iv*opts.x0+2*iv*t*opts.cx+t*t*opts.x1;
+   var y=iv*iv*opts.y0+2*iv*t*opts.cy+t*t*opts.y1;
+   var sz=opts.s0+(opts.s1-opts.s0)*t;
+   var tilt=(opts.tilt0||0)+((opts.tilt1||0)-(opts.tilt0||0))*t;
+   var sc=sz/66;
+   fl.style.transform='translate3d('+x.toFixed(1)+'px,'+y.toFixed(1)+'px,0) rotate('+tilt.toFixed(1)+'deg) scale('+sc.toFixed(3)+')';
+   if((++frameN&1)===0&&raw>.05&&raw<.94){
+    pts.push({x:x+sz*.5+(Math.random()-.5)*10,y:y+sz*.5+(Math.random()-.5)*10,vx:(Math.random()-.5)*.7,vy:(Math.random()-.5)*.7+.25,r:2+Math.random()*2.8,life:1,col:SP_COLS[Math.floor(Math.random()*SP_COLS.length)]});
+   }
+   c.clearRect(0,0,vw,vh);
+   for(var i=pts.length-1;i>=0;i--){
+    var p=pts[i];p.x+=p.vx;p.y+=p.vy;p.life-=.06;
+    if(p.life<=0){pts.splice(i,1);continue}
+    c.globalAlpha=p.life*.88;c.fillStyle=p.col;
+    var sr=p.r*p.life;
+    c.beginPath();c.moveTo(p.x,p.y-sr);c.lineTo(p.x+sr*.35,p.y-sr*.35);c.lineTo(p.x+sr,p.y);c.lineTo(p.x+sr*.35,p.y+sr*.35);c.lineTo(p.x,p.y+sr);c.lineTo(p.x-sr*.35,p.y+sr*.35);c.lineTo(p.x-sr,p.y);c.lineTo(p.x-sr*.35,p.y-sr*.35);c.closePath();c.fill();
+   }
+   c.globalAlpha=1;
+   if(raw<1){requestAnimationFrame(step)}
+   else if(opts.onDone){opts.onDone(fl,cv)}
+  }
+  requestAnimationFrame(step);
+ }
+ /* Cleanup if restored from bfcache */
+ addEventListener('pageshow',function(){
+  window.__twPauseDemo=false;
+  document.body.classList.remove('tw-leaving');
+  btn.style.visibility='';
+  Array.prototype.forEach.call(document.querySelectorAll('.tw-fly-star,.tw-fly-cv'),function(el){el.remove()});
+ });
+ /* Intercept clicks to login/signup: Half 1 ease-in arc to exact midpoint */
+ document.addEventListener('click',function(e){
+  if(reduceM||e.defaultPrevented||e.metaKey||e.ctrlKey||e.shiftKey||e.altKey||e.button!==0)return;
+  var a=e.target&&e.target.closest?e.target.closest('a[href]'):null;
+  if(!a)return;
+  var u;try{u=new URL(a.href,location.href)}catch(_){return}
+  if(!/\/login\.html$/i.test(u.pathname))return;
+  e.preventDefault();
+  window.__twPauseDemo=true;
+  if(window.TWSound)TWSound.play('click');
+  try{navigator.vibrate&&navigator.vibrate(10)}catch(_){}
+  var r=btn.getBoundingClientRect(),vw=window.innerWidth,vh=window.innerHeight;
+  var x0=r.width?r.left:vw*.32,y0=r.height?r.top:vh*.42,s0=r.width||66;
+  var estX=Math.min(vw-82,vw*.5+Math.min(155,vw*.31)),estY=Math.min(210,vh*.26);
+  var midX=(x0+estX)*.5+18,midY=Math.min(y0,estY)-22,midS=56;
+  btn.style.visibility='hidden';
+  document.body.classList.add('tw-leaving');
+  try{sessionStorage.setItem(FLIGHT_KEY,JSON.stringify({from:'home',x:midX,y:midY,s:midS,ts:Date.now()}))}catch(_){}
+  runArcFlight({x0:x0,y0:y0,cx:(x0+midX)*.5+8,cy:Math.min(y0,midY)-10,x1:midX,y1:midY,s0:s0,s1:midS,tilt0:0,tilt1:14,ease:'in',dur:210,onDone:function(){location.href=a.href}});
+ });
+ /* Arrival swoop if returning from login.html: Half 2 ease-out from exact midpoint */
+ (function checkReturn(){
+  if(reduceM)return;
+  var raw=null;try{raw=sessionStorage.getItem(FLIGHT_KEY);if(raw)sessionStorage.removeItem(FLIGHT_KEY)}catch(_){}
+  if(!raw)return;
+  var d;try{d=JSON.parse(raw)}catch(_){return}
+  if(!d||d.from!=='auth'||Date.now()-d.ts>5000)return;
+  btn.style.visibility='hidden';
+  var r=btn.getBoundingClientRect(),vw=window.innerWidth,vh=window.innerHeight;
+  if(!r.width){btn.style.visibility='';return}
+  var x0=Math.max(12,Math.min(vw-64,typeof d.x==='number'?d.x:vw*.5));
+  var y0=Math.max(40,Math.min(vh-80,typeof d.y==='number'?d.y:vh*.24));
+  runArcFlight({x0:x0,y0:y0,cx:(x0+r.left)*.5-18,cy:Math.min(y0,r.top)-16,x1:r.left,y1:r.top,s0:d.s||56,s1:r.width,tilt0:-14,tilt1:0,ease:'out',dur:360,onDone:function(fl,cv){
+   fl.remove();cv.remove();btn.style.visibility='';
+   btn.classList.remove('hop','happy');void btn.offsetWidth;btn.classList.add('hop','happy');
+   setTimeout(function(){btn.classList.remove('happy')},620);
+  }});
+ })();
+})();
 
 /* ---------- FAQ ---------- */
 var FAQ=[
@@ -248,7 +542,60 @@ Array.prototype.forEach.call(document.querySelectorAll('.q'),function(q){
 function hash(s){var h=2166136261;for(var i=0;i<s.length;i++)h=Math.imul(h^s.charCodeAt(i),16777619);return h>>>0}
 function rng(a){return function(){a|=0;a=a+0x6D2B79F5|0;var t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
 var PAIRS=[{s:'XAU/USD',k:'XAU',p:2650.40,d:2,dir:1},{s:'XAG/USD',k:'XAG',p:31.245,d:3,dir:-1},{s:'BTC',k:'BTC',p:91250,d:0,dir:1}];
-var cur=0,cv=$('cv'),cx=cv.getContext('2d'),DPR=1,C=[],M={},T0=0,CYC=9500,lastSig=-1;
+var cur=0,cv=$('cv'),cx=cv.getContext('2d'),DPR=1,C=[],M={},T0=0,CYC=10400,lastSig=-1,rimA=0;
+var AI_COLS=[[8,148,255],[201,89,221],[255,46,84],[255,144,4]];
+function aiRgba(rgb,a){return 'rgba('+rgb[0]+','+rgb[1]+','+rgb[2]+','+a.toFixed(3)+')'}
+function aiMix(p){
+ var t=((p%1)+1)%1*AI_COLS.length,i=Math.floor(t),f=t-i;
+ var c1=AI_COLS[i%AI_COLS.length],c2=AI_COLS[(i+1)%AI_COLS.length];
+ return [Math.round(c1[0]+(c2[0]-c1[0])*f),Math.round(c1[1]+(c2[1]-c1[1])*f),Math.round(c1[2]+(c2[2]-c1[2])*f)];
+}
+function drawLiquidRimGlow(W,H,t,intensity){
+ if(intensity<=0.005)return;
+ cx.save();cx.globalCompositeOperation='screen';
+ var blobs=[
+  {speed:0.55,phase:0.0,col:AI_COLS[0],r:0.55},
+  {speed:-0.42,phase:1.7,col:AI_COLS[1],r:0.52},
+  {speed:0.63,phase:3.3,col:AI_COLS[2],r:0.48},
+  {speed:-0.51,phase:4.9,col:AI_COLS[3],r:0.46}
+ ];
+ for(var i=0;i<blobs.length;i++){
+  var b=blobs[i],ang=t*b.speed+b.phase,cs=Math.cos(ang),sn=Math.sin(ang);
+  var bx=W*0.5+(cs<0?-1:1)*Math.pow(Math.abs(cs),0.72)*(W*0.52);
+  var by=H*0.5+(sn<0?-1:1)*Math.pow(Math.abs(sn),0.72)*(H*0.54);
+  var rad=Math.max(W,H)*b.r*(0.85+0.15*Math.sin(t*1.4+b.phase));
+  var g=cx.createRadialGradient(bx,by,0,bx,by,rad);
+  var pk=0.34*intensity;
+  g.addColorStop(0,aiRgba(b.col,pk));
+  g.addColorStop(0.32,aiRgba(b.col,pk*0.42));
+  g.addColorStop(0.68,aiRgba(b.col,pk*0.08));
+  g.addColorStop(1,aiRgba(b.col,0));
+  cx.fillStyle=g;cx.fillRect(0,0,W,H);
+ }
+ cx.restore();
+}
+function drawLiquidRimBorder(W,H,t,intensity){
+ if(intensity<=0.005)return;
+ cx.save();
+ var ang=t*1.1;
+ var gx1=W*0.5+Math.cos(ang)*W*0.55,gy1=H*0.5+Math.sin(ang)*H*0.65;
+ var lg=cx.createLinearGradient(gx1,gy1,W-gx1,H-gy1);
+ lg.addColorStop(0,aiRgba(AI_COLS[0],0.95*intensity));
+ lg.addColorStop(0.33,aiRgba(AI_COLS[1],0.95*intensity));
+ lg.addColorStop(0.66,aiRgba(AI_COLS[2],0.92*intensity));
+ lg.addColorStop(1,aiRgba(AI_COLS[3],0.92*intensity));
+ cx.strokeStyle=lg;cx.lineWidth=2.6;
+ cx.shadowColor=aiRgba(aiMix(t*0.18),0.75*intensity);cx.shadowBlur=12*intensity;
+ cx.beginPath();
+ if(cx.roundRect)cx.roundRect(1.3,1.3,W-2.6,H-2.6,14.5);else cx.rect(1.3,1.3,W-2.6,H-2.6);
+ cx.stroke();
+ cx.shadowBlur=0;
+ cx.strokeStyle='rgba(255,255,255,'+(0.28*intensity).toFixed(3)+')';cx.lineWidth=0.8;
+ cx.beginPath();
+ if(cx.roundRect)cx.roundRect(2.4,2.4,W-4.8,H-4.8,13.5);else cx.rect(2.4,2.4,W-4.8,H-4.8);
+ cx.stroke();
+ cx.restore();
+}
 $('pt').innerHTML=PAIRS.map(function(p,i){return '<button class="pt" data-i="'+i+'">'+p.s+'</button>'}).join('')+'<span class="dtag">ILLUSTRATION</span>';
 Array.prototype.forEach.call(document.querySelectorAll('.pt'),function(b){b.onclick=function(){setPair(+b.dataset.i);try{navigator.vibrate&&navigator.vibrate(8)}catch(e){}}});
 function gen(p){var r=rng(hash(p.s+'lp')),n=64,price=100,out=[],dr=-p.dir*.04;
@@ -257,38 +604,57 @@ function gen(p){var r=rng(hash(p.s+'lp')),n=64,price=100,out=[],dr=-p.dir*.04;
 function setPair(i){cur=i;var p=PAIRS[i];C=gen(p);var sl=C.slice(-14);var atr=sl.reduce(function(s,x){return s+x.h-x.l},0)/14;var last=C[C.length-1].c;
  M={atr:atr,last:last,e:last,t:last+p.dir*atr*2.4,s:last-p.dir*atr*1.3,sup:Math.min.apply(0,C.slice(-40).map(function(x){return x.l})),res:Math.max.apply(0,C.slice(-40).map(function(x){return x.h}))};
  Array.prototype.forEach.call(document.querySelectorAll('.pt'),function(b,j){b.classList.toggle('on',j===i)});
- T0=performance.now();$('df').classList.remove('on');$('vE').textContent=$('vT').textContent=$('vS').textContent='—';lastSig=-1}
+ T0=performance.now();rimA=0;$('df').classList.remove('on');$('vE').textContent=$('vT').textContent=$('vS').textContent='—';lastSig=-1}
 function sizeCv(){DPR=Math.min(2,devicePixelRatio||1);cv.width=cv.clientWidth*DPR;cv.height=cv.clientHeight*DPR}
 function ease(t){t=Math.max(0,Math.min(1,t));return 1-Math.pow(1-t,3)}
 function fx(v){return v.toFixed(PAIRS[cur].d)}
 function pill(x,y,w,txt,bg,fg){cx.fillStyle=bg;cx.beginPath();if(cx.roundRect)cx.roundRect(x,y-8,w,16,5);else cx.rect(x,y-8,w,16);cx.fill();cx.fillStyle=fg;cx.font='700 10px ui-monospace,Menlo,monospace';cx.textAlign='center';cx.textBaseline='middle';cx.fillText(txt,x+w/2,y+.5)}
-function setChip(k,t){var c=$('chip');if(c.dataset.k===k)return;c.dataset.k=k;c.className='chip '+k;$('chipT').textContent=t}
+function setChip(k,t){var c=$('chip');if(c.dataset.k===k)return;c.dataset.k=k;c.className='chip '+k;$('chipT').textContent=t;var cb=$('cb');if(cb)cb.classList.toggle('ai-on',k==='scan')}
 function draw(now){
  var W=cv.clientWidth,H=cv.clientHeight;cx.setTransform(DPR,0,0,DPR,0,0);cx.clearRect(0,0,W,H);
  var el=(now-T0),n=C.length,fut=16,pR=60,pT=16,pB=14,slot=(W-pR)/(n+fut),bw=Math.max(2,slot*.62),p=PAIRS[cur];
  var lo=Math.min(Math.min.apply(0,C.map(function(x){return x.l})),M.last-M.atr*4.5),hi=Math.max(Math.max.apply(0,C.map(function(x){return x.h})),M.last+M.atr*4.5);
  var y=function(v){return pT+(hi-v)/(hi-lo)*(H-pT-pB)},x=function(i){return (i+.5)*slot};
- var rv=ease(el/2300),scanT=(el-2300)/1500,tt=ease((el-3900)/1100),fade=el>CYC-600?Math.max(0,(CYC-el)/600):1;
+ var rv=ease(el/1800),scanning=el>=1800&&el<4400,tt=ease((el-4500)/1100),fade=el>CYC-600?Math.max(0,(CYC-el)/600):1;
+ var targetRim=scanning?1:0;
+ rimA+=(targetRim-rimA)*(reduce?1:0.1);
+ if(Math.abs(targetRim-rimA)<0.004)rimA=targetRim;
+ var tSec=reduce?0.6:now*0.001;
  cx.globalAlpha=fade;cx.lineWidth=1;cx.font='10px ui-monospace,Menlo,monospace';cx.textAlign='left';cx.textBaseline='middle';
  for(var g=0;g<5;g++){var gv=lo+(hi-lo)*g/4,gy=y(gv);cx.strokeStyle='#ffffff0a';cx.beginPath();cx.moveTo(0,gy);cx.lineTo(W-pR,gy);cx.stroke();cx.fillStyle='#4f5a51';cx.fillText(fx(gv),W-pR+6,gy)}
- var xr=W-pR,ex=x(n-1),scanning=scanT>0&&scanT<1,sx=scanning?scanT*(W-pR):null;
+ /* Apple Intelligence Liquid Mesh Rim glow di belakang candle */
+ if(rimA>0.005)drawLiquidRimGlow(W,H,tSec,rimA*fade);
+ var xr=W-pR,ex=x(n-1);
  if(tt>0)[[M.res,'R','#ff777d'],[M.sup,'S','#b7f36b']].forEach(function(l){var ly=y(l[0]);cx.save();cx.globalAlpha=fade*tt*.7;cx.strokeStyle=l[2];cx.setLineDash([2,5]);cx.beginPath();cx.moveTo(0,ly);cx.lineTo(xr*tt,ly);cx.stroke();cx.restore();cx.globalAlpha=fade*tt;cx.fillStyle=l[2];cx.font='700 10px ui-monospace,Menlo,monospace';cx.fillText(l[1],6,ly-8);cx.globalAlpha=fade});
  var show=Math.floor(n*rv);
- for(var i=0;i<show;i++){var k=C[i],col=k.c>=k.o?'#b7f36b':'#ff777d',xm=x(i);cx.globalAlpha=fade*((sx!=null&&xm>sx)?.25:1);cx.strokeStyle=col;cx.fillStyle=col;cx.beginPath();cx.moveTo(xm,y(k.h));cx.lineTo(xm,y(k.l));cx.stroke();cx.fillRect(xm-bw/2,y(Math.max(k.o,k.c)),bw,Math.max(1.5,Math.abs(y(k.o)-y(k.c))))}
+ var scanAlpha=1-rimA*(1-(0.88+0.12*Math.sin(tSec*2.1)));
+ for(var i=0;i<show;i++){var k=C[i],col=k.c>=k.o?'#b7f36b':'#ff777d',xm=x(i);cx.globalAlpha=fade*scanAlpha;cx.strokeStyle=col;cx.fillStyle=col;cx.beginPath();cx.moveTo(xm,y(k.h));cx.lineTo(xm,y(k.l));cx.stroke();cx.fillRect(xm-bw/2,y(Math.max(k.o,k.c)),bw,Math.max(1.5,Math.abs(y(k.o)-y(k.c))))}
  cx.globalAlpha=fade;
- if(sx!=null){var gr=cx.createLinearGradient(sx-80,0,sx,0);gr.addColorStop(0,'#b7f36b00');gr.addColorStop(1,'#b7f36b30');cx.fillStyle=gr;cx.fillRect(sx-80,0,80,H);cx.strokeStyle='#b7f36b';cx.lineWidth=1.5;cx.shadowColor='#b7f36b';cx.shadowBlur=10;cx.beginPath();cx.moveTo(sx,0);cx.lineTo(sx,H);cx.stroke();cx.shadowBlur=0;cx.lineWidth=1}
- var ly=y(M.last);if(rv>.98){cx.strokeStyle='#ffffff30';cx.setLineDash([3,4]);cx.beginPath();cx.moveTo(ex,ly);cx.lineTo(xr,ly);cx.stroke();cx.setLineDash([]);var pu=(Math.sin(now/260)+1)/2;cx.fillStyle='#b7f36b';cx.beginPath();cx.arc(ex,ly,3,0,7);cx.fill();cx.strokeStyle='rgba(183,243,107,'+(.5-.4*pu)+')';cx.beginPath();cx.arc(ex,ly,4+pu*7,0,7);cx.stroke();if(tt<=0)pill(W-pR+2,ly,56,fx(M.last),'#222b23','#eef3ee')}
+ var ly=y(M.last);
+ /* Soft prism glint on the latest candle while AI scanning */
+ if(rimA>0.005&&rv>.95){
+  var gc=aiMix(tSec*0.22),gr=18+(reduce?0:5*Math.sin(tSec*2.4));
+  cx.save();cx.globalCompositeOperation='lighter';
+  var rg=cx.createRadialGradient(ex,ly,0,ex,ly,gr);
+  rg.addColorStop(0,aiRgba(gc,0.34*rimA*fade));
+  rg.addColorStop(1,aiRgba(gc,0));
+  cx.fillStyle=rg;cx.beginPath();cx.arc(ex,ly,gr,0,Math.PI*2);cx.fill();
+  cx.restore();
+ }
+ if(rv>.98){cx.strokeStyle='#ffffff30';cx.setLineDash([3,4]);cx.beginPath();cx.moveTo(ex,ly);cx.lineTo(xr,ly);cx.stroke();cx.setLineDash([]);var pu=(Math.sin(now/260)+1)/2;cx.fillStyle='#b7f36b';cx.beginPath();cx.arc(ex,ly,3,0,7);cx.fill();cx.strokeStyle='rgba(183,243,107,'+(.5-.4*pu)+')';cx.beginPath();cx.arc(ex,ly,4+pu*7,0,7);cx.stroke();if(tt<=0)pill(W-pR+2,ly,56,fx(M.last),'#222b23','#eef3ee')}
  if(tt>0){var yE=y(M.e),yT=y(M.e+(M.t-M.e)*tt),yS=y(M.e+(M.s-M.e)*tt);
   cx.fillStyle='rgba(183,243,107,.14)';cx.fillRect(ex,Math.min(yE,yT),xr-ex,Math.abs(yT-yE));cx.fillStyle='rgba(255,119,125,.14)';cx.fillRect(ex,Math.min(yE,yS),xr-ex,Math.abs(yS-yE));
   [[M.e,'#8ab4ff','ENTRY',0],[M.t,'#b7f36b','TP',1],[M.s,'#ff777d','SL',1]].forEach(function(l){var yy=y(l[3]?M.e+(l[0]-M.e)*tt:l[0]);cx.strokeStyle=l[1];cx.setLineDash([5,4]);cx.beginPath();cx.moveTo(ex,yy);cx.lineTo(xr,yy);cx.stroke();cx.setLineDash([]);cx.globalAlpha=fade*Math.min(1,tt*1.4);pill(W-pR+2,yy,56,fx(l[0]),l[1],'#0a0e0b');cx.fillStyle=l[1];cx.font='800 10px ui-monospace,Menlo,monospace';cx.textAlign='left';var up=(l[2]==='TP')===(p.dir===1);cx.fillText(l[2],ex+8,yy+(l[2]==='ENTRY'?-9:(up?-9:10)));cx.globalAlpha=fade})}
+ /* Liquid-glass outer rim border di lapisan atas */
+ if(rimA>0.005)drawLiquidRimBorder(W,H,tSec,rimA*fade);
  cx.globalAlpha=1;
- if(el<2300)setChip('','READING CHART');else if(el<3900)setChip('scan','AI SCANNING');else setChip('done',p.dir===1?'SETUP BUY':'SETUP SELL');
+ if(el<1800)setChip('','READING CHART');else if(el<4400)setChip('scan','AI SCANNING');else setChip('done',p.dir===1?'SETUP BUY':'SETUP SELL');
  if(tt>.5&&lastSig!==cur){lastSig=cur;$('vE').textContent=fx(M.e);$('vT').textContent=fx(M.t);$('vS').textContent=fx(M.s);$('df').classList.add('on')}
 }
 var vis=true;if('IntersectionObserver' in window){new IntersectionObserver(function(e){vis=e[0].isIntersecting}).observe(cv)}
 var reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
 function loop(now){
- if(vis){var el=now-T0;if(el>CYC){setPair((cur+1)%PAIRS.length);now=T0}
+ if(vis&&!window.__twPauseDemo){var el=now-T0;if(el>CYC){setPair((cur+1)%PAIRS.length);now=T0}
   draw(reduce?T0+CYC*.7:now)}
  requestAnimationFrame(loop)}
 addEventListener('resize',sizeCv);
@@ -304,7 +670,7 @@ if(!isIOS)$('ios').style.display='none';
 function doInstall(){
  if(dp){dp.prompt();dp.userChoice.then(function(){dp=null;$('ib').classList.remove('show')})}
  else if(isIOS){$('install').scrollIntoView({behavior:'smooth',block:'center'})}
- else{$('install').scrollIntoView({behavior:'smooth',block:'center'});$('ibT').textContent='Open your browser menu and choose "Install app" or "Add to Home screen".'}
+ else{$('install').scrollIntoView({behavior:'smooth',block:'center'});$('ibT').textContent='Open your browser menu and choose "Install Apps" or "Add to Home screen".'}
 }
 btns.forEach(function(b){b.onclick=doInstall});
 $('ibGo').onclick=doInstall;

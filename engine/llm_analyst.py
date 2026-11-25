@@ -64,6 +64,36 @@ except Exception:
 
 REPO = HERE.parent
 AUDIT_FILE = REPO / "state" / "llm-analysis-log.jsonl"
+# --- AI maintenance state (2026-11-25) ------------------------------------
+# Bila SEMUA model dalam chain gagal (quota habis / maintenance / 503), tulis
+# status ke /data/ai-maintenance.json supaya kedua-dua laman boleh tunjuk
+# banner amaran. Tanpa ini, enjin return None -> frontend tukar jadi HOLD
+# conf=0.35 macam verdict biasa, dan tiada siapa sedar AI buta.
+MAINT_FILE = REPO / "data" / "ai-maintenance.json"
+MAINT_TARGETS = [REPO / "data", REPO / "member" / "data", REPO / "pwa-app" / "data"]
+
+MAINT_HINT = "quota|maintenance|service unavailable|rate limit|overloaded|503|429|expired|invalid api key|insufficient"
+
+def _maint_write(active, detail="", models=None):
+    """Tulis/clear status AI maintenance. Best-effort — tak pernah gagalkan scan."""
+    import re as _re
+    rec = {
+        "active": bool(active),
+        "detail": str(detail)[:300],
+        "models": list(models or [])[:10],
+        "checked_at": datetime.now(timezone.utc).isoformat(),
+    }
+    text = json.dumps(rec, ensure_ascii=False) + "\n"
+    for d in MAINT_TARGETS:
+        try:
+            d.mkdir(parents=True, exist_ok=True)
+            (d / "ai-maintenance.json").write_text(text)
+        except OSError:
+            pass
+
+def _maint_is_infra(err_text):
+    """Klasifikasi: kegagalan infra (maintenance/quota) vs setup tak sah."""
+    return bool(re.search(MAINT_HINT, str(err_text), re.I))
 ROOTSYS_KEY_FILE = Path.home() / ".config/opencode/secrets/rootsys-key"
 ROOTSYS_QWEN_KEY_FILE = Path.home() / ".config/opencode/secrets/rootsys-qwen-key"
 TW_BOT_ENV = Path("/home/ubuntu/tw-bot/.env")
@@ -145,11 +175,14 @@ def _read_env_file(path):
 
 
 ROOTSYS_GATEWAY_MODELS = {
-    "glm-5.2", "glm-5.3-flash", "glm-5.3-flash-mod", "glm-5.3-flash-beta",
-    "glm-5.3-beta", "deepseek-v4-flash", "deepseek-v4-pro", "deepseek-v4.1-flash",
-    "deepseek-v4-pro-mod", "deepseek-v4.1-flash-mod", "step-5-preview",
-    "space-bunny", "mimo-v2.6-pro", "minimax-m3.1-flash", "hy4std",
-    "hy4flash-free", "glm-5.3-flashx",
+    "glm-5.4", "glm-5.2", "glm-5.2-mod",
+    "glm-5.3-flash", "glm-5.3-flash-mod", "glm-5.3-flashx",
+    "deepseek-v4-flash", "deepseek-v4-pro", "deepseek-v4.1-flash",
+    "deepseek-v4-pro-mod", "deepseek-v4.1-flash-mod",
+    "step-5-preview", "step-5-preview-mod",
+    "space-bunny", "space-bunny-mod",
+    "mimo-v2.6-pro", "mimo-v2.6-pro-mod",
+    "minimax-m3.1-flash", "minimax-m3.1-flash-mod", "hy4std",
 }
 
 
@@ -158,10 +191,18 @@ def _route(model):
     .env berkuat kuasa tanpa restart."""
     bare = model.split("/", 1)[-1]
     if bare == "qwen4-max":
+        # qwen4-max dihentikan pada rootsys 2026-11-23 dan key dedikasi sudah
+        # tamat tempoh. Guna key gateway utama supaya ralat jelas (model_not_found)
+        # dan bukan 401 yang menyembunyikan punca sebenar.
         try:
             key = ROOTSYS_QWEN_KEY_FILE.read_text().strip()
         except OSError:
             key = ""
+        if not key:
+            try:
+                key = ROOTSYS_KEY_FILE.read_text().strip()
+            except OSError:
+                key = ""
         return "https://rootsys.cloud/v1/chat/completions", key
     if (model == PRIMARY_MODEL or model.startswith("rootsys/")
             or bare in ROOTSYS_GATEWAY_MODELS):
@@ -648,7 +689,12 @@ def _call_vision(model, prompt, bars, pair, tf, timeout, bos="", choch=False, le
     b64 = VC.render(bars, pair=pair, tf=tf, bos=bos, choch=choch, levels=levels)
     if not b64:
         raise RuntimeError("vision chart render gagal")
-    return _call_vision_b64(model, prompt, b64, timeout, max_tokens=700)
+    # GLM-5.3 FlashX ialah reasoning model: content keluar SELEPAS reasoning.
+    # 700 token habis dalam reasoning bila prompt vision panjang (seen live
+    # 2026-11-25: "content kosong" walaupun gateway balas 200). 4000 selamat
+    # — sama seperti _call_model() untuk text.
+    budget = 4000 if not _is_agy_model(model) else 700
+    return _call_vision_b64(model, prompt, b64, timeout, max_tokens=budget)
 
 
 def _vision_chain():
@@ -1038,6 +1084,7 @@ def analyze(pair, bars, pip, spread_pips, call=None, budget_s=None, held=None, t
     # Vision first: Gemini 4 Neon (High -> Medium) tengok carta (EMA20/50 + SL/TP1/TP2).
     # Gagal vision -> cuba sandaran vision -> jatuh ke chain text sedia ada (fail-safe).
     vision_failed = set()
+    infra_errors = []          # (model, error) — untuk banner maintenance
     if VISION_ENABLED and not explicit_call and vision_prompt is not None:
         for v_model in _vision_chain():
             t0 = time.time()
@@ -1048,11 +1095,14 @@ def analyze(pair, bars, pip, spread_pips, call=None, budget_s=None, held=None, t
                 )
                 j = parse_response(content)
             except Exception as e:
+                err_s = f"{type(e).__name__}: {str(e)[:200]}"
+                if _maint_is_infra(err_s):
+                    infra_errors.append((v_model, err_s))
                 vision_failed.add(v_model)
                 log(f"{pair} vision {v_model} gagal ({type(e).__name__}: {str(e)[:90]}) - cuba seterusnya")
                 _audit({"ts": datetime.now(timezone.utc).isoformat(), "pair": pair, "tf": tf,
                         "model": v_model, "vision": True,
-                        "error": f"{type(e).__name__}: {str(e)[:200]}"})
+                        "error": err_s})
                 continue
             latency = time.time() - t0
             # Jika quant mencadangkan arah tertentu dan vision cuba terbalik arah -> HOLD (elak konflik).
@@ -1069,6 +1119,7 @@ def analyze(pair, bars, pip, spread_pips, call=None, budget_s=None, held=None, t
                     _audit({"ts": datetime.now(timezone.utc).isoformat(), "pair": pair, "tf": tf,
                             "model": v_model, "vision": True, "latency_s": round(latency, 1),
                             "side": "HOLD", "conflict": f"{q_setup['side']}!={v_bias}"})
+                    _maint_write(False)   # model berjaya — AI hidup semula
                     return verdict
             try:
                 verdict = validate_verdict(
@@ -1098,6 +1149,7 @@ def analyze(pair, bars, pip, spread_pips, call=None, budget_s=None, held=None, t
                     "setup": q_setup.get("setup_label") if q_setup else ""})
             log(f"{pair} {tf} {v_model} (vision): {verdict['side']} conf={verdict.get('conf')} "
                 f"rr1={verdict.get('rr1')} ({latency:.1f}s)")
+            _maint_write(False)   # model berjaya — AI hidup semula
             return verdict
 
     chain = [m for m in ([PRIMARY_MODEL] + [m for m in FALLBACK_MODELS if m != PRIMARY_MODEL])
@@ -1111,9 +1163,12 @@ def analyze(pair, bars, pip, spread_pips, call=None, budget_s=None, held=None, t
         try:
             content = call(model, text_prompt, CALL_TIMEOUT_S)
         except Exception as e:
-            log(f"{pair} {model}: panggilan gagal ({type(e).__name__}: {str(e)[:100]})")
+            err_s = f"{type(e).__name__}: {str(e)[:200]}"
+            if _maint_is_infra(err_s):
+                infra_errors.append((model, err_s))
+            log(f"{pair} {model}: panggilan gagal ({err_s[:100]})")
             _audit({"ts": datetime.now(timezone.utc).isoformat(), "pair": pair,
-                    "model": model, "error": f"{type(e).__name__}: {str(e)[:200]}"})
+                    "model": model, "error": err_s})
             continue
         latency = time.time() - t0
         try:
@@ -1134,6 +1189,7 @@ def analyze(pair, bars, pip, spread_pips, call=None, budget_s=None, held=None, t
                 }
                 _audit({"ts": datetime.now(timezone.utc).isoformat(), "pair": pair, "tf": tf,
                         "model": model, "latency_s": round(latency, 1), "verdict": verdict})
+                _maint_write(False)   # model berjaya — AI hidup semula
                 return verdict
         try:
             verdict = validate_verdict(
@@ -1164,5 +1220,14 @@ def analyze(pair, bars, pip, spread_pips, call=None, budget_s=None, held=None, t
         _audit({"ts": datetime.now(timezone.utc).isoformat(), "pair": pair,
                 "model": model, "latency_s": round(latency, 1),
                 "content": content[:600], "verdict": verdict})
+        _maint_write(False)   # model berjaya — AI hidup semula
         return verdict
+
+    # Semua model gagal. Kalau puncanya infra (quota/maintenance/503), naikkan
+    # banner. Kalau cuma setup tak sah / parse, jangan panikkan client.
+    if infra_errors:
+        detail = " | ".join(dict.fromkeys(e[:120] for _, e in infra_errors))
+        seen = list(dict.fromkeys(m for m, _ in infra_errors))
+        log(f"AI MAINTENANCE: {len(seen)} model gagal infra -> {detail[:140]}")
+        _maint_write(True, detail, seen)
     return None
