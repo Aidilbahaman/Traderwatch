@@ -2694,7 +2694,8 @@ function mapVerdict(d){
  var en=lang==='en',hold=d.side==='HOLD',dir=hold?'WAIT':d.side,conf=Math.round((+d.conf||0)*100);
  var et=d.entry_type||'market';   /* market | buy_limit | sell_limit */
  var a={dir:dir,conf:conf,entry:null,sl:null,tp:null,tp2:null,entry_type:et,
-  reasons:[],checks:[],risk:[],model:d.model||'',meta:d.ai_meta||null,tf:d.tf||tf};
+  reasons:[],checks:[],risk:[],model:d.model||'',meta:d.ai_meta||null,tf:d.tf||tf,
+  news_blocked:!!d.news_blocked};
  var rr1=+d.rr1||0,rr2=+d.rr2||0;
  if(!hold){
   a.entry=+d.entry;a.sl=+d.sl;a.tp=+d.tp1;a.tp2=(d.tp2!=null&&isFinite(+d.tp2))?+d.tp2:null;
@@ -2714,7 +2715,10 @@ function mapVerdict(d){
  }else{
   var _why=d.reason?esc(d.reason):t('waitMsg');
   a.reasons=[_why];
-  if(d.scalp_blocked)a.reasons.push(en?'Scalping M5/M15 is tuned for XAUUSD only — use H1 or H4 for this pair.':'Scalping M5/M15 hanya untuk XAUUSD — guna H1 atau H4 untuk pair ini.');
+  if(d.news_blocked)a.reasons.unshift(en
+    ?'⏸ News blackout — a high-impact release just moved this market. Spreads widen and stop-hunts are common right after; medium/low risk stays out until it calms. High risk bypasses this.'
+    :'⏸ News blackout — berita berimpak tinggi baru menggerakkan pasaran ini. Spread melebar dan stop-hunt biasa selepas release; medium/low risk duduk luar sehingga tenang. High risk bypass.');
+  else if(d.scalp_blocked)a.reasons.push(en?'Scalping M5/M15 is tuned for XAUUSD only — use H1 or H4 for this pair.':'Scalping M5/M15 hanya untuk XAUUSD — guna H1 atau H4 untuk pair ini.');
   else if(d.stale_data)a.reasons.push(en?'No live price movement — market may be closed.':'Tiada pergerakan harga — market mungkin tutup.');
   else a.reasons.push(en?'No entry suggested — wait for a clearer setup.':'Tiada entry dicadangkan — tunggu setup lebih jelas.');
   a.checks=[{t:(en?'Clear direction (BUY/SELL) — waiting':'Arah jelas (BUY/SELL) — masih menunggu'),ok:false},
@@ -3289,7 +3293,14 @@ function show(a){
  if($('shareCom'))$('shareCom').onclick=function(){shareToCommunity(a)};
  if(a.entry!=null)zoomTo(20);
  loadAlignment();
- setTimeout(function(){$('res').scrollIntoView({behavior:'smooth',block:'start'})},220);
+ /* BUKAN scrollIntoView(): pada iOS ia menggulung ancestor overflow:hidden
+    (html/body/.phone) dan menolak seluruh app ke atas — nav bar terapung di
+    tengah skrin (bug IMG_8202). Guling #sheet sahaja. */
+ setTimeout(function(){
+  var sh=$('sheet'),rs=$('res');
+  if(sh&&rs){try{sh.scrollTo({top:Math.max(0,rs.offsetTop-84),behavior:'smooth'})}catch(e){sh.scrollTop=Math.max(0,rs.offsetTop-84)}}
+  if(typeof resetWinScroll==='function')try{resetWinScroll()}catch(e){}
+ },220);
 }
 /* Multi-TF alignment: satu panggilan vision (M5/H1/H4) selepas verdict siap. */
 function loadAlignment(){

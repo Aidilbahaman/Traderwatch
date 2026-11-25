@@ -936,13 +936,15 @@ def analyze(pair, bars, pip, spread_pips, call=None, budget_s=None, held=None, t
 
     # Berita high-impact dekat (<=1 jam) -> HOLD paksa, jangan panggil LLM.
     # Bukti: spread melebar & stop-hunt biasa semasa release; lebih baik duduk luar.
-    if not explicit_call and MC is not None:
+    # Owner 2026-11-25: High risk bypass — gate OFF bermaksud SEMUA penapis off,
+    # termasuk news embargo. Medium/Low kekal disekat dan papar sebab sebenar.
+    if not explicit_call and MC is not None and str(risk_level).lower() != "high":
         try:
             _nr = MC.news_risk(pair)
             if _nr and _nr.get("blocked"):
-                log(f"{pair} {tf}: HOLD — news blackout ({_nr['reason']})")
+                log(f"{pair} {tf}: HOLD — news blackout ({_nr['reason']}) [risk={risk_level}]")
                 return {"side": "HOLD", "conf": 0.2, "tf": tf,
-                        "reason": "News blackout: " + _nr["reason"][:80],
+                        "reason": "News blackout: " + _nr["reason"][:120],
                         "news_blocked": True}
         except Exception:
             pass
