@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Layout Desktop — 4 pilihan</title>
+<style>
+:root{--bg:#080b09;--card:#111612;--text:#eef3ee;--muted:#8a978c;--line:#222b23;--lime:#b7f36b}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;background:var(--bg);color:var(--text);
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,system-ui,sans-serif;
+  -webkit-font-smoothing:antialiased}
+.wrap{max-width:900px;margin:0 auto;padding:28px 18px 70px}
+h1{font-size:23px;letter-spacing:-.04em;margin:0 0 8px;font-weight:850}
+.sub{color:var(--muted);font-size:13px;margin:0 0 22px;line-height:1.6}
+.lead{color:var(--muted);font-size:12.5px;line-height:1.65;margin:0 0 26px;
+  padding:13px 15px;background:var(--card);border:1px solid var(--line);border-radius:12px}
+.lead b{color:var(--text)}
+.list{display:flex;flex-direction:column;gap:12px}
+.card{display:flex;align-items:center;gap:14px;padding:17px 19px;
+  background:var(--card);border:1px solid var(--line);border-radius:15px;
+  text-decoration:none;color:inherit;transition:border-color .18s,transform .18s,background .18s}
+.card:hover{border-color:rgba(183,243,107,.45);transform:translateX(3px);background:#141a15}
+.num{width:36px;height:36px;border-radius:10px;flex:none;background:rgba(183,243,107,.13);
+  color:var(--lime);display:grid;place-items:center;font-weight:900;font-size:15px}
+.tx{flex:1;min-width:0}
+.tx b{display:block;font-size:15px;font-weight:830;margin-bottom:3px}
+.tx span{display:block;font-size:12px;color:var(--muted);line-height:1.5}
+.go{margin-left:auto;flex:none;color:var(--lime);font-size:18px;opacity:.6}
+.card:hover .go{opacity:1}
+.tag{display:inline-block;margin-left:8px;font-size:9px;font-weight:800;letter-spacing:.08em;
+  padding:2px 7px;border-radius:99px;background:rgba(183,243,107,.14);color:var(--lime)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Layout desktop</h1>
+  <p class="sub">Empat rupa dengan falsafah berbeza. Semua kekalkan border hairline, sidebar boleh tutup, mobile tak disentuh.</p>
+
+  <p class="lead">
+    <b>Cara pilih:</b> fikir apa yang client anda buat paling kerap. Kalau dia
+    <b>scan semua pair sekali lalu</b> → Compact atau Dense. Kalau dia
+    <b>fokus satu-satu</b> → Focus. Kalau dia nak <b>selesa santai</b> → Wide.
+  </p>
+
+  <div class="list">
+    <a class="card" href="layout-compact.html">
+      <div class="num">1</div>
+      <div class="tx">
+        <b>Compact</b><span class="tag">8 kolum</span>
+        <span>Kandungan penuh lebar, kad kecil padat. 12 pair muat separuh skrin. Paling banyak data.</span>
+      </div>
+      <div class="go">→</div>
+    </a>
+
+    <a class="card" href="layout-wide.html">
+      <div class="num">2</div>
+      <div class="tx">
+        <b>Wide</b><span class="tag">4 kolum</span>
+        <span>Center 1240px, kad besar selesa, font besar. Paling selesa untuk mata.</span>
+      </div>
+      <div class="go">→</div>
+    </a>
+
+    <a class="card" href="layout-dense.html">
+      <div class="num">3</div>
+      <div class="tx">
+        <b>Dense</b><span class="tag">6 kolum × 2 baris</span>
+        <span>12 pair dalam 2 baris tetap. Semua nampak sekali lalu tanpa scroll. Paling symmetrical.</span>
+      </div>
+      <div class="go">→</div>
+    </a>
+
+    <a class="card" href="layout-focus.html">
+      <div class="num">4</div>
+      <div class="tx">
+        <b>Focus</b><span class="tag">3 kolum besar</span>
+        <span>Kad besar dengan chart mini 44px. Hanya 4 pair nampak tetapi setiap satu kaya detail.</span>
+      </div>
+      <div class="go">→</div>
+    </a>
+  </div>
+</div>
+</body>
+</html>
