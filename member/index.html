@@ -268,6 +268,9 @@ html.kb-pre .composer,html.kb-pre .dm-comp{transition:none !important;animation:
 #view-friends.st-list .orb-stage .orb-core{opacity:1;transform:translate(-50%,-50%) scale(.8)}
 #view-friends.st-list .orb-stage::before{opacity:.5}
 #view-friends.st-orbit .orb-stage{height:min(62vh,480px)}
+/* orbit state: section memenuhi tinggi scroll penuh (kalau tidak, sheet absolute bottom:0 tergantung
+   di tengah dan meninggalkan kawasan gelap antara tabs dan bnav — bug screenshot iPhone) */
+#view-friends.st-orbit{min-height:var(--frs-h,calc(100vh - 130px))}
 #view-friends.st-orbit .orb-sheet{position:absolute;left:0;right:0;bottom:0;transform:translateY(calc(100% - 92px));padding-top:6px;z-index:9;box-shadow:0 -18px 40px #000a}
 #view-friends.st-orbit .orb-sheet .orb-grip .glab::after{content:" ⌃"}
 #view-friends.st-orbit .orb-ring.r1{width:150px;height:150px}
@@ -341,11 +344,12 @@ html[data-theme="light"] .orb-btn.soft{color:#4f7e16}
    Semasa peek, orbBody disembunyikan supaya tiada row flash di bawah tabs. */
 #view-friends.st-orbit .orb-sheet #orbBody{max-height:calc(46vh - 20px);overflow-y:auto;overscroll-behavior:contain;opacity:0;transition:opacity .25s;pointer-events:none}
 #view-friends.st-orbit.peek-open .orb-sheet #orbBody{opacity:1;pointer-events:auto}
-.orb-tabs{display:flex;align-items:center;gap:6px;margin-bottom:10px;overflow-x:auto;scrollbar-width:none}
+.orb-tabs{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:10px}
 .orb-tabs::-webkit-scrollbar{display:none}
-.orb-tabs button{flex:none;padding:7px 13px;border-radius:999px;font-size:12.5px;font-weight:700;color:var(--muted);background:transparent;transition:.16s;display:inline-flex;align-items:center;gap:5px}
+.orb-tabs button{min-width:0;padding:8px 4px;border-radius:999px;font-size:12px;font-weight:700;color:var(--muted);background:transparent;transition:.16s;display:inline-flex;align-items:center;justify-content:center;gap:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.orb-tabs button span:not(.cnt){overflow:hidden;text-overflow:ellipsis}
 .orb-tabs button.on{background:var(--card2);color:var(--text);border:1px solid var(--line)}
-.orb-tabs .cnt{display:inline-grid;place-items:center;min-width:17px;height:17px;padding:0 5px;border-radius:999px;background:var(--lime);color:var(--onlime);font-size:10px;font-weight:900}
+.orb-tabs .cnt{display:inline-grid;place-items:center;min-width:16px;height:16px;padding:0 4px;border-radius:999px;background:var(--lime);color:var(--onlime);font-size:9.5px;font-weight:900;flex:none}
 
 .f-list{display:flex;flex-direction:column}
 .f-row{display:flex;align-items:center;gap:12px;padding:11px 6px;border-bottom:1px solid var(--line);cursor:pointer;border-radius:14px;transition:background .15s}
@@ -1835,7 +1839,7 @@ var hap=function(m){try{navigator.vibrate&&navigator.vibrate(m)}catch(e){}};
 /* ---------------- i18n ---------------- */
 var DICT={
  ms:{
-  greet:'Hai, ',trader:'Trader',greetSub:'Pilih pair — AI baca chart dan lukis Entry, SL & TP untuk anda.',
+  greet:'Hai, ',gM:'Selamat Pagi',gA:'Selamat Tengah Hari',gE:'Selamat Petang',trader:'Trader',greetSub:'Pilih pair — AI baca chart dan lukis Entry, SL & TP untuk anda.',
   navAnalyst:'Analyst',navCommunity:'Komuniti',navFriends:'Rakan',navProfile:'Profil',navSettings:'Tetapan',
   search:'Cari pair…',noPairs:'Tiada pair dijumpai.',hint:'Pilih pair untuk analisis AI masa sebenar.',all:'Semua',commodity:'Komoditi',forex:'Forex',crypto:'Crypto',indices:'Indeks',
   soon:'Belum dibuka',notOpen:'Pair ini belum dibuka untuk analisis AI. Cuba pair di bawah.',
@@ -1884,7 +1888,7 @@ var DICT={
   loggingOut:'Melog keluar…',langNative:'Bahasa Melayu'
  },
  en:{
-  greet:'Hi, ',trader:'Trader',greetSub:'Pick a pair — AI reads the chart and draws Entry, SL & TP for you.',
+  greet:'Hi, ',gM:'Good Morning',gA:'Good Afternoon',gE:'Good Evening',trader:'Trader',greetSub:'Pick a pair — AI reads the chart and draws Entry, SL & TP for you.',
   navAnalyst:'Analyst',navCommunity:'Community',navFriends:'Friends',navProfile:'Profile',navSettings:'Settings',
   search:'Search pairs…',noPairs:'No pairs found.',hint:'Choose a pair for real-time AI analysis.',all:'All',commodity:'Commodities',forex:'Forex',crypto:'Crypto',indices:'Indices',
   soon:'Not open yet',notOpen:'This pair is not open for AI analysis yet. Try a pair below.',
@@ -1933,7 +1937,7 @@ var DICT={
   loggingOut:'Signing out…',langNative:'English'
  },
  zh:{
-  greet:'你好，',trader:'交易者',greetSub:'选择货币对——AI 读取图表并为您绘制入场、止损与止盈。',
+  greet:'你好，',gM:'早上好',gA:'下午好',gE:'晚上好',trader:'交易者',greetSub:'选择货币对——AI 读取图表并为您绘制入场、止损与止盈。',
   navAnalyst:'分析',navCommunity:'社区',navFriends:'好友',navProfile:'个人资料',navSettings:'设置',
   search:'搜索货币对…',noPairs:'未找到货币对。',hint:'选择货币对进行实时 AI 分析。',all:'全部',commodity:'商品',forex:'外汇',crypto:'加密货币',indices:'指数',
   soon:'尚未开放',notOpen:'该货币对尚未开放 AI 分析。请尝试下方货币对。',
@@ -1980,7 +1984,7 @@ var DICT={
   loggingOut:'正在退出…',langNative:'中文'
  },
  id:{
-  greet:'Hai, ',trader:'Trader',greetSub:'Pilih pair — AI membaca chart dan lukis Entry, SL & TP untuk anda.',
+  greet:'Hai, ',gM:'Selamat Pagi',gA:'Selamat Siang',gE:'Selamat Malam',trader:'Trader',greetSub:'Pilih pair — AI membaca chart dan lukis Entry, SL & TP untuk anda.',
   navAnalyst:'Analis',navCommunity:'Komunitas',navFriends:'Teman',navProfile:'Profil',navSettings:'Pengaturan',
   search:'Cari pair…',noPairs:'Tidak ada pair ditemukan.',hint:'Pilih pair untuk analisis AI waktu nyata.',all:'Semua',commodity:'Komoditas',forex:'Forex',crypto:'Kripto',indices:'Indeks',
   soon:'Belum dibuka',notOpen:'Pair ini belum dibuka untuk analisis AI. Coba pair di bawah.',
@@ -2026,7 +2030,7 @@ var DICT={
   loggingOut:'Keluar…',langNative:'Bahasa Indonesia'
  },
  ta:{
-  greet:'வணக்கம், ',trader:'வர்த்தகர்',greetSub:'ஒரு ஜோடியைத் தேர்ந்தெடுக்கவும் — AI கிராபைப் படித்து Entry, SL & TP ஐ வரைகிறது.',
+  greet:'வணக்கம், ',gM:'காலை வணக்கம்',gA:'மதிய வணக்கம்',gE:'மாலை வணக்கம்',trader:'வர்த்தகர்',greetSub:'ஒரு ஜோடியைத் தேர்ந்தெடுக்கவும் — AI கிராபைப் படித்து Entry, SL & TP ஐ வரைகிறது.',
   navAnalyst:'பகுப்பாய்வு',navCommunity:'சமூகம்',navFriends:'நண்பர்கள்',navProfile:'சுயவிவரம்',navSettings:'அமைப்புகள்',
   search:'ஜோடிகளைத் தேடு…',noPairs:'ஜோடிகள் இல்லை.',hint:'நேரடி AI பகுப்பாய்விற்கு ஜோடியைத் தேர்ந்தெடுக்கவும்.',all:'அனைத்தும்',commodity:'பொருட்கள்',forex:'ஃபாரெக்ஸ்',crypto:'கிரிப்டோ',indices:'குறியீடுகள்',
   soon:'திறக்கப்படவில்லை',notOpen:'இந்த ஜோடி AI பகுப்பாய்விற்கு திறக்கப்படவில்லை. கீழே உள்ள ஜோடியை முயற்சிக்கவும்.',
@@ -3711,7 +3715,7 @@ function shareSetupInDM(){
    3 states: balanced (default) / list (orbit jadi pill) / orbit (orbit besar, list sorok bawah).
    Drag pada grip atau stage — ikut jari, lepas snap ikut velocity. */
 var FST={cur:'balanced',y:0,y0:0,t0:0,drag:false,moved:false};
-function fstSet(st){FST.cur=st;var v=$('view-friends');if(v){v.classList.remove('st-list','st-orbit','dragging','peek-open');if(st==='list')v.classList.add('st-list');if(st==='orbit')v.classList.add('st-orbit')}var g=$('orbGrip');if(g){var lab=g.querySelector('.glab');if(lab)lab.textContent=st==='list'?(lang==='en'?'Chats':'Chat'):st==='orbit'?(lang==='en'?'Starling':'Starling'):(lang==='en'?'Friends':'Rakan')}}
+function fstSet(st){FST.cur=st;var v=$('view-friends');if(v){v.classList.remove('st-list','st-orbit','dragging','peek-open');if(st==='list')v.classList.add('st-list');if(st==='orbit')v.classList.add('st-orbit');/* ukur tinggi scroll sebenar untuk min-height orbit */try{v.style.setProperty('--frs-h',document.getElementById('scroll').clientHeight+'px')}catch(e){}}var g=$('orbGrip');if(g){var lab=g.querySelector('.glab');if(lab)lab.textContent=st==='list'?(lang==='en'?'Chats':'Chat'):st==='orbit'?(lang==='en'?'Starling':'Starling'):(lang==='en'?'Friends':'Rakan')}}
 function fstStageH(){var v=$('view-friends');var s=$('orbStage');if(!v||!s)return 0;return s.getBoundingClientRect().height}
 function fstSnap(dy,dt){
  /* dy>0 = tarik ke bawah (ke arah orbit), dy<0 = ke atas (ke arah list) */
@@ -4605,6 +4609,7 @@ function renderStats(){
 function renderProfile(){
  if(!ME)return;
  var nm=ME.dispName||'Ahli';
+ drawGreet();
  $('pInit').textContent=initials(nm);$('pName').textContent=nm;$('pEmail').textContent=ME.email||'—';
  $('pPlan').textContent=PLAN==='pro'?'PRO':'FREE';
  $('pSince').textContent=t('since')+' '+dateMY(ME.created_at);
@@ -4713,11 +4718,34 @@ function drawThemes(){
 }
 function setLang(l){lang=l;try{localStorage.setItem('tw-lang',l)}catch(e){}renderAll();if(profileLoaded)renderProfile();if(comLoaded)drawMsgs();toast(t('langNative'))}
 
+/* ---------------- greeting ikut masa & nama client ----------------
+   "Good Morning/Afternoon/Evening, <Nama Front>" — masa ikut peranti
+   client (region dia), nama dari profil Supabase. Tsk 5 min supaya
+   greeting berubah sendiri kalau app dibiarkan terbuka lintas waktu. */
+function greetBucket(){
+ var h=new Date().getHours();
+ if(h>=5&&h<12)return 'gm';
+ if(h>=12&&h<18)return 'ga';
+ return 'ge';
+}
+function drawGreet(){
+ var el=$('greet');if(!el)return;
+ var bkt=greetBucket(); /* gm / ga / ge */
+ var key=bkt==='gm'?'gM':bkt==='ga'?'gA':'gE'; /* padan dengan kunci DICT */
+ var part=t(key);
+ var nm=(ME&&ME.dispName)?ME.dispName:t('trader');
+ el.innerHTML=esc(part)+', <span>'+esc(nm)+'</span>';
+}
+function scheduleGreet(){
+ try{if(window.__greetTimer)clearInterval(window.__greetTimer)}catch(e){}
+ window.__greetTimer=setInterval(function(){if(current==='analyst')drawGreet()},300000);
+}
+
 /* ---------------- render all ---------------- */
 function renderAll(){
  drawNav();try{
  document.documentElement.lang=lang;
- $('greet').innerHTML=esc(t('greet'))+'<span>'+esc(t('trader'))+'</span>';
+ drawGreet();
  $('greetSub').textContent=t('greetSub');$('hintTxt').textContent=t('hint');
  if(typeof updateStarMood==='function')updateStarMood(false);
  $('footTxt').textContent='Educational only. Trading involves substantial risk.';
@@ -5166,7 +5194,7 @@ if('serviceWorker' in navigator){window.addEventListener('load',function(){
 })}
 
 /* ---------------- init ---------------- */
-applyTheme();renderAll();
+applyTheme();renderAll();scheduleGreet();
 var _sp=new URLSearchParams(location.search);
 var iv=_sp.get('view');
 var _dm=_sp.get('dm');
@@ -5179,7 +5207,7 @@ if(!iv){
 showView(VIEWS.indexOf(iv)>-1?iv:'analyst');
 splashStart();
 /* build marker: sahkan versi CSS yang telefon render (buang bila punca blur jumpa) */
-try{var bt=document.getElementById('buildTag');if(bt)bt.textContent='build v106-drag6 · '+(getComputedStyle(document.querySelector('.appbar')).backdropFilter==='none'?'appbar blur OFF':'appbar blur STILL ON');}catch(e){}
+try{var bt=document.getElementById('buildTag');if(bt)bt.textContent='build v108-drag8 · '+(getComputedStyle(document.querySelector('.appbar')).backdropFilter==='none'?'appbar blur OFF':'appbar blur STILL ON');}catch(e){}
 })();
 
 </script>
