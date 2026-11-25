@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>TraderWatch Desktop — layout preview</title>
+<style>
+/* ============================================================
+   PREVIEW — TraderWatch Desktop layout (iOS natural style)
+   Bukan app sebenar. Untuk semakan sebelum masuk index.html.
+   Mobile (<=840px) kekal tak disentuh.
+   ============================================================ */
+@property --ai-angle{syntax:'<angle>';initial-value:0deg;inherits:false}
+
+:root{
+  --bg:#0a0e0b;--card:#111612;--card2:#171e18;--text:#eef3ee;--muted:#8a978c;
+  --line:#222b23;--lime:#b7f36b;--red:#ff777d;--orange:#ffc16b;--blue:#8ab4ff;
+  --chart:#0c110d;--onlime:#10150b;color-scheme:dark;
+  --ai1:#0894FF;--ai2:#C959DD;--ai3:#FF2E54;--ai4:#FF9004;
+}
+html[data-theme="light"]{--bg:#f5f7f5;--card:#fff;--card2:#eef2ed;--text:#14211a;
+  --muted:#63736a;--line:rgba(0,0,0,.1);--lime:#7ab52e;--red:#d64b55;
+  --orange:#b8791b;--blue:#3a6fc4;--chart:#f0f4ef;--onlime:#0b1405}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;overflow:hidden;background:var(--bg);color:var(--text);
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,system-ui,sans-serif;
+  -webkit-font-smoothing:antialiased;letter-spacing:-.011em}
+
+/* ====== DESKTOP APP SHELL ====== */
+.app{height:100%;display:grid;grid-template-columns:248px 1fr 360px;
+  grid-template-areas:"side main right"}
+@media (max-width:1400px){.app{grid-template-columns:220px 1fr 320px}}
+@media (max-width:1100px){.app{grid-template-columns:220px 1fr;grid-template-areas:"side main"} .right{display:none}}
+
+/* --- sidebar --- */
+.side{grid-area:side;background:var(--card);border-right:1px solid var(--line);
+  display:flex;flex-direction:column;overflow:hidden}
+.side .brand{display:flex;align-items:center;gap:11px;padding:20px 18px 16px;
+  border-bottom:1px solid var(--line)}
+.brand .logo{width:38px;height:38px;border-radius:12px;background:var(--lime);color:var(--onlime);
+  display:grid;place-items:center;font-weight:950;font-size:18px;
+  box-shadow:0 0 24px rgba(183,243,107,.25);flex:none}
+.brand b{display:block;font-size:14px;letter-spacing:.03em}
+.brand small{display:block;color:var(--muted);font-size:8.5px;letter-spacing:.18em;
+  text-transform:uppercase;font-weight:700;margin-top:2px}
+.side .sec{padding:18px 18px 8px;font-size:9px;letter-spacing:.14em;color:var(--muted);
+  text-transform:uppercase;font-weight:800}
+.navlist{padding:0 10px;flex:1;overflow-y:auto}
+.navlist button{width:100%;display:flex;align-items:center;gap:10px;padding:10px 12px;
+  border-radius:12px;border:0;background:transparent;color:var(--muted);
+  font-size:13px;font-weight:700;cursor:pointer;transition:.15s;text-align:left;
+  font-family:inherit}
+.navlist button:hover{background:var(--card2);color:var(--text)}
+.navlist button.on{background:rgba(183,243,107,.12);color:var(--lime)}
+.navlist button.on .dot{background:var(--lime);box-shadow:0 0 8px var(--lime)}
+.navlist .dot{width:7px;height:7px;border-radius:50%;background:var(--muted);flex:none;transition:.15s}
+.navlist svg{width:17px;height:17px;flex:none;stroke:currentColor;fill:none;
+  stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.sidefoot{padding:14px 16px 18px;border-top:1px solid var(--line);
+  display:flex;align-items:center;gap:10px}
+.av{width:32px;height:32px;border-radius:50%;background:var(--lime);color:var(--onlime);
+  display:grid;place-items:center;font-weight:850;font-size:11px;flex:none}
+.sidefoot .who b{display:block;font-size:12px}
+.sidefoot .who span{display:block;color:var(--muted);font-size:10px}
+.sidefoot .th{margin-left:auto;width:30px;height:30px;border-radius:9px;display:grid;place-items:center;
+  background:var(--card2);border:1px solid var(--line);color:var(--muted);cursor:pointer;font-size:13px}
+
+/* --- main --- */
+.main{grid-area:main;display:flex;flex-direction:column;overflow:hidden}
+.topbar{display:flex;align-items:center;gap:14px;padding:14px 24px;
+  border-bottom:1px solid var(--line);background:var(--card);flex:none}
+.topbar h1{font-size:16px;font-weight:830;letter-spacing:-.02em;margin:0}
+.topbar .pill{font-size:10px;font-weight:800;letter-spacing:.06em;padding:4px 10px;
+  border-radius:99px;background:rgba(183,243,107,.14);color:var(--lime);border:1px solid rgba(183,243,107,.3)}
+.topbar .sp{flex:1}
+.topbar .tb{width:34px;height:34px;border-radius:10px;background:var(--card2);border:1px solid var(--line);
+  color:var(--muted);display:grid;place-items:center;cursor:pointer;font-size:14px}
+.scroll{flex:1;overflow-y:auto;padding:26px 28px 40px;scrollbar-width:thin;
+  scrollbar-color:var(--line) transparent}
+.hero{display:flex;align-items:flex-end;gap:14px;margin-bottom:22px;flex-wrap:wrap}
+.hero h2{font-size:26px;font-weight:850;letter-spacing:-.045em;margin:0;line-height:1.05}
+.hero h2 em{font-style:normal;color:var(--lime)}
+.hero .sp2{flex:1}
+.hero .tf{display:flex;gap:4px;background:var(--card2);border:1px solid var(--line);
+  border-radius:12px;padding:3px}
+.hero .tf button{border:0;background:transparent;color:var(--muted);padding:8px 18px;
+  border-radius:9px;font-weight:750;font-size:12px;cursor:pointer;font-family:inherit;transition:.15s}
+.hero .tf button.on{background:var(--lime);color:var(--onlime)}
+
+/* chart + panel grid */
+.grid2{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:16px;align-items:stretch}
+@media (max-width:900px){.grid2{grid-template-columns:1fr}}
+.panel{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:14px 16px}
+.panel .lab{font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);
+  font-weight:800;margin-bottom:10px}
+.chartbox{position:relative;border-radius:14px;background:var(--chart);
+  border:1px solid var(--line);height:420px;overflow:hidden;
+  display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:12px}
+
+/* risk 3 pecahan */
+.risks{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.risk{border:1px solid var(--line);border-radius:12px;padding:10px 8px;text-align:center;
+  cursor:pointer;background:var(--card2);transition:.16s;position:relative;overflow:hidden}
+.risk b{display:block;font-size:12px;font-weight:820}
+.risk small{display:block;font-size:8px;color:var(--muted);letter-spacing:.06em;
+  text-transform:uppercase;margin-top:2px}
+.risk.low{--rc:#b7f36b}.risk.med{--rc:#ffc16b}.risk.high{--rc:#ff777d}
+.risk.low b{color:var(--lime)}.risk.med b{color:var(--orange)}.risk.high b{color:var(--red)}
+.risk .bar{height:3px;border-radius:99px;background:var(--line);margin-top:8px;overflow:hidden}
+.risk .bar i{display:block;height:100%;background:var(--rc)}
+.risk.low .bar i{width:33%}.risk.med .bar i{width:66%}.risk.high .bar i{width:100%}
+.risk.on{border-color:var(--rc);box-shadow:0 0 0 1px var(--rc)}
+.risk.high.on .bar i{box-shadow:0 0 8px var(--red)}
+
+/* right rail */
+.right{grid-area:right;background:var(--card);border-left:1px solid var(--line);
+  display:flex;flex-direction:column;overflow-y:auto}
+.right .sec{padding:18px 18px 10px;font-size:9px;letter-spacing:.14em;color:var(--muted);
+  text-transform:uppercase;font-weight:800}
+.aicard{margin:0 14px 12px;padding:14px;border-radius:14px;background:var(--card2);
+  border:1px solid var(--line)}
+.aicard .ai{display:flex;align-items:center;gap:12px}
+.aicard .orb{width:38px;height:38px;border-radius:50%;flex:none;
+  background:conic-gradient(from var(--ai-angle),var(--ai1),var(--ai2),var(--ai3),var(--ai4),var(--ai1));
+  animation:spinOrb 4s linear infinite;position:relative}
+.aicard .orb::after{content:"";position:absolute;inset:5px;border-radius:50%;background:var(--card2)}
+.aicard .st{font-size:11px;font-weight:800}
+.aicard .st small{display:block;font-weight:650;color:var(--muted);font-size:10px;margin-top:2px}
+@keyframes spinOrb{to{--ai-angle:360deg}}
+.lb{margin:0 14px 14px}
+.lb .row{display:flex;align-items:center;gap:9px;padding:8px 6px;border-radius:9px;font-size:12px}
+.lb .row:hover{background:var(--card2)}
+.lb .rk{width:22px;color:var(--muted);font-weight:800;font-size:11px;text-align:center;flex:none}
+.lb .rk.top{color:var(--lime)}
+.lb .av{width:26px;height:26px;border-radius:50%;background:var(--card2);color:var(--muted);
+  display:grid;place-items:center;font-size:9px;font-weight:800;flex:none}
+.lb .nm{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:700}
+.lb .pct{font-weight:820;font-variant-numeric:tabular-nums}
+.lb .pct.up{color:var(--lime)}.lb .pct.dn{color:var(--red)}
+.right .foot{margin-top:auto;padding:14px 18px;font-size:10px;color:var(--muted);line-height:1.5;
+  border-top:1px solid var(--line)}
+
+/* analisis kad (menunggu) */
+.waitbox{padding:20px;text-align:center;color:var(--muted);font-size:12.5px;line-height:1.6}
+.waitbox b{color:var(--text)}
+
+/* mobile guard: preview ini desktop sahaja */
+@media (max-width:840px){
+  body{display:grid;place-items:center;height:100%;padding:20px;text-align:center}
+  .app{display:none}
+  .mob{display:block}
+}
+.mob{display:none;font-size:14px;color:var(--muted);line-height:1.6;max-width:300px}
+.mob b{color:var(--text)}
+</style>
+</head>
+<body>
+
+<div class="app">
+  <!-- SIDEBAR -->
+  <aside class="side">
+    <div class="brand">
+      <div class="logo">✦</div>
+      <div><b>TRADERWATCH</b><small>AI Analyst</small></div>
+    </div>
+    <div class="sec">Market</div>
+    <nav class="navlist">
+      <button class="on"><span class="dot"></span><svg viewBox="0 0 24 24"><path d="M3 17l5-5 4 4 7-7"/><path d="M3 21h18"/></svg>Analyst</button>
+      <button><span class="dot"></span><svg viewBox="0 0 24 24"><path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 01-10 0V4z"/></svg>League</button>
+      <button><span class="dot"></span><svg viewBox="0 0 24 24"><path d="M21 12a8 8 0 01-11.6 7.1L4 21l1.9-5.4A8 8 0 1121 12z"/></svg>Community</button>
+      <button><span class="dot"></span><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.5"/><path d="M4.5 20a7.5 7.5 0 0115 0"/></svg>Profile</button>
+      <button><span class="dot"></span><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19 12a7 7 0 01-.1 1.2l2 1.6-2 3.4-2.4-1a7 7 0 01-2 1.2L14 21h-4l-.4-2.6a7 7 0 01-2-1.2l-2.4 1-2-3.4 2-1.6A7 7 0 015 12a7 7 0 01.1-1.2l-2-1.6 2-3.4 2.4 1a7 7 0 012-1.2L10 3h4l.4 2.6a7 7 0 012 1.2l2.4-1 2 3.4-2 1.6c.1.4.2.8.2 1.2z"/></svg>Settings</button>
+    </nav>
+    <div class="sidefoot">
+      <div class="av">TW</div>
+      <div class="who"><b>Trader</b><span>Free plan</span></div>
+      <div class="th">☾</div>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main">
+    <header class="topbar">
+      <h1>XAUUSD <span style="color:var(--muted);font-weight:650">· Gold / US Dollar</span></h1>
+      <span class="pill">LIVE</span>
+      <span class="sp"></span>
+      <button class="tb" title="Theme">☾</button>
+      <button class="tb" title="Sound">♪</button>
+    </header>
+
+    <div class="scroll">
+      <div class="hero">
+        <h2>Gold <em>analysis</em></h2>
+        <span class="sp2"></span>
+        <div class="tf">
+          <button>M1</button><button>M5</button><button>M15</button><button class="on">H1</button>
+        </div>
+      </div>
+
+      <div class="grid2">
+        <div class="panel">
+          <div class="lab">Real OHLC chart · H1</div>
+          <div class="chartbox">Chart OHLC sebenar di sini</div>
+
+          <div style="margin-top:14px">
+            <div class="lab">Manage your risk</div>
+            <div class="risks">
+              <div class="risk low"><b>Low</b><small>Tight scan</small><div class="bar"><i></i></div></div>
+              <div class="risk med on"><b>Medium</b><small>Default</small><div class="bar"><i></i></div></div>
+              <div class="risk high"><b>High</b><small>Gate off</small><div class="bar"><i></i></div></div>
+            </div>
+          </div>
+
+          <button style="width:100%;margin-top:14px;padding:14px;border-radius:14px;border:0;
+            background:var(--lime);color:var(--onlime);font-weight:800;font-size:14px;cursor:pointer;
+            font-family:inherit">✦ Analyze with AI</button>
+        </div>
+
+        <div class="panel" style="display:flex;flex-direction:column">
+          <div class="lab">Confluence checklist</div>
+          <div class="waitbox" style="flex:1;display:grid;place-items:center">
+            Belum ada analisis.<br>
+            <b>Tekan "Analyze with AI"</b><br>untuk mula imbasan H1.
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- RIGHT RAIL -->
+  <aside class="right">
+    <div class="sec">AI engine</div>
+    <div class="aicard">
+      <div class="ai">
+        <div class="orb"></div>
+        <div class="st">Enjin sedia<small>Enjin membaca 9 pair setiap minit</small></div>
+      </div>
+    </div>
+
+    <div class="sec">Paper league</div>
+    <div class="lb">
+      <div class="row"><span class="rk top">1</span><span class="av">AH</span><span class="nm">amir_h</span><span class="pct up">+12.4%</span></div>
+      <div class="row"><span class="rk top">2</span><span class="av">NA</span><span class="nm">nurul.a</span><span class="pct up">+8.1%</span></div>
+      <div class="row"><span class="rk">3</span><span class="av">ZM</span><span class="nm">zaid</span><span class="pct up">+3.9%</span></div>
+      <div class="row"><span class="rk">4</span><span class="av">TW</span><span class="nm">Anda</span><span class="pct dn">−0.6%</span></div>
+      <div class="row"><span class="rk">5</span><span class="av">RK</span><span class="nm">raf</span><span class="pct dn">−2.2%</span></div>
+    </div>
+
+    <div class="foot">
+      Virtual capital only — outcomes resolve from live prices.<br><br>
+      Educational only. Trading involves substantial risk.
+    </div>
+  </aside>
+</div>
+
+<div class="mob"><b>Preview ini untuk desktop.</b><br>Buka pada skrin > 840px untuk lihat layout penuh. Mobile app tak berubah.</div>
+
+</body>
+</html>
