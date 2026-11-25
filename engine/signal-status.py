@@ -485,16 +485,53 @@ def main():
     # memastikan Pages sentiasa dapat status live dan `git status` sentiasa
     # bersih (fail tak ternoda dalam working tree).
     if new_text != old_text:
+        if not _commit_and_push(changed):
+            return 1
+    return 0 if errors == 0 else 1
+
+
+def _commit_and_push(changed):
+    """Commit + push signal-status.json, surviving a concurrent editor.
+
+    The repo is edited by hand (and by T3) while this cron runs every 5 min.
+    A push sent from a parent that is 20-30 s stale is rejected with
+    `cannot lock ref 'refs/heads/main'` — observed 2026-11-25 00:27:44, 24 s
+    after an interactive commit. 288 runs a day make that race common even
+    though it is harmless. Re-pull then retry instead of losing the run down
+    the `return 1` path.
+    """
+    for attempt in (1, 2, 3):
         git("add", "signal-status.json")
         commit = git("commit", "-m", f"status: {changed} signal update(s)")
-        if commit.returncode != 0:
-            log("COMMIT-FAIL " + (commit.stderr or "")[:160])
-        else:
-            push = git("push", "origin", "main")
-            if push.returncode != 0:
-                log("PUSH-FAIL " + (push.stderr or "")[:160])
-                return 1
-    return 0 if errors == 0 else 1
+        committed_now = commit.returncode == 0
+        if not committed_now:
+            # "nothing to commit" is expected in two cases: the working tree
+            # is genuinely clean, or attempt 1 already created the commit and
+            # the pull just rebased it. Either way we still push — a previous
+            # run may have left a commit unpushed after a lock-ref rejection,
+            # and this is the only place that drains it.
+            if "nothing to commit" not in (commit.stdout or ""):
+                log("COMMIT-FAIL " + (commit.stderr or "")[:160])
+                return False
+
+        push = git("push", "origin", "main")
+        if push.returncode == 0:
+            return True
+
+        err = (push.stderr or "") + (push.stdout or "")
+        log(f"PUSH-FAIL attempt {attempt}: " + err[:160])
+        if attempt == 3:
+            break
+        # Someone else advanced main. Rebase our single status commit on top
+        # and try again. --autostash protects any half-written working tree.
+        rebase = git("-c", "rebase.autoStash=true", "pull", "--rebase", "--quiet")
+        if rebase.returncode != 0:
+            git("rebase", "--abort")
+            log("PUSH-RETRY abandoned: pull --rebase failed")
+            return False
+
+    log("PUSH-FAIL final — giving up after 3 attempts")
+    return False
 
 
 if __name__ == "__main__":
