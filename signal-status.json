@@ -4541,15 +4541,21 @@
    "entry_at": "2026-11-25T12:01:00+08:00"
   },
   "XAGUSD_20261125_120037": {
-   "status": "pending"
+   "status": "active",
+   "entry_at": "2026-11-25T12:13:00+08:00"
   },
   "BTCUSD_20261125_120552": {
    "status": "pending"
   },
   "XAGUSD_20261125_121040": {
-   "status": "pending"
+   "status": "active",
+   "entry_at": "2026-11-25T12:12:00+08:00"
+  },
+  "XAUUSD_20261125_121515": {
+   "status": "active",
+   "entry_at": "2026-11-25T12:16:00+08:00"
   }
  },
- "updated": "2026-11-25T12:11:01+08:00",
+ "updated": "2026-11-25T12:16:02+08:00",
  "_cursor": 0
 }
