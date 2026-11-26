@@ -5,7 +5,7 @@
  *  - /api/* dan /auth/*: NETWORK SAHAJA — jangan cache data pasaran/user
  *  - Data user (Supabase REST, chat, profil): tidak dicache sama sekali
  */
-const VERSION = 'tw-member-full-v140';
+const VERSION = 'tw-member-full-v141';
 const SHELL_CACHE = VERSION + '-shell';
 
 const SHELL_ASSETS = [
@@ -17,14 +17,16 @@ const SHELL_ASSETS = [
   './icons/icon-512.png',
   './icons/icon-maskable-512.png',
   './icons/icon-180.png',
-  './icons/apple-touch-icon.png'
+  './icons/apple-touch-icon.png',
+  './icons/starling-mascot.png'
 ];
 
 const SHELL_PATHS = new Set([
   '/member/', '/member/index.html', '/member/manifest.webmanifest',
   '/member/icons/favicon.svg', '/member/icons/icon-192.png',
   '/member/icons/icon-512.png', '/member/icons/icon-maskable-512.png',
-  '/member/icons/icon-180.png', '/member/icons/apple-touch-icon.png'
+  '/member/icons/icon-180.png', '/member/icons/apple-touch-icon.png',
+  '/member/icons/starling-mascot.png'
 ]);
 
 self.addEventListener('install', (event) => {

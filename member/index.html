@@ -68,19 +68,46 @@ html[data-theme="light"] .notch{background:#e5eae3}
 /* scroll area */
 .scroll{flex:1;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:none;padding-bottom:calc(74px + var(--sab))}
 .scroll.com{padding-bottom:calc(186px + var(--sab))}
+.scroll.an-lock{overflow-y:hidden !important;padding-bottom:0 !important}
 .scroll::-webkit-scrollbar{display:none}
 .view{padding:16px;animation:fade .28s ease both}
 @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
 
-/* analyst */
-h1{font-size:29px;line-height:1.08;letter-spacing:-.05em;margin:6px 0 6px;font-weight:850}h1 span{color:var(--lime)}
-.sub{color:var(--muted);margin:0 0 16px;font-size:14px}
-.search{display:flex;align-items:center;gap:10px;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:0 14px;margin-bottom:12px;transition:.2s}
-.search:focus-within{border-color:var(--lime);box-shadow:0 0 0 3px #b7f36b18}
-.search svg{flex:none;opacity:.6}
-.search input{flex:1;min-width:0;background:transparent;border:0;outline:0;color:var(--text);padding:13px 0;font-size:16px}
-.tabs{display:flex;gap:6px;overflow-x:auto;padding:2px 0 12px;scrollbar-width:none}.tabs::-webkit-scrollbar{display:none}
-.tab{background:var(--card);border:1px solid var(--line);color:var(--muted);padding:8px 14px;border-radius:999px;font-weight:700;font-size:13px;white-space:nowrap;transition:.15s}
+/* USD high-impact news marquee bar (right below appbar divider) */
+.usd-news{flex:none;position:relative;overflow:hidden;height:26px;display:flex;align-items:center;
+ background:linear-gradient(90deg,rgba(255,93,108,.10),rgba(18,24,19,.86) 24%,rgba(18,24,19,.86) 76%,rgba(255,93,108,.10));
+ border-bottom:1px solid var(--line);font-size:11px;font-weight:700;letter-spacing:.01em;color:var(--text)}
+html[data-theme="light"] .usd-news{background:linear-gradient(90deg,rgba(220,38,38,.08),rgba(246,249,243,.96) 24%,rgba(246,249,243,.96) 76%,rgba(220,38,38,.08))}
+.usd-news::before,.usd-news::after{content:"";position:absolute;top:0;bottom:0;width:18px;z-index:2;pointer-events:none}
+.usd-news::before{left:0;background:linear-gradient(90deg,var(--bg),transparent)}
+.usd-news::after{right:0;background:linear-gradient(270deg,var(--bg),transparent)}
+.un-track{display:inline-flex;align-items:center;white-space:nowrap;will-change:transform;animation:unMarquee 22s linear infinite}
+.usd-news:hover .un-track,.usd-news:active .un-track{animation-play-state:paused}
+.un-seg{display:inline-flex;align-items:center;gap:8px;padding-right:36px}
+.un-dot{width:6px;height:6px;border-radius:50%;background:#ff5d6c;box-shadow:0 0 8px #ff5d6c;flex:none;animation:pulseDot 1.6s infinite}
+.un-tag{font-size:9.5px;font-weight:900;letter-spacing:.06em;padding:1px 6px;border-radius:999px;background:rgba(255,93,108,.18);color:#ff8691;border:1px solid rgba(255,93,108,.38)}
+html[data-theme="light"] .un-tag{color:#c92434;background:rgba(220,38,38,.10);border-color:rgba(220,38,38,.28)}
+.un-title{color:var(--text);font-weight:750}
+.un-cd{font:800 11px ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:var(--lime);font-variant-numeric:tabular-nums;background:rgba(183,243,107,.10);border:1px solid rgba(183,243,107,.28);padding:1px 6px;border-radius:6px}
+html[data-theme="light"] .un-cd{color:#447010;background:rgba(104,166,34,.12);border-color:rgba(104,166,34,.28)}
+.un-meta{color:var(--muted);font-size:10.5px;font-weight:600}
+@keyframes unMarquee{0%{transform:translate3d(0,0,0)}100%{transform:translate3d(-50%,0,0)}}
+@media(prefers-reduced-motion:reduce){.un-track{animation:none !important}}
+
+/* analyst — header/search/tabs locked, only pair cards scroll */
+#view-analyst{padding:10px 16px 0;display:flex;flex-direction:column;height:var(--an-h,calc(100dvh - 130px));overflow:hidden}
+#view-analyst.hidden{display:none}
+#view-analyst .greet-row,#view-analyst .star-mood,#view-analyst .search,#view-analyst .tabs{flex:none}
+.pairs-scroll{flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;scrollbar-width:none;padding-bottom:calc(96px + var(--sab))}
+.pairs-scroll::-webkit-scrollbar{display:none}
+h1{font-size:27px;line-height:1.08;letter-spacing:-.05em;margin:4px 0 4px;font-weight:850}h1 span{color:var(--lime)}
+.sub{color:var(--muted);margin:0 0 12px;font-size:13.5px}
+.search{display:flex;align-items:center;gap:8px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:0 11px;height:36px;margin-bottom:8px;transition:.2s}
+.search:focus-within{border-color:var(--lime);box-shadow:0 0 0 2.5px #b7f36b18}
+.search svg{width:14px;height:14px;flex:none;opacity:.6}
+.search input{flex:1;min-width:0;background:transparent;border:0;outline:0;color:var(--text);padding:6px 0;font-size:13.5px;line-height:1.2}
+.tabs{display:flex;gap:6px;overflow-x:auto;padding:2px 0 10px;scrollbar-width:none}.tabs::-webkit-scrollbar{display:none}
+.tab{background:var(--card);border:1px solid var(--line);color:var(--muted);padding:6px 12px;border-radius:999px;font-weight:700;font-size:12.5px;white-space:nowrap;transition:.15s}
 .tab.on{background:var(--lime);border-color:var(--lime);color:var(--onlime)}
 .pairs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
 .pair{position:relative;overflow:hidden;isolation:isolate;background:var(--card);border:1px solid var(--line);border-radius:18px;padding:13px;text-align:left;color:var(--text);transition:transform .15s,border-color .2s;animation:up .45s both}
@@ -1432,8 +1459,8 @@ html[data-theme="light"] .chipc.scan{
 .greet-tx .sub{margin:0}
 /* Starling duduk sejajar greet, sedikit naik & keluar dari tepi supaya
    rasa "perched" atas header, bukan terapung jauh */
-.greet-row .st-buddy{width:58px;height:58px;margin:-6px -6px 0 0}
-.greet-row .st-buddy svg{width:54px;height:54px}
+.greet-row .st-buddy{width:64px;height:64px;margin:-6px -4px 0 0}
+.greet-row .st-buddy svg,.greet-row .st-buddy img{width:62px;height:62px}
 .st-buddy{
   position:relative;flex:none;width:54px;height:54px;padding:0;border:0;background:none;
   display:grid;place-items:center;cursor:pointer;-webkit-tap-highlight-color:transparent;
@@ -1442,7 +1469,8 @@ html[data-theme="light"] .chipc.scan{
 .st-buddy:active{transform:scale(.9)}
 .st-buddy.hop{animation:stHop .5s cubic-bezier(.22,1,.36,1)}
 @keyframes stHop{0%{transform:translateY(0) scale(1)}35%{transform:translateY(-10px) scale(1.1,.93)}65%{transform:translateY(2px) scale(.96,1.04)}100%{transform:translateY(0) scale(1)}}
-.st-svg{display:block;animation:stFloat 2.8s ease-in-out infinite;filter:drop-shadow(0 5px 14px rgba(183,243,107,.24))}
+.st-svg,.st-img{display:block;object-fit:contain;animation:stFloat 2.8s ease-in-out infinite;filter:drop-shadow(0 5px 14px rgba(183,243,107,.32))}
+.st-img.scan{animation:stFloat 1.4s ease-in-out infinite;filter:drop-shadow(0 0 10px rgba(183,243,107,.5))}
 @keyframes stFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
 .st-eyes{transform-origin:center;transform-box:fill-box;animation:stBlink 3.8s infinite,stGlance 4.8s ease-in-out infinite}
 @keyframes stBlink{0%,92%,100%{transform:scaleY(1)}96%{transform:scaleY(.08)}}
@@ -1961,8 +1989,14 @@ html[data-theme="light"] .star-mood{background:rgba(122,181,46,.10);border-color
         <button class="avatar" id="avatarBtn" aria-label="Profil">TW</button>
       </div>
     </header>
+    <div class="usd-news" id="usdNewsBar" role="status" aria-live="off">
+      <div class="un-track" id="usdNewsTrack">
+        <span class="un-seg"><span class="un-dot"></span><span class="un-tag">USD HIGH</span><span class="un-title">Loading USD High-Impact News…</span></span>
+        <span class="un-seg" aria-hidden="true"><span class="un-dot"></span><span class="un-tag">USD HIGH</span><span class="un-title">Loading USD High-Impact News…</span></span>
+      </div>
+    </div>
 
-    <div class="scroll" id="scroll">
+    <div class="scroll an-lock" id="scroll">
       <!-- ANALYST -->
       <section class="view" id="view-analyst" data-view="analyst">
         <div class="greet-row">
@@ -1972,11 +2006,13 @@ html[data-theme="light"] .star-mood{background:rgba(122,181,46,.10);border-color
           <button class="st-buddy" id="homeStarling" type="button" aria-label="Starling AI Buddy"></button>
         </div>
         <div class="star-mood" id="starMood" role="button" tabindex="0">✦ <span id="starMoodTxt">Starling sedia membaca 9 pair secara langsung.</span></div>
-        <label class="search"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><input id="q" type="search" autocomplete="off" aria-label="Cari pair"></label>
+        <label class="search"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><input id="q" type="search" autocomplete="off" aria-label="Cari pair"></label>
         <div class="tabs" id="tabs"></div>
-        <div class="pairs" id="pairs"></div>
-        <div class="hint"><i></i><span id="hintTxt">Pilih pair untuk analisis AI masa sebenar.</span></div>
-        <p class="foot" id="footTxt">Educational only. Trading involves substantial risk.</p>
+        <div class="pairs-scroll" id="pairsScroll">
+          <div class="pairs" id="pairs"></div>
+          <div class="hint"><i></i><span id="hintTxt">Pilih pair untuk analisis AI masa sebenar.</span></div>
+          <p class="foot" id="footTxt">Educational only. Trading involves substantial risk.</p>
+        </div>
       </section>
 
       <!-- COMMUNITY -->
@@ -2678,8 +2714,8 @@ var navIcons={
  settings:'<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1-2.8 2.8-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.5V21h-4v-.1a1.7 1.7 0 0 0-1-1.5 1.7 1.7 0 0 0-1.9.3l-.1.1L4.2 17l.1-.1a1.7 1.7 0 0 0 .3-1.9 1.7 1.7 0 0 0-1.5-1H3v-4h.1a1.7 1.7 0 0 0 1.5-1 1.7 1.7 0 0 0-.3-1.9L4.2 7 7 4.2l.1.1a1.7 1.7 0 0 0 1.9.3A1.7 1.7 0 0 0 10 3V3h4v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.9-.3l.1-.1L19.8 7l-.1.1a1.7 1.7 0 0 0-.3 1.9 1.7 1.7 0 0 0 1.5 1H21v4h-.1a1.7 1.7 0 0 0-1.5 1Z"/>'
 };
 var current='analyst';
-function starlingNavSvg(gid){
- return '<svg viewBox="0 0 64 64" aria-hidden="true"><defs><radialGradient id="'+gid+'" cx="42%" cy="30%" r="68%"><stop offset="0%" stop-color="#ecffc9"/><stop offset="55%" stop-color="#b7f36b"/><stop offset="100%" stop-color="#7bc92a"/></radialGradient></defs><path class="st-twinkle" d="M52 10 Q52 15 57 15 Q52 15 52 20 Q52 15 47 15 Q52 15 52 10Z" fill="#8ab4ff"/><path d="M32 6 C35 20 44 29 58 32 C44 35 35 44 32 58 C29 44 20 35 6 32 C20 29 29 20 32 6 Z" fill="url(#'+gid+')"/><g class="st-eyes"><ellipse cx="26.5" cy="31" rx="2.6" ry="3.2" fill="#0d140a"/><ellipse cx="37.5" cy="31" rx="2.6" ry="3.2" fill="#0d140a"/><circle cx="25.6" cy="29.8" r="1" fill="#ffffff"/><circle cx="36.6" cy="29.8" r="1" fill="#ffffff"/></g><ellipse cx="22.5" cy="35" rx="2.4" ry="1.4" fill="#ff7f8f" opacity=".55"/><ellipse cx="41.5" cy="35" rx="2.4" ry="1.4" fill="#ff7f8f" opacity=".55"/><path d="M29.5 35 Q32 37.5 34.5 35" fill="none" stroke="#0d140a" stroke-width="1.6" stroke-linecap="round"/></svg>';
+function starlingNavSvg(){
+ return '<img src="icons/starling-mascot.png?v=20261127a" width="24" height="24" alt="" style="display:block;object-fit:contain">';
 }
 function moveNavPill(animate){
  var navEl=$('bnav');
@@ -2731,7 +2767,9 @@ function showView(v){
  $('composer').classList.toggle('hidden',v!=='community');
  if(v!=='community'&&COM_EDIT)cancelEdit();
  $('scroll').classList.toggle('com',v==='community');
+ $('scroll').classList.toggle('an-lock',v==='analyst');
  $('scroll').classList.toggle('fr-lock',v==='friends');
+ if(v==='analyst'){try{$('view-analyst').style.setProperty('--an-h',$('scroll').clientHeight+'px')}catch(e){}}
  if(v==='friends'){try{$('view-friends').style.setProperty('--frs-h',$('scroll').clientHeight+'px')}catch(e){}}
  $('scroll').scrollTop=0;
  if(v==='analyst'){drawPairs(true);maybePrices();loadPairTraders();loadPairAi()}
@@ -3279,23 +3317,9 @@ function closeSheet(){
 $('bd').onclick=closeSheet;$('sx').onclick=closeSheet;
 /* Floating pill: analysis terus berjalan walaupun sheet ditutup/swipe down.
    Tap pill = buka semula sheet; ✕ = batal job. Siap -> pop up automatik. */
-function starlingSvg(mood,sz,gid){
- var s=sz||48,id=gid||('sg'+Math.random().toString(36).slice(2,6));
- var eyes='';
- if(mood==='happy'){
-  eyes='<path d="M23.5 31.5 Q26.5 28 29.5 31.5" fill="none" stroke="#0d140a" stroke-width="2.3" stroke-linecap="round"/><path d="M34.5 31.5 Q37.5 28 40.5 31.5" fill="none" stroke="#0d140a" stroke-width="2.3" stroke-linecap="round"/>';
- } else if(mood==='calm'){
-  eyes='<ellipse cx="26.5" cy="31" rx="2.4" ry="2.6" fill="#0d140a"/><ellipse cx="37.5" cy="31" rx="2.4" ry="2.6" fill="#0d140a"/><circle cx="25.8" cy="30.1" r=".9" fill="#ffffff"/><circle cx="36.8" cy="30.1" r=".9" fill="#ffffff"/>';
- } else if(mood==='scan'){
-  eyes='<g class="st-scan-eyes"><ellipse cx="26.5" cy="31" rx="2.6" ry="3.2" fill="#0d140a"/><ellipse cx="37.5" cy="31" rx="2.6" ry="3.2" fill="#0d140a"/><circle cx="25.6" cy="29.8" r="1" fill="#ffffff"/><circle cx="36.6" cy="29.8" r="1" fill="#ffffff"/></g>';
- } else if(mood==='sleep'){
-  eyes='<g class="st-sleep-eyes"><path d="M23.5 31.5 Q26.5 34 29.5 31.5" fill="none" stroke="#0d140a" stroke-width="2" stroke-linecap="round"/><path d="M34.5 31.5 Q37.5 34 40.5 31.5" fill="none" stroke="#0d140a" stroke-width="2" stroke-linecap="round"/></g><g class="st-happy-eyes"><path d="M23.5 31.5 Q26.5 28 29.5 31.5" fill="none" stroke="#0d140a" stroke-width="2.2" stroke-linecap="round"/><path d="M34.5 31.5 Q37.5 28 40.5 31.5" fill="none" stroke="#0d140a" stroke-width="2.2" stroke-linecap="round"/></g><text class="st-zzz" x="45" y="18">zZ</text>';
- } else {
-  eyes='<g class="st-eyes"><ellipse cx="26.5" cy="31" rx="2.6" ry="3.2" fill="#0d140a"/><ellipse cx="37.5" cy="31" rx="2.6" ry="3.2" fill="#0d140a"/><circle cx="25.6" cy="29.8" r="1" fill="#ffffff"/><circle cx="36.6" cy="29.8" r="1" fill="#ffffff"/></g><g class="st-happy-eyes"><path d="M23.5 31.5 Q26.5 28 29.5 31.5" fill="none" stroke="#0d140a" stroke-width="2.2" stroke-linecap="round"/><path d="M34.5 31.5 Q37.5 28 40.5 31.5" fill="none" stroke="#0d140a" stroke-width="2.2" stroke-linecap="round"/></g>';
- }
- var mouth=mood==='calm'?'<path d="M29 35.5 L35 35.5" fill="none" stroke="#0d140a" stroke-width="1.6" stroke-linecap="round"/>':(mood==='sleep'?'<circle cx="32" cy="35.6" r="1.4" fill="#0d140a"/>':'<path d="M29.5 35 Q32 37.5 34.5 35" fill="none" stroke="#0d140a" stroke-width="1.6" stroke-linecap="round"/>');
- var tw=(mood==='scan'||mood==='sleep')?'':'<path class="st-twinkle" d="M52 10 Q52 15 57 15 Q52 15 52 20 Q52 15 47 15 Q52 15 52 10Z" fill="#8ab4ff"/>';
- return '<svg class="'+(mood==='scan'?'':'st-svg')+'" width="'+s+'" height="'+s+'" viewBox="0 0 64 64" aria-hidden="true"><defs><radialGradient id="'+id+'" cx="42%" cy="30%" r="68%"><stop offset="0%" stop-color="#ecffc9"/><stop offset="55%" stop-color="#b7f36b"/><stop offset="100%" stop-color="#7bc92a"/></radialGradient></defs>'+tw+'<path d="M32 6 C35 20 44 29 58 32 C44 35 35 44 32 58 C29 44 20 35 6 32 C20 29 29 20 32 6 Z" fill="url(#'+id+')"/>'+eyes+'<ellipse cx="22.5" cy="35" rx="2.4" ry="1.4" fill="#ff7f8f" opacity=".55"/><ellipse cx="41.5" cy="35" rx="2.4" ry="1.4" fill="#ff7f8f" opacity=".55"/>'+mouth+'</svg>';
+function starlingSvg(mood,sz){
+ var s=sz||54;
+ return '<img class="st-img'+(mood==='scan'?' scan':'')+'" src="icons/starling-mascot.png?v=20261127a" width="'+s+'" height="'+s+'" alt="Starling AI" decoding="async">';
 }
 var starTipIdx=0,starHotPair=null,starHopT=null;
 function isFxWeekend(){var d=new Date(),day=d.getUTCDay(),h=d.getUTCHours();return day===6||(day===5&&h>=22)||(day===0&&h<21)}
@@ -4024,10 +4048,7 @@ function dmTime(iso){
  return d.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit',hour12:false});
 }
 function orbStarSVG(){
- return '<svg width="24" height="24" viewBox="-26 -26 52 52" aria-hidden="true">'
-  +'<defs><linearGradient id="osg" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#eaffc6"/><stop offset="100%" stop-color="#a5ec49"/></linearGradient></defs>'
-  +'<path d="M0-22Q2-2 22 0Q2 2 0 22Q-2 2-22 0Q-2-2 0-22Z" fill="url(#osg)"/>'
-  +'<circle cx="-4.2" cy="-1" r="1.7" fill="#0d1408"/><circle cx="4.2" cy="-1" r="1.7" fill="#0d1408"/></svg>';
+ return '<img src="icons/starling-mascot.png?v=20261127a" width="30" height="30" alt="" style="display:block;object-fit:contain">';
 }
 function orbIni(name){
  var parts=String(name||'?').trim().replace(/[^A-Za-z0-9\s]/g,' ').trim().split(/\s+/).filter(Boolean);
@@ -7082,6 +7103,85 @@ if(!iv){
 }
 showView(VIEWS.indexOf(iv)>-1?iv:'analyst');
 splashStart();
+/* Keep Analyst & Friends locked container heights synced on resize/orientation */
+function _syncLockedHeights(){
+ try{
+  var sc=$('scroll');if(!sc)return;
+  var h=sc.clientHeight+'px';
+  var va=$('view-analyst');if(va)va.style.setProperty('--an-h',h);
+  var vf=$('view-friends');if(vf)vf.style.setProperty('--frs-h',h);
+ }catch(e){}
+}
+window.addEventListener('resize',_syncLockedHeights);
+window.addEventListener('orientationchange',function(){setTimeout(_syncLockedHeights,120)});
+setTimeout(_syncLockedHeights,60);
+
+/* ===== High-Impact USD News Countdown Marquee (right below appbar line) ===== */
+(function initUsdNewsTicker(){
+ var track=$('usdNewsTrack');if(!track)return;
+ var usdEvents=[];
+ function fmtCd(ms){
+  if(ms<=0)return 'LIVE NOW';
+  var s=Math.floor(ms/1000);
+  var d=Math.floor(s/86400);s%=86400;
+  var h=Math.floor(s/3600);s%=3600;
+  var m=Math.floor(s/60);s%=60;
+  var pad=function(n){return n<10?'0'+n:String(n)};
+  return d>0?(d+'d '+pad(h)+'h '+pad(m)+'m '+pad(s)+'s'):(pad(h)+':'+pad(m)+':'+pad(s));
+ }
+ function buildTicker(){
+  var now=Date.now();
+  var upcoming=usdEvents.filter(function(e){return e._ts>now-300000});
+  var seg='';
+  if(upcoming.length){
+   seg=upcoming.slice(0,3).map(function(e,idx){
+    var meta=[];
+    if(e.forecast)meta.push('F: '+e.forecast);
+    if(e.previous)meta.push('P: '+e.previous);
+    var mHtml=meta.length?'<span class="un-meta">('+esc(meta.join(' · '))+')</span>':'';
+    return '<span class="un-seg"><span class="un-dot"></span><span class="un-tag">USD HIGH</span>'
+     +'<span class="un-title">'+esc(e.title)+'</span>'
+     +'<span class="un-cd" data-un-ts="'+e._ts+'">'+esc(fmtCd(e._ts-now))+'</span>'
+     +mHtml+'</span>';
+   }).join('');
+  }else{
+   var en=(lang==='en');
+   seg='<span class="un-seg"><span class="un-dot"></span><span class="un-tag">USD HIGH</span>'
+    +'<span class="un-title">'+(en?'No upcoming USD High-Impact News right now · Live calendar monitoring active':'Tiada berita High-Impact USD dalam masa terdekat · Pemantauan kalendar aktif')+'</span></span>';
+  }
+  track.innerHTML=seg+seg;
+ }
+ function tickCd(){
+  var now=Date.now();
+  var cds=track.querySelectorAll('.un-cd[data-un-ts]');
+  if(!cds.length)return;
+  var needRebuild=false;
+  for(var i=0;i<cds.length;i++){
+   var ts=Number(cds[i].getAttribute('data-un-ts'))||0;
+   var diff=ts-now;
+   if(diff<-300000){needRebuild=true;break}
+   cds[i].textContent=fmtCd(diff);
+  }
+  if(needRebuild)buildTicker();
+ }
+ function fetchCal(){
+  fetch('/calendar.json?t='+Date.now(),{cache:'no-store'}).then(function(r){return r.ok?r.json():null}).then(function(d){
+   if(!d){buildTicker();return}
+   var list=[];
+   if(Array.isArray(d.upcoming_high))list=d.upcoming_high.slice();
+   if(d.next_usd_high&&!list.some(function(x){return x.iso===d.next_usd_high.iso&&x.title===d.next_usd_high.title}))list.unshift(d.next_usd_high);
+   usdEvents=list.filter(function(e){
+    return e&&String(e.ccy||'').toUpperCase()==='USD'&&String(e.impact||'').toLowerCase()==='high';
+   }).map(function(e){
+    return {title:e.title||'USD News',iso:e.iso,forecast:e.forecast||'',previous:e.previous||'',_ts:Date.parse(e.iso||'')||0};
+   }).filter(function(e){return e._ts>0}).sort(function(a,b){return a._ts-b._ts});
+   buildTicker();
+  }).catch(function(){buildTicker()});
+ }
+ fetchCal();
+ setInterval(tickCd,1000);
+ setInterval(fetchCal,300000);
+})();
 /* build marker: sahkan versi CSS yang telefon render (buang bila punca blur jumpa) */
 try{var bt=document.getElementById('buildTag');if(bt)bt.textContent='build v109-scan1 · '+(getComputedStyle(document.querySelector('.appbar')).backdropFilter==='none'?'appbar blur OFF':'appbar blur STILL ON');}catch(e){}
 })();
