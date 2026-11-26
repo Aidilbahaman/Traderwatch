@@ -177,6 +177,7 @@ html[data-theme="light"] .ic{background:#e6efd9;border-color:#c9dbb4}
 .online{display:inline-flex;align-self:flex-start;align-items:center;gap:7px;background:var(--card);border:1px solid var(--line);border-radius:999px;padding:6px 12px;font-size:11px;font-weight:700;color:var(--muted);margin-bottom:14px}
 .online i{width:7px;height:7px;border-radius:50%;background:var(--lime);box-shadow:0 0 8px var(--lime)}
 .msgs{display:flex;flex-direction:column;gap:12px}
+.msgs.quiet .msg,.dm-msgs.quiet .dm-bbl,.dm-msgs.quiet .dm-setup,.dm-msgs.quiet .dm-pinbar{animation:none !important}
 .msg{display:flex;gap:10px;animation:up .4s both}
 .msg .av{width:34px;height:34px;flex:none;border-radius:12px;display:grid;place-items:center;font-size:11px;font-weight:850;color:#10150b;overflow:hidden}
 .msg .av img,.lrow .av img{width:100%;height:100%;object-fit:cover;display:block;border-radius:inherit}
@@ -3629,13 +3630,24 @@ function msgHtml(m,me){
  var avUrl=m.avatar_url||(isMe?myAvatarUrl():'');
  return '<div class="msg'+(isMe?' me':'')+'" data-id="'+m.id+'"'+(own?' data-own="1"':'')+'><div class="av" style="background:'+avCol(m.username)+'">'+avInnerHtml(m.username,avUrl)+'</div><div class="body'+((isSig||isGif)?' wide':'')+'"><div class="meta"><b>'+esc(m.username)+'</b>'+rk+rt+'<time>'+esc(myTm(m.created_at))+'</time>'+ed+opt+'</div>'+inner+(isSig?sigCardHtml(m.payload,m.id):'')+rxHtml(m)+'</div></div>';
 }
-function drawMsgs(){
+var _comSig='',_roomsSig='';
+function _msgSig(list){
+ return (list||[]).map(function(m){
+  return [m.id,m.edited_at||'',m.body||'',m.kind||'',m.avatar_url||'',m.reactions?JSON.stringify(m.reactions):'',m.mine?m.mine.join(','):''].join('|');
+ }).join('\n');
+}
+function drawMsgs(quiet){
  if(COM_EDIT&&!findComMsg(COM_EDIT.id))cancelEdit();
- var me=myChatName();
- if(!MSGS.length){
-  $('msgs').innerHTML='<div class="empty">'+esc(t('emptyChat'))+'</div>';
- }else{
-  $('msgs').innerHTML=MSGS.map(function(m){return msgHtml(m,me)}).join('');
+ var me=myChatName(),box=$('msgs');
+ var sig=_msgSig(MSGS);
+ if(!quiet||sig!==_comSig||!box.children.length){
+  _comSig=sig;
+  box.classList.toggle('quiet',!!quiet);
+  if(!MSGS.length){
+   box.innerHTML='<div class="empty">'+esc(t('emptyChat'))+'</div>';
+  }else{
+   box.innerHTML=MSGS.map(function(m){return msgHtml(m,me)}).join('');
+  }
  }
  var users={};MSGS.forEach(function(m){users[m.username]=1});
  var n=Object.keys(users).length;
@@ -3647,6 +3659,9 @@ function drawRooms(){
  var box=$('rooms');if(!box)return;
  if(!COM_FEAT.rooms){box.classList.add('hidden');return}
  box.classList.remove('hidden');
+ var rSig=COM_ROOM+'|'+JSON.stringify(COM_ROOMS)+'|'+lang;
+ if(rSig===_roomsSig&&box.children.length)return;
+ _roomsSig=rSig;
  var hot=0,hotRoom=null;
  COM_PAIR_ROOMS.forEach(function(k){var v=COM_ROOMS[k]||0;if(v>hot){hot=v;hotRoom=k}});
  box.innerHTML=['all'].concat(COM_PAIR_ROOMS).map(function(r){
@@ -3692,7 +3707,7 @@ function loadMessages(silent){
   if(window.TWChatExtras&&window.TWChatExtras.setRemote)window.TWChatExtras.setRemote(!!f.gifs);
   COM_ROOMS=(res.data&&res.data.rooms)||{};
   if(!COM_FEAT.rooms&&COM_ROOM!=='all')COM_ROOM='all';
-  drawMsgs();
+  drawMsgs(!!silent);
  }).catch(function(){if(!silent&&req===comReq)toast(t('sendErr'))});
 }
 /* ---------------- edit / delete your own community message ---------------- */
@@ -4190,7 +4205,12 @@ function closeDM(){
  if(document.activeElement===$('dmInp'))$('dmInp').blur();
  loadFriends(true);
 }
-var DM_CACHE={};   /* fid -> {msgs, at}: buka semula DM = instan, refresh senyap */
+var DM_CACHE={},_dmSig='';   /* fid -> {msgs, at}: buka semula DM = instan, refresh senyap */
+function _calcDmSig(fid,list){
+ return (fid||'')+'#'+(list||[]).map(function(m){
+  return [m.id,m.deleted?1:0,m.pinned?1:0,m.body||'',m.kind||'',m.reply?m.reply.id:''].join('|');
+ }).join('\n');
+}
 function loadDM(scrollEnd){
  if(!FR.dmFriend)return;
  var fid=FR.dmFriend.id;
@@ -4201,7 +4221,8 @@ function loadDM(scrollEnd){
   FR.dmMsgs=c.msgs;FR.dmInit=true;
   var mx=0;c.msgs.forEach(function(x){var v=Number(x.id)||0;if(v>mx)mx=v});
   FR.dmLastId=mx;
-  drawDMMsgs(false);
+  _dmSig='';
+  drawDMMsgs(false,false);
  }
  apiFetch('/api/chat/dm?with='+encodeURIComponent(fid)+'&limit=60').then(function(r){
   if(!FR.dmFriend||FR.dmFriend.id!==fid)return;
@@ -4221,11 +4242,17 @@ function loadDM(scrollEnd){
   if(FR.dmInit&&next.some(function(m){return !m.me&&Number(m.id)>Number(prevLast||0)})){
    playChatSfx('recv');hap(10);
   }
+  var wasInit=FR.dmInit;
   FR.dmInit=true;
   if(maxId>0)FR.dmLastId=maxId;
   FR.dmMsgs=next;
   DM_CACHE[fid]={msgs:next.slice(0,60),at:Date.now()};
-  drawDMMsgs(scrollEnd||(maxId&&maxId!==Number(prevLast||0)));
+  var nextSig=_calcDmSig(fid,next);
+  var hasNew=!!(maxId&&maxId!==Number(prevLast||0));
+  if(!wasInit||scrollEnd||nextSig!==_dmSig){
+   _dmSig=nextSig;
+   drawDMMsgs(scrollEnd||hasNew,wasInit&&!scrollEnd);
+  }
   var ff=FR.friends.filter(function(x){return x.id===fid})[0];
   if(ff&&ff.unread){ff.unread=0;loadFriends(true)}
  }).catch(function(){
@@ -4238,8 +4265,10 @@ function loadDM(scrollEnd){
   var rb=$('dmRetry');if(rb)rb.onclick=function(){loadDM(true)};
  });
 }
-function drawDMMsgs(scrollEnd){
+function drawDMMsgs(scrollEnd,quiet){
  var box=$('dmMsgs');if(!box)return;
+ box.classList.toggle('quiet',!!quiet);
+ _dmSig=_calcDmSig(FR.dmFriend?FR.dmFriend.id:'',FR.dmMsgs);
  var en=(lang==='en');
  if(!FR.dmMsgs.length){
   box.innerHTML='<div class="dm-day">'+(en?'Private chat between friends · Say hi!':'Chat peribadi antara rakan · Ucapkan hai!')+'</div>'
