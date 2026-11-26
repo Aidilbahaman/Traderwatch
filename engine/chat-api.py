@@ -1000,7 +1000,8 @@ def build_friends_overview(uid):
     seen_start = time.time() - 86400
     seen_today_ids = {u for u, ts in _seen.items() if ts >= seen_start} | online_ids
 
-    today_joined = sum(1 for u in ordered if (u.get("created_at") or "") >= day0)
+    cutoff24_iso = (datetime.now(timezone.utc) - timedelta(hours=24)).isoformat()
+    today_joined = sum(1 for u in ordered if (u.get("created_at") or "") >= cutoff24_iso)
     total_members = len(ordered)
 
     try:
@@ -1089,12 +1090,13 @@ def build_friends_overview(uid):
         })
     friends.sort(key=lambda x: (1 if x["last_at"] else 0, x["last_at"], 1 if x["online"] else 0, x["username"].lower()), reverse=True)
 
-    # Newest 12 arrivals (exclude self) + wave counts
-    newest = [u for u in ordered if u["id"] != uid][:12]
+    # Unlimited new registrations within the last 24 hours (fallback to newest 12 if none)
+    newest_24h = [u for u in ordered if u["id"] != uid and (u.get("created_at") or "") >= cutoff24_iso]
+    newest = newest_24h if newest_24h else [u for u in ordered if u["id"] != uid][:12]
     wave_counts = {}
     my_waves = set()
     if newest:
-        ids_csv = ",".join(u["id"] for u in newest)
+        ids_csv = ",".join(u["id"] for u in newest[:150])
         try:
             wrows = sb("GET", "/rest/v1/member_waves", params={
                 "select": "from_user_id,to_user_id",
@@ -1124,6 +1126,7 @@ def build_friends_overview(uid):
     return {
         "me": {"id": uid, "username": (by_id.get(uid) or {}).get("username") or "Trader"},
         "today_joined": today_joined,
+        "new_24h_count": len(newest_24h),
         "total_members": total_members,
         "online_count": presence_count(),
         "friends": friends,

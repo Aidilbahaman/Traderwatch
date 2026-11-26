@@ -4151,10 +4151,12 @@ function renderFriends(){
   tabs.parentElement.insertBefore(grip,tabs);
  }
 
+ var unreadChats=FR.friends.filter(function(f){return (f.unread||0)>0}).length;
+ var newCnt=FR.new24h!=null?Number(FR.new24h):Number(FR.today||0);
  tabs.innerHTML=
-  '<button class="'+(FR.tab==='chats'?'on':'')+'" data-ftab="chats" type="button"><span>'+(en?'Private Chats':'Chat Peribadi')+'</span>'+(FR.friends.length?'<span class="cnt">'+FR.friends.length+'</span>':'')+'</button>'
+  '<button class="'+(FR.tab==='chats'?'on':'')+'" data-ftab="chats" type="button"><span>'+(en?'Private Chats':'Chat Peribadi')+'</span>'+(unreadChats?'<span class="cnt">'+unreadChats+'</span>':'')+'</button>'
   +'<button class="'+(FR.tab==='req'?'on':'')+'" data-ftab="req" type="button"><span>'+(en?'Requests':'Permintaan')+'</span>'+(reqCnt?'<span class="cnt">'+reqCnt+'</span>':'')+'</button>'
-  +'<button class="'+(FR.tab==='new'?'on':'')+'" data-ftab="new" type="button"><span>'+(en?'New Traders':'Ahli Baru')+'</span><span class="cnt">'+FR.arrivals.length+'</span></button>';
+  +'<button class="'+(FR.tab==='new'?'on':'')+'" data-ftab="new" type="button"><span>'+(en?'New Traders':'Ahli Baru')+'</span>'+(newCnt?'<span class="cnt">'+newCnt+'</span>':'')+'</button>';
 
  /* Body */
  if(FR.tab==='chats'){
@@ -4209,6 +4211,7 @@ function loadFriends(silent){
   var d=r.data,prevTop=FR.lastTopArrival;
   FR.loaded=true;
   FR.today=d.today_joined||0;
+  FR.new24h=(d.new_24h_count!=null)?Number(d.new_24h_count):(d.today_joined||0);
   FR.total=d.total_members||0;
   FR.online=d.online_count||0;
   FR.unread=d.unread_total||0;
