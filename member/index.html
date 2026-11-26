@@ -52,7 +52,8 @@ html[data-theme="light"] .notch{background:#e5eae3}
 .ibtn{width:34px;height:34px;flex:none;border-radius:11px;background:var(--card);border:1px solid var(--line);color:var(--muted);display:grid;place-items:center;transition:.15s}
 .ibtn svg{display:block;flex:none}
 .ibtn:hover{color:var(--text);border-color:var(--lime)}
-.avatar{width:34px;height:34px;flex:none;border-radius:50%;background:var(--lime);color:var(--onlime);display:grid;place-items:center;font-weight:850;font-size:12px;border:2px solid var(--card);box-shadow:0 0 0 1px var(--lime),0 0 16px #b7f36b44}
+.avatar{width:34px;height:34px;flex:none;border-radius:50%;background:var(--lime);color:var(--onlime);display:grid;place-items:center;font-weight:850;font-size:12px;border:2px solid var(--card);box-shadow:0 0 0 1px var(--lime),0 0 16px #b7f36b44;overflow:hidden;padding:0}
+.avatar img{width:100%;height:100%;object-fit:cover;display:block;border-radius:50%}
 @media(max-width:520px){.appbar{padding:max(12px,calc(env(safe-area-inset-top,0px) + 4px)) max(14px,env(safe-area-inset-right,0px)) 10px max(14px,env(safe-area-inset-left,0px));gap:8px}}
 /* iOS-only: teks header turun di bawah zon status-bar (safe-area penuh + gap).
    Android takde kelas ini — tak berubah. Diagnostik/fix untuk blur header iPhone PWA:
@@ -792,7 +793,20 @@ html[data-theme="light"] .bcard.got .bstatus{color:#4c7a17}
 .pcard{position:relative;overflow:hidden;background:linear-gradient(145deg,#1a2418,var(--card));border:1px solid var(--line);border-radius:22px;padding:20px;text-align:center;margin-bottom:14px}
 html[data-theme="light"] .pcard{background:linear-gradient(145deg,#eaf3e2,var(--card))}
 .pcard::before{content:"";position:absolute;top:-50px;left:50%;transform:translateX(-50%);width:200px;height:120px;background:radial-gradient(ellipse,#b7f36b26,transparent 70%);pointer-events:none}
-.pavatar{width:74px;height:74px;margin:0 auto 12px;border-radius:50%;background:var(--lime);color:var(--onlime);display:grid;place-items:center;font-weight:900;font-size:24px;box-shadow:0 0 0 5px #b7f36b1c,0 0 34px #b7f36b55;position:relative}
+.pavatar-wrap{position:relative;display:inline-block;margin:0 auto 12px;padding:0;border:0;background:transparent;cursor:pointer;border-radius:50%;-webkit-tap-highlight-color:transparent}
+.pavatar-wrap:active .pavatar{transform:scale(.95)}
+.pavatar{width:74px;height:74px;margin:0;border-radius:50%;background:var(--lime);color:var(--onlime);display:grid;place-items:center;font-weight:900;font-size:24px;box-shadow:0 0 0 5px #b7f36b1c,0 0 34px #b7f36b55;position:relative;overflow:hidden;transition:transform .16s ease,opacity .16s ease}
+.pavatar img{width:100%;height:100%;object-fit:cover;display:block;border-radius:50%}
+.pavatar.busy{opacity:.55;animation:pulse 1s ease-in-out infinite}
+.pavatar-cam{position:absolute;right:-2px;bottom:-2px;width:26px;height:26px;border-radius:50%;background:rgba(16,22,18,.92);color:var(--lime);border:2px solid var(--card);display:grid;place-items:center;box-shadow:0 4px 12px rgba(0,0,0,.45);pointer-events:none}
+html[data-theme="light"] .pavatar-cam{background:#18241b;color:#b7f36b}
+.av-pop{position:fixed;inset:0;z-index:120;display:grid;place-items:center;background:rgba(5,9,7,.58);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);padding:20px}
+.av-pop-card{width:min(290px,100%);background:rgba(18,24,19,.86);backdrop-filter:saturate(180%) blur(24px);-webkit-backdrop-filter:saturate(180%) blur(24px);border:1px solid rgba(255,255,255,.12);border-radius:20px;padding:14px;box-shadow:0 20px 50px rgba(0,0,0,.55);display:grid;gap:8px}
+html[data-theme="light"] .av-pop-card{background:rgba(255,255,255,.92);border-color:rgba(20,33,26,.12)}
+.av-pop-card h4{margin:2px 4px 4px;font-size:14px;font-weight:800;text-align:center}
+.av-pop-card button{height:42px;border-radius:12px;border:1px solid var(--line);background:rgba(255,255,255,.05);color:var(--text);font-size:13.5px;font-weight:750;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px}
+.av-pop-card button.prim{background:var(--lime);color:var(--onlime);border-color:transparent}
+.av-pop-card button.danger{color:var(--red);border-color:rgba(255,119,125,.28);background:rgba(255,119,125,.08)}
 .pcard h3{margin:0;font-size:19px;letter-spacing:-.03em;font-weight:850}
 .pcard .em{margin:3px 0 12px;color:var(--muted);font-size:13px}
 .chip{display:inline-block;background:var(--lime);color:var(--onlime);font-size:10px;font-weight:850;letter-spacing:.1em;padding:5px 12px;border-radius:999px}
@@ -1988,7 +2002,11 @@ html[data-theme="light"] .star-mood{background:rgba(122,181,46,.10);border-color
       <section class="view hidden" id="view-profile" data-view="profile">
         <div class="pcard" id="pcardShare" role="button" tabindex="0" aria-label="Open share card">
           <div class="sharechip" aria-hidden="true"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V3M7 8l5-5 5 5M5 13v7h14v-7"/></svg><span>Share</span></div>
-          <div class="pavatar" id="pInit">TW</div>
+          <button class="pavatar-wrap" id="pAvBtn" type="button" aria-label="Change profile picture" title="Change profile picture">
+            <div class="pavatar" id="pInit">TW</div>
+            <span class="pavatar-cam" aria-hidden="true"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg></span>
+          </button>
+          <input type="file" id="pAvInput" accept="image/*" hidden>
           <h3 id="pName">Ahli TraderWatch</h3>
           <p class="em" id="pEmail">—</p>
           <span class="chip" id="pPlan">FREE</span>
@@ -6153,16 +6171,168 @@ function renderReady(){
   setTimeout(function(){if(a.parentNode)a.parentNode.removeChild(a)},0);
  };
 }
+function myAvatarUrl(){
+ if(!ME)return '';
+ return String(ME.avatar_url||(ME.user_metadata&&(ME.user_metadata.avatar_url||ME.user_metadata.picture))||'').trim();
+}
+function renderAvatarEl(el,nm,url){
+ if(!el)return;
+ var init=initials(nm||'TW');
+ if(!url){el.textContent=init;return}
+ el.innerHTML='';
+ var img=document.createElement('img');
+ img.src=url;img.alt=nm||'Profile';img.decoding='async';
+ img.onerror=function(){el.textContent=init};
+ el.appendChild(img);
+}
 function renderProfile(){
  if(!ME)return;
- var nm=ME.dispName||'Ahli';
+ var nm=ME.dispName||'Ahli',av=myAvatarUrl();
  drawGreet();
- $('pInit').textContent=initials(nm);$('pName').textContent=nm;$('pEmail').textContent=ME.email||'—';
+ renderAvatarEl($('pInit'),nm,av);
+ $('pName').textContent=nm;$('pEmail').textContent=ME.email||'—';
  $('pPlan').textContent=PLAN==='pro'?'PRO':'FREE';
  $('pSince').textContent=t('since')+' '+dateMY(ME.created_at);
- $('avatarBtn').textContent=initials(nm);
+ renderAvatarEl($('avatarBtn'),nm,av);
  renderStats();drawMenu();
 }
+var _avBusy=false;
+function _dataUrlBytes(u){
+ var i=u.indexOf(',');
+ if(i<0)return u.length;
+ var b64=u.slice(i+1);
+ var pad=b64.endsWith('==')?2:(b64.endsWith('=')?1:0);
+ return Math.floor((b64.length*3)/4)-pad;
+}
+function _loadImgSource(file){
+ return new Promise(function(resolve,reject){
+  if(typeof createImageBitmap==='function'){
+   createImageBitmap(file).then(function(bmp){
+    resolve({src:bmp,w:bmp.width,h:bmp.height,close:function(){try{bmp.close()}catch(e){}}});
+   }).catch(fallback);
+  }else{fallback()}
+  function fallback(){
+   var rd=new FileReader();
+   rd.onerror=function(){reject(new Error('read'))};
+   rd.onload=function(){
+    var im=new Image();
+    im.onload=function(){resolve({src:im,w:im.naturalWidth||im.width,h:im.naturalHeight||im.height,close:function(){}})};
+    im.onerror=function(){reject(new Error('decode'))};
+    im.src=rd.result;
+   };
+   rd.readAsDataURL(file);
+  }
+ });
+}
+function compressAvatarFile(file,maxBytes){
+ maxBytes=maxBytes||500*1024;
+ return _loadImgSource(file).then(function(img){
+  try{
+   var side=Math.min(img.w,img.h);
+   if(!side)throw new Error('empty');
+   var sx=Math.floor((img.w-side)/2),sy=Math.floor((img.h-side)/2);
+   var dims=[Math.min(side,768),Math.min(side,512),Math.min(side,384),Math.min(side,256)];
+   var quals=[0.88,0.80,0.72,0.62,0.52,0.42,0.32];
+   var cv=document.createElement('canvas'),cx=cv.getContext('2d');
+   var bestUrl='',bestBytes=Infinity;
+   for(var di=0;di<dims.length;di++){
+    var d=dims[di];
+    cv.width=d;cv.height=d;
+    cx.fillStyle='#111612';cx.fillRect(0,0,d,d);
+    cx.drawImage(img.src,sx,sy,side,side,0,0,d,d);
+    for(var qi=0;qi<quals.length;qi++){
+     var u=cv.toDataURL('image/jpeg',quals[qi]);
+     var b=_dataUrlBytes(u);
+     if(b<bestBytes){bestBytes=b;bestUrl=u}
+     if(b<=maxBytes)return {dataUrl:u,bytes:b};
+    }
+   }
+   return {dataUrl:bestUrl,bytes:bestBytes};
+  }finally{img.close()}
+ });
+}
+function _setLocalAvatar(url){
+ if(!ME)return;
+ ME.avatar_url=url||'';
+ if(!ME.user_metadata)ME.user_metadata={};
+ ME.user_metadata.avatar_url=url||'';
+ try{_sxAvatarCache={}}catch(e){}
+ renderProfile();
+}
+function uploadAvatarFile(file){
+ if(!file||_avBusy)return;
+ var en=(lang==='en');
+ if(!/^image\//i.test(file.type||'')&&!/\.(jpe?g|png|webp|gif|heic|heif)$/i.test(file.name||'')){
+  toast(en?'Please choose an image file':'Sila pilih fail gambar');
+  return;
+ }
+ _avBusy=true;
+ var avEl=$('pInit');if(avEl)avEl.classList.add('busy');
+ compressAvatarFile(file,500*1024).then(function(res){
+  return apiFetch('/api/chat/avatar',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({image:res.dataUrl})}).then(function(r){
+   _avBusy=false;if(avEl)avEl.classList.remove('busy');
+   if(!r.ok||!r.data||!r.data.ok){
+    toast((r.data&&r.data.error)?r.data.error:(en?'Failed to upload photo':'Gagal muat naik gambar'));
+    return;
+   }
+   _setLocalAvatar(r.data.avatar_url||'');
+   var kb=Math.max(1,Math.round((r.data.bytes||res.bytes||0)/1024));
+   hap(10);
+   toast((en?'Profile picture updated':'Gambar profil dikemas kini')+' ('+kb+' KB)');
+  });
+ }).catch(function(){
+  _avBusy=false;if(avEl)avEl.classList.remove('busy');
+  toast(en?'Could not process image':'Tidak dapat proses gambar');
+ });
+}
+function removeAvatar(){
+ if(_avBusy)return;
+ var en=(lang==='en');
+ _avBusy=true;
+ var avEl=$('pInit');if(avEl)avEl.classList.add('busy');
+ apiFetch('/api/chat/avatar',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({remove:true})}).then(function(r){
+  _avBusy=false;if(avEl)avEl.classList.remove('busy');
+  if(!r.ok){toast(en?'Failed to remove photo':'Gagal buang gambar');return}
+  _setLocalAvatar('');
+  hap(6);
+  toast(en?'Profile picture removed':'Gambar profil dibuang');
+ }).catch(function(){
+  _avBusy=false;if(avEl)avEl.classList.remove('busy');
+  toast(en?'Failed to remove photo':'Gagal buang gambar');
+ });
+}
+function openAvatarMenu(){
+ var en=(lang==='en');
+ var pop=document.createElement('div');pop.className='av-pop';
+ pop.innerHTML='<div class="av-pop-card"><h4>'+(en?'Profile picture':'Gambar profil')+'</h4>'
+  +'<button type="button" class="prim" data-av="pick">'+(en?'Change photo':'Tukar gambar')+'</button>'
+  +'<button type="button" class="danger" data-av="del">'+(en?'Remove photo':'Buang gambar')+'</button>'
+  +'<button type="button" data-av="cancel">'+(en?'Cancel':'Batal')+'</button></div>';
+ var close=function(){if(pop.parentNode)pop.parentNode.removeChild(pop)};
+ pop.onclick=function(e){
+  if(e.target===pop){close();return}
+  var b=e.target.closest?e.target.closest('button[data-av]'):null;
+  if(!b)return;
+  var a=b.dataset.av;
+  close();
+  if(a==='pick')$('pAvInput').click();
+  else if(a==='del')removeAvatar();
+ };
+ document.body.appendChild(pop);
+}
+$('pAvBtn').onclick=function(e){
+ e.stopPropagation();
+ if(_avBusy)return;
+ hap(6);
+ if(myAvatarUrl())openAvatarMenu();
+ else $('pAvInput').click();
+};
+$('pAvInput').onclick=function(e){e.stopPropagation()};
+$('pAvInput').addEventListener('change',function(){
+ var f=this.files&&this.files[0];
+ this.value='';
+ if(f)uploadAvatarFile(f);
+});
 var MICO={
  mAccount:'<circle cx="12" cy="8" r="4"/><path d="M4 21v-1a8 8 0 0 1 16 0v1"/>',
  mPerf:'<path d="M3 3v18h18"/><path d="m7 15 4-5 3 3 5-7"/>',

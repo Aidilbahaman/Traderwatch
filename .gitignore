@@ -11,3 +11,4 @@ engine/bot.db
 *.db
 venv/
 backups/
+member/avatars/

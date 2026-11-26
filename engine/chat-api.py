@@ -39,6 +39,8 @@ Storage: Supabase table `chat_messages`. Run this SQL once in the SQL editor:
 The table is intentionally NOT readable with the anon key. All reads go through
 this server so the filter and the auth check can never be bypassed.
 """
+import base64
+import io
 import json
 import os
 import pathlib
@@ -50,6 +52,12 @@ import urllib.parse
 import urllib.request
 from datetime import datetime, timedelta, timezone
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+
+try:
+    from PIL import Image, ImageOps
+except Exception:
+    Image = None
+    ImageOps = None
 
 ENV = pathlib.Path("/home/ubuntu/.secrets/supabase.env")
 PORT = int(os.environ.get("CHAT_PORT", "8101"))
@@ -77,6 +85,77 @@ _cache = {}
 _feat = {"ext": (0.0, False), "rx": (0.0, False), "ed": (0.0, False)}
 _last_edit = {}                 # user_id -> unix ts of last accepted edit
 EDIT_RATE_LIMIT = 1.5           # seconds between edits per user
+
+# ---- profile avatars (auto-compressed <= 500 KB on disk) ----
+AVATAR_DIR = pathlib.Path(__file__).resolve().parent.parent / "member" / "avatars"
+AVATAR_MAX_BYTES = 500 * 1024   # strict 500 KB cap on disk
+AVATAR_MAX_RAW = 2 * 1024 * 1024  # 2 MB max incoming payload
+AVATAR_MAX_DIM = 768
+_last_avatar = {}
+AVATAR_RATE_LIMIT = 3.0
+
+
+def save_avatar_image(uid, data_url):
+    """Decode base64 image, center-crop square, compress to <= 500 KB JPEG, save atomically."""
+    if not UUID_RE.match(uid or ""):
+        raise ValueError("invalid user")
+    if Image is None:
+        raise RuntimeError("image processor unavailable")
+    s = str(data_url or "").strip()
+    if s.startswith("data:"):
+        comma = s.find(",")
+        if comma < 0:
+            raise ValueError("bad data url")
+        s = s[comma + 1:]
+    try:
+        raw = base64.b64decode(s, validate=True)
+    except Exception:
+        raise ValueError("invalid base64 image")
+    if not raw or len(raw) > AVATAR_MAX_RAW:
+        raise ValueError("image too large")
+    try:
+        im = Image.open(io.BytesIO(raw))
+        im.load()
+        if ImageOps is not None:
+            im = ImageOps.exif_transpose(im)
+    except Exception:
+        raise ValueError("unsupported image format")
+    if im.mode in ("RGBA", "LA") or (im.mode == "P" and "transparency" in im.info):
+        bg = Image.new("RGB", im.size, (17, 22, 18))
+        rgba = im.convert("RGBA")
+        bg.paste(rgba, mask=rgba.split()[-1])
+        im = bg
+    elif im.mode != "RGB":
+        im = im.convert("RGB")
+    w, h = im.size
+    side = min(w, h)
+    if side <= 0:
+        raise ValueError("empty image")
+    left = (w - side) // 2
+    top = (h - side) // 2
+    im = im.crop((left, top, left + side, top + side))
+
+    out = None
+    for dim in (min(side, AVATAR_MAX_DIM), min(side, 512), min(side, 384), min(side, 256)):
+        cur = im.resize((dim, dim), Image.Resampling.LANCZOS) if dim < side else im
+        for q in (88, 80, 72, 62, 52, 42, 32):
+            buf = io.BytesIO()
+            cur.save(buf, format="JPEG", quality=q, optimize=True, progressive=True)
+            data = buf.getvalue()
+            if len(data) <= AVATAR_MAX_BYTES:
+                out = data
+                break
+        if out is not None:
+            break
+    if out is None:
+        raise ValueError("could not compress under 500KB")
+
+    AVATAR_DIR.mkdir(parents=True, exist_ok=True)
+    dst = AVATAR_DIR / f"{uid}.jpg"
+    tmp = AVATAR_DIR / f".{uid}.{os.getpid()}.tmp"
+    tmp.write_bytes(out)
+    os.replace(tmp, dst)
+    return f"/member/avatars/{uid}.jpg?v={int(time.time())}", len(out)
 
 # ---- presence (online count) ----
 PRESENCE_TTL = float(os.environ.get("PRESENCE_TTL", "150"))  # 60s heartbeat + margin
@@ -483,12 +562,14 @@ def ed_ok():
 # ---------------------------------------------------------------- GIF picker
 # Media chat: GIF disimpan sebagai kind='gif' + payload JSON (bukan teks), jadi
 # penapis pautan tidak menyentuhnya dan URL sentiasa divalidasi semula di sini.
-# Provider sebenar (Tenor/Klipy/Giphy) dipanggil server-side supaya API key
+# Provider sebenar (Klipy/Giphy) dipanggil server-side supaya API key
 # tidak pernah sampai ke pelayar. Tanpa key, app guna pek reaksi terbina dalam.
 GIF_ENV = pathlib.Path("/home/ubuntu/.secrets/gif.env")
 GIF_LOCAL_RE = re.compile(r"^/member/gifs/[a-z0-9_-]{1,40}\.gif$", re.I)
+# Tenor is dead (Google discontinued the API in 2026) — Klipy is the official
+# migration path, Giphy the alternate. Media hosts stay pinned so a stored
+# payload can never point anywhere else.
 GIF_HOSTS = {
-    "media.tenor.com", "c.tenor.com", "media1.tenor.com",
     "static.klipy.com", "static1.klipy.com", "static2.klipy.com",
     "media.giphy.com", "i.giphy.com", "media0.giphy.com", "media1.giphy.com",
     "media2.giphy.com", "media3.giphy.com", "media4.giphy.com",
@@ -505,7 +586,7 @@ def gif_keys():
     if now - _gif_key_cache["at"] < 60 and _gif_key_cache["keys"] is not None:
         return _gif_key_cache["keys"]
     keys = {k: (os.environ.get(k) or "").strip() for k in
-            ("TENOR_API_KEY", "KLIPY_APP_KEY", "GIPHY_API_KEY")}
+            ("KLIPY_APP_KEY", "GIPHY_API_KEY")}
     try:
         for line in GIF_ENV.read_text().splitlines():
             line = line.strip()
@@ -565,27 +646,6 @@ def _gif_http(url, timeout=8):
         return json.loads(r.read().decode("utf-8", "replace"))
 
 
-def _gif_fetch_tenor(q, key, limit):
-    base = "https://tenor.googleapis.com/v2/" + ("search" if q else "featured")
-    qs = {"key": key, "limit": limit, "media_filter": "tinygif,gif", "contentfilter": "high",
-          "locale": "en_US"}
-    if q:
-        qs["q"] = q
-    data = _gif_http(base + "?" + urllib.parse.urlencode(qs))
-    out = []
-    for it in data.get("results", [])[:limit]:
-        mf = it.get("media_formats") or {}
-        gif = mf.get("gif") or mf.get("tinygif") or {}
-        tiny = mf.get("tinygif") or gif
-        if not gif.get("url"):
-            continue
-        dims = gif.get("dims") or [240, 240]
-        out.append({"id": str(it.get("id") or ""), "title": (it.get("content_description") or "GIF")[:60],
-                    "url": gif["url"], "preview": tiny.get("url") or gif["url"],
-                    "w": int(dims[0] or 240), "h": int(dims[1] or 240)})
-    return out
-
-
 def _gif_fetch_klipy(q, key, limit):
     path = "search" if q else "trending"
     qs = {"per_page": max(8, min(50, limit)), "content_filter": "high", "locale": "en"}
@@ -628,8 +688,7 @@ def _gif_fetch_giphy(q, key, limit):
     return out
 
 
-GIF_PROVIDERS = (("TENOR_API_KEY", "tenor", _gif_fetch_tenor),
-                 ("KLIPY_APP_KEY", "klipy", _gif_fetch_klipy),
+GIF_PROVIDERS = (("KLIPY_APP_KEY", "klipy", _gif_fetch_klipy),
                  ("GIPHY_API_KEY", "giphy", _gif_fetch_giphy))
 
 
@@ -1303,9 +1362,49 @@ class Handler(BaseHTTPRequestHandler):
 
         try:
             n = int(self.headers.get("Content-Length") or 0)
+            if n > AVATAR_MAX_RAW + 131072:
+                return self._send(413, {"error": "payload too large"})
             payload = json.loads(self.rfile.read(n).decode() or "{}")
         except Exception:
             return self._send(400, {"error": "bad json"})
+
+        # ---- profile picture upload / remove (auto-compressed <= 500 KB)
+        if path == "/api/chat/avatar":
+            uid = user.get("id") or ""
+            if not uid or not UUID_RE.match(uid):
+                return self._send(401, {"error": "sign in required"})
+            now = time.time()
+            if now - _last_avatar.get(uid, 0) < AVATAR_RATE_LIMIT:
+                return self._send(429, {"error": "slow down"})
+            _last_avatar[uid] = now
+            if payload.get("remove"):
+                try:
+                    p = AVATAR_DIR / f"{uid}.jpg"
+                    if p.exists():
+                        p.unlink()
+                except OSError:
+                    pass
+                try:
+                    sb("PUT", "/auth/v1/user",
+                       body={"data": {"avatar_url": ""}}, token=self._token())
+                except RuntimeError as e:
+                    return self._send(502, {"error": str(e)})
+                return self._send(200, {"ok": True, "avatar_url": ""})
+            img = payload.get("image")
+            if not img:
+                return self._send(400, {"error": "missing image"})
+            try:
+                url, nbytes = save_avatar_image(uid, img)
+            except ValueError as e:
+                return self._send(400, {"error": str(e)})
+            except RuntimeError as e:
+                return self._send(500, {"error": str(e)})
+            try:
+                sb("PUT", "/auth/v1/user",
+                   body={"data": {"avatar_url": url}}, token=self._token())
+            except RuntimeError as e:
+                return self._send(502, {"error": str(e)})
+            return self._send(200, {"ok": True, "avatar_url": url, "bytes": nbytes})
 
         # ---- presence heartbeat (online count)
         if path == "/api/chat/presence":
