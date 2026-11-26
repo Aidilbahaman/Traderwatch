@@ -6,10 +6,12 @@
 <meta name="robots" content="noindex,nofollow,noarchive,nosnippet">
 <meta name="referrer" content="no-referrer">
 <meta name="theme-color" content="#0a0e0b">
-<link rel="manifest" href="manifest.webmanifest?v=20261124a">
-<link rel="icon" href="icons/favicon.svg?v=20261124a" type="image/svg+xml">
-<link rel="icon" type="image/png" href="icons/icon-192.png?v=20261124a">
-<link rel="apple-touch-icon" href="icons/apple-touch-icon.png?v=20261124a">
+<link rel="manifest" href="manifest.webmanifest?v=20261127a">
+<link rel="icon" href="icons/favicon.ico?v=20261127a" sizes="any">
+<link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png?v=20261127a">
+<link rel="icon" type="image/png" sizes="16x16" href="icons/favicon-16.png?v=20261127a">
+<link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png?v=20261127a">
+<link rel="apple-touch-icon" sizes="180x180" href="icons/apple-touch-icon.png?v=20261127a">
 <meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="Trader Watch">
 <meta name="description" content="Trader Watch — analisis AI sebenar, komuniti dan profil ahli.">
@@ -41,8 +43,8 @@ html[data-theme="light"] .notch{background:#e5eae3}
    (ia sticky di atas .scroll yang berasingan), jadi glass blur nyata tiada beza visual —
    buang terus untuk bunuh bug ini pada semua versi iOS. */
 .appbar{position:sticky;top:0;z-index:20;display:flex;align-items:center;gap:10px;padding:28px 16px 10px;background:var(--glass);border-bottom:1px solid var(--line)}
-.logo{width:34px;height:34px;flex:none;border-radius:11px;background:var(--lime);color:var(--onlime);display:grid;place-items:center;font-weight:950;font-size:17px;box-shadow:0 0 24px #b7f36b33}
-.logo svg{display:block}
+.logo{width:34px;height:34px;flex:none;border-radius:11px;background:#02040a;border:1px solid rgba(183,243,107,.28);overflow:hidden;display:grid;place-items:center;box-shadow:0 0 24px #b7f36b33}
+.logo svg,.logo img{display:block;width:100%;height:100%;object-fit:cover;border-radius:inherit}
 .brand{min-width:0;flex:1 1 auto;overflow:hidden;display:flex;flex-direction:column;justify-content:center}
 .brand b{display:block;font-size:13px;letter-spacing:.03em;font-weight:850;line-height:1.1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .brand small{display:block;color:var(--muted);font-size:9px;letter-spacing:.12em;text-transform:uppercase;font-weight:700;margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -1886,7 +1888,7 @@ html[data-theme="light"] .star-mood{background:rgba(122,181,46,.10);border-color
   <div class="phone" id="phone">
     <div class="notch"></div>
     <header class="appbar">
-      <div class="logo"><svg viewBox="-22 -22 44 44" width="19" height="19" aria-hidden="true"><path d="M0-20Q0 0 20 0Q0 0 0 20Q0 0-20 0Q0 0 0-20Z" fill="currentColor"/></svg></div>
+      <div class="logo"><img src="icons/icon-192.png?v=20261127a" alt="TraderWatch"></div>
       <div class="brand"><b>TRADERWATCH</b><small>AI Analyst</small></div>
       <div class="baract">
         <button class="ibtn" id="themeBtn" aria-label="Toggle theme">

@@ -5,7 +5,7 @@
  *  - /api/* dan /auth/*: NETWORK SAHAJA — jangan cache data pasaran/user
  *  - Data user (Supabase REST, chat, profil): tidak dicache sama sekali
  */
-const VERSION = 'tw-member-full-v129';
+const VERSION = 'tw-member-full-v130';
 const SHELL_CACHE = VERSION + '-shell';
 
 const SHELL_ASSETS = [
@@ -98,7 +98,7 @@ self.addEventListener('push', (event) => {
   let data = {};
   try { data = event.data ? event.data.json() : {}; } catch (e) { data = {}; }
   const title = data.title || 'Trader Watch';
-  const ico = data.icon || '/member/icons/icon-192.png?v=20261124a';
+  const ico = data.icon || '/member/icons/icon-192.png?v=20261127a';
   const opts = {
     body: data.body || '',
     icon: ico,

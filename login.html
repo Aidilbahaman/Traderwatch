@@ -1,57 +1,323 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Log in – TraderWatch</title>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,minimum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" content="#0a0e0b">
 <meta name="robots" content="noindex">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Source+Sans+3:wght@400;600&display=swap" media="print" onload="this.media='all'">
-<link rel="stylesheet" href="app.css">
+<link rel="icon" href="favicon.ico?v=20261127a" sizes="any">
+<link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png?v=20261127a">
+<link rel="icon" type="image/png" sizes="16x16" href="icons/favicon-16.png?v=20261127a">
+<link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png?v=20261127a">
+<link rel="apple-touch-icon" sizes="180x180" href="icons/apple-touch-icon.png?v=20261127a">
+<title>Log in — TraderWatch</title>
 <style>
+:root{
+  --bg:#0a0e0b;--card:#111612;--card2:#171e18;--input:#0c110d;
+  --text:#eef3ee;--muted:#8a978c;--line:#222b23;--line2:#2e3a30;
+  --lime:#b7f36b;--onlime:#10150b;--red:#ff777d;--orange:#ffc16b;--blue:#8ab4ff;
+  color-scheme:dark
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 [hidden]{display:none!important}
-.box{max-width:440px;margin:56px auto;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:28px}
-.box h1{font-size:2rem;margin-bottom:18px}
-#turnstileWrap{display:flex;justify-content:center;margin:6px 0 12px}
-#cf-turnstile{display:flex;justify-content:center}
-#cf-turnstile iframe{margin:0 auto}
-.signin-note{background:var(--panel2,#f4f6f8);border:1px solid var(--line);border-radius:12px;padding:13px 15px;margin:0 0 18px;font-size:14px;color:var(--text,#17171d)}
-.signin-note p{margin:0}
-.signin-note p.sub{margin-top:6px;color:var(--muted);font-size:13px}
-.signin-note details{margin-top:9px}
-.signin-note summary{cursor:pointer;color:var(--muted);font-size:12.5px;font-weight:600}
-.signin-note ul{margin:8px 0 0;padding-left:18px;color:var(--muted);font-size:12.5px;display:grid;gap:5px}
-.alt{margin-top:18px;color:var(--muted);display:grid;gap:8px}
-.linkbtn{background:none;border:0;color:var(--muted);font:600 1rem var(--body);cursor:pointer;text-decoration:underline;padding:0;text-align:left}
-.oauth{display:grid;gap:10px;margin-bottom:18px}
-.oauth-btn{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;padding:11px 14px;border-radius:10px;border:1px solid var(--line);background:var(--panel);color:var(--ink);font:600 1rem var(--body);cursor:pointer;transition:background .15s ease,border-color .15s ease}
-.oauth-btn:hover{background:var(--fill,#f5f5f7);border-color:var(--muted)}
+html,body{margin:0;min-height:100%;background:var(--bg);touch-action:pan-x pan-y;-webkit-text-size-adjust:100%}
+body{
+  font:15px/1.5 -apple-system,BlinkMacSystemFont,"Inter","Segoe UI",sans-serif;
+  letter-spacing:-.018em;color:var(--text);
+  overflow-x:hidden;display:flex;flex-direction:column;min-height:100vh;min-height:100dvh
+}
+a{color:inherit;text-decoration:none}
+button,input{font:inherit}
+button{cursor:pointer;border:0;background:none;color:inherit}
+:focus-visible{outline:2px solid var(--lime);outline-offset:2px;border-radius:10px}
+
+.glow{
+  position:fixed;inset:0 0 auto 0;height:520px;pointer-events:none;z-index:0;
+  background:radial-gradient(ellipse 72% 58% at 50% -10%,rgba(183,243,107,.16) 0,transparent 66%)
+}
+
+header{
+  position:sticky;top:0;z-index:20;
+  padding:calc(12px + env(safe-area-inset-top)) 0 12px;
+  background:rgba(10,14,11,.82);
+  backdrop-filter:saturate(160%) blur(18px);-webkit-backdrop-filter:saturate(160%) blur(18px);
+  border-bottom:1px solid var(--line)
+}
+.hrow{max-width:520px;margin:0 auto;padding:0 max(18px,env(safe-area-inset-right,0px)) 0 max(18px,env(safe-area-inset-left,0px));display:flex;align-items:center;gap:10px}
+.brand{display:flex;align-items:center;gap:10px;font-weight:850;font-size:14.5px;letter-spacing:.03em;white-space:nowrap;min-width:0}
+.logo{
+  width:32px;height:32px;flex:none;border-radius:10px;
+  background:#02040a;border:1px solid rgba(183,243,107,.28);overflow:hidden;
+  display:grid;place-items:center;
+  box-shadow:0 0 22px rgba(183,243,107,.32);
+  animation:logoPulse 3s ease-in-out infinite
+}
+.logo img{width:100%;height:100%;object-fit:cover;display:block;border-radius:inherit}
+@keyframes logoPulse{
+  0%,100%{box-shadow:0 0 18px rgba(183,243,107,.28)}
+  50%{box-shadow:0 0 30px rgba(183,243,107,.54)}
+}
+.hact{margin-left:auto;display:flex;align-items:center;gap:8px;flex:none}
+.ibtn{
+  width:36px;height:36px;border-radius:11px;
+  background:var(--card);border:1px solid var(--line);color:var(--muted);
+  display:grid;place-items:center;transition:border-color .16s,color .16s
+}
+.ibtn:hover{color:var(--text);border-color:var(--line2)}
+.backlink{
+  display:inline-flex;align-items:center;justify-content:center;height:36px;
+  font-size:12.5px;font-weight:700;color:var(--muted);line-height:1;
+  padding:0 12px;border-radius:10px;background:var(--card);border:1px solid var(--line);
+  transition:border-color .16s,color .16s;white-space:nowrap
+}
+.backlink:hover{color:var(--text);border-color:var(--line2)}
+@media(max-width:360px){
+  .hrow{padding:0 max(14px,env(safe-area-inset-right,0px)) 0 max(14px,env(safe-area-inset-left,0px));gap:8px}
+  .brand{font-size:13.5px;gap:8px}
+  .logo{width:30px;height:30px;border-radius:9px}
+  .hact{gap:6px}
+  .backlink{height:32px;padding:0 10px;font-size:12px}
+  .ibtn{width:32px;height:32px;border-radius:10px}
+}
+
+main{
+  position:relative;z-index:1;flex:1;
+  width:100%;max-width:460px;margin:0 auto;
+  padding:26px 18px calc(36px + env(safe-area-inset-bottom))
+}
+
+.box{
+  background:var(--card);
+  border:1px solid var(--line);
+  border-radius:26px;
+  padding:24px 20px 22px;
+  box-shadow:0 26px 70px rgba(0,0,0,.62),0 0 0 1px rgba(183,243,107,.04)
+}
+@media(min-width:460px){.box{padding:28px 26px 26px}}
+
+/* Mode segmented switch */
+.seg{
+  display:grid;grid-template-columns:1fr 1fr;gap:4px;
+  background:var(--input);border:1px solid var(--line);border-radius:14px;
+  padding:4px;margin-bottom:20px
+}
+.seg button{
+  padding:9px 12px;border-radius:10px;font-weight:800;font-size:13.5px;
+  color:var(--muted);transition:background .2s,color .2s,box-shadow .2s
+}
+.seg button.on{
+  background:var(--lime);color:var(--onlime);
+  box-shadow:0 0 18px rgba(183,243,107,.24)
+}
+
+.auth-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:0 0 6px}
+.box h1{
+  margin:0;font-size:27px;line-height:1.08;
+  letter-spacing:-.045em;font-weight:900
+}
+.hint{margin:0 0 20px;color:var(--muted);font-size:14px}
+
+/* Starling AI mascot perched beside heading (Gaya 1) */
+.auth-star{
+  position:relative;flex:none;width:48px;height:48px;padding:0;
+  background:none;border:0;cursor:pointer;display:grid;place-items:center;
+  -webkit-tap-highlight-color:transparent;
+  transition:transform .18s cubic-bezier(.22,1,.36,1)
+}
+.auth-star:active{transform:scale(.9)}
+.auth-star.hop{animation:stHop .52s cubic-bezier(.22,1,.36,1)}
+@keyframes stHop{
+  0%{transform:translateY(0) scale(1)}
+  35%{transform:translateY(-10px) scale(1.1,.93)}
+  65%{transform:translateY(2px) scale(.96,1.04)}
+  100%{transform:translateY(0) scale(1)}
+}
+.auth-star svg{display:block;width:48px;height:48px;animation:stFloat 2.8s ease-in-out infinite;filter:drop-shadow(0 5px 14px rgba(183,243,107,.28))}
+@keyframes stFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
+.auth-star .st-eyes{transform-origin:center;transform-box:fill-box;animation:stBlink 3.8s infinite,stGlance 4.8s ease-in-out infinite}
+@keyframes stBlink{0%,92%,100%{transform:scaleY(1)}96%{transform:scaleY(.08)}}
+@keyframes stGlance{0%,38%,100%{translate:0 0}48%,66%{translate:-1.6px 1px}76%,88%{translate:1.2px .5px}}
+.auth-star .st-happy{opacity:0;transition:opacity .12s}
+.auth-star.happy .st-eyes{opacity:0}
+.auth-star.happy .st-happy{opacity:1}
+.auth-star .st-twinkle{transform-origin:center;transform-box:fill-box;animation:stTwinkle 2.2s ease-in-out infinite}
+@keyframes stTwinkle{0%,100%{transform:scale(.72);opacity:.5}50%{transform:scale(1.24);opacity:1}}
+
+/* Smooth arrival & departure page motion (GPU-only, zero blur thrash) */
+main,header{transition:opacity .22s cubic-bezier(.22,1,.36,1),transform .26s cubic-bezier(.22,1,.36,1)}
+body.tw-arriving .box{animation:boxIn .36s cubic-bezier(.22,1,.36,1) both}
+@keyframes boxIn{from{opacity:0;transform:translate3d(0,12px,0) scale(.98)}to{opacity:1;transform:none}}
+body.tw-leaving main{opacity:0;transform:translate3d(0,8px,0) scale(.97);pointer-events:none}
+body.tw-leaving header{opacity:.4;pointer-events:none}
+.tw-fly-star{position:fixed;left:0;top:0;width:66px;height:66px;z-index:9999;pointer-events:none;will-change:transform;transform-origin:0 0}
+.tw-fly-cv{position:fixed;inset:0;width:100%;height:100%;z-index:9998;pointer-events:none}
+
+.oauth{display:grid;gap:9px;margin-bottom:18px}
+.oauth-btn{
+  display:flex;align-items:center;justify-content:center;gap:10px;
+  width:100%;padding:12px 14px;border-radius:14px;
+  border:1px solid var(--line);background:var(--card2);color:var(--text);
+  font-weight:700;font-size:14px;
+  transition:border-color .16s,background .16s,transform .12s
+}
+.oauth-btn:hover{border-color:#354636;background:#1c251d}
+.oauth-btn:active{transform:scale(.985)}
 .oauth-btn svg{width:18px;height:18px;flex:0 0 auto}
-.divider{display:flex;align-items:center;gap:12px;color:var(--muted);font-size:.85rem;margin:0 0 18px}
+
+.divider{
+  display:flex;align-items:center;gap:12px;
+  color:#6c796e;font-size:12px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;
+  margin:0 0 18px
+}
 .divider::before,.divider::after{content:"";flex:1;height:1px;background:var(--line)}
 
-/* Telegram fullscreen: pad by the insets the client reports. Zero in a
-   normal browser, so nothing changes there. */
-:root[data-tg="1"] .top{padding-top:calc(12px + var(--tg-top,0px))}
+.signin-note{
+  background:rgba(255,193,107,.07);
+  border:1px solid rgba(255,193,107,.24);
+  border-radius:15px;padding:13px 14px;margin:0 0 18px;
+  font-size:13.5px;line-height:1.5;color:var(--text)
+}
+.signin-note p{margin:0}
+.signin-note p.sub{margin-top:6px;color:var(--muted);font-size:12.5px}
+.signin-note details{margin-top:9px;border-top:1px solid rgba(255,255,255,.07);padding-top:8px}
+.signin-note summary{cursor:pointer;color:var(--orange);font-size:12.5px;font-weight:700}
+.signin-note ul{margin:8px 0 0;padding-left:18px;color:var(--muted);font-size:12.5px;display:grid;gap:5px}
+
+form{display:grid;gap:13px}
+.field{display:grid;gap:6px}
+.field span.lbl{font-size:12.5px;font-weight:700;color:#b8c4b9;letter-spacing:-.01em}
+.input-wrap{position:relative;display:flex;align-items:center}
+.field input{
+  width:100%;padding:13px 14px;border-radius:13px;
+  background:var(--input);border:1px solid var(--line);
+  color:var(--text);font-size:16px;outline:0;
+  transition:border-color .18s,box-shadow .18s,background .18s
+}
+.field input::placeholder{color:#536055}
+.field input:focus{
+  border-color:var(--lime);
+  box-shadow:0 0 0 3px rgba(183,243,107,.16);
+  background:#0e140f
+}
+.field.has-eye input{padding-right:44px}
+.eye-btn{
+  position:absolute;right:6px;width:34px;height:34px;border-radius:9px;
+  display:grid;place-items:center;color:var(--muted);transition:color .15s,background .15s
+}
+.eye-btn:hover{color:var(--text);background:rgba(255,255,255,.05)}
+
+#turnstileWrap{display:flex;justify-content:center;min-height:10px;margin:2px 0 4px}
+#cf-turnstile{display:flex;justify-content:center}
+#cf-turnstile iframe{margin:0 auto}
+
+.btn{
+  width:100%;padding:14px 18px;border-radius:15px;
+  background:var(--lime);color:var(--onlime);
+  font-weight:850;font-size:15px;letter-spacing:-.01em;
+  box-shadow:0 0 26px rgba(183,243,107,.24);
+  transition:transform .12s,box-shadow .2s,opacity .2s
+}
+.btn:hover:not(:disabled){box-shadow:0 0 36px rgba(183,243,107,.44)}
+.btn:active:not(:disabled){transform:scale(.985)}
+.btn:disabled{opacity:.48;box-shadow:none;cursor:not-allowed}
+
+.msg{
+  font-size:13px;line-height:1.45;border-radius:12px;
+  padding:0;margin:0;min-height:0;transition:all .2s
+}
+.msg.ok{
+  padding:11px 13px;background:rgba(183,243,107,.10);
+  border:1px solid rgba(183,243,107,.32);color:var(--lime)
+}
+.msg.err{
+  padding:11px 13px;background:rgba(255,119,125,.10);
+  border:1px solid rgba(255,119,125,.32);color:#ff9ba0
+}
+
+.alt{
+  margin-top:18px;padding-top:16px;border-top:1px solid var(--line);
+  display:grid;gap:10px;font-size:13.5px;color:var(--muted)
+}
+.linkbtn{
+  color:var(--muted);font-weight:650;font-size:13px;text-align:left;
+  padding:0;transition:color .15s;display:inline-flex;align-items:center;gap:6px
+}
+.linkbtn:hover{color:var(--lime)}
+.linkbtn:disabled{opacity:.45;cursor:not-allowed}
+.mode-line{font-size:13.5px;color:var(--muted);margin-top:2px}
+.mode-line a{color:var(--lime);font-weight:750}
+.mode-line a:hover{text-decoration:underline}
+
+.foot-note{
+  text-align:center;color:#5d695f;font-size:11.5px;margin-top:18px;line-height:1.5
+}
+.muted{color:var(--muted)}
+
+/* Telegram fullscreen insets */
+:root[data-tg="1"] header{padding-top:calc(12px + var(--tg-top,0px))}
 :root[data-tg="1"] body{padding-bottom:calc(76px + var(--tg-bottom,0px))}
-:root[data-tg="1"] .tabbar{bottom:calc(10px + var(--tg-bottom,0px))}
+
+@media(prefers-reduced-motion:reduce){
+  *{animation:none!important;transition:none!important}
+}
 </style>
 <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 </head>
 <body>
+<div class="glow"></div>
 <header>
-  <div class="wrap nav">
-    <a class="logo" href="index.html" aria-label="TraderWatch home">
-      <svg width="32" height="32" viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="7" fill="#050b14" stroke="#264261"/><path d="M8 9h16v4h-6.2v11h-3.6V13H8z" fill="#fff"/><rect x="20" y="20" width="5" height="5" fill="#2ecf6f"/></svg>
-      <span>TraderWatch</span></a>
-    <button data-sound-toggle type="button" aria-label="Toggle sound" style="margin-left:auto;background:none;border:1px solid var(--line);border-radius:9px;width:36px;height:36px;display:grid;place-items:center;color:var(--muted);cursor:pointer"></button>
+  <div class="hrow">
+    <a class="brand" href="index.html" aria-label="TraderWatch home">
+      <div class="logo">
+        <img src="icons/icon-192.png?v=20261127a" alt="TraderWatch">
+      </div>
+      <span>TRADERWATCH</span>
+    </a>
+    <div class="hact">
+      <a class="backlink" href="index.html">← Home</a>
+      <button class="ibtn" data-sound-toggle type="button" aria-label="Toggle sound"></button>
+    </div>
   </div>
 </header>
-<main class="wrap">
+
+<main>
   <div class="box">
-    <h1 id="formTitle">Log in</h1>
-    <p id="formHint" class="muted" style="margin:-10px 0 18px">Welcome back. Log in to continue.</p>
+    <div class="seg" role="tablist" aria-label="Authentication mode">
+      <button type="button" id="tabLogin" role="tab" aria-selected="true" class="on">Log in</button>
+      <button type="button" id="tabSignup" role="tab" aria-selected="false">Sign up</button>
+    </div>
+
+    <div class="auth-head">
+      <h1 id="formTitle">Welcome back</h1>
+      <button class="auth-star" id="authStarling" type="button" aria-label="Starling AI mascot">
+        <svg viewBox="0 0 64 64" aria-hidden="true">
+          <defs>
+            <radialGradient id="authStarG" cx="42%" cy="30%" r="68%">
+              <stop offset="0%" stop-color="#ecffc9"/>
+              <stop offset="55%" stop-color="#b7f36b"/>
+              <stop offset="100%" stop-color="#7bc92a"/>
+            </radialGradient>
+          </defs>
+          <path class="st-twinkle" d="M52 10 Q52 15 57 15 Q52 15 52 20 Q52 15 47 15 Q52 15 52 10Z" fill="#8ab4ff"/>
+          <path d="M32 6 C35 20 44 29 58 32 C44 35 35 44 32 58 C29 44 20 35 6 32 C20 29 29 20 32 6 Z" fill="url(#authStarG)"/>
+          <g class="st-eyes">
+            <ellipse cx="26.5" cy="31" rx="2.6" ry="3.2" fill="#0d140a"/>
+            <ellipse cx="37.5" cy="31" rx="2.6" ry="3.2" fill="#0d140a"/>
+            <circle cx="25.6" cy="29.8" r="1" fill="#ffffff"/>
+            <circle cx="36.6" cy="29.8" r="1" fill="#ffffff"/>
+          </g>
+          <g class="st-happy">
+            <path d="M23.5 31.5 Q26.5 28 29.5 31.5" fill="none" stroke="#0d140a" stroke-width="2.2" stroke-linecap="round"/>
+            <path d="M34.5 31.5 Q37.5 28 40.5 31.5" fill="none" stroke="#0d140a" stroke-width="2.2" stroke-linecap="round"/>
+          </g>
+          <ellipse cx="22.5" cy="35" rx="2.4" ry="1.4" fill="#ff7f8f" opacity=".55"/>
+          <ellipse cx="41.5" cy="35" rx="2.4" ry="1.4" fill="#ff7f8f" opacity=".55"/>
+          <path d="M29.5 35 Q32 37.5 34.5 35" fill="none" stroke="#0d140a" stroke-width="1.6" stroke-linecap="round"/>
+        </svg>
+      </button>
+    </div>
+    <p id="formHint" class="hint">Log in to access AI charts, setups &amp; member tools.</p>
+
     <div class="oauth">
       <button class="oauth-btn" type="button" id="googleBtn">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.27-4.74 3.27-8.1z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84A11 11 0 0 0 12 23z"/><path fill="#FBBC05" d="M5.84 14.1a6.6 6.6 0 0 1 0-4.2V7.06H2.18a11 11 0 0 0 0 9.88l3.66-2.84z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15A11 11 0 0 0 12 1 11 11 0 0 0 2.18 7.06l3.66 2.84C6.71 7.3 9.14 5.38 12 5.38z"/></svg>
@@ -62,49 +328,209 @@
         Continue with GitHub
       </button>
     </div>
+
     <div class="divider"><span>or with email</span></div>
+
     <form id="loginForm" novalidate>
-      <label id="nameWrap" hidden>Full name
-        <input name="name" type="text" autocomplete="name">
+      <label class="field" id="nameWrap" hidden>
+        <span class="lbl">Full name</span>
+        <div class="input-wrap">
+          <input name="name" type="text" autocomplete="name" placeholder="Your name">
+        </div>
       </label>
-      <label id="confirmWrap" hidden>Confirm password
-        <input name="confirm" type="password" autocomplete="new-password">
+
+      <label class="field">
+        <span class="lbl">Email</span>
+        <div class="input-wrap">
+          <input name="email" type="email" autocomplete="email" placeholder="you@example.com" required>
+        </div>
       </label>
-      <label>Email
-        <input name="email" type="email" autocomplete="email" required>
+
+      <label class="field has-eye">
+        <span class="lbl">Password</span>
+        <div class="input-wrap">
+          <input name="password" type="password" autocomplete="current-password" placeholder="At least 8 characters" required>
+          <button class="eye-btn" type="button" data-eye="password" aria-label="Show password">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+          </button>
+        </div>
       </label>
-      <label>Password
-        <input name="password" type="password" autocomplete="current-password" required>
+
+      <label class="field has-eye" id="confirmWrap" hidden>
+        <span class="lbl">Confirm password</span>
+        <div class="input-wrap">
+          <input name="confirm" type="password" autocomplete="new-password" placeholder="Repeat password">
+          <button class="eye-btn" type="button" data-eye="confirm" aria-label="Show confirm password">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+          </button>
+        </div>
       </label>
-      <div id="turnstileWrap" style="margin:6px 0 12px"><div id="cf-turnstile"></div></div>
+
+      <div id="turnstileWrap"><div id="cf-turnstile"></div></div>
+
       <button class="btn" type="submit" id="submitBtn" disabled>Log in</button>
       <div class="msg" id="msg" role="status" aria-live="polite"></div>
       <button class="linkbtn" type="button" id="resend" hidden>Resend verification email</button>
       <small id="resendTimer" class="muted" hidden></small>
     </form>
+
     <div class="alt">
       <button class="linkbtn" type="button" id="forgot">Forgot your password?</button>
       <button class="linkbtn" type="button" id="otpBtn">Sign in without a password — email me a link</button>
-      <span id="modeToggle">New here? <a href="login.html?mode=signup">Create a free account</a></span>
+      <span class="mode-line" id="modeToggle">New here? <a href="login.html?mode=signup" id="modeSwitchLink">Create a free account</a></span>
     </div>
   </div>
+
+  <p class="foot-note">Free for everyone · Educational only · traderwatch.org</p>
 </main>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
-<script src="config.js?v=202610182133"></script>
-<script src="common.js?v=202610182133"></script>
-<script src="sound.js?v=20261121s3"></script>
+
+<!-- Run Starling arrival BEFORE external CDN scripts so flight starts on frame 1 (zero network stall!) -->
+<script>
+['gesturestart','gesturechange','gestureend'].forEach(function(ev){
+  document.addEventListener(ev, function(e){ e.preventDefault(); }, { passive: false });
+});
+document.addEventListener('touchstart', function(e){ if(e.touches && e.touches.length > 1) e.preventDefault(); }, { passive: false });
+document.addEventListener('touchmove', function(e){ if(e.touches && e.touches.length > 1) e.preventDefault(); }, { passive: false });
+(function(){
+  const starBtn = document.getElementById("authStarling");
+  if(!starBtn) return;
+  const FLIGHT_KEY = "tw_starling_flight";
+  const SP_COLS = ["#b7f36b","#eaffc4","#0894FF","#C959DD","#FF2E54"];
+  const reduceM = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  let hopTimer = null;
+
+  function hopStar(playAudio){
+    if(playAudio && window.TWSound) TWSound.play('click');
+    starBtn.classList.remove("hop","happy");
+    void starBtn.offsetWidth;
+    starBtn.classList.add("hop","happy");
+    if(hopTimer) clearTimeout(hopTimer);
+    hopTimer = setTimeout(function(){ starBtn.classList.remove("happy"); }, 760);
+  }
+  window.__starHop = function(){ hopStar(false); };
+  starBtn.addEventListener("click", function(){ hopStar(true); });
+
+  function starSvg(){
+    return '<svg viewBox="0 0 64 64" width="66" height="66" style="display:block"><defs><radialGradient id="twAuthFlyG" cx="42%" cy="30%" r="68%"><stop offset="0%" stop-color="#ecffc9"/><stop offset="55%" stop-color="#b7f36b"/><stop offset="100%" stop-color="#7bc92a"/></radialGradient><radialGradient id="twAuthAura" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#b7f36b" stop-opacity=".42"/><stop offset="100%" stop-color="#b7f36b" stop-opacity="0"/></radialGradient></defs><circle cx="32" cy="32" r="30" fill="url(#twAuthAura)"/><path d="M52 10 Q52 15 57 15 Q52 15 52 20 Q52 15 47 15 Q52 15 52 10Z" fill="#8ab4ff"/><path d="M32 6 C35 20 44 29 58 32 C44 35 35 44 32 58 C29 44 20 35 6 32 C20 29 29 20 32 6 Z" fill="url(#twAuthFlyG)"/><path d="M23.5 31.5 Q26.5 28 29.5 31.5" fill="none" stroke="#0d140a" stroke-width="2.3" stroke-linecap="round"/><path d="M34.5 31.5 Q37.5 28 40.5 31.5" fill="none" stroke="#0d140a" stroke-width="2.3" stroke-linecap="round"/><ellipse cx="22.5" cy="35" rx="2.4" ry="1.4" fill="#ff7f8f" opacity=".55"/><ellipse cx="41.5" cy="35" rx="2.4" ry="1.4" fill="#ff7f8f" opacity=".55"/><path d="M29.5 35 Q32 37.5 34.5 35" fill="none" stroke="#0d140a" stroke-width="1.6" stroke-linecap="round"/></svg>';
+  }
+
+  function runArc(opts){
+    const cv = document.createElement("canvas"); cv.className = "tw-fly-cv";
+    const vw = window.innerWidth, vh = window.innerHeight;
+    cv.width = vw; cv.height = vh;
+    const c = cv.getContext("2d");
+    const fl = document.createElement("div"); fl.className = "tw-fly-star";
+    fl.innerHTML = starSvg();
+    const initSc = opts.s0 / 66;
+    fl.style.transform = "translate3d(" + opts.x0.toFixed(1) + "px," + opts.y0.toFixed(1) + "px,0) rotate(" + (opts.tilt0 || 0) + "deg) scale(" + initSc.toFixed(3) + ")";
+    document.body.appendChild(cv); document.body.appendChild(fl);
+    const pts = [], t0 = performance.now(), dur = opts.dur || 360;
+    let frameN = 0;
+    function curve(t){
+      if(opts.ease === "in") return t * t;
+      if(opts.ease === "out") return 1 - Math.pow(1 - t, 3);
+      return t<.5 ? 4*t*t*t : 1-Math.pow(-2*t+2,3)/2;
+    }
+    function step(now){
+      const raw = Math.min(1, (now - t0) / dur), t = curve(raw), iv = 1 - t;
+      const x = iv*iv*opts.x0 + 2*iv*t*opts.cx + t*t*opts.x1;
+      const y = iv*iv*opts.y0 + 2*iv*t*opts.cy + t*t*opts.y1;
+      const sz = opts.s0 + (opts.s1 - opts.s0) * t;
+      const tilt = (opts.tilt0 || 0) + ((opts.tilt1 || 0) - (opts.tilt0 || 0)) * t;
+      const sc = sz / 66;
+      fl.style.transform = "translate3d(" + x.toFixed(1) + "px," + y.toFixed(1) + "px,0) rotate(" + tilt.toFixed(1) + "deg) scale(" + sc.toFixed(3) + ")";
+      if((++frameN & 1) === 0 && raw > .05 && raw < .94){
+        pts.push({x:x+sz*.5+(Math.random()-.5)*10, y:y+sz*.5+(Math.random()-.5)*10, vx:(Math.random()-.5)*.7, vy:(Math.random()-.5)*.7+.25, r:2+Math.random()*2.8, life:1, col:SP_COLS[Math.floor(Math.random()*SP_COLS.length)]});
+      }
+      c.clearRect(0,0,vw,vh);
+      for(let i = pts.length - 1; i >= 0; i--){
+        const p = pts[i]; p.x += p.vx; p.y += p.vy; p.life -= .06;
+        if(p.life <= 0){ pts.splice(i,1); continue; }
+        c.globalAlpha = p.life*.88; c.fillStyle = p.col;
+        const sr = p.r * p.life;
+        c.beginPath(); c.moveTo(p.x,p.y-sr); c.lineTo(p.x+sr*.35,p.y-sr*.35); c.lineTo(p.x+sr,p.y); c.lineTo(p.x+sr*.35,p.y+sr*.35); c.lineTo(p.x,p.y+sr); c.lineTo(p.x-sr*.35,p.y+sr*.35); c.lineTo(p.x-sr,p.y); c.lineTo(p.x-sr*.35,p.y-sr*.35); c.closePath(); c.fill();
+      }
+      c.globalAlpha = 1;
+      if(raw < 1) requestAnimationFrame(step);
+      else if(opts.onDone) opts.onDone(fl, cv);
+    }
+    requestAnimationFrame(step);
+  }
+
+  /* Arrival swoop: Half 2 ease-out from EXACT midpoint where index.html handed off (zero teleport, zero 1-frame flash) */
+  (function checkArrival(){
+    if(reduceM) return;
+    let raw = null;
+    try{ raw = sessionStorage.getItem(FLIGHT_KEY); if(raw) sessionStorage.removeItem(FLIGHT_KEY); }catch(_){}
+    if(!raw) return;
+    let d; try{ d = JSON.parse(raw); }catch(_){ return; }
+    if(!d || d.from !== "home" || Date.now() - d.ts > 5000) return;
+    starBtn.style.visibility = "hidden";
+    document.body.classList.add("tw-arriving");
+    const r = starBtn.getBoundingClientRect(), vw = window.innerWidth, vh = window.innerHeight;
+    if(!r.width){ starBtn.style.visibility = ""; return; }
+    const x0 = Math.max(12, Math.min(vw - 64, typeof d.x === "number" ? d.x : vw * .52));
+    const y0 = Math.max(40, Math.min(vh - 80, typeof d.y === "number" ? d.y : vh * .22));
+    runArc({
+      x0, y0,
+      cx: (x0 + r.left) * .5 + 18,
+      cy: Math.min(y0, r.top) - 16,
+      x1: r.left, y1: r.top,
+      s0: d.s || 56, s1: r.width,
+      tilt0: 14, tilt1: 0,
+      ease: "out", dur: 360,
+      onDone: function(fl, cv){
+        fl.remove(); cv.remove();
+        starBtn.style.visibility = "";
+        hopStar(false);
+      }
+    });
+  })();
+
+  window.addEventListener("pageshow", function(){
+    document.body.classList.remove("tw-leaving");
+    starBtn.style.visibility = "";
+    document.querySelectorAll(".tw-fly-star,.tw-fly-cv").forEach(function(el){ el.remove(); });
+  });
+
+  /* Return flight: Half 1 ease-in arc to exact midpoint */
+  document.addEventListener("click", function(e){
+    if(reduceM || e.defaultPrevented || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return;
+    const a = e.target && e.target.closest ? e.target.closest('a[href="index.html"]') : null;
+    if(!a) return;
+    e.preventDefault();
+    if(window.TWSound) TWSound.play('click');
+    const r = starBtn.getBoundingClientRect(), vw = window.innerWidth, vh = window.innerHeight;
+    const estX = Math.max(24, vw * .32), estY = Math.max(160, vh * .40);
+    const midX = (r.left + estX) * .5 - 18, midY = Math.min(r.top, estY) - 20, midS = 56;
+    starBtn.style.visibility = "hidden";
+    document.body.classList.add("tw-leaving");
+    try{ sessionStorage.setItem(FLIGHT_KEY, JSON.stringify({ from:"auth", x:midX, y:midY, s:midS, ts:Date.now() })); }catch(_){}
+    runArc({
+      x0: r.left, y0: r.top,
+      cx: (r.left + midX) * .5 - 8,
+      cy: Math.min(r.top, midY) - 10,
+      x1: midX, y1: midY,
+      s0: r.width || 48, s1: midS,
+      tilt0: 0, tilt1: -14,
+      ease: "in", dur: 210,
+      onDone: function(){ location.href = a.href; }
+    });
+  });
+})();
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js" defer></script>
+<script src="config.js?v=202610182133" defer></script>
+<script src="common.js?v=202610182133" defer></script>
+<script src="sound.js?v=20261121s3" defer></script>
 <script src="https://telegram.org/js/telegram-web-app.js" async onload="window.__tgReady&&window.__tgReady()"></script>
 
 <script>
-/* ===== Telegram Mini App bootstrap =====
-   SDK dimuat async (tak sekat render form). Bootstrap jalan bila SDK siap,
-   atau terus jika telegram-web-app.js sudah ada dalam cache. */
+/* ===== Telegram Mini App bootstrap ===== */
 window.__tgReady = function(){
  if(window.__tgBooted) return; window.__tgBooted = true;
   var tg = window.Telegram && window.Telegram.WebApp;
-  /* telegram-web-app.js defines window.Telegram even in a normal browser, so
-     presence is not proof. Outside Telegram the platform is "unknown" and
-     initData is empty — treat that as a plain web visit and do nothing. */
   if(!tg) return;
   var inTelegram = (tg.platform && tg.platform !== "unknown") || (tg.initData && tg.initData.length > 0);
   if(!inTelegram) return;
@@ -112,9 +538,6 @@ window.__tgReady = function(){
   var root = document.documentElement;
   root.setAttribute("data-tg", "1");
 
-  /* Fullscreen removes the app name and the kebab menu. The close button
-     stays: Telegram does not expose a way to hide it, and it is the user's
-     only way out. */
   try{ tg.ready(); }catch(_){}
   try{ tg.expand(); }catch(_){}
   function goFull(){
@@ -124,9 +547,6 @@ window.__tgReady = function(){
   }
   goFull();
 
-  /* Telegram reports insets in px. Mirror them into CSS variables so the
-     sticky header and the floating tab bar do not slide under the status
-     bar or the close button. */
   function applyInsets(){
     var sa = tg.safeAreaInset || {}, cs = tg.contentSafeAreaInset || {};
     var top = Math.max(sa.top || 0, cs.top || 0);
@@ -144,18 +564,10 @@ window.__tgReady = function(){
     });
   }catch(_){}
 
-  /* Keep the page in sync with Telegram's light/dark setting unless the
-     member already chose a theme with our own toggle. */
   try{
-    var forced = null;
-    try{ forced = localStorage.getItem("tw_theme"); }catch(_){}
-    if(!forced && tg.colorScheme){
-      document.documentElement.dataset.theme = tg.colorScheme === "dark" ? "dark" : "light";
-    }
     if(tg.setHeaderColor){
-      var dark = (document.documentElement.dataset.theme || tg.colorScheme) === "dark";
-      tg.setHeaderColor(dark ? "#000000" : "#f5f5f7");
-      tg.setBackgroundColor(dark ? "#000000" : "#f5f5f7");
+      tg.setHeaderColor("#0a0e0b");
+      tg.setBackgroundColor("#0a0e0b");
     }
   }catch(_){}
  };
@@ -165,16 +577,34 @@ window.__tgReady = function(){
 <script>
 const form = document.getElementById("loginForm"), msg = document.getElementById("msg");
 const resend = document.getElementById("resend"), resendTimer = document.getElementById("resendTimer");
+const tabLogin = document.getElementById("tabLogin"), tabSignup = document.getElementById("tabSignup");
 let resendEmail = "", resendCooldown = null;
-const signup = new URLSearchParams(location.search).get("mode") === "signup";
+let signup = new URLSearchParams(location.search).get("mode") === "signup";
 const title = document.getElementById("formTitle"), hint = document.getElementById("formHint");
 const nameWrap = document.getElementById("nameWrap"), confirmWrap = document.getElementById("confirmWrap");
 const passwordInput = form.elements.password, submitButton = form.querySelector('button[type="submit"]');
-function show(t, ok){ msg.textContent = t; msg.className = "msg " + (ok ? "ok" : "err"); if(window.TWSound && ok===false) TWSound.play('error'); }
-/* ---- Cloudflare Turnstile gate (anti-bot) ----
-   Real widget (managed). Token dihantar terus ke Supabase sebagai captchaToken
-   (Supabase enforce di server). JANGAN pre-verify di backend kita: token
-   Turnstile single-use — siteverify kedua akan gagal. */
+
+function show(t, ok){
+  msg.textContent = t;
+  msg.className = "msg" + (t ? (ok ? " ok" : " err") : "");
+  if(window.TWSound && ok===false) TWSound.play('error');
+}
+
+/* Password visibility toggles */
+document.querySelectorAll('[data-eye]').forEach(function(btn){
+  btn.addEventListener('click', function(){
+    const inp = form.elements[btn.getAttribute('data-eye')];
+    if(!inp) return;
+    const isPwd = inp.type === 'password';
+    inp.type = isPwd ? 'text' : 'password';
+    btn.setAttribute('aria-label', isPwd ? 'Hide password' : 'Show password');
+    btn.innerHTML = isPwd
+      ? '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M9.88 9.88a3 3 0 1 0 4.24 4.24"/><path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c6.5 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68"/><path d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3.5 7 10 7a9.74 9.74 0 0 0 5.39-1.61"/><line x1="2" x2="22" y1="2" y2="22"/></svg>'
+      : '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>';
+  });
+});
+
+/* ---- Cloudflare Turnstile gate (anti-bot) ---- */
 const TURNSTILE_SITEKEY = "0x4AAAAAAGLylBqIwcPYBksV";
 let turnstileToken = null, turnstileReady = false, turnstileWidget = null;
 function setSubmit(on){ submitButton.disabled = !on; }
@@ -183,7 +613,7 @@ function renderTurnstile(){
   turnstileReady = true;
   turnstileWidget = window.turnstile.render("#cf-turnstile", {
     sitekey: TURNSTILE_SITEKEY,
-    theme: "auto",
+    theme: "dark",
     callback: function(token){
       turnstileToken = token; setSubmit(true);
     },
@@ -194,7 +624,7 @@ function renderTurnstile(){
 (function waitTurnstile(){
   if(window.turnstile){ renderTurnstile(); return; }
   if(!window.__tsTries) window.__tsTries = 0;
-  if(++window.__tsTries > 30){ // ~6s: CF blocked/offline -> graceful fallback
+  if(++window.__tsTries > 30){
     setSubmit(true);
     var w = document.getElementById("turnstileWrap");
     if(w) w.innerHTML = '<small class="muted">Human check unavailable — you can still sign in.</small>';
@@ -206,10 +636,10 @@ function resetTurnstile(){
   turnstileToken = null;
   if(turnstileReady){ setSubmit(false); try{window.turnstile.reset(turnstileWidget)}catch(_){} }
 }
-// Beacon diagnostik (metadata sahaja, TIADA credential) + pengesanan browser
-// dalam aplikasi (Telegram/WhatsApp/chat = storage sementara → loop login).
+
 function twBeacon(event, detail){
   try {
+    if(typeof CONFIG === "undefined") return;
     fetch(CONFIG.supabaseUrl + "/rest/v1/auth_diag", {
       method: "POST", keepalive: true,
       headers: { "Content-Type": "application/json", apikey: CONFIG.supabaseKey, Authorization: "Bearer " + CONFIG.supabaseKey, Prefer: "return=minimal" },
@@ -224,36 +654,58 @@ function twInApp(){
   if(/iPhone|iPad|iPod/.test(ua) && /AppleWebKit/.test(ua) && !/Safari\/|CriOS|FxiOS|EdgiOS/.test(ua)) return true;
   return false;
 }
-function setMode(isSignup){
-  title.textContent = isSignup ? "Create your account" : "Log in";
-  hint.textContent = isSignup ? "Sign up for free to access your TraderWatch account." : "Welcome back. Log in to continue.";
-  nameWrap.hidden = !isSignup; nameWrap.querySelector('input').required = isSignup;
-  confirmWrap.hidden = !isSignup; confirmWrap.querySelector('input').required = isSignup;
-  passwordInput.autocomplete = isSignup ? "new-password" : "current-password";
-  submitButton.textContent = isSignup ? "Create account" : "Log in";
-  document.getElementById("forgot").hidden = isSignup;
-  document.getElementById("modeToggle").innerHTML = isSignup
-    ? 'Already have an account? <a href="login.html">Log in</a>'
-    : 'New here? <a href="login.html?mode=signup">Create a free account</a>';
+
+function setMode(isSignup, pushUrl){
+  signup = !!isSignup;
+  document.title = (signup ? "Sign up" : "Log in") + " — TraderWatch";
+  tabLogin.classList.toggle("on", !signup);
+  tabLogin.setAttribute("aria-selected", String(!signup));
+  tabSignup.classList.toggle("on", signup);
+  tabSignup.setAttribute("aria-selected", String(signup));
+  title.textContent = signup ? "Create your account" : "Welcome back";
+  hint.textContent = signup ? "Free access to AI signals, annotated charts & member tools." : "Log in to access AI charts, setups & member tools.";
+  nameWrap.hidden = !signup; nameWrap.querySelector('input').required = signup;
+  confirmWrap.hidden = !signup; confirmWrap.querySelector('input').required = signup;
+  passwordInput.autocomplete = signup ? "new-password" : "current-password";
+  submitButton.textContent = signup ? "Create free account" : "Log in";
+  document.getElementById("forgot").hidden = signup;
+  document.getElementById("modeToggle").innerHTML = signup
+    ? 'Already have an account? <a href="login.html" id="modeSwitchLink">Log in</a>'
+    : 'New here? <a href="login.html?mode=signup" id="modeSwitchLink">Create a free account</a>';
+  const sw = document.getElementById("modeSwitchLink");
+  if(sw){
+    sw.addEventListener("click", function(e){
+      e.preventDefault();
+      if(window.TWSound) TWSound.play('click');
+      setMode(!signup, true);
+    });
+  }
+  show("", true);
+  if(pushUrl && history && history.replaceState){
+    const u = new URL(location.href);
+    if(signup) u.searchParams.set("mode", "signup");
+    else u.searchParams.delete("mode");
+    history.replaceState(null, "", u.pathname + u.search + u.hash);
+  }
 }
-setMode(signup);
-// Clean, calm sign-in notice. The verbose login-loop diagnostics were removed
-// once the cross-origin session bug was fixed; detailed help is tucked behind
-// a collapsed "Trouble signing in?" toggle so it never alarms normal users.
+tabLogin.addEventListener("click", function(){ if(signup){ if(window.TWSound) TWSound.play('click'); setMode(false, true); if(window.__starHop) window.__starHop(); } });
+tabSignup.addEventListener("click", function(){ if(!signup){ if(window.TWSound) TWSound.play('click'); setMode(true, true); if(window.__starHop) window.__starHop(); } });
+setMode(signup, false);
+
 (function(){
   const p = new URLSearchParams(location.search);
   const why = p.get('why') || (p.get('err') === 'storage' ? 'storage' : '');
   const bounced = p.get('bounce') === '1' || !!why;
   const inApp = twInApp();
   if (!bounced && !inApp) return;
-  let msg;
-  if (why === 'storage') msg = 'Your browser is blocking site data. Enable cookies for traderwatch.org, then sign in again.';
-  else if (why === 'signedout') msg = 'Your session has ended. Please sign in again to continue.';
-  else msg = 'Please sign in to continue to the member area.';
+  let noteMsg;
+  if (why === 'storage') noteMsg = 'Your browser is blocking site data. Enable cookies for traderwatch.org, then sign in again.';
+  else if (why === 'signedout') noteMsg = 'Your session has ended. Please sign in again to continue.';
+  else noteMsg = 'Please sign in to continue to the member area.';
   const extra = inApp ? 'For lasting access, open this page in your browser (tap ⋯ → "Open in Safari/Chrome").' : '';
   const note = document.createElement('div');
   note.className = 'signin-note';
-  note.innerHTML = '<p>' + msg + '</p>' + (extra ? '<p class="sub">' + extra + '</p>' : '') +
+  note.innerHTML = '<p>' + noteMsg + '</p>' + (extra ? '<p class="sub">' + extra + '</p>' : '') +
     '<details><summary>Trouble signing in?</summary><ul>' +
     '<li>Use a regular tab, not Incognito / Private.</li>' +
     '<li>Allow cookies for traderwatch.org (turn off "clear cookies on exit").</li>' +
@@ -262,16 +714,8 @@ setMode(signup);
   document.querySelector('.box').insertBefore(note, document.getElementById('loginForm'));
   if (inApp) twBeacon('login_inapp_seen', { ua: (navigator.userAgent||'').slice(0,220), bounced: bounced });
 })();
-// The login page must always show the credential form. Never auto-enter an
-// existing session from here: on a shared browser that would silently open
-// whoever was signed in before. A successful login replaces the old session.
-// The custom domain and member portal are separate origins, so pass the
-// short-lived Supabase session in the URL fragment; the member app consumes it
-// client-side and the fragment is never sent to Caddy.
+
 function sessionSaved(){
-  // Sahkan session BETUL-BETUL tersimpan sebelum navigasi. Jika pelayar
-  // menyekat storage, supabase fallback ke memory → session hilang semasa
-  // navigasi → loop login. Tangkap di sini dengan mesej jelas.
   try {
     const k = 'sb-' + new URL(CONFIG.supabaseUrl).hostname.split('.')[0] + '-auth-token';
     return !!localStorage.getItem(k);
@@ -286,11 +730,6 @@ function goToMember(next, session){
   twBeacon('login_ok', { exp: session && session.expires_at, inApp: twInApp(), ua: (navigator.userAgent||'').slice(0,220) });
   if(window.TWSound) TWSound.play('success');
   const path = next && /^\/member(?:\/|$)/.test(next) ? next : "/member/";
-  // Same origin as login (traderwatch.org): Supabase keeps the session in
-  // localStorage here, so no cross-domain token handoff is needed. Sending the
-  // session to member.traderwatch.org created a loop when setSession failed
-  // there (different origin, no stored session) and the member page bounced
-  // back to login. Keep everything on one origin.
   const base = location.origin + path;
   location.replace(base);
 }
@@ -358,16 +797,6 @@ resend.addEventListener("click", async ()=>{
   }catch(_){ show("Unable to resend right now. Please try again later.", false); resend.disabled = false; }
 });
 
-/* Telegram Mini App auto-login removed — Telegram service is closed. The
-   login form must always render. Auto-redirecting an existing session here
-   created a redirect loop with the member page's own redirect-to-login when
-   the two origins disagreed on session state. Members now always see the
-   form and explicitly sign in; a successful submit still calls goToMember. */
-
-/* ===== Social login (OAuth): Google / GitHub =====
-   Provider mesti diaktifkan di Supabase Auth + OAuth app didaftarkan di
-   Google Cloud / GitHub. signInWithOAuth redirect ke provider, kemudian
-   kembali ke verify.html yang consumir session dan membuka member area. */
 async function oauthSignIn(provider){
   const next = new URLSearchParams(location.search).get("next");
   const redirectUrl = new URL("verify.html", location.href);

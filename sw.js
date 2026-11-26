@@ -3,11 +3,12 @@
  * navigasi network-first fallback index.html; /api/* dan /member/* diurus
  * oleh service worker masing-masing (network sahaja di sini).
  */
-const VERSION = 'tw-landing-v2';
+const VERSION = 'tw-landing-v14';
 const SHELL_CACHE = VERSION + '-shell';
 const SHELL_ASSETS = [
   './',
   './index.html',
+  './login.html',
   './manifest.webmanifest',
   './icons/icon-192.png',
   './icons/icon-512.png',
@@ -15,7 +16,7 @@ const SHELL_ASSETS = [
   './icons/icon-180.png',
   './icons/apple-touch-icon.png'
 ];
-const SHELL_PATHS = ['/index.html', '/manifest.webmanifest', '/icons/'];
+const SHELL_PATHS = ['/index.html', '/login.html', '/manifest.webmanifest', '/icons/'];
 
 self.addEventListener('install', (e) => {
   e.waitUntil(caches.open(SHELL_CACHE).then((c) => c.addAll(SHELL_ASSETS)).then(() => self.skipWaiting()));
@@ -35,13 +36,25 @@ function isShell(url) {
 }
 
 async function navFallback(request) {
+  const url = new URL(request.url);
+  const isHome = url.origin === self.location.origin && (url.pathname === '/' || url.pathname === '/index.html');
+  const isLogin = url.origin === self.location.origin && url.pathname === '/login.html';
+  /* Stale-while-revalidate untuk index.html & login.html sahaja supaya tukar halaman PWA serta-merta (0ms tunggu rangkaian) */
+  if (isHome || isLogin) {
+    const cacheKey = isLogin ? './login.html' : './index.html';
+    const c = await caches.open(SHELL_CACHE);
+    const cached = await c.match(cacheKey);
+    const fresh = fetch(request).then((res) => {
+      if (res && res.ok) c.put(cacheKey, res.clone());
+      return res;
+    }).catch(() => null);
+    if (cached) return cached;
+    const net = await fresh;
+    if (net) return net;
+    return new Response('Offline — halaman tidak dijumpai dalam cache.', { status: 503 });
+  }
   try {
-    const res = await fetch(request);
-    if (res && res.ok) {
-      const c = await caches.open(SHELL_CACHE);
-      c.put('./index.html', res.clone());
-    }
-    return res;
+    return await fetch(request);
   } catch (err) {
     const c = await caches.open(SHELL_CACHE);
     return (await c.match('./index.html')) || (await c.match('./')) ||
