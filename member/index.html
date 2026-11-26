@@ -215,22 +215,22 @@ html[data-theme="light"] .ic{background:#e6efd9;border-color:#c9dbb4}
 #view-community{padding:12px 16px 0;position:relative;display:flex;flex-direction:column;height:var(--com-h,calc(100dvh - 130px));overflow:hidden}
 #view-community.hidden{display:none}
 #view-community>.com-head,#view-community>.rooms{flex:none;position:relative;z-index:2}
-.com-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:8px}
+.com-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:5px}
 .com-head .vhead{margin:0;min-width:0}
-.com-head .online{margin:4px 0 0;flex:none;white-space:nowrap}
-.com-scroll{flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;scrollbar-width:none;position:relative;z-index:2;padding:4px 0 calc(176px + var(--sab))}
+.com-head .online{margin:2px 0 0;flex:none;white-space:nowrap}
+.com-scroll{flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;scrollbar-width:none;position:relative;z-index:2;padding:2px 0 calc(158px + var(--sab))}
 .com-scroll::-webkit-scrollbar{display:none}
-.msgs{display:flex;flex-direction:column;gap:12px}
+.msgs{display:flex;flex-direction:column;gap:7px}
 .msgs.quiet .msg,.dm-msgs.quiet .dm-bbl,.dm-msgs.quiet .dm-setup,.dm-msgs.quiet .dm-pinbar{animation:none !important}
-.msg{display:flex;gap:10px;animation:up .4s both}
-.msg .av{width:34px;height:34px;flex:none;border-radius:12px;display:grid;place-items:center;font-size:11px;font-weight:850;color:#10150b;overflow:hidden}
+.msg{display:flex;gap:8px;animation:up .4s both}
+.msg .av{width:30px;height:30px;flex:none;border-radius:10px;display:grid;place-items:center;font-size:10.5px;font-weight:850;color:#10150b;overflow:hidden}
 .msg .av img,.lrow .av img{width:100%;height:100%;object-fit:cover;display:block;border-radius:inherit}
 .orb-av img{width:100%;height:100%;object-fit:cover;display:block;border-radius:50%}
-.msg .body{background:var(--card);border:1px solid var(--line);border-radius:4px 16px 16px 16px;padding:10px 13px;max-width:calc(100% - 44px)}
-.msg .meta{display:flex;align-items:baseline;gap:8px;margin-bottom:3px}
-.msg .meta b{font-size:13px;font-weight:800}
-.msg .meta time{font-size:10px;color:var(--muted)}
-.msg p{margin:0;font-size:13.5px;line-height:1.5;color:var(--text);word-break:break-word}
+.msg .body{background:var(--card);border:1px solid var(--line);border-radius:4px 14px 14px 14px;padding:7px 11px;max-width:calc(100% - 38px)}
+.msg .meta{display:flex;align-items:baseline;gap:6px;margin-bottom:2px}
+.msg .meta b{font-size:12px;font-weight:800}
+.msg .meta time{font-size:9.5px;color:var(--muted)}
+.msg p{margin:0;font-size:13px;line-height:1.38;color:var(--text);word-break:break-word}
 .msg.me{flex-direction:row-reverse}
 .msg.me .body{background:#b7f36b12;border-color:#b7f36b40;border-radius:16px 4px 16px 16px}
 html[data-theme="light"] .msg.me .body{background:#eaf5db;border-color:#b9d999}
@@ -245,13 +245,12 @@ html[data-theme="light"] .msg.me .body{background:#eaf5db;border-color:#b9d999}
 .editbar button{flex:none;width:26px;height:26px;border:1px solid var(--line);border-radius:50%;background:var(--card2);color:var(--muted);font-size:12px;line-height:1;display:grid;place-items:center}
 .msg-actwrap{position:fixed;inset:0;z-index:70}
 .actask{padding:12px 16px 8px;font-size:12.5px;font-weight:700;line-height:1.4;color:var(--muted);text-align:center;max-width:230px}
-#view-community{display:flex;flex-direction:column;min-height:calc(100% + var(--kb-extra,0px))}
 #view-community::after{content:"";display:block;flex:0 0 var(--kb-extra,0px)}
-.comnote{font-size:11px;color:var(--muted);text-align:center;margin:auto 0 4px;padding-top:18px;opacity:.72}
+.comnote{font-size:10px;color:var(--muted);text-align:center;margin:8px 0 2px;padding-top:2px;opacity:.65;line-height:1.35}
 /* ===== Community upgrade: pair rooms, signal cards, reactions, league badge ===== */
-.rooms{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;margin:0 -16px 12px;padding:0 16px 2px}
+.rooms{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;margin:0 -16px 6px;padding:0 16px 2px}
 .rooms::-webkit-scrollbar{display:none}
-.room{flex:none;display:inline-flex;align-items:center;gap:5px;padding:7px 12px;border-radius:999px;background:var(--card);border:1px solid var(--line);color:var(--muted);font-size:12px;font-weight:800;transition:background .15s,color .15s,border-color .15s}
+.room{flex:none;display:inline-flex;align-items:center;gap:5px;padding:5px 11px;border-radius:999px;background:var(--card);border:1px solid var(--line);color:var(--muted);font-size:11.5px;font-weight:800;transition:background .15s,color .15s,border-color .15s}
 .room.on{background:var(--lime);border-color:var(--lime);color:var(--onlime)}
 .room .rc{font-size:9.5px;font-weight:800;padding:1px 6px;border-radius:99px;background:#ff777d26;color:#ff9ba0}
 .room.on .rc{background:#10150b26;color:var(--onlime)}
@@ -273,12 +272,12 @@ html[data-theme="light"] .msg.me .body{background:#eaf5db;border-color:#b9d999}
 .sigcard .take2{width:100%;margin-top:8px;padding:9px;border-radius:11px;font-weight:850;font-size:12px;color:var(--lime);background:#b7f36b12;border:1px solid #b7f36b55}
 .sigcard .take2:active{transform:scale(.98)}
 html[data-theme="light"] .sigcard .take2,html[data-theme="light"] .msg .rtag,html[data-theme="light"] .rxc.mine{color:#4c7a17}
-.rxrow{display:flex;flex-wrap:wrap;gap:5px;margin-top:6px;align-items:center}
-.rxc,.rxadd,.rxp{font-size:12px;font-weight:800;padding:3px 9px;border-radius:99px;background:var(--card2);border:1px solid var(--line);color:var(--text);line-height:1.3}
+.rxrow{display:flex;flex-wrap:wrap;gap:4px;margin-top:4px;align-items:center}
+.rxc,.rxadd,.rxp{font-size:11px;font-weight:800;padding:2px 7px;border-radius:99px;background:var(--card2);border:1px solid var(--line);color:var(--text);line-height:1.25}
 .rxc.mine{background:#b7f36b1a;border-color:#b7f36b66;color:var(--lime)}
 .rxc.bump{animation:rxBump .35s cubic-bezier(.22,1,.36,1)}
 @keyframes rxBump{40%{transform:scale(1.3)}}
-.rxadd{color:var(--muted);padding:3px 8px}
+.rxadd{color:var(--muted);padding:2px 7px}
 .rxpick{display:inline-flex;gap:4px;margin-left:2px;animation:up .2s both}
 .rxp{padding:3px 7px;font-size:14px}
 .rxp:active{transform:scale(1.2)}
