@@ -5854,16 +5854,18 @@
    "status": "pending"
   },
   "XAUUSD_20261126_185045": {
-   "status": "pending"
+   "status": "active",
+   "entry_at": "2026-11-26T18:57:00+08:00"
   },
   "XAUUSD_20261126_184609": {
    "status": "active",
    "entry_at": "2026-11-26T18:48:00+08:00"
   },
   "XAUUSD_20261126_185554": {
-   "status": "pending"
+   "status": "active",
+   "entry_at": "2026-11-26T18:56:00+08:00"
   }
  },
- "updated": "2026-11-26T18:56:03+08:00",
+ "updated": "2026-11-26T19:01:02+08:00",
  "_cursor": 0
 }
