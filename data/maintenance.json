@@ -1,5 +1,7 @@
 {
  "maintenance": false,
- "note": "Set true untuk banner maintenance. Hilang ~60s selepas false.",
- "updated_at": "2026-11-26T21:20:00+08:00"
+ "source": "off",
+ "note": "\u26a0\ufe0f TraderWatch under maintenance, sorry for any inconvenience during maintenance periods \ud83d\ude4f\ud83c\udffb",
+ "updated_at": "2026-11-26T13:46:57.531081+00:00",
+ "manual": false
 }
