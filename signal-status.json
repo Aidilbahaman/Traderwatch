@@ -5253,8 +5253,12 @@
    "entry_at": "2026-11-26T10:06:00+08:00"
   },
   "XAUUSD_20261126_095603": {
-   "status": "active",
-   "entry_at": "2026-11-26T14:16:00+08:00"
+   "status": "sl",
+   "pips": -291.7,
+   "r": -1,
+   "unit": "pips",
+   "closed": "2026-11-27T04:26:02+08:00",
+   "entry_at": "2026-11-26T09:59:00+08:00"
   },
   "BTCUSD_20261126_100305": {
    "status": "sl",
@@ -5281,8 +5285,12 @@
    "entry_at": "2026-11-26T10:18:00+08:00"
   },
   "XAGUSD_20261126_101712": {
-   "status": "active",
-   "entry_at": "2026-11-26T10:23:00+08:00"
+   "status": "sl",
+   "pips": -584.0,
+   "r": -1,
+   "unit": "pips",
+   "closed": "2026-11-27T04:26:02+08:00",
+   "entry_at": "2026-11-26T10:20:00+08:00"
   },
   "XAUUSD_20261126_101623": {
    "status": "active",
@@ -5309,8 +5317,12 @@
    "entry_at": "2026-11-26T10:33:00+08:00"
   },
   "XAGUSD_20261126_102926": {
-   "status": "active",
-   "entry_at": "2026-11-26T14:10:00+08:00"
+   "status": "tp",
+   "pips": 740.0,
+   "r": 1.21,
+   "unit": "pips",
+   "closed": "2026-11-27T04:26:02+08:00",
+   "entry_at": "2026-11-26T11:07:00+08:00"
   },
   "BTCUSD_20261126_103750": {
    "status": "sl",
@@ -6148,7 +6160,8 @@
    "entry_at": "2026-11-27T00:20:00+08:00"
   },
   "XAGUSD_20261127_001718": {
-   "status": "pending"
+   "status": "active",
+   "entry_at": "2026-11-27T00:27:00+08:00"
   },
   "XAUUSD_20261127_001628": {
    "status": "active",
@@ -6163,7 +6176,8 @@
    "entry_at": "2026-11-27T00:27:00+08:00"
   },
   "XAUUSD_20261127_004537": {
-   "status": "pending"
+   "status": "active",
+   "entry_at": "2026-11-27T01:03:00+08:00"
   },
   "XAGUSD_20261127_011231": {
    "status": "active",
@@ -6178,25 +6192,33 @@
    "entry_at": "2026-11-27T03:16:00+08:00"
   },
   "XAUUSD_20261127_032550": {
-   "status": "pending"
+   "status": "active",
+   "entry_at": "2026-11-27T04:25:00+08:00"
   },
   "XAUUSD_20261127_040548": {
-   "status": "pending"
+   "status": "active",
+   "entry_at": "2026-11-27T04:18:00+08:00"
   },
   "XAUUSD_20261127_040043": {
-   "status": "pending"
+   "status": "active",
+   "entry_at": "2026-11-27T04:18:00+08:00"
   },
   "XAUUSD_20261127_035129": {
-   "status": "pending"
+   "status": "active",
+   "entry_at": "2026-11-27T04:18:00+08:00"
   },
   "XAUUSD_20261127_034629": {
-   "status": "pending"
+   "status": "active",
+   "entry_at": "2026-11-27T04:18:00+08:00"
   },
   "BTCUSD_20261127_040716": {
    "status": "active",
    "entry_at": "2026-11-27T04:15:00+08:00"
+  },
+  "XAUUSD_20261127_042211": {
+   "status": "pending"
   }
  },
- "updated": "2026-11-27T04:16:02+08:00",
+ "updated": "2026-11-27T04:26:02+08:00",
  "_cursor": 0
 }
