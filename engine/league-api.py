@@ -20,6 +20,7 @@ Auth: Supabase member Bearer token on every call.
 import json
 import os
 import pathlib
+import re
 import threading
 import time
 import urllib.error
@@ -129,10 +130,31 @@ def cached(key, ttl, fn):
     return val
 
 
+def rank_key(r):
+    """Susunan rasmi liga: win rate dulu (peraturan yang dipaparkan dalam app),
+    kemudian net_r, kemudian bilangan trade sebagai pemutus seri.
+    Sebelum ini kad 'Your position' ikut susunan SQL (net_r) sementara senarai
+    klien ikut win_rate — dua jawapan untuk soalan yang sama."""
+    try:
+        wr = float(r.get("win_rate") or 0)
+    except (TypeError, ValueError):
+        wr = 0.0
+    try:
+        nr = float(r.get("net_r") or 0)
+    except (TypeError, ValueError):
+        nr = 0.0
+    try:
+        n = int(r.get("trades") or 0)
+    except (TypeError, ValueError):
+        n = 0
+    return (-wr, -nr, -n)
+
+
 def cached_leaderboard():
-    return cached("leaderboard", LEADERBOARD_TTL,
+    rows = cached("leaderboard", LEADERBOARD_TTL,
                   lambda: sb("POST", "/rest/v1/rpc/get_leaderboard",
                              body={"p_season": SEASON}) or [])
+    return sorted(rows, key=rank_key)
 
 
 def invalidate_league(uid=None):
@@ -201,9 +223,99 @@ def verify_user(token):
         return None
 
 
+# ---------------------------------------------------------------- privacy
+# Nama penuh tidak keluar dari server. Lihat public_name() dalam chat-api.py —
+# logik yang sama, disalin di sini supaya league-api tidak perlu import chat.
+HONORIFICS = {"mr", "mrs", "ms", "dr", "haji", "hj", "bin", "binti", "a/l", "a/p"}
+
+
+def public_name(raw):
+    """One-token display name. Never returns a full legal name."""
+    txt = str(raw or "").strip()
+    if not txt:
+        return "Trader"
+    txt = re.sub(r"[^\w\s.'-]", " ", txt)
+    tokens = [t for t in txt.split() if t]
+    while len(tokens) > 1 and tokens[0].strip(".").lower() in HONORIFICS:
+        tokens.pop(0)
+    pick = ""
+    for t in tokens:
+        core = t.strip(".'-")
+        if len(re.sub(r"[^A-Za-z]", "", core)) >= 2:
+            pick = core
+            break
+    if not pick and tokens:
+        pick = tokens[0].strip(".'-")
+    if not pick:
+        return "Trader"
+    if pick.isupper() and len(pick) <= 2:
+        return pick
+    return pick[:1].upper() + pick[1:].lower() if pick.isupper() else pick[:1].upper() + pick[1:]
+
+
+def _suffix_parts(raw):
+    """Calon akhiran daripada token kedua: ["B.", "BA"]."""
+    txt = [t for t in re.sub(r"[^\w\s.'-]", " ", str(raw or "")).split() if t.strip(".'-")]
+    parts = []
+    for t in txt[1:]:
+        core = re.sub(r"[^A-Za-z]", "", t)
+        if core:
+            parts.append(core[0].upper() + ".")
+    if len(txt) > 1:
+        core = re.sub(r"[^A-Za-z]", "", txt[-1])
+        if len(core) >= 2:
+            parts.append(core[:2].upper())
+    return parts
+
+
+def disambiguate(items):
+    """Sama seperti chat-api.disambiguate: beri akhiran hanya pada nama yang
+    berlanggar, ikut uid, supaya leaderboard dan senarai rakan sepadan."""
+    base = {it["id"]: public_name(it["raw"]) for it in items}
+    groups = {}
+    for it in items:
+        groups.setdefault(base[it["id"]], []).append(it)
+
+    out = {}
+    for nm, members in groups.items():
+        if len(members) == 1:
+            out[members[0]["id"]] = nm
+            continue
+        taken = set()
+        plain = [it for it in members if not _suffix_parts(it["raw"])]
+        suffixed = [it for it in members if _suffix_parts(it["raw"])]
+        for idx, it in enumerate(plain):
+            if idx == 0 and nm not in taken:
+                taken.add(nm)
+                out[it["id"]] = nm
+            else:
+                cand = nm + " " + str(it["id"])[:2].upper()
+                while cand in taken:
+                    cand += "2"
+                taken.add(cand)
+                out[it["id"]] = cand
+        for it in suffixed:
+            final = None
+            for p in _suffix_parts(it["raw"]):
+                cand = nm + " " + p
+                if cand not in taken and cand not in out.values():
+                    final = cand
+                    break
+            if not final:
+                cand = nm + " " + str(it["id"])[:2].upper()
+                while cand in taken or cand in out.values():
+                    cand += "2"
+                final = cand
+            taken.add(final)
+            out[it["id"]] = final
+    return out
+
+
 def display_name(user):
     meta = user.get("user_metadata") or {}
-    return (meta.get("name") or (user.get("email") or "trader").split("@")[0])[:40]
+    raw = (meta.get("username") or meta.get("full_name") or meta.get("name")
+           or (user.get("email") or "trader").split("@")[0])
+    return public_name(raw)[:40]
 
 
 def my_trades(uid, limit=100):
@@ -430,9 +542,15 @@ class Handler(BaseHTTPRequestHandler):
                 return self._send(200, weekly_recap(uid))
             if path == "/api/league/leaderboard":
                 rows = cached_leaderboard()
+                # paper_trades menyimpan nama semasa trade dibuka dan mungkin
+                # nama penuh lama. Tapis + bezakan seluruh papan sekali gus,
+                # supaya dua "Aidil" tidak nampak macam orang yang sama.
+                names = disambiguate([{"id": r.get("user_id") or "", "raw": r.get("username") or ""}
+                                      for r in rows])
                 for i, r in enumerate(rows):
                     r["rank"] = i + 1
                     r["is_me"] = (r.get("user_id") == uid)
+                    r["username"] = names.get(r.get("user_id") or "", public_name(r.get("username")))
                 return self._send(200, {"leaderboard": rows, "season": SEASON,
                                         "start_balance": START_BALANCE})
             if path == "/api/league/me":
@@ -483,12 +601,14 @@ class Handler(BaseHTTPRequestHandler):
 
     def do_POST(self):
         path = urllib.parse.urlparse(self.path).path
-        if path != "/api/league/trade":
+        if path != "/api/league/trade" and path != "/api/league/trade-close":
             return self._send(404, {"error": "not found"})
         user = self._user()
         if not user:
             return self._send(401, {"error": "Please sign in as a member."})
         uid = user["id"]
+        if path == "/api/league/trade-close":
+            return self._handle_trade_close(user)
         try:
             n = int(self.headers.get("Content-Length") or 0)
             req = json.loads(self.rfile.read(n).decode() or "{}")
@@ -632,6 +752,133 @@ class Handler(BaseHTTPRequestHandler):
         except Exception as e:
             log(f"POST trade error {type(e).__name__}: {str(e)[:140]}")
             return self._send(500, {"error": "Something went wrong. Try again."})
+
+    def _handle_trade_close(self, user):
+        """POST /api/league/trade-close {id, reason: profit|loss}
+
+        Manual close dari trade-detail modal:
+        1. Sahkan trade itu milik user dan masih 'open'.
+        2. Kira R semasa daripada LIVE price (profit -> positif, loss -> negatif).
+        3. Tutup paper trade (status tp/sl) supaya leaderboard/balance konsisten
+           dengan auto-resolver.
+        4. Kalau user ada MT5 position untuk trade ini (audit log lookup),
+           tutup position MT5 sebenar juga.
+        """
+        uid = user["id"]
+        try:
+            n = int(self.headers.get("Content-Length") or 0)
+            req = json.loads(self.rfile.read(n).decode() or "{}")
+        except ValueError:
+            return self._send(400, {"error": "Invalid request."})
+        trade_id = req.get("id")
+        reason = str(req.get("reason", "")).lower()
+        if not trade_id or reason not in ("profit", "loss"):
+            return self._send(400, {"error": "Missing id or invalid close reason."})
+        try:
+            trades = my_trades(uid)
+            tr = next((t for t in trades if str(t.get("id")) == str(trade_id)), None)
+            if not tr:
+                return self._send(404, {"error": "Trade not found."})
+            if str(tr.get("status", "")).lower() != "open":
+                return self._send(409, {"error": "Trade already closed."})
+            pair = str(tr.get("pair", "")).upper()
+            side = str(tr.get("side", "")).upper()
+            entry = float(tr["entry"]); sl = float(tr["sl"])
+            price = live_price(pair)
+            if price is None:
+                return self._send(503, {"error": "Live price unavailable — try again in a moment."})
+            risk = abs(entry - sl)
+            if risk <= 0:
+                return self._send(409, {"error": "Invalid trade levels."})
+            # R semasa: BUY profit bila price > entry; SELL sebaliknya.
+            r_now = (price - entry) / risk if side == "BUY" else (entry - price) / risk
+            # Konsisten dengan resolver: profit -> 'tp', loss -> 'sl'.
+            # R mengikut butang yang ditekan: profit -> |R| (positif),
+            # loss -> -|R| — selari dengan docstring & status tp/sl.
+            r_result = round(abs(r_now) if reason == "profit" else -abs(r_now), 2)
+            status = "tp" if reason == "profit" else "sl"
+            now_iso = datetime.now(timezone.utc).isoformat()
+            sb("PATCH", f"/rest/v1/paper_trades?id=eq.{tr['id']}", body={
+                "status": status, "r_result": r_result,
+                "closed_at": now_iso})
+            tr.update({"status": status, "r_result": r_result, "closed_at": now_iso})
+            log(f"{uid[:8]} manual close #{tr['id']} {pair} {side} reason={reason} r={r_result:+.2f}")
+            invalidate_league(uid)
+            mt5res = self._mt5_close_position(uid, tr)
+            return self._send(200, {"trade": tr, "mt5": mt5res})
+        except urllib.error.HTTPError as e:
+            log(f"trade-close sb HTTP {e.code}: {e.read().decode()[:160]}")
+            return self._send(502, {"error": "Could not close trade. Try again."})
+        except Exception as e:
+            log(f"trade-close error {type(e).__name__}: {str(e)[:140]}")
+            return self._send(500, {"error": "Something went wrong. Try again."})
+
+    def _mt5_close_position(self, uid, tr):
+        """Tutup MT5 position sebenar untuk trade paper ini (kalau ada).
+
+        Lookup ticket dari audit log mt5-ondemand (uid+pair+side+sl+tp match).
+        Entry di-PATCH kepada fill price selepas sync, jadi sl/tp (yang tak
+        pernah berubah) adalah kunci yang paling dipercayai. Kalau ticket
+        sudah tiada (sudah TP/SL di broker), kira sebagai synced supaya paper
+        dan broker kekal selari.
+        """
+        if not (MO and MA):
+            return {"synced": False, "reason": "mt5-unavailable"}
+        acct = MA.account_for(uid)
+        if not (MO.is_owner(uid) or (acct and acct.get("can_trade") is True)):
+            return {"synced": False, "reason": "not-authorized"}
+        pair = str(tr.get("pair", "")).replace("/", "").replace(" ", "").upper()
+        side = str(tr.get("side", "")).upper()
+        sl = float(tr["sl"]); tp = float(tr["tp"])
+        ticket = self._find_mt5_ticket(uid, acct, pair, side, sl, tp)
+        if not ticket:
+            return {"synced": False, "reason": "no-mt5-position"}
+        try:
+            if acct:
+                mp = MO._scoped_mp(acct)
+            else:
+                # Owner: guna scoped module default MO.MP (module mt5-pending asal).
+                mp = MO.MP
+            res = mp.mt5({"action": "close_position", "ticket": int(ticket)})
+        except Exception as e:
+            log(f"mt5 close error {type(e).__name__}: {str(e)[:140]}")
+            return {"synced": False, "reason": f"mt5-error:{type(e).__name__}"}
+        if res.get("ok"):
+            log(f"{uid[:8]} MT5 position #{ticket} closed (manual close)")
+            return {"synced": True, "ticket": ticket}
+        if "position not found" in str(res.get("error", "")):
+            # Broker dah tutup sendiri (TP/SL hit) — paper close sahaja cukup.
+            log(f"{uid[:8]} MT5 #{ticket} already closed at broker")
+            return {"synced": True, "ticket": ticket, "already_closed": True}
+        return {"synced": False, "reason": str(res.get("error") or res.get("comment") or "mt5-reject")[:80]}
+
+    def _find_mt5_ticket(self, uid, acct, pair, side, sl, tp):
+        """Cari MT5 ticket terakhir untuk setup ini dari audit log ondemand."""
+        import pathlib
+        if acct:
+            audit = pathlib.Path(MO.REPO) / "state" / f"mt5-ondemand-{acct.get('key')}-log.jsonl"
+        else:
+            audit = pathlib.Path(MO.REPO) / "state" / "mt5-ondemand-log.jsonl"
+        try:
+            lines = audit.read_text().strip().splitlines()
+        except OSError:
+            return None
+        sl_f, tp_f = float(sl), float(tp)
+        ticket = None
+        for line in lines:
+            try:
+                rec = json.loads(line)
+            except ValueError:
+                continue
+            if rec.get("uid") != uid or rec.get("dry_run"):
+                continue
+            if (str(rec.get("pair", "")).upper() == pair
+                    and str(rec.get("side", "")).upper() == side
+                    and rec.get("ticket")
+                    and abs(float(rec.get("sl", 0)) - sl_f) < 1e-9
+                    and abs(float(rec.get("tp", 0)) - tp_f) < 1e-9):
+                ticket = rec["ticket"]   # ambil yang terakhir (terkini)
+        return ticket
 
 
 def main():
