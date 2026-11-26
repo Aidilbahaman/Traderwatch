@@ -5411,7 +5411,8 @@
    "entry_at": "2026-11-26T12:54:00+08:00"
   },
   "XAUUSD_20261126_123108": {
-   "status": "pending"
+   "status": "active",
+   "entry_at": "2026-11-26T13:30:00+08:00"
   },
   "BTCUSD_20261126_123702": {
    "status": "active",
@@ -5480,9 +5481,13 @@
    "status": "pending"
   },
   "BTCUSD_20261126_132433": {
+   "status": "active",
+   "entry_at": "2026-11-26T13:30:00+08:00"
+  },
+  "BTCUSD_20261126_132854": {
    "status": "pending"
   }
  },
- "updated": "2026-11-26T13:26:02+08:00",
+ "updated": "2026-11-26T13:31:02+08:00",
  "_cursor": 0
 }
