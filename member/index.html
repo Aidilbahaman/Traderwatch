@@ -1961,7 +1961,7 @@ html[data-theme="light"] .star-mood{background:rgba(122,181,46,.10);border-color
 
 /* ---- fallback: <=840px mobile biasa (TIDAK DISSENTUH) ---- */
 </style>
-<link rel="stylesheet" href="chat-extras.css?v=20261127a">
+<link rel="stylesheet" href="chat-extras.css?v=20261127b">
 <style id="tw-frosted-cards">
 /* Unified frosted glass cards so the moving green aurora glows through cleanly */
 .pair:not(.hot1),
@@ -4308,6 +4308,7 @@ function renderFriends(){
     return '<div class="f-row'+(f.unread?' unread':'')+'" data-f-open="'+esc(f.id)+'">'
      +orbAvHTML(f.username,f.id,f.online,f.rank,f.avatar_url)
      +'<div class="f-mid"><div class="f-r1"><b>'+esc(f.username)+'</b><time>'+esc(relAgo(f.last_at))+'</time></div>'
+     +'<div class="f-pres'+(f.online?' on':'')+'"><i></i>'+esc(lastSeenTxt(f.last_seen,f.online))+'</div>'
      +'<div class="f-r2"><p>'+esc(lastTxt)+'</p>'+(f.unread?'<span class="f-udot">'+f.unread+'</span>':'')+'</div></div></div>';
    }).join('')+'</div>';
   }
@@ -4378,23 +4379,92 @@ function loadFriends(silent){
  }).catch(function(){if(!silent&&current==='friends')renderFriends()});
 }
 
+/* ---------- last online / typing (friends only) ---------- */
+function lastSeenTxt(iso,online){
+ var en=(lang==='en');
+ if(online)return en?'Online now':'Aktif sekarang';
+ var ts=Date.parse(iso||'');
+ if(!isFinite(ts))return en?'Offline':'Luar talian';
+ var sec=Math.max(0,Math.floor((Date.now()-ts)/1000));
+ if(sec<60)return en?'Last online just now':'Terakhir online baru tadi';
+ var min=Math.floor(sec/60);
+ if(min<60)return en?('Last online '+min+' min ago'):('Terakhir online '+min+' min lalu');
+ var hr=Math.floor(min/60);
+ if(hr<24)return en?('Last online '+hr+(hr===1?' hr':' hrs')+' ago'):('Terakhir online '+hr+' jam lalu');
+ var day=Math.floor(hr/24);
+ return en?('Last online '+day+(day===1?' day':' days')+' ago'):('Terakhir online '+day+' hari lalu');
+}
+function renderDmSub(){
+ var el=$('dmSub');if(!el||!FR.dmFriend)return;
+ var f=FR.dmFriend,en=(lang==='en');
+ if(FR.dmTyping){
+  el.className='on typ';
+  el.innerHTML='<span class="tdots"><b></b><b></b><b></b></span>'+(en?'typing…':'sedang menaip…');
+ }else if(f.online){
+  el.className='on';el.innerHTML='<i></i>'+esc(lastSeenTxt(f.last_seen,true));
+ }else{
+  el.className='off';el.innerHTML='<i></i>'+esc(lastSeenTxt(f.last_seen,false));
+ }
+}
+function syncTypingBubble(stick){
+ var box=$('dmMsgs');if(!box)return;
+ var b=document.getElementById('dmTypingBbl');
+ if(FR.dmTyping&&FR.dmFriend){
+  var created=false;
+  if(!b){
+   b=document.createElement('div');b.id='dmTypingBbl';b.className='dm-bbl typing';
+   b.setAttribute('aria-label','typing');b.innerHTML='<span></span><span></span><span></span>';
+   created=true;
+  }
+  var nearBottom=(box.scrollHeight-box.scrollTop-box.clientHeight)<140;
+  if(b.parentNode!==box||b!==box.lastElementChild)box.appendChild(b);
+  if(created&&(nearBottom||stick))box.scrollTop=box.scrollHeight;
+ }else if(b&&b.parentNode){b.parentNode.removeChild(b)}
+}
+function pollDmStatus(){
+ var f=FR.dmFriend;
+ if(!f||(document.visibilityState&&document.visibilityState!=='visible'))return;
+ var fid=f.id;
+ apiFetch('/api/chat/dm/status?with='+encodeURIComponent(fid)).then(function(r){
+  if(!FR.dmFriend||FR.dmFriend.id!==fid||!r.ok||!r.data)return;
+  var d=r.data,was=!!FR.dmTyping;
+  FR.dmFriend.online=!!d.online;
+  if(d.last_seen)FR.dmFriend.last_seen=d.last_seen;
+  FR.dmTyping=!!d.typing;
+  renderDmSub();
+  if(was!==FR.dmTyping)syncTypingBubble(false);
+ }).catch(function(){});
+}
+var _typSentAt=0,_typOn=false;
+function sendTyping(on){
+ var f=FR.dmFriend;if(!f)return;
+ var now=Date.now();
+ if(on){if(_typOn&&now-_typSentAt<2500)return;_typOn=true;_typSentAt=now}
+ else{if(!_typOn)return;_typOn=false}
+ apiFetch('/api/chat/dm/typing',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({to:f.id,typing:!!on})}).catch(function(){});
+}
+
 function openDM(fid){
  var f=FR.friends.filter(function(x){return x.id===fid})[0]||{id:fid,username:'Trader',online:false,rank:null};
- FR.dmFriend=f;FR.dmMsgs=[];FR.dmInit=false;FR.dmLastId=null;setDmReply(null);
+ FR.dmFriend=f;FR.dmMsgs=[];FR.dmInit=false;FR.dmLastId=null;FR.dmTyping=false;_typOn=false;setDmReply(null);
  $('dmAv').innerHTML=avInnerHtml(f.username,f.avatar_url,orbIni);
  $('dmAv').style.background=orbBg(f.id);
  $('dmName').textContent=f.username;
- $('dmSub').className=f.online?'on':'';
- $('dmSub').innerHTML=f.online?'<i></i>'+(lang==='en'?'Online now':'Aktif sekarang'):(lang==='en'?'Private friend':'Rakan peribadi');
+ renderDmSub();
  $('dmInp').setAttribute('placeholder',lang==='en'?'Message privately...':'Tulis mesej peribadi...');
  $('dmMsgs').innerHTML='<div class="dm-day">'+(lang==='en'?'Loading private chat...':'Memuatkan chat peribadi...')+'</div>';
  $('dmSheet').classList.add('open');
  loadDM(true);
  clearInterval(FR.dmPoll);
  FR.dmPoll=setInterval(function(){if(FR.dmFriend&&(!document.visibilityState||document.visibilityState==='visible'))loadDM(false)},4000);
+ clearInterval(FR.dmStatusPoll);
+ FR.dmStatusPoll=setInterval(pollDmStatus,2000);
+ pollDmStatus();
 }
 function closeDM(){
  $('dmSheet').classList.remove('open');
+ sendTyping(false);
+ clearInterval(FR.dmStatusPoll);FR.dmStatusPoll=null;FR.dmTyping=false;
  clearInterval(FR.dmPoll);FR.dmPoll=null;FR.dmFriend=null;FR.dmInit=false;FR.dmLastId=null;
  if(document.activeElement===$('dmInp'))$('dmInp').blur();
  loadFriends(true);
@@ -4426,9 +4496,9 @@ function loadDM(scrollEnd){
   }
   if(r.data&&r.data.friend){
    var fr=r.data.friend;FR.dmFriend=fr;
+   FR.dmTyping=!!fr.typing;
    $('dmName').textContent=fr.username;
-   $('dmSub').className=fr.online?'on':'';
-   $('dmSub').innerHTML=fr.online?'<i></i>'+(lang==='en'?'Online now':'Aktif sekarang'):(lang==='en'?'Private friend':'Rakan peribadi');
+   renderDmSub();
   }
   var next=(r.data&&Array.isArray(r.data.messages))?r.data.messages:[];
   var prevLast=FR.dmLastId;
@@ -4460,6 +4530,10 @@ function loadDM(scrollEnd){
  });
 }
 function drawDMMsgs(scrollEnd,quiet){
+ _drawDMCore(scrollEnd,quiet);
+ syncTypingBubble(!!scrollEnd);
+}
+function _drawDMCore(scrollEnd,quiet){
  var box=$('dmMsgs');if(!box)return;
  box.classList.toggle('quiet',!!quiet);
  _dmSig=_calcDmSig(FR.dmFriend?FR.dmFriend.id:'',FR.dmMsgs);
@@ -4823,8 +4897,10 @@ $('view-friends').addEventListener('click',function(e){
 
 $('dmBack').onclick=closeDM;
 $('dmSendBtn').addEventListener('mousedown',function(e){e.preventDefault()});
-$('dmSendBtn').onclick=function(){sendDM(null)};
-$('dmInp').addEventListener('keydown',function(e){if(e.key==='Enter')sendDM(null)});
+$('dmSendBtn').onclick=function(){sendDM(null);_typOn=false};
+$('dmInp').addEventListener('keydown',function(e){if(e.key==='Enter'){sendDM(null);_typOn=false}});
+$('dmInp').addEventListener('input',function(){sendTyping(this.value.trim().length>0)});
+$('dmInp').addEventListener('blur',function(){sendTyping(false)});
 $('dmShareBtn').onclick=shareSetupInDM;
 $('dmRemoveBtn').onclick=function(){
  if(!FR.dmFriend)return;
@@ -7332,5 +7408,5 @@ try{var bt=document.getElementById('buildTag');if(bt)bt.textContent='build v109-
 
     <!-- ===== WELCOME CINEMATIC (2 layer) ===== -->
 </body>
-<script src="chat-extras.js?v=20261126c"></script>
+<script src="chat-extras.js?v=20261127b"></script>
 </html>

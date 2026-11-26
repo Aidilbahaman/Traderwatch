@@ -178,7 +178,7 @@ _presence_lock = threading.Lock()
 # _presence di atas hilang bila server restart. Orbit pula perlu tahu siapa yang
 # pernah online HARI INI, jadi cap masa terakhir disimpan ke state/presence.json.
 SEEN_FILE = pathlib.Path(__file__).resolve().parent.parent / "state" / "presence.json"
-SEEN_KEEP = 7 * 86400           # simpan 7 hari (debug); orbit guna "hari ini" sahaja
+SEEN_KEEP = 30 * 86400          # simpan 30 hari — "last online" rakan (orbit guna "hari ini" sahaja)
 _seen = {}                      # user_id -> unix ts terakhir dikesan online
 _seen_dirty = False
 _seen_last_flush = 0.0
@@ -253,6 +253,39 @@ def presence_online_set():
         for u in stale:
             _presence.pop(u, None)
         return set(_presence.keys())
+
+
+def last_seen_iso(uid):
+    """ISO8601 (UTC) cap masa terakhir ahli dikesan online, atau '' jika tak pernah."""
+    ts = _seen.get(uid)
+    if not ts:
+        return ""
+    return datetime.fromtimestamp(ts, timezone.utc).isoformat()
+
+
+# ---- typing indicator (in-memory sahaja; luput sendiri dalam beberapa saat) ----
+TYPING_TTL = 5.0
+_typing = {}                    # (sender_id, recipient_id) -> unix ts typing terakhir
+_typing_lock = threading.Lock()
+
+
+def typing_set(sender, recipient, on):
+    key = (sender, recipient)
+    with _typing_lock:
+        if on:
+            _typing[key] = time.time()
+        else:
+            _typing.pop(key, None)
+        if len(_typing) > 2000:         # elak membesar tanpa had
+            cutoff = time.time() - 60
+            for k in [k for k, v in _typing.items() if v < cutoff]:
+                _typing.pop(k, None)
+
+
+def is_typing(sender, recipient):
+    with _typing_lock:
+        ts = _typing.get((sender, recipient))
+    return bool(ts and time.time() - ts <= TYPING_TTL)
 
 
 _load_seen()
@@ -1080,6 +1113,7 @@ def build_friends_overview(uid):
             "username": info["username"],
             "avatar_url": avatar_url_for(fid),
             "online": fid in online_ids,
+            "last_seen": last_seen_iso(fid),
             "seen_today": fid in seen_today_ids,
             "rank": ranks.get(fid),
             "unread": unread_by.get(fid, 0),
@@ -1224,6 +1258,24 @@ class Handler(BaseHTTPRequestHandler):
                         break
             return self._send(200, {"results": hits})
 
+        # ---- Lightweight friend status (online / last seen / typing) — in-memory, murah
+        #      untuk di-poll setiap ~2s semasa DM dibuka.
+        if path == "/api/chat/dm/status":
+            other = ((q.get("with") or [""])[0] or "").strip()
+            if not _valid_uuid(other) or other == uid:
+                return self._send(400, {"error": "invalid friend id"})
+            try:
+                if not is_friends(uid, other):
+                    return self._send(403, {"error": "friends only"})
+            except RuntimeError as e:
+                return self._send(502, {"error": str(e)})
+            return self._send(200, {
+                "id": other,
+                "online": other in presence_online_set(),
+                "last_seen": last_seen_iso(other),
+                "typing": is_typing(other, uid),
+            })
+
         # ---- Private DM thread (strictly accepted friends only)
         if path == "/api/chat/dm":
             other = ((q.get("with") or [""])[0] or "").strip()
@@ -1302,7 +1354,10 @@ class Handler(BaseHTTPRequestHandler):
                 "friend": {
                     "id": other,
                     "username": info["username"],
+                    "avatar_url": avatar_url_for(other),
                     "online": other in presence_online_set(),
+                    "last_seen": last_seen_iso(other),
+                    "typing": is_typing(other, uid),
                     "rank": rank_map().get(other),
                 },
                 "messages": msgs,
@@ -1429,6 +1484,20 @@ class Handler(BaseHTTPRequestHandler):
             if not uid:
                 return self._send(401, {"error": "sign in required"})
             return self._send(200, {"ok": True, "online": presence_beat(uid)})
+
+        # ---- typing indicator: {"to": "<friend uuid>", "typing": true|false}
+        if path == "/api/chat/dm/typing":
+            uid_t = user.get("id") or ""
+            to_t = str(payload.get("to") or "").strip()
+            if not uid_t or not _valid_uuid(to_t) or to_t == uid_t:
+                return self._send(400, {"error": "invalid friend id"})
+            try:
+                if not is_friends(uid_t, to_t):
+                    return self._send(403, {"error": "friends only"})
+            except RuntimeError as e:
+                return self._send(502, {"error": str(e)})
+            typing_set(uid_t, to_t, bool(payload.get("typing", True)))
+            return self._send(200, {"ok": True})
 
         # ---- alert preference: stored on the user's metadata
         if path == "/api/chat/alert":
@@ -1669,6 +1738,7 @@ class Handler(BaseHTTPRequestHandler):
                 if ok:
                     row["reply_to"] = rt_id
             _last_dm[uid] = now
+            typing_set(uid, target, False)      # mesej dihantar → tamat "typing"
             try:
                 rows = sb("POST", "/rest/v1/dm_messages", body=row) or [{}]
             except RuntimeError as e:
