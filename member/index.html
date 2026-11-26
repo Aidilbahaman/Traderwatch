@@ -792,8 +792,8 @@ html[data-theme="light"] .pcard{background:linear-gradient(145deg,#eaf3e2,var(--
 .member.sshare{color:var(--lime);font-weight:700;margin-top:3px;opacity:.85}
 #sxbd{position:absolute;inset:0;background:#000a;z-index:56;opacity:0;transition:opacity .25s}
 #sxbd.open{opacity:1}
-#sx{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%) scale(.97);z-index:57;width:min(340px,calc(100% - 24px));max-height:calc(100% - 24px);background:var(--card);border:1px solid var(--line);border-radius:24px;padding:14px;display:flex;flex-direction:column;gap:10px;opacity:0;pointer-events:none;transition:opacity .25s,transform .25s;overflow:hidden}
-#sx.open{opacity:1;pointer-events:auto;transform:translate(-50%,-50%) scale(1)}
+#shx{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%) scale(.97);z-index:57;width:min(340px,calc(100% - 24px));max-height:calc(100% - 24px);background:var(--card);border:1px solid var(--line);border-radius:24px;padding:14px;display:flex;flex-direction:column;gap:10px;opacity:0;pointer-events:none;transition:opacity .25s,transform .25s;overflow:hidden}
+#shx.open{opacity:1;pointer-events:auto;transform:translate(-50%,-50%) scale(1)}
 .sxhead{display:flex;align-items:center;justify-content:space-between;flex:none}
 .sxhead b{font-size:17px;font-weight:850}
 .sxbtn{width:40px;height:40px;border-radius:20px;border:1px solid var(--line2);background:var(--card2);color:var(--text);font-size:15px;cursor:pointer}
@@ -986,6 +986,11 @@ html[data-theme="light"] .nav .ndot{border-color:#fff}
 .mtfbox .note b{color:var(--text)}
 .pvtag{text-align:center;color:var(--orange);font-size:10px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;margin:0 0 12px}
 .go{position:relative;overflow:visible!important;width:100%!important;padding:14px;border-radius:15px;font-weight:800;font-size:15px;color:var(--onlime)!important;background:var(--lime)!important;box-shadow:0 0 26px #b7f36b2b!important;transition:transform .12s!important;text-align:center!important;white-space:normal!important;line-height:1.3!important;display:block!important}
+/* .go{display:block!important} di atas menang atas .hidden{display:none!important}
+   (specificity sama, .go datang kemudian). Tanpa rule ini butang "Analyze with AI"
+   terus nampak dalam sheet alt: Account details, My Performance, Community
+   notifications, dan masa scan sedang berjalan. Dua kelas = specificity lebih tinggi. */
+.go.hidden{display:none!important}
 .go:active{transform:scale(.98)}
 .go:disabled{opacity:.55;box-shadow:none}
 /* Butang aksi modal trade sentiasa nampak (sticky) — tak hilang di bawah fold */
@@ -2108,9 +2113,12 @@ html[data-theme="light"] .star-mood{background:rgba(122,181,46,.10);border-color
 
 
     <div id="toast" role="status" aria-live="polite"></div>
-    <!-- share weekly popup: pcard tap -> popup card 9:16 -->
+<div id="floatAna" class="floata hidden" role="button" tabindex="0" aria-live="polite">
+      <span class="fstar" id="floatStar" aria-hidden="true"></span><span class="ftxt" id="floatTxt"></span><span class="fx" id="floatX" role="button" aria-label="Cancel analysis">✕</span>
+    </div>
+  </div>    <!-- share weekly popup: pcard tap -> popup card 9:16 -->
     <div id="sxbd" class="hidden"></div>
-    <div id="sx" class="hidden" role="dialog" aria-modal="true" aria-labelledby="sxTitle">
+    <div id="shx" class="hidden" role="dialog" aria-modal="true" aria-labelledby="sxTitle">
       <div class="sxhead"><b id="sxTitle">Share your week</b><button class="sxbtn" id="sxx" aria-label="Close">✕</button></div>
       <div class="sxscroll">
         <div class="sprev"><div class="scard" id="scardRoot">
@@ -2144,10 +2152,7 @@ html[data-theme="light"] .star-mood{background:rgba(122,181,46,.10);border-color
         <button class="ac" id="sxMore"><i><svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg></i><span id="sxMoreLab">More</span></button>
       </div>
     </div>
-    <div id="floatAna" class="floata hidden" role="button" tabindex="0" aria-live="polite">
-      <span class="fstar" id="floatStar" aria-hidden="true"></span><span class="ftxt" id="floatTxt"></span><span class="fx" id="floatX" role="button" aria-label="Cancel analysis">✕</span>
-    </div>
-  </div>
+
   
   <div class="stagehint">TraderWatch AI Analyst · 390 × 844</div>
 </div>
@@ -5154,7 +5159,7 @@ function openShareCard(){
     exception -> fallback empty-state, popup tetap muncul. */
  function _openShell(){
   $('sxbd').classList.remove('hidden');$('sxbd').classList.add('open');
-  $('sx').classList.remove('hidden');$('sx').classList.add('open');
+  $('shx').classList.remove('hidden');$('shx').classList.add('open');
  }
  if(!ME){_openShell();$('sxEmpty').classList.remove('hidden');return}
  try{
@@ -5206,7 +5211,7 @@ function openShareCard(){
   _openShell();
  }
 }
-function closeShareCard(){$('sx').classList.remove('open');$('sxbd').classList.remove('open');$('sxbd').classList.add('hidden');$('sx').classList.add('hidden');SXPNG=null}
+function closeShareCard(){$('shx').classList.remove('open');$('sxbd').classList.remove('open');$('sxbd').classList.add('hidden');$('shx').classList.add('hidden');SXPNG=null}
 var SBIC=[
  '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/></svg>',
  '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1"/></svg>',
