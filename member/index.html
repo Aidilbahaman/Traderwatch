@@ -529,6 +529,47 @@ html.kb-open .dm-comp{bottom:calc(var(--kb-h,0px) + 10px)}
 .chip.done .p{background:var(--lime)}
 @keyframes orbBlink{0%,100%{opacity:.25}50%{opacity:1}}
 .aihub-sub{font-size:10.5px;color:var(--muted);margin-top:6px;padding-left:2px;line-height:1.4}
+.aihub{position:relative;overflow:hidden;transition:border-color .35s ease,box-shadow .35s ease,background .35s ease}
+.aihub-scans{display:inline-flex;align-items:center;gap:6px;margin-top:7px;padding:3px 9px;border-radius:999px;font-size:10.5px;font-weight:750;letter-spacing:.01em;color:var(--muted);background:rgba(255,255,255,.04);border:1px solid var(--line);font-variant-numeric:tabular-nums;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.aihub-scans .sc-ico{display:inline-flex;align-items:center;flex:none}
+.aihub-scans b{color:var(--text);font-weight:850}
+.aihub-scans .sc-sep{opacity:.45}
+.aihub-scans .sc-usr{opacity:.82;overflow:hidden;text-overflow:ellipsis}
+/* Tier 1: 10-49 scans/hr (Active Lime Pulse) */
+.aihub.sc-t1{border-color:rgba(183,243,107,.42);animation:scGlow1 2.8s ease-in-out infinite}
+.aihub.sc-t1 .aihub-scans{color:#d8ff9e;background:rgba(183,243,107,.11);border-color:rgba(183,243,107,.38);box-shadow:0 0 14px rgba(183,243,107,.18)}
+.aihub.sc-t1 .aihub-scans b{color:#b7f36b}
+.aihub.sc-t1 .aihub-scans .sc-ico{animation:scBeat 1.8s ease-in-out infinite}
+.aihub.sc-t1 .hole .wv{animation-duration:2.2s;border-color:rgba(183,243,107,.85)}
+.aihub.sc-t1 .hole .photon{opacity:.78;animation-duration:2s}
+/* Tier 2: 50-99 scans/hr (High Heat Amber Overdrive) */
+.aihub.sc-t2{border-color:rgba(255,176,74,.55);background:linear-gradient(135deg,rgba(255,154,54,.08),var(--card) 62%);animation:scGlow2 2.2s ease-in-out infinite}
+.aihub.sc-t2::after{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(110deg,transparent 25%,rgba(255,193,107,.14) 50%,transparent 75%);transform:translateX(-120%);animation:scSweep 3.2s linear infinite}
+.aihub.sc-t2 .aihub-scans{color:#ffe0a8;background:rgba(255,168,66,.16);border-color:rgba(255,176,74,.52);box-shadow:0 0 18px rgba(255,168,66,.26)}
+.aihub.sc-t2 .aihub-scans b{color:#ffc16b}
+.aihub.sc-t2 .aihub-scans .sc-ico{animation:scFlame 1.1s ease-in-out infinite}
+.aihub.sc-t2 .hole .core{box-shadow:0 0 0 1.5px #ffc16bd9,0 0 18px 6px rgba(255,168,66,.65),0 0 38px 10px rgba(255,120,40,.28)}
+.aihub.sc-t2 .hole .wv{border-color:rgba(255,180,82,.85);animation-duration:1.6s}
+.aihub.sc-t2 .hole .scanarc{opacity:.85;border-top-color:#ffc16b;border-right-color:rgba(255,140,60,.65);animation-duration:1.4s}
+/* Tier 3: 100+ scans/hr (Supernova Plasma Hyperdrive) */
+.aihub.sc-t3{border-color:rgba(196,138,255,.68);background:linear-gradient(135deg,rgba(177,140,255,.13),rgba(183,243,107,.06) 52%,rgba(255,176,74,.09));animation:scGlow3 1.7s ease-in-out infinite}
+.aihub.sc-t3::after{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(110deg,transparent 15%,rgba(196,138,255,.22) 42%,rgba(183,243,107,.2) 55%,transparent 82%);transform:translateX(-120%);animation:scSweep 2.1s linear infinite}
+.aihub.sc-t3 .aihub-scans{color:#fff;background:linear-gradient(90deg,rgba(177,140,255,.32),rgba(183,243,107,.24),rgba(255,193,107,.3));background-size:200% 100%;border-color:rgba(205,160,255,.65);box-shadow:0 0 22px rgba(177,140,255,.38);animation:scGrad 2.4s linear infinite}
+.aihub.sc-t3 .aihub-scans b{color:#eaffb8}
+.aihub.sc-t3 .aihub-scans .sc-ico{animation:scHyper .75s ease-in-out infinite}
+.aihub.sc-t3 .hole .core{box-shadow:0 0 0 2px #d7b8ff,0 0 22px 8px rgba(177,140,255,.8),0 0 48px 14px rgba(183,243,107,.42)}
+.aihub.sc-t3 .hole .wv{border-color:rgba(204,158,255,.92);animation-duration:1.15s}
+.aihub.sc-t3 .hole .scanarc{opacity:1;border-top-color:#d7b8ff;border-right-color:#b7f36b;animation-duration:.95s}
+.aihub.sc-t3 .hole .dot{animation-duration:1.1s !important}
+@keyframes scGlow1{0%,100%{box-shadow:0 0 0 0 rgba(183,243,107,.12)}50%{box-shadow:0 0 22px 1px rgba(183,243,107,.26)}}
+@keyframes scGlow2{0%,100%{box-shadow:0 0 10px rgba(255,168,66,.16)}50%{box-shadow:0 0 28px 2px rgba(255,168,66,.36)}}
+@keyframes scGlow3{0%,100%{box-shadow:0 0 14px rgba(177,140,255,.28),0 0 26px rgba(183,243,107,.14)}50%{box-shadow:0 0 32px 3px rgba(177,140,255,.52),0 0 42px rgba(255,193,107,.26)}}
+@keyframes scSweep{to{transform:translateX(120%)}}
+@keyframes scBeat{0%,100%{transform:scale(1)}50%{transform:scale(1.25)}}
+@keyframes scFlame{0%,100%{transform:scale(1) rotate(-4deg)}50%{transform:scale(1.3) rotate(5deg)}}
+@keyframes scHyper{0%,100%{transform:scale(1) translateY(0)}50%{transform:scale(1.35) translateY(-1.5px)}}
+@keyframes scGrad{0%{background-position:0% 50%}100%{background-position:200% 50%}}
+@media(prefers-reduced-motion:reduce){.aihub.sc-t1,.aihub.sc-t2,.aihub.sc-t3,.aihub.sc-t2::after,.aihub.sc-t3::after,.aihub-scans,.aihub-scans .sc-ico{animation:none !important}}
 .hole{position:relative;width:72px;height:72px;display:grid;place-items:center;flex:none;isolation:isolate}
 .hole .aura{position:absolute;width:44px;height:44px;border-radius:50%;
  background:radial-gradient(circle,#b7f36b2e 0%,#b7f36b12 48%,transparent 68%);
@@ -1976,7 +2017,7 @@ html[data-theme="light"] .star-mood{background:rgba(122,181,46,.10);border-color
             <div class="aihub-tx">
               <div class="chip idle" id="orbChip"><span class="p"></span><span id="orbChipTx">Enjin AI sedia</span></div>
               <div class="aihub-sub" id="orbSub"></div>
-              <div class="aihub-sub scans" id="orbScans" hidden></div>
+              <div class="aihub-scans" id="orbScans"><span class="sc-ico">⚡</span><span>0 scans / 1h</span></div>
             </div>
           </div>
           <div id="aiLearnCard" hidden></div>
@@ -5005,21 +5046,27 @@ function orbStartPoll(){
   if(current==='liga'&&lsub==='lb'){loadAiLive();loadScanCount()}
  },8000);
 }
-/* Scan per user last 24h — bawah AI Engine Ready orb */
-var SCAN_TTL=60000,SCAN_AT=0;
+/* Scan count user per hour — bawah AI Engine Ready orb + animasi tier 10 / 50 / 100 */
+var SCAN_TTL=20000,SCAN_AT=0;
 function loadScanCount(){
- var el=$('orbScans');if(!el)return;
+ var el=$('orbScans'),hub=$('aiOrb');if(!el)return;
  var now=Date.now();
  if(now-SCAN_AT<SCAN_TTL&&el.dataset.done==='1')return;
  SCAN_AT=now;
- apiFetch('/api/analyze/scans-24h').then(function(r){
+ apiFetch('/api/analyze/scans-1h').then(function(r){
   if(!r.ok||!r.data)return;
-  var users=(r.data&&r.data.users)||[],total=(r.data&&r.data.total)||0;
-  var lab=users.map(function(u){return u.username+' ×'+u.scans}).slice(0,3).join(' · ');
-  if(!users.length){el.hidden=true;el.dataset.done='1';return}
-  el.textContent=(lang==='en'?('Scans 24h: '+total):('Imbasan 24j: '+total))+(lab?' · '+lab:'');
+  var users=(r.data&&r.data.users)||[];
+  var total=Number(r.data&&r.data.total)||0;
+  var active=Number(r.data&&r.data.active_users)||users.length||0;
+  var tier=total>=100?'sc-t3':total>=50?'sc-t2':total>=10?'sc-t1':'';
+  if(hub){hub.classList.remove('sc-t1','sc-t2','sc-t3');if(tier)hub.classList.add(tier)}
+  var ico=total>=100?'🚀':total>=50?'🔥':total>=10?'⚡':'⚡';
+  var en=(lang==='en');
+  var cntTxt='<b>'+total+'</b> '+(en?(total===1?'scan/hr':'scans/hr'):'imbasan/jam');
+  var usrTxt=active>0?('<span class="sc-sep">·</span><span class="sc-usr">'+active+' '+(en?(active===1?'user':'users'):'ahli')+'</span>'):'';
+  el.innerHTML='<span class="sc-ico">'+ico+'</span><span>'+cntTxt+'</span>'+usrTxt;
   el.hidden=false;el.dataset.done='1';
- }).catch(function(){el.hidden=true});
+ }).catch(function(){});
 }
 orbStartPoll();
 if(typeof window!=='undefined'){window.__orbSet=orbSet;window.__orbLive=loadAiLive;}

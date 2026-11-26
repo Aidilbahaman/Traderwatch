@@ -122,18 +122,19 @@ def log(msg):
 
 _scans24_cache = {"at": 0.0, "out": []}
 SCANS24_TTL = 60
+_scans1h_cache = {"at": 0.0, "out": None}
+SCANS1H_TTL = 20
 
-def scans_24h():
-    """Scan per user dalam 24 jam dari audit log llm-analysis-log.jsonl.
-    Rekod src=member dengan uid. Tap dedupe (5 TF satu ketukan = 1 scan).
-    Returns [{username, scans}] sorted desc. Cache 60s (log besar)."""
-    import pathlib
+
+def _scans_in_window(seconds):
+    """Scan per user dalam tetingkap `seconds` dari audit log llm-analysis-log.jsonl.
+    Rekod src=member. Tap dedupe (5 TF satu ketukan = 1 scan).
+    Returns (users_list, total_scans)."""
     now = time.time()
-    if now - _scans24_cache["at"] < SCANS24_TTL and _scans24_cache["out"]:
-        return _scans24_cache["out"]
     log_path = pathlib.Path(__file__).resolve().parent.parent / "state" / "llm-analysis-log.jsonl"
-    cutoff = now - 86400
+    cutoff = now - seconds
     per_user = {}
+    anon_keys = set()
     try:
         if log_path.exists():
             size = log_path.stat().st_size
@@ -148,9 +149,6 @@ def scans_24h():
                         continue
                     if r.get("src") != "member":
                         continue
-                    uid = r.get("uid")
-                    if not uid:
-                        continue
                     ts = str(r.get("ts") or "")
                     try:
                         t = datetime.fromisoformat(ts.replace("Z", "+00:00")).timestamp()
@@ -158,18 +156,41 @@ def scans_24h():
                         continue
                     if t < cutoff:
                         continue
+                    uid = r.get("uid")
                     tap = str(r.get("tap") or "").strip()
-                    key = ("tap:" + tap) if tap else ("min:%d" % int(t // 60))
-                    if key in per_user.setdefault(uid, set()):
-                        continue
-                    per_user[uid].add(key)
+                    key = ("tap:" + tap) if tap else ("min:%s:%d" % (r.get("pair") or "", int(t // 60)))
+                    if uid:
+                        per_user.setdefault(uid, set()).add(key)
+                    else:
+                        anon_keys.add(key)
     except Exception as e:
-        log(f"scans_24h read fail {type(e).__name__}: {str(e)[:100]}")
+        log(f"scans_window({seconds}) read fail {type(e).__name__}: {str(e)[:100]}")
     out = [{"uid": uid, "username": _display_name_of(uid), "scans": len(keys)}
            for uid, keys in per_user.items()]
     out.sort(key=lambda x: -x["scans"])
+    total = sum(x["scans"] for x in out) + len(anon_keys)
+    return out, total
+
+
+def scans_24h():
+    """Scan per user dalam 24 jam (cache 60s)."""
+    now = time.time()
+    if now - _scans24_cache["at"] < SCANS24_TTL and _scans24_cache["out"]:
+        return _scans24_cache["out"]
+    out, _ = _scans_in_window(86400)
     _scans24_cache.update(at=now, out=out)
     return out
+
+
+def scans_1h():
+    """Scan per user dalam 1 jam terakhir (cache 20s)."""
+    now = time.time()
+    if now - _scans1h_cache["at"] < SCANS1H_TTL and _scans1h_cache["out"] is not None:
+        return _scans1h_cache["out"]
+    out, total = _scans_in_window(3600)
+    res = {"window": "1h", "total": total, "active_users": len(out), "users": out}
+    _scans1h_cache.update(at=now, out=res)
+    return res
 
 def _display_name_of(uid):
     """Nama paparan untuk uid — Supabase profiles (service key), cache 5 min."""
@@ -499,6 +520,12 @@ class Handler(BaseHTTPRequestHandler):
     def do_GET(self):
         parsed = urllib.parse.urlparse(self.path)
         path = parsed.path
+        if path == "/api/analyze/scans-1h":
+            """Kiraan scan per user dalam 1 jam terakhir."""
+            user = verify_user(self._token())
+            if not user or not user.get("id"):
+                return self._send(401, {"error": "Please sign in as a member."})
+            return self._send(200, scans_1h())
         if path == "/api/analyze/scans-24h":
             """Kiraan scan per user dalam 24 jam — sumber: audit log
             llm-analysis-log.jsonl (rekod src=member dengan uid)."""
