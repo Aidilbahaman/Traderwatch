@@ -68,7 +68,7 @@ html[data-theme="light"] .notch{background:#e5eae3}
 /* scroll area */
 .scroll{flex:1;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:none;padding-bottom:calc(74px + var(--sab))}
 .scroll.com{padding-bottom:calc(186px + var(--sab))}
-.scroll.an-lock{overflow-y:hidden !important;padding-bottom:0 !important}
+.scroll.an-lock,.scroll.com-lock{overflow-y:hidden !important;padding-bottom:0 !important}
 .scroll::-webkit-scrollbar{display:none}
 .view{padding:16px;animation:fade .28s ease both}
 @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
@@ -203,6 +203,22 @@ html[data-theme="light"] .ic{background:#e6efd9;border-color:#c9dbb4}
 .vhead p{margin:4px 0 0;color:var(--muted);font-size:13px}
 .online{display:inline-flex;align-self:flex-start;align-items:center;gap:7px;background:var(--card);border:1px solid var(--line);border-radius:999px;padding:6px 12px;font-size:11px;font-weight:700;color:var(--muted);margin-bottom:14px}
 .online i{width:7px;height:7px;border-radius:50%;background:var(--lime);box-shadow:0 0 8px var(--lime)}
+/* community — locked header/rooms, scrollable chat + soft moving green aurora bg */
+#view-community{padding:12px 16px 0;position:relative;display:flex;flex-direction:column;height:var(--com-h,calc(100dvh - 130px));overflow:hidden;isolation:isolate}
+#view-community.hidden{display:none}
+#view-community::before,#view-community::after{content:"";position:absolute;pointer-events:none;z-index:0;border-radius:50%;filter:blur(44px);will-change:transform,opacity}
+#view-community::before{width:300px;height:240px;left:-15%;top:12%;background:radial-gradient(ellipse at center,rgba(183,243,107,.16) 0%,rgba(52,211,153,.10) 45%,transparent 75%);animation:comAuroraA 15s ease-in-out infinite alternate}
+#view-community::after{width:280px;height:260px;right:-16%;bottom:18%;background:radial-gradient(ellipse at center,rgba(74,222,128,.14) 0%,rgba(16,185,129,.09) 48%,transparent 76%);animation:comAuroraB 19s ease-in-out infinite alternate}
+html[data-theme="light"] #view-community::before{background:radial-gradient(ellipse at center,rgba(132,204,22,.16) 0%,rgba(16,185,129,.08) 48%,transparent 75%)}
+html[data-theme="light"] #view-community::after{background:radial-gradient(ellipse at center,rgba(74,222,128,.14) 0%,rgba(132,204,22,.08) 48%,transparent 76%)}
+@keyframes comAuroraA{0%{transform:translate3d(0,0,0) scale(1);opacity:.72}50%{transform:translate3d(38%,24%,0) scale(1.18);opacity:1}100%{transform:translate3d(12%,48%,0) scale(.94);opacity:.78}}
+@keyframes comAuroraB{0%{transform:translate3d(0,0,0) scale(1.06);opacity:.68}50%{transform:translate3d(-36%,-22%,0) scale(.92);opacity:.96}100%{transform:translate3d(-14%,-44%,0) scale(1.16);opacity:.74}}
+@media(prefers-reduced-motion:reduce){#view-community::before,#view-community::after{animation:none !important}}
+#view-community>.vhead,#view-community>.online,#view-community>.rooms{flex:none;position:relative;z-index:2}
+#view-community>.vhead{margin-bottom:8px}
+#view-community>.online{margin-bottom:8px}
+.com-scroll{flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;scrollbar-width:none;position:relative;z-index:2;padding:4px 0 calc(176px + var(--sab))}
+.com-scroll::-webkit-scrollbar{display:none}
 .msgs{display:flex;flex-direction:column;gap:12px}
 .msgs.quiet .msg,.dm-msgs.quiet .dm-bbl,.dm-msgs.quiet .dm-setup,.dm-msgs.quiet .dm-pinbar{animation:none !important}
 .msg{display:flex;gap:10px;animation:up .4s both}
@@ -2020,8 +2036,10 @@ html[data-theme="light"] .star-mood{background:rgba(122,181,46,.10);border-color
         <div class="vhead"><h2 id="comTitle">Komuniti</h2><p id="comSub">Berbincang dengan trader lain.</p></div>
         <div class="online"><i></i><span id="onlineTxt">Komuniti aktif</span></div>
         <div class="rooms hidden" id="rooms" role="tablist" aria-label="Rooms"></div>
-        <div class="msgs" id="msgs"></div>
-        <p class="comnote" id="comNote"></p>
+        <div class="com-scroll" id="comScroll">
+          <div class="msgs" id="msgs"></div>
+          <p class="comnote" id="comNote"></p>
+        </div>
       </section>
 
       <!-- FRIENDS (ORBIT) -->
@@ -2767,9 +2785,11 @@ function showView(v){
  $('composer').classList.toggle('hidden',v!=='community');
  if(v!=='community'&&COM_EDIT)cancelEdit();
  $('scroll').classList.toggle('com',v==='community');
+ $('scroll').classList.toggle('com-lock',v==='community');
  $('scroll').classList.toggle('an-lock',v==='analyst');
  $('scroll').classList.toggle('fr-lock',v==='friends');
  if(v==='analyst'){try{$('view-analyst').style.setProperty('--an-h',$('scroll').clientHeight+'px')}catch(e){}}
+ if(v==='community'){try{$('view-community').style.setProperty('--com-h',$('scroll').clientHeight+'px')}catch(e){}}
  if(v==='friends'){try{$('view-friends').style.setProperty('--frs-h',$('scroll').clientHeight+'px')}catch(e){}}
  $('scroll').scrollTop=0;
  if(v==='analyst'){drawPairs(true);maybePrices();loadPairTraders();loadPairAi()}
@@ -3705,17 +3725,33 @@ function _msgSig(list){
   return [m.id,m.edited_at||'',m.body||'',m.kind||'',m.avatar_url||'',m.reactions?JSON.stringify(m.reactions):'',m.mine?m.mine.join(','):''].join('|');
  }).join('\n');
 }
-function drawMsgs(quiet){
+function scrollComBottom(smooth){
+ var cs=$('comScroll');if(!cs)return;
+ var top=Math.max(0,cs.scrollHeight-cs.clientHeight);
+ if(smooth&&cs.scrollTo){try{cs.scrollTo({top:top,behavior:'smooth'})}catch(e){cs.scrollTop=top}}
+ else cs.scrollTop=top;
+}
+function isComNearBottom(){
+ var cs=$('comScroll');if(!cs)return true;
+ return (cs.scrollHeight-cs.scrollTop-cs.clientHeight)<200;
+}
+function drawMsgs(quiet,forceBottom){
  if(COM_EDIT&&!findComMsg(COM_EDIT.id))cancelEdit();
  var me=myChatName(),box=$('msgs');
  var sig=_msgSig(MSGS);
- if(!quiet||sig!==_comSig||!box.children.length){
+ var near=isComNearBottom();
+ var changed=(!quiet||sig!==_comSig||!box.children.length);
+ if(changed){
   _comSig=sig;
   box.classList.toggle('quiet',!!quiet);
   if(!MSGS.length){
    box.innerHTML='<div class="empty">'+esc(t('emptyChat'))+'</div>';
   }else{
    box.innerHTML=MSGS.map(function(m){return msgHtml(m,me)}).join('');
+  }
+  if(forceBottom||!quiet||near){
+   scrollComBottom(!!quiet&&!forceBottom);
+   setTimeout(function(){scrollComBottom(false)},120);
   }
  }
  var users={};MSGS.forEach(function(m){users[m.username]=1});
@@ -3909,10 +3945,9 @@ function sendMsg(gifObj){
    if(COM_FEAT.rooms&&COM_ROOM!=='all')COM_ROOMS[COM_ROOM]=(COM_ROOMS[COM_ROOM]||0)+1;
   }
   playChatSfx('sent');
-  drawMsgs();hap(8);
+  drawMsgs(false,true);hap(8);
   if(res.data&&res.data.filtered&&res.data.filtered.length)toast(t('someFiltered'));
-  var last=$('msgs').lastElementChild,comp=$('composer'),sc=$('scroll');
- if(last&&comp&&sc){var lr=last.getBoundingClientRect(),cr=comp.getBoundingClientRect();if(lr.bottom>cr.top-12)sc.scrollBy({top:lr.bottom-cr.top+16,behavior:'smooth'})}
+  scrollComBottom(true);
  }).catch(function(){sending=false;$('sendBtn').disabled=false;toast(t('sendErr'))});
 }
 setInterval(function(){
@@ -7109,6 +7144,7 @@ function _syncLockedHeights(){
   var sc=$('scroll');if(!sc)return;
   var h=sc.clientHeight+'px';
   var va=$('view-analyst');if(va)va.style.setProperty('--an-h',h);
+  var vc=$('view-community');if(vc)vc.style.setProperty('--com-h',h);
   var vf=$('view-friends');if(vf)vf.style.setProperty('--frs-h',h);
  }catch(e){}
 }
