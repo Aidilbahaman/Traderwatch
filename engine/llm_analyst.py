@@ -558,6 +558,9 @@ _AUDIT_CTX = threading.local()
 def _audit(record):
     try:
         record.setdefault("src", getattr(_AUDIT_CTX, "src", "bot"))
+        uid = getattr(_AUDIT_CTX, "uid", None)
+        if uid:
+            record.setdefault("uid", uid)
         tap = getattr(_AUDIT_CTX, "tap", None)
         if tap:
             record.setdefault("tap", tap)
@@ -914,7 +917,7 @@ def build_quant_text_prompt(base_prompt, q, prof, market_ctx=""):
 
 
 def analyze(pair, bars, pip, spread_pips, call=None, budget_s=None, held=None, tf="M15",
-            src="bot", tap=None, risk_level="med"):
+            src="bot", tap=None, risk_level="med", uid=None):
     """Analisis LLM untuk satu pair mengikut timeframe. Return verdict dict / None.
 
     TF-aware: M5=scalping, M15=intraday, H1=swing, H4/D1=position.
@@ -926,9 +929,12 @@ def analyze(pair, bars, pip, spread_pips, call=None, budget_s=None, held=None, t
     Hanya "member" dikira dalam lencana permintaan pada pair card.
     tap = id satu ketukan UI. Scan 5 TF dalam satu ketukan berkongsi tap yang
     sama, jadi lencana kira SATU permintaan, bukan lima.
+    uid = Supabase user id pemanggil (member scan) — ditulis ke audit log untuk
+    kiraan "scans per user last 24h" pada orb hub.
     """
     _AUDIT_CTX.src = src
     _AUDIT_CTX.tap = tap
+    _AUDIT_CTX.uid = uid
     explicit_call = call is not None
     call = call or _call_model
     budget_s = budget_s or BUDGET_S

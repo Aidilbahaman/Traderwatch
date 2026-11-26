@@ -120,6 +120,83 @@ def log(msg):
     print(f"{datetime.now(timezone.utc).isoformat()} ANALYZE {msg}", flush=True)
 
 
+_scans24_cache = {"at": 0.0, "out": []}
+SCANS24_TTL = 60
+
+def scans_24h():
+    """Scan per user dalam 24 jam dari audit log llm-analysis-log.jsonl.
+    Rekod src=member dengan uid. Tap dedupe (5 TF satu ketukan = 1 scan).
+    Returns [{username, scans}] sorted desc. Cache 60s (log besar)."""
+    import pathlib
+    now = time.time()
+    if now - _scans24_cache["at"] < SCANS24_TTL and _scans24_cache["out"]:
+        return _scans24_cache["out"]
+    log_path = pathlib.Path(__file__).resolve().parent.parent / "state" / "llm-analysis-log.jsonl"
+    cutoff = now - 86400
+    per_user = {}
+    try:
+        if log_path.exists():
+            size = log_path.stat().st_size
+            with log_path.open("rb") as f:
+                if size > 4_000_000:
+                    f.seek(size - 4_000_000)
+                    f.readline()
+                for raw in f:
+                    try:
+                        r = json.loads(raw)
+                    except Exception:
+                        continue
+                    if r.get("src") != "member":
+                        continue
+                    uid = r.get("uid")
+                    if not uid:
+                        continue
+                    ts = str(r.get("ts") or "")
+                    try:
+                        t = datetime.fromisoformat(ts.replace("Z", "+00:00")).timestamp()
+                    except Exception:
+                        continue
+                    if t < cutoff:
+                        continue
+                    tap = str(r.get("tap") or "").strip()
+                    key = ("tap:" + tap) if tap else ("min:%d" % int(t // 60))
+                    if key in per_user.setdefault(uid, set()):
+                        continue
+                    per_user[uid].add(key)
+    except Exception as e:
+        log(f"scans_24h read fail {type(e).__name__}: {str(e)[:100]}")
+    out = [{"uid": uid, "username": _display_name_of(uid), "scans": len(keys)}
+           for uid, keys in per_user.items()]
+    out.sort(key=lambda x: -x["scans"])
+    _scans24_cache.update(at=now, out=out)
+    return out
+
+def _display_name_of(uid):
+    """Nama paparan untuk uid — Supabase profiles (service key), cache 5 min."""
+    global _name_cache
+    now = time.time()
+    if now - _name_cache["at"] < 300 and uid in _name_cache["map"]:
+        return _name_cache["map"][uid]
+    try:
+        req = urllib.request.Request(SB_URL + "/rest/v1/profiles?select=id,name,email",
+                                     headers={"apikey": SB_KEY,
+                                              "Authorization": "Bearer " + SB_KEY})
+        with urllib.request.urlopen(req, timeout=15) as r:
+            rows = json.loads(r.read().decode()) or []
+        m = {}
+        for row in rows:
+            nm = (row.get("name") or "").strip()
+            if not nm:
+                em = (row.get("email") or "")
+                nm = em.split("@")[0] if em else ""
+            m[row.get("id")] = nm or (row.get("id") or "?")[:8]
+        _name_cache.update(at=now, map=m)
+    except Exception as e:
+        log(f"names fetch fail {type(e).__name__}: {str(e)[:80]}")
+    return _name_cache["map"].get(uid) or (uid or "?")[:8]
+
+_name_cache = {"at": 0.0, "map": {}}
+
 def bump_analyses(uid):
     """Atomic per-account analysis counter (Supabase RPC). Best-effort: a counter
     failure must never break the analysis response."""
@@ -388,7 +465,7 @@ def run_analysis(pair, tf="M15", tap=None, risk_level="med"):
     pip = M.pip_of(disp)
     spread = SMC.SPREAD_PIPS.get(pair, SMC.DEFAULT_SPREAD_PIPS)
     verdict = LA.analyze(disp, bars, pip, spread, tf=tf, src="member", tap=tap,
-                         risk_level=risk_level)
+                         risk_level=risk_level, uid=uid)
     price = bars[-1][3]
     if verdict is None:
         return {"side": "HOLD", "pair": disp, "price": price, "tf": tf,
@@ -422,6 +499,15 @@ class Handler(BaseHTTPRequestHandler):
     def do_GET(self):
         parsed = urllib.parse.urlparse(self.path)
         path = parsed.path
+        if path == "/api/analyze/scans-24h":
+            """Kiraan scan per user dalam 24 jam — sumber: audit log
+            llm-analysis-log.jsonl (rekod src=member dengan uid)."""
+            user = verify_user(self._token())
+            if not user or not user.get("id"):
+                return self._send(401, {"error": "Please sign in as a member."})
+            out = scans_24h()
+            return self._send(200, {"window": "24h", "users": out,
+                                    "total": sum(int(u.get("scans", 0)) for u in out)})
         if path == "/api/analyze/live":
             user = verify_user(self._token())
             if not user or not user.get("id"):
