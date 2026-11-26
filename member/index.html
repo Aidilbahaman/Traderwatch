@@ -893,12 +893,14 @@ html[data-theme="light"] .nav .ndot{border-color:#fff}
    (overflow-y:auto), jadi kad nampak legap walaupun CSS betul.
    Tanpa sokongan backdrop-filter, kad kekal legap macam asal. */
 @supports ((-webkit-backdrop-filter:blur(1px)) or (backdrop-filter:blur(1px))){
-  .open #bd{-webkit-backdrop-filter:blur(20px) saturate(145%);backdrop-filter:blur(20px) saturate(145%)}
-  #sheet{background-color:rgba(38,47,40,.55);
+  /* Blur 60px + lapisan hitam ditipiskan: kad nampak "tembus" — grid pair
+     di belakang kelihatan kabur macam cermin berkabus (frosted glass). */
+  .open #bd{background:rgba(0,0,0,.45);-webkit-backdrop-filter:blur(60px) saturate(160%);backdrop-filter:blur(60px) saturate(160%)}
+  #sheet{background-color:rgba(30,38,32,.42);
     background-image:linear-gradient(180deg,rgba(255,255,255,.07),rgba(255,255,255,0) 160px);
     border-top-color:rgba(255,255,255,.18);
     box-shadow:0 -20px 60px #000a,inset 0 1px 0 rgba(255,255,255,.08)}
-  html[data-theme="light"] #sheet{background-color:rgba(255,255,255,.62);background-image:none;border-top-color:rgba(255,255,255,.95)}
+  html[data-theme="light"] #sheet{background-color:rgba(255,255,255,.5);background-image:none;border-top-color:rgba(255,255,255,.95)}
   #sheet .grab{background:transparent}
 }
 .floata{position:absolute;left:12px;right:12px;bottom:calc(74px + var(--sab));z-index:35;display:flex;align-items:center;gap:10px;background:var(--glass);backdrop-filter:saturate(160%) blur(18px);-webkit-backdrop-filter:saturate(160%) blur(18px);border:1px solid rgba(201,89,221,.45);border-radius:999px;padding:8px 13px 8px 9px;box-shadow:0 10px 30px #000a,0 0 22px rgba(8,148,255,.22);animation:up .3s both;cursor:pointer}
