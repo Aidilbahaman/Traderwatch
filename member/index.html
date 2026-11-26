@@ -261,10 +261,10 @@ html.kb-pre .composer,html.kb-pre .dm-comp{transition:none !important;animation:
 /* ===== ORBIT FRIENDS + LIVE WELCOMING + PRIVATE DM ===== */
 .nav .ndot{position:absolute;top:5px;right:calc(50% - 14px);width:7px;height:7px;border-radius:50%;background:var(--lime);box-shadow:0 0 8px var(--lime);pointer-events:none}
 .ibtn.on{color:var(--lime);border-color:rgba(183,243,107,.45);background:rgba(183,243,107,.1)}
-#view-friends{padding:0 16px 12px}
-/* ===== Friends snap-stage: 3 states (balanced / list-full / orbit-full), drag bawah grip ===== */
-#view-friends{position:relative;overflow:hidden}
-.orb-stage{position:relative;height:262px;margin:0 -16px 6px;overflow:hidden;transition:height .38s cubic-bezier(.22,1,.36,1),transform .38s cubic-bezier(.22,1,.36,1),opacity .3s}
+#scroll.fr-lock{overflow-y:hidden !important}
+#view-friends{padding:0 16px;position:relative;overflow:hidden;display:flex;flex-direction:column;height:var(--frs-h,calc(100dvh - 130px))}
+#view-friends.hidden{display:none}
+.orb-stage{position:relative;flex:none;height:252px;margin:0 -16px 6px;overflow:hidden;transition:height .38s cubic-bezier(.22,1,.36,1),transform .38s cubic-bezier(.22,1,.36,1),opacity .3s}
 .orb-stage::before{content:"";position:absolute;inset:0;background:radial-gradient(circle at 50% 48%,rgba(183,243,107,.14),transparent 60%);pointer-events:none;transition:opacity .4s}
 .orb-stage.flash::before{background:radial-gradient(circle at 50% 48%,rgba(183,243,107,.32),transparent 64%)}
 /* grip drag handle atas sheet */
@@ -301,19 +301,18 @@ html[data-theme="light"] #view-friends.st-orbit .orb-sheet{box-shadow:0 -18px 40
 #view-friends.st-orbit .orb-stage{--ocx:50%;--ocy:44%}
 #view-friends.st-orbit .orb-ring,#view-friends.st-orbit .orb-core{top:44%}
 #view-friends.st-orbit .orb-core{width:52px;height:52px}
-/* ===== walking orbit (orbit state): node berjalan ikut laluan, label disembunyikan ===== */
-#view-friends.st-orbit .orb-node{offset-path:circle(38% at 50% 44%);left:auto;top:auto;offset-rotate:0deg}
-#view-friends.st-orbit .orb-node span{display:none}
-#view-friends.st-orbit .orb-node .walk-tag{display:block}
-#view-friends.st-orbit .orb-node{animation:walkOrbit var(--wdur,26s) linear infinite;animation-delay:var(--wdel,0s)}
+/* ===== walking orbit (orbit state): node berjalan ikut 2 laluan orbit berasingan, nama kekal nampak ===== */
+#view-friends.st-orbit .orb-node{offset-path:circle(26% at 50% 44%);left:auto;top:auto;offset-rotate:0deg;transform:none;animation:walkOrbit var(--wdur,30s) linear infinite;animation-delay:var(--wdel,0s)}
+#view-friends.st-orbit .orb-node.is-new{offset-path:circle(41% at 50% 44%)}
+#view-friends.st-orbit .orb-node span{display:block}
 @keyframes walkOrbit{from{offset-distance:var(--wdist,0%)}to{offset-distance:calc(var(--wdist,0%) + 100%)}}
 /* fallback: tiada offset-path (Safari lama) — node statik, label kekal */
 @supports not (offset-path:circle(50% at 50% 50%)){
- #view-friends.st-orbit .orb-node{left:var(--wl,50%);top:var(--wt,40%);animation:none}
+ #view-friends.st-orbit .orb-node{left:var(--wl,50%);top:var(--wt,40%);transform:translate(-50%,-50%);animation:none}
  #view-friends.st-orbit .orb-node span{display:block}
 }
 @media (prefers-reduced-motion:reduce){
- #view-friends.st-orbit .orb-node{animation:none;left:var(--wl,50%);top:var(--wt,40%)}
+ #view-friends.st-orbit .orb-node{animation:none;left:var(--wl,50%);top:var(--wt,40%);transform:translate(-50%,-50%)}
 }
 /* drag-follow mode (jari di skrin) — transition dimatikan supaya ikut jari 1:1 */
 #view-friends.dragging .orb-stage,#view-friends.dragging .orb-sheet{transition:none}
@@ -364,7 +363,8 @@ html[data-theme="light"] .orb-findbtn{background:rgba(122,181,46,.12);border-col
 .orb-node .orb-av{width:36px;height:36px;font-size:11.5px;border:2px solid var(--bg);box-shadow:0 6px 16px rgba(0,0,0,.38)}
 .orb-node.is-new .orb-av{box-shadow:0 0 0 2px rgba(183,243,107,.72),0 0 18px rgba(183,243,107,.36);animation:orbPop .42s cubic-bezier(.22,1,.36,1)}
 @keyframes orbPop{from{transform:scale(.3);opacity:0}to{transform:scale(1);opacity:1}}
-.orb-av .on-d{position:absolute;right:-1px;bottom:-1px;width:10px;height:10px;border-radius:50%;background:var(--lime);border:2px solid var(--bg);box-shadow:0 0 8px rgba(183,243,107,.6)}
+.orb-av .on-d{position:absolute;right:-1px;bottom:-1px;width:10px;height:10px;border-radius:50%;background:var(--lime);border:2px solid var(--bg);box-shadow:0 0 8px rgba(183,243,107,.65)}
+.orb-av .on-d.off{background:#667368;box-shadow:none}
 .orb-av .rk-p{position:absolute;left:-3px;top:-3px;min-width:16px;height:16px;padding:0 3px;border-radius:99px;background:#151d16;border:1px solid rgba(246,199,109,.65);color:#f6c76d;font-size:8.5px;font-weight:900;display:grid;place-items:center}
 .orb-node span{font-size:9.5px;font-weight:700;color:var(--muted);background:var(--glass);padding:1px 6px;border-radius:6px;max-width:74px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;pointer-events:none}
 .orb-node.is-new span{color:var(--lime)}
@@ -382,14 +382,13 @@ html[data-theme="light"] .orb-btn.soft{color:#4f7e16}
 .orb-btn:active{transform:scale(.93)}
 .orb-btn:disabled{opacity:.5}
 
-.orb-sheet{margin:0 -16px;padding:4px 16px 24px;border-radius:26px 26px 0 0;background:linear-gradient(180deg,var(--card) 0%,var(--bg) 100%);border-top:1px solid var(--line);transition:transform .38s cubic-bezier(.22,1,.36,1);position:relative}
-/* orbit state: sheet peek menunjukkan grip + tabs sahaja — tinggi ikut kandungan, min-height lama
-   memaksa 360px dan menyebabkan kawasan kosong nampak bawah tabs (bug drag ke bawah) */
-#view-friends.st-orbit .orb-sheet{min-height:0}
-/* scroll-list dalam sheet untuk st-orbit (sheet menutup bawah, list scrollable) */
-/* orbit state: peek tunjuk grip + tabs sahaja; list tak nampak sehingga user tarik grip ke atas.
-   Semasa peek, orbBody disembunyikan supaya tiada row flash di bawah tabs. */
-#view-friends.st-orbit .orb-sheet #orbBody{max-height:calc(46vh - 20px);overflow-y:auto;overscroll-behavior:contain;opacity:0;transition:opacity .25s;pointer-events:none}
+.orb-sheet{margin:0 -16px;padding:4px 16px 0;border-radius:26px 26px 0 0;background:linear-gradient(180deg,var(--card) 0%,var(--bg) 100%);border-top:1px solid var(--line);transition:transform .38s cubic-bezier(.22,1,.36,1);position:relative;flex:1;min-height:0;display:flex;flex-direction:column;overflow:hidden}
+.orb-grip,.orb-tabs{flex:none}
+#orbBody{flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;scrollbar-width:none;padding-bottom:calc(94px + var(--sab))}
+#orbBody::-webkit-scrollbar{display:none}
+/* orbit state: sheet peek menunjukkan grip + tabs sahaja */
+#view-friends.st-orbit .orb-sheet{min-height:0;flex:none}
+#view-friends.st-orbit .orb-sheet #orbBody{max-height:calc(46vh - 20px);opacity:0;transition:opacity .25s;pointer-events:none}
 #view-friends.st-orbit.peek-open .orb-sheet #orbBody{opacity:1;pointer-events:auto}
 .orb-tabs{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:10px}
 .orb-tabs::-webkit-scrollbar{display:none}
@@ -2732,6 +2731,8 @@ function showView(v){
  $('composer').classList.toggle('hidden',v!=='community');
  if(v!=='community'&&COM_EDIT)cancelEdit();
  $('scroll').classList.toggle('com',v==='community');
+ $('scroll').classList.toggle('fr-lock',v==='friends');
+ if(v==='friends'){try{$('view-friends').style.setProperty('--frs-h',$('scroll').clientHeight+'px')}catch(e){}}
  $('scroll').scrollTop=0;
  if(v==='analyst'){drawPairs(true);maybePrices();loadPairTraders();loadPairAi()}
  if(v==='community')loadMessages();
@@ -4035,7 +4036,7 @@ function orbIni(name){
 }
 function orbAvHTML(name,id,online,rank,avatarUrl){
  return '<div class="orb-av" style="background:'+orbBg(id||name)+'">'+avInnerHtml(name,avatarUrl,orbIni)
-  +(online?'<span class="on-d"></span>':'')
+  +'<span class="on-d'+(online?'':' off')+'" title="'+(online?'Online':'Offline')+'"></span>'
   +(rank?'<span class="rk-p">#'+rank+'</span>':'')+'</div>';
 }
 function firstWord(s){
@@ -4069,8 +4070,11 @@ function renderFriends(){
  var innerNodes=orbitF.slice(0,4);
  var outerNodes=FR.arrivals.filter(function(a){return a.seen_today}).slice(0,4);
 
- /* Keep selected node fresh */
+ /* Keep selected node fresh.
+    New client pill bar auto-tunjuk HANYA jika ahli baru sertai <= 5 minit;
+    lebih 5 minit automatik hilang melainkan pengguna tap node secara manual. */
  var selObj=null;
+ function _isFresh5m(iso){var ts=Date.parse(iso||'');return isFinite(ts)&&(Date.now()-ts)<=300000}
  if(FR.sel){
   if(FR.sel.kind==='friend'){
    var ff=orbitF.filter(function(x){return x.id===FR.sel.id})[0];
@@ -4080,8 +4084,9 @@ function renderFriends(){
    if(aa)selObj={kind:'new',data:aa};
   }
  }
- if(!selObj&&outerNodes.length)selObj={kind:'new',data:outerNodes[0]};
- else if(!selObj&&innerNodes.length)selObj={kind:'friend',data:innerNodes[0]};
+ if(!selObj&&outerNodes.length&&_isFresh5m(outerNodes[0].created_at)){
+  selObj={kind:'new',data:outerNodes[0]};
+ }
 
  var liveTxt=FR.today>0
   ? ('<b>+'+FR.today+'</b> '+(en?'joined today':'baru hari ini'))
@@ -4117,12 +4122,16 @@ function renderFriends(){
   +'<div class="orb-core">'+orbStarSVG()+'<span class="scan-ring"></span><span class="scan-ring r2"></span><span class="scan-line"></span></div>'
   +innerNodes.map(function(f,i){
    var isSel=selObj&&selObj.kind==='friend'&&selObj.data.id===f.id;
-   return '<div class="orb-node'+(isSel?' sel':'')+'" style="left:'+inPos[i].x+'%;top:'+inPos[i].y+'%" data-orb-f="'+esc(f.id)+'">'
+   var wdist=Math.round((i*100)/Math.max(1,innerNodes.length))+'%';
+   var wdur=(28+i*3)+'s';
+   return '<div class="orb-node'+(isSel?' sel':'')+'" style="left:'+inPos[i].x+'%;top:'+inPos[i].y+'%;--wl:'+inPos[i].x+'%;--wt:'+inPos[i].y+'%;--wdist:'+wdist+';--wdur:'+wdur+'" data-orb-f="'+esc(f.id)+'">'
     +orbAvHTML(f.username,f.id,f.online,f.rank,f.avatar_url)+'<span>'+esc(firstWord(f.username))+'</span></div>';
   }).join('')
   +outerNodes.map(function(a,i){
    var isSel=selObj&&selObj.kind==='new'&&selObj.data.id===a.id;
-   return '<div class="orb-node is-new'+(isSel?' sel':'')+'" style="left:'+outPos[i].x+'%;top:'+outPos[i].y+'%" data-orb-n="'+esc(a.id)+'">'
+   var wdist=Math.round(((i+0.5)*100)/Math.max(1,outerNodes.length))+'%';
+   var wdur=(38+i*4)+'s';
+   return '<div class="orb-node is-new'+(isSel?' sel':'')+'" style="left:'+outPos[i].x+'%;top:'+outPos[i].y+'%;--wl:'+outPos[i].x+'%;--wt:'+outPos[i].y+'%;--wdist:'+wdist+';--wdur:'+wdur+'" data-orb-n="'+esc(a.id)+'">'
     +orbAvHTML(a.username,a.id,!!a.online,a.rank,a.avatar_url)+'<span>NEW · '+esc(firstWord(a.username))+'</span></div>';
   }).join('')
   +tipHTML
@@ -4185,7 +4194,7 @@ function renderFriends(){
     else if(a.rel==='pending_in')btn='<button class="orb-btn lime" data-f-acc="'+esc(a.id)+'" type="button">'+(en?'Accept':'Terima')+'</button>';
     else btn='<button class="orb-btn" data-f-add="'+esc(a.id)+'" type="button">'+(en?'+ Add':'+ Tambah')+'</button>';
     var waveTxt=(a.waved?(en?'Waved':'Disapa'):(en?'Wave':'Sapa'))+(a.waves>0?' · '+a.waves:'');
-    return '<div class="f-row" style="cursor:default">'+orbAvHTML(a.username,a.id,false,a.rank,a.avatar_url)
+    return '<div class="f-row" style="cursor:default">'+orbAvHTML(a.username,a.id,!!a.online,a.rank,a.avatar_url)
      +'<div class="f-mid"><div class="f-r1"><b>'+esc(a.username)+'</b><time>'+esc(relAgo(a.created_at))+'</time></div>'
      +'<div class="f-r2"><p>'+(en?'Joined Trader Watch':'Sertai Trader Watch')+'</p></div></div>'
      +'<div class="f-act"><button class="orb-btn '+(a.waved?'soft':'lime')+'" data-f-wave="'+esc(a.id)+'" type="button">'+esc(waveTxt)+'</button>'+btn+'</div></div>';
@@ -4619,7 +4628,12 @@ function fstSnap(dy,dt){
 
 /* Orbit + Find Traders event handlers */
 $('view-friends').addEventListener('click',function(e){
- var el=e.target.closest?e.target.closest('button,.orb-node,.f-row'):null;if(!el)return;
+ var el=e.target.closest?e.target.closest('button,.orb-node,.f-row,.orb-tip'):null;
+ if(!el){
+  if(FR.sel&&e.target.closest&&e.target.closest('#orbStage')){FR.sel=null;renderFriends()}
+  return;
+ }
+ if(el.classList&&el.classList.contains('orb-tip'))return;
  if(el.id==='orbFindBtn'){openFindSheet();return}
  if(el.dataset.orbF){
   var fid=el.dataset.orbF;

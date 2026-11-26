@@ -995,11 +995,10 @@ def build_friends_overview(uid):
     ranks = rank_map()
     online_ids = presence_online_set()
     day0 = day_start_utc()
-    # Siapa yang pernah dikesan online sejak 12 malam (MYT). Orbit guna ini:
-    # nama kekal sampai tengah malam, esok hilang kalau tak buka app.
-    seen_start = datetime.now(MYT).replace(
-        hour=DAILY_RESET_HOUR_MYT, minute=0, second=0, microsecond=0).timestamp()
-    seen_today_ids = {u for u, ts in _seen.items() if ts >= seen_start}
+    # Siapa yang pernah dikesan online dalam 24 jam terakhir. Orbit guna ini:
+    # nama kekal dalam ruang orbit selama 24 jam bersama dot online/offline.
+    seen_start = time.time() - 86400
+    seen_today_ids = {u for u, ts in _seen.items() if ts >= seen_start} | online_ids
 
     today_joined = sum(1 for u in ordered if (u.get("created_at") or "") >= day0)
     total_members = len(ordered)
