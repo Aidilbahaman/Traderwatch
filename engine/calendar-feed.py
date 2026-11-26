@@ -10,6 +10,7 @@ dikosongkan) supaya dashboard tidak hilang data secara tiba-tiba.
 import json
 import os
 import sys
+import urllib.parse
 import urllib.request
 from datetime import datetime, timezone, timedelta
 from pathlib import Path
@@ -18,10 +19,73 @@ MYT = timezone(timedelta(hours=8))
 OUT = Path("/home/ubuntu/web/Traderwatch-repo/calendar.json")
 CACHE = Path("/home/ubuntu/tw-bot/calendar-cache.json")
 URL = "https://nfs.faireconomy.media/ff_calendar_thisweek.json"
+TV_URL = "https://economic-calendar.tradingview.com/events"
+LOOKAHEAD_DAYS = 21  # 3 minggu kehadapan
+TV_COUNTRIES = "US,EU,GB,JP,AU,CA,NZ,CH"
+TV_CCY = {"US": "USD", "EU": "EUR", "GB": "GBP", "JP": "JPY", "AU": "AUD", "CA": "CAD", "NZ": "NZD", "CH": "CHF"}
 
 
 def log(msg):
     print(f"{datetime.now(timezone.utc).isoformat(timespec='seconds')} {msg}", flush=True)
+
+
+def _fmt_val(v, unit="", scale=None):
+    if v is None or v == "":
+        return ""
+    s = str(v)
+    if s.endswith(".0"):
+        s = s[:-2]
+    suf = str(unit or "")
+    if scale == "K" and not suf.endswith("K"):
+        suf = "K" + suf
+    elif scale == "M" and not suf.endswith("M"):
+        suf = "M" + suf
+    elif scale == "B" and not suf.endswith("B"):
+        suf = "B" + suf
+    return f"{s}{suf}".strip()
+
+
+def fetch_tradingview():
+    now = datetime.now(timezone.utc)
+    end = now + timedelta(days=LOOKAHEAD_DAYS)
+    qs = urllib.parse.urlencode({
+        "from": now.strftime("%Y-%m-%dT%H:%M:%S.000Z"),
+        "to": end.strftime("%Y-%m-%dT%H:%M:%S.000Z"),
+        "countries": TV_COUNTRIES,
+    })
+    req = urllib.request.Request(
+        f"{TV_URL}?{qs}",
+        headers={
+            "User-Agent": "Mozilla/5.0",
+            "Origin": "https://www.tradingview.com",
+            "Referer": "https://www.tradingview.com/",
+        },
+    )
+    with urllib.request.urlopen(req, timeout=25) as r:
+        data = json.loads(r.read().decode("utf-8", "replace"))
+    rows = data.get("result") or []
+    out = []
+    for e in rows:
+        imp = e.get("importance")
+        impact = "High" if imp == 1 else ("Medium" if imp == 0 else "Low")
+        ctry = str(e.get("country") or "").upper()
+        ccy = str(e.get("currency") or TV_CCY.get(ctry) or ctry).upper()
+        unit = e.get("unit") or ""
+        scale = e.get("scale")
+        out.append({
+            "date": e.get("date") or "",
+            "country": ccy,
+            "title": e.get("title") or "",
+            "impact": impact,
+            "forecast": _fmt_val(e.get("forecast"), unit, scale),
+            "previous": _fmt_val(e.get("previous"), unit, scale),
+        })
+    try:
+        CACHE.parent.mkdir(parents=True, exist_ok=True)
+        CACHE.write_text(json.dumps(out))
+    except OSError:
+        pass
+    return out
 
 
 def fetch():
@@ -31,7 +95,11 @@ def fetch():
     if body.lstrip()[:1] not in (b"[", b"{"):
         raise ValueError("respons bukan JSON")
     data = json.loads(body)
-    CACHE.write_bytes(body)
+    try:
+        CACHE.parent.mkdir(parents=True, exist_ok=True)
+        CACHE.write_bytes(body)
+    except OSError:
+        pass
     return data
 
 
@@ -42,15 +110,16 @@ def load_cache():
     return json.loads(CACHE.read_text())
 
 
-def build(raw):
+def build(raw, source="TradingView 21d feed"):
     now = datetime.now(MYT)
+    end = now + timedelta(days=LOOKAHEAD_DAYS)
     events = []
     for x in raw:
         try:
-            when = datetime.fromisoformat(x["date"]).astimezone(MYT)
+            when = datetime.fromisoformat(str(x["date"]).replace("Z", "+00:00")).astimezone(MYT)
         except Exception:
             continue
-        if when <= now:
+        if when <= now or when > end:
             continue
         events.append({
             "iso": when.isoformat(),
@@ -67,27 +136,35 @@ def build(raw):
 
     return {
         "generated_at": now.isoformat(),
-        "source": "ForexFactory weekly feed",
+        "source": source,
+        "lookahead_days": LOOKAHEAD_DAYS,
         "next_high": high[0] if high else None,
         "next_usd_high": usd_high[0] if usd_high else None,
-        "upcoming_high": high[:12],
+        "upcoming_high": high[:24],
+        "upcoming_usd_high": usd_high[:30],
         "counts": {"all_upcoming": len(events), "high": len(high), "usd_high": len(usd_high)},
     }
 
 
 def main():
-    raw, err = None, None
+    raw, source = None, "TradingView 21d feed"
     try:
-        raw = fetch()
-        log(f"feed OK: {len(raw)} events")
+        raw = fetch_tradingview()
+        log(f"tv feed OK: {len(raw)} events (21d)")
     except Exception as ex:
-        err = ex
-        log(f"feed FAIL: {type(ex).__name__}: {ex}")
+        log(f"tv feed FAIL: {type(ex).__name__}: {ex}")
         try:
-            raw = load_cache()
-            log(f"cache OK: {len(raw)} events")
+            raw = fetch()
+            source = "ForexFactory weekly feed"
+            log(f"ff feed OK: {len(raw)} events")
         except Exception as ex2:
-            log(f"cache FAIL: {ex2}")
+            log(f"ff feed FAIL: {type(ex2).__name__}: {ex2}")
+            try:
+                raw = load_cache()
+                source = "cached feed"
+                log(f"cache OK: {len(raw)} events")
+            except Exception as ex3:
+                log(f"cache FAIL: {ex3}")
 
     if raw is None:
         if OUT.exists():
@@ -96,13 +173,15 @@ def main():
         OUT.write_text(json.dumps({
             "generated_at": datetime.now(MYT).isoformat(),
             "source": "unavailable",
-            "next_high": None, "next_usd_high": None, "upcoming_high": [],
+            "lookahead_days": LOOKAHEAD_DAYS,
+            "next_high": None, "next_usd_high": None,
+            "upcoming_high": [], "upcoming_usd_high": [],
             "counts": {"all_upcoming": 0, "high": 0, "usd_high": 0},
         }, indent=1))
         log("tulis calendar.json kosong (tiada cache)")
         return 0
 
-    payload = build(raw)
+    payload = build(raw, source=source)
     tmp = OUT.with_suffix(".tmp")
     tmp.write_text(json.dumps(payload, indent=1, ensure_ascii=False))
     tmp.replace(OUT)

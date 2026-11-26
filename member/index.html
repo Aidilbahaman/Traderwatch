@@ -7130,11 +7130,12 @@ setTimeout(_syncLockedHeights,60);
   return d>0?(d+'d '+pad(h)+'h '+pad(m)+'m '+pad(s)+'s'):(pad(h)+':'+pad(m)+':'+pad(s));
  }
  function buildTicker(){
-  var now=Date.now();
-  var upcoming=usdEvents.filter(function(e){return e._ts>now-300000});
+  var now=Date.now(),maxHorizon=now+21*86400000;
+  var upcoming=usdEvents.filter(function(e){return e._ts>now-300000&&e._ts<=maxHorizon});
   var seg='';
   if(upcoming.length){
-   seg=upcoming.slice(0,3).map(function(e,idx){
+   var shown=upcoming.slice(0,8);
+   seg=shown.map(function(e){
     var meta=[];
     if(e.forecast)meta.push('F: '+e.forecast);
     if(e.previous)meta.push('P: '+e.previous);
@@ -7144,10 +7145,12 @@ setTimeout(_syncLockedHeights,60);
      +'<span class="un-cd" data-un-ts="'+e._ts+'">'+esc(fmtCd(e._ts-now))+'</span>'
      +mHtml+'</span>';
    }).join('');
+   track.style.animationDuration=Math.max(18,shown.length*11)+'s';
   }else{
    var en=(lang==='en');
    seg='<span class="un-seg"><span class="un-dot"></span><span class="un-tag">USD HIGH</span>'
-    +'<span class="un-title">'+(en?'No upcoming USD High-Impact News right now · Live calendar monitoring active':'Tiada berita High-Impact USD dalam masa terdekat · Pemantauan kalendar aktif')+'</span></span>';
+    +'<span class="un-title">'+(en?'No upcoming USD High-Impact News in the next 3 weeks':'Tiada berita High-Impact USD dalam 3 minggu kehadapan')+'</span></span>';
+   track.style.animationDuration='22s';
   }
   track.innerHTML=seg+seg;
  }
@@ -7168,7 +7171,8 @@ setTimeout(_syncLockedHeights,60);
   fetch('/calendar.json?t='+Date.now(),{cache:'no-store'}).then(function(r){return r.ok?r.json():null}).then(function(d){
    if(!d){buildTicker();return}
    var list=[];
-   if(Array.isArray(d.upcoming_high))list=d.upcoming_high.slice();
+   if(Array.isArray(d.upcoming_usd_high)&&d.upcoming_usd_high.length)list=d.upcoming_usd_high.slice();
+   else if(Array.isArray(d.upcoming_high))list=d.upcoming_high.slice();
    if(d.next_usd_high&&!list.some(function(x){return x.iso===d.next_usd_high.iso&&x.title===d.next_usd_high.title}))list.unshift(d.next_usd_high);
    usdEvents=list.filter(function(e){
     return e&&String(e.ccy||'').toUpperCase()==='USD'&&String(e.impact||'').toLowerCase()==='high';
