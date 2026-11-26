@@ -4810,8 +4810,14 @@ function drawTdChart(){
  if(!c.length){tdcx.fillStyle=css('--muted');tdcx.font='700 11px ui-monospace,Menlo,monospace';tdcx.textAlign='center';tdcx.textBaseline='middle';tdcx.fillText(t('loading'),W/2,H/2);return}
  var n=c.length,pR=56,pT=10,pB=10,slot=(W-pR)/n,bw=Math.max(2,slot*.62);
  var st=String(x.status||'open').toLowerCase();
- // Trade closed: tunjuk EXIT price (bukan live quote yang terus bergerak).
- var liveV=(st==='open')?TD.price:(x.exit_price!=null&&isFinite(+x.exit_price)?+x.exit_price:TD.price);
+ // Closed trade: EXIT price di-derive dari r_result (tally utk SEMUA trade history,
+ // auto-resolver dan manual close): exit = entry ± r*|entry-sl|. Kalau r_result
+ // tiada (sepatutnya tak berlaku utk closed), fallback live quote.
+ var liveV=TD.price;
+ if(st!=='open'&&x.r_result!=null&&isFinite(+x.r_result)&&isFinite(+x.entry)&&isFinite(+x.sl)){
+  var rk=+x.r_result,er=Math.abs(+x.entry-+x.sl);
+  liveV=(String(x.side).toUpperCase()==='SELL')?(+x.entry-rk*er):(+x.entry+rk*er);
+ }
  var lo=Math.min.apply(0,c.map(function(k){return k.l})),hi=Math.max.apply(0,c.map(function(k){return k.h}));
  [+x.entry,+x.sl,+x.tp,liveV].forEach(function(v){if(v!=null&&isFinite(v)){lo=Math.min(lo,v);hi=Math.max(hi,v)}});
  var pad=(hi-lo)*.06||1;lo-=pad;hi+=pad;
@@ -4862,9 +4868,14 @@ function syncCloseBox(){
 function drawTdLive(){
  var x=TD.trade;if(!x)return;
  var p=TD.price,el=$('tdPnl'),st=String(x.status||'open').toLowerCase();
+ // Closed trade: tunjuk EXIT price (derive dari r_result), bukan live quote.
+ if(st!=='open'&&x.r_result!=null&&isFinite(+x.r_result)&&isFinite(+x.entry)&&isFinite(+x.sl)){
+  var rk0=+x.r_result,er0=Math.abs(+x.entry-+x.sl);
+  p=(String(x.side||'').toUpperCase()==='SELL')?(+x.entry-rk0*er0):(+x.entry+rk0*er0);
+ }
  var priceEl=$('tdPrice'),prevShown=parseFloat(priceEl.textContent.replace(/[^0-9.\-]/g,''));
  priceEl.textContent=p!=null?tfx(x.pair,p):'—';
- if(p!=null&&isFinite(prevShown)&&p!==prevShown)flashEl(priceEl,p-prevShown);
+ if(st==='open'&&p!=null&&isFinite(prevShown)&&p!==prevShown)flashEl(priceEl,p-prevShown);
  if(st==='open'){
   var e=+x.entry,s=+x.sl;
   if(p==null||!isFinite(e)||!isFinite(s)||e===s){el.className='tdpnl neu';el.innerHTML='';return}
@@ -4885,7 +4896,14 @@ function drawTdLive(){
 }
 function drawTdLevels(){
  var x=TD.trade;if(!x)return;
+ var st=String(x.status||'open').toLowerCase();
+ // Closed trade: semua jarak relatif kepada EXIT price (derive dari r_result),
+ // bukan live quote yang terus bergerak — tally dgn chart EXIT line & final R.
  var p=TD.price;
+ if(st!=='open'&&x.r_result!=null&&isFinite(+x.r_result)&&isFinite(+x.entry)&&isFinite(+x.sl)){
+  var rk=+x.r_result,er=Math.abs(+x.entry-+x.sl);
+  p=(String(x.side).toUpperCase()==='SELL')?(+x.entry-rk*er):(+x.entry+rk*er);
+ }
  function cell(cls,lab,v){
   var d=(p!=null&&isFinite(v))?p-v:null;
   var dt=d==null?'—':(d>0?'+':d<0?'−':'')+tfx(x.pair,Math.abs(d));
@@ -4896,7 +4914,13 @@ function drawTdLevels(){
 function drawTdProg(){
  var x=TD.trade;if(!x)return;
  var sl=+x.sl,tp=+x.tp,pct=null;
- if(TD.price!=null&&isFinite(sl)&&isFinite(tp)&&tp!==sl)pct=Math.max(0,Math.min(100,(TD.price-sl)/(tp-sl)*100));
+ var stp=String(x.status||'open').toLowerCase(),pv=TD.price;
+ // Closed trade: posisi bar = exit price (derive dari r_result).
+ if(stp!=='open'&&x.r_result!=null&&isFinite(+x.r_result)&&isFinite(+x.entry)&&isFinite(sl)){
+  var rk2=+x.r_result,er2=Math.abs(+x.entry-sl);
+  pv=(String(x.side||'').toUpperCase()==='SELL')?(+x.entry-rk2*er2):(+x.entry+rk2*er2);
+ }
+ if(pv!=null&&isFinite(sl)&&isFinite(tp)&&tp!==sl)pct=Math.max(0,Math.min(100,(pv-sl)/(tp-sl)*100));
  $('tdProgPct').textContent=pct==null?'—':Math.round(pct)+'%';
  $('tdProgFill').style.width=(pct==null?0:pct)+'%';
  $('tdProgMark').style.left=(pct==null?0:pct)+'%';
