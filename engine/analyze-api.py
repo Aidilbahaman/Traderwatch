@@ -477,7 +477,7 @@ def fetch_bars_tf(pair, tf):
     return res
 
 
-def run_analysis(pair, tf="M15", tap=None, risk_level="med"):
+def run_analysis(pair, tf="M15", tap=None, risk_level="med", uid=None):
     tf = tf if tf in ANALYSIS_TFS else "M5"
     bars = fetch_bars_tf(pair, tf)
     if len(bars) < TF_MIN_BARS.get(tf, 100):
@@ -732,7 +732,7 @@ class Handler(BaseHTTPRequestHandler):
         if M5.read_status().get("market") == "closed" and pair != "BTCUSD":
             return self._send(409, {"error": "Market closed for this pair — it reopens soon. BTCUSD is available 24/7.", "market_closed": True})
         try:
-            result = run_analysis(pair, tf, tap=tap, risk_level=risk_level)
+            result = run_analysis(pair, tf, tap=tap, risk_level=risk_level, uid=uid)
         except Exception as e:
             log(f"{pair} error {type(e).__name__}: {str(e)[:160]}")
             return self._send(500, {"error": "Analisis gagal buat masa ini. Cuba lagi sebentar."})
