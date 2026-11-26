@@ -785,6 +785,47 @@ html[data-theme="light"] .pcard{background:linear-gradient(145deg,#eaf3e2,var(--
 .pcard .em{margin:3px 0 12px;color:var(--muted);font-size:13px}
 .chip{display:inline-block;background:var(--lime);color:var(--onlime);font-size:10px;font-weight:850;letter-spacing:.1em;padding:5px 12px;border-radius:999px}
 .member{display:block;color:var(--muted);font-size:11px;margin-top:11px}
+/* share weekly: pcard tap affordance + popup (design tokens app, bukan mockup) */
+.pcard{cursor:pointer}
+.pcard:active{transform:scale(.995)}
+.sharechip{position:absolute;top:14px;right:14px;display:flex;align-items:center;gap:5px;background:var(--card2);color:var(--lime);font-size:10px;font-weight:800;letter-spacing:.06em;padding:5px 10px;border-radius:12px;border:1px solid var(--line)}
+.member.sshare{color:var(--lime);font-weight:700;margin-top:3px;opacity:.85}
+#sxbd{position:absolute;inset:0;background:#000a;z-index:56;opacity:1;transition:opacity .25s}
+#sx{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%) scale(.97);z-index:57;width:min(340px,calc(100% - 24px));max-height:calc(100% - 24px);background:var(--card);border:1px solid var(--line);border-radius:24px;padding:14px;display:flex;flex-direction:column;gap:10px;opacity:0;pointer-events:none;transition:opacity .25s,transform .25s;overflow:hidden}
+#sx.open{opacity:1;pointer-events:auto;transform:translate(-50%,-50%) scale(1)}
+.sxhead{display:flex;align-items:center;justify-content:space-between;flex:none}
+.sxhead b{font-size:17px;font-weight:850}
+.sxbtn{width:40px;height:40px;border-radius:20px;border:1px solid var(--line2);background:var(--card2);color:var(--text);font-size:15px;cursor:pointer}
+.sxscroll{overflow-y:auto;flex:1;min-height:0;display:flex;justify-content:center}
+.sprev{width:250px;height:444px;border-radius:16px;overflow:hidden;border:1px solid #3a5a2c;flex:none}
+.scard{width:450px;height:800px;box-sizing:border-box;padding:26px 24px;background:var(--bg);color:var(--text);transform:scale(.556);transform-origin:top left;display:flex;flex-direction:column;gap:16px}
+html[data-theme="light"] .scard{background:#0a100c}
+.schead{display:flex;align-items:center;justify-content:space-between}
+.schead .lft{display:flex;align-items:center;gap:10px}
+.slg{width:34px;height:34px;border-radius:10px;background:var(--lime);display:flex;align-items:center;justify-content:center}
+.slgt{font-size:13px;font-weight:850;letter-spacing:1.5px}
+.swkl{font-size:11px;font-weight:700;letter-spacing:2px;color:var(--muted)}
+.scuser{display:flex;align-items:center;gap:14px}
+.sav{width:54px;height:54px;border-radius:27px;background:var(--lime);color:var(--onlime);font-size:21px;font-weight:850;display:flex;align-items:center;justify-content:center;flex:none}
+.snm{font-size:19px;font-weight:850;max-width:270px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.srk{display:inline-block;margin-top:4px;border:1px solid var(--lime);color:var(--lime);font-size:11px;font-weight:700;letter-spacing:1px;padding:3px 10px;border-radius:12px}
+.scbig{background:var(--card2);border:1px solid #3a5a2c;border-radius:22px;padding:18px 18px 10px}
+.slab{font-size:13px;color:var(--muted);font-weight:600}
+.snet{font-size:64px;font-weight:850;color:var(--lime);line-height:1.05;letter-spacing:-2px;font-variant-numeric:tabular-nums}
+.snet.neg{color:var(--red)}
+.sempty{font-size:13px;color:var(--muted);margin-top:4px}
+.scstats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.scst{background:var(--card2);border:1px solid var(--line);border-radius:16px;padding:13px 6px;text-align:center}
+.scst b{display:block;font-size:22px;font-weight:850;font-variant-numeric:tabular-nums}
+.scst span{font-size:12px;color:var(--muted)}
+.scbadge{display:flex;align-items:center;gap:12px;min-height:48px}
+.scbadge .smd{width:46px;height:46px;border-radius:23px;display:flex;align-items:center;justify-content:center;background:var(--card2);border:2px solid var(--lime);color:var(--lime);flex:none}
+.scbadge .snames{font-size:12px;color:#aab5ad;line-height:1.4;margin-left:4px}
+.scfoot{margin-top:auto;font-size:10.5px;color:var(--muted);text-align:center}
+.sbtn{width:100%;height:50px;border-radius:16px;border:none;background:var(--lime);color:var(--onlime);font-family:inherit;font-size:15px;font-weight:850;flex:none;cursor:pointer}
+.srow{display:flex;justify-content:center;gap:10px;width:100%;flex:none}
+.ac{display:flex;flex-direction:column;align-items:center;gap:5px;background:none;border:none;color:var(--text);font-family:inherit;font-size:11px;font-weight:700;padding:0;width:80px;cursor:pointer}
+.ac i{width:48px;height:48px;border-radius:24px;background:var(--card2);border:1px solid var(--line2);display:flex;align-items:center;justify-content:center;color:var(--lime);font-style:normal}
 .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px}
 .stat{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px 6px;text-align:center}
 .stat b{display:block;font-size:20px;font-weight:850;font-variant-numeric:tabular-nums;letter-spacing:-.04em}
@@ -1871,12 +1912,14 @@ html[data-theme="light"] .star-mood{background:rgba(122,181,46,.10);border-color
 
       <!-- PROFILE -->
       <section class="view hidden" id="view-profile" data-view="profile">
-        <div class="pcard">
+        <div class="pcard" id="pcardShare" role="button" tabindex="0" aria-label="Open share card">
+          <div class="sharechip" aria-hidden="true"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V3M7 8l5-5 5 5M5 13v7h14v-7"/></svg><span>Share</span></div>
           <div class="pavatar" id="pInit">TW</div>
           <h3 id="pName">Ahli TraderWatch</h3>
           <p class="em" id="pEmail">—</p>
           <span class="chip" id="pPlan">FREE</span>
           <span class="member" id="pSince">—</span>
+          <span class="member sshare" id="pShareHint">Tap to share your week</span>
         </div>
         <div class="stats">
           <div class="stat"><b id="s1v">—</b><small id="s1">Analyses made</small></div>
@@ -2047,6 +2090,42 @@ html[data-theme="light"] .star-mood{background:rgba(122,181,46,.10);border-color
 
 
     <div id="toast" role="status" aria-live="polite"></div>
+<!-- share weekly popup: pcard tap -> popup card 9:16 -->
+    <div id="sxbd" class="hidden"></div>
+    <div id="sx" class="hidden" role="dialog" aria-modal="true" aria-labelledby="sxTitle">
+      <div class="sxhead"><b id="sxTitle">Share your week</b><button class="sxbtn" id="sxx" aria-label="Close">✕</button></div>
+      <div class="sxscroll">
+        <div class="sprev"><div class="scard" id="scardRoot">
+          <div class="schead">
+            <div class="lft"><div class="slg"><svg viewBox="-22 -22 44 44" width="20" height="20" aria-hidden="true"><path d="M0-20Q0 0 20 0Q0 0 0 20Q0 0-20 0Q0 0 0-20Z" fill="#0a100c"/></svg></div><div class="slgt">TRADERWATCH</div></div>
+            <div class="swkl">WEEKLY RECAP</div>
+          </div>
+          <div class="scuser">
+            <div class="sav" id="sxAv">TW</div>
+            <div><div class="snm" id="sxName">—</div><div class="srk" id="sxRank">PAPER LEAGUE · S1</div></div>
+          </div>
+          <div class="scbig">
+            <div class="slab" id="sxNetLab">This week's Net R</div>
+            <div class="snet" id="sxNet">0.0R</div>
+            <svg viewBox="0 0 360 110" width="100%" height="110" role="img" aria-label="Equity curve" id="sxCurveWrap"><line x1="0" y1="55" x2="360" y2="55" stroke="#1e2b22" stroke-width="1" id="sxCurveBase"/><polyline id="sxCurve" points="" fill="none" stroke="#b7f36b" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><circle id="sxDot" r="6" fill="#b7f36b" cx="360" cy="55"/></svg>
+            <div class="sempty hidden" id="sxEmpty">No trades this week yet</div>
+          </div>
+          <div class="scstats">
+            <div class="scst"><b id="sxTrades">0</b><span id="sxTradesLab">Trades</span></div>
+            <div class="scst"><b id="sxWin">—</b><span id="sxWinLab">Win rate</span></div>
+            <div class="scst"><b id="sxBest">—</b><span id="sxBestLab">Best trade</span></div>
+          </div>
+          <div class="scbadge" id="sxBadgeRow"></div>
+          <div class="scfoot">Paper trading results. Not financial advice.</div>
+        </div></div>
+      </div>
+      <button class="sbtn" id="sxShare">Share to Story</button>
+      <div class="srow">
+        <button class="ac" id="sxSave"><i><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12M7 11l5 5 5-5M5 20h14"/></svg></i><span id="sxSaveLab">Save image</span></button>
+        <button class="ac" id="sxLink"><i><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M10 14a4 4 0 0 0 6 0l3-3a4 4 0 0 0-6-6l-1 1M14 10a4 4 0 0 0-6 0l-3 3a4 4 0 0 0 6 6l1-1"/></svg></i><span id="sxLinkLab">Copy link</span></button>
+        <button class="ac" id="sxMore"><i><svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg></i><span id="sxMoreLab">More</span></button>
+      </div>
+    </div>
     <div id="floatAna" class="floata hidden" role="button" tabindex="0" aria-live="polite">
       <span class="fstar" id="floatStar" aria-hidden="true"></span><span class="ftxt" id="floatTxt"></span><span class="fx" id="floatX" role="button" aria-label="Cancel analysis">✕</span>
     </div>
@@ -2216,6 +2295,8 @@ var DICT={
   toastOpened:'Paper trade dibuka! Pantau di Liga.',tpHit:'TP!',slHit:'SL!',tpHit:'TP!',slHit:'SL!',pickPair:'Pilih pair untuk analisis AI.',
   leagueErr:'Gagal memuatkan data liga. Cuba lagi.',tradeErr:'Gagal membuka trade. Cuba lagi.',noBalance:'Baki tidak tersedia — cuba lagi.',
   mtfLab:'Alignment multi-TF',mtfAligned:'Searah',mtfMixed:'Bercampur',closeProfit:'Tutup Untung',closeLoss:'Tutup Rugi',closeNote:'Tutup manual — paper trade + posisi MT5 (jika ada)',closeDone:'Trade ditutup.',closeErr:'Gagal menutup trade.',closeMt5Ok:'Trade ditutup — posisi MT5 juga ditutup.',shareLab:'Share result',closeConfirm:'Tutup trade ini sekarang?',closeConfirmMt5:'Tutup trade ini? Posisi MT5 sebenar juga akan ditutup.',shareSaved:'Gambar disimpan 📥',shareErr:'Gagal jana gambar.',
+  sxTitle:'Kongsi minggu anda',sxShare:'Kongsi ke Story',sxSave:'Simpan gambar',sxLink:'Salin pautan',sxMore:'Lagi',sxTapShare:'Ketuk untuk kongsi minggu anda',
+  sxNetLab:'Net R minggu ini',sxTrades:'Trade',sxWin:'Kadar menang',sxBest:'Trade terbaik',sxEmpty:'Tiada trade minggu ini',sxBadgeNone:'Tiada lencana lagi minggu ini',sxLinkCopied:'Pautan disalin 📋',
   orbIdle:'Enjin AI sedia',orbSubIdle:'12 pair dipantau',orbOne:'AI sedang membaca',orbMany:'%n analisis berjalan',orbBy:'oleh',orbNow:'sekarang',orbLiveN:'%n client minta serentak',
   ailTitle:'Pembelajaran AI',ailEmpty:'AI masih belajar — perlukan beberapa trade ditutup dulu sebelum corak dikenal pasti.',ailN:'%n trade',ailWin:'kadar menang',
   aiReqTitle:'Bilangan ahli yang minta analisis pair ini hari ini',aiReqHour:'Permintaan hari ini',tradersTitle:'Bilangan trader berbeza yang ambil pair ini hari ini',traderOne:'trader',traderUnit:'trader',aiRead:'Apa AI baca',aiNarr:'Bagaimana saya fikir',aiInd:'Indikator',aiStruct:'Struktur',aiCtx:'Konteks pasaran',aiVision:'Mod',aiVisionOn:'Vision (imej carta sebenar)',aiVisionOff:'Teks sahaja',wTitle:'Selamat datang!',wSub:'Sediakan app anda sebelum mula.',wNotifT:'Hidupkan notifikasi',wNotifS:'Alert bila trade kena TP/SL & signal baru',wInstallT:'Tambah ke skrin utama',wInstallS:'Buka macam app, penuh skrin',wGoT:'Mula trade',wSkipT:'Langkau dulu',wDone:'Selesai',wTurnOn:'Hidupkan',wAdd:'Tambah',wManual:'Panduan',wWait:'Menunggu…',cineEnterT:'Ketik untuk masuk',cineTag:'Rasai era baru trading AI.',cineCap1:'Pasaran tak pernah tidur.',cineCap2:'Sekarang, ia berfikir.',
@@ -2265,6 +2346,8 @@ var DICT={
   instantNote:'Instant entry — your trade fills at the live market price when you open, not the quoted entry.',
   leagueErr:'Could not load league data. Try again.',tradeErr:'Could not open the trade. Try again.',noBalance:'Balance unavailable — try again.',
   mtfLab:'Multi-TF alignment',mtfAligned:'Aligned',mtfMixed:'Mixed',closeProfit:'Close in Profit',closeLoss:'Close in Loss',closeNote:'Manual close — paper trade + MT5 position (if any)',closeDone:'Trade closed.',closeErr:'Could not close trade.',closeMt5Ok:'Trade closed — MT5 position also closed.',shareLab:'Share result',closeConfirm:'Close this trade now?',closeConfirmMt5:'Close this trade? The real MT5 position will also be closed.',shareSaved:'Image saved 📥',shareErr:'Could not generate image.',
+  sxTitle:'Share your week',sxShare:'Share to Story',sxSave:'Save image',sxLink:'Copy link',sxMore:'More',sxTapShare:'Tap to share your week',
+  sxNetLab:"This week's Net R",sxTrades:'Trades',sxWin:'Win rate',sxBest:'Best trade',sxEmpty:'No trades this week yet',sxBadgeNone:'No badges yet this week',sxLinkCopied:'Link copied 📋',
   orbIdle:'AI engine ready',orbSubIdle:'12 pairs monitored',orbOne:'AI is reading',orbMany:'%n analyses running',orbBy:'by',orbNow:'now',orbLiveN:'%n clients requesting',
   ailTitle:'AI Learning',ailEmpty:'AI is still learning — it needs a few closed trades before patterns can be identified.',ailN:'%n trades',ailWin:'win rate',
   aiReqTitle:'Members who requested this pair today',aiReqHour:'Requests today',tradersTitle:'Distinct traders who took this pair today',traderOne:'trader',traderUnit:'traders',aiRead:'What the AI read',aiNarr:'How I think',aiInd:'Indicators',aiStruct:'Structure',aiCtx:'Market context',aiVision:'Mode',aiVisionOn:'Vision (real chart image)',aiVisionOff:'Text only',wTitle:'Welcome!',wSub:'Two quick steps to get set up.',wNotifT:'Turn on notifications',wNotifS:'Get alerted when a trade hits TP or SL',wInstallT:'Add to home screen',wInstallS:'Full screen, no browser bar',wGoT:'Start trading',wSkipT:'Skip for now',wDone:'Done',wTurnOn:'Turn on',wAdd:'Add',wManual:'Guide',wWait:'Waiting…',cineEnterT:'Tap anywhere to enter',cineTag:'Institutional-grade market intelligence.',cineCap1:'The market never sleeps,',cineCap2:'and now it thinks.',
@@ -2312,6 +2395,8 @@ var DICT={
   instantNote:'即时入场——开仓时按实时市价成交，而非报价入场位。',
   leagueErr:'无法加载联赛数据，请重试。',tradeErr:'开仓失败，请重试。',noBalance:'余额不可用——请重试。',
   mtfLab:'多周期一致性',mtfAligned:'同向',mtfMixed:'分歧',closeProfit:'获利平仓',closeLoss:'亏损平仓',closeNote:'手动平仓 — 模拟交易 + MT5 持仓（如有）',closeDone:'交易已平仓。',closeErr:'平仓失败。',closeMt5Ok:'交易已平仓 — MT5 持仓也已关闭。',shareLab:'分享战绩',closeConfirm:'确定现在平仓？',closeConfirmMt5:'确定平仓？ MT5 持仓也将一并平仓。',shareSaved:'图片已保存 📥',shareErr:'无法生成图片。',
+  sxTitle:'分享本周战绩',sxShare:'分享到 Story',sxSave:'保存图片',sxLink:'复制链接',sxMore:'更多',sxTapShare:'点击分享本周战绩',
+  sxNetLab:'本周净 R',sxTrades:'交易',sxWin:'胜率',sxBest:'最佳交易',sxEmpty:'本周暂无交易',sxBadgeNone:'本周暂无徽章',sxLinkCopied:'链接已复制 📋',
   orbIdle:'AI 引擎就绪',orbSubIdle:'监控 12 个货币对',orbOne:'AI 正在读取',orbMany:'%n 个分析进行中',orbBy:'来自',orbNow:'现在',orbLiveN:'%n 位客户同时请求',
   ailTitle:'AI 学习',ailEmpty:'AI 仍在学习——需要先有几笔已平仓的交易才能识别模式。',ailN:'%n 笔交易',ailWin:'胜率',
   aiReqTitle:'过去一小时内请求此货币对的会员人数',aiReqHour:'今日请求',tradersTitle:'今天采用此货币对的不同交易者',traderOne:'位交易者',traderUnit:'位交易者',aiRead:'AI 读取的内容',aiNarr:'我的思考',aiInd:'指标',aiStruct:'结构',aiCtx:'市场背景',aiVision:'模式',aiVisionOn:'视觉（真实图表图像）',aiVisionOff:'仅文本',wTitle:'欢迎！',wSub:'请先设置您的应用。',wNotifT:'开启通知',wNotifS:'交易触及 TP/SL 及新信号时提醒',wInstallT:'添加到主屏幕',wInstallS:'像应用一样打开，全屏显示',wGoT:'开始交易',wSkipT:'暂时跳过',wDone:'完成',wTurnOn:'开启',wAdd:'添加',wManual:'指南',wWait:'等待中…',cineEnterT:'点击任意处进入',cineTag:'体验 AI 交易新纪元。',cineCap1:'市场从不休眠。',cineCap2:'现在，它会思考。',
@@ -2358,6 +2443,8 @@ var DICT={
   instantNote:'Instant entry — trade diisi pada harga pasar saat dibuka, bukan entry kutipan.',
   leagueErr:'Gagal memuat data liga. Coba lagi.',tradeErr:'Gagal membuka trade. Coba lagi.',noBalance:'Saldo tidak tersedia — coba lagi.',
   mtfLab:'Alignment multi-TF',mtfAligned:'Searah',mtfMixed:'Campuran',closeProfit:'Tutup Untung',closeLoss:'Tutup Rugi',closeNote:'Tutup manual — paper trade + posisi MT5 (jika ada)',closeDone:'Trade ditutup.',closeErr:'Gagal menutup trade.',closeMt5Ok:'Trade ditutup — posisi MT5 juga ditutup.',shareLab:'Bagikan hasil',closeConfirm:'Tutup trade ini sekarang?',closeConfirmMt5:'Tutup trade ini? Posisi MT5 nyata juga akan ditutup.',shareSaved:'Gambar tersimpan 📥',shareErr:'Gagal membuat gambar.',
+  sxTitle:'Bagikan minggu anda',sxShare:'Bagikan ke Story',sxSave:'Simpan gambar',sxLink:'Salin tautan',sxMore:'Lagi',sxTapShare:'Ketuk untuk bagikan minggu anda',
+  sxNetLab:'Net R minggu ini',sxTrades:'Trade',sxWin:'Tingkat menang',sxBest:'Trade terbaik',sxEmpty:'Belum ada trade minggu ini',sxBadgeNone:'Belum ada lencana minggu ini',sxLinkCopied:'Tautan disalin 📋',
   orbIdle:'Mesin AI siap',orbSubIdle:'12 pasangan dipantau',orbOne:'AI sedang membaca',orbMany:'%n analisis berjalan',orbBy:'oleh',orbNow:'sekarang',orbLiveN:'%n klien meminta',
   ailTitle:'Pembelajaran AI',ailEmpty:'AI masih belajar — perlu beberapa trade ditutup dulu sebelum pola dikenali.',ailN:'%n trade',ailWin:'tingkat menang',
   aiReqTitle:'Jumlah anggota yang minta analisis pair ini dalam sejam terakhir',aiReqHour:'Permintaan hari ini',tradersTitle:'Jumlah trader berbeda yang ambil pair ini hari ini',traderOne:'trader',traderUnit:'trader',aiRead:'Yang AI baca',aiNarr:'Cara saya berpikir',aiInd:'Indikator',aiStruct:'Struktur',aiCtx:'Konteks pasar',aiVision:'Mode',aiVisionOn:'Vision (gambar chart asli)',aiVisionOff:'Teks saja',wTitle:'Selamat datang!',wSub:'Siapkan aplikasi Anda sebelum mulai.',wNotifT:'Aktifkan notifikasi',wNotifS:'Notifikasi saat trade kena TP/SL & sinyal baru',wInstallT:'Tambah ke layar utama',wInstallS:'Buka seperti aplikasi, layar penuh',wGoT:'Mulai trading',wSkipT:'Lewati dulu',wDone:'Selesai',wTurnOn:'Aktifkan',wAdd:'Tambah',wManual:'Panduan',wWait:'Menunggu…',cineEnterT:'Ketuk untuk masuk',cineTag:'Rasakan era baru trading AI.',cineCap1:'Pasar tak pernah tidur.',cineCap2:'Sekarang, ia berpikir.',
@@ -2405,6 +2492,8 @@ var DICT={
   instantNote:'உடனடி நுழைவு — திறக்கும்போது நேரடி சந்தை விலையில் நிரப்பப்படும், மேற்கோள் நுழைவு விலையில் அல்ல.',
   leagueErr:'லீக் தரவை ஏற்ற முடியவில்லை. மீண்டும் முயற்சிக்கவும்.',tradeErr:'வர்த்தகத்தைத் தொடங்க முடியவில்லை. மீண்டும் முயற்சிக்கவும்.',noBalance:'இருப்பு கிடைக்கவில்லை — மீண்டும் முயற்சிக்கவும்.',
   mtfLab:'பல-TF ஒருமை',mtfAligned:'ஒரே திசை',mtfMixed:'கலப்பு',closeProfit:'லாபத்தில் மூடு',closeLoss:'நஷ்டத்தில் மூடு',closeNote:'கைமுறை மூடல் — பேப்பர் டிரேட் + MT5 நிலை (ஏதேனும்)',closeDone:'வர்த்தகம் மூடப்பட்டது.',closeErr:'வர்த்தகத்தை மூட முடியவில்லை.',closeMt5Ok:'வர்த்தகம் மூடப்பட்டது — MT5 நிலையும் மூடப்பட்டது.',shareLab:'முடிவைப் பகிர்',closeConfirm:'இந்த வர்த்தகத்தை இப்போது மூடவா?',closeConfirmMt5:'இந்த வர்த்தகத்தை மூடவா? உண்மையான MT5 நிலையும் மூடப்படும்.',shareSaved:'படம் சேமிக்கப்பட்டது 📥',shareErr:'படம் உருவாக்க முடியவில்லை.',
+  sxTitle:'உங்கள் வாரத்தைப் பகிரவும்',sxShare:'Story-ல் பகிரவும்',sxSave:'படத்தைச் சேமிக்கவும்',sxLink:'இணைப்பை நகலெடுக்கவும்',sxMore:'மேலும்',sxTapShare:'உங்கள் வாரத்தைப் பகிர தட்டவும்',
+  sxNetLab:'இந்த வார நிகர R',sxTrades:'வர்த்தகங்கள்',sxWin:'வெற்றி விகிதம்',sxBest:'சிறந்த வர்த்தகம்',sxEmpty:'இந்த வாரம் இன்னும் வர்த்தகம் இல்லை',sxBadgeNone:'இந்த வாரம் இன்னும் பேட்ஜ் இல்லை',sxLinkCopied:'இணைப்பு நகலெடுக்கப்பட்டது 📋',
   orbIdle:'AI இயந்திரம் தயார்',orbSubIdle:'12 ஜோடிகள் கண்காணிப்பில்',orbOne:'AI படிக்கிறது',orbMany:'%n பகுப்பாய்வுகள் இயங்குகின்றன',orbBy:'மூலம்',orbNow:'இப்போது',orbLiveN:'%n வாடிக்கையாளர்கள் கோருகிறார்கள்',
   ailTitle:'AI கற்றல்',ailEmpty:'AI இன்னும் கற்கிறது — வடிவங்களை அடையாளம் காண சில மூடிய வர்த்தகங்கள் தேவை.',ailN:'%n வர்த்தகங்கள்',ailWin:'வெற்றி விகிதம்',
   aiReqTitle:'கடந்த ஒரு மணி நேரத்தில் இந்த ஜோடியைக் கோரிய உறுப்பினர்கள்',aiReqHour:'இன்றைய கோரிக்கைகள்',tradersTitle:'இன்று இந்த ஜோடியை எடுத்த வெவ்வேறு வர்த்தகர்கள்',traderOne:'வர்த்தகர்',traderUnit:'வர்த்தகர்கள்',aiRead:'AI படித்தது',aiNarr:'நான் சிந்திப்பது',aiInd:'குறிகாட்டிகள்',aiStruct:'கட்டமைப்பு',aiCtx:'சந்தை சூழல்',aiVision:'முறை',aiVisionOn:'படம் (உண்மையான சார்ட்)',aiVisionOff:'உரை மட்டும்',wTitle:'வரவேற்பு!',wSub:'தொடங்குவதற்கு முன் உங்கள் ஆப்பை அமைக்கவும்.',wNotifT:'அறிவிப்புகளை இயக்கு',wNotifS:'வர்த்தகம் TP/SL அடையும் போது & புதிய சிக்னல்களுக்கு எச்சரிக்கை',wInstallT:'முகப்புத் திரையில் சேர்',wInstallS:'ஆப் போல திற, முழுத் திரை',wGoT:'வர்த்தகம் தொடங்கு',wSkipT:'இப்போது தவிர்',wDone:'முடிந்தது',wTurnOn:'இயக்கு',wAdd:'சேர்',wManual:'வழிகாட்டி',wWait:'காத்திருக்கிறது…',cineEnterT:'எங்கும் தட்டி உள்நுழைக',cineTag:'AI வர்த்தகத்தின் புதிய சகாப்தம்.',cineCap1:'சந்தை ஒருபோதும் உறங்குவதில்லை.',cineCap2:'இப்போது, அது சிந்திக்கிறது.',
@@ -5003,6 +5092,167 @@ function applyManualClose(kind){
 $('tdCloseProfit').onclick=function(){applyManualClose('profit')};
 $('tdCloseLoss').onclick=function(){applyManualClose('loss')};
 document.addEventListener('visibilitychange',function(){if(TD.trade&&tdVisible()){pollQuote();loadTdCandles()}});
+
+/* ---------------- share weekly: pcard tap -> popup + PNG 1080x1920 ---------------- */
+var SXPNG=null;
+function weekStats(){
+ /* Net R 7 hari dari LG.trades (r_result + closed_at). Semua kiraan client-side. */
+ var now=Date.now(),cut=now-7*864e5;
+ var wk=(LG.trades||[]).filter(function(x){
+  return String(x.status||'').toLowerCase()!=='open'&&x.r_result!=null&&x.closed_at&&new Date(x.closed_at).getTime()>=cut;
+ }).sort(function(a,b){return String(a.closed_at).localeCompare(String(b.closed_at))});
+ var net=0,pts=[],best=null,wins=0;
+ wk.forEach(function(x){var r=+x.r_result||0;net+=r;if(best===null||r>best)best=r;if(r>0)wins++;
+  pts.push({r:net,ts:new Date(x.closed_at).getTime()})});
+ var trades=wk.length,winRate=trades?Math.round(wins/trades*100):null;
+ return {trades:trades,net:net,winRate:winRate,best:best,pts:pts};
+}
+function sxCurvePath(pts,W,H,pad){
+ if(!pts||pts.length<2)return null;
+ var xs=pts.map(function(p,i){return pad+i*(W-2*pad)/(pts.length-1)});
+ var ys=pts.map(function(p){return p.r});
+ var lo=Math.min.apply(0,ys),hi=Math.max.apply(0,ys);if(hi===lo)hi=lo+1;
+ return xs.map(function(x,i){return x.toFixed(1)+','+(H-pad-(ys[i]-lo)/(hi-lo)*(H-2*pad)).toFixed(1)}).join(' ');
+}
+function openShareCard(){
+ if(!ME)return toast(t('closeErr')||'Sign in first');
+ var st=weekStats();
+ $('sxAv').textContent=initials(ME.dispName||'TW');
+ $('sxName').textContent=ME.dispName||'Ahli';
+ var rank=(MYPERF&&MYPERF.rank!=null)?('RANK #'+MYPERF.rank+' · S1'):'PAPER LEAGUE · S1';
+ $('sxRank').textContent=rank;
+ var net=$('sxNet');net.textContent=(st.net>0?'+':st.net<0?'−':'')+Math.abs(st.net).toFixed(2)+'R';
+ net.className='snet'+(st.net<0?' neg':'');
+ $('sxNetLab').textContent=t('sxNetLab');
+ $('sxEmpty').classList.toggle('hidden',st.trades>0);
+ $('sxTrades').textContent=st.trades;$('sxTradesLab').textContent=t('sxTrades');
+ $('sxWin').textContent=st.winRate==null?'—':st.winRate+'%';$('sxWinLab').textContent=t('sxWin');
+ var best=$('sxBest');
+ best.textContent=st.best==null?'—':(st.best>0?'+':'')+st.best.toFixed(2)+'R';
+ best.style.color=(st.best!=null&&st.best>0)?'var(--lime)':'';
+ best.className=st.best!=null&&st.best<0?'neg':'';
+ $('sxBestLab').textContent=t('sxBest');
+ var cr=$('sxCurve'),dot=$('sxDot');
+ if(st.pts.length>=2){var path=sxCurvePath(st.pts,360,110,14);cr.setAttribute('points',path);
+  var last=path.split(' ').pop().split(',');dot.setAttribute('cx',last[0]);dot.setAttribute('cy',last[1]);
+  cr.setAttribute('stroke',st.net<0?'#ff777d':'#b7f36b');dot.setAttribute('fill',st.net<0?'#ff777d':'#b7f36b');
+  cr.style.display='';dot.style.display='';
+ }else{cr.style.display='none';dot.style.display='none'}
+ /* badges: reuse kriteria drawBadges (sedia ada), max 3 yang unlocked */
+ var me=LG.me,lowRisk=(LG.trades||[]).filter(function(x){return +x.risk_pct<=1}).length;
+ var total=me?((+me.trades_closed||0)+(+me.trades_open||0)):0;
+ var cands=[
+  {got:(me&&+me.analyses_count||0)>=50,nm:'50 Analyses'},
+  {got:total>=50,nm:'50 Paper Trades'},
+  {got:total>=1,nm:'First Paper Trade'},
+  {got:lowRisk>=10,nm:'Risk Shield'},
+  {got:greenStreak()>=7,nm:'7-Win Streak'}
+ ].filter(function(b){return b.got}).slice(0,3);
+ var row=$('sxBadgeRow');
+ if(cands.length){row.innerHTML=cands.map(function(b,i){return '<div class="smd">'+SBIC[i%SBIC.length]+'</div>'}).join('')+
+  '<div class="snames">'+esc(cands.map(function(b){return b.nm}).join(' · '))+'</div>'}
+ else row.innerHTML='<div class="snames" style="color:var(--muted)">'+esc(t('sxBadgeNone'))+'</div>';
+ $('sxbd').classList.remove('hidden');
+ $('sx').classList.remove('hidden');$('sx').classList.add('open');
+}
+function closeShareCard(){$('sx').classList.remove('open');$('sxbd').classList.add('hidden');$('sx').classList.add('hidden');SXPNG=null}
+var SBIC=[
+ '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/></svg>',
+ '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1"/></svg>',
+ '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l2.4 5.6L20 9l-4 4 1 6-5-3-5 3 1-6-4-4 5.6-.4Z"/></svg>'];
+function renderWeeklyPng(){
+ /* Kad 1080x1920 (9:16) — padanan visual popup, guna data sebenar. */
+ var st=weekStats(),c=document.createElement('canvas');c.width=1080;c.height=1920;
+ var g=c.getContext('2d');
+ g.fillStyle='#0a100c';g.fillRect(0,0,1080,1920);
+ g.strokeStyle='rgba(183,243,107,.4)';g.lineWidth=3;roundRect(g,8,8,1064,1904,40);g.stroke();
+ var pad=84;
+ /* header: logo petal sebenar */
+ g.save();g.translate(pad,pad);g.scale(2.4,2.4);
+ g.fillStyle='#b7f36b';roundRect(g,-14,-14,28,28,8);g.fill();
+ g.fillStyle='#0a100c';g.beginPath();g.moveTo(0,-20);g.quadraticCurveTo(0,0,20,0);g.quadraticCurveTo(0,0,0,20);g.quadraticCurveTo(0,0,-20,0);g.quadraticCurveTo(0,0,0,-20);g.fill();g.restore();
+ g.fillStyle='#eef3ee';g.font='800 34px -apple-system,Inter,sans-serif';g.textBaseline='middle';g.fillText('TRADERWATCH',pad+80,pad+18);
+ g.fillStyle='#8f9c93';g.font='700 24px -apple-system,Inter,sans-serif';g.textAlign='right';
+ g.fillText('WEEKLY RECAP',1080-pad,pad+18);g.textAlign='left';
+ /* user row */
+ var uy=pad+120;
+ g.fillStyle='#b7f36b';g.beginPath();g.arc(pad+27,uy,27,0,7);g.fill();
+ g.fillStyle='#0a100c';g.font='800 26px -apple-system,Inter,sans-serif';g.textAlign='center';g.fillText(initials(ME?ME.dispName||'TW':'TW'),pad+27,uy+1);g.textAlign='left';
+ g.fillStyle='#eef3ee';g.font='800 42px -apple-system,Inter,sans-serif';g.fillText((ME?ME.dispName||'Ahli':'Ahli').slice(0,26),pad+72,uy-4);
+ var rank=(MYPERF&&MYPERF.rank!=null)?('RANK #'+MYPERF.rank+' · SEASON 1'):'PAPER LEAGUE · SEASON 1';
+ g.strokeStyle='#b7f36b';g.lineWidth=2;roundRect(g,pad+72,uy+18,g.measureText(rank).width+36,44,18);g.stroke();
+ g.fillStyle='#b7f36b';g.font='700 22px -apple-system,Inter,sans-serif';g.fillText(rank,pad+90,uy+41);
+ /* Net R panel */
+ var py=uy+120,ph=560;
+ g.fillStyle='#111a14';roundRect(g,pad,py,1080-2*pad,ph,44);g.fill();
+ g.strokeStyle='#3a5a2c';g.lineWidth=2;roundRect(g,pad,py,1080-2*pad,ph,44);g.stroke();
+ g.fillStyle='#8f9c93';g.font='600 30px -apple-system,Inter,sans-serif';g.fillText(t('sxNetLab'),pad+44,py+56);
+ var netTxt=(st.net>0?'+':st.net<0?'−':'')+Math.abs(st.net).toFixed(2)+'R';
+ g.fillStyle=st.net<0?'#ff777d':'#b7f36b';g.font='850 150px -apple-system,Inter,sans-serif';g.fillText(netTxt,pad+40,py+210);
+ /* equity curve */
+ var cy0=py+ph-120,ch=280,cx0=pad+44,cw=1080-2*pad-88;
+ g.strokeStyle='#1e2b22';g.lineWidth=2;g.beginPath();g.moveTo(cx0,cy0+60);g.lineTo(cx0+cw,cy0+60);g.stroke();
+ if(st.pts.length>=2){
+  var path=sxCurvePath(st.pts,cw,ch,20).split(' ').map(function(s){var p=s.split(',');return [cx0+ +p[0],cy0-40+ +p[1]]});
+  g.strokeStyle=st.net<0?'#ff777d':'#b7f36b';g.lineWidth=8;g.lineJoin='round';g.lineCap='round';g.beginPath();
+  path.forEach(function(p,i){i?g.lineTo(p[0],p[1]):g.moveTo(p[0],p[1])});g.stroke();
+  var lp=path[path.length-1];g.fillStyle=st.net<0?'#ff777d':'#b7f36b';g.beginPath();g.arc(lp[0],lp[1],12,0,7);g.fill();
+ }else{
+  g.strokeStyle='#b7f36b';g.lineWidth=8;g.lineCap='round';g.beginPath();g.moveTo(cx0,cy0);g.lineTo(cx0+cw,cy0);g.stroke();
+  g.fillStyle='#8f9c93';g.font='600 30px -apple-system,Inter,sans-serif';g.fillText(t('sxEmpty'),cx0,cy0+70);
+ }
+ /* 3 stats */
+ var sy=py+ph+60,sw=(1080-2*pad-2*24)/3;
+ [[''+st.trades,t('sxTrades')],[st.winRate==null?'—':st.winRate+'%',t('sxWin')],
+  [st.best==null?'—':(st.best>0?'+':'')+st.best.toFixed(2)+'R',t('sxBest')]].forEach(function(s,i){
+  var x=pad+i*(sw+24);
+  g.fillStyle='#111a14';roundRect(g,x,sy,sw,180,28);g.fill();
+  g.strokeStyle='#1e2b22';roundRect(g,x,sy,sw,180,28);g.stroke();
+  g.fillStyle='#eef3ee';g.font='850 56px -apple-system,Inter,sans-serif';g.textAlign='center';g.fillText(s[0],x+sw/2,sy+76);
+  g.fillStyle='#8f9c93';g.font='600 26px -apple-system,Inter,sans-serif';g.fillText(s[1],x+sw/2,sy+132);g.textAlign='left';
+ });
+ /* footer disclaimer */
+ g.fillStyle='#8f9c93';g.font='500 26px -apple-system,Inter,sans-serif';g.textAlign='center';
+ g.fillText('Paper trading results. Not financial advice.',540,1920-70);g.textAlign='left';
+ return c;
+}
+function sxSharePng(){
+ try{
+  var c=renderWeeklyPng();
+  c.toBlob(function(blob){
+   if(!blob){toast(t('shareErr'));return}
+   var file=new File([blob],'traderwatch-weekly.png',{type:'image/png'});
+   if(navigator.canShare&&navigator.canShare({files:[file]})){
+    navigator.share({files:[file],title:'TraderWatch Weekly Recap'}).catch(function(){});
+   }else{
+    var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=file.name;a.click();
+    setTimeout(function(){URL.revokeObjectURL(a.href)},2000);
+    toast(t('shareSaved'));
+   }
+  },'image/png');
+ }catch(e){toast(t('shareErr'))}
+}
+function sxSavePng(){
+ try{
+  var c=renderWeeklyPng();
+  c.toBlob(function(blob){
+   if(!blob){toast(t('shareErr'));return}
+   var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='traderwatch-weekly.png';a.click();
+   setTimeout(function(){URL.revokeObjectURL(a.href)},2000);
+   toast(t('shareSaved'));
+  },'image/png');
+ }catch(e){toast(t('shareErr'))}
+}
+function sxCopyLink(){
+ var url=location.origin+location.pathname+'?ref='+(ME?ME.id.slice(0,8):'');
+ if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(url).then(function(){toast(t('sxLinkCopied'))}).catch(function(){toast(t('sxLinkCopied'))})}
+ else{var ta=document.createElement('textarea');ta.value=url;document.body.appendChild(ta);ta.select();try{document.execCommand('copy');toast(t('sxLinkCopied'))}catch(e){}document.body.removeChild(ta)}
+}
+$('pcardShare').onclick=openShareCard;
+$('pcardShare').onkeydown=function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();openShareCard()}};
+$('sxx').onclick=closeShareCard;$('sxbd').onclick=closeShareCard;
+$('sxShare').onclick=sxSharePng;$('sxMore').onclick=sxSharePng;
+$('sxSave').onclick=sxSavePng;$('sxLink').onclick=sxCopyLink;
 
 /* ---------------- profile (Supabase REST sebenar) ---------------- */
 var profileLoaded=false,ME=null,PLAN='free',MYPERF=null;
