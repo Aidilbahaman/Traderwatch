@@ -178,7 +178,9 @@ html[data-theme="light"] .ic{background:#e6efd9;border-color:#c9dbb4}
 .online i{width:7px;height:7px;border-radius:50%;background:var(--lime);box-shadow:0 0 8px var(--lime)}
 .msgs{display:flex;flex-direction:column;gap:12px}
 .msg{display:flex;gap:10px;animation:up .4s both}
-.msg .av{width:34px;height:34px;flex:none;border-radius:12px;display:grid;place-items:center;font-size:11px;font-weight:850;color:#10150b}
+.msg .av{width:34px;height:34px;flex:none;border-radius:12px;display:grid;place-items:center;font-size:11px;font-weight:850;color:#10150b;overflow:hidden}
+.msg .av img,.lrow .av img{width:100%;height:100%;object-fit:cover;display:block;border-radius:inherit}
+.orb-av img{width:100%;height:100%;object-fit:cover;display:block;border-radius:50%}
 .msg .body{background:var(--card);border:1px solid var(--line);border-radius:4px 16px 16px 16px;padding:10px 13px;max-width:calc(100% - 44px)}
 .msg .meta{display:flex;align-items:baseline;gap:8px;margin-bottom:3px}
 .msg .meta b{font-size:13px;font-weight:800}
@@ -676,7 +678,7 @@ html[data-theme="light"] .season{background:linear-gradient(135deg,#eaf5db,var(-
 .lrow.me{background:#b7f36b12;border-color:#b7f36b55}
 html[data-theme="light"] .lrow.me{background:#eaf5db;border-color:#9cc46f}
 .lrow .rk{width:26px;flex:none;display:grid;place-items:center;font-weight:850;font-variant-numeric:tabular-nums;color:var(--muted);font-size:13px}
-.lrow .av{width:34px;height:34px;flex:none;border-radius:12px;display:grid;place-items:center;font-size:11px;font-weight:850;color:#10150b}
+.lrow .av{width:34px;height:34px;flex:none;border-radius:12px;display:grid;place-items:center;font-size:11px;font-weight:850;color:#10150b;overflow:hidden}
 .lrow .who{min-width:0;flex:1}
 .lrow .nm{font-weight:750;font-size:13.5px;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
 .lbadge{font-size:8.5px;font-weight:800;letter-spacing:.04em;background:var(--card2);border:1px solid var(--line);color:var(--muted);padding:1.5px 7px;border-radius:999px;white-space:nowrap}
@@ -1970,6 +1972,7 @@ html[data-theme="light"] .star-mood{background:rgba(122,181,46,.10);border-color
             <div class="aihub-tx">
               <div class="chip idle" id="orbChip"><span class="p"></span><span id="orbChipTx">Enjin AI sedia</span></div>
               <div class="aihub-sub" id="orbSub"></div>
+              <div class="aihub-sub scans" id="orbScans" hidden></div>
             </div>
           </div>
           <div id="aiLearnCard" hidden></div>
@@ -3605,6 +3608,12 @@ function rxHtml(m){
  }).join('');
  return '<div class="rxrow">'+chips+'<button class="rxadd" data-id="'+m.id+'" type="button" aria-label="React">＋</button></div>';
 }
+function avInnerHtml(name,url,iniFn){
+ var init=(iniFn||initials)(name||'TW');
+ var u=String(url||'').trim();
+ if(!u)return esc(init);
+ return '<img src="'+esc(u)+'" alt="" data-ini="'+esc(init)+'" loading="lazy" decoding="async" onerror="this.replaceWith(document.createTextNode(this.dataset.ini||\'\'))">';
+}
 function msgHtml(m,me){
  var own=(m.own===true),isMe=own||(m.own==null&&me&&m.username===me),isSig=m.kind==='signal'&&m.payload&&m.payload.pair;
  var rk=m.rank?'<span class="rk r'+m.rank+'">🏆 #'+m.rank+' '+esc(tx('League','Liga'))+'</span>':'';
@@ -3617,7 +3626,8 @@ function msgHtml(m,me){
  var inner=isGif&&gifU
   ?'<img class="chat-gif" src="'+esc(gifU)+'" alt="'+esc(m.payload.title||'GIF')+'" width="'+(Number(m.payload.w)||240)+'" height="'+(Number(m.payload.h)||240)+'" loading="lazy">'
   :'<p>'+esc(txt)+'</p>';
- return '<div class="msg'+(isMe?' me':'')+'" data-id="'+m.id+'"'+(own?' data-own="1"':'')+'><div class="av" style="background:'+avCol(m.username)+'">'+esc(initials(m.username))+'</div><div class="body'+((isSig||isGif)?' wide':'')+'"><div class="meta"><b>'+esc(m.username)+'</b>'+rk+rt+'<time>'+esc(myTm(m.created_at))+'</time>'+ed+opt+'</div>'+inner+(isSig?sigCardHtml(m.payload,m.id):'')+rxHtml(m)+'</div></div>';
+ var avUrl=m.avatar_url||(isMe?myAvatarUrl():'');
+ return '<div class="msg'+(isMe?' me':'')+'" data-id="'+m.id+'"'+(own?' data-own="1"':'')+'><div class="av" style="background:'+avCol(m.username)+'">'+avInnerHtml(m.username,avUrl)+'</div><div class="body'+((isSig||isGif)?' wide':'')+'"><div class="meta"><b>'+esc(m.username)+'</b>'+rk+rt+'<time>'+esc(myTm(m.created_at))+'</time>'+ed+opt+'</div>'+inner+(isSig?sigCardHtml(m.payload,m.id):'')+rxHtml(m)+'</div></div>';
 }
 function drawMsgs(){
  if(COM_EDIT&&!findComMsg(COM_EDIT.id))cancelEdit();
@@ -3964,8 +3974,8 @@ function orbIni(name){
  if(parts.length>=2)return (parts[0][0]+parts[1][0]).toUpperCase();
  return String(parts[0]||'?').slice(0,2).toUpperCase();
 }
-function orbAvHTML(name,id,online,rank){
- return '<div class="orb-av" style="background:'+orbBg(id||name)+'">'+esc(orbIni(name))
+function orbAvHTML(name,id,online,rank,avatarUrl){
+ return '<div class="orb-av" style="background:'+orbBg(id||name)+'">'+avInnerHtml(name,avatarUrl,orbIni)
   +(online?'<span class="on-d"></span>':'')
   +(rank?'<span class="rk-p">#'+rank+'</span>':'')+'</div>';
 }
@@ -4049,12 +4059,12 @@ function renderFriends(){
   +innerNodes.map(function(f,i){
    var isSel=selObj&&selObj.kind==='friend'&&selObj.data.id===f.id;
    return '<div class="orb-node'+(isSel?' sel':'')+'" style="left:'+inPos[i].x+'%;top:'+inPos[i].y+'%" data-orb-f="'+esc(f.id)+'">'
-    +orbAvHTML(f.username,f.id,f.online,f.rank)+'<span>'+esc(firstWord(f.username))+'</span></div>';
+    +orbAvHTML(f.username,f.id,f.online,f.rank,f.avatar_url)+'<span>'+esc(firstWord(f.username))+'</span></div>';
   }).join('')
   +outerNodes.map(function(a,i){
    var isSel=selObj&&selObj.kind==='new'&&selObj.data.id===a.id;
    return '<div class="orb-node is-new'+(isSel?' sel':'')+'" style="left:'+outPos[i].x+'%;top:'+outPos[i].y+'%" data-orb-n="'+esc(a.id)+'">'
-    +orbAvHTML(a.username,a.id,!!a.online,a.rank)+'<span>NEW · '+esc(firstWord(a.username))+'</span></div>';
+    +orbAvHTML(a.username,a.id,!!a.online,a.rank,a.avatar_url)+'<span>NEW · '+esc(firstWord(a.username))+'</span></div>';
   }).join('')
   +tipHTML
   +'<button class="orb-minipill" id="orbMini" type="button" aria-label="'+(en?'Expand orbit':'Besarkan orbit')+'">'
@@ -4088,7 +4098,7 @@ function renderFriends(){
    body.innerHTML='<div class="f-list">'+FR.friends.map(function(f){
     var lastTxt=f.last_msg?(f.last_from_me?(en?'You: ':'Anda: ')+f.last_msg:f.last_msg):(en?'Friends — tap to start chatting':'Rakan — tap untuk mula berbual');
     return '<div class="f-row'+(f.unread?' unread':'')+'" data-f-open="'+esc(f.id)+'">'
-     +orbAvHTML(f.username,f.id,f.online,f.rank)
+     +orbAvHTML(f.username,f.id,f.online,f.rank,f.avatar_url)
      +'<div class="f-mid"><div class="f-r1"><b>'+esc(f.username)+'</b><time>'+esc(relAgo(f.last_at))+'</time></div>'
      +'<div class="f-r2"><p>'+esc(lastTxt)+'</p>'+(f.unread?'<span class="f-udot">'+f.unread+'</span>':'')+'</div></div></div>';
    }).join('')+'</div>';
@@ -4098,7 +4108,7 @@ function renderFriends(){
    body.innerHTML='<div class="empty">'+(en?'No pending friend requests right now.':'Tiada permintaan rakan buat masa ini.')+'</div>';
   }else{
    body.innerHTML='<div class="f-list">'+FR.requests.map(function(r){
-    return '<div class="f-row" style="cursor:default">'+orbAvHTML(r.username,r.id,false,r.rank)
+    return '<div class="f-row" style="cursor:default">'+orbAvHTML(r.username,r.id,false,r.rank,r.avatar_url)
      +'<div class="f-mid"><div class="f-r1"><b>'+esc(r.username)+'</b><time>'+esc(relAgo(r.created_at))+'</time></div>'
      +'<div class="f-r2"><p>'+(en?'Wants to chat privately with you':'Ingin berhubung secara peribadi')+'</p></div></div>'
      +'<div class="f-act"><button class="orb-btn lime" data-f-acc="'+esc(r.id)+'" type="button">'+(en?'Accept':'Terima')+'</button>'
@@ -4116,7 +4126,7 @@ function renderFriends(){
     else if(a.rel==='pending_in')btn='<button class="orb-btn lime" data-f-acc="'+esc(a.id)+'" type="button">'+(en?'Accept':'Terima')+'</button>';
     else btn='<button class="orb-btn" data-f-add="'+esc(a.id)+'" type="button">'+(en?'+ Add':'+ Tambah')+'</button>';
     var waveTxt=(a.waved?(en?'Waved':'Disapa'):(en?'Wave':'Sapa'))+(a.waves>0?' · '+a.waves:'');
-    return '<div class="f-row" style="cursor:default">'+orbAvHTML(a.username,a.id,false,a.rank)
+    return '<div class="f-row" style="cursor:default">'+orbAvHTML(a.username,a.id,false,a.rank,a.avatar_url)
      +'<div class="f-mid"><div class="f-r1"><b>'+esc(a.username)+'</b><time>'+esc(relAgo(a.created_at))+'</time></div>'
      +'<div class="f-r2"><p>'+(en?'Joined Trader Watch':'Sertai Trader Watch')+'</p></div></div>'
      +'<div class="f-act"><button class="orb-btn '+(a.waved?'soft':'lime')+'" data-f-wave="'+esc(a.id)+'" type="button">'+esc(waveTxt)+'</button>'+btn+'</div></div>';
@@ -4162,7 +4172,7 @@ function loadFriends(silent){
 function openDM(fid){
  var f=FR.friends.filter(function(x){return x.id===fid})[0]||{id:fid,username:'Trader',online:false,rank:null};
  FR.dmFriend=f;FR.dmMsgs=[];FR.dmInit=false;FR.dmLastId=null;setDmReply(null);
- $('dmAv').textContent=orbIni(f.username);
+ $('dmAv').innerHTML=avInnerHtml(f.username,f.avatar_url,orbIni);
  $('dmAv').style.background=orbBg(f.id);
  $('dmName').textContent=f.username;
  $('dmSub').className=f.online?'on':'';
@@ -4650,7 +4660,7 @@ $('fFindInp').addEventListener('input',function(){
     else if(u.rel==='pending_out')act='<button class="orb-btn" disabled type="button">'+(en?'Sent':'Dihantar')+'</button>';
     else if(u.rel==='pending_in')act='<button class="orb-btn lime" data-s-acc="'+esc(u.id)+'" type="button">'+(en?'Accept':'Terima')+'</button>';
     else act='<button class="orb-btn lime" data-s-add="'+esc(u.id)+'" type="button">'+(en?'+ Add':'+ Tambah')+'</button>';
-    return '<div class="f-row" style="cursor:default">'+orbAvHTML(u.username,u.id,false,u.rank)
+    return '<div class="f-row" style="cursor:default">'+orbAvHTML(u.username,u.id,false,u.rank,u.avatar_url)
      +'<div class="f-mid"><div class="f-r1"><b>'+esc(u.username)+'</b></div></div><div class="f-act">'+act+'</div></div>';
    }).join('')+'</div>';
   });
@@ -4827,9 +4837,10 @@ function drawLb(){
   else if(metric==='cons'){val=wrTxt(x.win_rate);cls='neu';sub=money(bal)+' · '+n+' '+unit}
   else{val=wrTxt(x.win_rate);cls='neu';sub=money(bal)+' · '+n+' '+unit}
   var flame=(x.is_me&&tpStreak()>=3)?'<span class="fl" aria-hidden="true">🔥</span>':'';
+  var lbAv=x.avatar_url||(x.is_me?myAvatarUrl():'');
   return '<div class="lrow'+(x.is_me?' me':'')+(rank<=3?' g'+rank:'')+'" style="animation-delay:'+(i*30)+'ms">'+
    '<span class="rk">'+rk+'</span>'+
-   '<span class="av" style="background:'+avCol(String(x.username||'?'))+'">'+esc(initials(x.username))+'</span>'+
+   '<span class="av" style="background:'+avCol(String(x.username||'?'))+'">'+avInnerHtml(x.username,lbAv)+'</span>'+
    '<span class="who"><span class="nm">'+esc(x.username)+(x.is_me?'<span class="lbadge">'+esc(t('youName'))+'</span>':'')+flame+'</span>'+
    '<span class="lbal" title="'+esc(t('balanceLab'))+'">'+esc(money(bal))+'<i class="'+gcls+'">'+esc(gtxt)+'</i></span>'+
    '<span class="lsub2">'+esc(sub)+'</span></span>'+
@@ -4940,6 +4951,7 @@ function orbSet(phase,chipTxt,subTxt){
 }
 function loadAiLive(){
  buildOrb();
+ loadScanCount();
  apiFetch('/api/analyze/live').then(function(r){
   if(!r.ok||!r.data)return orbSet('idle',t('orbIdle'),'');
   var live=r.data.live||[],n=live.length;
@@ -4958,8 +4970,24 @@ function orbStartPoll(){
  if(ORB.timer)return;
  ORB.timer=setInterval(function(){
   if(document.visibilityState&&document.visibilityState!=='visible')return;
-  if(current==='liga'&&lsub==='lb')loadAiLive();
+  if(current==='liga'&&lsub==='lb'){loadAiLive();loadScanCount()}
  },8000);
+}
+/* Scan per user last 24h — bawah AI Engine Ready orb */
+var SCAN_TTL=60000,SCAN_AT=0;
+function loadScanCount(){
+ var el=$('orbScans');if(!el)return;
+ var now=Date.now();
+ if(now-SCAN_AT<SCAN_TTL&&el.dataset.done==='1')return;
+ SCAN_AT=now;
+ apiFetch('/api/analyze/scans-24h').then(function(r){
+  if(!r.ok||!r.data)return;
+  var users=(r.data&&r.data.users)||[],total=(r.data&&r.data.total)||0;
+  var lab=users.map(function(u){return u.username+' ×'+u.scans}).slice(0,3).join(' · ');
+  if(!users.length){el.hidden=true;el.dataset.done='1';return}
+  el.textContent=(lang==='en'?('Scans 24h: '+total):('Imbasan 24j: '+total))+(lab?' · '+lab:'');
+  el.hidden=false;el.dataset.done='1';
+ }).catch(function(){el.hidden=true});
 }
 orbStartPoll();
 if(typeof window!=='undefined'){window.__orbSet=orbSet;window.__orbLive=loadAiLive;}
@@ -6258,6 +6286,14 @@ function _setLocalAvatar(url){
  ME.user_metadata.avatar_url=url||'';
  try{_sxAvatarCache={}}catch(e){}
  renderProfile();
+ if(Array.isArray(MSGS)&&MSGS.length){
+  MSGS.forEach(function(m){if(m.own)m.avatar_url=url||''});
+  drawMsgs();
+ }
+ if(LG&&Array.isArray(LG.board)&&LG.board.length){
+  LG.board.forEach(function(x){if(x.is_me)x.avatar_url=url||''});
+  drawLb();
+ }
 }
 function uploadAvatarFile(file){
  if(!file||_avBusy)return;

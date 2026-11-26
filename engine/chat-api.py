@@ -95,6 +95,17 @@ _last_avatar = {}
 AVATAR_RATE_LIMIT = 3.0
 
 
+def avatar_url_for(uid):
+    """Return cache-busted local avatar URL if this user has uploaded a photo."""
+    if not uid or not UUID_RE.match(str(uid)):
+        return ""
+    p = AVATAR_DIR / f"{uid}.jpg"
+    try:
+        return f"/member/avatars/{uid}.jpg?v={int(p.stat().st_mtime)}"
+    except OSError:
+        return ""
+
+
 def save_avatar_image(uid, data_url):
     """Decode base64 image, center-crop square, compress to <= 500 KB JPEG, save atomically."""
     if not UUID_RE.match(uid or ""):
@@ -1025,6 +1036,7 @@ def build_friends_overview(uid):
                     "id": other,
                     "friendship_id": f.get("id"),
                     "username": info["username"],
+                    "avatar_url": avatar_url_for(other),
                     "rank": ranks.get(other),
                     "created_at": f.get("created_at") or "",
                 })
@@ -1067,6 +1079,7 @@ def build_friends_overview(uid):
         friends.append({
             "id": fid,
             "username": info["username"],
+            "avatar_url": avatar_url_for(fid),
             "online": fid in online_ids,
             "seen_today": fid in seen_today_ids,
             "rank": ranks.get(fid),
@@ -1098,6 +1111,7 @@ def build_friends_overview(uid):
     arrivals = [{
         "id": u["id"],
         "username": u["username"],
+        "avatar_url": avatar_url_for(u["id"]),
         "created_at": u["created_at"],
         "rank": ranks.get(u["id"]),
         "online": u["id"] in online_ids,
@@ -1201,6 +1215,7 @@ class Handler(BaseHTTPRequestHandler):
                     hits.append({
                         "id": u["id"],
                         "username": u["username"],
+                        "avatar_url": avatar_url_for(u["id"]),
                         "rank": ranks.get(u["id"]),
                         "rel": rel_map.get(u["id"], "none"),
                     })
@@ -1341,6 +1356,7 @@ class Handler(BaseHTTPRequestHandler):
         for r in rows:
             owner = r.pop("user_id", None)
             r["username"] = (dir_by_id.get(owner) or {}).get("username") or public_name(r.get("username"))
+            r["avatar_url"] = avatar_url_for(owner)
             r["rank"] = ranks.get(owner)
             r["own"] = bool(uid) and owner == uid   # ownership by id, not by display name
             slot = rx.get(r["id"]) or {"reactions": {}, "mine": []}
@@ -1796,6 +1812,7 @@ class Handler(BaseHTTPRequestHandler):
         msg = (rows or [{}])[0]
         msg.pop("user_id", None)
         msg["own"] = True
+        msg["avatar_url"] = avatar_url_for(uid)
         msg.setdefault("reactions", {})
         msg.setdefault("mine", [])
         return self._send(201, {"message": msg, "filtered": actions})

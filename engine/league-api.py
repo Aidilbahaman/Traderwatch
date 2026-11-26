@@ -548,9 +548,15 @@ class Handler(BaseHTTPRequestHandler):
                 names = disambiguate([{"id": r.get("user_id") or "", "raw": r.get("username") or ""}
                                       for r in rows])
                 for i, r in enumerate(rows):
+                    uid_r = r.get("user_id") or ""
                     r["rank"] = i + 1
-                    r["is_me"] = (r.get("user_id") == uid)
-                    r["username"] = names.get(r.get("user_id") or "", public_name(r.get("username")))
+                    r["is_me"] = (uid_r == uid)
+                    r["username"] = names.get(uid_r, public_name(r.get("username")))
+                    av_p = pathlib.Path(__file__).resolve().parent.parent / "member" / "avatars" / f"{uid_r}.jpg"
+                    try:
+                        r["avatar_url"] = f"/member/avatars/{uid_r}.jpg?v={int(av_p.stat().st_mtime)}" if uid_r else ""
+                    except OSError:
+                        r["avatar_url"] = ""
                 return self._send(200, {"leaderboard": rows, "season": SEASON,
                                         "start_balance": START_BALANCE})
             if path == "/api/league/me":
