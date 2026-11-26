@@ -664,6 +664,28 @@ def _call_model(model, prompt, timeout):
     return (choice.get("message") or {}).get("content") or ""
 
 
+# Reasoning models (GLM family) sometimes spend the ENTIRE token budget on
+# hidden reasoning and return content="". Measured 2026-11-26 on the real
+# production vision prompt: 1 in 5 calls empty. An empty reply is transient —
+# the same model usually answers on a second attempt — so retry once before
+# burning a fallback slot. Hard failures (quota/503) still raise immediately;
+# those are NOT worth retrying on the same model.
+EMPTY_RETRY_MAX = 1
+
+
+def _call_with_empty_retry(call_fn, *args, **kwargs):
+    """call_fn sekali; kalau balik content kosong, cuba SEKALI lagi."""
+    content = call_fn(*args, **kwargs)
+    if (content or "").strip():
+        return content
+    log(f"empty content dari {args[0] if args else '?'} — retry sekali")
+    for _ in range(EMPTY_RETRY_MAX):
+        content = call_fn(*args, **kwargs)
+        if (content or "").strip():
+            return content
+    return content            # masih kosong — biarkan caller jumpa ValueError
+
+
 def _call_vision_b64(model, prompt, b64, timeout, max_tokens=700):
     """Panggil model vision (agy CLI atau HTTP OpenAI-compatible) dengan PNG base64."""
     if _is_agy_model(model):
@@ -1091,7 +1113,8 @@ def analyze(pair, bars, pip, spread_pips, call=None, budget_s=None, held=None, t
         for v_model in _vision_chain():
             t0 = time.time()
             try:
-                content = _call_vision(
+                content = _call_with_empty_retry(
+                    _call_vision,
                     v_model, vision_prompt, bars, pair, tf, CALL_TIMEOUT_S,
                     bos=bos, choch=choch, levels=q_setup if (q_setup and q_setup.get("side")) else None,
                 )
@@ -1163,7 +1186,7 @@ def analyze(pair, bars, pip, spread_pips, call=None, budget_s=None, held=None, t
             break
         t0 = time.time()
         try:
-            content = call(model, text_prompt, CALL_TIMEOUT_S)
+            content = _call_with_empty_retry(call, model, text_prompt, CALL_TIMEOUT_S)
         except Exception as e:
             err_s = f"{type(e).__name__}: {str(e)[:200]}"
             if _maint_is_infra(err_s):
