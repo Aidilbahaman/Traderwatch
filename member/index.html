@@ -185,6 +185,16 @@ html[data-theme="light"] .ic{background:#e6efd9;border-color:#c9dbb4}
 .msg.me .body{background:#b7f36b12;border-color:#b7f36b40;border-radius:16px 4px 16px 16px}
 html[data-theme="light"] .msg.me .body{background:#eaf5db;border-color:#b9d999}
 .msg.me .meta{flex-direction:row-reverse}
+/* edit / delete own message */
+.msg .edlab{font-size:9.5px;color:var(--muted);font-style:italic;opacity:.85;white-space:nowrap}
+.msg .mopt{flex:none;width:22px;height:22px;padding:0;border:0;border-radius:8px;background:none;color:var(--muted);font-size:15px;line-height:18px;opacity:.6}
+.msg .mopt:active{background:var(--card2);opacity:1}
+.composer.editmode{flex-wrap:wrap;border-color:rgba(183,243,107,.5)}
+.editbar{flex:0 0 100%;display:flex;align-items:center;gap:8px;padding:7px 6px 8px 2px;margin-bottom:2px;border-bottom:1px solid var(--line);font-size:11px;font-weight:800;color:var(--lime)}
+.editbar span{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--muted)}
+.editbar button{flex:none;width:26px;height:26px;border:1px solid var(--line);border-radius:50%;background:var(--card2);color:var(--muted);font-size:12px;line-height:1;display:grid;place-items:center}
+.msg-actwrap{position:fixed;inset:0;z-index:70}
+.actask{padding:12px 16px 8px;font-size:12.5px;font-weight:700;line-height:1.4;color:var(--muted);text-align:center;max-width:230px}
 #view-community{display:flex;flex-direction:column;min-height:calc(100% + var(--kb-extra,0px))}
 #view-community::after{content:"";display:block;flex:0 0 var(--kb-extra,0px)}
 .comnote{font-size:11px;color:var(--muted);text-align:center;margin:auto 0 4px;padding-top:18px;opacity:.72}
@@ -1808,6 +1818,8 @@ html[data-theme="light"] .star-mood{background:rgba(122,181,46,.10);border-color
 
 /* ---- fallback: <=840px mobile biasa (TIDAK DISSENTUH) ---- */
 </style>
+<link rel="stylesheet" href="chat-extras.css?v=20261126a">
+<script src="chat-extras.js?v=20261126a" defer></script>
 </head>
 <body>
 <div id="splash" role="status" aria-live="polite" aria-label="Loading TraderWatch">
@@ -1996,6 +2008,7 @@ html[data-theme="light"] .star-mood{background:rgba(122,181,46,.10);border-color
     </div>
 
     <div class="composer hidden" id="composer">
+      <div class="editbar hidden" id="editBar"></div>
       <input id="msgInput" type="text" autocomplete="off" maxlength="500" aria-label="Tulis mesej">
       <button class="send" id="sendBtn" data-no-sound aria-label="Hantar mesej"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m4 12 16-8-6 16-2.5-6.5L4 12Z"/></svg></button>
     </div>
@@ -2310,7 +2323,7 @@ var DICT={
   bcRisk:'10 trade risiko ≤1%',bcCons:'7 hari hijau berturut',bcAna:'50 analisis AI',bcPat:'Tunggu HOLD 5×',bcTp:'5 TP berturut-turut',bcStart:'Buka paper trade pertama',
   got:'Dicapai',locked:'Berkunci',
   takeTrade:'＋ Saya ambil trade ini',noSetup:'Tiada setup untuk diambil sekarang.',
-  shareCom:'⇪ Kongsi ke Komuniti',sharedTo:'Dikongsi ke #',roomAll:'Semua',roomMsgPre:'Mesej dalam #',shareNo:'Perkongsian belum tersedia.',
+  shareCom:'⇪ Kongsi ke Komuniti',sharedTo:'Dikongsi ke #',roomAll:'Semua',roomMsgPre:'Mesej dalam #',shareNo:'Perkongsian belum tersedia.',editMsg:'Sunting',deleteMsg:'Padam',editTitle:'Menyunting mesej',deleteAsk:'Padam mesej ini untuk semua?',deleteYes:'Ya, padam',deletedOk:'Mesej dipadam.',editedOk:'Mesej dikemas kini.',edited:'diedit',ownOnly:'Anda hanya boleh sunting mesej sendiri.',cancel:'Batal',
   riskTitle:'Buka paper trade',lotLab:'Lot anggaran',rBase:'Risiko dikira dari baki maya anda:',rNote:'Modal maya sahaja — tiada wang sebenar.',openBtn:'Buka trade',opening:'Membuka…',
   riskModePct:'Risk %',riskModeLot:'Lot sendiri',lotSize:'Saiz lot',riskAmt:'Risiko',ofBalance:'dari baki',lotTooBig:'Lot melebihi baki',lotInvalid:'Lot 0.01–100',
   mt5Opt:'Juga hantar order sebenar ke MT5 dengan lot ini',mt5Note:'Paper trade + order MT5 sebenar (instant entry) pada lot di atas.',mt5Sent:'Dihantar ke MT5',mt5Dry:'MT5 dry-run (tiada order live)',mt5Fail:'Order MT5 tidak dihantar',
@@ -2361,7 +2374,7 @@ var DICT={
   bcRisk:'10 trades at ≤1% risk',bcCons:'7 green days in a row',bcAna:'50 AI analyses',bcPat:'Waited out HOLD 5×',bcTp:'5 TPs in a row',bcStart:'Open your first paper trade',
   got:'Earned',locked:'Locked',
   takeTrade:'＋ Take this trade',noSetup:'No setup to take right now.',
-  shareCom:'⇪ Share to Community',sharedTo:'Shared to #',roomAll:'All',roomMsgPre:'Message in #',shareNo:'Sharing not available yet.',
+  shareCom:'⇪ Share to Community',sharedTo:'Shared to #',roomAll:'All',roomMsgPre:'Message in #',shareNo:'Sharing not available yet.',editMsg:'Edit',deleteMsg:'Delete',editTitle:'Editing message',deleteAsk:'Delete this message for everyone?',deleteYes:'Yes, delete',deletedOk:'Message deleted.',editedOk:'Message updated.',edited:'edited',ownOnly:'You can only edit your own messages.',cancel:'Cancel',
   riskTitle:'Open paper trade',lotLab:'Indicative lot',rBase:'Risk sized from your virtual balance:',rNote:'Virtual capital only — no real money.',openBtn:'Open trade',opening:'Opening…',
   riskModePct:'Risk %',riskModeLot:'Custom lot',lotSize:'Lot size',riskAmt:'Risk',ofBalance:'of balance',lotTooBig:'Lot risks more than balance',lotInvalid:'Lot 0.01–100',
   toastOpened:'Paper trade opened! Track it in League.',tpHit:'TP!',slHit:'SL!',pickPair:'Pick a pair for AI analysis.',
@@ -2411,7 +2424,7 @@ var DICT={
   bcRisk:'10 笔交易风险 ≤1%',bcCons:'连续 7 个盈利日',bcAna:'50 次 AI 分析',bcPat:'等待 HOLD 5 次',bcTp:'连续 5 次止盈',bcStart:'开启首笔模拟交易',
   got:'已获得',locked:'未解锁',
   takeTrade:'＋ 采用这笔交易',noSetup:'目前没有可采用的设置。',
-  shareCom:'⇪ 分享到社区',sharedTo:'已分享到 #',roomAll:'全部',roomMsgPre:'在 # 中发送消息',shareNo:'暂时无法分享。',
+  shareCom:'⇪ 分享到社区',sharedTo:'已分享到 #',roomAll:'全部',roomMsgPre:'在 # 中发送消息',shareNo:'暂时无法分享。',editMsg:'编辑',deleteMsg:'删除',editTitle:'正在编辑消息',deleteAsk:'为所有人删除这条消息？',deleteYes:'确认删除',deletedOk:'消息已删除。',editedOk:'消息已更新。',edited:'已编辑',ownOnly:'只能编辑自己的消息。',cancel:'取消',
   riskTitle:'开启模拟交易',lotLab:'参考手数',rBase:'风险按您的虚拟余额计算：',rNote:'仅虚拟资金——不涉及真实金钱。',openBtn:'开仓',opening:'开仓中…',
   toastOpened:'模拟交易已开仓！可在联赛中查看。',tpHit:'止盈！',slHit:'止损！',pickPair:'选择货币对进行 AI 分析。',
   mt5Opt:'同时以该手数向 MT5 下达真实订单',mt5Note:'模拟交易 + 按上述手数在 MT5 下真实市价单。',mt5Sent:'已发送至 MT5',mt5Dry:'MT5 演练（未下实单）',mt5Fail:'MT5 订单未下达',
@@ -2459,7 +2472,7 @@ var DICT={
   bcRisk:'10 trade risiko ≤1%',bcCons:'7 hari hijau berturut',bcAna:'50 analisis AI',bcPat:'Menunggu HOLD 5×',bcTp:'5 TP berturut-turut',bcStart:'Buka paper trade pertama',
   got:'Diraih',locked:'Terkunci',
   takeTrade:'＋ Saya ambil trade ini',noSetup:'Tidak ada setup untuk diambil sekarang.',
-  shareCom:'⇪ Bagikan ke Komunitas',sharedTo:'Dibagikan ke #',roomAll:'Semua',roomMsgPre:'Pesan di #',shareNo:'Berbagi belum tersedia.',
+  shareCom:'⇪ Bagikan ke Komunitas',sharedTo:'Dibagikan ke #',roomAll:'Semua',roomMsgPre:'Pesan di #',shareNo:'Berbagi belum tersedia.',editMsg:'Edit',deleteMsg:'Hapus',editTitle:'Mengedit pesan',deleteAsk:'Hapus pesan ini untuk semua?',deleteYes:'Ya, hapus',deletedOk:'Pesan dihapus.',editedOk:'Pesan diperbarui.',edited:'diedit',ownOnly:'Anda hanya bisa mengedit pesan sendiri.',cancel:'Batal',
   riskTitle:'Buka paper trade',lotLab:'Lot perkiraan',rBase:'Risiko dihitung dari saldo virtual Anda:',rNote:'Hanya modal virtual — tanpa uang sungguhan.',openBtn:'Buka trade',opening:'Membuka…',
   toastOpened:'Paper trade dibuka! Pantau di Liga.',pickPair:'Pilih pair untuk analisis AI.',
   mt5Opt:'Juga kirim order nyata ke MT5 dengan lot ini',mt5Note:'Paper trade + order pasar MT5 nyata pada lot di atas.',mt5Sent:'Terkirim ke MT5',mt5Dry:'MT5 dry-run (tanpa order live)',mt5Fail:'Order MT5 tidak terkirim',
@@ -2508,7 +2521,7 @@ var DICT={
   bcRisk:'≤1% இடரில் 10 வர்த்தகங்கள்',bcCons:'தொடர்ச்சியாக 7 பசுமை நாட்கள்',bcAna:'50 AI பகுப்பாய்வுகள்',bcPat:'HOLD ஐ 5× கடந்து காத்திருப்பு',bcTp:'தொடர்ச்சியாக 5 TP',bcStart:'உங்கள் முதல் பேப்பர் வர்த்தகத்தைத் தொடங்கவும்',
   got:'பெறப்பட்டது',locked:'பூட்டப்பட்டது',
   takeTrade:'＋ இந்த வர்த்தகத்தை எடுக்கிறேன்',noSetup:'இப்போது எடுக்க அமைப்பு இல்லை.',
-  shareCom:'⇪ சமூகத்தில் பகிர்',sharedTo:'# இல் பகிரப்பட்டது',roomAll:'அனைத்தும்',roomMsgPre:'# இல் செய்தி',shareNo:'பகிர்வு இன்னும் இல்லை.',
+  shareCom:'⇪ சமூகத்தில் பகிர்',sharedTo:'# இல் பகிரப்பட்டது',roomAll:'அனைத்தும்',roomMsgPre:'# இல் செய்தி',shareNo:'பகிர்வு இன்னும் இல்லை.',editMsg:'திருத்து',deleteMsg:'நீக்கு',editTitle:'செய்தியைத் திருத்துகிறது',deleteAsk:'அனைவருக்கும் இந்தச் செய்தியை நீக்கவா?',deleteYes:'ஆம், நீக்கு',deletedOk:'செய்தி நீக்கப்பட்டது.',editedOk:'செய்தி புதுப்பிக்கப்பட்டது.',edited:'திருத்தப்பட்டது',ownOnly:'உங்கள் செய்திகளை மட்டுமே திருத்த முடியும்.',cancel:'ரத்து',
   riskTitle:'பேப்பர் வர்த்தகத்தைத் தொடங்கு',lotLab:'மதிப்பிடப்பட்ட லாட்',rBase:'உங்கள் மெய்நிகர் இருப்பிலிருந்து இடர் கணக்கிடப்படுகிறது:',rNote:'மெய்நிகர் மூலதனம் மட்டும் — உண்மையான பணம் இல்லை.',openBtn:'வர்த்தகத்தைத் தொடங்கு',opening:'தொடங்குகிறது…',
   toastOpened:'பேப்பர் வர்த்தகம் தொடங்கப்பட்டது! லீக்கில் கண்காணிக்கவும்.',tpHit:'TP!',slHit:'SL!',pickPair:'AI பகுப்பாய்விற்கு ஒரு ஜோடியைத் தேர்ந்தெடுக்கவும்.',
   mt5Opt:'இந்த லாட்டுடன் MT5-க்கு உண்மையான ஆர்டரையும் அனுப்பு',mt5Note:'பேப்பர் வர்த்தகம் + மேலே உள்ள லாட்டில் உண்மையான MT5 சந்தை ஆர்டர்.',mt5Sent:'MT5-க்கு அனுப்பப்பட்டது',mt5Dry:'MT5 dry-run (நேரடி ஆர்டர் இல்லை)',mt5Fail:'MT5 ஆர்டர் அனுப்பப்படவில்லை',
@@ -2608,6 +2621,7 @@ function showView(v){
  moveNavPill(prev!==v);
  VIEWS.forEach(function(x){var el=$('view-'+x);if(el)el.classList.toggle('hidden',x!==v)});
  $('composer').classList.toggle('hidden',v!=='community');
+ if(v!=='community'&&COM_EDIT)cancelEdit();
  $('scroll').classList.toggle('com',v==='community');
  $('scroll').scrollTop=0;
  if(v==='analyst'){drawPairs(true);maybePrices();loadPairTraders();loadPairAi()}
@@ -3500,7 +3514,7 @@ function playChatSfx(kind){
 
 /* ---------------- community (API sebenar) ---------------- */
 var MSGS=[],comLoaded=false,sending=false,comInit=false,comLastId=null;
-var COM_ROOM='all',COM_ROOMS={},COM_FEAT={rooms:false,cards:false,reactions:false},comReq=0;
+var COM_ROOM='all',COM_ROOMS={},COM_FEAT={rooms:false,cards:false,reactions:false,edit:false,mod:false},comReq=0;
 var COM_PAIR_ROOMS=['XAUUSD','BTCUSD','XAGUSD','EURUSD','GBPUSD','USDJPY','AUDUSD','USDCAD','NZDUSD'];
 var RX_EMOJIS=['🔥','🎯','👏','👍'];
 function tx(en,ms){return lang==='en'?en:ms}
@@ -3531,13 +3545,21 @@ function rxHtml(m){
  return '<div class="rxrow">'+chips+'<button class="rxadd" data-id="'+m.id+'" type="button" aria-label="React">＋</button></div>';
 }
 function msgHtml(m,me){
- var isMe=me&&m.username===me,isSig=m.kind==='signal'&&m.payload&&m.payload.pair;
+ var own=(m.own===true),isMe=own||(m.own==null&&me&&m.username===me),isSig=m.kind==='signal'&&m.payload&&m.payload.pair;
  var rk=m.rank?'<span class="rk r'+m.rank+'">🏆 #'+m.rank+' '+esc(tx('League','Liga'))+'</span>':'';
  var rt=(COM_ROOM==='all'&&m.room&&m.room!=='all')?'<span class="rtag">'+esc(m.room)+'</span>':'';
+ var ed=m.edited_at?'<span class="edlab">'+esc(t('edited'))+'</span>':'';
+ var opt=(own&&COM_FEAT.edit)?'<button class="mopt" data-opt="'+m.id+'" type="button" aria-label="'+esc(t('editMsg')+' / '+t('deleteMsg'))+'">⋯</button>':'';
  var txt=(isSig&&m.body==='Kongsi setup AI')?tx('Shared an AI setup:','Kongsi setup AI:'):m.body;
- return '<div class="msg'+(isMe?' me':'')+'" data-id="'+m.id+'"><div class="av" style="background:'+avCol(m.username)+'">'+esc(initials(m.username))+'</div><div class="body'+(isSig?' wide':'')+'"><div class="meta"><b>'+esc(m.username)+'</b>'+rk+rt+'<time>'+esc(myTm(m.created_at))+'</time></div><p>'+esc(txt)+'</p>'+(isSig?sigCardHtml(m.payload,m.id):'')+rxHtml(m)+'</div></div>';
+ var isGif=m.kind==='gif'&&m.payload&&m.payload.url;
+ var gifU=isGif?gifSafe(m.payload.url):'';
+ var inner=isGif&&gifU
+  ?'<img class="chat-gif" src="'+esc(gifU)+'" alt="'+esc(m.payload.title||'GIF')+'" width="'+(Number(m.payload.w)||240)+'" height="'+(Number(m.payload.h)||240)+'" loading="lazy">'
+  :'<p>'+esc(txt)+'</p>';
+ return '<div class="msg'+(isMe?' me':'')+'" data-id="'+m.id+'"'+(own?' data-own="1"':'')+'><div class="av" style="background:'+avCol(m.username)+'">'+esc(initials(m.username))+'</div><div class="body'+((isSig||isGif)?' wide':'')+'"><div class="meta"><b>'+esc(m.username)+'</b>'+rk+rt+'<time>'+esc(myTm(m.created_at))+'</time>'+ed+opt+'</div>'+inner+(isSig?sigCardHtml(m.payload,m.id):'')+rxHtml(m)+'</div></div>';
 }
 function drawMsgs(){
+ if(COM_EDIT&&!findComMsg(COM_EDIT.id))cancelEdit();
  var me=myChatName();
  if(!MSGS.length){
   $('msgs').innerHTML='<div class="empty">'+esc(t('emptyChat'))+'</div>';
@@ -3595,19 +3617,127 @@ function loadMessages(silent){
   MSGS=next;
   if(res.data&&typeof res.data.online==='number')ONLINE=res.data.online;
   var f=(res.data&&res.data.features)||{};
-  COM_FEAT={rooms:!!f.rooms,cards:!!f.cards,reactions:!!f.reactions};
+  COM_FEAT={rooms:!!f.rooms,cards:!!f.cards,reactions:!!f.reactions,edit:!!f.edit,mod:!!f.mod};
+  if(window.TWChatExtras&&window.TWChatExtras.setRemote)window.TWChatExtras.setRemote(!!f.gifs);
   COM_ROOMS=(res.data&&res.data.rooms)||{};
   if(!COM_FEAT.rooms&&COM_ROOM!=='all')COM_ROOM='all';
   drawMsgs();
  }).catch(function(){if(!silent&&req===comReq)toast(t('sendErr'))});
 }
-function sendMsg(){
- if(sending)return;
- var inp=$('msgInput'),v=inp.value.trim();
+/* ---------------- edit / delete your own community message ---------------- */
+var COM_EDIT=null;   /* {id, body} mesej yang sedang disunting */
+var SEND_ICON='<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m4 12 16-8-6 16-2.5-6.5L4 12Z"/></svg>';
+var SAVE_ICON='<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>';
+var ED_ICON='<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>';
+var DEL_ICON='<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>';
+function findComMsg(id){return MSGS.filter(function(x){return String(x.id)===String(id)})[0]}
+function cancelEdit(){
+ if(!COM_EDIT)return;
+ COM_EDIT=null;
+ var bar=$('editBar');if(bar){bar.classList.add('hidden');bar.innerHTML=''}
+ $('composer').classList.remove('editmode');
+ $('msgInput').value='';
+ $('sendBtn').innerHTML=SEND_ICON;
+}
+function startEdit(id){
+ var m=findComMsg(id);if(!m||!m.own||m.kind==='signal')return;
+ COM_EDIT={id:m.id,body:m.body||''};
+ var bar=$('editBar');
+ bar.innerHTML=ED_ICON+'<span>'+esc(t('editTitle'))+'</span><button type="button" id="editX" aria-label="'+esc(t('cancel'))+'">✕</button>';
+ bar.classList.remove('hidden');
+ $('composer').classList.add('editmode');
+ $('sendBtn').innerHTML=SAVE_ICON;
+ $('editX').onclick=cancelEdit;
+ var inp=$('msgInput');inp.value=m.body||'';inp.focus();
+ try{inp.setSelectionRange(inp.value.length,inp.value.length)}catch(e){}
+ hap(6);
+}
+function saveEdit(){
+ if(!COM_EDIT||sending)return;
+ var inp=$('msgInput'),v=inp.value.trim(),id=COM_EDIT.id;
  if(!v){toast(t('emptyMsg'));return}
  if(v.length>500){toast(t('longMsg'));return}
  sending=true;$('sendBtn').disabled=true;
- var body={text:v};if(COM_FEAT.rooms&&COM_ROOM!=='all')body.room=COM_ROOM;
+ apiFetch('/api/chat/edit',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id:id,text:v})}).then(function(res){
+  sending=false;$('sendBtn').disabled=false;
+  if(!res.ok){
+   if(res.status===403)toast(t('ownOnly'));
+   else if(res.status===429)toast(t('slow'));
+   else if(res.status===400)toast((res.data&&/max/i.test(res.data.error||''))?t('longMsg'):t('filtered'));
+   else toast(t('sendErr'));
+   return;
+  }
+  var m=findComMsg(id);
+  if(m){m.body=(res.data&&res.data.body)||v;m.edited_at=(res.data&&res.data.edited_at)||new Date().toISOString()}
+  cancelEdit();drawMsgs();hap(8);playChatSfx('sent');
+  if(res.data&&res.data.filtered&&res.data.filtered.length)toast(t('someFiltered'));else toast(t('editedOk'));
+ }).catch(function(){sending=false;$('sendBtn').disabled=false;toast(t('sendErr'))});
+}
+function deleteComMsg(id){
+ var m=findComMsg(id);if(!m)return;
+ if(!m.own&&!COM_FEAT.mod)return;
+ apiFetch('/api/chat/delete',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id:id})}).then(function(r){
+  if(!r.ok){toast(r.status===403?t('ownOnly'):t('sendErr'));return}
+  MSGS=MSGS.filter(function(x){return String(x.id)!==String(id)});
+  if(COM_EDIT&&String(COM_EDIT.id)===String(id))cancelEdit();
+  drawMsgs();hap(10);playChatSfx('sent');toast(t('deletedOk'));
+ }).catch(function(){toast(t('sendErr'))});
+}
+function openMsgActions(id){
+ var m=findComMsg(id);if(!m||!COM_FEAT.edit)return;
+ var canEdit=m.own&&m.kind!=='signal',canDel=m.own||COM_FEAT.mod;
+ if(!canEdit&&!canDel)return;
+ var wrap=document.createElement('div');wrap.className='dm-actwrap msg-actwrap';
+ var menu=document.createElement('div');menu.className='dm-actmenu';
+ menu.innerHTML=(canEdit?'<button data-a="edit" type="button">'+ED_ICON+esc(t('editMsg'))+'</button>':'')
+  +'<button data-a="del" type="button" class="red">'+DEL_ICON+esc(t('deleteMsg'))+'</button>';
+ wrap.appendChild(menu);document.body.appendChild(wrap);hap(6);
+ var close=function(){if(wrap.parentNode)wrap.parentNode.removeChild(wrap);document.removeEventListener('pointerdown',onDoc,true)};
+ var onDoc=function(e){if(!menu.contains(e.target))close()};
+ setTimeout(function(){document.addEventListener('pointerdown',onDoc,true)},10);
+ wrap.addEventListener('click',function(e){
+  var b=e.target.closest?e.target.closest('button'):null;if(!b)return;
+  var a=b.dataset.a;
+  if(a==='edit'){close();startEdit(id)}
+  else if(a==='del'){
+   menu.innerHTML='<div class="actask">'+esc(t('deleteAsk'))+'</div>'
+    +'<button data-a="del-yes" type="button" class="red">'+DEL_ICON+esc(t('deleteYes'))+'</button>'
+    +'<button data-a="del-no" type="button">'+esc(t('cancel'))+'</button>';
+  }
+  else if(a==='del-yes'){close();deleteComMsg(id)}
+  else if(a==='del-no'){close()}
+ });
+}
+/* long-press 480ms atau klik kanan pada bubble sendiri = menu sunting/padam */
+(function(){
+ var tmr=null,el=null,sx=0,sy=0,box=$('msgs');
+ if(!box)return;
+ box.addEventListener('pointerdown',function(e){
+  var m=e.target.closest?e.target.closest('.msg[data-own]'):null;
+  if(!m||e.target.closest('button'))return;
+  el=m;sx=e.clientX;sy=e.clientY;
+  tmr=setTimeout(function(){tmr=null;if(el){hap(6);openMsgActions(el.dataset.id);el=null}},480);
+ },{passive:true});
+ box.addEventListener('pointermove',function(e){
+  if(!el)return;
+  if(Math.abs(e.clientX-sx)>10||Math.abs(e.clientY-sy)>10){clearTimeout(tmr);tmr=null;el=null}
+ },{passive:true});
+ var end=function(){clearTimeout(tmr);tmr=null;el=null};
+ box.addEventListener('pointerup',end);box.addEventListener('pointercancel',end);box.addEventListener('pointerleave',end);
+ box.addEventListener('contextmenu',function(e){
+  var m=e.target.closest?e.target.closest('.msg[data-own]'):null;
+  if(!m)return;e.preventDefault();openMsgActions(m.dataset.id);
+ });
+})();
+function sendMsg(gifObj){
+ if(COM_EDIT){saveEdit();return}
+ if(sending)return;
+ var inp=$('msgInput'),v=gifObj?'':inp.value.trim();
+ if(!v&&!gifObj){toast(t('emptyMsg'));return}
+ if(v.length>500){toast(t('longMsg'));return}
+ sending=true;$('sendBtn').disabled=true;
+ var body={};if(gifObj){body.gif=gifObj}else{body.text=v}
+ if(!gifObj&&COM_FEAT.rooms&&COM_ROOM!=='all')body.room=COM_ROOM;
  apiFetch('/api/chat/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)}).then(function(res){
   sending=false;$('sendBtn').disabled=false;
   if(!res.ok){
@@ -3615,8 +3745,9 @@ function sendMsg(){
    else if(res.status===400)toast((res.data&&/max/i.test(res.data.error||''))?t('longMsg'):t('filtered'));
    else toast(t('sendErr'));return;
   }
-  inp.value='';
+  if(!gifObj)inp.value='';
   if(res.data&&res.data.message){
+   res.data.message.own=true;
    MSGS.push(res.data.message);
    if(res.data.message.id!=null)comLastId=Math.max(Number(comLastId||0),Number(res.data.message.id)||0);
    if(COM_FEAT.rooms&&COM_ROOM!=='all')COM_ROOMS[COM_ROOM]=(COM_ROOMS[COM_ROOM]||0)+1;
@@ -3634,7 +3765,7 @@ setInterval(function(){
 },8000);
 $('sendBtn').addEventListener('mousedown',function(e){e.preventDefault()});
 $('sendBtn').onclick=sendMsg;
-$('msgInput').addEventListener('keydown',function(e){if(e.key==='Enter')sendMsg()});
+$('msgInput').addEventListener('keydown',function(e){if(e.key==='Enter'){e.preventDefault();sendMsg()}else if(e.key==='Escape'&&COM_EDIT){cancelEdit()}});
 /* Dock sembunyi SEGERA bila input chat focus (jangan tunggu viewport resize
    yang mungkin lambat/tak dilapor sesetengah keyboard Android). */
 (function(){
@@ -3667,6 +3798,7 @@ $('msgInput').addEventListener('keydown',function(e){if(e.key==='Enter')sendMsg(
 $('rooms').addEventListener('click',function(e){
  var b=e.target.closest?e.target.closest('.room'):null;if(!b)return;
  var r=b.dataset.r;if(!r||r===COM_ROOM)return;
+ if(COM_EDIT)cancelEdit();
  COM_ROOM=r;comInit=false;comLastId=null;hap(6);drawRooms();loadMessages();
 });
 function redrawReact(id,bumpEmoji){
@@ -3713,7 +3845,8 @@ $('msgs').addEventListener('click',function(e){
  var b=e.target.closest?e.target.closest('button'):null;if(!b)return;
  if(b.classList.contains('rxc')||b.classList.contains('rxp')){toggleReact(+b.dataset.id,b.dataset.e);return}
  if(b.classList.contains('rxadd')){openRxPicker(b);return}
- if(b.classList.contains('take2')){takeFromCard(b.dataset.id)}
+ if(b.classList.contains('take2')){takeFromCard(b.dataset.id);return}
+ if(b.dataset&&b.dataset.opt!=null){openMsgActions(b.dataset.opt)}
 });
 var shareBusy=false;
 function shareToCommunity(a){
@@ -4059,6 +4192,10 @@ function drawDMMsgs(scrollEnd){
     +(en?(m.mine_deleted?'You deleted this message':'Message deleted'):(m.mine_deleted?'Anda padam mesej ini':'Mesej dipadam'))
     +'<time>'+esc(dmTime(m.created_at))+'</time></div>';
   }
+  if(m.kind==='gif'&&m.payload){
+   var g=gifBubbleHtml(m.payload,m.me,{id:m.id,created_at:m.created_at},ref);
+   if(g)return g;
+  }
   if(m.kind==='signal'&&m.payload){
    var p=m.payload,dec=pdec(p.pair),isSell=p.side==='SELL';
    return '<div class="dm-setup'+(m.me?' me':'')+(m.pinned?' pinned-b':'')+'" data-mid="'+esc(String(m.id))+'">'+ref
@@ -4077,6 +4214,19 @@ function drawDMMsgs(scrollEnd){
  if(scrollEnd)box.scrollTop=box.scrollHeight;
 }
 function dmFriendName(){return FR.dmFriend?FR.dmFriend.username:''}
+/* GIF mesej: payload {url,w,h,title}. URL disemak semula di klien supaya
+   payload lama/asing tak boleh menyuntik img dari hos luar whitelist. */
+function gifSafe(u){
+ if(typeof window.twSafeGifUrl==='function')return window.twSafeGifUrl(u);
+ return /^\/member\/gifs\/[a-z0-9_-]{1,40}\.gif$/i.test(String(u||''))?u:'';
+}
+function gifBubbleHtml(p,isMe,meta,ref){
+ var u=gifSafe(p&&p.url);if(!u)return '';
+ var w=Number(p.w)||240,h=Number(p.h)||240;
+ return '<div class="dm-bbl media'+(isMe?' me':'')+'" data-mid="'+esc(String(meta.id))+'">'+(ref||'')
+  +'<img class="dm-gif" src="'+esc(u)+'" alt="'+esc((p&&p.title)||'GIF')+'" width="'+w+'" height="'+h+'" loading="lazy">'
+  +'<time>'+esc(dmTime(meta.created_at))+'</time></div>';
+}
 /* ---------- reply / pin / delete ---------- */
 var DM_REPLY=null;   /* {id, body, me} mesej yang dibalas */
 function setDmReply(m){
@@ -4166,23 +4316,24 @@ function openDmActions(id, el){
  };
  box.addEventListener('pointerup',end);box.addEventListener('pointercancel',end);box.addEventListener('pointerleave',end);
 })();
-function sendDM(cardObj){
+function sendDM(cardObj, gifObj){
  if(FR.dmBusy||!FR.dmFriend)return;
- var inp=$('dmInp'),v=cardObj?'':inp.value.trim();
- if(!v&&!cardObj)return;
+ var inp=$('dmInp'),v=(cardObj||gifObj)?'':inp.value.trim();
+ if(!v&&!cardObj&&!gifObj)return;
  if(v.length>500){toast(t('longMsg'));return}
  FR.dmBusy=true;$('dmSendBtn').disabled=true;
  var body={to:FR.dmFriend.id};
  if(v)body.text=v;
- if(DM_REPLY&&!cardObj){body.reply_to=DM_REPLY.id;body.reply_body=DM_REPLY.body||''}
+ if(DM_REPLY&&!cardObj&&!gifObj){body.reply_to=DM_REPLY.id;body.reply_body=DM_REPLY.body||''}
  if(cardObj)body.card=cardObj;
+ if(gifObj)body.gif=gifObj;
  apiFetch('/api/chat/dm',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)}).then(function(r){
   FR.dmBusy=false;$('dmSendBtn').disabled=false;
   if(!r.ok){
    toast(r.status===429?t('slow'):r.status===403?(lang==='en'?'Friends only':'Hanya untuk rakan'):t('sendErr'));
    return;
   }
-  if(!cardObj)inp.value='';
+  if(!cardObj&&!gifObj)inp.value='';
   if(r.data&&r.data.message){
    FR.dmMsgs.push(r.data.message);
    if(r.data.message.id!=null)FR.dmLastId=Math.max(Number(FR.dmLastId||0),Number(r.data.message.id)||0);
@@ -5920,7 +6071,7 @@ window.addEventListener('appinstalled',function(){drawWelcome();try{localStorage
 if(typeof window!=='undefined'){window.__welcome=showWelcome;window.__drawWelcome=drawWelcome;}
 if(typeof window!=='undefined'){window.__forceLogout=goLogin;}
 if('serviceWorker' in navigator){window.addEventListener('load',function(){
- navigator.serviceWorker.register('sw.js?v=114v60',{scope:'./',updateViaCache:'none'}).then(function(reg){
+ navigator.serviceWorker.register('sw.js?v=114v61',{scope:'./',updateViaCache:'none'}).then(function(reg){
   /* PWA homescreen resume instance lama tanpa navigation -> check update
      bila app kembali nampak/focus + setiap 30 min, dan reload automatik
      bila SW versi baru mengambil alih (controllerchange). */

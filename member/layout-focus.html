@@ -3472,7 +3472,7 @@ function playChatSfx(kind){
 
 /* ---------------- community (API sebenar) ---------------- */
 var MSGS=[],comLoaded=false,sending=false,comInit=false,comLastId=null;
-var COM_ROOM='all',COM_ROOMS={},COM_FEAT={rooms:false,cards:false,reactions:false},comReq=0;
+var COM_ROOM='all',COM_ROOMS={},COM_FEAT={rooms:false,cards:false,reactions:false,edit:false,mod:false},comReq=0;
 var COM_PAIR_ROOMS=['XAUUSD','BTCUSD','XAGUSD','EURUSD','GBPUSD','USDJPY','AUDUSD','USDCAD','NZDUSD'];
 var RX_EMOJIS=['🔥','🎯','👏','👍'];
 function tx(en,ms){return lang==='en'?en:ms}
@@ -3567,7 +3567,7 @@ function loadMessages(silent){
   MSGS=next;
   if(res.data&&typeof res.data.online==='number')ONLINE=res.data.online;
   var f=(res.data&&res.data.features)||{};
-  COM_FEAT={rooms:!!f.rooms,cards:!!f.cards,reactions:!!f.reactions};
+  COM_FEAT={rooms:!!f.rooms,cards:!!f.cards,reactions:!!f.reactions,edit:!!f.edit,mod:!!f.mod};
   COM_ROOMS=(res.data&&res.data.rooms)||{};
   if(!COM_FEAT.rooms&&COM_ROOM!=='all')COM_ROOM='all';
   drawMsgs();

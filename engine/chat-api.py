@@ -1291,7 +1291,7 @@ class Handler(BaseHTTPRequestHandler):
                                 "rooms": room_counts() if ext else {},
                                 "features": {"rooms": ext, "cards": ext,
                                              "reactions": rx_ok(), "edit": edit_ok,
-                                             "gifs": gif_ok()}})
+                                             "gifs": gif_ok(), "mod": is_admin_uid(uid)}})
 
     def do_POST(self):
         path = urllib.parse.urlparse(self.path).path
