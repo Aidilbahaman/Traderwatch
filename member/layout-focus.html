@@ -790,7 +790,8 @@ html[data-theme="light"] .pcard{background:linear-gradient(145deg,#eaf3e2,var(--
 .pcard:active{transform:scale(.995)}
 .sharechip{position:absolute;top:14px;right:14px;display:flex;align-items:center;gap:5px;background:var(--card2);color:var(--lime);font-size:10px;font-weight:800;letter-spacing:.06em;padding:5px 10px;border-radius:12px;border:1px solid var(--line)}
 .member.sshare{color:var(--lime);font-weight:700;margin-top:3px;opacity:.85}
-#sxbd{position:absolute;inset:0;background:#000a;z-index:56;opacity:1;transition:opacity .25s}
+#sxbd{position:absolute;inset:0;background:#000a;z-index:56;opacity:0;transition:opacity .25s}
+#sxbd.open{opacity:1}
 #sx{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%) scale(.97);z-index:57;width:min(340px,calc(100% - 24px));max-height:calc(100% - 24px);background:var(--card);border:1px solid var(--line);border-radius:24px;padding:14px;display:flex;flex-direction:column;gap:10px;opacity:0;pointer-events:none;transition:opacity .25s,transform .25s;overflow:hidden}
 #sx.open{opacity:1;pointer-events:auto;transform:translate(-50%,-50%) scale(1)}
 .sxhead{display:flex;align-items:center;justify-content:space-between;flex:none}
@@ -5120,47 +5121,64 @@ function sxCurvePath(pts,W,H,pad){
  return xs.map(function(x,i){return x.toFixed(1)+','+(H-pad-(ys[i]-lo)/(hi-lo)*(H-2*pad)).toFixed(1)}).join(' ');
 }
 function openShareCard(){
- if(!ME)return toast(t('closeErr')||'Sign in first');
- var st=weekStats();
- $('sxAv').textContent=initials(ME.dispName||'TW');
- $('sxName').textContent=ME.dispName||'Ahli';
- var rank=(MYPERF&&MYPERF.rank!=null)?('RANK #'+MYPERF.rank+' · S1'):'PAPER LEAGUE · S1';
- $('sxRank').textContent=rank;
- var net=$('sxNet');net.textContent=(st.net>0?'+':st.net<0?'−':'')+Math.abs(st.net).toFixed(2)+'R';
- net.className='snet'+(st.net<0?' neg':'');
- $('sxNetLab').textContent=t('sxNetLab');
- $('sxEmpty').classList.toggle('hidden',st.trades>0);
- $('sxTrades').textContent=st.trades;$('sxTradesLab').textContent=t('sxTrades');
- $('sxWin').textContent=st.winRate==null?'—':st.winRate+'%';$('sxWinLab').textContent=t('sxWin');
- var best=$('sxBest');
- best.textContent=st.best==null?'—':(st.best>0?'+':'')+st.best.toFixed(2)+'R';
- best.style.color=(st.best!=null&&st.best>0)?'var(--lime)':'';
- best.className=st.best!=null&&st.best<0?'neg':'';
- $('sxBestLab').textContent=t('sxBest');
- var cr=$('sxCurve'),dot=$('sxDot');
- if(st.pts.length>=2){var path=sxCurvePath(st.pts,360,110,14);cr.setAttribute('points',path);
-  var last=path.split(' ').pop().split(',');dot.setAttribute('cx',last[0]);dot.setAttribute('cy',last[1]);
-  cr.setAttribute('stroke',st.net<0?'#ff777d':'#b7f36b');dot.setAttribute('fill',st.net<0?'#ff777d':'#b7f36b');
-  cr.style.display='';dot.style.display='';
- }else{cr.style.display='none';dot.style.display='none'}
- /* badges: reuse kriteria drawBadges (sedia ada), max 3 yang unlocked */
- var me=LG.me,lowRisk=(LG.trades||[]).filter(function(x){return +x.risk_pct<=1}).length;
- var total=me?((+me.trades_closed||0)+(+me.trades_open||0)):0;
- var cands=[
-  {got:(me&&+me.analyses_count||0)>=50,nm:'50 Analyses'},
-  {got:total>=50,nm:'50 Paper Trades'},
-  {got:total>=1,nm:'First Paper Trade'},
-  {got:lowRisk>=10,nm:'Risk Shield'},
-  {got:greenStreak()>=7,nm:'7-Win Streak'}
- ].filter(function(b){return b.got}).slice(0,3);
- var row=$('sxBadgeRow');
- if(cands.length){row.innerHTML=cands.map(function(b,i){return '<div class="smd">'+SBIC[i%SBIC.length]+'</div>'}).join('')+
-  '<div class="snames">'+esc(cands.map(function(b){return b.nm}).join(' · '))+'</div>'}
- else row.innerHTML='<div class="snames" style="color:var(--muted)">'+esc(t('sxBadgeNone'))+'</div>';
- $('sxbd').classList.remove('hidden');
- $('sx').classList.remove('hidden');$('sx').classList.add('open');
+ /* Popup MESTI sentiasa terbuka walaupun data pecah — jangan tinggalkan scrim
+    kosong (bug: hitam tanpa kandungan). Data populate dalam try/catch;
+    exception -> fallback empty-state, popup tetap muncul. */
+ function _openShell(){
+  $('sxbd').classList.remove('hidden');$('sxbd').classList.add('open');
+  $('sx').classList.remove('hidden');$('sx').classList.add('open');
+ }
+ if(!ME){_openShell();$('sxEmpty').classList.remove('hidden');return}
+ try{
+  var st=weekStats();
+  $('sxAv').textContent=initials(ME.dispName||'TW');
+  $('sxName').textContent=ME.dispName||'Ahli';
+  var rank=(MYPERF&&MYPERF.rank!=null)?('RANK #'+MYPERF.rank+' · S1'):'PAPER LEAGUE · S1';
+  $('sxRank').textContent=rank;
+  var net=$('sxNet');net.textContent=(st.net>0?'+':st.net<0?'−':'')+Math.abs(st.net).toFixed(2)+'R';
+  net.className='snet'+(st.net<0?' neg':'');
+  $('sxNetLab').textContent=t('sxNetLab');
+  $('sxEmpty').classList.toggle('hidden',st.trades>0);
+  $('sxTrades').textContent=st.trades;$('sxTradesLab').textContent=t('sxTrades');
+  $('sxWin').textContent=st.winRate==null?'—':st.winRate+'%';$('sxWinLab').textContent=t('sxWin');
+  var best=$('sxBest');
+  best.textContent=st.best==null?'—':(st.best>0?'+':'')+st.best.toFixed(2)+'R';
+  best.style.color=(st.best!=null&&st.best>0)?'var(--lime)':'';
+  best.className=st.best!=null&&st.best<0?'neg':'';
+  $('sxBestLab').textContent=t('sxBest');
+  var cr=$('sxCurve'),dot=$('sxDot');
+  if(st.pts.length>=2){var path=sxCurvePath(st.pts,360,110,14);cr.setAttribute('points',path);
+   var last=path.split(' ').pop().split(',');dot.setAttribute('cx',last[0]);dot.setAttribute('cy',last[1]);
+   cr.setAttribute('stroke',st.net<0?'#ff777d':'#b7f36b');dot.setAttribute('fill',st.net<0?'#ff777d':'#b7f36b');
+   cr.style.display='';dot.style.display='';
+  }else{cr.style.display='none';dot.style.display='none'}
+  /* badges: reuse kriteria drawBadges (sedia ada), max 3 yang unlocked */
+  var me=LG.me,lowRisk=(LG.trades||[]).filter(function(x){return +x.risk_pct<=1}).length;
+  var total=me?((+me.trades_closed||0)+(+me.trades_open||0)):0;
+  var cands=[
+   {got:(me&&+me.analyses_count||0)>=50,nm:'50 Analyses'},
+   {got:total>=50,nm:'50 Paper Trades'},
+   {got:total>=1,nm:'First Paper Trade'},
+   {got:lowRisk>=10,nm:'Risk Shield'},
+   {got:(function(){try{return greenStreak()>=7}catch(e){return false}})(),nm:'7-Win Streak'}
+  ].filter(function(b){return b.got}).slice(0,3);
+  var row=$('sxBadgeRow');
+  if(cands.length){row.innerHTML=cands.map(function(b,i){return '<div class="smd">'+SBIC[i%SBIC.length]+'</div>'}).join('')+
+   '<div class="snames">'+esc(cands.map(function(b){return b.nm}).join(' · '))+'</div>'}
+  else row.innerHTML='<div class="snames" style="color:var(--muted)">'+esc(t('sxBadgeNone'))+'</div>';
+  _openShell();
+ }catch(e){
+  /* data pecah -> papar empty-state, jangan tinggalkan scrim kosong */
+  try{console.warn('share card data error:',e&&e.message)}catch(_){}
+  $('sxNet').textContent='0.0R';$('sxNet').className='snet';
+  $('sxTrades').textContent='0';$('sxWin').textContent='—';$('sxBest').textContent='—';
+  $('sxEmpty').classList.remove('hidden');
+  var cr2=$('sxCurve'),dot2=$('sxDot');cr2.style.display='none';dot2.style.display='none';
+  $('sxBadgeRow').innerHTML='<div class="snames" style="color:var(--muted)">'+esc(t('sxBadgeNone'))+'</div>';
+  _openShell();
+ }
 }
-function closeShareCard(){$('sx').classList.remove('open');$('sxbd').classList.add('hidden');$('sx').classList.add('hidden');SXPNG=null}
+function closeShareCard(){$('sx').classList.remove('open');$('sxbd').classList.remove('open');$('sxbd').classList.add('hidden');$('sx').classList.add('hidden');SXPNG=null}
 var SBIC=[
  '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/></svg>',
  '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1"/></svg>',
