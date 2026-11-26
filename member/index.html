@@ -1963,6 +1963,86 @@ html[data-theme="light"] .star-mood{background:rgba(122,181,46,.10);border-color
 /* ---- fallback: <=840px mobile biasa (TIDAK DISSENTUH) ---- */
 </style>
 <link rel="stylesheet" href="chat-extras.css?v=20261127a">
+<style id="tw-frosted-cards">
+/* Unified frosted glass cards so the moving green aurora glows through cleanly */
+.pair:not(.hot1),
+.search,
+.tab:not(.on),
+.lsub,
+.tstat,
+.tcard,
+.aihub:not(.sc-t2):not(.sc-t3),
+.season,
+.youcard,
+.lrow:not(.g1):not(.g2):not(.me),
+.bcard,
+.stat,
+.rdy,
+.menu,
+.freecard,
+.msg .body{
+  background:rgba(15,22,16,.56);
+  backdrop-filter:saturate(165%) blur(16px);
+  -webkit-backdrop-filter:saturate(165%) blur(16px);
+  border-color:rgba(255,255,255,.10);
+  box-shadow:0 8px 24px rgba(0,0,0,.28),inset 0 1px 0 rgba(255,255,255,.07);
+}
+.pair.hot1{
+  backdrop-filter:saturate(165%) blur(16px);
+  -webkit-backdrop-filter:saturate(165%) blur(16px);
+}
+.pcard{
+  background:linear-gradient(145deg,rgba(26,38,24,.64),rgba(14,20,15,.56));
+  backdrop-filter:saturate(165%) blur(18px);
+  -webkit-backdrop-filter:saturate(165%) blur(18px);
+  border-color:rgba(255,255,255,.11);
+  box-shadow:0 12px 32px rgba(0,0,0,.32),inset 0 1px 0 rgba(255,255,255,.08);
+}
+.orb-sheet{
+  background:linear-gradient(180deg,rgba(16,24,17,.68) 0%,rgba(10,15,11,.74) 100%);
+  backdrop-filter:saturate(170%) blur(20px);
+  -webkit-backdrop-filter:saturate(170%) blur(20px);
+  border-top:1px solid rgba(255,255,255,.12);
+  box-shadow:0 -10px 30px rgba(0,0,0,.32),inset 0 1px 0 rgba(255,255,255,.08);
+}
+.orb-tabs button.on{
+  background:rgba(255,255,255,.08);
+  border-color:rgba(255,255,255,.14);
+}
+.msg.me .body{
+  background:rgba(183,243,107,.10);
+  border-color:rgba(183,243,107,.24);
+}
+html[data-theme="light"] .pair:not(.hot1),
+html[data-theme="light"] .search,
+html[data-theme="light"] .tab:not(.on),
+html[data-theme="light"] .lsub,
+html[data-theme="light"] .tstat,
+html[data-theme="light"] .tcard,
+html[data-theme="light"] .aihub:not(.sc-t2):not(.sc-t3),
+html[data-theme="light"] .season,
+html[data-theme="light"] .youcard,
+html[data-theme="light"] .lrow:not(.g1):not(.g2):not(.me),
+html[data-theme="light"] .bcard,
+html[data-theme="light"] .stat,
+html[data-theme="light"] .rdy,
+html[data-theme="light"] .menu,
+html[data-theme="light"] .freecard,
+html[data-theme="light"] .msg .body{
+  background:rgba(255,255,255,.72);
+  border-color:rgba(20,33,26,.10);
+  box-shadow:0 6px 20px rgba(15,28,18,.07),inset 0 1px 0 rgba(255,255,255,.88);
+}
+html[data-theme="light"] .pcard{
+  background:linear-gradient(145deg,rgba(234,245,226,.78),rgba(255,255,255,.72));
+  border-color:rgba(20,33,26,.10);
+  box-shadow:0 8px 24px rgba(15,28,18,.08),inset 0 1px 0 rgba(255,255,255,.9);
+}
+html[data-theme="light"] .orb-sheet{
+  background:linear-gradient(180deg,rgba(255,255,255,.76) 0%,rgba(244,248,242,.84) 100%);
+  border-top:1px solid rgba(20,33,26,.10);
+}
+</style>
 </head>
 <body>
 <div id="splash" role="status" aria-live="polite" aria-label="Loading TraderWatch">
