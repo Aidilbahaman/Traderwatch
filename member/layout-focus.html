@@ -832,6 +832,26 @@ html[data-theme="light"] .scard{background:#0a100c}
 .stat b{display:block;font-size:20px;font-weight:850;font-variant-numeric:tabular-nums;letter-spacing:-.04em}
 .stat small{display:block;color:var(--muted);font-size:10px;margin-top:3px;line-height:1.3}
 .stat b.pos{color:var(--green)}.stat b.neg{color:var(--red)}
+/* "Ready for Live?" card (Phase 2) — token tema sedia ada sahaja */
+.rdy{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:16px}
+.rdy.on{border-color:var(--lime)}
+.rdyh{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.rdyh b{font-size:16px;font-weight:850;letter-spacing:-.02em}
+.rdytag{flex:none;font-size:9.5px;font-weight:900;letter-spacing:.1em;padding:4px 8px;border-radius:9px;background:var(--lime);color:var(--onlime)}
+.rdysub{color:var(--muted);font-size:12px;margin-top:6px;line-height:1.45}
+.rdymeta{display:flex;justify-content:space-between;gap:8px;font-size:10.5px;color:var(--muted);font-weight:700;margin:13px 0 6px}
+.rdybar{height:7px;border-radius:4px;background:var(--card2);overflow:hidden}
+.rdybar i{display:block;height:100%;width:0;border-radius:4px;background:var(--lime);transition:width .45s ease}
+.rdyck{display:flex;align-items:center;gap:9px;padding:9px 0;border-top:1px solid var(--line);font-size:12.5px;font-weight:650}
+.rdyck svg{flex:none}
+.rdyck span{flex:1;min-width:0;color:var(--text)}
+.rdyck b{font-weight:850;font-variant-numeric:tabular-nums;white-space:nowrap;color:var(--text)}
+.rdyck b.miss{color:var(--red)}
+.rdybtn{width:100%;margin-top:12px;padding:13px 10px;border-radius:14px;background:var(--lime);color:var(--onlime);font-weight:850;font-size:13.5px;display:flex;align-items:center;justify-content:center;gap:7px;transition:transform .12s}
+.rdybtn:active{transform:scale(.98)}
+.rdybtn.lock{background:var(--card2);color:var(--muted);border:1px solid var(--line)}
+.rdynote{color:var(--muted);font-size:10.5px;line-height:1.45;margin-top:9px;text-align:center}
+@media(max-width:360px){.rdy{padding:14px}.rdyck{font-size:12px;gap:7px}.rdyh b{font-size:15px}}
 .sec{font-size:10px;color:var(--muted);font-weight:800;letter-spacing:.12em;text-transform:uppercase;margin:18px 0 8px}
 .menu{background:var(--card);border:1px solid var(--line);border-radius:18px;overflow:hidden}
 .mrow{width:100%;display:flex;align-items:center;gap:12px;padding:14px 15px;text-align:left;color:var(--text);border-bottom:1px solid var(--line);font-size:14px;font-weight:650;transition:.15s}
@@ -1932,6 +1952,7 @@ html[data-theme="light"] .star-mood{background:rgba(122,181,46,.10);border-color
           <div class="stat"><b id="s2v">—</b><small id="s2">Paper trades</small></div>
           <div class="stat"><b id="s3v">—</b><small id="s3">Your Net R</small></div>
         </div>
+        <div id="rdyCard"></div>
         <div class="sec" id="menuSec">Akaun</div>
         <div class="menu" id="menu"></div>
         <div class="freecard">
@@ -2173,6 +2194,7 @@ html[data-theme="light"] .star-mood{background:rgba(122,181,46,.10);border-color
 
 <script src="../sound.js?v=20261121s3"></script>
 <script src="/bridge-banner.js?v=20261125a"></script>
+<script src="/maintenance-banner.js?v=20261126m"></script>
 <script>
 (function(){
 'use strict';
@@ -2307,7 +2329,12 @@ var DICT={
   ailTitle:'Pembelajaran AI',ailEmpty:'AI masih belajar — perlukan beberapa trade ditutup dulu sebelum corak dikenal pasti.',ailN:'%n trade',ailWin:'kadar menang',
   aiReqTitle:'Bilangan ahli yang minta analisis pair ini hari ini',aiReqHour:'Permintaan hari ini',tradersTitle:'Bilangan trader berbeza yang ambil pair ini hari ini',traderOne:'trader',traderUnit:'trader',aiRead:'Apa AI baca',aiNarr:'Bagaimana saya fikir',aiInd:'Indikator',aiStruct:'Struktur',aiCtx:'Konteks pasaran',aiVision:'Mod',aiVisionOn:'Vision (imej carta sebenar)',aiVisionOff:'Teks sahaja',wTitle:'Selamat datang!',wSub:'Sediakan app anda sebelum mula.',wNotifT:'Hidupkan notifikasi',wNotifS:'Alert bila trade kena TP/SL & signal baru',wInstallT:'Tambah ke skrin utama',wInstallS:'Buka macam app, penuh skrin',wGoT:'Mula trade',wSkipT:'Langkau dulu',wDone:'Selesai',wTurnOn:'Hidupkan',wAdd:'Tambah',wManual:'Panduan',wWait:'Menunggu…',cineEnterT:'Ketik untuk masuk',cineTag:'Rasai era baru trading AI.',cineCap1:'Pasaran tak pernah tidur.',cineCap2:'Sekarang, ia berfikir.',
   tdTitle:'Detail trade',livePrice:'Harga live',exitPrice:'Harga exit',unreal:'P&L belum realized',finalRes:'Keputusan akhir',openedAt:'Dibuka',closedAt:'Ditutup',slTpRange:'Julat SL → TP',quoteErr:'Harga live tidak tersedia.',
-  loggingOut:'Melog keluar…',langNative:'Bahasa Melayu'
+  loggingOut:'Melog keluar…',langNative:'Bahasa Melayu',
+  rdyT:'Ready for Live?',rdyNew:'BARU',rdySub:'Capai 4 milestone dalam paper trading sebelum anda pertaruhkan duit sebenar.',
+  rdyProg:'Kemajuan',rdyDone:'%n dari 4 selesai',
+  rdyK1:'%n+ trade paper',rdyK2:'Win rate %n% atau lebih',rdyK3:'Net R melebihi sifar',rdyK4:'Max drawdown bawah %nR',
+  rdyUnlT:'Anda Sedia untuk Live',rdyUnl:'DIBUKA',rdyUnlSub:'Keempat-empat milestone selesai. Mula kecil dan kekalkan peraturan risiko yang sama seperti paper trading.',
+  rdyOpen:'Buka Akaun Live',rdySteps:'Buka Akaun Live · %n langkah lagi',rdyToast:'Selesaikan %n langkah lagi'
  },
  en:{
   greet:'Hi, ',gM:'Good Morning',gA:'Good Afternoon',gE:'Good Evening',trader:'Trader',
@@ -2358,7 +2385,12 @@ var DICT={
   ailTitle:'AI Learning',ailEmpty:'AI is still learning — it needs a few closed trades before patterns can be identified.',ailN:'%n trades',ailWin:'win rate',
   aiReqTitle:'Members who requested this pair today',aiReqHour:'Requests today',tradersTitle:'Distinct traders who took this pair today',traderOne:'trader',traderUnit:'traders',aiRead:'What the AI read',aiNarr:'How I think',aiInd:'Indicators',aiStruct:'Structure',aiCtx:'Market context',aiVision:'Mode',aiVisionOn:'Vision (real chart image)',aiVisionOff:'Text only',wTitle:'Welcome!',wSub:'Two quick steps to get set up.',wNotifT:'Turn on notifications',wNotifS:'Get alerted when a trade hits TP or SL',wInstallT:'Add to home screen',wInstallS:'Full screen, no browser bar',wGoT:'Start trading',wSkipT:'Skip for now',wDone:'Done',wTurnOn:'Turn on',wAdd:'Add',wManual:'Guide',wWait:'Waiting…',cineEnterT:'Tap anywhere to enter',cineTag:'Institutional-grade market intelligence.',cineCap1:'The market never sleeps,',cineCap2:'and now it thinks.',
   tdTitle:'Trade detail',livePrice:'Live price',exitPrice:'Exit price',unreal:'Unrealized P&L',finalRes:'Final result',openedAt:'Opened',closedAt:'Closed',slTpRange:'SL → TP range',quoteErr:'Live price unavailable.',
-  loggingOut:'Signing out…',langNative:'English'
+  loggingOut:'Signing out…',langNative:'English',
+  rdyT:'Ready for Live?',rdyNew:'NEW',rdySub:'Hit these 4 milestones in paper trading before you risk real money.',
+  rdyProg:'Progress',rdyDone:'%n of 4 done',
+  rdyK1:'%n+ paper trades',rdyK2:'Win rate %n% or more',rdyK3:'Net R above zero',rdyK4:'Max drawdown under %nR',
+  rdyUnlT:'You\'re Ready for Live',rdyUnl:'UNLOCKED',rdyUnlSub:'All 4 milestones done. Start small and keep the same risk rules you used in paper trading.',
+  rdyOpen:'Open Live Account',rdySteps:'Open Live Account · %n steps to go',rdyToast:'Finish %n more steps'
  },
  zh:{
   greet:'你好，',gM:'早上好',gA:'下午好',gE:'晚上好',trader:'交易者',
@@ -2407,7 +2439,12 @@ var DICT={
   ailTitle:'AI 学习',ailEmpty:'AI 仍在学习——需要先有几笔已平仓的交易才能识别模式。',ailN:'%n 笔交易',ailWin:'胜率',
   aiReqTitle:'过去一小时内请求此货币对的会员人数',aiReqHour:'今日请求',tradersTitle:'今天采用此货币对的不同交易者',traderOne:'位交易者',traderUnit:'位交易者',aiRead:'AI 读取的内容',aiNarr:'我的思考',aiInd:'指标',aiStruct:'结构',aiCtx:'市场背景',aiVision:'模式',aiVisionOn:'视觉（真实图表图像）',aiVisionOff:'仅文本',wTitle:'欢迎！',wSub:'请先设置您的应用。',wNotifT:'开启通知',wNotifS:'交易触及 TP/SL 及新信号时提醒',wInstallT:'添加到主屏幕',wInstallS:'像应用一样打开，全屏显示',wGoT:'开始交易',wSkipT:'暂时跳过',wDone:'完成',wTurnOn:'开启',wAdd:'添加',wManual:'指南',wWait:'等待中…',cineEnterT:'点击任意处进入',cineTag:'体验 AI 交易新纪元。',cineCap1:'市场从不休眠。',cineCap2:'现在，它会思考。',
   tdTitle:'交易详情',livePrice:'实时价格',exitPrice:'出场价',unreal:'未实现盈亏',finalRes:'最终结果',openedAt:'开仓时间',closedAt:'平仓时间',slTpRange:'SL → TP 区间',quoteErr:'实时价格不可用。',
-  loggingOut:'正在退出…',langNative:'中文'
+  loggingOut:'正在退出…',langNative:'中文',
+  rdyT:'准备好实盘了吗？',rdyNew:'新',rdySub:'在模拟交易中完成这 4 个里程碑，再投入真实资金。',
+  rdyProg:'进度',rdyDone:'已完成 %n / 4',
+  rdyK1:'%n 笔以上模拟交易',rdyK2:'胜率 %n% 或以上',rdyK3:'Net R 大于零',rdyK4:'最大回撤低于 %nR',
+  rdyUnlT:'你已准备好实盘',rdyUnl:'已解锁',rdyUnlSub:'4 个里程碑全部完成。从小额开始，沿用模拟交易中的风险规则。',
+  rdyOpen:'开设实盘账户',rdySteps:'开设实盘账户 · 还差 %n 步',rdyToast:'再完成 %n 步'
  },
  id:{
   greet:'Hai, ',gM:'Selamat Pagi',gA:'Selamat Siang',gE:'Selamat Malam',trader:'Trader',
@@ -2455,7 +2492,12 @@ var DICT={
   ailTitle:'Pembelajaran AI',ailEmpty:'AI masih belajar — perlu beberapa trade ditutup dulu sebelum pola dikenali.',ailN:'%n trade',ailWin:'tingkat menang',
   aiReqTitle:'Jumlah anggota yang minta analisis pair ini dalam sejam terakhir',aiReqHour:'Permintaan hari ini',tradersTitle:'Jumlah trader berbeda yang ambil pair ini hari ini',traderOne:'trader',traderUnit:'trader',aiRead:'Yang AI baca',aiNarr:'Cara saya berpikir',aiInd:'Indikator',aiStruct:'Struktur',aiCtx:'Konteks pasar',aiVision:'Mode',aiVisionOn:'Vision (gambar chart asli)',aiVisionOff:'Teks saja',wTitle:'Selamat datang!',wSub:'Siapkan aplikasi Anda sebelum mulai.',wNotifT:'Aktifkan notifikasi',wNotifS:'Notifikasi saat trade kena TP/SL & sinyal baru',wInstallT:'Tambah ke layar utama',wInstallS:'Buka seperti aplikasi, layar penuh',wGoT:'Mulai trading',wSkipT:'Lewati dulu',wDone:'Selesai',wTurnOn:'Aktifkan',wAdd:'Tambah',wManual:'Panduan',wWait:'Menunggu…',cineEnterT:'Ketuk untuk masuk',cineTag:'Rasakan era baru trading AI.',cineCap1:'Pasar tak pernah tidur.',cineCap2:'Sekarang, ia berpikir.',
   tdTitle:'Detail trade',livePrice:'Harga live',exitPrice:'Harga exit',unreal:'P&L belum realized',finalRes:'Hasil akhir',openedAt:'Dibuka',closedAt:'Ditutup',slTpRange:'Rentang SL → TP',quoteErr:'Harga live tidak tersedia.',
-  loggingOut:'Keluar…',langNative:'Bahasa Indonesia'
+  loggingOut:'Keluar…',langNative:'Bahasa Indonesia',
+  rdyT:'Siap untuk Live?',rdyNew:'BARU',rdySub:'Capai 4 milestone di paper trading sebelum mempertaruhkan uang sungguhan.',
+  rdyProg:'Kemajuan',rdyDone:'%n dari 4 selesai',
+  rdyK1:'%n+ trade paper',rdyK2:'Win rate %n% atau lebih',rdyK3:'Net R di atas nol',rdyK4:'Max drawdown di bawah %nR',
+  rdyUnlT:'Anda Siap untuk Live',rdyUnl:'TERBUKA',rdyUnlSub:'Keempat milestone selesai. Mulai kecil dan pertahankan aturan risiko yang sama seperti paper trading.',
+  rdyOpen:'Buka Akun Live',rdySteps:'Buka Akun Live · %n langkah lagi',rdyToast:'Selesaikan %n langkah lagi'
  },
  ta:{
   greet:'வணக்கம், ',gM:'காலை வணக்கம்',gA:'மதிய வணக்கம்',gE:'மாலை வணக்கம்',trader:'வர்த்தகர்',
@@ -2504,7 +2546,12 @@ var DICT={
   ailTitle:'AI கற்றல்',ailEmpty:'AI இன்னும் கற்கிறது — வடிவங்களை அடையாளம் காண சில மூடிய வர்த்தகங்கள் தேவை.',ailN:'%n வர்த்தகங்கள்',ailWin:'வெற்றி விகிதம்',
   aiReqTitle:'கடந்த ஒரு மணி நேரத்தில் இந்த ஜோடியைக் கோரிய உறுப்பினர்கள்',aiReqHour:'இன்றைய கோரிக்கைகள்',tradersTitle:'இன்று இந்த ஜோடியை எடுத்த வெவ்வேறு வர்த்தகர்கள்',traderOne:'வர்த்தகர்',traderUnit:'வர்த்தகர்கள்',aiRead:'AI படித்தது',aiNarr:'நான் சிந்திப்பது',aiInd:'குறிகாட்டிகள்',aiStruct:'கட்டமைப்பு',aiCtx:'சந்தை சூழல்',aiVision:'முறை',aiVisionOn:'படம் (உண்மையான சார்ட்)',aiVisionOff:'உரை மட்டும்',wTitle:'வரவேற்பு!',wSub:'தொடங்குவதற்கு முன் உங்கள் ஆப்பை அமைக்கவும்.',wNotifT:'அறிவிப்புகளை இயக்கு',wNotifS:'வர்த்தகம் TP/SL அடையும் போது & புதிய சிக்னல்களுக்கு எச்சரிக்கை',wInstallT:'முகப்புத் திரையில் சேர்',wInstallS:'ஆப் போல திற, முழுத் திரை',wGoT:'வர்த்தகம் தொடங்கு',wSkipT:'இப்போது தவிர்',wDone:'முடிந்தது',wTurnOn:'இயக்கு',wAdd:'சேர்',wManual:'வழிகாட்டி',wWait:'காத்திருக்கிறது…',cineEnterT:'எங்கும் தட்டி உள்நுழைக',cineTag:'AI வர்த்தகத்தின் புதிய சகாப்தம்.',cineCap1:'சந்தை ஒருபோதும் உறங்குவதில்லை.',cineCap2:'இப்போது, அது சிந்திக்கிறது.',
   tdTitle:'வர்த்தக விவரம்',livePrice:'நேரடி விலை',exitPrice:'வெளியேறும் விலை',unreal:'நிறைவேறாத லாப/நஷ்டம்',finalRes:'இறுதி முடிவு',openedAt:'திறக்கப்பட்ட நேரம்',closedAt:'மூடப்பட்ட நேரம்',slTpRange:'SL → TP வரம்பு',quoteErr:'நேரடி விலை கிடைக்கவில்லை.',
-  loggingOut:'வெளியேறுகிறது…',langNative:'தமிழ்'
+  loggingOut:'வெளியேறுகிறது…',langNative:'தமிழ்',
+  rdyT:'லைவ்-க்குத் தயாரா?',rdyNew:'புதியது',rdySub:'உண்மையான பணத்தை பயன்படுத்தும் முன் பேப்பர் டிரேடிங்கில் இந்த 4 மைல்கற்களை முடிக்கவும்.',
+  rdyProg:'முன்னேற்றம்',rdyDone:'4 இல் %n முடிந்தது',
+  rdyK1:'%n+ பேப்பர் டிரேட்',rdyK2:'வின் ரேட் %n% அல்லது அதிகம்',rdyK3:'Net R பூஜ்ஜியத்திற்கு மேல்',rdyK4:'அதிகபட்ச டிராடவுன் %nR-க்கு கீழ்',
+  rdyUnlT:'நீங்கள் லைவ்-க்குத் தயார்',rdyUnl:'திறக்கப்பட்டது',rdyUnlSub:'நான்கு மைல்கற்களும் முடிந்தது. சிறியதாக தொடங்கி பேப்பர் டிரேடிங்கில் பயன்படுத்திய அதே ரிஸ்க் விதிகளை பின்பற்றுங்கள்.',
+  rdyOpen:'லைவ் கணக்கைத் திற',rdySteps:'லைவ் கணக்கைத் திற · %n படிகள் மீதம்',rdyToast:'மேலும் %n படிகளை முடிக்கவும்'
  }
 };
 var FULL={ms:1,en:1};
@@ -5298,9 +5345,17 @@ function loadProfile(){
 /* Prestasi PERIBADI ahli dari Paper Trading League (/api/league/me).
  * Data prestasi global enjin tidak dipaparkan lagi. */
 function loadPerf(){
- apiFetch('/api/league/me').then(function(r){
+ /* Trades dibaca serentak dengan /me: /me untuk angka tile (sumber sama),
+    /trades untuk drawdown. /trades gagal tidak boleh jatuhkan stats sedia ada. */
+ Promise.all([
+  apiFetch('/api/league/me'),
+  apiFetch('/api/league/trades').catch(function(){return {ok:false,data:null}})
+ ]).then(function(rs){
+  var r=rs[0],tr=rs[1];
   var d=r.ok?r.data:null;
   MYPERF=(d&&d.balance!=null)?{net_r:+d.net_r||0,win_rate:(d.win_rate!=null&&isFinite(+d.win_rate))?+d.win_rate:null,balance:+d.balance,rank:(d.rank!=null)?+d.rank:null,trades_closed:+d.trades_closed||0,trades_open:+d.trades_open||0,analyses_count:+d.analyses_count||0}:null;
+  READY.trades=(tr&&tr.ok&&tr.data&&Array.isArray(tr.data.trades))?tr.data.trades:null;
+  READY.at=Date.now();
   renderStats();
  }).catch(function(){MYPERF=null;renderStats()});
 }
@@ -5314,6 +5369,71 @@ function renderStats(){
  s3.className=has?(nr>0?'pos':nr<0?'neg':''):'';
  $('s2').textContent=t('s2');
  $('s3').textContent=t('s3');
+ renderReady();
+}
+/* ---------------- "Ready for Live?" card (Phase 2) ----------------
+   Satu tempat untuk tukar had milestone + link broker. Angka datang dari
+   sumber sedia ada sahaja: /api/league/me (closed trades, win rate, Net R —
+   sama angka macam stats tiles) dan /api/league/trades (drawdown). */
+var READY_CFG={minTrades:50,minWinRate:45,minNetR:0,maxDrawdownR:10,allowOpenWhenLocked:false};
+var READY_BROKER='https://rinfinity.com/en/welcome-bonus?a=wnzx';
+var READY_NOTE='Opens our partner broker (Rinfinity) in your browser. Trading involves risk. Not financial advice. TraderWatch may earn a commission if you sign up.';
+var READY={trades:null,at:0};
+/* Drawdown = penurunan terbesar dari puncak cumulative R (equity mula 0R). */
+function readyMaxDD(list){
+ var cl=(list||[]).filter(function(x){
+  return x&&String(x.status||'')!=='open'&&x.r_result!=null&&isFinite(+x.r_result);
+ }).slice().sort(function(a,b){return String(a.closed_at||'').localeCompare(String(b.closed_at||''))});
+ var cum=0,peak=0,dd=0;
+ cl.forEach(function(x){cum+=+x.r_result;if(cum>peak)peak=cum;if(peak-cum>dd)dd=peak-cum});
+ return dd;
+}
+function readyR(v){return Math.abs(+v||0).toFixed(2).replace(/\.?0+$/,'')+'R'}
+function readyState(){
+ var cfg=READY_CFG,p=MYPERF;
+ var list=READY.trades||((typeof LG!=='undefined'&&LG&&Array.isArray(LG.trades))?LG.trades:null);
+ var n=p?(+p.trades_closed||0):0;
+ var wr=(p&&p.win_rate!=null&&isFinite(+p.win_rate))?+p.win_rate:null;
+ var nr=(p&&p.net_r!=null&&isFinite(+p.net_r))?+p.net_r:null;
+ var dd=list?readyMaxDD(list):null;
+ var rows=[
+  {lab:t('rdyK1').replace('%n',cfg.minTrades),ok:n>=cfg.minTrades,val:String(n)},
+  {lab:t('rdyK2').replace('%n',cfg.minWinRate),ok:wr!=null&&wr>=cfg.minWinRate,val:wr==null?'—':wrTxt(wr)},
+  {lab:t('rdyK3'),ok:nr!=null&&nr>cfg.minNetR,val:nr==null?'—':(nr===0?'0R':fmtR(nr))},
+  {lab:t('rdyK4').replace('%n',cfg.maxDrawdownR),ok:dd!=null&&dd<cfg.maxDrawdownR,val:dd==null?'—':readyR(dd)}
+ ];
+ var done=0;rows.forEach(function(x){if(x.ok)done++});
+ return {rows:rows,done:done,unlocked:done===rows.length};
+}
+var RDY_OK='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--lime)" stroke-width="3" stroke-linecap="round" aria-label="Done"><polyline points="5 12 10 17 19 7"/></svg>';
+var RDY_NO='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--red)" stroke-width="3" stroke-linecap="round" aria-label="Not yet"><path d="M6 6l12 12M18 6L6 18"/></svg>';
+var RDY_LOCK='<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>';
+var RDY_ARROW='<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>';
+function renderReady(){
+ var el=$('rdyCard');if(!el)return;
+ var s=readyState(),n=s.rows.length,left=n-s.done,pct=Math.round(s.done/n*100);
+ var rowsHtml=s.rows.map(function(r){
+  return '<div class="rdyck">'+(r.ok?RDY_OK:RDY_NO)+'<span>'+esc(r.lab)+'</span><b'+(r.ok?'':' class="miss"')+'>'+esc(r.val)+'</b></div>';
+ }).join('');
+ var btn=s.unlocked
+  ?'<button class="rdybtn" id="rdyOpen" type="button">'+esc(t('rdyOpen'))+RDY_ARROW+'</button>'
+  :'<button class="rdybtn lock" id="rdyOpen" type="button">'+RDY_LOCK+esc(t('rdySteps').replace('%n',left))+'</button>';
+ el.className='rdy'+(s.unlocked?' on':'');
+ el.innerHTML='<div class="rdyh"><b>'+esc(s.unlocked?t('rdyUnlT'):t('rdyT'))+'</b><span class="rdytag">'+esc(s.unlocked?t('rdyUnl'):t('rdyNew'))+'</span></div>'+
+  '<div class="rdysub">'+esc(s.unlocked?t('rdyUnlSub'):t('rdySub'))+'</div>'+
+  '<div class="rdymeta"><span>'+esc(t('rdyProg'))+'</span><span>'+esc(t('rdyDone').replace('%n',s.done))+'</span></div>'+
+  '<div class="rdybar"><i style="width:'+pct+'%"></i></div>'+
+  rowsHtml+btn+
+  '<div class="rdynote">'+esc(READY_NOTE)+'</div>';
+ $('rdyOpen').onclick=function(){
+  if(!s.unlocked&&!READY_CFG.allowOpenWhenLocked){hap(6);toast(t('rdyToast').replace('%n',left));return}
+  hap(8);
+  /* Link broker mesti buka di browser luar, bukan webview dalam app. */
+  var a=document.createElement('a');
+  a.href=READY_BROKER;a.target='_blank';a.rel='noopener noreferrer';
+  document.body.appendChild(a);a.click();
+  setTimeout(function(){if(a.parentNode)a.parentNode.removeChild(a)},0);
+ };
 }
 function renderProfile(){
  if(!ME)return;
