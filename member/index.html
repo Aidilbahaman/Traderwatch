@@ -856,7 +856,10 @@ html[data-theme="light"] .av-pop-card{background:rgba(255,255,255,.92);border-co
 .rdybtn{width:100%;margin-top:12px;padding:13px 10px;border-radius:14px;background:var(--lime);color:var(--onlime);font-weight:850;font-size:13.5px;display:flex;align-items:center;justify-content:center;gap:7px;transition:transform .12s}
 .rdybtn:active{transform:scale(.98)}
 .rdybtn.lock{background:var(--card2);color:var(--muted);border:1px solid var(--line)}
-.rdynote{color:var(--muted);font-size:10.5px;line-height:1.45;margin-top:9px;text-align:center}
+.rdynote{color:var(--muted);font-size:10.5px;line-height:1.48;margin-top:10px;text-align:center}
+.rdynote p{margin:0 0 6px}
+.rdynote p:first-child{color:var(--text);font-weight:700;opacity:.88}
+.rdynote p:last-child{margin-bottom:0;opacity:.82}
 @media(max-width:360px){.rdy{padding:14px}.rdyck{font-size:12px;gap:7px}.rdyh b{font-size:15px}}
 .sec{font-size:10px;color:var(--muted);font-weight:800;letter-spacing:.12em;text-transform:uppercase;margin:18px 0 8px}
 .menu{background:var(--card);border:1px solid var(--line);border-radius:18px;overflow:hidden}
@@ -2380,7 +2383,7 @@ var DICT={
   loggingOut:'Melog keluar…',langNative:'Bahasa Melayu',
   rdyT:'Ready for Live?',rdyNew:'BARU',rdySub:'Capai milestone ini dalam paper trading sebelum anda pertaruhkan duit sebenar.',
   rdyProg:'Kemajuan',rdyDone:'%n dari %t selesai',
-  rdyK1:'%n+ trade paper',rdyK2:'Win rate %n% atau lebih',rdyK3:'Net R melebihi sifar',
+  rdyK1:'%n trade paper',rdyK2:'Win rate %n% atau lebih',rdyK3:'Untung pertama $%n dalam paper trade',
   rdyUnlT:'Anda Sedia untuk Live',rdyUnl:'DIBUKA',rdyUnlSub:'Semua milestone selesai. Mula kecil dan kekalkan peraturan risiko yang sama seperti paper trading.',
   rdyOpen:'Buka Akaun Live',rdySteps:'Buka Akaun Live · %n langkah lagi',rdyToast:'Selesaikan %n langkah lagi'
  },
@@ -2436,7 +2439,7 @@ var DICT={
   loggingOut:'Signing out…',langNative:'English',
   rdyT:'Ready for Live?',rdyNew:'NEW',rdySub:'Hit these milestones in paper trading before you risk real money.',
   rdyProg:'Progress',rdyDone:'%n of %t done',
-  rdyK1:'%n+ paper trades',rdyK2:'Win rate %n% or more',rdyK3:'Net R above zero',
+  rdyK1:'%n paper trades',rdyK2:'Win rate %n% or more',rdyK3:'First $%n profit in paper trade',
   rdyUnlT:'You\'re Ready for Live',rdyUnl:'UNLOCKED',rdyUnlSub:'All milestones done. Start small and keep the same risk rules you used in paper trading.',
   rdyOpen:'Open Live Account',rdySteps:'Open Live Account · %n steps to go',rdyToast:'Finish %n more steps'
  },
@@ -2490,7 +2493,7 @@ var DICT={
   loggingOut:'正在退出…',langNative:'中文',
   rdyT:'准备好实盘了吗？',rdyNew:'新',rdySub:'在模拟交易中完成这些里程碑，再投入真实资金。',
   rdyProg:'进度',rdyDone:'已完成 %n / %t',
-  rdyK1:'%n 笔以上模拟交易',rdyK2:'胜率 %n% 或以上',rdyK3:'Net R 大于零',
+  rdyK1:'%n 笔模拟交易',rdyK2:'胜率 %n% 或以上',rdyK3:'模拟交易首个 $%n 盈利',
   rdyUnlT:'你已准备好实盘',rdyUnl:'已解锁',rdyUnlSub:'所有里程碑已完成。从小额开始，沿用模拟交易中的风险规则。',
   rdyOpen:'开设实盘账户',rdySteps:'开设实盘账户 · 还差 %n 步',rdyToast:'再完成 %n 步'
  },
@@ -2543,7 +2546,7 @@ var DICT={
   loggingOut:'Keluar…',langNative:'Bahasa Indonesia',
   rdyT:'Siap untuk Live?',rdyNew:'BARU',rdySub:'Capai milestone ini di paper trading sebelum mempertaruhkan uang sungguhan.',
   rdyProg:'Kemajuan',rdyDone:'%n dari %t selesai',
-  rdyK1:'%n+ trade paper',rdyK2:'Win rate %n% atau lebih',rdyK3:'Net R di atas nol',
+  rdyK1:'%n trade paper',rdyK2:'Win rate %n% atau lebih',rdyK3:'Profit pertama $%n di paper trade',
   rdyUnlT:'Anda Siap untuk Live',rdyUnl:'TERBUKA',rdyUnlSub:'Semua milestone selesai. Mulai kecil dan pertahankan aturan risiko yang sama seperti paper trading.',
   rdyOpen:'Buka Akun Live',rdySteps:'Buka Akun Live · %n langkah lagi',rdyToast:'Selesaikan %n langkah lagi'
  },
@@ -2597,7 +2600,7 @@ var DICT={
   loggingOut:'வெளியேறுகிறது…',langNative:'தமிழ்',
   rdyT:'லைவ்-க்குத் தயாரா?',rdyNew:'புதியது',rdySub:'உண்மையான பணத்தை பயன்படுத்தும் முன் பேப்பர் டிரேடிங்கில் இந்த மைல்கற்களை முடிக்கவும்.',
   rdyProg:'முன்னேற்றம்',rdyDone:'%t இல் %n முடிந்தது',
-  rdyK1:'%n+ பேப்பர் டிரேட்',rdyK2:'வின் ரேட் %n% அல்லது அதிகம்',rdyK3:'Net R பூஜ்ஜியத்திற்கு மேல்',
+  rdyK1:'%n பேப்பர் டிரேட்',rdyK2:'வின் ரேட் %n% அல்லது அதிகம்',rdyK3:'பேப்பர் டிரேடில் முதல் $%n லாபம்',
   rdyUnlT:'நீங்கள் லைவ்-க்குத் தயார்',rdyUnl:'திறக்கப்பட்டது',rdyUnlSub:'அனைத்து மைல்கற்களும் முடிந்தது. சிறியதாக தொடங்கி பேப்பர் டிரேடிங்கில் பயன்படுத்திய அதே ரிஸ்க் விதிகளை பின்பற்றுங்கள்.',
   rdyOpen:'லைவ் கணக்கைத் திற',rdySteps:'லைவ் கணக்கைத் திற · %n படிகள் மீதம்',rdyToast:'மேலும் %n படிகளை முடிக்கவும்'
  }
@@ -6162,7 +6165,7 @@ function loadProfile(){
 function loadPerf(){
  apiFetch('/api/league/me').then(function(r){
   var d=r.ok?r.data:null;
-  MYPERF=(d&&d.balance!=null)?{net_r:+d.net_r||0,win_rate:(d.win_rate!=null&&isFinite(+d.win_rate))?+d.win_rate:null,balance:+d.balance,rank:(d.rank!=null)?+d.rank:null,trades_closed:+d.trades_closed||0,trades_open:+d.trades_open||0,analyses_count:+d.analyses_count||0}:null;
+  MYPERF=(d&&d.balance!=null)?{net_r:+d.net_r||0,win_rate:(d.win_rate!=null&&isFinite(+d.win_rate))?+d.win_rate:null,balance:+d.balance,start_balance:(d.start_balance!=null&&isFinite(+d.start_balance))?+d.start_balance:10000,rank:(d.rank!=null)?+d.rank:null,trades_closed:+d.trades_closed||0,trades_open:+d.trades_open||0,analyses_count:+d.analyses_count||0}:null;
   renderStats();
  }).catch(function(){MYPERF=null;renderStats()});
 }
@@ -6182,18 +6185,23 @@ function renderStats(){
    Satu tempat untuk tukar had milestone + link broker. Angka datang dari
    sumber sedia ada sahaja: /api/league/me (closed trades, win rate, Net R —
    sama angka macam stats tiles). */
-var READY_CFG={minTrades:50,minWinRate:45,minNetR:0,allowOpenWhenLocked:false};
+var READY_CFG={minTrades:5,minWinRate:45,minProfitUsd:500,allowOpenWhenLocked:false};
 var READY_BROKER='https://rinfinity.com/en/welcome-bonus?a=wnzx';
-var READY_NOTE='Opens our partner broker (Rinfinity) in your browser. Trading involves risk. Not financial advice. TraderWatch may earn a commission if you sign up.';
+var READY_NOTE_PARTS=[
+ 'Your support helps TraderWatch grow.',
+ 'By choosing our partner broker, you contribute to the continued development, maintenance, and enhancement of the TraderWatch platform, helping us deliver better tools and experiences for everyone.',
+ 'Trading involves risk. Not financial advice. TraderWatch may earn a commission from qualifying sign-ups.'
+];
 function readyState(){
  var cfg=READY_CFG,p=MYPERF;
  var n=p?(+p.trades_closed||0):0;
  var wr=(p&&p.win_rate!=null&&isFinite(+p.win_rate))?+p.win_rate:null;
- var nr=(p&&p.net_r!=null&&isFinite(+p.net_r))?+p.net_r:null;
+ var prof=(p&&p.balance!=null&&isFinite(+p.balance))?(+p.balance-(+p.start_balance||10000)):null;
+ var profTxt=prof==null?'—':((prof>0?'+':prof<0?'-':'')+'$'+Math.abs(prof).toLocaleString('en-US',{maximumFractionDigits:2}));
  var rows=[
   {lab:t('rdyK1').replace('%n',cfg.minTrades),ok:n>=cfg.minTrades,val:String(n)},
   {lab:t('rdyK2').replace('%n',cfg.minWinRate),ok:wr!=null&&wr>=cfg.minWinRate,val:wr==null?'—':wrTxt(wr)},
-  {lab:t('rdyK3'),ok:nr!=null&&nr>cfg.minNetR,val:nr==null?'—':(nr===0?'0R':fmtR(nr))},
+  {lab:t('rdyK3').replace('%n',cfg.minProfitUsd),ok:prof!=null&&prof>=cfg.minProfitUsd,val:profTxt},
  ];
  var done=0;rows.forEach(function(x){if(x.ok)done++});
  return {rows:rows,done:done,unlocked:done===rows.length};
@@ -6217,7 +6225,7 @@ function renderReady(){
   '<div class="rdymeta"><span>'+esc(t('rdyProg'))+'</span><span>'+esc(t('rdyDone').replace('%n',s.done).replace('%t',n))+'</span></div>'+
   '<div class="rdybar"><i style="width:'+pct+'%"></i></div>'+
   rowsHtml+btn+
-  '<div class="rdynote">'+esc(READY_NOTE)+'</div>';
+  '<div class="rdynote">'+READY_NOTE_PARTS.map(function(p){return '<p>'+esc(p)+'</p>'}).join('')+'</div>';
  $('rdyOpen').onclick=function(){
   if(!s.unlocked&&!READY_CFG.allowOpenWhenLocked){hap(6);toast(t('rdyToast').replace('%n',left));return}
   hap(8);
