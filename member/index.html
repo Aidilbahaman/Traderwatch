@@ -1525,7 +1525,7 @@ html[data-theme="light"] .star-mood{background:rgba(122,181,46,.10);border-color
    var target=e.target;
    if(!target||!target.closest)return;
    var comp=target.closest('#composer,#dmComp');
-   if(!comp||target.closest('#sendBtn,#dmSendBtn,#dmShareBtn'))return;
+   if(!comp||target.closest('#sendBtn,#dmSendBtn,#dmShareBtn,.cx-btn'))return;
    var inp=comp.id==='dmComp'?document.getElementById('dmInp'):document.getElementById('msgInput');
    if(!inp||document.activeElement===inp)return;
    e.preventDefault();
@@ -2073,7 +2073,7 @@ html[data-theme="light"] .star-mood{background:rgba(122,181,46,.10);border-color
       <div class="dm-msgs" id="dmMsgs"></div>
       <div class="dm-comp hidden" id="dmReplyBar" style="position:absolute;left:12px;right:12px;bottom:100%;display:flex;gap:6px;align-items:center;padding:8px 10px;border-radius:14px 14px 0 0;background:var(--card2);border:1px solid var(--line);border-bottom:0"></div>
       <div class="dm-comp" id="dmComp">
-        <button class="dm-plus" id="dmShareBtn" type="button" aria-label="Share setup" title="Share latest setup">
+        <button class="dm-plus" id="dmShareBtn" type="button" aria-label="Share latest trade" title="Share latest trade">
           <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
         </button>
         <input id="dmInp" type="text" autocomplete="off" maxlength="500" placeholder="Message privately..." aria-label="Private message">
@@ -3775,12 +3775,13 @@ function openMsgActions(id){
 function sendMsg(gifObj){
  if(COM_EDIT){saveEdit();return}
  if(sending)return;
- var inp=$('msgInput'),v=gifObj?'':inp.value.trim();
- if(!v&&!gifObj){toast(t('emptyMsg'));return}
+ var isGif=!!(gifObj&&typeof gifObj==='object'&&typeof gifObj.url==='string'&&gifObj.url);
+ var inp=$('msgInput'),v=isGif?'':inp.value.trim();
+ if(!v&&!isGif){toast(t('emptyMsg'));return}
  if(v.length>500){toast(t('longMsg'));return}
  sending=true;$('sendBtn').disabled=true;
- var body={};if(gifObj){body.gif=gifObj}else{body.text=v}
- if(!gifObj&&COM_FEAT.rooms&&COM_ROOM!=='all')body.room=COM_ROOM;
+ var body={};if(isGif){body.gif=gifObj}else{body.text=v}
+ if(COM_FEAT.rooms&&COM_ROOM!=='all')body.room=COM_ROOM;
  apiFetch('/api/chat/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)}).then(function(res){
   sending=false;$('sendBtn').disabled=false;
   if(!res.ok){
@@ -3788,7 +3789,7 @@ function sendMsg(gifObj){
    else if(res.status===400)toast((res.data&&/max/i.test(res.data.error||''))?t('longMsg'):t('filtered'));
    else toast(t('sendErr'));return;
   }
-  if(!gifObj)inp.value='';
+  if(!isGif)inp.value='';
   if(res.data&&res.data.message){
    res.data.message.own=true;
    MSGS.push(res.data.message);
@@ -3807,7 +3808,7 @@ setInterval(function(){
  if(current==='community')loadMessages(true);
 },8000);
 $('sendBtn').addEventListener('mousedown',function(e){e.preventDefault()});
-$('sendBtn').onclick=sendMsg;
+$('sendBtn').onclick=function(){sendMsg()};
 $('msgInput').addEventListener('keydown',function(e){if(e.key==='Enter'){e.preventDefault();sendMsg()}else if(e.key==='Escape'&&COM_EDIT){cancelEdit()}});
 /* Dock sembunyi SEGERA bila input chat focus (jangan tunggu viewport resize
    yang mungkin lambat/tak dilapor sesetengah keyboard Android). */
@@ -3829,27 +3830,11 @@ $('msgInput').addEventListener('keydown',function(e){if(e.key==='Enter'){e.preve
  if(mi){
   mi.addEventListener('focus',function(){setKbFocus(true)});
   mi.addEventListener('blur',function(){setTimeout(function(){if(document.activeElement!==mi)setKbFocus(false)},60)});
-  document.addEventListener('DOMContentLoaded', function(){
-  if(window.TWChatExtras){
-   var btn=document.createElement('button');
-   btn.className='cx-btn'; btn.type='button'; btn.innerHTML='GIF';
-   mi.parentNode.insertBefore(btn, mi.nextSibling);
-   TWChatExtras.mount(btn, mi, {community:true});
-  }
- });
  }
  var di=document.getElementById('dmInp');
  if(di){
   di.addEventListener('focus',function(){setKbFocus(true)});
   di.addEventListener('blur',function(){setTimeout(function(){if(document.activeElement!==di)setKbFocus(false)},60)});
-  document.addEventListener('DOMContentLoaded', function(){
-  if(window.TWChatExtras){
-   var btn=document.createElement('button');
-   btn.className='cx-btn'; btn.type='button'; btn.innerHTML='GIF';
-   di.parentNode.insertBefore(btn, di.nextSibling);
-   TWChatExtras.mount(btn, di, {community:false});
-  }
-  });
  }
 })();
 
@@ -4243,7 +4228,7 @@ function drawDMMsgs(scrollEnd){
   var ref='';
   if(m.reply){
    var who=m.reply.me?(en?'You':'Anda'):(dmFriendName()||'');
-   var rtx=m.reply.body||(m.reply.kind==='signal'?(en?'Signal setup':'Setup signal'):'');
+   var rtx=m.reply.body||(m.reply.kind==='signal'?(en?'Signal setup':'Setup signal'):m.reply.kind==='gif'?'GIF':'');
    ref='<div class="dm-replyref" data-dm-jump="'+esc(String(m.reply.id))+'"><b>'+esc(who)+'</b><span>'+esc(rtx)+'</span></div>';
   }
   if(m.deleted){
@@ -4377,22 +4362,24 @@ function openDmActions(id, el){
 })();
 function sendDM(cardObj, gifObj){
  if(FR.dmBusy||!FR.dmFriend)return;
- var inp=$('dmInp'),v=(cardObj||gifObj)?'':inp.value.trim();
- if(!v&&!cardObj&&!gifObj)return;
+ var hasCard=!!(cardObj&&typeof cardObj==='object'&&cardObj.pair);
+ var hasGif=!!(gifObj&&typeof gifObj==='object'&&typeof gifObj.url==='string'&&gifObj.url);
+ var inp=$('dmInp'),v=(hasCard||hasGif)?'':inp.value.trim();
+ if(!v&&!hasCard&&!hasGif)return;
  if(v.length>500){toast(t('longMsg'));return}
  FR.dmBusy=true;$('dmSendBtn').disabled=true;
  var body={to:FR.dmFriend.id};
  if(v)body.text=v;
- if(DM_REPLY&&!cardObj&&!gifObj){body.reply_to=DM_REPLY.id;body.reply_body=DM_REPLY.body||''}
- if(cardObj)body.card=cardObj;
- if(gifObj)body.gif=gifObj;
+ if(DM_REPLY&&!hasCard&&!hasGif){body.reply_to=DM_REPLY.id;body.reply_body=DM_REPLY.body||''}
+ if(hasCard)body.card=cardObj;
+ if(hasGif)body.gif=gifObj;
  apiFetch('/api/chat/dm',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)}).then(function(r){
   FR.dmBusy=false;$('dmSendBtn').disabled=false;
   if(!r.ok){
    toast(r.status===429?t('slow'):r.status===403?(lang==='en'?'Friends only':'Hanya untuk rakan'):t('sendErr'));
    return;
   }
-  if(!cardObj&&!gifObj)inp.value='';
+  if(!hasCard&&!hasGif)inp.value='';
   if(r.data&&r.data.message){
    FR.dmMsgs.push(r.data.message);
    if(r.data.message.id!=null)FR.dmLastId=Math.max(Number(FR.dmLastId||0),Number(r.data.message.id)||0);
@@ -4403,24 +4390,61 @@ function sendDM(cardObj, gifObj){
   hap(8);
  }).catch(function(){FR.dmBusy=false;$('dmSendBtn').disabled=false;toast(t('sendErr'))});
 }
+function _tradeToCard(tr){
+ if(!tr)return null;
+ var pair=String(tr.pair||'').replace('/','').toUpperCase();
+ var side=String(tr.side||tr.dir||'').toUpperCase();
+ var entry=Number(tr.entry),sl=Number(tr.sl),tp=Number(tr.tp);
+ if(!pair||(side!=='BUY'&&side!=='SELL')||!isFinite(entry)||!isFinite(sl)||!isFinite(tp))return null;
+ if(side==='BUY'&&!(sl<entry&&entry<tp))return null;
+ if(side==='SELL'&&!(tp<entry&&entry<sl))return null;
+ var c=Number(tr.ai_conf!=null?tr.ai_conf:(tr.conf!=null?tr.conf:0));
+ if(isFinite(c)&&c>0&&c<=1)c=Math.round(c*100);
+ else c=isFinite(c)?Math.max(0,Math.min(100,Math.round(c))):0;
+ return {pair:pair,side:side,tf:String(tr.ai_tf||tr.tf||'M15').toUpperCase(),entry:entry,sl:sl,tp:tp,conf:c};
+}
 function shareSetupInDM(){
- if(!FR.dmFriend)return;
- var pick=null;
- /* Prefer latest analyzed pair if it has entry/sl/tp, else newest PAIR_AI BUY/SELL */
- if(typeof PAIR_AI==='object'&&PAIR_AI){
-  Object.keys(PAIR_AI).forEach(function(k){
-   var a=PAIR_AI[k];
-   if(!pick&&a&&(a.side==='BUY'||a.side==='SELL')&&a.entry!=null&&a.sl!=null&&a.tp!=null){
-    pick={pair:k,side:a.side,tf:a.tf||'M15',entry:a.entry,sl:a.sl,tp:a.tp,conf:Math.round((a.conf||0)*100)};
+ if(!FR.dmFriend||FR.dmBusy)return;
+ var en=(lang==='en');
+ function pickAndSend(list){
+  var pick=null,fromTrade=false;
+  if(Array.isArray(list)&&list.length){
+   var sorted=list.slice().sort(function(a,b){
+    var ta=Date.parse(a.opened_at||a.created_at||0)||0;
+    var tb=Date.parse(b.opened_at||b.created_at||0)||0;
+    return tb-ta;
+   });
+   for(var i=0;i<sorted.length;i++){
+    pick=_tradeToCard(sorted[i]);
+    if(pick){fromTrade=true;break}
    }
-  });
+  }
+  if(!pick&&typeof S==='object'&&S&&S.m){
+   pick=_tradeToCard(S.m);
+  }
+  if(!pick){
+   toast(en?'No taken trade yet. Take a trade first to share.':'Belum ada trade diambil. Ambil satu trade dahulu untuk kongsi.');
+   return;
+  }
+  sendDM(pick);
+  var lbl=pairName(pick.pair)+' '+pick.side;
+  toast(fromTrade?(en?'Shared latest trade: ':'Trade terkini dikongsi: ')+lbl:(en?'Shared setup: ':'Setup dikongsi: ')+lbl);
  }
- if(!pick){
-  toast(lang==='en'?'Analyze a pair first to share a setup':'Analisis satu pair dahulu untuk kongsi setup');
+ if(LG.state==='ready'&&Array.isArray(LG.trades)){
+  pickAndSend(LG.trades);
   return;
  }
- sendDM(pick);
- toast((lang==='en'?'Shared setup: ':'Setup dikongsi: ')+pick.pair);
+ var btn=$('dmShareBtn');
+ if(btn)btn.disabled=true;
+ apiFetch('/api/league/trades').then(function(r){
+  if(btn)btn.disabled=false;
+  var list=(r.ok&&r.data&&Array.isArray(r.data.trades))?r.data.trades:[];
+  if(list.length)LG.trades=list;
+  pickAndSend(list);
+ }).catch(function(){
+  if(btn)btn.disabled=false;
+  pickAndSend(LG.trades||[]);
+ });
 }
 
 /* ===== Friends snap-stage drag engine =====
@@ -4953,7 +4977,7 @@ if(typeof window!=='undefined'){window.__aiLearn=loadAiLearn;window.__drawAiLear
 if(typeof window!=='undefined'){window.__showAccount=showAccount;}
 if(typeof window!=='undefined'){window.__show=show;window.__mapVerdict=mapVerdict;window.__setChip=setChip;window.__S=S;}
 if(typeof window!=='undefined'){window.__setCur=function(sym){var p=PAIRS.filter(function(x){return x.s===sym})[0];if(p){cur=p;S.m=null;try{openSheet(sym)}catch(e){}}}};
-if(typeof window!=='undefined'){window.__loadProfile=loadProfile;window.__showView=showView;window.__openDM=openDM;window.__sendDM=sendDM;window.__setDmReply=setDmReply;window.__openDmActions=openDmActions;window.__FR=function(){return FR};window.__drawDMMsgs=drawDMMsgs;}
+if(typeof window!=='undefined'){window.sendMsg=sendMsg;window.sendDM=sendDM;window.apiFetch=apiFetch;window.hap=hap;try{Object.defineProperty(window,'lang',{get:function(){return lang},configurable:true})}catch(e){window.lang=lang}window.__loadProfile=loadProfile;window.__showView=showView;window.__openDM=openDM;window.__sendDM=sendDM;window.__setDmReply=setDmReply;window.__openDmActions=openDmActions;window.__FR=function(){return FR};window.__drawDMMsgs=drawDMMsgs;}
 if(typeof window!=='undefined'){window.__getME=function(){return ME};window.__getLG=function(){return LG.me};}
 
 function renderLiga(){
