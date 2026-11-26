@@ -5,19 +5,39 @@
   var MSG = '⚠️ TraderWatch under maintenance, sorry for any inconvenience during maintenance periods 🙏🏻';
 
   function css() {
+    if (document.getElementById(BANNER_ID + '-css')) return;
     var st = document.createElement('style');
     st.id = BANNER_ID + '-css';
     st.textContent =
-      '#' + BANNER_ID + '{position:fixed;top:0;left:0;right:0;z-index:9999;' +
+      '#' + BANNER_ID + '{position:fixed;top:env(safe-area-inset-top,0px);left:0;right:0;z-index:2147483646;' +
       'background:#b7f36b;color:#0a100c;font:700 13px/1.35 -apple-system,Inter,system-ui,sans-serif;' +
-      'text-align:center;padding:10px 44px 10px 14px;box-shadow:0 2px 10px #0008}' +
-      '#' + BANNER_ID + ' .twm-x{position:absolute;right:10px;top:50%;transform:translateY(-50%);' +
-      'background:none;border:none;color:#0a100c;font-size:16px;font-weight:800;cursor:pointer;padding:4px 8px}';
+      'text-align:center;padding:10px max(42px,calc(34px + env(safe-area-inset-right,0px))) 10px max(14px,env(safe-area-inset-left,0px));' +
+      'box-shadow:0 4px 14px #0008}' +
+      '#' + BANNER_ID + ' .twm-x{position:absolute;right:max(8px,env(safe-area-inset-right,0px));top:50%;transform:translateY(-50%);' +
+      'background:none;border:none;color:#0a100c;font-size:16px;font-weight:800;cursor:pointer;padding:4px 8px}' +
+      '@media(max-width:520px){' +
+      'html.tw-maint-on .appbar{margin-top:calc(var(--tw-maint-h,0px) + env(safe-area-inset-top,0px))!important;padding-top:10px!important}' +
+      'html.tw-maint-on .dm-head{margin-top:calc(var(--tw-maint-h,0px) + env(safe-area-inset-top,0px))!important;padding-top:10px!important}' +
+      'html.tw-maint-on #sheet{max-height:calc(92% - var(--tw-maint-h,0px) - env(safe-area-inset-top,0px))}' +
+      '}';
     document.head.appendChild(st);
   }
 
+  function measure() {
+    var b = document.getElementById(BANNER_ID);
+    if (!b) return;
+    document.documentElement.style.setProperty('--tw-maint-h', b.offsetHeight + 'px');
+  }
+
+  function hide() {
+    var el = document.getElementById(BANNER_ID);
+    if (el) el.remove();
+    document.documentElement.classList.remove('tw-maint-on');
+    document.documentElement.style.removeProperty('--tw-maint-h');
+  }
+
   function show(dismissable) {
-    if (document.getElementById(BANNER_ID)) return;
+    if (document.getElementById(BANNER_ID)) { measure(); return; }
     css();
     var b = document.createElement('div');
     b.id = BANNER_ID;
@@ -25,10 +45,12 @@
     b.innerHTML = '<span>' + MSG + '</span>' +
       '<button class="twm-x" aria-label="Tutup banner">✕</button>';
     b.querySelector('.twm-x').onclick = function () {
-      b.remove();
+      hide();
       try { sessionStorage.setItem('tw-maint-dismissed', '1'); } catch (e) {}
     };
     document.body.appendChild(b);
+    document.documentElement.classList.add('tw-maint-on');
+    measure();
   }
 
   function check() {
@@ -38,7 +60,7 @@
         var on = !!(d && d.maintenance === true);
         try {
           if (!on && sessionStorage.getItem('tw-maint-dismissed') === '1') {
-            var el = document.getElementById(BANNER_ID); if (el) el.remove();
+            hide();
             return;
           }
         } catch (e) {}
@@ -46,12 +68,14 @@
           try { sessionStorage.removeItem('tw-maint-dismissed'); } catch (e) {}
           show();
         } else {
-          var el = document.getElementById(BANNER_ID);
-          if (el) el.remove();
+          hide();
         }
       })
       .catch(function () { /* fail senyap - tiada banner */ });
   }
+
+  window.addEventListener('resize', measure);
+  window.addEventListener('orientationchange', measure);
 
   function boot() {
     check();
