@@ -214,9 +214,10 @@ html[data-theme="light"] #view-community::after{background:radial-gradient(ellip
 @keyframes comAuroraA{0%{transform:translate3d(0,0,0) scale(1);opacity:.72}50%{transform:translate3d(38%,24%,0) scale(1.18);opacity:1}100%{transform:translate3d(12%,48%,0) scale(.94);opacity:.78}}
 @keyframes comAuroraB{0%{transform:translate3d(0,0,0) scale(1.06);opacity:.68}50%{transform:translate3d(-36%,-22%,0) scale(.92);opacity:.96}100%{transform:translate3d(-14%,-44%,0) scale(1.16);opacity:.74}}
 @media(prefers-reduced-motion:reduce){#view-community::before,#view-community::after{animation:none !important}}
-#view-community>.vhead,#view-community>.online,#view-community>.rooms{flex:none;position:relative;z-index:2}
-#view-community>.vhead{margin-bottom:8px}
-#view-community>.online{margin-bottom:8px}
+#view-community>.com-head,#view-community>.rooms{flex:none;position:relative;z-index:2}
+.com-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:8px}
+.com-head .vhead{margin:0;min-width:0}
+.com-head .online{margin:4px 0 0;flex:none;white-space:nowrap}
 .com-scroll{flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;scrollbar-width:none;position:relative;z-index:2;padding:4px 0 calc(176px + var(--sab))}
 .com-scroll::-webkit-scrollbar{display:none}
 .msgs{display:flex;flex-direction:column;gap:12px}
@@ -2033,8 +2034,10 @@ html[data-theme="light"] .star-mood{background:rgba(122,181,46,.10);border-color
 
       <!-- COMMUNITY -->
       <section class="view hidden" id="view-community" data-view="community">
-        <div class="vhead"><h2 id="comTitle">Komuniti</h2><p id="comSub">Berbincang dengan trader lain.</p></div>
-        <div class="online"><i></i><span id="onlineTxt">Komuniti aktif</span></div>
+        <div class="com-head">
+          <div class="vhead"><h2 id="comTitle">Komuniti</h2><p id="comSub">Berbincang dengan trader lain.</p></div>
+          <div class="online"><i></i><span id="onlineTxt">Komuniti aktif</span></div>
+        </div>
         <div class="rooms hidden" id="rooms" role="tablist" aria-label="Rooms"></div>
         <div class="com-scroll" id="comScroll">
           <div class="msgs" id="msgs"></div>
