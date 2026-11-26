@@ -9,6 +9,8 @@ here, and the filtered text is what gets stored.
 Endpoints (all JSON, all under /api/):
   GET  /api/chat/messages?limit=50      -> newest-first message list + online count
   POST /api/chat/messages               -> {"text": "..."} -> stored message
+  POST /api/chat/edit                   -> {"id": 12, "text": "..."} -> own message edited
+  POST /api/chat/delete                 -> {"id": 12} -> own message soft-deleted
   POST /api/chat/alert                  -> {"level": "off|team|all"}
   POST /api/chat/presence               -> heartbeat; returns {ok, online}
 
@@ -72,7 +74,9 @@ REACT_COOLDOWN = 0.4            # seconds between reaction toggles per user
 _last_react = {}
 _cache_lock = threading.Lock()
 _cache = {}
-_feat = {"ext": (0.0, False), "rx": (0.0, False)}
+_feat = {"ext": (0.0, False), "rx": (0.0, False), "ed": (0.0, False)}
+_last_edit = {}                 # user_id -> unix ts of last accepted edit
+EDIT_RATE_LIMIT = 1.5           # seconds between edits per user
 
 # ---- presence (online count) ----
 PRESENCE_TTL = float(os.environ.get("PRESENCE_TTL", "150"))  # 60s heartbeat + margin
@@ -195,36 +199,13 @@ CONTACT_RE = re.compile(
     r"group saya|grup saya|channel saya)\b", re.I)
 
 
-def sanitise(text):
-    """Return (clean_text, actions). Blocked content is REPLACED, not silently
-    dropped, so the sender can see their message was filtered."""
-    actions = []
-    t = text
-
-    t, n = URL_RE.subn("[pautan disekat]", t)
-    if n:
-        actions.append("link")
-    t, n = DOMAIN_RE.subn("[pautan disekat]", t)
-    if n:
-        actions.append("link")
-    t, n = EMAIL_RE.subn("[emel disekat]", t)
-    if n:
-        actions.append("email")
-    t, n = MY_PHONE_RE.subn("[nombor disekat]", t)
-    if n:
-        actions.append("phone")
-    t, n = PHONE_RE.subn("[nombor disekat]", t)
-    if n:
-        actions.append("phone")
-    t, n = HANDLE_RE.subn("[handle disekat]", t)
-    if n:
-        actions.append("handle")
-    t, n = CONTACT_RE.subn("[hubungan disekat]", t)
-    if n:
-        actions.append("contact")
-
-    t = re.sub(r"\s{2,}", " ", t).strip()
-    return t, sorted(set(actions))
+def sanitise(text, admin=False):
+    """Return (clean_text, actions). Word filter DISABLED for everyone per owner
+    request 2026-11-26 — messages pass through unfiltered. Keep the signature
+    and actions list for API compatibility (actions always empty now). The
+    admin flag is accepted but no longer changes behaviour."""
+    del admin
+    return (re.sub(r"\s{2,}", " ", text or "").strip(), [])
 
 
 def has_blocked(text):
@@ -492,6 +473,211 @@ def ext_ok():
 
 def rx_ok():
     return _probe("rx", "/rest/v1/chat_reactions", {"select": "message_id", "limit": 1})
+
+
+def ed_ok():
+    """True once the edited_at column exists (migrations/20261126_chat_edit_delete.sql)."""
+    return _probe("ed", "/rest/v1/chat_messages", {"select": "edited_at", "limit": 1})
+
+
+# ---------------------------------------------------------------- GIF picker
+# Media chat: GIF disimpan sebagai kind='gif' + payload JSON (bukan teks), jadi
+# penapis pautan tidak menyentuhnya dan URL sentiasa divalidasi semula di sini.
+# Provider sebenar (Tenor/Klipy/Giphy) dipanggil server-side supaya API key
+# tidak pernah sampai ke pelayar. Tanpa key, app guna pek reaksi terbina dalam.
+GIF_ENV = pathlib.Path("/home/ubuntu/.secrets/gif.env")
+GIF_LOCAL_RE = re.compile(r"^/member/gifs/[a-z0-9_-]{1,40}\.gif$", re.I)
+GIF_HOSTS = {
+    "media.tenor.com", "c.tenor.com", "media1.tenor.com",
+    "static.klipy.com", "static1.klipy.com", "static2.klipy.com",
+    "media.giphy.com", "i.giphy.com", "media0.giphy.com", "media1.giphy.com",
+    "media2.giphy.com", "media3.giphy.com", "media4.giphy.com",
+}
+GIF_RATE = 20                  # carian GIF / minit / user
+_last_gif = {}
+_gif_key_cache = {"at": 0.0, "keys": {}}
+
+
+def gif_keys():
+    """Provider keys from the environment or /home/ubuntu/.secrets/gif.env.
+    Cache 60s so editing the secrets file does not need a restart."""
+    now = time.time()
+    if now - _gif_key_cache["at"] < 60 and _gif_key_cache["keys"] is not None:
+        return _gif_key_cache["keys"]
+    keys = {k: (os.environ.get(k) or "").strip() for k in
+            ("TENOR_API_KEY", "KLIPY_APP_KEY", "GIPHY_API_KEY")}
+    try:
+        for line in GIF_ENV.read_text().splitlines():
+            line = line.strip()
+            if not line or line.startswith("#") or "=" not in line:
+                continue
+            k, v = line.split("=", 1)
+            k = k.strip()
+            if k in keys:
+                keys[k] = v.strip().strip('"').strip("'")
+    except OSError:
+        pass
+    good = {k: v for k, v in keys.items() if v and not v.lower().startswith(("no", "changeme", "xxx"))}
+    _gif_key_cache.update({"at": now, "keys": good})
+    return good
+
+
+def gif_ok():
+    return bool(gif_keys())
+
+
+def clean_gif(g):
+    """Validate a GIF reference. Only same-site pack files or https media from
+    a known provider host survive; everything else is rejected, never stored."""
+    if not isinstance(g, dict):
+        return None
+    url = str(g.get("url") or "").strip()
+    if len(url) > 500:
+        return None
+    if GIF_LOCAL_RE.match(url):
+        final = url
+    else:
+        try:
+            p = urllib.parse.urlparse(url)
+        except ValueError:
+            return None
+        if p.scheme != "https" or (p.hostname or "").lower() not in GIF_HOSTS:
+            return None
+        final = urllib.parse.urlunparse(p._replace(query="", fragment=""))
+        if len(final) > 400:
+            return None
+    title = re.sub(r"[\x00-\x1f]", "", str(g.get("title") or ""))[:60].strip() or "GIF"
+    try:
+        w = max(40, min(800, int(g.get("w") or 240)))
+        h = max(40, min(800, int(g.get("h") or 240)))
+    except (TypeError, ValueError):
+        w = h = 240
+    gid = re.sub(r"[^A-Za-z0-9_-]", "", str(g.get("id") or ""))[:60]
+    return {"url": final, "title": title, "w": w, "h": h, "id": gid or None}
+
+
+def _gif_http(url, timeout=8):
+    req = urllib.request.Request(url, headers={
+        "User-Agent": "TraderWatch/1.0 (+https://traderwatch.org)",
+        "Accept": "application/json",
+    })
+    with urllib.request.urlopen(req, timeout=timeout) as r:
+        return json.loads(r.read().decode("utf-8", "replace"))
+
+
+def _gif_fetch_tenor(q, key, limit):
+    base = "https://tenor.googleapis.com/v2/" + ("search" if q else "featured")
+    qs = {"key": key, "limit": limit, "media_filter": "tinygif,gif", "contentfilter": "high",
+          "locale": "en_US"}
+    if q:
+        qs["q"] = q
+    data = _gif_http(base + "?" + urllib.parse.urlencode(qs))
+    out = []
+    for it in data.get("results", [])[:limit]:
+        mf = it.get("media_formats") or {}
+        gif = mf.get("gif") or mf.get("tinygif") or {}
+        tiny = mf.get("tinygif") or gif
+        if not gif.get("url"):
+            continue
+        dims = gif.get("dims") or [240, 240]
+        out.append({"id": str(it.get("id") or ""), "title": (it.get("content_description") or "GIF")[:60],
+                    "url": gif["url"], "preview": tiny.get("url") or gif["url"],
+                    "w": int(dims[0] or 240), "h": int(dims[1] or 240)})
+    return out
+
+
+def _gif_fetch_klipy(q, key, limit):
+    path = "search" if q else "trending"
+    qs = {"per_page": max(8, min(50, limit)), "content_filter": "high", "locale": "en"}
+    if q:
+        qs["q"] = q
+    url = "https://api.klipy.com/api/v1/%s/gifs/%s?%s" % (
+        urllib.parse.quote(key, safe=""), path, urllib.parse.urlencode(qs))
+    data = _gif_http(url)
+    out = []
+    for it in ((data.get("data") or {}).get("data") or [])[:limit]:
+        files = it.get("file") or {}
+        md = files.get("md") or files.get("hd") or files.get("sm") or {}
+        gif = md.get("gif") or {}
+        sm = (files.get("sm") or {}).get("gif") or gif
+        if not gif.get("url"):
+            continue
+        out.append({"id": str(it.get("id") or it.get("slug") or ""),
+                    "title": (it.get("title") or "GIF")[:60],
+                    "url": gif["url"], "preview": sm.get("url") or gif["url"],
+                    "w": int(gif.get("width") or 240), "h": int(gif.get("height") or 240)})
+    return out
+
+
+def _gif_fetch_giphy(q, key, limit):
+    path = "search" if q else "trending"
+    qs = {"api_key": key, "limit": limit, "rating": "pg-13"}
+    if q:
+        qs["q"] = q
+    data = _gif_http("https://api.giphy.com/v1/gifs/%s?%s" % (path, urllib.parse.urlencode(qs)))
+    out = []
+    for it in data.get("data", [])[:limit]:
+        imgs = it.get("images") or {}
+        gif = imgs.get("downsized") or imgs.get("original") or {}
+        prev = imgs.get("fixed_width_small") or imgs.get("fixed_width") or {}
+        if not gif.get("url"):
+            continue
+        out.append({"id": str(it.get("id") or ""), "title": (it.get("title") or "GIF")[:60],
+                    "url": gif["url"], "preview": prev.get("url") or gif["url"],
+                    "w": int(gif.get("width") or 240), "h": int(gif.get("height") or 240)})
+    return out
+
+
+GIF_PROVIDERS = (("TENOR_API_KEY", "tenor", _gif_fetch_tenor),
+                 ("KLIPY_APP_KEY", "klipy", _gif_fetch_klipy),
+                 ("GIPHY_API_KEY", "giphy", _gif_fetch_giphy))
+
+
+def gif_search(q, limit=24):
+    """Search the configured provider. Returns (provider, results); never raises
+    past this point — the picker degrades to the built-in pack on any failure."""
+    keys = gif_keys()
+    for env_key, name, fn in GIF_PROVIDERS:
+        key = keys.get(env_key)
+        if not key:
+            continue
+        cache_key = "gif:%s:%s:%d" % (name, q.lower(), limit)
+        def load(k=key, f=fn):
+            try:
+                return f(q, k, limit)
+            except Exception:
+                return []
+        return name, _cached(cache_key, 300, load)
+    return None, []
+
+
+def rate_gif(uid):
+    """Simple per-user token bucket: GIF_RATE searches per rolling minute."""
+    now = time.time()
+    slot = [t for t in _last_gif.get(uid, []) if now - t < 60]
+    if len(slot) >= GIF_RATE:
+        _last_gif[uid] = slot
+        return False
+    slot.append(now)
+    _last_gif[uid] = slot
+    return True
+
+
+def is_admin_uid(uid):
+    """Profiles role check, cached 60s. Only used to let admins moderate other
+    people's messages; failure degrades to 'not admin' instead of erroring."""
+    if not uid:
+        return False
+
+    def load():
+        try:
+            rows = sb("GET", "/rest/v1/profiles",
+                      params={"select": "role", "id": "eq." + uid, "limit": 1}) or []
+        except RuntimeError:
+            return False
+        return bool(rows) and (rows[0].get("role") or "").lower() == "admin"
+
+    return _cached("admin:" + uid, 60, load)
 
 
 def _num(v):
@@ -1048,6 +1234,19 @@ class Handler(BaseHTTPRequestHandler):
                 "pinned": pinned[-1:],
             })
 
+        # ---- GIF picker search (server-side proxy so no API key hits the client)
+        if path == "/api/chat/gif":
+            q_raw = ((q.get("q") or [""])[0] or "").strip()
+            if len(q_raw) > 60:
+                return self._send(400, {"error": "query too long"})
+            if not rate_gif(uid):
+                return self._send(429, {"error": "slow down"})
+            provider, rows = gif_search(q_raw, 24)
+            if not provider:
+                return self._send(200, {"provider": None, "results": [],
+                                        "hint": "no provider configured"})
+            return self._send(200, {"provider": provider, "results": rows})
+
         if path != "/api/chat/messages":
             return self._send(404, {"error": "not found"})
 
@@ -1058,7 +1257,11 @@ class Handler(BaseHTTPRequestHandler):
 
         ext = ext_ok()
         room = ((q.get("room") or ["all"])[0] or "all").upper()
-        params = {"select": "id,user_id,username,body,created_at" + (",room,kind,payload" if ext else ""),
+        edit_ok = ed_ok()
+        sel = "id,user_id,username,body,created_at" + (",room,kind,payload" if ext else "")
+        if edit_ok:
+            sel += ",edited_at"
+        params = {"select": sel,
                   "created_at": "gte." + day_start_utc(),
                   "order": "created_at.desc",
                   "limit": limit}
@@ -1080,12 +1283,15 @@ class Handler(BaseHTTPRequestHandler):
             owner = r.pop("user_id", None)
             r["username"] = (dir_by_id.get(owner) or {}).get("username") or public_name(r.get("username"))
             r["rank"] = ranks.get(owner)
+            r["own"] = bool(uid) and owner == uid   # ownership by id, not by display name
             slot = rx.get(r["id"]) or {"reactions": {}, "mine": []}
             r["reactions"], r["mine"] = slot["reactions"], slot["mine"]
         return self._send(200, {"messages": rows, "reset_at_utc": day_start_utc(),
                                 "online": presence_count(),
                                 "rooms": room_counts() if ext else {},
-                                "features": {"rooms": ext, "cards": ext, "reactions": rx_ok()}})
+                                "features": {"rooms": ext, "cards": ext,
+                                             "reactions": rx_ok(), "edit": edit_ok,
+                                             "gifs": gif_ok()}})
 
     def do_POST(self):
         path = urllib.parse.urlparse(self.path).path
@@ -1311,7 +1517,12 @@ class Handler(BaseHTTPRequestHandler):
                 card = clean_card(payload.get("card"))
                 if not card:
                     return self._send(400, {"error": "invalid signal card"})
-            if not raw and not card:
+            gif = None
+            if payload.get("gif"):
+                gif = clean_gif(payload.get("gif"))
+                if not gif:
+                    return self._send(400, {"error": "invalid gif"})
+            if not raw and not card and not gif:
                 return self._send(400, {"error": "empty message"})
             if len(raw) > MAX_LEN:
                 return self._send(400, {"error": f"max {MAX_LEN} characters"})
@@ -1322,8 +1533,8 @@ class Handler(BaseHTTPRequestHandler):
                 "sender_id": uid,
                 "recipient_id": target,
                 "body": clean_txt,
-                "kind": "signal" if card else "text",
-                "payload": card,
+                "kind": "gif" if gif else ("signal" if card else "text"),
+                "payload": gif or card,
             }
             # Reply-to: mesti mesej dalam thread yang sama (rakan sahaja).
             rt = payload.get("reply_to")
@@ -1361,11 +1572,76 @@ class Handler(BaseHTTPRequestHandler):
                            "me": False} if row.get("reply_to") else None),
             }
             me_name = display_name(user)
-            push_body = f"Shared {card['pair']} {card['side']} setup" if card else clean_txt[:120]
+            push_body = (f"Shared {card['pair']} {card['side']} setup" if card
+                         else ("Sent a GIF" if gif else clean_txt[:120]))
             send_push_async(target, me_name, push_body,
                             "https://traderwatch.org/member/?view=friends&dm=" + uid,
                             "tw-dm-" + uid[:8])
             return self._send(201, {"message": out_msg})
+
+        # ---- edit / delete your own community message -------------------------
+        # {"id": 12, "text": "..."}  |  {"id": 12}
+        # Ownership is checked against chat_messages.user_id, never the display
+        # name. Admins may delete (not edit) anyone's message for moderation.
+        if path in ("/api/chat/edit", "/api/chat/delete"):
+            uid = user.get("id") or ""
+            try:
+                mid = int(payload.get("id"))
+            except (TypeError, ValueError):
+                return self._send(400, {"error": "bad id"})
+            if not ed_ok():
+                return self._send(501, {"error": "edit/delete not enabled yet"})
+            try:
+                rows = sb("GET", "/rest/v1/chat_messages", params={
+                    "select": "id,user_id,body,kind,created_at",
+                    "id": f"eq.{mid}", "created_at": "gte." + day_start_utc(),
+                    "limit": 1}) or []
+            except RuntimeError as e:
+                return self._send(502, {"error": str(e)})
+            if not rows:
+                return self._send(404, {"error": "message not found"})
+            row = rows[0]
+            mine = row.get("user_id") == uid
+
+            if path == "/api/chat/delete":
+                if not mine and not is_admin_uid(uid):
+                    return self._send(403, {"error": "only your own messages"})
+                params = {"id": f"eq.{mid}"}
+                if mine:
+                    params["user_id"] = f"eq.{uid}"      # belt and braces
+                try:
+                    sb("DELETE", "/rest/v1/chat_messages", params=params)
+                except RuntimeError as e:
+                    return self._send(502, {"error": str(e)})
+                return self._send(200, {"ok": True, "id": mid, "deleted": True})
+
+            if not mine:
+                return self._send(403, {"error": "only your own messages"})
+            if (row.get("kind") or "text") == "signal":
+                return self._send(400, {"error": "signal cards cannot be edited"})
+            raw = str(payload.get("text") or "").strip()
+            if not raw:
+                return self._send(400, {"error": "empty message"})
+            if len(raw) > MAX_LEN:
+                return self._send(400, {"error": f"max {MAX_LEN} characters"})
+            now = time.time()
+            if now - _last_edit.get(uid, 0) < EDIT_RATE_LIMIT:
+                return self._send(429, {"error": "slow down"})
+            clean, actions = sanitise(raw)
+            if not clean:
+                return self._send(400, {"error": "message filtered out"})
+            _last_edit[uid] = now
+            edited_at = datetime.now(timezone.utc).isoformat()
+            try:
+                upd = sb("PATCH", "/rest/v1/chat_messages", params={"id": f"eq.{mid}"},
+                         body={"body": clean, "edited_at": edited_at}) or []
+            except RuntimeError as e:
+                return self._send(502, {"error": str(e)})
+            stored = (upd or [{}])[0]
+            return self._send(200, {"ok": True, "id": mid,
+                                    "body": stored.get("body", clean),
+                                    "edited_at": stored.get("edited_at", edited_at),
+                                    "filtered": actions})
 
         if path != "/api/chat/messages":
             return self._send(404, {"error": "not found"})
@@ -1378,7 +1654,14 @@ class Handler(BaseHTTPRequestHandler):
                 return self._send(400, {"error": "invalid signal card"})
             if not ext_ok():
                 return self._send(501, {"error": "signal cards not enabled yet"})
-        if not raw and not card:
+        gif = None
+        if payload.get("gif"):
+            gif = clean_gif(payload.get("gif"))
+            if not gif:
+                return self._send(400, {"error": "invalid gif"})
+            if not ext_ok():
+                return self._send(501, {"error": "gifs not enabled yet"})
+        if not raw and not card and not gif:
             return self._send(400, {"error": "empty message"})
         if len(raw) > MAX_LEN:
             return self._send(400, {"error": f"max {MAX_LEN} characters"})
@@ -1389,18 +1672,22 @@ class Handler(BaseHTTPRequestHandler):
             return self._send(429, {"error": "slow down"})
 
         clean, actions = sanitise(raw) if raw else ("", [])
-        if not clean and not card:
+        if not clean and not card and not gif:
             return self._send(400, {"error": "message filtered out"})
-        if not clean:
+        if not clean and card:
             clean = "Kongsi setup AI"
+        if not clean and gif:
+            clean = "GIF"
 
         row = {"user_id": uid, "username": public_name(display_name(user)), "body": clean}
         if ext_ok():
             room = str(payload.get("room") or "").upper()
             row["room"] = card["pair"] if card else (room if room in ROOMS else "all")
-            row["kind"] = "signal" if card else "text"
+            row["kind"] = "gif" if gif else ("signal" if card else "text")
             if card:
                 row["payload"] = card
+            if gif:
+                row["payload"] = gif
 
         _last_post[uid] = now
         try:
@@ -1409,6 +1696,7 @@ class Handler(BaseHTTPRequestHandler):
             return self._send(502, {"error": str(e)})
         msg = (rows or [{}])[0]
         msg.pop("user_id", None)
+        msg["own"] = True
         msg.setdefault("reactions", {})
         msg.setdefault("mine", [])
         return self._send(201, {"message": msg, "filtered": actions})
