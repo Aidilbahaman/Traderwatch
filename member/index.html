@@ -945,17 +945,20 @@ html[data-theme="light"] .nav .ndot{border-color:#fff}
   /* Kaca beku. Blur 14px (bukan 60px): 60px mencampur semua warna jadi kabus
      rata, sebab itu kad nampak macam legap. 14px kekalkan bentuk/warna grid
      pair di belakang. Tint nipis + panel dalam kad turut lutsinar, jadi
-     seluruh kad betul-betul "tembus" ke UI belakang. */
-  .open #bd{background:rgba(0,0,0,.10);-webkit-backdrop-filter:blur(14px) saturate(180%);backdrop-filter:blur(14px) saturate(180%)}
-  #sheet{background-color:rgba(40,50,42,.27);
+     seluruh kad betul-betul "tembus" ke UI belakang.
+     Diselaraskan juga untuk floating trade detail (#tdbd + #td). */
+  .open #bd,.tdopen #tdbd{background:rgba(0,0,0,.10);-webkit-backdrop-filter:blur(14px) saturate(180%);backdrop-filter:blur(14px) saturate(180%)}
+  #sheet,#td{background-color:rgba(40,50,42,.27);
     background-image:linear-gradient(180deg,rgba(255,255,255,.08),rgba(255,255,255,0) 180px);
     border-top-color:rgba(255,255,255,.20);
     box-shadow:0 -20px 60px #000a,inset 0 1px 0 rgba(255,255,255,.10)}
-  #sheet .chartbox{background:rgba(10,14,11,.50)}
-  #sheet .tf,#sheet .risk{background:rgba(24,32,26,.45)}
-  html[data-theme="light"] #sheet{background-color:rgba(255,255,255,.32);background-image:none;border-top-color:rgba(255,255,255,.95)}
-  html[data-theme="light"] #sheet .chartbox{background:rgba(240,244,239,.55)}
-  html[data-theme="light"] #sheet .tf,html[data-theme="light"] #sheet .risk{background:rgba(238,242,237,.55)}
+  #td{border-color:rgba(255,255,255,.20);box-shadow:0 30px 80px #000c,inset 0 1px 0 rgba(255,255,255,.12)}
+  #sheet .chartbox,#td .chartbox{background:rgba(10,14,11,.50);border-color:rgba(255,255,255,.10)}
+  #sheet .tf,#sheet .risk,#td .tdlive,#td .rlevels div,#td .tdpbar{background:rgba(24,32,26,.45);border-color:rgba(255,255,255,.11)}
+  #td .rhead .x{background:rgba(24,32,26,.55);border:1px solid rgba(255,255,255,.12)}
+  html[data-theme="light"] #sheet,html[data-theme="light"] #td{background-color:rgba(255,255,255,.32);background-image:none;border-color:rgba(255,255,255,.95)}
+  html[data-theme="light"] #sheet .chartbox,html[data-theme="light"] #td .chartbox{background:rgba(240,244,239,.55)}
+  html[data-theme="light"] #sheet .tf,html[data-theme="light"] #sheet .risk,html[data-theme="light"] #td .tdlive,html[data-theme="light"] #td .rlevels div,html[data-theme="light"] #td .tdpbar{background:rgba(238,242,237,.55);border-color:rgba(0,0,0,.08)}
   #sheet .grab{background:transparent}
 }
 .floata{position:absolute;left:12px;right:12px;bottom:calc(74px + var(--sab));z-index:35;display:flex;align-items:center;gap:10px;background:var(--glass);backdrop-filter:saturate(160%) blur(18px);-webkit-backdrop-filter:saturate(160%) blur(18px);border:1px solid rgba(201,89,221,.45);border-radius:999px;padding:8px 13px 8px 9px;box-shadow:0 10px 30px #000a,0 0 22px rgba(8,148,255,.22);animation:up .3s both;cursor:pointer}
@@ -1129,17 +1132,29 @@ html[data-theme="light"] .lotbadge{color:#4c7a17}
 .tdpbar u{position:absolute;top:50%;width:12px;height:12px;border-radius:50%;background:var(--text);border:2px solid var(--bg);transform:translate(-50%,-50%);box-shadow:0 2px 8px #000a;transition:left .5s cubic-bezier(.2,.8,.2,1)}
 .tdends{display:flex;justify-content:space-between;font-size:8.5px;font-weight:800;letter-spacing:.06em;color:var(--muted);margin-top:4px}
 #td .kv{margin-top:14px;font-size:12px}
-.tdclose{margin-top:12px;display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.tdclose button{padding:11px 8px;border-radius:12px;font-size:12px;font-weight:850;cursor:pointer;transition:transform .12s,filter .12s;border:1px solid var(--line);background:var(--card2);color:var(--text)}
-.tdclose button:active{transform:scale(.97)}
-.tdclose button:disabled{opacity:.55;cursor:default}
-.tdclose .close-profit{border-color:rgba(183,243,107,.45);color:var(--lime);background:rgba(183,243,107,.1)}
-.tdclose .close-loss{border-color:rgba(255,119,125,.4);color:var(--red);background:rgba(255,119,125,.08)}
-html[data-theme="light"] .tdclose .close-profit{color:#4f7e16}
-.tdclose .close-note{grid-column:1/-1;text-align:center;color:var(--muted);font-size:9.5px;line-height:1.35}
-.tdshare{margin-top:14px}
-.btn-share{width:100%;background:var(--card2);border:1px solid var(--line);color:var(--text);border-radius:12px;padding:11px;font-size:13px;font-weight:800;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px}
+.tdclose{margin-top:14px;display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.tdclose button{position:relative;display:flex;align-items:center;justify-content:center;gap:8px;padding:11px 10px;border-radius:14px;font-size:12.5px;font-weight:850;letter-spacing:-.01em;cursor:pointer;transition:transform .14s cubic-bezier(.2,.8,.2,1),box-shadow .18s,border-color .18s,filter .15s;border:1px solid var(--line);background:var(--card2);color:var(--text)}
+.tdclose button .ic{width:22px;height:22px;border-radius:50%;display:grid;place-items:center;flex:none;transition:transform .18s}
+.tdclose button:hover:not(:disabled) .ic{transform:scale(1.08)}
+.tdclose button:active:not(:disabled){transform:scale(.97)}
+.tdclose button:disabled{opacity:.5;cursor:default}
+.tdclose .close-profit{border-color:rgba(183,243,107,.42);color:var(--lime);background:linear-gradient(145deg,rgba(183,243,107,.18),rgba(183,243,107,.06));box-shadow:0 8px 22px -8px rgba(183,243,107,.28),inset 0 1px 0 rgba(255,255,255,.14)}
+.tdclose .close-profit .ic{background:rgba(183,243,107,.22);color:var(--lime);box-shadow:0 0 12px rgba(183,243,107,.25)}
+.tdclose .close-profit:hover:not(:disabled){border-color:rgba(183,243,107,.65);box-shadow:0 10px 26px -6px rgba(183,243,107,.38),inset 0 1px 0 rgba(255,255,255,.2)}
+.tdclose .close-loss{border-color:rgba(255,119,125,.38);color:var(--red);background:linear-gradient(145deg,rgba(255,119,125,.17),rgba(255,119,125,.05));box-shadow:0 8px 22px -8px rgba(255,119,125,.25),inset 0 1px 0 rgba(255,255,255,.12)}
+.tdclose .close-loss .ic{background:rgba(255,119,125,.20);color:var(--red);box-shadow:0 0 12px rgba(255,119,125,.22)}
+.tdclose .close-loss:hover:not(:disabled){border-color:rgba(255,119,125,.62);box-shadow:0 10px 26px -6px rgba(255,119,125,.34),inset 0 1px 0 rgba(255,255,255,.18)}
+html[data-theme="light"] .tdclose .close-profit{color:#3f6a0e;background:linear-gradient(145deg,rgba(122,181,46,.20),rgba(122,181,46,.08));border-color:rgba(122,181,46,.45)}
+html[data-theme="light"] .tdclose .close-profit .ic{background:rgba(122,181,46,.22);color:#3f6a0e}
+html[data-theme="light"] .tdclose .close-loss{color:#c82832;background:linear-gradient(145deg,rgba(220,53,69,.16),rgba(220,53,69,.06));border-color:rgba(220,53,69,.38)}
+html[data-theme="light"] .tdclose .close-loss .ic{background:rgba(220,53,69,.18);color:#c82832}
+.tdclose .close-note{grid-column:1/-1;text-align:center;color:var(--muted);font-size:10px;line-height:1.35;opacity:.85;margin-top:1px}
+.tdshare{margin-top:12px}
+.btn-share{width:100%;background:linear-gradient(180deg,rgba(255,255,255,.07),rgba(255,255,255,.02));border:1px solid rgba(255,255,255,.14);box-shadow:0 8px 20px -8px rgba(0,0,0,.45),inset 0 1px 0 rgba(255,255,255,.10);color:var(--text);border-radius:14px;padding:12px;font-size:13px;font-weight:800;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:transform .12s,border-color .18s,background .18s}
+.btn-share svg{color:var(--lime);flex:none}
+.btn-share:hover{border-color:rgba(183,243,107,.38)}
 .btn-share:active{transform:scale(.98)}
+html[data-theme="light"] .btn-share{background:rgba(238,242,237,.65);border-color:rgba(0,0,0,.10)}
 
 /* toast */
 #toast{position:absolute;left:50%;bottom:calc(96px + env(safe-area-inset-bottom));transform:translate(-50%,12px);z-index:70;background:var(--text);color:var(--bg);font-size:12.5px;font-weight:750;padding:10px 16px;border-radius:999px;box-shadow:0 12px 34px #0006;opacity:0;pointer-events:none;transition:.25s;white-space:nowrap;max-width:92%;overflow:hidden;text-overflow:ellipsis}
@@ -2113,11 +2128,11 @@ html[data-theme="light"] .star-mood{background:rgba(122,181,46,.10);border-color
       </div>
       <div class="kv" id="tdMeta"></div>
       <div class="tdclose" id="tdCloseBox">
-        <button class="close-profit" id="tdCloseProfit" type="button">✓ Close in Profit</button>
-        <button class="close-loss" id="tdCloseLoss" type="button">✕ Close in Loss</button>
+        <button class="close-profit" id="tdCloseProfit" type="button"><span class="ic" aria-hidden="true"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span><span id="tdCloseProfitLab">Close in Profit</span></button>
+        <button class="close-loss" id="tdCloseLoss" type="button"><span class="ic" aria-hidden="true"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg></span><span id="tdCloseLossLab">Close in Loss</span></button>
         <div class="close-note" id="tdCloseNote">Manual close — paper trade + MT5 position (if any)</div>
       </div>
-      <div class="tdshare"><button class="btn-share" id="tdShare" type="button">🖼 <span id="tdShareLab">Share result</span></button></div>
+      <div class="tdshare"><button class="btn-share" id="tdShare" type="button"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="4"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></svg><span id="tdShareLab">Share result</span></button></div>
     </div>
 
 
@@ -5124,9 +5139,12 @@ function syncCloseBox(){
  var x=TD.trade,st=x?String(x.status||'open').toLowerCase():'open';
  box.style.display=(st==='open')?'':'none';
  var cp=$('tdCloseProfit'),cl=$('tdCloseLoss'),nt=$('tdCloseNote');
+ var cpl=$('tdCloseProfitLab'),cll=$('tdCloseLossLab');
  var busy=tdCloseBusy;
- if(cp){cp.textContent='✓ '+t('closeProfit');cp.disabled=busy;cp.setAttribute('aria-busy',busy?'true':'false')}
- if(cl){cl.textContent='✕ '+t('closeLoss');cp.disabled=busy;cl.disabled=busy;cl.setAttribute('aria-busy',busy?'true':'false')}
+ if(cpl)cpl.textContent=t('closeProfit');
+ if(cll)cll.textContent=t('closeLoss');
+ if(cp){cp.disabled=busy;cp.setAttribute('aria-busy',busy?'true':'false')}
+ if(cl){cl.disabled=busy;cl.setAttribute('aria-busy',busy?'true':'false')}
  if(nt)nt.textContent=t('closeNote');
 }
 function drawTdLive(){
