@@ -995,13 +995,12 @@ def build_friends_overview(uid):
     ranks = rank_map()
     online_ids = presence_online_set()
     day0 = day_start_utc()
-    # Siapa yang pernah dikesan online dalam 24 jam terakhir. Orbit guna ini:
-    # nama kekal dalam ruang orbit selama 24 jam bersama dot online/offline.
-    seen_start = time.time() - 86400
+    # Kiraan harian: reset setiap 12:00 tengah malam waktu Malaysia (MYT, UTC+8).
+    seen_start = datetime.now(MYT).replace(
+        hour=DAILY_RESET_HOUR_MYT, minute=0, second=0, microsecond=0).timestamp()
     seen_today_ids = {u for u, ts in _seen.items() if ts >= seen_start} | online_ids
 
-    cutoff24_iso = (datetime.now(timezone.utc) - timedelta(hours=24)).isoformat()
-    today_joined = sum(1 for u in ordered if (u.get("created_at") or "") >= cutoff24_iso)
+    today_joined = sum(1 for u in ordered if (u.get("created_at") or "") >= day0)
     total_members = len(ordered)
 
     try:
@@ -1090,8 +1089,8 @@ def build_friends_overview(uid):
         })
     friends.sort(key=lambda x: (1 if x["last_at"] else 0, x["last_at"], 1 if x["online"] else 0, x["username"].lower()), reverse=True)
 
-    # Unlimited new registrations within the last 24 hours (fallback to newest 12 if none)
-    newest_24h = [u for u in ordered if u["id"] != uid and (u.get("created_at") or "") >= cutoff24_iso]
+    # Unlimited new registrations hari ini (reset 12:00 malam waktu Malaysia / MYT)
+    newest_24h = [u for u in ordered if u["id"] != uid and (u.get("created_at") or "") >= day0]
     newest = newest_24h if newest_24h else [u for u in ordered if u["id"] != uid][:12]
     wave_counts = {}
     my_waves = set()
