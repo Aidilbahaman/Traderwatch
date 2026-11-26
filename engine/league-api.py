@@ -801,7 +801,8 @@ class Handler(BaseHTTPRequestHandler):
             sb("PATCH", f"/rest/v1/paper_trades?id=eq.{tr['id']}", body={
                 "status": status, "r_result": r_result,
                 "closed_at": now_iso})
-            tr.update({"status": status, "r_result": r_result, "closed_at": now_iso})
+            tr.update({"status": status, "r_result": r_result, "closed_at": now_iso,
+                       "exit_price": price})   # dalam response sahaja (tiada column exit_price)
             log(f"{uid[:8]} manual close #{tr['id']} {pair} {side} reason={reason} r={r_result:+.2f}")
             invalidate_league(uid)
             mt5res = self._mt5_close_position(uid, tr)
