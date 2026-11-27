@@ -1,0 +1,16 @@
+[Unit]
+Description=TraderWatch Starling Automated IB Onboarding Bot (Telegram)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=ubuntu
+WorkingDirectory=/home/ubuntu/web/Traderwatch-repo
+ExecStart=/home/ubuntu/web/Traderwatch-repo/venv/bin/python /home/ubuntu/web/Traderwatch-repo/bot/starling_ib_bot.py
+Restart=always
+RestartSec=5
+Environment=PYTHONUNBUFFERED=1
+
+[Install]
+WantedBy=multi-user.target
