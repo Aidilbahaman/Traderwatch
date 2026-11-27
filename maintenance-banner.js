@@ -83,13 +83,108 @@
       '#' + OVERLAY_ID + ' .twm-back{margin:0 0 5px;font-size:14px;font-weight:800;color:#f3faf4}' +
       '#' + OVERLAY_ID + ' .twm-tag{margin:0 0 12px;font-size:11.8px;font-weight:700;color:#b7f36b}' +
       '#' + OVERLAY_ID + ' .twm-sign{margin:0;font-size:11px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:#7e9484}' +
-      '@media(prefers-reduced-motion:reduce){#' + OVERLAY_ID + ' .twm-ico img,#' + OVERLAY_ID + ' .twm-dot,#' + OVERLAY_ID + ' .twm-card{animation:none!important}}';
+      '@keyframes twEq{0%,100%{transform:scaleY(.35)}50%{transform:scaleY(1)}}' +
+      '#' + OVERLAY_ID + ' .twm-snd{' +
+        'position:absolute;top:14px;right:14px;z-index:3;' +
+        'display:inline-flex;align-items:center;gap:6px;padding:5px 10px;border-radius:999px;' +
+        'background:rgba(183,243,107,.10);border:1px solid rgba(183,243,107,.28);' +
+        'color:#b7f36b;font:750 10px/1 -apple-system,Inter,system-ui,sans-serif;letter-spacing:.04em;' +
+        'cursor:pointer;-webkit-tap-highlight-color:transparent;transition:background .16s,border-color .16s,opacity .16s;' +
+      '}' +
+      '#' + OVERLAY_ID + ' .twm-snd:hover{background:rgba(183,243,107,.18);border-color:rgba(183,243,107,.48)}' +
+      '#' + OVERLAY_ID + ' .twm-snd.off{color:#839787;background:rgba(255,255,255,.05);border-color:rgba(255,255,255,.12)}' +
+      '#' + OVERLAY_ID + ' .twm-eq{display:inline-flex;align-items:flex-end;gap:2px;height:10px}' +
+      '#' + OVERLAY_ID + ' .twm-eq i{display:block;width:2px;height:10px;border-radius:2px;background:currentColor;transform-origin:bottom}' +
+      '#' + OVERLAY_ID + ' .twm-snd.on .twm-eq i:nth-child(1){animation:twEq .9s ease-in-out infinite}' +
+      '#' + OVERLAY_ID + ' .twm-snd.on .twm-eq i:nth-child(2){animation:twEq .7s ease-in-out .18s infinite}' +
+      '#' + OVERLAY_ID + ' .twm-snd.on .twm-eq i:nth-child(3){animation:twEq 1.05s ease-in-out .34s infinite}' +
+      '#' + OVERLAY_ID + ' .twm-snd.off .twm-eq i{transform:scaleY(.35)}' +
+      '@media(prefers-reduced-motion:reduce){#' + OVERLAY_ID + ' .twm-ico img,#' + OVERLAY_ID + ' .twm-dot,#' + OVERLAY_ID + ' .twm-card,#' + OVERLAY_ID + ' .twm-eq i{animation:none!important}}';
     document.head.appendChild(st);
   }
 
   var DEFAULT_REOPEN = '2026-11-30T06:00:00+08:00';
+  var BGM_SRC = '/assets/traderwatch-soundtrack.mp3?v=20261128a';
   var reopenTs = Date.parse(DEFAULT_REOPEN);
   var cdTimer = null;
+  var bgm = null;
+  var userMuted = false;
+  var unlockBound = false;
+
+  function syncSoundBtn() {
+    var b = document.getElementById('twmSoundBtn');
+    if (!b) return;
+    var playing = !!(bgm && !bgm.paused && !bgm.muted);
+    b.className = 'twm-snd ' + (playing ? 'on' : 'off');
+    var lbl = b.querySelector('.twm-slbl');
+    if (lbl) lbl.textContent = playing ? 'Sound On' : (userMuted ? 'Muted' : 'Tap for Sound');
+    b.setAttribute('aria-pressed', playing ? 'true' : 'false');
+  }
+
+  function unlockPlay() {
+    if (userMuted || !bgm) return;
+    bgm.muted = false;
+    var p = bgm.play();
+    if (p && typeof p.then === 'function') {
+      p.then(function () {
+        unbindUnlock();
+        syncSoundBtn();
+      }).catch(function () { syncSoundBtn(); });
+    } else {
+      unbindUnlock();
+      syncSoundBtn();
+    }
+  }
+
+  function bindUnlock() {
+    if (unlockBound) return;
+    unlockBound = true;
+    document.addEventListener('pointerdown', unlockPlay, true);
+    document.addEventListener('touchstart', unlockPlay, true);
+    document.addEventListener('keydown', unlockPlay, true);
+  }
+
+  function unbindUnlock() {
+    if (!unlockBound) return;
+    unlockBound = false;
+    document.removeEventListener('pointerdown', unlockPlay, true);
+    document.removeEventListener('touchstart', unlockPlay, true);
+    document.removeEventListener('keydown', unlockPlay, true);
+  }
+
+  function startBgm() {
+    if (!bgm) {
+      bgm = new Audio(BGM_SRC);
+      bgm.loop = true;
+      bgm.preload = 'auto';
+      bgm.volume = 0.6;
+      bgm.muted = false;
+      bgm.setAttribute('playsinline', '');
+      bgm.addEventListener('play', syncSoundBtn);
+      bgm.addEventListener('pause', syncSoundBtn);
+    }
+    if (userMuted) { syncSoundBtn(); return; }
+    bgm.muted = false;
+    var p = bgm.play();
+    if (p && typeof p.then === 'function') {
+      p.then(function () {
+        unbindUnlock();
+        syncSoundBtn();
+      }).catch(function () {
+        bindUnlock();
+        syncSoundBtn();
+      });
+    } else {
+      syncSoundBtn();
+    }
+  }
+
+  function stopBgm() {
+    unbindUnlock();
+    if (bgm) {
+      try { bgm.pause(); bgm.currentTime = 0; } catch (e) {}
+    }
+  }
 
   function pad2(n) { return n < 10 ? '0' + n : String(n); }
 
@@ -116,6 +211,7 @@
 
   function hide() {
     if (cdTimer) { clearInterval(cdTimer); cdTimer = null; }
+    stopBgm();
     var el = document.getElementById(OVERLAY_ID);
     if (el) el.remove();
     document.documentElement.classList.remove('tw-maint-on');
@@ -137,6 +233,10 @@
     wrap.setAttribute('aria-label', 'TraderWatch Maintenance');
     wrap.innerHTML =
       '<div class="twm-card">' +
+        '<button class="twm-snd off" id="twmSoundBtn" type="button" aria-label="Toggle soundtrack">' +
+          '<span class="twm-eq" aria-hidden="true"><i></i><i></i><i></i></span>' +
+          '<span class="twm-slbl">Sound On</span>' +
+        '</button>' +
         '<div class="twm-top">' +
           '<div class="twm-ico"><img src="/member/icons/starling-mascot.png?v=20261127b" width="48" height="48" alt="Starling AI"></div>' +
           '<div class="twm-pill"><span class="twm-dot"></span>System Upgrade</div>' +
@@ -164,6 +264,22 @@
       '</div>';
     document.body.appendChild(wrap);
     document.documentElement.classList.add('tw-maint-on');
+    var sb = document.getElementById('twmSoundBtn');
+    if (sb) {
+      sb.onclick = function (e) {
+        e.stopPropagation();
+        if (bgm && !bgm.paused && !bgm.muted) {
+          userMuted = true;
+          unbindUnlock();
+          bgm.pause();
+          syncSoundBtn();
+        } else {
+          userMuted = false;
+          startBgm();
+        }
+      };
+    }
+    startBgm();
     tickCountdown();
     if (cdTimer) clearInterval(cdTimer);
     cdTimer = setInterval(tickCountdown, 1000);
