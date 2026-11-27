@@ -252,8 +252,8 @@
             '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M21.9 4.6c.3-1.2-.8-2.1-1.9-1.7L2.7 9.6c-1.2.5-1.1 2.2.1 2.6l4.4 1.4 1.7 5.3c.3 1 1.6 1.3 2.3.5l2.5-2.5 4.5 3.3c.9.7 2.2.2 2.5-.9l3.2-14.7zM9.2 13.5l8.8-5.6-6.9 6.9-.3 3.2-1.2-3.8-3.2-1 2.8.3z"/></svg>' +
           '</span>' +
           '<span class="twm-tg-tx">' +
-            '<b>Join Official Telegram</b>' +
-            '<small>Get live upgrade &amp; launch updates</small>' +
+            '<b>Follow our official channel</b>' +
+            '<small>Get latest updates and news in telegram</small>' +
           '</span>' +
           '<span class="twm-tg-arr" aria-hidden="true">→</span>' +
         '</a>' +
