@@ -318,6 +318,24 @@ html[data-theme="light"] .sigcard .tr-st.sl{color:#b91c1c}
 .sigcard .tr-badge.bad{color:#ff8f95;background:rgba(255,119,125,.12);border-color:rgba(255,119,125,.34)}
 .sigcard .tr-badge.tm{color:var(--muted);background:rgba(255,255,255,.05);border-color:var(--line)}
 .sigcard .tr-disc{margin-top:6px;padding:6px 8px;border-radius:9px;font-size:10px;line-height:1.4;color:var(--muted);background:rgba(255,255,255,.035);border:1px solid rgba(255,255,255,.07)}
+.tr-tick{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;margin:7px 0 6px;padding:7px 10px;border-radius:10px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.09);font-size:11px;line-height:1.25}
+.tr-tick-l{display:inline-flex;align-items:center;gap:6px;font-weight:750;color:var(--text);font-variant-numeric:tabular-nums}
+.tr-tick-l .dot{width:6px;height:6px;border-radius:50%;background:var(--lime);box-shadow:0 0 8px var(--lime);animation:pulse 1.5s infinite;flex:none}
+.tr-tick-l small{font-size:9px;font-weight:800;letter-spacing:.06em;color:var(--muted);text-transform:uppercase}
+.tr-tick-l b{font-size:12.5px;font-weight:850;color:var(--text)}
+.tr-tick-d{font-size:10.5px;font-weight:750;font-variant-numeric:tabular-nums;color:var(--muted)}
+.tr-tick-d.up{color:var(--lime)}
+.tr-tick-d.dn{color:var(--red)}
+.tr-zone{display:inline-flex;align-items:center;gap:4px;padding:2.5px 8px;border-radius:999px;font-size:10px;font-weight:800;letter-spacing:.02em;white-space:nowrap}
+.tr-zone.near{background:rgba(183,243,107,.16);border:1px solid rgba(183,243,107,.34);color:var(--lime)}
+.tr-zone.pull{background:rgba(56,189,248,.16);border:1px solid rgba(56,189,248,.34);color:#7dd3fc}
+.tr-zone.move{background:rgba(255,180,84,.16);border:1px solid rgba(255,180,84,.34);color:var(--orange)}
+.tr-zone.far{background:rgba(255,107,107,.16);border:1px solid rgba(255,107,107,.34);color:var(--red)}
+html[data-theme="light"] .tr-tick{background:rgba(20,33,26,.04);border-color:rgba(20,33,26,.10)}
+html[data-theme="light"] .tr-zone.near{color:#3d6a0d}
+html[data-theme="light"] .tr-zone.pull{color:#0369a1}
+html[data-theme="light"] .tr-zone.move{color:#9a5800}
+html[data-theme="light"] .tr-zone.far{color:#b91c1c}
 html[data-theme="light"] .sigcard .tr-disc{background:rgba(20,33,26,.04);border-color:rgba(20,33,26,.09)}
 html[data-theme="light"] .sigcard .tr-badge.ok{color:#3d6a0d}
 html[data-theme="light"] .sigcard .tr-badge.warn{color:#9a5800}
@@ -3838,13 +3856,85 @@ function _fmtElapsedMin(mins){
  var h=Math.floor(mins/60),m=mins%60;
  return h+(lang==='en'?'h':'j')+(m?' '+m+'m':'');
 }
+var LIVE_Q={};
+function _cardLivePrice(pair){
+ var q=LIVE_Q[pair];
+ if(q&&isFinite(q.p)&&(Date.now()-q.at)<120000)return q.p;
+ return (typeof P==='object'&&P&&P[pair]&&isFinite(+P[pair].p))?+P[pair].p:null;
+}
+function _liveTickerInner(pair,entry,sl,side,liveP){
+ var dec=pdec(pair),sell=String(side||'').toUpperCase()==='SELL';
+ var en=(lang!=='ms');
+ if(liveP==null||!isFinite(liveP)){
+  return '<span class="tr-tick-l"><span class="dot"></span><small>LIVE</small><b>—</b></span><span class="tr-zone move">'+esc(en?'Checking price…':'Semak harga…')+'</span>';
+ }
+ var diff=liveP-entry;
+ var dirDiff=sell?(entry-liveP):(liveP-entry);
+ var risk=Math.abs(entry-sl);
+ var rDist=risk>0?(dirDiff/risk):0;
+ var dStr=(diff>=0?'+':'')+diff.toFixed(dec);
+ var dCls=dirDiff>0?'up':dirDiff<0?'dn':'';
+ var zCls='near',zTxt=en?'Near Entry':'Dekat Entry';
+ if(Math.abs(rDist)<=0.25){zCls='near';zTxt=en?'Near Entry':'Dekat Entry'}
+ else if(rDist>0.25&&rDist<=0.65){zCls='move';zTxt=(en?'Moving ':'Bergerak ')+'('+(rDist>=0?'+':'')+rDist.toFixed(2)+'R)'}
+ else if(rDist>0.65){zCls='far';zTxt=en?'Far from Entry':'Sudah Jauh'}
+ else if(rDist<-0.25&&rDist>-0.75){zCls='pull';zTxt=en?'Better Entry':'Entry Lebih Baik'}
+ else{zCls='far';zTxt=en?'Near SL':'Dekat SL'}
+ return '<span class="tr-tick-l"><span class="dot"></span><small>LIVE</small><b>'+liveP.toFixed(dec)+'</b><span class="tr-tick-d '+dCls+'">('+esc(dStr)+')</span></span><span class="tr-zone '+zCls+'">'+esc(zTxt)+'</span>';
+}
+function _liveTickerHtml(p,isClosed){
+ if(isClosed)return '';
+ var liveP=_cardLivePrice(p.pair);
+ return '<div class="tr-tick" data-tk-pair="'+esc(p.pair)+'" data-tk-entry="'+Number(p.entry)+'" data-tk-sl="'+Number(p.sl)+'" data-tk-side="'+esc(p.side)+'">'+_liveTickerInner(p.pair,+p.entry,+p.sl,p.side,liveP)+'</div>';
+}
+var _cardQBusy=false;
+function pollCardQuotes(){
+ if(_cardQBusy||document.visibilityState==='hidden')return;
+ var inCom=(current==='community');
+ var inDm=!!(FR&&FR.dmFriend&&$('dmSheet')&&$('dmSheet').classList.contains('open'));
+ if(!inCom&&!inDm)return;
+ var nodes=document.querySelectorAll('.tr-tick[data-tk-pair]');
+ if(!nodes.length)return;
+ var seen={},pairs=[];
+ nodes.forEach(function(el){var pr=el.getAttribute('data-tk-pair');if(pr&&!seen[pr]){seen[pr]=1;pairs.push(pr)}});
+ if(!pairs.length)return;
+ _cardQBusy=true;
+ Promise.all(pairs.map(function(pr){
+  return apiFetch('/api/league/quote?pair='+encodeURIComponent(pr)).then(function(r){
+   if(r.ok&&r.data&&isFinite(+r.data.price)){
+    var px=+r.data.price;
+    LIVE_Q[pr]={p:px,at:Date.now()};
+    if(typeof P==='object'&&P){P[pr]=Object.assign({},P[pr]||{},{p:px})}
+   }
+  }).catch(function(){});
+ })).then(function(){
+  _cardQBusy=false;
+  document.querySelectorAll('.tr-tick[data-tk-pair]').forEach(function(el){
+   var pr=el.getAttribute('data-tk-pair');
+   var enV=+el.getAttribute('data-tk-entry'),slV=+el.getAttribute('data-tk-sl'),sd=el.getAttribute('data-tk-side');
+   var px=_cardLivePrice(pr);
+   if(px!=null){
+    el.innerHTML=_liveTickerInner(pr,enV,slV,sd,px);
+    var card=el.closest('.sigcard,.dm-setup');
+    var flt=card&&card.querySelector('.tr-flt');
+    var risk=Math.abs(enV-slV);
+    if(flt&&risk>0){
+     var rr=(String(sd).toUpperCase()==='SELL'?(enV-px):(px-enV))/risk;
+     flt.className='tr-flt '+(rr>0.02?'pos':rr<-0.02?'neg':'neu');
+     flt.textContent=(rr>=0?'+':'')+rr.toFixed(2)+'R';
+    }
+   }
+  });
+ }).catch(function(){_cardQBusy=false});
+}
+setInterval(pollCardQuotes,6000);
 function sigCardHtml(p,id,createdAt){
  var d=pdec(p.pair),f=function(v){return Number(v).toFixed(d)},sell=p.side==='SELL';
  var st=String(p.status||'open').toLowerCase();
  var isTp=(p.card_type==='tp'||st==='tp');
  var isSl=(st==='sl');
  var isClosed=(st==='tp'||st==='sl'||st==='be'||st==='expired');
- var liveP=(typeof P==='object'&&P&&P[p.pair]&&isFinite(+P[p.pair].p))?+P[p.pair].p:null;
+ var liveP=_cardLivePrice(p.pair);
  if(!isClosed&&liveP!=null){
   if((!sell&&liveP>=+p.tp)||(sell&&liveP<=+p.tp)){isTp=true;isClosed=true;st='tp'}
   else if((!sell&&liveP<=+p.sl)||(sell&&liveP>=+p.sl)){isSl=true;isClosed=true;st='sl'}
@@ -3899,6 +3989,7 @@ function sigCardHtml(p,id,createdAt){
  return '<div class="sigcard'+(sell?' sell':'')+(isTp?' tp-hit':'')+(isSl?' sl-hit':'')+'" data-live-card="'+id+'"><div class="sh"><b>✦ '+esc(p.pair)+' · '+esc(p.tf)+'</b><span class="sd">'+hdrRight+'</span></div>'+
   '<div class="tr-livebar">'+stPill+fltHtml+'</div>'+
   '<div class="sl3"><div class="e"><small>'+esc(t('entry'))+'</small><b>'+f(p.entry)+'</b></div><div class="t"><small>'+esc(t('tp'))+'</small><b>'+f(p.tp)+'</b></div><div class="s"><small>'+esc(t('sl'))+'</small><b>'+f(p.sl)+'</b></div></div>'+
+  _liveTickerHtml(p,isClosed)+
   extraHtml+takeBtn+'</div>';
 }
 function rxHtml(m){
@@ -3984,6 +4075,7 @@ function drawMsgs(quiet,forceBottom){
  $('onlineTxt').textContent=(ONLINE!=null)?(ONLINE+' '+t('onlineNow')):(n?(n+' '+t('membersToday')):t('online'));
  $('comNote').textContent=t('resetAt');
  drawRooms();
+ if(typeof pollCardQuotes==='function')pollCardQuotes();
 }
 function drawRooms(){
  var box=$('rooms');if(!box)return;
@@ -4853,12 +4945,14 @@ function _drawDMCore(scrollEnd,quiet){
      +'<div class="st-cell"><small>SL</small><b style="color:var(--red)">'+Number(p.sl).toFixed(dec)+'</b></div>'
      +'<div class="st-cell"><small>TP</small><b style="color:var(--lime)">'+Number(p.tp).toFixed(dec)+'</b></div>'
     +'</div>'
+    +_liveTickerHtml(p,isClosed)
     +extra+btnHtml+'</div>';
   }
   return '<div class="dm-bbl'+(m.me?' me':'')+(m.pinned?' pinned-b':'')+'" data-mid="'+esc(String(m.id))+'">'+ref+esc(m.body)+'<time>'+esc(dmTime(m.created_at))+'</time></div>';
  }).join('');
  box.innerHTML=html;
  if(scrollEnd)box.scrollTop=box.scrollHeight;
+ if(typeof pollCardQuotes==='function')pollCardQuotes();
 }
 function dmFriendName(){return FR.dmFriend?FR.dmFriend.username:''}
 /* GIF mesej: payload {url,w,h,title}. URL disemak semula di klien supaya
