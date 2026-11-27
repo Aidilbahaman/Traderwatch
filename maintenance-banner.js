@@ -74,6 +74,12 @@
       '#' + OVERLAY_ID + ' .twm-copy p{margin:0}' +
       '#' + OVERLAY_ID + ' .twm-copy .twm-warm{color:#dcebe0;font-weight:600}' +
       '#' + OVERLAY_ID + ' .twm-div{height:1px;width:100%;margin:14px 0;background:linear-gradient(90deg,transparent,rgba(183,243,107,.32),transparent)}' +
+      '#' + OVERLAY_ID + ' .twm-cdbox{margin:0 0 14px;padding:11px 10px 10px;border-radius:16px;background:rgba(183,243,107,.06);border:1px solid rgba(183,243,107,.22)}' +
+      '#' + OVERLAY_ID + ' .twm-cdlab{margin:0 0 8px;font-size:9.5px;font-weight:800;letter-spacing:.09em;text-transform:uppercase;color:#9db2a2}' +
+      '#' + OVERLAY_ID + ' .twm-cdgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:7px}' +
+      '#' + OVERLAY_ID + ' .twm-cdu{padding:7px 4px 6px;border-radius:11px;background:rgba(8,14,10,.72);border:1px solid rgba(255,255,255,.08)}' +
+      '#' + OVERLAY_ID + ' .twm-cdu b{display:block;font-size:18px;font-weight:900;line-height:1.1;color:#b7f36b;font-variant-numeric:tabular-nums;letter-spacing:-.02em}' +
+      '#' + OVERLAY_ID + ' .twm-cdu span{display:block;margin-top:2px;font-size:8.5px;font-weight:750;letter-spacing:.06em;text-transform:uppercase;color:#7e9484}' +
       '#' + OVERLAY_ID + ' .twm-back{margin:0 0 5px;font-size:14px;font-weight:800;color:#f3faf4}' +
       '#' + OVERLAY_ID + ' .twm-tag{margin:0 0 12px;font-size:11.8px;font-weight:700;color:#b7f36b}' +
       '#' + OVERLAY_ID + ' .twm-sign{margin:0;font-size:11px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:#7e9484}' +
@@ -81,14 +87,46 @@
     document.head.appendChild(st);
   }
 
+  var DEFAULT_REOPEN = '2026-11-30T06:00:00+08:00';
+  var reopenTs = Date.parse(DEFAULT_REOPEN);
+  var cdTimer = null;
+
+  function pad2(n) { return n < 10 ? '0' + n : String(n); }
+
+  function tickCountdown() {
+    var dEl = document.getElementById('twmCdD');
+    if (!dEl) return;
+    var diff = reopenTs - Date.now();
+    if (!isFinite(diff) || diff <= 0) {
+      dEl.textContent = '00';
+      document.getElementById('twmCdH').textContent = '00';
+      document.getElementById('twmCdM').textContent = '00';
+      document.getElementById('twmCdS').textContent = '00';
+      return;
+    }
+    var sec = Math.floor(diff / 1000);
+    var d = Math.floor(sec / 86400); sec %= 86400;
+    var h = Math.floor(sec / 3600); sec %= 3600;
+    var m = Math.floor(sec / 60); sec %= 60;
+    dEl.textContent = pad2(d);
+    document.getElementById('twmCdH').textContent = pad2(h);
+    document.getElementById('twmCdM').textContent = pad2(m);
+    document.getElementById('twmCdS').textContent = pad2(sec);
+  }
+
   function hide() {
+    if (cdTimer) { clearInterval(cdTimer); cdTimer = null; }
     var el = document.getElementById(OVERLAY_ID);
     if (el) el.remove();
     document.documentElement.classList.remove('tw-maint-on');
   }
 
-  function show() {
-    if (document.getElementById(OVERLAY_ID)) return;
+  function show(reopenIso) {
+    if (reopenIso) {
+      var parsed = Date.parse(reopenIso);
+      if (isFinite(parsed)) reopenTs = parsed;
+    }
+    if (document.getElementById(OVERLAY_ID)) { tickCountdown(); return; }
     injectCss();
     var isMember = !!document.getElementById('phone');
     var wrap = document.createElement('div');
@@ -111,19 +149,31 @@
           '<p class="twm-warm">Enjoy your holiday. Take a moment to recharge.</p>' +
         '</div>' +
         '<div class="twm-div"></div>' +
+        '<div class="twm-cdbox">' +
+          '<div class="twm-cdlab">Estimated Reopen · Mon 6:00 AM MYT</div>' +
+          '<div class="twm-cdgrid">' +
+            '<div class="twm-cdu"><b id="twmCdD">00</b><span>Days</span></div>' +
+            '<div class="twm-cdu"><b id="twmCdH">00</b><span>Hours</span></div>' +
+            '<div class="twm-cdu"><b id="twmCdM">00</b><span>Mins</span></div>' +
+            '<div class="twm-cdu"><b id="twmCdS">00</b><span>Secs</span></div>' +
+          '</div>' +
+        '</div>' +
         '<p class="twm-back">We’ll be back soon.</p>' +
         '<p class="twm-tag">Better experience. Smarter trading. One step ahead.</p>' +
         '<p class="twm-sign">— TraderWatch</p>' +
       '</div>';
     document.body.appendChild(wrap);
     document.documentElement.classList.add('tw-maint-on');
+    tickCountdown();
+    if (cdTimer) clearInterval(cdTimer);
+    cdTimer = setInterval(tickCountdown, 1000);
   }
 
   function check() {
     fetch('/data/maintenance.json?t=' + Date.now(), { cache: 'no-store' })
       .then(function (r) { return r.ok ? r.json() : null; })
       .then(function (d) {
-        if (d && d.maintenance === true) show();
+        if (d && d.maintenance === true) show(d.reopen_at || DEFAULT_REOPEN);
         else hide();
       })
       .catch(function () {});

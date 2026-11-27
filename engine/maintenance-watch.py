@@ -105,6 +105,8 @@ def main():
         "updated_at": ts_now.isoformat(),
         "manual": flag.get("manual", False),
     }
+    if flag.get("reopen_at"):
+        new_flag["reopen_at"] = flag["reopen_at"]
     if new_flag.get("maintenance") != flag.get("maintenance") or \
        new_flag.get("source") != flag.get("source"):
         FLAG.write_text(json.dumps(new_flag, indent=1))
