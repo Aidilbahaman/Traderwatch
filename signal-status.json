@@ -7095,17 +7095,28 @@
    "entry_at": "2026-11-27T13:27:00+08:00"
   },
   "XAGUSD_20261127_132624": {
-   "status": "pending"
+   "status": "active",
+   "entry_at": "2026-11-27T13:37:00+08:00"
   },
   "BTCUSD_20261127_133203": {
    "status": "active",
    "entry_at": "2026-11-27T13:33:00+08:00"
   },
   "XAGUSD_20261127_133122": {
-   "status": "active",
+   "status": "sl",
+   "pips": -484.0,
+   "r": -1,
+   "unit": "pips",
+   "closed": "2026-11-27T13:41:02+08:00",
    "entry_at": "2026-11-27T13:32:00+08:00"
+  },
+  "BTCUSD_20261127_133735": {
+   "status": "pending"
+  },
+  "XAGUSD_20261127_133632": {
+   "status": "pending"
   }
  },
- "updated": "2026-11-27T13:36:02+08:00",
+ "updated": "2026-11-27T13:41:02+08:00",
  "_cursor": 0
 }
