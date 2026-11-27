@@ -1096,8 +1096,8 @@ html[data-theme="light"] .navpill{background:linear-gradient(160deg,rgba(122,181
 .nav:active svg{transform:scale(.85)}
 /* ikon Starling dalam slot nav */
 .nav .st-nav{display:block;width:21px;height:21px}
-.nav .st-nav svg{width:21px;height:21px;animation:stNavFloat 3s ease-in-out infinite;filter:drop-shadow(0 2px 6px rgba(183,243,107,.3))}
-html[data-theme="light"] .nav .st-nav svg{filter:drop-shadow(0 2px 6px rgba(122,181,46,.3))}
+.nav .st-nav svg,.nav .st-nav img{width:22px;height:22px;object-fit:contain;transform-origin:50% 62%;animation:stNavFloat 2.8s ease-in-out infinite;filter:drop-shadow(0 2px 7px rgba(183,243,107,.42))}
+html[data-theme="light"] .nav .st-nav svg,html[data-theme="light"] .nav .st-nav img{filter:drop-shadow(0 2px 6px rgba(122,181,46,.35))}
 @keyframes stNavFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-2px)}}
 /* syiling Liga — terapung dalam curve tengah */
 .ligaslot{position:relative;display:flex;justify-content:center;height:100%}
@@ -1398,7 +1398,7 @@ html[data-theme="light"] .btn-share{background:rgba(238,242,237,.65);border-colo
 #splash.gone{opacity:0;visibility:hidden}
 #splash .sp-wrap{display:flex;flex-direction:column;align-items:center;gap:22px;
  transform:translateY(-4vh)}
-#splash .sp-star{width:76px;height:76px;filter:drop-shadow(0 0 22px #b7f36b66)}
+#splash .sp-star{width:84px;height:84px;object-fit:contain;transform-origin:50% 62%;animation:stAlive 2.6s ease-in-out infinite;filter:drop-shadow(0 0 24px #b7f36b88)}
 #splash .sp-name{font-size:12px;font-weight:900;letter-spacing:.34em;color:#eef3ee;padding-left:.34em}
 #splash .sp-bar{width:120px;height:2px;border-radius:99px;background:#b7f36b1f;overflow:hidden;margin-top:2px}
 #splash .sp-bar i{display:block;height:100%;width:36%;border-radius:99px;
@@ -1568,8 +1568,19 @@ html[data-theme="light"] .chipc.scan{
 .st-buddy:active{transform:scale(.9)}
 .st-buddy.hop{animation:stHop .5s cubic-bezier(.22,1,.36,1)}
 @keyframes stHop{0%{transform:translateY(0) scale(1)}35%{transform:translateY(-10px) scale(1.1,.93)}65%{transform:translateY(2px) scale(.96,1.04)}100%{transform:translateY(0) scale(1)}}
-.st-svg,.st-img{display:block;object-fit:contain;animation:stFloat 2.8s ease-in-out infinite;filter:drop-shadow(0 5px 14px rgba(183,243,107,.32))}
-.st-img.scan{animation:stFloat 1.4s ease-in-out infinite;filter:drop-shadow(0 0 10px rgba(183,243,107,.5))}
+.st-svg,.st-img{display:block;object-fit:contain;transform-origin:50% 62%;animation:stAlive 3.2s ease-in-out infinite;will-change:transform,filter}
+.st-img.scan{animation:stScanAlive 1.3s ease-in-out infinite}
+.orb-core img{transform-origin:50% 62%;animation:stAlive 3s ease-in-out infinite}
+@keyframes stAlive{
+  0%,100%{transform:translateY(0) rotate(-3deg) scale(1,1);filter:drop-shadow(0 5px 14px rgba(183,243,107,.34))}
+  25%{transform:translateY(-5px) rotate(2.5deg) scale(.97,1.04);filter:drop-shadow(0 9px 20px rgba(125,211,252,.44))}
+  50%{transform:translateY(-2px) rotate(4deg) scale(1.04,.96);filter:drop-shadow(0 6px 18px rgba(183,243,107,.52))}
+  75%{transform:translateY(-6px) rotate(-2deg) scale(.98,1.03);filter:drop-shadow(0 10px 22px rgba(183,243,107,.45))}
+}
+@keyframes stScanAlive{
+  0%,100%{transform:translateY(0) rotate(-6deg) scale(.96,1.04);filter:drop-shadow(0 0 12px rgba(183,243,107,.65))}
+  50%{transform:translateY(-6px) rotate(6deg) scale(1.08,.94);filter:drop-shadow(0 0 18px rgba(125,211,252,.78))}
+}
 @keyframes stFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
 .st-eyes{transform-origin:center;transform-box:fill-box;animation:stBlink 3.8s infinite,stGlance 4.8s ease-in-out infinite}
 @keyframes stBlink{0%,92%,100%{transform:scaleY(1)}96%{transform:scaleY(.08)}}

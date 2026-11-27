@@ -93,8 +93,13 @@ header.sc{background:#0a0e0bd9;backdrop-filter:saturate(160%) blur(18px);-webkit
   65%{transform:translateY(2px) scale(.96,1.04)}
   100%{transform:translateY(0) scale(1)}
 }
-.st-svg{display:block;animation:stFloat 2.8s ease-in-out infinite;filter:drop-shadow(0 6px 18px rgba(183,243,107,.24))}
-@keyframes stFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
+.st-svg{display:block;animation:stAlive 3.2s ease-in-out infinite;transform-origin:50% 62%;will-change:transform,filter}
+@keyframes stAlive{
+  0%,100%{transform:translateY(0) rotate(-3deg) scale(1,1);filter:drop-shadow(0 6px 16px rgba(183,243,107,.32))}
+  25%{transform:translateY(-6px) rotate(2.5deg) scale(.97,1.04);filter:drop-shadow(0 10px 22px rgba(125,211,252,.42))}
+  50%{transform:translateY(-2px) rotate(4deg) scale(1.04,.96);filter:drop-shadow(0 7px 20px rgba(183,243,107,.50))}
+  75%{transform:translateY(-7px) rotate(-2deg) scale(.98,1.03);filter:drop-shadow(0 11px 24px rgba(183,243,107,.44))}
+}
 .st-shadow{
   width:38px;height:7px;border-radius:50%;margin-top:1px;
   background:radial-gradient(ellipse,rgba(183,243,107,.34),transparent 70%);
