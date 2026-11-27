@@ -84,7 +84,7 @@
       '@keyframes twTgBob{0%,100%{transform:translate(0,0)}50%{transform:translate(2px,-1.5px)}}' +
       '#' + OVERLAY_ID + ' .twm-tg{' +
         'position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center;gap:10px;' +
-        'width:100%;margin:0 0 15px;padding:11px 16px;border-radius:14px;text-decoration:none;' +
+        'width:100%;margin:0 0 10px;padding:11px 16px;border-radius:14px;text-decoration:none;' +
         'background:linear-gradient(135deg,rgba(42,171,238,.20) 0%,rgba(56,189,248,.10) 55%,rgba(183,243,107,.12) 100%);' +
         'border:1px solid rgba(56,189,248,.42);' +
         'box-shadow:0 8px 24px rgba(0,0,0,.32),0 0 22px rgba(42,171,238,.16),inset 0 1px 0 rgba(255,255,255,.14);' +
@@ -105,9 +105,29 @@
       '#' + OVERLAY_ID + ' .twm-tg-ico svg{width:16px;height:16px;display:block;animation:twTgBob 2.4s ease-in-out infinite}' +
       '#' + OVERLAY_ID + ' .twm-tg-tx{text-align:left;min-width:0;flex:1}' +
       '#' + OVERLAY_ID + ' .twm-tg-tx b{display:block;font-size:12.8px;font-weight:800;line-height:1.2;color:#f3faff}' +
-      '#' + OVERLAY_ID + ' .twm-tg-tx small{display:block;margin-top:2px;font-size:10.5px;font-weight:600;color:#9cc9e4}' +
+      '#' + OVERLAY_ID + ' .twm-tg-tx small{display:block;margin-top:2px;font-size:10.5px;font-weight:600;line-height:1.3;color:#9cc9e4}' +
       '#' + OVERLAY_ID + ' .twm-tg-arr{flex:none;font-size:15px;font-weight:800;color:#7dd3fc;transition:transform .16s}' +
       '#' + OVERLAY_ID + ' .twm-tg:hover .twm-tg-arr{transform:translateX(3px)}' +
+      '#' + OVERLAY_ID + ' .twm-tg.twm-sup{' +
+        'margin:0 0 16px;' +
+        'background:linear-gradient(135deg,rgba(183,243,107,.14) 0%,rgba(74,222,128,.07) 55%,rgba(14,26,17,.55) 100%);' +
+        'border:1px solid rgba(183,243,107,.58);' +
+        'box-shadow:0 8px 24px rgba(0,0,0,.34),0 0 22px rgba(183,243,107,.22),inset 0 1px 0 rgba(255,255,255,.12);' +
+        'color:#f3faf4;' +
+      '}' +
+      '#' + OVERLAY_ID + ' .twm-tg.twm-sup::after{animation-delay:1.9s}' +
+      '#' + OVERLAY_ID + ' .twm-tg.twm-sup:hover{border-color:rgba(183,243,107,.88);box-shadow:0 12px 28px rgba(0,0,0,.42),0 0 30px rgba(183,243,107,.34)}' +
+      '#' + OVERLAY_ID + ' .twm-tg.twm-sup .twm-tg-ico{' +
+        'border-radius:50%;' +
+        'background:radial-gradient(circle,rgba(183,243,107,.38) 0%,rgba(74,222,128,.16) 100%);' +
+        'border:1px solid rgba(183,243,107,.45);' +
+        'color:#ffffff;' +
+        'box-shadow:0 0 14px rgba(183,243,107,.42);' +
+      '}' +
+      '#' + OVERLAY_ID + ' .twm-tg.twm-sup .twm-tg-ico svg{width:17px;height:17px}' +
+      '#' + OVERLAY_ID + ' .twm-tg.twm-sup .twm-tg-tx b{color:#ffffff}' +
+      '#' + OVERLAY_ID + ' .twm-tg.twm-sup .twm-tg-tx small{color:#a9b9ad}' +
+      '#' + OVERLAY_ID + ' .twm-tg.twm-sup .twm-tg-arr{color:#b7f36b}' +
       '#' + OVERLAY_ID + ' .twm-back{margin:0 0 5px;font-size:14px;font-weight:800;color:#f3faf4}' +
       '#' + OVERLAY_ID + ' .twm-tag{margin:0 0 12px;font-size:11.8px;font-weight:700;color:#b7f36b}' +
       '#' + OVERLAY_ID + ' .twm-sign{margin:0;font-size:11px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:#7e9484}' +
@@ -254,6 +274,16 @@
           '<span class="twm-tg-tx">' +
             '<b>Follow our official channel</b>' +
             '<small>Get latest updates and news in telegram</small>' +
+          '</span>' +
+          '<span class="twm-tg-arr" aria-hidden="true">→</span>' +
+        '</a>' +
+        '<a class="twm-tg twm-sup" href="https://t.me/Traderwatchstarlingaibot" target="_blank" rel="noopener noreferrer">' +
+          '<span class="twm-tg-ico" aria-hidden="true">' +
+            '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="m11 17 2 2a1 1 0 1 0 3-3"/><path d="m14 14 2.5 2.5a1 1 0 1 0 3-3l-3.88-3.88a3 3 0 0 0-4.24 0l-.88.88a1 1 0 1 1-3-3l2.81-2.81a5.79 5.79 0 0 1 7.06-.87l.47.28a2 2 0 0 0 1.42.25L21 4"/><path d="m21 3 1 11h-2"/><path d="M3 3 2 14l6.5 6.5a1 1 0 1 0 3-3"/><path d="M3 4h8"/></svg>' +
+          '</span>' +
+          '<span class="twm-tg-tx">' +
+            '<b>Support TraderWatch</b>' +
+            '<small>Become an investor or support us via our IB program</small>' +
           '</span>' +
           '<span class="twm-tg-arr" aria-hidden="true">→</span>' +
         '</a>' +
