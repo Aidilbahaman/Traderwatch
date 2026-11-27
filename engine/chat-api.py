@@ -841,6 +841,12 @@ def clean_card(c):
     p_usd = _num(c.get("profit_usd"))
     if p_usd is not None and -1e6 <= p_usd <= 1e6:
         out["profit_usd"] = round(p_usd, 2)
+    try:
+        tid = int(c.get("trade_id") or 0)
+        if tid > 0:
+            out["trade_id"] = tid
+    except (TypeError, ValueError):
+        pass
     return out
 
 
@@ -1469,6 +1475,27 @@ class Handler(BaseHTTPRequestHandler):
         # Utamakan nama direktori (sudah ditapis + dibezakan ikut uid) supaya
         # "Aidil" dan "Aidil B." kekal konsisten dengan senarai rakan.
         dir_by_id = users_directory()["by_id"]
+        # Live-sync status (open / tp / sl / be) bagi kad trade yang dikongsi
+        tids = sorted({
+            int(r["payload"]["trade_id"])
+            for r in rows
+            if r.get("kind") == "signal" and isinstance(r.get("payload"), dict)
+            and str(r["payload"].get("trade_id") or "").isdigit()
+            and int(r["payload"]["trade_id"]) > 0
+        })
+        live_trades = {}
+        if tids:
+            try:
+                tkey = "live_tr:" + ",".join(str(x) for x in tids[:40])
+                trows = _cached(tkey, 5, lambda: sb(
+                    "GET", "/rest/v1/paper_trades",
+                    params={"select": "id,status,r_result,profit_usd,opened_at,closed_at",
+                            "id": "in.(" + ",".join(str(x) for x in tids[:40]) + ")"}
+                ) or [])
+                for tr in trows:
+                    live_trades[int(tr["id"])] = tr
+            except Exception:
+                live_trades = {}
         for r in rows:
             owner = r.pop("user_id", None)
             dev = is_dev_uid(owner)
@@ -1477,6 +1504,21 @@ class Handler(BaseHTTPRequestHandler):
             r["avatar_url"] = avatar_url_for(owner)
             r["rank"] = ranks.get(owner)
             r["own"] = bool(uid) and owner == uid   # ownership by id, not by display name
+            if r.get("kind") == "signal" and isinstance(r.get("payload"), dict):
+                tid = r["payload"].get("trade_id")
+                tr = live_trades.get(int(tid)) if (tid and str(tid).isdigit()) else None
+                if tr:
+                    p = dict(r["payload"])
+                    p["status"] = str(tr.get("status") or p.get("status") or "open").lower()
+                    if tr.get("opened_at"):
+                        p["opened_at"] = tr["opened_at"]
+                    if tr.get("closed_at"):
+                        p["closed_at"] = tr["closed_at"]
+                    if tr.get("r_result") is not None:
+                        p["r_result"] = round(float(tr["r_result"]), 2)
+                    if tr.get("profit_usd") is not None:
+                        p["profit_usd"] = round(float(tr["profit_usd"]), 2)
+                    r["payload"] = p
             slot = rx.get(r["id"]) or {"reactions": {}, "mine": []}
             r["reactions"], r["mine"] = slot["reactions"], slot["mine"]
         return self._send(200, {"messages": rows, "reset_at_utc": day_start_utc(),
