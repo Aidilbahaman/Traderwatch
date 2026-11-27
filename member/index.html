@@ -607,6 +607,9 @@ html.kb-open .dm-qbar,html.kb-focus:not(.kb-open) .dm-qbar{opacity:0;pointer-eve
 .dm-setup .tr-badge.bad{color:#ff8f95;background:rgba(255,119,125,.12);border-color:rgba(255,119,125,.34)}
 .dm-setup .tr-badge.tm{color:var(--muted);background:rgba(255,255,255,.05);border-color:var(--line)}
 .dm-setup .tr-disc{margin-top:6px;padding:6px 8px;border-radius:9px;font-size:9.5px;line-height:1.4;color:var(--muted);background:rgba(255,255,255,.035);border:1px solid rgba(255,255,255,.07)}
+.dm-setup .take2{width:100%;margin-top:8px;padding:9px 12px;border-radius:11px;font-weight:850;font-size:12px;color:var(--lime);background:#b7f36b14;border:1px solid #b7f36b55;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;transition:transform .14s,background .15s}
+.dm-setup .take2:active{transform:scale(.98);background:#b7f36b26}
+html[data-theme="light"] .dm-setup .take2{color:#4c7a17;background:rgba(132,204,22,.12);border-color:rgba(104,166,34,.42)}
 .dm-setup .take2.muted{opacity:.52;pointer-events:none}
 html[data-theme="light"] .dm-comp{background:rgba(255,255,255,.94);border-color:rgba(20,33,26,.12);box-shadow:0 8px 24px rgba(0,0,0,.10)}
 .dm-comp:focus-within{border-color:rgba(183,243,107,.55);box-shadow:0 12px 32px rgba(0,0,0,.52),0 0 0 3px rgba(183,243,107,.13)}
@@ -4421,14 +4424,28 @@ function openRxPicker(btn){
  pk.innerHTML=RX_EMOJIS.map(function(e){return '<button class="rxp" data-id="'+id+'" data-e="'+e+'" type="button">'+e+'</button>'}).join('');
  row.appendChild(pk);
 }
+function openCopyTrade(p){
+ if(!p)return;
+ var norm=String(p.pair||'').toUpperCase().replace(/[^A-Z0-9]/g,'');
+ var pair=PAIRS.filter(function(x){return x.s===norm})[0];
+ if(!pair){toast(t('notOpen'));return}
+ var side=String(p.side||'').toUpperCase();
+ if(side!=='BUY'&&side!=='SELL'){toast(t('noSetup'));return}
+ var entry=+p.entry,sl=+p.sl,tp=+p.tp;
+ if(!isFinite(entry)||!isFinite(sl)||!isFinite(tp)){toast(t('noSetup'));return}
+ var cl=pairClosed(pair);if(cl){toast(cl==='offline'?t('dataOffline'):t('mktClosed'));return}
+ var liveP=_cardLivePrice(pair.s);
+ var useEntry=entry;
+ if(liveP!=null&&isFinite(liveP)){
+  if((side==='BUY'&&sl<liveP&&liveP<tp)||(side==='SELL'&&sl>liveP&&liveP>tp))useEntry=liveP;
+ }
+ cur=pair;hap(10);
+ openRisk({dir:side,entry:useEntry,sl:sl,tp:tp,conf:+p.conf||0,tf:p.tf||'M15',entry_type:'market',meta:null});
+}
 function takeFromCard(id){
  var m=MSGS.filter(function(x){return String(x.id)===String(id)})[0];
  if(!m||!m.payload)return;
- var p=m.payload,pair=PAIRS.filter(function(x){return x.s===p.pair})[0];
- if(!pair)return;
- var cl=pairClosed(pair);if(cl){toast(cl==='offline'?t('dataOffline'):t('mktClosed'));return}
- cur=pair;hap(10);
- openRisk({dir:p.side,entry:+p.entry,sl:+p.sl,tp:+p.tp,conf:+p.conf||0,tf:p.tf,entry_type:'market',meta:null});
+ openCopyTrade(m.payload);
 }
 $('msgs').addEventListener('click',function(e){
  var b=e.target.closest?e.target.closest('button'):null;if(!b)return;
@@ -4918,7 +4935,7 @@ function _drawDMCore(scrollEnd,quiet){
    var openedTs=Date.parse(p.opened_at||m.created_at||'')||0;
    var mins=openedTs?Math.max(0,Math.floor((Date.now()-openedTs)/60000)):0;
    var durTxt=_fmtElapsedMin(mins);
-   var extra='',btnHtml='<button class="take2" data-dm-take="'+esc(String(m.id))+'" type="button">'+(en?'Take trade':'Ambil trade')+'</button>';
+   var extra='',btnHtml='<button class="take2" data-dm-take="'+esc(String(m.id))+'" type="button">'+esc(en?'Take this trade →':'Ambil trade ini →')+'</button>';
    if(isTp&&p.card_type==='tp'){
     extra='<div class="tr-disc">'+esc(en?'Closed in profit on Paper League. Past results do not guarantee future performance.':'Ditutup untung di Paper League. Keputusan lepas tidak menjamin prestasi masa hadapan.')+'</div>';
     btnHtml='';
@@ -5311,15 +5328,12 @@ $('dmMsgs').addEventListener('click',function(e){
   if(el){el.scrollIntoView({behavior:'smooth',block:'center'});el.classList.add('replying');setTimeout(function(){el.classList.remove('replying')},1200)}
   return;
  }
- var b=e.target.closest?e.target.closest('.take2'):null;if(!b)return;
+ var b=e.target.closest?e.target.closest('.take2'):null;if(!b||b.disabled)return;
+ e.preventDefault();e.stopPropagation();
  var mid=b.dataset.dmTake;
  var m=FR.dmMsgs.filter(function(x){return String(x.id)===String(mid)})[0];
  if(!m||!m.payload)return;
- var p=m.payload,pair=PAIRS.filter(function(x){return x.s===p.pair})[0];
- if(!pair)return;
- var cl=pairClosed(pair);if(cl){toast(cl==='offline'?t('dataOffline'):t('mktClosed'));return}
- cur=pair;closeDM();hap(10);
- openRisk({dir:p.side,entry:+p.entry,sl:+p.sl,tp:+p.tp,conf:+p.conf||0,tf:p.tf,entry_type:'market',meta:null});
+ openCopyTrade(m.payload);
 });
 
 /* Find Traders Sheet */
@@ -5810,7 +5824,8 @@ function openRisk(a){
  riskBal=(LG.me&&isFinite(+LG.me.balance))?+LG.me.balance:null;
  $('rErr').innerHTML='';
  $('rInstant').textContent=t('instantNote');
- $('rPair').innerHTML='<b>'+esc(pairName(riskAna.pair))+'</b><span class="side '+esc(riskAna.side.toLowerCase())+'">'+esc(riskAna.side)+'</span><span class="rsub">'+esc(riskAna.tf)+' · '+riskAna.conf+'%</span>';
+ var subTxt=riskAna.conf>0?(esc(riskAna.tf)+' · '+riskAna.conf+'%'):(esc(riskAna.tf)+' · '+esc(lang==='ms'?'Salin Trade':'Copy Trade'));
+ $('rPair').innerHTML='<b>'+esc(pairName(riskAna.pair))+'</b><span class="side '+esc(riskAna.side.toLowerCase())+'">'+esc(riskAna.side)+'</span><span class="rsub">'+subTxt+'</span>';
  $('rLevels').innerHTML='<div class="e"><small>'+esc(t('entry'))+'</small><b>'+tfx(riskAna.pair,riskAna.entry)+'</b></div><div class="t"><small>'+esc(t('tp'))+'</small><b>'+tfx(riskAna.pair,riskAna.tp)+'</b></div><div class="s"><small>'+esc(t('sl'))+'</small><b>'+tfx(riskAna.pair,riskAna.sl)+'</b></div>';
  drawRiskModes();drawRiskOpts();updateLot();
  $('mt5Chk').checked=true;drawMt5Opt();
@@ -5845,7 +5860,7 @@ function submitTrade(){
  apiFetch('/api/league/trade',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)}).then(function(r){
   riskBusy=false;
   if(r.ok){
-   hap(12);closeRisk();closeSheet();
+   hap(12);closeRisk();closeSheet();if(FR&&FR.dmFriend)closeDM();
    showView('liga');setSub('trades');
    loadLeague(true);
    var msg=t('toastOpened'),m=r.data&&r.data.mt5;
