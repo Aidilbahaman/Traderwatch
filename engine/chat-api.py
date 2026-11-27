@@ -820,7 +820,28 @@ def clean_card(c):
         return None
     if side == "SELL" and not (tp < entry < sl):
         return None
-    return {"pair": pair, "side": side, "tf": tf, "entry": entry, "sl": sl, "tp": tp, "conf": conf}
+    out = {"pair": pair, "side": side, "tf": tf, "entry": entry, "sl": sl, "tp": tp, "conf": conf}
+    ctype = str(c.get("card_type") or "").lower()
+    if ctype in ("tp", "trade", "signal"):
+        out["card_type"] = ctype
+    st = str(c.get("status") or "").lower()
+    if st in ("open", "tp", "sl", "be", "expired"):
+        out["status"] = st
+    for ts_k in ("opened_at", "closed_at"):
+        ts_v = str(c.get(ts_k) or "").strip()[:40]
+        if ts_v:
+            try:
+                datetime.fromisoformat(ts_v.replace("Z", "+00:00"))
+                out[ts_k] = ts_v
+            except Exception:
+                pass
+    r_res = _num(c.get("r_result"))
+    if r_res is not None and -50 <= r_res <= 200:
+        out["r_result"] = round(r_res, 2)
+    p_usd = _num(c.get("profit_usd"))
+    if p_usd is not None and -1e6 <= p_usd <= 1e6:
+        out["profit_usd"] = round(p_usd, 2)
+    return out
 
 
 def _rank_key(r):

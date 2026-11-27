@@ -218,7 +218,7 @@ html[data-theme="light"] .ic{background:#e6efd9;border-color:#c9dbb4}
 .com-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:5px}
 .com-head .vhead{margin:0;min-width:0}
 .com-head .online{margin:2px 0 0;flex:none;white-space:nowrap}
-.com-scroll{flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;scrollbar-width:none;position:relative;z-index:2;padding:2px 0 calc(158px + var(--sab))}
+.com-scroll{flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;scrollbar-width:none;position:relative;z-index:2;padding:2px 0 calc(194px + var(--sab))}
 .com-scroll::-webkit-scrollbar{display:none}
 .msgs{display:flex;flex-direction:column;gap:7px}
 .msgs.quiet .msg,.dm-msgs.quiet .dm-bbl,.dm-msgs.quiet .dm-setup,.dm-msgs.quiet .dm-pinbar{animation:none !important}
@@ -283,6 +283,34 @@ html[data-theme="light"] .sigcard .take2,html[data-theme="light"] .msg .rtag,htm
 .rxp:active{transform:scale(1.2)}
 @media (prefers-reduced-motion:reduce){.rxc.bump{animation:none}}
 .composer{position:absolute;left:12px;right:12px;bottom:calc(104px + var(--sab));display:flex;gap:8px;align-items:center;background:rgba(18,24,19,.88);backdrop-filter:saturate(180%) blur(22px);-webkit-backdrop-filter:saturate(180%) blur(22px);padding:5px 5px 5px 16px;border-radius:28px;border:1px solid rgba(255,255,255,.11);box-shadow:0 10px 28px rgba(0,0,0,.44),inset 0 1px 0 rgba(255,255,255,.08);z-index:28;transition:bottom .22s cubic-bezier(.22,1,.36,1),border-color .2s,box-shadow .22s}
+/* Community quick-share pills right above composer */
+.com-qbar{position:absolute;left:12px;right:12px;bottom:calc(158px + var(--sab));z-index:27;display:flex;align-items:center;gap:7px;overflow-x:auto;scrollbar-width:none;padding:2px 0;transition:bottom .22s cubic-bezier(.22,1,.36,1),opacity .18s}
+.com-qbar::-webkit-scrollbar{display:none}
+.com-qbar.hidden{display:none}
+html.kb-open .com-qbar,html.kb-focus:not(.kb-open) .com-qbar{opacity:0;pointer-events:none}
+.com-qpill{flex:none;display:inline-flex;align-items:center;gap:5px;padding:6px 11px;border-radius:999px;font-size:11px;font-weight:800;letter-spacing:.01em;color:var(--text);background:rgba(16,24,17,.74);backdrop-filter:saturate(170%) blur(14px);-webkit-backdrop-filter:saturate(170%) blur(14px);border:1px solid rgba(255,255,255,.12);box-shadow:0 6px 18px rgba(0,0,0,.32),inset 0 1px 0 rgba(255,255,255,.08);cursor:pointer;transition:transform .12s,border-color .15s,background .15s}
+.com-qpill:active{transform:scale(.95)}
+.com-qpill:disabled{opacity:.5;pointer-events:none}
+.com-qpill.tp{border-color:rgba(183,243,107,.38);color:#d7ff9a}
+.com-qpill.tr{border-color:rgba(138,180,255,.38);color:#cfe0ff}
+html[data-theme="light"] .com-qpill{background:rgba(255,255,255,.86);border-color:rgba(20,33,26,.12);color:#14211a;box-shadow:0 4px 14px rgba(15,28,18,.10)}
+html[data-theme="light"] .com-qpill.tp{border-color:rgba(104,166,34,.42);color:#3f6b0e}
+html[data-theme="light"] .com-qpill.tr{border-color:rgba(37,99,235,.34);color:#1d4ed8}
+/* Shared Trade & TP card extras */
+.sigcard.tp-hit{border-color:rgba(183,243,107,.65);background:linear-gradient(145deg,rgba(183,243,107,.10),var(--chart) 65%)}
+.sigcard .tp-res{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:900;color:var(--lime);background:rgba(183,243,107,.14);border:1px solid rgba(183,243,107,.38);padding:2px 8px;border-radius:999px;margin-bottom:7px}
+.sigcard .tr-meta{display:flex;flex-wrap:wrap;align-items:center;gap:5px;margin-top:7px}
+.sigcard .tr-badge{display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:800;padding:2.5px 8px;border-radius:999px;border:1px solid transparent}
+.sigcard .tr-badge.ok{color:#b7f36b;background:rgba(183,243,107,.12);border-color:rgba(183,243,107,.34)}
+.sigcard .tr-badge.warn{color:#ffc16b;background:rgba(255,193,107,.12);border-color:rgba(255,193,107,.34)}
+.sigcard .tr-badge.bad{color:#ff8f95;background:rgba(255,119,125,.12);border-color:rgba(255,119,125,.34)}
+.sigcard .tr-badge.tm{color:var(--muted);background:rgba(255,255,255,.05);border-color:var(--line)}
+.sigcard .tr-disc{margin-top:6px;padding:6px 8px;border-radius:9px;font-size:10px;line-height:1.4;color:var(--muted);background:rgba(255,255,255,.035);border:1px solid rgba(255,255,255,.07)}
+html[data-theme="light"] .sigcard .tr-disc{background:rgba(20,33,26,.04);border-color:rgba(20,33,26,.09)}
+html[data-theme="light"] .sigcard .tr-badge.ok{color:#3d6a0d}
+html[data-theme="light"] .sigcard .tr-badge.warn{color:#9a5800}
+html[data-theme="light"] .sigcard .tr-badge.bad{color:#b91c1c}
+.sigcard .take2.muted{opacity:.52;pointer-events:none}
 html[data-theme="light"] .composer{background:rgba(255,255,255,.92);border-color:rgba(20,33,26,.12);box-shadow:0 8px 24px rgba(0,0,0,.10),inset 0 1px 0 rgba(255,255,255,.9)}
 .composer:focus-within{border-color:rgba(183,243,107,.55);box-shadow:0 12px 32px rgba(0,0,0,.52),0 0 0 3px rgba(183,243,107,.13),inset 0 1px 0 rgba(255,255,255,.12)}
 html[data-theme="light"] .composer:focus-within{border-color:rgba(104,166,34,.55);box-shadow:0 10px 26px rgba(0,0,0,.14),0 0 0 3px rgba(132,204,22,.16),inset 0 1px 0 rgba(255,255,255,.95)}
@@ -2256,6 +2284,10 @@ html[data-theme="light"] .dev-tx{background:linear-gradient(90deg,#a86f00 0%,#dc
       </section>
     </div>
 
+    <div class="com-qbar hidden" id="comQuickBar" aria-label="Quick share">
+      <button class="com-qpill tp" id="comShareTp" type="button">🎯 <span id="comShareTpTxt">Share recent TP</span></button>
+      <button class="com-qpill tr" id="comShareTrade" type="button">📈 <span id="comShareTradeTxt">Share latest Trade</span></button>
+    </div>
     <div class="composer hidden" id="composer">
       <div class="editbar hidden" id="editBar"></div>
       <input id="msgInput" type="text" autocomplete="off" maxlength="500" aria-label="Tulis mesej">
@@ -2874,6 +2906,7 @@ function showView(v){
  moveNavPill(prev!==v);
  VIEWS.forEach(function(x){var el=$('view-'+x);if(el)el.classList.toggle('hidden',x!==v)});
  $('composer').classList.toggle('hidden',v!=='community');
+ var qb=$('comQuickBar');if(qb)qb.classList.toggle('hidden',v!=='community');
  if(v!=='community'&&COM_EDIT)cancelEdit();
  $('scroll').classList.toggle('com',v==='community');
  $('scroll').classList.toggle('com-lock',v==='community');
@@ -3775,11 +3808,63 @@ function myTm(iso){
  if(day===today)return hm;
  return new Intl.DateTimeFormat('en-GB',{timeZone:'Asia/Kuala_Lumpur',day:'numeric',month:'short'}).format(d)+' '+hm;
 }
+function _fmtElapsedMin(mins){
+ if(mins<1)return tx('<1 min','<1 min');
+ if(mins<60)return mins+' min';
+ var h=Math.floor(mins/60),m=mins%60;
+ return h+(lang==='en'?'h':'j')+(m?' '+m+'m':'');
+}
 function sigCardHtml(p,id){
  var d=pdec(p.pair),f=function(v){return Number(v).toFixed(d)},sell=p.side==='SELL';
- return '<div class="sigcard'+(sell?' sell':'')+'"><div class="sh"><b>✦ '+esc(p.pair)+' · '+esc(p.tf)+'</b><span class="sd">'+esc(p.side)+(p.conf?' '+(+p.conf)+'%':'')+'</span></div>'+
+ var isTp=(p.card_type==='tp'||p.status==='tp');
+ var isTr=(p.card_type==='trade');
+ var hdrRight=isTp?'🎯 TP HIT':(esc(p.side)+(p.conf?' '+(+p.conf)+'%':''));
+ var tpBanner='';
+ if(isTp){
+  var bits=['🎯 '+tx('TP Reached','TP Tercapai')];
+  if(p.r_result!=null&&isFinite(+p.r_result))bits.push((+p.r_result>=0?'+':'')+(+p.r_result).toFixed(2)+'R');
+  if(p.profit_usd!=null&&isFinite(+p.profit_usd))bits.push((+p.profit_usd>=0?'+$':'-$')+Math.abs(+p.profit_usd).toFixed(2));
+  tpBanner='<div class="tp-res">'+esc(bits.join(' · '))+'</div>';
+ }
+ var extraHtml='';
+ var takeBtn='<button class="take2" type="button" data-id="'+id+'">'+esc(tx('Take this trade →','Ambil trade ini →'))+'</button>';
+ if(isTp){
+  extraHtml='<div class="tr-disc">'+esc(tx('Closed in profit on Paper League. Past results do not guarantee future performance.','Ditutup untung di Paper League. Keputusan lepas tidak menjamin prestasi masa hadapan.'))+'</div>';
+  takeBtn='';
+ }else if(isTr){
+  var openedTs=Date.parse(p.opened_at||'')||0;
+  var mins=openedTs?Math.max(0,Math.floor((Date.now()-openedTs)/60000)):0;
+  var durTxt=_fmtElapsedMin(mins);
+  var closed=(p.status&&p.status!=='open');
+  var liveP=(typeof P==='object'&&P&&P[p.pair]&&isFinite(+P[p.pair].p))?+P[p.pair].p:null;
+  var hitAlready=false;
+  if(liveP!=null){
+   if(!sell&&(liveP>=+p.tp||liveP<=+p.sl))hitAlready=true;
+   if(sell&&(liveP<=+p.tp||liveP>=+p.sl))hitAlready=true;
+  }
+  var vCls='ok',vTxt=tx('Valid to follow','Sah untuk follow');
+  if(closed){
+   vCls='bad';vTxt=tx('Trade closed — Not valid','Trade ditutup — Tidak sah');
+  }else if(hitAlready){
+   vCls='bad';vTxt=tx('TP/SL already hit — Not valid','TP/SL sudah kena — Tidak sah');
+  }else if(mins>90){
+   vCls='bad';vTxt=tx('Late entry — Not recommended','Entry lewat — Tidak digalakkan');
+  }else if(mins>30){
+   vCls='warn';vTxt=tx('Caution — Check live price first','Berhati-hati — Semak harga live dulu');
+  }
+  var tmBadge=openedTs?('<span class="tr-badge tm">⏱ '+esc(tx('Running ','Berjalan ')+durTxt)+'</span>'):'';
+  var disc=tx(
+   'Disclaimer: Trade has been running for '+durTxt+'. Verify live entry price & risk before following. Educational only, not financial advice.',
+   'Penafian: Trade telah berjalan selama '+durTxt+'. Semak harga entry live & risiko sebelum follow. Pendidikan sahaja, bukan nasihat kewangan.'
+  );
+  extraHtml='<div class="tr-meta">'+tmBadge+'<span class="tr-badge '+vCls+'">'+esc(vTxt)+'</span></div><div class="tr-disc">'+esc(disc)+'</div>';
+  if(closed||hitAlready){
+   takeBtn='<button class="take2 muted" type="button" disabled>'+esc(tx('Trade no longer active','Trade tidak lagi aktif'))+'</button>';
+  }
+ }
+ return '<div class="sigcard'+(sell?' sell':'')+(isTp?' tp-hit':'')+'"><div class="sh"><b>✦ '+esc(p.pair)+' · '+esc(p.tf)+'</b><span class="sd">'+hdrRight+'</span></div>'+tpBanner+
   '<div class="sl3"><div class="e"><small>'+esc(t('entry'))+'</small><b>'+f(p.entry)+'</b></div><div class="t"><small>'+esc(t('tp'))+'</small><b>'+f(p.tp)+'</b></div><div class="s"><small>'+esc(t('sl'))+'</small><b>'+f(p.sl)+'</b></div></div>'+
-  '<button class="take2" type="button" data-id="'+id+'">'+esc(tx('Take this trade →','Ambil trade ini →'))+'</button></div>';
+  extraHtml+takeBtn+'</div>';
 }
 function rxHtml(m){
  if(!COM_FEAT.reactions)return '';
@@ -4055,6 +4140,75 @@ setInterval(function(){
 $('sendBtn').addEventListener('mousedown',function(e){e.preventDefault()});
 $('sendBtn').onclick=function(){sendMsg()};
 $('msgInput').addEventListener('keydown',function(e){if(e.key==='Enter'){e.preventDefault();sendMsg()}else if(e.key==='Escape'&&COM_EDIT){cancelEdit()}});
+/* Community quick-share: Share recent TP & Share latest Trade */
+var _comShareBusy=false;
+function shareTradeToCommunity(mode){
+ if(_comShareBusy)return;
+ var en=(lang==='en');
+ function runWithTrades(list){
+  var arr=Array.isArray(list)?list.slice():[];
+  arr.sort(function(a,b){
+   var ta=Date.parse((mode==='tp'?(a.closed_at||a.opened_at):a.opened_at)||a.created_at||0)||0;
+   var tb=Date.parse((mode==='tp'?(b.closed_at||b.opened_at):b.opened_at)||b.created_at||0)||0;
+   return tb-ta;
+  });
+  var tr=null;
+  if(mode==='tp'){
+   tr=arr.filter(function(x){return String(x.status||'').toLowerCase()==='tp'})[0]||null;
+   if(!tr){toast(en?'No TP trade yet to share.':'Belum ada trade TP untuk dikongsi.');return}
+  }else{
+   tr=arr.filter(function(x){return String(x.status||'open').toLowerCase()==='open'})[0]||arr[0]||null;
+   if(!tr){toast(en?'No taken trade yet. Take a trade first to share.':'Belum ada trade diambil. Ambil satu trade dahulu untuk kongsi.');return}
+  }
+  var card=_tradeToCard(tr);
+  if(!card){toast(en?'Invalid trade levels.':'Paras trade tidak sah.');return}
+  card.card_type=(mode==='tp'?'tp':'trade');
+  card.status=String(tr.status||'open').toLowerCase();
+  if(tr.opened_at)card.opened_at=tr.opened_at;
+  if(tr.closed_at)card.closed_at=tr.closed_at;
+  if(tr.r_result!=null&&isFinite(+tr.r_result))card.r_result=+tr.r_result;
+  if(tr.profit_usd!=null&&isFinite(+tr.profit_usd))card.profit_usd=+tr.profit_usd;
+  var txt=(mode==='tp')
+   ?(en?'Shared recent TP':'Kongsi TP terkini')
+   :(en?'Shared latest trade':'Kongsi trade terkini');
+  var body={card:card,text:txt};
+  if(COM_FEAT.rooms&&COM_ROOM!=='all')body.room=COM_ROOM;
+  _comShareBusy=true;
+  var b1=$('comShareTp'),b2=$('comShareTrade');
+  if(b1)b1.disabled=true;if(b2)b2.disabled=true;
+  apiFetch('/api/chat/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)}).then(function(res){
+   _comShareBusy=false;if(b1)b1.disabled=false;if(b2)b2.disabled=false;
+   if(!res.ok){toast(res.status===429?t('slow'):t('sendErr'));return}
+   if(res.data&&res.data.message){
+    res.data.message.own=true;
+    MSGS.push(res.data.message);
+    if(res.data.message.id!=null)comLastId=Math.max(Number(comLastId||0),Number(res.data.message.id)||0);
+   }
+   playChatSfx('sent');hap(10);
+   drawMsgs(false,true);scrollComBottom(true);
+   toast((mode==='tp'?(en?'Shared recent TP: ':'TP terkini dikongsi: '):(en?'Shared latest trade: ':'Trade terkini dikongsi: '))+pairName(card.pair));
+  }).catch(function(){
+   _comShareBusy=false;if(b1)b1.disabled=false;if(b2)b2.disabled=false;
+   toast(t('sendErr'));
+  });
+ }
+ if(LG.state==='ready'&&Array.isArray(LG.trades)&&LG.trades.length){
+  runWithTrades(LG.trades);return;
+ }
+ var b1=$('comShareTp'),b2=$('comShareTrade');
+ if(b1)b1.disabled=true;if(b2)b2.disabled=true;
+ apiFetch('/api/league/trades').then(function(r){
+  if(b1)b1.disabled=false;if(b2)b2.disabled=false;
+  var list=(r.ok&&r.data&&Array.isArray(r.data.trades))?r.data.trades:[];
+  if(list.length)LG.trades=list;
+  runWithTrades(list);
+ }).catch(function(){
+  if(b1)b1.disabled=false;if(b2)b2.disabled=false;
+  runWithTrades(LG.trades||[]);
+ });
+}
+if($('comShareTp'))$('comShareTp').onclick=function(){hap(6);shareTradeToCommunity('tp')};
+if($('comShareTrade'))$('comShareTrade').onclick=function(){hap(6);shareTradeToCommunity('trade')};
 /* Dock sembunyi SEGERA bila input chat focus (jangan tunggu viewport resize
    yang mungkin lambat/tak dilapor sesetengah keyboard Android). */
 (function(){
