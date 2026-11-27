@@ -71,6 +71,14 @@ _last_dm = {}                   # user_id -> unix ts of last DM
 _last_wave = {}                 # user_id -> unix ts of last wave
 DM_RATE_LIMIT = 1.2
 UUID_RE = re.compile(r"^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$", re.I)
+DEV_UIDS = {x.strip() for x in os.environ.get("DEV_UIDS", "c59521e0-f0e7-48cb-856a-8990a643e3ae").split(",") if x.strip()}
+DEV_NAME = "Aidil (Dev)"
+
+
+def is_dev_uid(uid):
+    return bool(uid) and str(uid) in DEV_UIDS
+
+
 PUSH_ENV = pathlib.Path("/home/ubuntu/.secrets/push.env")
 
 # ---- rooms / signal cards / reactions (needs migrations/20261124_chat_rooms_cards_reactions.sql) ----
@@ -1067,7 +1075,8 @@ def build_friends_overview(uid):
                 requests_in.append({
                     "id": other,
                     "friendship_id": f.get("id"),
-                    "username": info["username"],
+                    "username": DEV_NAME if is_dev_uid(other) else info["username"],
+                    "is_dev": is_dev_uid(other),
                     "avatar_url": avatar_url_for(other),
                     "rank": ranks.get(other),
                     "created_at": f.get("created_at") or "",
@@ -1110,7 +1119,8 @@ def build_friends_overview(uid):
                 preview = lm.get("body") or ""
         friends.append({
             "id": fid,
-            "username": info["username"],
+            "username": DEV_NAME if is_dev_uid(fid) else info["username"],
+            "is_dev": is_dev_uid(fid),
             "avatar_url": avatar_url_for(fid),
             "online": fid in online_ids,
             "last_seen": last_seen_iso(fid),
@@ -1144,7 +1154,8 @@ def build_friends_overview(uid):
 
     arrivals = [{
         "id": u["id"],
-        "username": u["username"],
+        "username": DEV_NAME if is_dev_uid(u["id"]) else u["username"],
+        "is_dev": is_dev_uid(u["id"]),
         "avatar_url": avatar_url_for(u["id"]),
         "created_at": u["created_at"],
         "rank": ranks.get(u["id"]),
@@ -1249,7 +1260,8 @@ class Handler(BaseHTTPRequestHandler):
                 if term in u["username"].lower():
                     hits.append({
                         "id": u["id"],
-                        "username": u["username"],
+                        "username": DEV_NAME if is_dev_uid(u["id"]) else u["username"],
+                        "is_dev": is_dev_uid(u["id"]),
                         "avatar_url": avatar_url_for(u["id"]),
                         "rank": ranks.get(u["id"]),
                         "rel": rel_map.get(u["id"], "none"),
@@ -1353,7 +1365,8 @@ class Handler(BaseHTTPRequestHandler):
             return self._send(200, {
                 "friend": {
                     "id": other,
-                    "username": info["username"],
+                    "username": DEV_NAME if is_dev_uid(other) else info["username"],
+                    "is_dev": is_dev_uid(other),
                     "avatar_url": avatar_url_for(other),
                     "online": other in presence_online_set(),
                     "last_seen": last_seen_iso(other),
@@ -1411,7 +1424,9 @@ class Handler(BaseHTTPRequestHandler):
         dir_by_id = users_directory()["by_id"]
         for r in rows:
             owner = r.pop("user_id", None)
-            r["username"] = (dir_by_id.get(owner) or {}).get("username") or public_name(r.get("username"))
+            dev = is_dev_uid(owner)
+            r["username"] = DEV_NAME if dev else ((dir_by_id.get(owner) or {}).get("username") or public_name(r.get("username")))
+            r["is_dev"] = dev
             r["avatar_url"] = avatar_url_for(owner)
             r["rank"] = ranks.get(owner)
             r["own"] = bool(uid) and owner == uid   # ownership by id, not by display name
@@ -1865,7 +1880,8 @@ class Handler(BaseHTTPRequestHandler):
         if not clean and gif:
             clean = "GIF"
 
-        row = {"user_id": uid, "username": public_name(display_name(user)), "body": clean}
+        dev_post = is_dev_uid(uid)
+        row = {"user_id": uid, "username": DEV_NAME if dev_post else public_name(display_name(user)), "body": clean}
         if ext_ok():
             room = str(payload.get("room") or "").upper()
             row["room"] = card["pair"] if card else (room if room in ROOMS else "all")
@@ -1883,6 +1899,9 @@ class Handler(BaseHTTPRequestHandler):
         msg = (rows or [{}])[0]
         msg.pop("user_id", None)
         msg["own"] = True
+        msg["is_dev"] = dev_post
+        if dev_post:
+            msg["username"] = DEV_NAME
         msg["avatar_url"] = avatar_url_for(uid)
         msg.setdefault("reactions", {})
         msg.setdefault("mine", [])

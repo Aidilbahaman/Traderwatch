@@ -2041,6 +2041,15 @@ html[data-theme="light"] .orb-sheet{
   background:linear-gradient(180deg,rgba(255,255,255,.76) 0%,rgba(244,248,242,.84) 100%);
   border-top:1px solid rgba(20,33,26,.10);
 }
+/* Exclusive Developer badge: Aidil (Dev) in shimmering gold + animated Starling */
+.dev-nm{display:inline-flex;align-items:center;gap:4px;vertical-align:middle;max-width:100%}
+.dev-tx{font-weight:850;background:linear-gradient(90deg,#ffd86b 0%,#fff3bd 34%,#f4b938 66%,#ffd86b 100%);background-size:200% auto;-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 0 8px rgba(255,206,74,.42));animation:devGoldShimmer 3s linear infinite;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+html[data-theme="light"] .dev-tx{background:linear-gradient(90deg,#a86f00 0%,#dca016 40%,#8c5a00 72%,#a86f00 100%);background-size:200% auto;-webkit-background-clip:text;background-clip:text;filter:drop-shadow(0 0 4px rgba(180,120,0,.22))}
+.dev-star{width:16px;height:16px;flex:none;object-fit:contain;display:inline-block;filter:drop-shadow(0 0 6px rgba(255,214,102,.65));animation:devStarBob 2.2s ease-in-out infinite}
+#pName .dev-star{width:20px;height:20px}
+@keyframes devGoldShimmer{0%{background-position:0% 50%}100%{background-position:200% 50%}}
+@keyframes devStarBob{0%,100%{transform:translateY(0) rotate(-4deg) scale(1)}50%{transform:translateY(-2.5px) rotate(6deg) scale(1.12)}}
+@media(prefers-reduced-motion:reduce){.dev-tx,.dev-star{animation:none !important}}
 </style>
 </head>
 <body>
@@ -3780,6 +3789,12 @@ function rxHtml(m){
  }).join('');
  return '<div class="rxrow">'+chips+'<button class="rxadd" data-id="'+m.id+'" type="button" aria-label="React">＋</button></div>';
 }
+var DEV_UID='c59521e0-f0e7-48cb-856a-8990a643e3ae';
+function isMeDev(){return !!(ME&&ME.id===DEV_UID)}
+function devNameHtml(name,isDev){
+ if(!isDev)return esc(name);
+ return '<span class="dev-nm"><span class="dev-tx">'+esc(name||'Aidil (Dev)')+'</span><img class="dev-star" src="icons/starling-mascot.png?v=20261127a" width="16" height="16" alt="" aria-hidden="true"></span>';
+}
 function avInnerHtml(name,url,iniFn){
  var init=(iniFn||initials)(name||'TW');
  var u=String(url||'').trim();
@@ -3799,7 +3814,8 @@ function msgHtml(m,me){
   ?'<img class="chat-gif" src="'+esc(gifU)+'" alt="'+esc(m.payload.title||'GIF')+'" width="'+(Number(m.payload.w)||240)+'" height="'+(Number(m.payload.h)||240)+'" loading="lazy">'
   :'<p>'+esc(txt)+'</p>';
  var avUrl=m.avatar_url||(isMe?myAvatarUrl():'');
- return '<div class="msg'+(isMe?' me':'')+'" data-id="'+m.id+'"'+(own?' data-own="1"':'')+'><div class="av" style="background:'+avCol(m.username)+'">'+avInnerHtml(m.username,avUrl)+'</div><div class="body'+((isSig||isGif)?' wide':'')+'"><div class="meta"><b>'+esc(m.username)+'</b>'+rk+rt+'<time>'+esc(myTm(m.created_at))+'</time>'+ed+opt+'</div>'+inner+(isSig?sigCardHtml(m.payload,m.id):'')+rxHtml(m)+'</div></div>';
+ var isDev=!!(m.is_dev||(isMe&&isMeDev()));
+ return '<div class="msg'+(isMe?' me':'')+'" data-id="'+m.id+'"'+(own?' data-own="1"':'')+'><div class="av" style="background:'+avCol(m.username)+'">'+avInnerHtml(m.username,avUrl)+'</div><div class="body'+((isSig||isGif)?' wide':'')+'"><div class="meta"><b>'+devNameHtml(isDev?'Aidil (Dev)':m.username,isDev)+'</b>'+rk+rt+'<time>'+esc(myTm(m.created_at))+'</time>'+ed+opt+'</div>'+inner+(isSig?sigCardHtml(m.payload,m.id):'')+rxHtml(m)+'</div></div>';
 }
 var _comSig='',_roomsSig='';
 function _msgSig(list){
@@ -4234,7 +4250,7 @@ function renderFriends(){
  if(selObj){
   var d=selObj.data;
   if(selObj.kind==='friend'){
-   tipHTML='<div class="orb-tip"><div class="tm"><b>'+esc(d.username)+'</b><small>'+(d.online?(en?'Online':'Aktif'):(en?'Friend':'Rakan'))+'</small></div>'
+   tipHTML='<div class="orb-tip"><div class="tm"><b>'+devNameHtml(d.username,d.is_dev)+'</b><small>'+(d.online?(en?'Online':'Aktif'):(en?'Friend':'Rakan'))+'</small></div>'
     +'<button class="orb-btn lime" data-f-open="'+esc(d.id)+'" type="button">'+(en?'Chat':'Mesej')+'</button></div>';
   }else{
    var actBtn='';
@@ -4242,7 +4258,7 @@ function renderFriends(){
    else if(d.rel==='pending_out')actBtn='<button class="orb-btn" disabled type="button">'+(en?'Sent':'Dihantar')+'</button>';
    else if(d.rel==='pending_in')actBtn='<button class="orb-btn lime" data-f-acc="'+esc(d.id)+'" type="button">'+(en?'Accept':'Terima')+'</button>';
    else actBtn='<button class="orb-btn" data-f-add="'+esc(d.id)+'" type="button">'+(en?'+ Add':'+ Tambah')+'</button>';
-   tipHTML='<div class="orb-tip"><div class="tm"><b>'+esc(d.username)+'</b><small>'+esc(relAgo(d.created_at))+'</small></div>'
+   tipHTML='<div class="orb-tip"><div class="tm"><b>'+devNameHtml(d.username,d.is_dev)+'</b><small>'+esc(relAgo(d.created_at))+'</small></div>'
     +'<button class="orb-btn '+(d.waved?'soft':'lime')+'" data-f-wave="'+esc(d.id)+'" type="button">'+(d.waved?(en?'Waved':'Disapa'):(en?'Wave':'Sapa'))+'</button>'
     +actBtn+'</div>';
   }
@@ -4263,7 +4279,7 @@ function renderFriends(){
    var wdist=Math.round((i*100)/Math.max(1,innerNodes.length))+'%';
    var wdur=(28+i*3)+'s';
    return '<div class="orb-node'+(isSel?' sel':'')+'" style="left:'+inPos[i].x+'%;top:'+inPos[i].y+'%;--wl:'+inPos[i].x+'%;--wt:'+inPos[i].y+'%;--wdist:'+wdist+';--wdur:'+wdur+'" data-orb-f="'+esc(f.id)+'">'
-    +orbAvHTML(f.username,f.id,f.online,f.rank,f.avatar_url)+'<span>'+esc(firstWord(f.username))+'</span></div>';
+    +orbAvHTML(f.username,f.id,f.online,f.rank,f.avatar_url)+'<span>'+(f.is_dev?devNameHtml('Aidil (Dev)',true):esc(firstWord(f.username)))+'</span></div>';
   }).join('')
   +outerNodes.map(function(a,i){
    var isSel=selObj&&selObj.kind==='new'&&selObj.data.id===a.id;
@@ -4307,7 +4323,7 @@ function renderFriends(){
     var lastTxt=f.last_msg?(f.last_from_me?(en?'You: ':'Anda: ')+f.last_msg:f.last_msg):(en?'Friends — tap to start chatting':'Rakan — tap untuk mula berbual');
     return '<div class="f-row'+(f.unread?' unread':'')+'" data-f-open="'+esc(f.id)+'">'
      +orbAvHTML(f.username,f.id,f.online,f.rank,f.avatar_url)
-     +'<div class="f-mid"><div class="f-r1"><b>'+esc(f.username)+'</b><time>'+esc(relAgo(f.last_at))+'</time></div>'
+     +'<div class="f-mid"><div class="f-r1"><b>'+devNameHtml(f.username,f.is_dev)+'</b><time>'+esc(relAgo(f.last_at))+'</time></div>'
      +'<div class="f-pres'+(f.online?' on':'')+'"><i></i>'+esc(lastSeenTxt(f.last_seen,f.online))+'</div>'
      +'<div class="f-r2"><p>'+esc(lastTxt)+'</p>'+(f.unread?'<span class="f-udot">'+f.unread+'</span>':'')+'</div></div></div>';
    }).join('')+'</div>';
@@ -4318,7 +4334,7 @@ function renderFriends(){
   }else{
    body.innerHTML='<div class="f-list">'+FR.requests.map(function(r){
     return '<div class="f-row" style="cursor:default">'+orbAvHTML(r.username,r.id,false,r.rank,r.avatar_url)
-     +'<div class="f-mid"><div class="f-r1"><b>'+esc(r.username)+'</b><time>'+esc(relAgo(r.created_at))+'</time></div>'
+     +'<div class="f-mid"><div class="f-r1"><b>'+devNameHtml(r.username,r.is_dev)+'</b><time>'+esc(relAgo(r.created_at))+'</time></div>'
      +'<div class="f-r2"><p>'+(en?'Wants to chat privately with you':'Ingin berhubung secara peribadi')+'</p></div></div>'
      +'<div class="f-act"><button class="orb-btn lime" data-f-acc="'+esc(r.id)+'" type="button">'+(en?'Accept':'Terima')+'</button>'
      +'<button class="f-x" data-f-dec="'+esc(r.id)+'" type="button" aria-label="Decline"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div></div>';
@@ -4336,7 +4352,7 @@ function renderFriends(){
     else btn='<button class="orb-btn" data-f-add="'+esc(a.id)+'" type="button">'+(en?'+ Add':'+ Tambah')+'</button>';
     var waveTxt=(a.waved?(en?'Waved':'Disapa'):(en?'Wave':'Sapa'))+(a.waves>0?' · '+a.waves:'');
     return '<div class="f-row" style="cursor:default">'+orbAvHTML(a.username,a.id,!!a.online,a.rank,a.avatar_url)
-     +'<div class="f-mid"><div class="f-r1"><b>'+esc(a.username)+'</b><time>'+esc(relAgo(a.created_at))+'</time></div>'
+     +'<div class="f-mid"><div class="f-r1"><b>'+devNameHtml(a.username,a.is_dev)+'</b><time>'+esc(relAgo(a.created_at))+'</time></div>'
      +'<div class="f-r2"><p>'+(en?'Joined Trader Watch':'Sertai Trader Watch')+'</p></div></div>'
      +'<div class="f-act"><button class="orb-btn '+(a.waved?'soft':'lime')+'" data-f-wave="'+esc(a.id)+'" type="button">'+esc(waveTxt)+'</button>'+btn+'</div></div>';
    }).join('')+'</div>';
@@ -4449,7 +4465,7 @@ function openDM(fid){
  FR.dmFriend=f;FR.dmMsgs=[];FR.dmInit=false;FR.dmLastId=null;FR.dmTyping=false;_typOn=false;setDmReply(null);
  $('dmAv').innerHTML=avInnerHtml(f.username,f.avatar_url,orbIni);
  $('dmAv').style.background=orbBg(f.id);
- $('dmName').textContent=f.username;
+ $('dmName').innerHTML=devNameHtml(f.username,f.is_dev);
  renderDmSub();
  $('dmInp').setAttribute('placeholder',lang==='en'?'Message privately...':'Tulis mesej peribadi...');
  $('dmMsgs').innerHTML='<div class="dm-day">'+(lang==='en'?'Loading private chat...':'Memuatkan chat peribadi...')+'</div>';
@@ -4497,7 +4513,7 @@ function loadDM(scrollEnd){
   if(r.data&&r.data.friend){
    var fr=r.data.friend;FR.dmFriend=fr;
    FR.dmTyping=!!fr.typing;
-   $('dmName').textContent=fr.username;
+   $('dmName').innerHTML=devNameHtml(fr.username,fr.is_dev);
    renderDmSub();
   }
   var next=(r.data&&Array.isArray(r.data.messages))?r.data.messages:[];
@@ -4965,7 +4981,7 @@ $('fFindInp').addEventListener('input',function(){
     else if(u.rel==='pending_in')act='<button class="orb-btn lime" data-s-acc="'+esc(u.id)+'" type="button">'+(en?'Accept':'Terima')+'</button>';
     else act='<button class="orb-btn lime" data-s-add="'+esc(u.id)+'" type="button">'+(en?'+ Add':'+ Tambah')+'</button>';
     return '<div class="f-row" style="cursor:default">'+orbAvHTML(u.username,u.id,false,u.rank,u.avatar_url)
-     +'<div class="f-mid"><div class="f-r1"><b>'+esc(u.username)+'</b></div></div><div class="f-act">'+act+'</div></div>';
+     +'<div class="f-mid"><div class="f-r1"><b>'+devNameHtml(u.username,u.is_dev)+'</b></div></div><div class="f-act">'+act+'</div></div>';
    }).join('')+'</div>';
   });
  },220);
@@ -5142,10 +5158,11 @@ function drawLb(){
   else{val=wrTxt(x.win_rate);cls='neu';sub=money(bal)+' · '+n+' '+unit}
   var flame=(x.is_me&&tpStreak()>=3)?'<span class="fl" aria-hidden="true">🔥</span>':'';
   var lbAv=x.avatar_url||(x.is_me?myAvatarUrl():'');
+  var lbDev=!!(x.is_dev||(x.is_me&&isMeDev()));
   return '<div class="lrow'+(x.is_me?' me':'')+(rank<=3?' g'+rank:'')+'" style="animation-delay:'+(i*30)+'ms">'+
    '<span class="rk">'+rk+'</span>'+
    '<span class="av" style="background:'+avCol(String(x.username||'?'))+'">'+avInnerHtml(x.username,lbAv)+'</span>'+
-   '<span class="who"><span class="nm">'+esc(x.username)+(x.is_me?'<span class="lbadge">'+esc(t('youName'))+'</span>':'')+flame+'</span>'+
+   '<span class="who"><span class="nm">'+devNameHtml(lbDev?'Aidil (Dev)':x.username,lbDev)+(x.is_me?'<span class="lbadge">'+esc(t('youName'))+'</span>':'')+flame+'</span>'+
    '<span class="lbal" title="'+esc(t('balanceLab'))+'">'+esc(money(bal))+'<i class="'+gcls+'">'+esc(gtxt)+'</i></span>'+
    '<span class="lsub2">'+esc(sub)+'</span></span>'+
    '<span class="val '+cls+'">'+esc(val)+'</span></div>';
@@ -6533,7 +6550,9 @@ function renderProfile(){
  var nm=ME.dispName||'Ahli',av=myAvatarUrl();
  drawGreet();
  renderAvatarEl($('pInit'),nm,av);
- $('pName').textContent=nm;$('pEmail').textContent=ME.email||'—';
+ if(isMeDev())$('pName').innerHTML=devNameHtml('Aidil (Dev)',true);
+ else $('pName').textContent=nm;
+ $('pEmail').textContent=ME.email||'—';
  $('pPlan').textContent=PLAN==='pro'?'PRO':'FREE';
  $('pSince').textContent=t('since')+' '+dateMY(ME.created_at);
  renderAvatarEl($('avatarBtn'),nm,av);

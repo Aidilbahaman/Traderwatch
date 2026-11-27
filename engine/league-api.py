@@ -547,11 +547,14 @@ class Handler(BaseHTTPRequestHandler):
                 # supaya dua "Aidil" tidak nampak macam orang yang sama.
                 names = disambiguate([{"id": r.get("user_id") or "", "raw": r.get("username") or ""}
                                       for r in rows])
+                dev_uids = {x.strip() for x in os.environ.get("DEV_UIDS", "c59521e0-f0e7-48cb-856a-8990a643e3ae").split(",") if x.strip()}
                 for i, r in enumerate(rows):
                     uid_r = r.get("user_id") or ""
+                    is_dev = bool(uid_r) and uid_r in dev_uids
                     r["rank"] = i + 1
                     r["is_me"] = (uid_r == uid)
-                    r["username"] = names.get(uid_r, public_name(r.get("username")))
+                    r["is_dev"] = is_dev
+                    r["username"] = "Aidil (Dev)" if is_dev else names.get(uid_r, public_name(r.get("username")))
                     av_p = pathlib.Path(__file__).resolve().parent.parent / "member" / "avatars" / f"{uid_r}.jpg"
                     try:
                         r["avatar_url"] = f"/member/avatars/{uid_r}.jpg?v={int(av_p.stat().st_mtime)}" if uid_r else ""
