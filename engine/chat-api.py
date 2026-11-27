@@ -73,10 +73,24 @@ DM_RATE_LIMIT = 1.2
 UUID_RE = re.compile(r"^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$", re.I)
 DEV_UIDS = {x.strip() for x in os.environ.get("DEV_UIDS", "c59521e0-f0e7-48cb-856a-8990a643e3ae").split(",") if x.strip()}
 DEV_NAME = "Aidil (Dev)"
+DEVOPS_UIDS = {x.strip() for x in os.environ.get("DEVOPS_UIDS", "29f38e2e-45ac-4f2a-a0b5-7fea90a65d32").split(",") if x.strip()}
+DEVOPS_NAME = "Aiwebdev DevOps"
 
 
 def is_dev_uid(uid):
     return bool(uid) and str(uid) in DEV_UIDS
+
+
+def is_devops_uid(uid):
+    return bool(uid) and str(uid) in DEVOPS_UIDS
+
+
+def special_name(uid, fallback):
+    if is_dev_uid(uid):
+        return DEV_NAME
+    if is_devops_uid(uid):
+        return DEVOPS_NAME
+    return fallback
 
 
 PUSH_ENV = pathlib.Path("/home/ubuntu/.secrets/push.env")
@@ -1102,8 +1116,9 @@ def build_friends_overview(uid):
                 requests_in.append({
                     "id": other,
                     "friendship_id": f.get("id"),
-                    "username": DEV_NAME if is_dev_uid(other) else info["username"],
+                    "username": special_name(other, info["username"]),
                     "is_dev": is_dev_uid(other),
+                    "is_devops": is_devops_uid(other),
                     "avatar_url": avatar_url_for(other),
                     "rank": ranks.get(other),
                     "created_at": f.get("created_at") or "",
@@ -1146,8 +1161,9 @@ def build_friends_overview(uid):
                 preview = lm.get("body") or ""
         friends.append({
             "id": fid,
-            "username": DEV_NAME if is_dev_uid(fid) else info["username"],
+            "username": special_name(fid, info["username"]),
             "is_dev": is_dev_uid(fid),
+            "is_devops": is_devops_uid(fid),
             "avatar_url": avatar_url_for(fid),
             "online": fid in online_ids,
             "last_seen": last_seen_iso(fid),
@@ -1181,8 +1197,9 @@ def build_friends_overview(uid):
 
     arrivals = [{
         "id": u["id"],
-        "username": DEV_NAME if is_dev_uid(u["id"]) else u["username"],
+        "username": special_name(u["id"], u["username"]),
         "is_dev": is_dev_uid(u["id"]),
+        "is_devops": is_devops_uid(u["id"]),
         "avatar_url": avatar_url_for(u["id"]),
         "created_at": u["created_at"],
         "rank": ranks.get(u["id"]),
@@ -1203,8 +1220,9 @@ def build_friends_overview(uid):
             continue
         orbit_active.append({
             "id": oid,
-            "username": DEV_NAME if is_dev_uid(oid) else u["username"],
+            "username": special_name(oid, u["username"]),
             "is_dev": is_dev_uid(oid),
+            "is_devops": is_devops_uid(oid),
             "avatar_url": avatar_url_for(oid),
             "created_at": u["created_at"],
             "rank": ranks.get(oid),
@@ -1313,8 +1331,9 @@ class Handler(BaseHTTPRequestHandler):
                 if term in u["username"].lower():
                     hits.append({
                         "id": u["id"],
-                        "username": DEV_NAME if is_dev_uid(u["id"]) else u["username"],
+                        "username": special_name(u["id"], u["username"]),
                         "is_dev": is_dev_uid(u["id"]),
+                        "is_devops": is_devops_uid(u["id"]),
                         "avatar_url": avatar_url_for(u["id"]),
                         "rank": ranks.get(u["id"]),
                         "rel": rel_map.get(u["id"], "none"),
@@ -1396,9 +1415,9 @@ class Handler(BaseHTTPRequestHandler):
             if dm_tids:
                 try:
                     tkey = "live_tr:" + ",".join(str(x) for x in dm_tids[:40])
-                    trows = _cached(tkey, 5, lambda: sb(
+                    trows = _cached(tkey, 2, lambda: sb(
                         "GET", "/rest/v1/paper_trades",
-                        params={"select": "id,status,r_result,profit_usd,opened_at,closed_at",
+                        params={"select": "id,status,r_result,risk_usd,opened_at,closed_at",
                                 "id": "in.(" + ",".join(str(x) for x in dm_tids[:40]) + ")"}
                     ) or [])
                     for tr in trows:
@@ -1428,9 +1447,10 @@ class Handler(BaseHTTPRequestHandler):
                         if tr.get("closed_at"):
                             pl["closed_at"] = tr["closed_at"]
                         if tr.get("r_result") is not None:
-                            pl["r_result"] = round(float(tr["r_result"]), 2)
-                        if tr.get("profit_usd") is not None:
-                            pl["profit_usd"] = round(float(tr["profit_usd"]), 2)
+                            rr = round(float(tr["r_result"]), 2)
+                            pl["r_result"] = rr
+                            if tr.get("risk_usd") is not None:
+                                pl["profit_usd"] = round(rr * float(tr["risk_usd"]), 2)
                 msgs.append({
                     "id": r["id"],
                     "me": r["sender_id"] == uid,
@@ -1454,8 +1474,9 @@ class Handler(BaseHTTPRequestHandler):
             return self._send(200, {
                 "friend": {
                     "id": other,
-                    "username": DEV_NAME if is_dev_uid(other) else info["username"],
+                    "username": special_name(other, info["username"]),
                     "is_dev": is_dev_uid(other),
+                    "is_devops": is_devops_uid(other),
                     "avatar_url": avatar_url_for(other),
                     "online": other in presence_online_set(),
                     "last_seen": last_seen_iso(other),
@@ -1523,9 +1544,9 @@ class Handler(BaseHTTPRequestHandler):
         if tids:
             try:
                 tkey = "live_tr:" + ",".join(str(x) for x in tids[:40])
-                trows = _cached(tkey, 5, lambda: sb(
+                trows = _cached(tkey, 2, lambda: sb(
                     "GET", "/rest/v1/paper_trades",
-                    params={"select": "id,status,r_result,profit_usd,opened_at,closed_at",
+                    params={"select": "id,status,r_result,risk_usd,opened_at,closed_at",
                             "id": "in.(" + ",".join(str(x) for x in tids[:40]) + ")"}
                 ) or [])
                 for tr in trows:
@@ -1535,8 +1556,10 @@ class Handler(BaseHTTPRequestHandler):
         for r in rows:
             owner = r.pop("user_id", None)
             dev = is_dev_uid(owner)
-            r["username"] = DEV_NAME if dev else ((dir_by_id.get(owner) or {}).get("username") or public_name(r.get("username")))
+            devops = is_devops_uid(owner)
+            r["username"] = special_name(owner, (dir_by_id.get(owner) or {}).get("username") or public_name(r.get("username")))
             r["is_dev"] = dev
+            r["is_devops"] = devops
             r["avatar_url"] = avatar_url_for(owner)
             r["rank"] = ranks.get(owner)
             r["own"] = bool(uid) and owner == uid   # ownership by id, not by display name
@@ -1551,9 +1574,10 @@ class Handler(BaseHTTPRequestHandler):
                     if tr.get("closed_at"):
                         p["closed_at"] = tr["closed_at"]
                     if tr.get("r_result") is not None:
-                        p["r_result"] = round(float(tr["r_result"]), 2)
-                    if tr.get("profit_usd") is not None:
-                        p["profit_usd"] = round(float(tr["profit_usd"]), 2)
+                        rr = round(float(tr["r_result"]), 2)
+                        p["r_result"] = rr
+                        if tr.get("risk_usd") is not None:
+                            p["profit_usd"] = round(rr * float(tr["risk_usd"]), 2)
                     r["payload"] = p
             slot = rx.get(r["id"]) or {"reactions": {}, "mine": []}
             r["reactions"], r["mine"] = slot["reactions"], slot["mine"]
