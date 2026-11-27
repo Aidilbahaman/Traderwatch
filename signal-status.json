@@ -7973,9 +7973,14 @@
    "status": "pending"
   },
   "XAGUSD_20261127_211743": {
-   "status": "pending"
+   "status": "active",
+   "entry_at": "2026-11-27T21:37:00+08:00"
+  },
+  "XAGUSD_20261127_213658": {
+   "status": "active",
+   "entry_at": "2026-11-27T21:37:00+08:00"
   }
  },
- "updated": "2026-11-27T21:36:02+08:00",
+ "updated": "2026-11-27T21:41:02+08:00",
  "_cursor": 0
 }
