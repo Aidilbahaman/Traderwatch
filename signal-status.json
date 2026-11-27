@@ -7554,7 +7554,8 @@
    "entry_at": "2026-11-27T17:28:00+08:00"
   },
   "XAGUSD_20261127_173136": {
-   "status": "pending"
+   "status": "active",
+   "entry_at": "2026-11-27T17:43:00+08:00"
   },
   "BTCUSD_20261127_173944": {
    "status": "active",
@@ -7562,8 +7563,11 @@
   },
   "XAGUSD_20261127_173635": {
    "status": "pending"
+  },
+  "XAGUSD_20261127_174159": {
+   "status": "pending"
   }
  },
- "updated": "2026-11-27T17:41:02+08:00",
+ "updated": "2026-11-27T17:46:02+08:00",
  "_cursor": 0
 }
