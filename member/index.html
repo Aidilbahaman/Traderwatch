@@ -1752,273 +1752,252 @@ html[data-theme="light"] .star-mood{background:rgba(122,181,46,.10);border-color
    tanpa mengubah sebarang fungsi JS.
    ============================================================ */
 @media (min-width:841px){
+  :root{--sb-w:232px}
+  body.sb-min{--sb-w:72px}
+
   /* ---- shell ---- */
   html,body{overflow:hidden}
   .stage{display:block!important;background:
-    radial-gradient(60% 50% at 18% 0%,rgba(183,243,107,.05),transparent 60%),
+    radial-gradient(60% 50% at 18% 0%,rgba(183,243,107,.06),transparent 60%),
     radial-gradient(50% 44% at 100% 100%,rgba(138,180,255,.04),transparent 60%),
     var(--bg)!important;padding:0!important}
   .phone{
     display:grid!important;
-    grid-template-columns:auto minmax(0,1fr)!important;
-    grid-template-rows:minmax(0,1fr)!important;
+    grid-template-columns:var(--sb-w) minmax(0,1fr)!important;
+    grid-template-rows:auto auto minmax(0,1fr)!important;
     width:100%!important;height:100%!important;max-height:none!important;
     border:0!important;border-radius:0!important;box-shadow:none!important;
-    background:transparent!important;overflow:visible!important;
-    gap:0}
+    background:transparent!important;overflow:hidden!important;
+    gap:0;
+    transition:grid-template-columns .22s cubic-bezier(.22,1,.36,1)}
   .notch{display:none!important}
 
-  /* ---- SIDE NAV (kiri) — dari .bnavwrap sedia ada ---- */
+  /* ---- SIDE NAV (kiri) — frosted glass collapsible sidebar ---- */
   .bnavwrap{
-    grid-column:1!important;grid-row:1/span 2!important;
+    grid-column:1!important;grid-row:1/span 3!important;
     position:relative!important;
-    width:232px!important;
-    transition:width .22s cubic-bezier(.22,1,.36,1)!important;
+    width:var(--sb-w)!important;
+    transition:width .22s cubic-bezier(.22,1,.36,1),padding .22s cubic-bezier(.22,1,.36,1)!important;
     height:100vh!important;min-height:100vh!important;max-height:none!important;
     flex:none!important;
     z-index:25!important;
-    border-right:1px solid var(--line);border-top:0;border-bottom:0;border-left:0;
+    border-right:1px solid rgba(255,255,255,.08)!important;border-top:0;border-bottom:0;border-left:0;
     border-radius:0!important;
-    background:var(--card)!important;
-    display:block!important;
-    padding:18px 12px calc(18px + env(safe-area-inset-bottom))!important;
-    box-shadow:none!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important;
+    background:rgba(11,16,13,.84)!important;
+    backdrop-filter:blur(22px) saturate(145%)!important;-webkit-backdrop-filter:blur(22px) saturate(145%)!important;
+    display:flex!important;flex-direction:column!important;
+    padding:16px 12px calc(18px + env(safe-area-inset-bottom))!important;
+    box-shadow:1px 0 24px rgba(0,0,0,.28)!important;
     overflow-y:auto;overflow-x:hidden}
+  [data-theme="light"] .bnavwrap{background:rgba(246,248,245,.88)!important;border-right-color:var(--line)!important}
   .bnav{position:static!important;display:block!important;height:auto!important;
     background:transparent!important;border:0!important;box-shadow:none!important;
     backdrop-filter:none!important;-webkit-backdrop-filter:none!important;
     padding:0!important;border-radius:0!important;
     left:auto!important;right:auto!important;bottom:auto!important;top:auto!important;
     transform:none!important}
-  /* buang overlay hitam & pill dari mobile — ia menutup label sidebar */
   .bnav::before,.bnav::after,.bnav .navpill{display:none!important}
   .bnav *{position:static!important;transform:none!important;left:auto!important;
     right:auto!important;bottom:auto!important;top:auto!important}
-  /* keep yang memang perlu absolute (ndot notifikasi) */
-  .bnav .ndot{position:absolute!important}
-  /* ligaslot & ligacoin: pastikan dalam flow, tiada bertindih */
+  .bnav .ndot{position:absolute!important;top:8px!important;right:10px!important}
   .bnav .ligaslot,.bnav .ligacoin{position:relative!important;left:auto!important;
     right:auto!important;top:auto!important;bottom:auto!important;
     transform:none!important;width:100%!important;height:auto!important}
-  .bnavrow{display:block!important;width:100%!important;padding:0!important;margin:0!important}
-  .bnavrow::before{display:none!important}   /* buang garis/pemisah lama */
-  .bnav .navpill{display:none!important}    /* pill lama tak relevan pada desktop */
-  .bnav .ligaslot{margin:4px 0!important;padding:0!important;height:auto!important;
-    width:100%!important;position:static!important}
+  .bnavrow{display:flex!important;flex-direction:column!important;gap:4px!important;width:100%!important;padding:0!important;margin:0!important}
+  .bnavrow::before{display:none!important}
+  .bnav .ligaslot{margin:0!important;padding:0!important;height:auto!important;width:100%!important}
   .bnav .ligacoin{
     display:flex!important;flex-direction:row!important;align-items:center;gap:12px;
-    width:100%!important;height:auto!important;padding:12px 14px!important;
+    width:100%!important;height:auto!important;padding:11px 14px!important;
     border-radius:12px!important;background:transparent!important;
-    border:0!important;box-shadow:none!important;position:static!important}
+    border:1px solid transparent!important;box-shadow:none!important;position:relative!important;
+    color:var(--muted)!important;transition:background .16s,color .16s,border-color .16s!important}
   .bnav .ligacoin .halo,.bnav .ligacoin .burst{display:none!important}
-  .bnav .ligacoin svg{width:20px!important;height:20px!important;position:static!important;
-    transform:none!important;flex:none!important}
-  .bnav .ligacoin .clbl{position:static!important;transform:none!important;opacity:1!important;
-    font-size:13px!important;font-weight:700!important;color:inherit!important;left:auto!important;
-    bottom:auto!important;top:auto!important;white-space:nowrap!important;
-    text-align:left!important}
-  .bnav .ligacoin{color:var(--muted)!important}
-  .bnav .ligacoin.on{color:var(--lime)!important}
-  .bnav .ligacoin:hover:not(.on){color:var(--text)!important}
+  .bnav .ligacoin svg{width:20px!important;height:20px!important;flex:none!important}
+  .bnav .ligacoin .clbl{opacity:1!important;font-size:13px!important;font-weight:750!important;
+    color:inherit!important;white-space:nowrap!important;text-align:left!important}
+  .bnav .ligacoin.on{background:rgba(183,243,107,.13)!important;border-color:rgba(183,243,107,.24)!important;color:var(--lime)!important}
+  .bnav .ligacoin:hover:not(.on){background:rgba(255,255,255,.05)!important;color:var(--text)!important}
   .bnav .nav{
     display:flex!important;flex-direction:row!important;align-items:center;gap:12px;
     width:100%!important;height:auto!important;padding:11px 14px!important;
     border-radius:12px!important;min-width:0!important;margin:0!important;
-    position:static!important;transform:none!important;
-    font-size:13px!important;color:var(--muted)!important}
-  .bnav .nav.on{color:var(--lime)!important}
-  .bnav .nav:hover:not(.on){color:var(--text)!important}
-  .bnav .nav svg,.bnav .nav .st-nav{width:20px!important;height:20!important;flex:none}
+    position:relative!important;border:1px solid transparent!important;
+    font-size:13px!important;color:var(--muted)!important;
+    transition:background .16s,color .16s,border-color .16s!important}
+  .bnav .nav.on{background:rgba(183,243,107,.13)!important;border-color:rgba(183,243,107,.24)!important;color:var(--lime)!important}
+  .bnav .nav.on svg{filter:none!important}
+  .bnav .nav:hover:not(.on){background:rgba(255,255,255,.05)!important;color:var(--text)!important}
+  .bnav .nav:active{transform:none!important}
+  .bnav .nav svg,.bnav .nav .st-nav{width:20px!important;height:20px!important;flex:none!important;display:inline-flex!important;align-items:center;justify-content:center}
   .bnav .nav span{display:inline!important;opacity:1!important;
     font-size:13px!important;font-weight:700!important;max-width:none!important;
     overflow:visible!important;text-overflow:clip!important;white-space:nowrap!important;
     text-align:left!important;color:inherit!important}
-  .bnav .ligacoin .clbl{font-size:13px!important;font-weight:750!important}
-  .bnav .nav.on{background:rgba(183,243,107,.12);color:var(--lime)}
-  .bnav .nav.on svg{filter:none!important}
-  .bnav .nav:hover:not(.on){background:var(--card2);color:var(--text)}
-  .bnav .nav:active{transform:none!important}
 
-  /* ---- MAIN (tengah) ---- */
-  .appbar{
-    position:static!important;order:0;
-    display:flex!important;align-items:center;gap:12px;
-    padding:16px 26px 14px!important;
-    max-width:none!important;margin:0!important;
-    border-bottom:1px solid var(--line);background:var(--card)!important;
-    backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
-  .scroll{
-    max-width:1080px!important;margin:0 auto!important;width:100%!important;
-    padding:26px 30px 60px!important;
-    scrollbar-width:thin;scrollbar-color:var(--line) transparent}
-  .scroll::-webkit-scrollbar{width:10px}
-  .scroll::-webkit-scrollbar-thumb{background:var(--line);border-radius:6px}
-  .scroll::-webkit-scrollbar-track{background:transparent}
-
-  /* ---- TYPE SCALE desktop ---- */
-  h1{font-size:34px!important}
-  .sub{font-size:15px!important}
-  .view{padding:0!important}
-
-  /* ---- PAIR GRID lebih kolum ---- */
-  .pairs{grid-template-columns:repeat(auto-fill,minmax(230px,1fr))!important;gap:14px!important}
-  .pair{padding:15px!important;border-radius:18px!important}
-  .pair:hover{transform:translateY(-3px)!important;border-color:rgba(183,243,107,.38)!important;
-    box-shadow:0 12px 32px rgba(0,0,0,.35)!important}
-  .pair .ic{width:36px!important;height:36px!important;font-size:11px!important}
-
-  /* ---- TABS ---- */
-  .tab{padding:9px 18px!important;font-size:13px!important}
-
-  /* ---- SEARCH ---- */
-  .search{max-width:none!important;width:100%!important}
-
-  /* ---- APPBAR: pindah ke atas sebagai topbar ---- */
-  .appbar{
-    grid-column:2!important;grid-row:1!important;
-    display:flex!important;align-items:center;gap:12px!important;
-    padding:16px 30px 14px!important;
-    margin:0!important;
-    border-bottom:1px solid var(--line)!important;
-    background:var(--card)!important;
-    backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
-  .appbar .brand b{font-size:15px!important}
-  .appbar .brand small{font-size:9px!important}
-  .appbar .baract{margin-left:auto!important;display:flex!important;gap:8px!important}
-  .appbar .logo{width:40px!important;height:40px!important;font-size:20px!important}
-
-  /* ---- SCROLL wrapper: kandungan center dengan max-width ---- */
-  .scroll{
-    grid-column:2!important;grid-row:2!important;
-    max-width:none!important;margin:0!important;width:auto!important;
-    padding:28px 32px 60px!important;
-    scrollbar-width:thin;scrollbar-color:var(--line) transparent}
-  .scroll::-webkit-scrollbar{width:10px;height:10px}
-  .scroll::-webkit-scrollbar-thumb{background:var(--line);border-radius:6px}
-  .scroll::-webkit-scrollbar-track{background:transparent}
-
-  /* ---- VIEW padding ---- */
-  .view{padding:0!important}
-
-  /* ---- type scale ---- */
-  h1{font-size:36px!important;line-height:1.05!important}
-  h1 span{font-size:inherit!important}
-  .sub{font-size:15px!important;margin-bottom:22px!important}
-  .greet-row{margin-bottom:12px!important;align-items:center!important}
-  .greet-row .st-buddy{width:84px!important;height:84px!important;margin:0!important}
-  .greet-row .st-buddy svg{width:78px!important;height:78px!important}
-
-  /* ---- SEARCH ---- */
-  .search{padding:10px 16px!important;font-size:13px!important;margin-bottom:12px!important}
-  .search input{font-size:15px!important}
-
-  /* ---- TABS ---- */
-  .tabs{gap:8px!important;margin-bottom:22px!important}
-  .tab{padding:10px 20px!important;font-size:13.5px!important;border-radius:14px!important}
-
-  /* ---- PAIR GRID: lebih kolum pada desktop ---- */
-  .pairs{grid-template-columns:repeat(auto-fill,minmax(240px,1fr))!important;gap:16px!important}
-  .pair{padding:16px!important;border-radius:18px!important;transition:transform .18s,border-color .2s,box-shadow .2s!important}
-  .pair:hover{transform:translateY(-3px)!important;
-    border-color:rgba(183,243,107,.42)!important;
-    box-shadow:0 14px 36px rgba(0,0,0,.38)!important}
-  .pair:active{transform:scale(.985)!important}
-  .pair .ic{width:38px!important;height:38px!important;font-size:11px!important;border-radius:11px!important}
-  .pair .nm{font-size:16px!important}
-  .pair .px{font-size:17px!important}
-  .pair:hover .spark{opacity:1!important}
-
-  /* ---- HINT / FOOT ---- */
-  .hint{max-width:620px!important;margin:22px auto 0!important;text-align:center}
-  .foot{max-width:620px!important;margin:14px auto 0!important;text-align:center}
-
-  /* ---- SHEET (analisis) besar sikit ---- */
-  #sheet{max-width:720px!important;left:50%!important;right:auto!important;
-    transform:translateX(-50%) translateY(108%)!important;
-    border-radius:24px 24px 0 0!important;
-    border:1px solid var(--line);border-bottom:0!important;
-    box-shadow:0 -24px 70px rgba(0,0,0,.55)!important}
-  .open #sheet{transform:translateX(-50%) translateY(0)!important}
-  #sheet .chartbox{height:300px!important}
-
-  /* ---- modal risk / td center juga ---- */
-  #risk,#td{max-width:420px!important}
-
-  /* ---- BNAVWRAP lama disembunyikan di bawah (mobile fallback) ---- */
-  html:not(:root) .bnavwrap{display:block}
-
-  /* ============================================================
-     DESKTOP REFINEMENT — collapsible sidebar / compact topbar /
-     12-pair single screen. Semua override dalam block ini SAHAJA.
-     ============================================================ */
-
-  /* ---- FIX 1: collapsible sidebar (default collapsed 72px) ---- */
-  .phone{grid-template-rows:auto minmax(0,1fr)!important}
-  .appbar{flex:0 0 auto!important}
   .sbtoggle{
-    display:block;width:30px;height:30px;padding:0;margin:0 0 14px;
-    border-radius:9px;border:1px solid var(--line);background:var(--card2);
-    color:var(--muted);font-size:13px;line-height:1;cursor:pointer;
-    display:grid;place-items:center;
+    width:34px;height:34px;padding:0;margin:0 0 16px;
+    border-radius:10px;border:1px solid rgba(255,255,255,.10);background:rgba(255,255,255,.04);
+    color:var(--muted);font-size:14px;line-height:1;cursor:pointer;
+    display:grid;place-items:center;flex:none;
     transition:border-color .18s,color .18s,background .18s}
-  .sbtoggle:hover{border-color:var(--lime);color:var(--lime)}
-  body.sb-min .bnavwrap{width:72px!important;padding-left:21px!important;padding-right:21px!important}
-  body.sb-min .sbtoggle{margin:0 auto 14px}
+  .sbtoggle:hover{border-color:rgba(183,243,107,.45);color:var(--lime);background:rgba(183,243,107,.08)}
+  body.sb-min .bnavwrap{padding-left:14px!important;padding-right:14px!important}
+  body.sb-min .sbtoggle{margin:0 auto 16px}
   body.sb-min .bnav .nav span,body.sb-min .bnav .ligacoin .clbl{display:none!important}
   body.sb-min .bnav .nav,body.sb-min .bnav .ligacoin{justify-content:center!important;padding:11px 0!important}
-  body.sb-min .bnav .nav .st-nav{display:inline!important} /* st-nav = icon svg wrapper, keep */
-  body.sb-min .bnav .nav svg{width:20px!important;height:20px!important}
+  body.sb-min .bnav .nav .st-nav{display:inline-flex!important}
+  body.sb-min .bnav .ndot{top:6px!important;right:8px!important}
 
-  /* ---- FIX 2: clean single-row topbar ---- */
+  /* ---- TOPBAR (row 1, col 2) ---- */
   .appbar{
-    padding:12px 26px!important;gap:14px!important;
-    border-bottom:1px solid var(--line)!important;
-    background:var(--card)!important}
-  .appbar .logo{width:34px!important;height:34px!important;border-radius:10px!important}
-  .appbar .brand{display:flex!important;flex-direction:row!important;align-items:baseline!important;gap:8px!important;
-    flex:0 0 auto!important;justify-content:flex-start!important}
-  .appbar .brand b{font-size:14px!important}
-  .appbar .brand small{font-size:9px!important;margin-top:0!important}
-  .appbar .logo{flex:none!important}
+    grid-column:2!important;grid-row:1!important;
+    position:static!important;flex:0 0 auto!important;
+    display:flex!important;align-items:center;gap:14px!important;
+    padding:12px 28px!important;margin:0!important;max-width:none!important;
+    border-bottom:1px solid rgba(255,255,255,.07)!important;
+    background:rgba(11,16,13,.80)!important;
+    backdrop-filter:blur(20px) saturate(140%)!important;-webkit-backdrop-filter:blur(20px) saturate(140%)!important}
+  [data-theme="light"] .appbar{background:rgba(246,248,245,.86)!important;border-bottom-color:var(--line)!important}
+  .appbar .logo{width:34px!important;height:34px!important;border-radius:10px!important;flex:none!important}
+  .appbar .brand{display:flex!important;flex-direction:row!important;align-items:baseline!important;gap:8px!important;flex:0 0 auto!important;justify-content:flex-start!important}
+  .appbar .brand b{font-size:14.5px!important;letter-spacing:.06em!important}
+  .appbar .brand small{font-size:9.5px!important;margin-top:0!important}
   .appbar .baract{margin-left:auto!important;display:flex!important;gap:8px!important}
 
-  /* ---- FIX 2: compact greeting (title left, starling right) ---- */
-  .greet-row{display:flex!important;align-items:center!important;justify-content:space-between!important;margin-bottom:10px!important}
-  h1{font-size:26px!important}
+  /* ---- USD NEWS TICKER (row 2, col 2 — fixed grid placement!) ---- */
+  .usd-news{
+    grid-column:2!important;grid-row:2!important;
+    width:100%!important;margin:0!important;
+    border-bottom:1px solid rgba(255,255,255,.06)!important}
+
+  /* ---- SCROLL AREA (row 3, col 2) ---- */
+  .scroll{
+    grid-column:2!important;grid-row:3!important;
+    max-width:none!important;margin:0!important;width:auto!important;height:auto!important;
+    padding:22px 32px 48px!important;
+    overflow-y:auto!important;overflow-x:hidden!important;
+    scrollbar-width:thin;scrollbar-color:rgba(183,243,107,.22) transparent}
+  .scroll.an-lock,.scroll.com-lock,.scroll.frs-lock{overflow-y:auto!important}
+  .scroll::-webkit-scrollbar{width:8px;height:8px}
+  .scroll::-webkit-scrollbar-thumb{background:rgba(255,255,255,.14);border-radius:8px}
+  .scroll::-webkit-scrollbar-thumb:hover{background:rgba(183,243,107,.32)}
+  .scroll::-webkit-scrollbar-track{background:transparent}
+
+  /* ---- CENTERED VIEW CONTAINERS ---- */
+  .view{padding:0!important;max-width:1160px!important;margin:0 auto!important;width:100%!important}
+  #view-analyst{height:auto!important;min-height:0!important;overflow:visible!important}
+  #view-analyst .pairs-scroll{overflow:visible!important;height:auto!important;flex:none!important;padding-bottom:16px!important}
+  #view-liga,#view-profile,#view-settings{max-width:920px!important}
+  #view-community{max-width:920px!important;height:calc(100vh - 140px)!important;min-height:460px!important;display:flex!important;flex-direction:column!important}
+  #view-community.hidden{display:none!important}
+  #view-community .com-scroll{flex:1 1 auto!important;min-height:0!important;overflow-y:auto!important;padding-bottom:124px!important}
+
+  /* ---- ANALYST VIEW ---- */
+  .greet-row{display:flex!important;align-items:center!important;justify-content:space-between!important;margin-bottom:12px!important}
+  h1{font-size:28px!important;line-height:1.1!important}
   h1 span{font-size:inherit!important}
+  .greet-row .st-buddy{width:56px!important;height:56px!important;margin:0!important}
+  .greet-row .st-buddy img,.greet-row .st-buddy svg{width:52px!important;height:52px!important}
   .view[data-view="analyst"] .star-mood{display:none!important}
   .view[data-view="analyst"] .sub{display:none!important}
   .view[data-view="analyst"] .hint{display:none!important}
 
-  /* ---- FIX 3+4: compact search / tabs ---- */
-  .scroll{padding:18px 22px 40px!important}
-  .search{padding:9px 14px!important;margin-bottom:10px!important;font-size:13px!important}
-  .search input{font-size:13px!important}
-  .tabs{margin-bottom:12px!important}
-  .tab{padding:7px 16px!important;font-size:12px!important}
+  .search{max-width:none!important;width:100%!important;padding:10px 16px!important;margin-bottom:12px!important;font-size:13.5px!important;border-radius:14px!important}
+  .search input{font-size:13.5px!important}
+  .tabs{gap:8px!important;margin-bottom:16px!important}
+  .tab{padding:8px 18px!important;font-size:12.5px!important;border-radius:999px!important}
 
-  /* ---- FIX 3+4: compact pair cards — 12 fit on first load ---- */
-  .pairs{grid-template-columns:repeat(auto-fill,minmax(168px,1fr))!important;gap:10px!important}
-  .pair{padding:11px 12px!important;border-radius:14px!important;min-height:0!important}
-  .pair .ic{width:28px!important;height:28px!important;font-size:9px!important;border-radius:8px!important}
-  .pair .nm{font-size:12.5px!important}
-  .pair .ds{font-size:10px!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important}
-  .pair .px{font-size:13px!important;margin-top:7px!important}
-  .pair .spark{height:18px!important;margin:6px 0 4px!important}
-  .pair .aitick{font-size:8px!important}
-  .pair .traders{font-size:8px!important}
-  .pair .badges{margin-top:6px!important}
+  .pairs{grid-template-columns:repeat(auto-fill,minmax(215px,1fr))!important;gap:14px!important}
+  .pair{padding:14px 15px!important;border-radius:16px!important;min-height:0!important;transition:transform .18s,border-color .2s,box-shadow .2s!important}
+  .pair:hover{transform:translateY(-3px)!important;border-color:rgba(183,243,107,.42)!important;box-shadow:0 14px 34px rgba(0,0,0,.38)!important}
+  .pair:active{transform:scale(.985)!important}
+  .pair .ic{width:34px!important;height:34px!important;font-size:10.5px!important;border-radius:10px!important}
+  .pair .nm{font-size:14.5px!important}
+  .pair .ds{font-size:11px!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important}
+  .pair .px{font-size:15.5px!important;margin-top:8px!important}
+  .pair .spark{height:22px!important;margin:7px 0 5px!important}
+  .pair .aitick,.pair .traders{font-size:9.5px!important}
+  .pair .badges{margin-top:7px!important}
+  .foot{max-width:620px!important;margin:18px auto 0!important;text-align:center}
 
-  /* ---- FLOATING ANALYST CARD — desktop centered compact ---- */
-  .floata{
+  /* ---- COMMUNITY COMPOSER & QUICK-SHARE BAR (sidebar-aware!) ---- */
+  .com-qbar{
+    position:fixed!important;
+    left:calc(var(--sb-w) + 32px)!important;right:32px!important;
+    bottom:74px!important;
+    max-width:920px!important;margin:0 auto!important;
+    padding:0!important;z-index:22!important;
+    transition:left .22s cubic-bezier(.22,1,.36,1)!important}
+  .composer{
+    position:fixed!important;
+    left:calc(var(--sb-w) + 32px)!important;right:32px!important;
+    bottom:16px!important;
+    max-width:920px!important;margin:0 auto!important;
+    z-index:23!important;
+    transition:left .22s cubic-bezier(.22,1,.36,1)!important}
+
+  /* ---- FRIENDS / ORBIT: 2-column desktop split ---- */
+  #view-friends{
+    max-width:1120px!important;
+    height:calc(100vh - 130px)!important;min-height:500px!important;
+    display:grid!important;grid-template-columns:390px minmax(0,1fr)!important;
+    gap:20px!important;align-items:stretch!important;overflow:hidden!important}
+  #view-friends.hidden{display:none!important}
+  #view-friends .orb-stage{
+    height:100%!important;min-height:0!important;max-height:none!important;
+    border-radius:22px!important;border:1px solid rgba(255,255,255,.08)!important}
+  #view-friends .orb-sheet{
+    height:100%!important;min-height:0!important;max-height:none!important;
+    border-radius:22px!important;border:1px solid rgba(255,255,255,.08)!important;
+    overflow-y:auto!important;padding:16px!important}
+
+  /* ---- PRIVATE DM OVERLAY (desktop panel right of sidebar, centered chat) ---- */
+  .dm-sheet{
+    left:var(--sb-w)!important;right:0!important;top:0!important;bottom:0!important;
+    width:auto!important;
+    transition:left .22s cubic-bezier(.22,1,.36,1),transform .24s cubic-bezier(.22,1,.36,1)!important}
+  .dm-head{
+    max-width:860px!important;width:100%!important;margin:0 auto!important;
+    padding:14px 24px!important}
+  .dm-msgs{
+    max-width:860px!important;width:100%!important;margin:0 auto!important;
+    padding:16px 24px 124px!important}
+  .dm-qbar{
     left:50%!important;right:auto!important;transform:translateX(-50%)!important;
-    width:240px!important;max-width:none!important;
-    bottom:calc(74px + var(--sab))!important;
-    padding:6px 9px 6px 7px!important;gap:7px!important;
+    width:min(812px,calc(100% - 48px))!important;bottom:74px!important}
+  .dm-comp{
+    left:50%!important;right:auto!important;transform:translateX(-50%)!important;
+    width:min(812px,calc(100% - 48px))!important;bottom:16px!important}
+
+  /* ---- LEAGUE / PROFILE / SETTINGS polish ---- */
+  #view-liga .bgrid{grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:12px!important}
+  #view-profile .stats{gap:14px!important}
+  #view-settings .themes{grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:12px!important}
+
+  /* ---- SHEETS & MODALS (centered desktop cards) ---- */
+  #sheet{max-width:740px!important;width:calc(100% - 48px)!important;left:50%!important;right:auto!important;
+    transform:translateX(-50%) translateY(108%)!important;
+    border-radius:24px 24px 0 0!important;
+    border:1px solid rgba(255,255,255,.10)!important;border-bottom:0!important;
+    box-shadow:0 -24px 70px rgba(0,0,0,.60)!important}
+  .open #sheet{transform:translateX(-50%) translateY(0)!important}
+  #sheet .chartbox{height:300px!important}
+  #risk,#td{max-width:440px!important}
+  .ffind-card{max-width:460px!important}
+
+  /* ---- FLOATING ANALYST CARD — desktop bottom centered ---- */
+  .floata{
+    left:calc(50% + var(--sb-w) / 2)!important;right:auto!important;transform:translateX(-50%)!important;
+    width:260px!important;max-width:none!important;
+    bottom:22px!important;
+    padding:7px 12px 7px 9px!important;gap:8px!important;
     border-radius:999px!important}
   .floata .fstar{width:20px!important;height:20px!important}
-  .floata .ftxt{font-size:11.5px!important}
+  .floata .ftxt{font-size:12px!important}
   .floata .fx{font-size:12px!important;padding:2px 6px!important;border-radius:8px!important}
+
+  html:not(:root) .bnavwrap{display:flex}
 }
 
 /* ---- fallback: <=840px mobile biasa (TIDAK DISSENTUH) ---- */
