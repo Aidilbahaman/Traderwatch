@@ -46,15 +46,15 @@
       '}' +
       '#' + OVERLAY_ID + ' .twm-top{display:flex;flex-direction:column;align-items:center;gap:11px;margin-bottom:16px}' +
       '#' + OVERLAY_ID + ' .twm-ico{' +
-        'width:64px;height:64px;border-radius:20px;' +
-        'background:radial-gradient(circle at 50% 45%,rgba(183,243,107,.24),rgba(183,243,107,.04) 72%);' +
+        'width:88px;height:88px;border-radius:22px;' +
+        'background:radial-gradient(circle at 50% 45%,rgba(183,243,107,.22),rgba(183,243,107,.04) 72%);' +
         'border:1px solid rgba(183,243,107,.34);' +
-        'display:grid;place-items:center;' +
+        'display:grid;place-items:center;overflow:hidden;' +
         'box-shadow:0 0 28px rgba(183,243,107,.24);' +
       '}' +
       '#' + OVERLAY_ID + ' .twm-ico img{' +
-        'width:48px;height:48px;object-fit:contain;display:block;' +
-        'transform-origin:50% 62%;animation:twMaintFloat 3.2s ease-in-out infinite;' +
+        'width:78px;height:78px;object-fit:contain;display:block;' +
+        'filter:drop-shadow(0 6px 14px rgba(183,243,107,.32));' +
       '}' +
       '#' + OVERLAY_ID + ' .twm-pill{' +
         'display:inline-flex;align-items:center;gap:6px;padding:4px 12px;border-radius:999px;' +
@@ -199,7 +199,7 @@
     wrap.innerHTML =
       '<div class="twm-card">' +
         '<div class="twm-top">' +
-          '<div class="twm-ico"><img src="/member/icons/starling-mascot.png?v=20261127b" width="48" height="48" alt="Starling AI"></div>' +
+          '<div class="twm-ico"><img src="/member/icons/poring-mascot.webp?v=20261128a" width="78" height="78" alt="TraderWatch Mascot"></div>' +
           '<div class="twm-pill"><span class="twm-dot"></span>System Upgrade</div>' +
         '</div>' +
         '<h2>WE’RE MAKING <span>TRADERWATCH BETTER.</span></h2>' +
