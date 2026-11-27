@@ -1036,10 +1036,10 @@ def build_friends_overview(uid):
     ranks = rank_map()
     online_ids = presence_online_set()
     day0 = day_start_utc()
-    # Kiraan harian: reset setiap 12:00 tengah malam waktu Malaysia (MYT, UTC+8).
-    seen_start = datetime.now(MYT).replace(
-        hour=DAILY_RESET_HOUR_MYT, minute=0, second=0, microsecond=0).timestamp()
-    seen_today_ids = {u for u, ts in _seen.items() if ts >= seen_start} | online_ids
+    # Orbit space: kekal selama 1 jam sahaja (offline > 1 jam → hilang dari space).
+    # Kiraan harian New Traders kekal reset 12:00 tengah malam waktu Malaysia (day0).
+    seen_1h_ids = {u for u, ts in _seen.items() if ts >= time.time() - 3600} | online_ids
+    seen_today_ids = seen_1h_ids
 
     today_joined = sum(1 for u in ordered if (u.get("created_at") or "") >= day0)
     total_members = len(ordered)
@@ -1163,8 +1163,33 @@ def build_friends_overview(uid):
         "waved": u["id"] in my_waves,
         "waves": wave_counts.get(u["id"], 0),
         "rel": rel_map.get(u["id"], "none"),
-        "seen_today": u["id"] in seen_today_ids,
+        "seen_today": u["id"] in seen_1h_ids,
+        "seen_1h": u["id"] in seen_1h_ids,
     } for u in newest]
+
+    # Semua ahli (bukan rakan) yang aktif dalam 1 jam terakhir — tiada had bilangan
+    friend_set = set(friend_ids)
+    orbit_active = []
+    for u in ordered:
+        oid = u["id"]
+        if oid == uid or oid in friend_set or oid not in seen_1h_ids:
+            continue
+        orbit_active.append({
+            "id": oid,
+            "username": DEV_NAME if is_dev_uid(oid) else u["username"],
+            "is_dev": is_dev_uid(oid),
+            "avatar_url": avatar_url_for(oid),
+            "created_at": u["created_at"],
+            "rank": ranks.get(oid),
+            "online": oid in online_ids,
+            "last_seen": last_seen_iso(oid),
+            "waved": oid in my_waves,
+            "waves": wave_counts.get(oid, 0),
+            "rel": rel_map.get(oid, "none"),
+            "is_new": (u.get("created_at") or "") >= day0,
+            "seen_1h": True,
+        })
+    orbit_active.sort(key=lambda x: (1 if x["online"] else 0, x["last_seen"] or x["created_at"] or ""), reverse=True)
 
     unread_dm_total = sum(unread_by.values())
     return {
@@ -1177,6 +1202,7 @@ def build_friends_overview(uid):
         "requests": requests_in,
         "outgoing": outgoing_ids,
         "arrivals": arrivals,
+        "orbit_active": orbit_active,
         "unread_total": unread_dm_total + len(requests_in),
         "unread_dm": unread_dm_total,
     }
