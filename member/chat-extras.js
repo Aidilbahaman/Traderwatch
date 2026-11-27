@@ -22,7 +22,7 @@
     query: '', reqId: 0, searchT: 0, built: false, busy: false
   };
 
-  function L(en, ms) { return window.lang === 'en' ? en : ms; }
+  function L(en, ms) { return window.lang === 'ms' ? ms : en; }
   function $(id) { return document.getElementById(id); }
   function esc(s) {
     return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
@@ -109,8 +109,30 @@
     S.panel.style.maxHeight = Math.max(220, Math.min(420, cR.top - hostR.top - 24)) + 'px';
   }
 
+  function refreshLang() {
+    document.querySelectorAll('.cx-btn').forEach(function (b) {
+      b.setAttribute('aria-label', L('Send a GIF', 'Hantar GIF'));
+      b.title = L('Send a GIF', 'Hantar GIF');
+    });
+    if (!S.panel) return;
+    S.panel.setAttribute('aria-label', L('GIF picker', 'Pemilih GIF'));
+    var cl = S.panel.querySelector('.cx-close');
+    if (cl) cl.setAttribute('aria-label', L('Close', 'Tutup'));
+    var si = S.panel.querySelector('.cx-search input');
+    if (si) {
+      si.setAttribute('placeholder', L('Search GIF…', 'Cari GIF…'));
+      si.setAttribute('aria-label', L('Search GIF', 'Cari GIF'));
+    }
+    var clr = S.panel.querySelector('.cx-clear');
+    if (clr) clr.setAttribute('aria-label', L('Clear', 'Kosongkan'));
+    var ft = S.panel.querySelector('.cx-foot');
+    if (ft) ft.innerHTML = esc(L('Powered by', 'Dikuasakan oleh')) + ' <b>TRADERWATCH</b>';
+    if (S.packReady) drawGifs();
+  }
+
   function open(target, input, kind, onGif) {
     build();
+    refreshLang();
     S.target = target; S.input = input; S.kind = kind; S.onGif = onGif;
     try { input.blur(); } catch (e) {}
     place();
@@ -283,6 +305,7 @@
   window.TWChatExtras = {
     mount: autoMount,
     close: close,
+    refreshLang: refreshLang,
     setRemote: function (on) { S.remote = !!on; },
     isOpen: function () { return !!(S.panel && S.panel.classList.contains('open')); }
   };

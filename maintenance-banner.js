@@ -2,7 +2,9 @@
   if (window.TWMaintenance) return;
   var BANNER_ID = 'tw-maint-banner';
   var FLAG_URL = '/data/maintenance.json?t=' + Date.now();
-  var MSG = '⚠️ TraderWatch under maintenance, sorry for any inconvenience during maintenance periods 🙏🏻';
+  var MSG_EN = '⚠️ TraderWatch under maintenance, sorry for any inconvenience during maintenance periods 🙏🏻';
+  var MSG_MS = '⚠️ TraderWatch sedang dalam penyelenggaraan, maaf atas sebarang kesulitan sepanjang tempoh penyelenggaraan 🙏🏻';
+  function isMs() { try { return localStorage.getItem('tw-lang') === 'ms'; } catch (e) { return false; } }
 
   function css() {
     if (document.getElementById(BANNER_ID + '-css')) return;
@@ -42,8 +44,9 @@
     var b = document.createElement('div');
     b.id = BANNER_ID;
     b.setAttribute('role', 'status');
-    b.innerHTML = '<span>' + MSG + '</span>' +
-      '<button class="twm-x" aria-label="Tutup banner">✕</button>';
+    var ms = isMs();
+    b.innerHTML = '<span>' + (ms ? MSG_MS : MSG_EN) + '</span>' +
+      '<button class="twm-x" aria-label="' + (ms ? 'Tutup banner' : 'Close banner') + '">✕</button>';
     b.querySelector('.twm-x').onclick = function () {
       hide();
       try { sessionStorage.setItem('tw-maint-dismissed', '1'); } catch (e) {}
