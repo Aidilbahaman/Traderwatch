@@ -80,6 +80,34 @@
       '#' + OVERLAY_ID + ' .twm-cdu{padding:7px 4px 6px;border-radius:11px;background:rgba(8,14,10,.72);border:1px solid rgba(255,255,255,.08)}' +
       '#' + OVERLAY_ID + ' .twm-cdu b{display:block;font-size:18px;font-weight:900;line-height:1.1;color:#b7f36b;font-variant-numeric:tabular-nums;letter-spacing:-.02em}' +
       '#' + OVERLAY_ID + ' .twm-cdu span{display:block;margin-top:2px;font-size:8.5px;font-weight:750;letter-spacing:.06em;text-transform:uppercase;color:#7e9484}' +
+      '@keyframes twTgSweep{0%{transform:translateX(-140%) skewX(-18deg)}42%,100%{transform:translateX(260%) skewX(-18deg)}}' +
+      '@keyframes twTgBob{0%,100%{transform:translate(0,0)}50%{transform:translate(2px,-1.5px)}}' +
+      '#' + OVERLAY_ID + ' .twm-tg{' +
+        'position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center;gap:10px;' +
+        'width:100%;margin:0 0 15px;padding:11px 16px;border-radius:14px;text-decoration:none;' +
+        'background:linear-gradient(135deg,rgba(42,171,238,.20) 0%,rgba(56,189,248,.10) 55%,rgba(183,243,107,.12) 100%);' +
+        'border:1px solid rgba(56,189,248,.42);' +
+        'box-shadow:0 8px 24px rgba(0,0,0,.32),0 0 22px rgba(42,171,238,.16),inset 0 1px 0 rgba(255,255,255,.14);' +
+        'color:#eef8ff;cursor:pointer;transition:transform .16s cubic-bezier(.22,1,.36,1),border-color .18s,box-shadow .18s;' +
+      '}' +
+      '#' + OVERLAY_ID + ' .twm-tg::after{' +
+        'content:"";position:absolute;top:0;bottom:0;left:0;width:42%;pointer-events:none;' +
+        'background:linear-gradient(90deg,transparent,rgba(255,255,255,.16),transparent);' +
+        'animation:twTgSweep 3.8s ease-in-out infinite;' +
+      '}' +
+      '#' + OVERLAY_ID + ' .twm-tg:hover{transform:translateY(-1.5px);border-color:rgba(125,211,252,.72);box-shadow:0 12px 28px rgba(0,0,0,.4),0 0 28px rgba(56,189,248,.28)}' +
+      '#' + OVERLAY_ID + ' .twm-tg:active{transform:scale(.98)}' +
+      '#' + OVERLAY_ID + ' .twm-tg-ico{' +
+        'width:30px;height:30px;border-radius:10px;flex:none;display:grid;place-items:center;' +
+        'background:linear-gradient(135deg,#38bdf8,#229ed9);color:#fff;' +
+        'box-shadow:0 4px 12px rgba(34,158,217,.45);' +
+      '}' +
+      '#' + OVERLAY_ID + ' .twm-tg-ico svg{width:16px;height:16px;display:block;animation:twTgBob 2.4s ease-in-out infinite}' +
+      '#' + OVERLAY_ID + ' .twm-tg-tx{text-align:left;min-width:0;flex:1}' +
+      '#' + OVERLAY_ID + ' .twm-tg-tx b{display:block;font-size:12.8px;font-weight:800;line-height:1.2;color:#f3faff}' +
+      '#' + OVERLAY_ID + ' .twm-tg-tx small{display:block;margin-top:2px;font-size:10.5px;font-weight:600;color:#9cc9e4}' +
+      '#' + OVERLAY_ID + ' .twm-tg-arr{flex:none;font-size:15px;font-weight:800;color:#7dd3fc;transition:transform .16s}' +
+      '#' + OVERLAY_ID + ' .twm-tg:hover .twm-tg-arr{transform:translateX(3px)}' +
       '#' + OVERLAY_ID + ' .twm-back{margin:0 0 5px;font-size:14px;font-weight:800;color:#f3faf4}' +
       '#' + OVERLAY_ID + ' .twm-tag{margin:0 0 12px;font-size:11.8px;font-weight:700;color:#b7f36b}' +
       '#' + OVERLAY_ID + ' .twm-sign{margin:0;font-size:11px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:#7e9484}' +
@@ -219,6 +247,16 @@
             '<div class="twm-cdu"><b id="twmCdS">00</b><span>Secs</span></div>' +
           '</div>' +
         '</div>' +
+        '<a class="twm-tg" href="https://t.me/traderwatchworldwide" target="_blank" rel="noopener noreferrer">' +
+          '<span class="twm-tg-ico" aria-hidden="true">' +
+            '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M21.9 4.6c.3-1.2-.8-2.1-1.9-1.7L2.7 9.6c-1.2.5-1.1 2.2.1 2.6l4.4 1.4 1.7 5.3c.3 1 1.6 1.3 2.3.5l2.5-2.5 4.5 3.3c.9.7 2.2.2 2.5-.9l3.2-14.7zM9.2 13.5l8.8-5.6-6.9 6.9-.3 3.2-1.2-3.8-3.2-1 2.8.3z"/></svg>' +
+          '</span>' +
+          '<span class="twm-tg-tx">' +
+            '<b>Join Official Telegram</b>' +
+            '<small>Get live upgrade &amp; launch updates</small>' +
+          '</span>' +
+          '<span class="twm-tg-arr" aria-hidden="true">→</span>' +
+        '</a>' +
         '<p class="twm-back">We’ll be back soon.</p>' +
         '<p class="twm-tag">Better experience. Smarter trading. One step ahead.</p>' +
         '<p class="twm-sign">— TraderWatch</p>' +
