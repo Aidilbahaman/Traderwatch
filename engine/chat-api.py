@@ -1384,6 +1384,27 @@ class Handler(BaseHTTPRequestHandler):
                 seen_ids.add(r["id"])
                 uniq.append(r)
             rows = uniq
+            dm_tids = sorted({
+                int(r["payload"]["trade_id"])
+                for r in rows
+                if not r.get("deleted") and r.get("kind") == "signal"
+                and isinstance(r.get("payload"), dict)
+                and str(r["payload"].get("trade_id") or "").isdigit()
+                and int(r["payload"]["trade_id"]) > 0
+            })
+            dm_live_tr = {}
+            if dm_tids:
+                try:
+                    tkey = "live_tr:" + ",".join(str(x) for x in dm_tids[:40])
+                    trows = _cached(tkey, 5, lambda: sb(
+                        "GET", "/rest/v1/paper_trades",
+                        params={"select": "id,status,r_result,profit_usd,opened_at,closed_at",
+                                "id": "in.(" + ",".join(str(x) for x in dm_tids[:40]) + ")"}
+                    ) or [])
+                    for tr in trows:
+                        dm_live_tr[int(tr["id"])] = tr
+                except Exception:
+                    dm_live_tr = {}
             msgs = []
             for r in rows:
                 deleted = bool(r.get("deleted"))
@@ -1395,13 +1416,28 @@ class Handler(BaseHTTPRequestHandler):
                     parent = parent[0] if parent else None
                 if parent and parent.get("deleted"):
                     parent = dict(parent, body="")
+                pl = None if deleted else r.get("payload")
+                if not deleted and r.get("kind") == "signal" and isinstance(pl, dict):
+                    tid = pl.get("trade_id")
+                    tr = dm_live_tr.get(int(tid)) if (tid and str(tid).isdigit()) else None
+                    if tr:
+                        pl = dict(pl)
+                        pl["status"] = str(tr.get("status") or pl.get("status") or "open").lower()
+                        if tr.get("opened_at"):
+                            pl["opened_at"] = tr["opened_at"]
+                        if tr.get("closed_at"):
+                            pl["closed_at"] = tr["closed_at"]
+                        if tr.get("r_result") is not None:
+                            pl["r_result"] = round(float(tr["r_result"]), 2)
+                        if tr.get("profit_usd") is not None:
+                            pl["profit_usd"] = round(float(tr["profit_usd"]), 2)
                 msgs.append({
                     "id": r["id"],
                     "me": r["sender_id"] == uid,
                     # Soft-deleted: isi disembunyikan, baris kekal (bubble "dipadam")
                     "body": "" if deleted else (r.get("body") or ""),
                     "kind": r.get("kind") or "text",
-                    "payload": None if deleted else r.get("payload"),
+                    "payload": pl,
                     "created_at": r.get("created_at") or "",
                     "deleted": deleted,
                     "mine_deleted": deleted and r.get("deleted_by") == uid,

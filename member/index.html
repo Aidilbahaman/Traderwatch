@@ -522,7 +522,7 @@ html[data-theme="light"] .orb-btn.soft{color:#4f7e16}
 html[data-theme="light"] .dm-who small.on{color:#4f7e16}
 .dm-who small i{width:6px;height:6px;border-radius:50%;background:currentColor}
 .dm-lock{display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:700;color:var(--muted);padding:4px 8px;border-radius:999px;background:var(--card);border:1px solid var(--line);flex:none}
-.dm-msgs{flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:none;padding:14px 14px calc(86px + var(--sab));display:flex;flex-direction:column;gap:7px}
+.dm-msgs{flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:none;padding:14px 14px calc(114px + var(--sab));display:flex;flex-direction:column;gap:7px}
 .dm-msgs::-webkit-scrollbar{display:none}
 .dm-msgs::after{content:"";display:block;flex:0 0 var(--kb-h,0px)}
 html.kb-open .dm-msgs{padding-bottom:74px}
@@ -568,6 +568,28 @@ html[data-theme="light"] .dm-bbl.me{background:#e7f5d4;border-color:#b2d783}
 .dm-setup .st-cell small{display:block;font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
 .dm-setup .st-cell b{font-size:12px;font-variant-numeric:tabular-nums}
 .dm-comp{position:absolute;left:12px;right:12px;bottom:calc(12px + var(--sab));display:flex;gap:6px;align-items:center;background:rgba(18,24,19,.72);padding:5px 5px 5px 7px;border-radius:28px;border:1px solid rgba(255,255,255,.11);box-shadow:0 10px 28px rgba(0,0,0,.44),inset 0 1px 0 rgba(255,255,255,.08);z-index:38;transition:bottom .22s cubic-bezier(.22,1,.36,1),border-color .2s,box-shadow .22s}
+.dm-qbar{position:absolute;left:12px;right:12px;bottom:calc(66px + var(--sab));z-index:37;display:flex;align-items:center;gap:7px;overflow-x:auto;scrollbar-width:none;padding:2px 0;transition:bottom .22s cubic-bezier(.22,1,.36,1),opacity .18s}
+.dm-qbar::-webkit-scrollbar{display:none}
+html.kb-open .dm-qbar,html.kb-focus:not(.kb-open) .dm-qbar{opacity:0;pointer-events:none}
+.dm-setup.tp-hit{border-color:rgba(183,243,107,.65);background:linear-gradient(145deg,rgba(183,243,107,.10),var(--card) 65%)}
+.dm-setup.sl-hit{border-color:rgba(255,119,125,.60);background:linear-gradient(145deg,rgba(255,119,125,.09),var(--card) 65%)}
+.dm-setup .tr-livebar{display:flex;align-items:center;justify-content:space-between;gap:6px;margin-bottom:7px;flex-wrap:wrap}
+.dm-setup .tr-st{display:inline-flex;align-items:center;gap:5px;font-size:10px;font-weight:900;letter-spacing:.03em;padding:2px 7px;border-radius:999px;border:1px solid transparent}
+.dm-setup .tr-st.run{color:#b7f36b;background:rgba(183,243,107,.12);border-color:rgba(183,243,107,.38)}
+.dm-setup .tr-st.run i{width:6px;height:6px;border-radius:50%;background:var(--lime);box-shadow:0 0 8px var(--lime);animation:pulseDot 1.5s infinite}
+.dm-setup .tr-st.tp{color:#b7f36b;background:rgba(183,243,107,.18);border-color:rgba(183,243,107,.5)}
+.dm-setup .tr-st.sl{color:#ff8f95;background:rgba(255,119,125,.16);border-color:rgba(255,119,125,.45)}
+.dm-setup .tr-st.off{color:var(--muted);background:rgba(255,255,255,.06);border-color:var(--line)}
+.dm-setup .tr-flt{font:800 10.5px ui-monospace,SFMono-Regular,Menlo,monospace;font-variant-numeric:tabular-nums}
+.dm-setup .tr-flt.pos{color:var(--lime)}.dm-setup .tr-flt.neg{color:var(--red)}.dm-setup .tr-flt.neu{color:var(--muted)}
+.dm-setup .tr-meta{display:flex;flex-wrap:wrap;align-items:center;gap:5px;margin-top:6px}
+.dm-setup .tr-badge{display:inline-flex;align-items:center;gap:4px;font-size:9.5px;font-weight:800;padding:2px 7px;border-radius:999px;border:1px solid transparent}
+.dm-setup .tr-badge.ok{color:#b7f36b;background:rgba(183,243,107,.12);border-color:rgba(183,243,107,.34)}
+.dm-setup .tr-badge.warn{color:#ffc16b;background:rgba(255,193,107,.12);border-color:rgba(255,193,107,.34)}
+.dm-setup .tr-badge.bad{color:#ff8f95;background:rgba(255,119,125,.12);border-color:rgba(255,119,125,.34)}
+.dm-setup .tr-badge.tm{color:var(--muted);background:rgba(255,255,255,.05);border-color:var(--line)}
+.dm-setup .tr-disc{margin-top:6px;padding:6px 8px;border-radius:9px;font-size:9.5px;line-height:1.4;color:var(--muted);background:rgba(255,255,255,.035);border:1px solid rgba(255,255,255,.07)}
+.dm-setup .take2.muted{opacity:.52;pointer-events:none}
 html[data-theme="light"] .dm-comp{background:rgba(255,255,255,.94);border-color:rgba(20,33,26,.12);box-shadow:0 8px 24px rgba(0,0,0,.10)}
 .dm-comp:focus-within{border-color:rgba(183,243,107,.55);box-shadow:0 12px 32px rgba(0,0,0,.52),0 0 0 3px rgba(183,243,107,.13)}
 html[data-theme="light"] .dm-comp:focus-within{border-color:rgba(104,166,34,.55);box-shadow:0 10px 26px rgba(0,0,0,.14),0 0 0 3px rgba(132,204,22,.16)}
@@ -2326,6 +2348,10 @@ html[data-theme="light"] .dev-tx{background:linear-gradient(90deg,#a86f00 0%,#dc
       </div>
       <div class="dm-msgs" id="dmMsgs"></div>
       <div class="dm-comp hidden" id="dmReplyBar" style="position:absolute;left:12px;right:12px;bottom:100%;display:flex;gap:6px;align-items:center;padding:8px 10px;border-radius:14px 14px 0 0;background:var(--card2);border:1px solid var(--line);border-bottom:0"></div>
+      <div class="dm-qbar" id="dmQuickBar" aria-label="Quick share">
+        <button class="com-qpill tp" id="dmShareTp" type="button">🎯 <span>Share recent TP</span></button>
+        <button class="com-qpill tr" id="dmShareTrade" type="button">📈 <span>Share latest Trade</span></button>
+      </div>
       <div class="dm-comp" id="dmComp">
         <button class="dm-plus" id="dmShareBtn" type="button" aria-label="Share latest trade" title="Share latest trade">
           <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
@@ -4670,6 +4696,7 @@ function openDM(fid){
  $('dmMsgs').innerHTML='<div class="dm-day">'+(lang==='en'?'Loading private chat...':'Memuatkan chat peribadi...')+'</div>';
  $('dmSheet').classList.add('open');
  loadDM(true);
+ maybePrices();
  clearInterval(FR.dmPoll);
  FR.dmPoll=setInterval(function(){if(FR.dmFriend&&(!document.visibilityState||document.visibilityState==='visible'))loadDM(false)},4000);
  clearInterval(FR.dmStatusPoll);
@@ -4687,7 +4714,8 @@ function closeDM(){
 var DM_CACHE={},_dmSig='';   /* fid -> {msgs, at}: buka semula DM = instan, refresh senyap */
 function _calcDmSig(fid,list){
  return (fid||'')+'#'+(list||[]).map(function(m){
-  return [m.id,m.deleted?1:0,m.pinned?1:0,m.body||'',m.kind||'',m.reply?m.reply.id:''].join('|');
+  var ps=(m.kind==='signal'&&m.payload)?[m.payload.status||'',m.payload.r_result!=null?m.payload.r_result:'',m.payload.closed_at||''].join(':'):'';
+  return [m.id,m.deleted?1:0,m.pinned?1:0,m.body||'',m.kind||'',ps,m.reply?m.reply.id:''].join('|');
  }).join('\n');
 }
 function loadDM(scrollEnd){
@@ -4782,15 +4810,58 @@ function _drawDMCore(scrollEnd,quiet){
   }
   if(m.kind==='signal'&&m.payload){
    var p=m.payload,dec=pdec(p.pair),isSell=p.side==='SELL';
-   return '<div class="dm-setup'+(m.me?' me':'')+(m.pinned?' pinned-b':'')+'" data-mid="'+esc(String(m.id))+'">'+ref
+   var st=String(p.status||'open').toLowerCase();
+   var isTp=(p.card_type==='tp'||st==='tp'),isSl=(st==='sl'),isClosed=(st==='tp'||st==='sl'||st==='be'||st==='expired');
+   var liveP=(typeof P==='object'&&P&&P[p.pair]&&isFinite(+P[p.pair].p))?+P[p.pair].p:null;
+   if(!isClosed&&liveP!=null){
+    if((!isSell&&liveP>=+p.tp)||(isSell&&liveP<=+p.tp)){isTp=true;isClosed=true;st='tp'}
+    else if((!isSell&&liveP<=+p.sl)||(isSell&&liveP>=+p.sl)){isSl=true;isClosed=true;st='sl'}
+   }
+   var rLive=null;
+   if(p.r_result!=null&&isFinite(+p.r_result))rLive=+p.r_result;
+   else if(liveP!=null){var rsk=Math.abs(+p.entry-+p.sl);if(rsk>0)rLive=(isSell?(+p.entry-liveP):(liveP-+p.entry))/rsk}
+   var fltHtml='';
+   if(rLive!=null&&isFinite(rLive)){
+    var fc=rLive>0.02?'pos':rLive<-0.02?'neg':'neu';
+    var ft=(rLive>=0?'+':'')+rLive.toFixed(2)+'R';
+    if(isClosed&&p.profit_usd!=null&&isFinite(+p.profit_usd))ft+=' · '+(+p.profit_usd>=0?'+$':'-$')+Math.abs(+p.profit_usd).toFixed(2);
+    fltHtml='<span class="tr-flt '+fc+'">'+esc(ft)+'</span>';
+   }
+   var stPill=isTp?('<span class="tr-st tp">🎯 '+esc(en?'HIT TP':'KENA TP')+'</span>')
+    :isSl?('<span class="tr-st sl">✕ '+esc(en?'HIT SL':'KENA SL')+'</span>')
+    :isClosed?('<span class="tr-st off">'+esc(en?'CLOSED':'DITUTUP')+'</span>')
+    :('<span class="tr-st run"><i></i>'+esc(en?'ACTIVE RUNNING':'AKTIF BERJALAN')+'</span>');
+   var openedTs=Date.parse(p.opened_at||m.created_at||'')||0;
+   var mins=openedTs?Math.max(0,Math.floor((Date.now()-openedTs)/60000)):0;
+   var durTxt=_fmtElapsedMin(mins);
+   var extra='',btnHtml='<button class="take2" data-dm-take="'+esc(String(m.id))+'" type="button">'+(en?'Take trade':'Ambil trade')+'</button>';
+   if(isTp&&p.card_type==='tp'){
+    extra='<div class="tr-disc">'+esc(en?'Closed in profit on Paper League. Past results do not guarantee future performance.':'Ditutup untung di Paper League. Keputusan lepas tidak menjamin prestasi masa hadapan.')+'</div>';
+    btnHtml='';
+   }else{
+    var vCls='ok',vTxt=en?'Valid to follow':'Sah untuk follow';
+    if(isTp){vCls='ok';vTxt=en?'Target reached (TP)':'Sasaran dicapai (TP)'}
+    else if(isSl){vCls='bad';vTxt=en?'Stop loss hit (SL)':'Stop loss kena (SL)'}
+    else if(isClosed){vCls='bad';vTxt=en?'Trade closed — Not valid':'Trade ditutup — Tidak sah'}
+    else if(mins>90){vCls='bad';vTxt=en?'Late entry — Not recommended':'Entry lewat — Tidak digalakkan'}
+    else if(mins>30){vCls='warn';vTxt=en?'Caution — Check live price first':'Berhati-hati — Semak harga live dulu'}
+    var tmBadge=(!isClosed&&openedTs)?('<span class="tr-badge tm">⏱ '+esc((en?'Running ':'Berjalan ')+durTxt)+'</span>'):'';
+    var disc=isClosed
+     ?(en?'This trade has already closed. Do not chase closed entries.':'Trade ini telah ditutup. Jangan kejar entry yang telah tamat.')
+     :(en?'Disclaimer: Running for '+durTxt+'. Verify live price & risk before following. Not financial advice.':'Penafian: Berjalan '+durTxt+'. Semak harga live & risiko sebelum follow. Bukan nasihat kewangan.');
+    extra='<div class="tr-meta">'+tmBadge+'<span class="tr-badge '+vCls+'">'+esc(vTxt)+'</span></div><div class="tr-disc">'+esc(disc)+'</div>';
+    if(isClosed)btnHtml='<button class="take2 muted" type="button" disabled>'+esc(isTp?(en?'Hit TP — Trade closed':'Kena TP — Trade tamat'):isSl?(en?'Hit SL — Trade closed':'Kena SL — Trade tamat'):(en?'Trade closed':'Trade tamat'))+'</button>';
+   }
+   return '<div class="dm-setup'+(m.me?' me':'')+(m.pinned?' pinned-b':'')+(isTp?' tp-hit':'')+(isSl?' sl-hit':'')+'" data-mid="'+esc(String(m.id))+'">'+ref
     +'<div class="st-top"><span class="st-pair">'+esc(p.pair)+' <span class="st-side'+(isSell?' sell':'')+'">'+esc(p.side)+'</span></span>'
     +'<span style="font-size:10px;color:var(--muted)">'+esc(p.tf||'')+' · '+esc(dmTime(m.created_at))+'</span></div>'
+    +'<div class="tr-livebar">'+stPill+fltHtml+'</div>'
     +'<div class="st-grid">'
      +'<div class="st-cell"><small>Entry</small><b>'+Number(p.entry).toFixed(dec)+'</b></div>'
      +'<div class="st-cell"><small>SL</small><b style="color:var(--red)">'+Number(p.sl).toFixed(dec)+'</b></div>'
      +'<div class="st-cell"><small>TP</small><b style="color:var(--lime)">'+Number(p.tp).toFixed(dec)+'</b></div>'
     +'</div>'
-    +'<button class="take2" data-dm-take="'+esc(String(m.id))+'" type="button">'+(en?'Take trade':'Ambil trade')+'</button></div>';
+    +extra+btnHtml+'</div>';
   }
   return '<div class="dm-bbl'+(m.me?' me':'')+(m.pinned?' pinned-b':'')+'" data-mid="'+esc(String(m.id))+'">'+ref+esc(m.body)+'<time>'+esc(dmTime(m.created_at))+'</time></div>';
  }).join('');
@@ -4943,46 +5014,57 @@ function _tradeToCard(tr){
  else c=isFinite(c)?Math.max(0,Math.min(100,Math.round(c))):0;
  return {pair:pair,side:side,tf:String(tr.ai_tf||tr.tf||'M15').toUpperCase(),entry:entry,sl:sl,tp:tp,conf:c};
 }
-function shareSetupInDM(){
+function shareSetupInDM(mode){
  if(!FR.dmFriend||FR.dmBusy)return;
  var en=(lang==='en');
+ var isTp=(mode==='tp');
  function pickAndSend(list){
-  var pick=null,fromTrade=false;
-  if(Array.isArray(list)&&list.length){
-   var sorted=list.slice().sort(function(a,b){
-    var ta=Date.parse(a.opened_at||a.created_at||0)||0;
-    var tb=Date.parse(b.opened_at||b.created_at||0)||0;
-    return tb-ta;
-   });
-   for(var i=0;i<sorted.length;i++){
-    pick=_tradeToCard(sorted[i]);
-    if(pick){fromTrade=true;break}
-   }
-  }
-  if(!pick&&typeof S==='object'&&S&&S.m){
-   pick=_tradeToCard(S.m);
+  var arr=Array.isArray(list)?list.slice():[];
+  arr.sort(function(a,b){
+   var ta=Date.parse((isTp?(a.closed_at||a.opened_at):a.opened_at)||a.created_at||0)||0;
+   var tb=Date.parse((isTp?(b.closed_at||b.opened_at):b.opened_at)||b.created_at||0)||0;
+   return tb-ta;
+  });
+  var tr=null,pick=null,fromTrade=false;
+  if(isTp){
+   tr=arr.filter(function(x){return String(x.status||'').toLowerCase()==='tp'})[0]||null;
+   if(!tr){toast(en?'No TP trade yet to share.':'Belum ada trade TP untuk dikongsi.');return}
+   pick=_tradeToCard(tr);if(pick)fromTrade=true;
+  }else{
+   tr=arr.filter(function(x){return String(x.status||'open').toLowerCase()==='open'})[0]||arr[0]||null;
+   if(tr){pick=_tradeToCard(tr);if(pick)fromTrade=true}
+   if(!pick&&typeof S==='object'&&S&&S.m)pick=_tradeToCard(S.m);
   }
   if(!pick){
    toast(en?'No taken trade yet. Take a trade first to share.':'Belum ada trade diambil. Ambil satu trade dahulu untuk kongsi.');
    return;
   }
+  if(tr){
+   pick.card_type=isTp?'tp':'trade';
+   pick.status=String(tr.status||'open').toLowerCase();
+   if(tr.id)pick.trade_id=tr.id;
+   if(tr.opened_at)pick.opened_at=tr.opened_at;
+   if(tr.closed_at)pick.closed_at=tr.closed_at;
+   if(tr.r_result!=null&&isFinite(+tr.r_result))pick.r_result=+tr.r_result;
+   if(tr.profit_usd!=null&&isFinite(+tr.profit_usd))pick.profit_usd=+tr.profit_usd;
+  }
   sendDM(pick);
   var lbl=pairName(pick.pair)+' '+pick.side;
-  toast(fromTrade?(en?'Shared latest trade: ':'Trade terkini dikongsi: ')+lbl:(en?'Shared setup: ':'Setup dikongsi: ')+lbl);
+  toast(isTp?(en?'Shared recent TP: ':'TP terkini dikongsi: ')+lbl:(fromTrade?(en?'Shared latest trade: ':'Trade terkini dikongsi: ')+lbl:(en?'Shared setup: ':'Setup dikongsi: ')+lbl));
  }
- if(LG.state==='ready'&&Array.isArray(LG.trades)){
+ if(LG.state==='ready'&&Array.isArray(LG.trades)&&LG.trades.length){
   pickAndSend(LG.trades);
   return;
  }
- var btn=$('dmShareBtn');
- if(btn)btn.disabled=true;
+ var btns=[$('dmShareBtn'),$('dmShareTp'),$('dmShareTrade')];
+ btns.forEach(function(b){if(b)b.disabled=true});
  apiFetch('/api/league/trades').then(function(r){
-  if(btn)btn.disabled=false;
+  btns.forEach(function(b){if(b)b.disabled=false});
   var list=(r.ok&&r.data&&Array.isArray(r.data.trades))?r.data.trades:[];
   if(list.length)LG.trades=list;
   pickAndSend(list);
  }).catch(function(){
-  if(btn)btn.disabled=false;
+  btns.forEach(function(b){if(b)b.disabled=false});
   pickAndSend(LG.trades||[]);
  });
 }
@@ -5116,7 +5198,9 @@ $('dmSendBtn').onclick=function(){sendDM(null);_typOn=false};
 $('dmInp').addEventListener('keydown',function(e){if(e.key==='Enter'){sendDM(null);_typOn=false}});
 $('dmInp').addEventListener('input',function(){sendTyping(this.value.trim().length>0)});
 $('dmInp').addEventListener('blur',function(){sendTyping(false)});
-$('dmShareBtn').onclick=shareSetupInDM;
+$('dmShareBtn').onclick=function(){shareSetupInDM('trade')};
+if($('dmShareTp'))$('dmShareTp').onclick=function(){hap(6);shareSetupInDM('tp')};
+if($('dmShareTrade'))$('dmShareTrade').onclick=function(){hap(6);shareSetupInDM('trade')};
 $('dmRemoveBtn').onclick=function(){
  if(!FR.dmFriend)return;
  var nm=FR.dmFriend.username;
