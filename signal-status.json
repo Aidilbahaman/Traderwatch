@@ -7635,9 +7635,22 @@
    "status": "pending"
   },
   "XAGUSD_20261127_190615": {
-   "status": "pending"
+   "status": "active",
+   "entry_at": "2026-11-27T19:15:00+08:00"
+  },
+  "XAGUSD_20261127_191630": {
+   "status": "active",
+   "entry_at": "2026-11-27T19:17:00+08:00"
+  },
+  "BTCUSD_20261127_191254": {
+   "status": "active",
+   "entry_at": "2026-11-27T19:13:00+08:00"
+  },
+  "XAGUSD_20261127_191156": {
+   "status": "active",
+   "entry_at": "2026-11-27T19:12:00+08:00"
   }
  },
- "updated": "2026-11-27T19:11:02+08:00",
- "_cursor": 0
+ "updated": "2026-11-27T19:21:03+08:00",
+ "_cursor": 80
 }
